@@ -1,0 +1,259 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Document Prefix Creation";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    #modal-content2 {
+        background-color: #fefefe;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 30%;
+    }
+
+    #example-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+</style>
+
+<div >
+    <h3>Document Prefix Settings</h3>
+    <div class="d-flex justify-content-end">
+        <button class="btn btn-success fw-bold ms-3 h-70 radius-30 my-2" type="button" data-bs-toggle="dropdown" onclick="gotoCreateDP()">
+            New Document Prefix
+        </button>
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button title="Print" class="btn btn-white border-0" type="button" id="salesPrint-pdf" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-printer fs-5" style=" margin-right: 0px; "></i>
+        </button>
+        <button title="Export to excel" class="btn btn-white border-0" type="button" id="salesPrint-excel" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-file-earmark-excel fs-5" style=" margin-right: 0px; "></i>
+        </button>
+    </div>
+    <div id="example-table"></div>
+</div>
+
+<div class="col-md-2  col-2">
+    <div id="customModal" class="modal">
+        <div class="modal-content" id="modal-content2">
+            <p>Are you sure you want to delete?</p>
+            <div class="row">
+                <div class="col-md-6 col-6">
+                    <button id="confirmBtn" class="btn btn-success" style="width: 100px">OK</button>
+                </div>
+                <div class="col-md-6 col-6 d-flex justify-content-end">
+                    <button id="cancelBtn" class="btn btn-danger" style="width: 100px">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+    <script>
+        function gotoCreateDP() {
+            var editUrl = '@Url.Action("DocPrefixCreation", "BuyerOrder")';
+            window.location.href = editUrl;
+        }
+
+        function setInactiveUrl(data) {
+            var myUrlInactive = '@Url.Action("InactiveDocPrefix", "BuyerOrder")';
+
+            var modal = document.getElementById("customModal");
+            modal.style.display = "block";
+
+            document.getElementById("confirmBtn").onclick = function () {
+                $.ajax({
+                    type: "get",
+                    data: { Id: data },
+                    url: myUrlInactive,
+                    success: function (response) {
+                        if (response.success == "1") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-green",
+                            });
+                            initTabulator();
+                        }
+                        else if (response.success == "0") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-red",
+                            });
+                        }
+                    }
+                });
+                modal.style.display = "none";
+            };
+
+            document.getElementById("cancelBtn").onclick = function () {
+                modal.style.display = "none";
+            };
+        }
+
+        var column = [
+            {
+                title: "Doc Prefix", field: "DocPrefix", hozAlign: "center", vertAlign: "middle"
+            },
+            {
+                title: "DocType", field: "DocType", hozAlign: "center", vertAlign: "middle"
+            },
+            {
+                title: "Last Doc No", field: "LastDocNo", hozAlign: "center", vertAlign: "middle"
+            },
+
+            {
+                title: "Actions", field: "button", headerHozAlign: "center", vertAlign: "middle", headerSort: false, hozAlign: "right", resizable: false, formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    console.log("see data::", data);
+                    var myUrlGetforInvoice = `@Url.Action("DocPrefixCreation", "BuyerOrder")?id=${data.Id}`;
+
+                    var inActive = `setInactiveUrl(${data.Id}) `
+                    var active = `setActiveUrl(${data.Id}) `
+
+
+                    var editHtml;
+
+                    editHtml = `
+                                                <a href='${myUrlGetforInvoice}' class='text-decoration-none text-black ms-3 mt-1'>
+                                                    <i class='bi bi-pencil-square pe-1'></i> <span>Edit</span>  <br />
+                                                </a>
+                                                <div class='dropdown-divider m-0'></div>`;
+
+
+
+                    var deleteHtml;
+                    deleteHtml = `
+                                                     <a onclick='${inActive}' class='text-decoration-none text-black ms-3 mt-1' href='#' id='InActive'>
+                                                         <i class="bi bi-trash3"></i><span class='ms-1 mt-2'>Delete</span><br />
+                                                     </a>
+                                                 `;
+
+                    var statusDependentHtml = editHtml + deleteHtml;
+                    var html = `
+                                                                                      <div class='dropdown ms-1'>
+
+                                                                                                                              <a href='${myUrlGetforInvoice}' class='text-decoration-none  ms-3 mt-1'>
+                                                                                                   Edit
+                                                                                               </a>
+                                                                                          <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                                                         <ul class='dropdown-menu item-menu' aria-labelledby='dropdownMenuButton1'>
+                                                                                              ${statusDependentHtml}
+
+                                                                                          </ul>
+                                                                                      </div>
+                                                                                  `;
+
+                    return html;
+                },
+                visible: true, cellClick: function (e, cell) {
+                    cell.getElement().classList.add('active-cell');
+                },
+            },
+
+        ];
+
+        function initTabulator() {
+            function fetchDataFromServer() {
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetDocPrefixList", "BuyerOrder")'
+                };
+                return $.ajax({
+                    url: MyAppUrlSettings.MyUsefulUrl,
+
+                    dataType: "json",
+                });
+            }
+
+            fetchDataFromServer().done(function (response) {
+
+                console.log("notrmal response:", response.data);
+                var dataTable = response.data;
+
+
+                salesApiUrl = '@Url.Action("GetDocPrefixList", "BuyerOrder")',
+                    salesTable = new Tabulator("#example-table", {
+
+                        layout: "fitColumns",
+                        minHeight: 400,
+                        pagination: true,
+                        movableColumns: true,
+                        data: dataTable,
+                        columns: column,
+
+                    });
+                document.getElementById("salesPrint-pdf").addEventListener("click", function () {
+                    salesTable.print(false, true);
+                });
+                document.getElementById("salesPrint-excel").addEventListener("click", function () {
+                    salesTable.download("xlsx", "data.xlsx", { sheetName: "Table Data" });
+                });
+            });
+        }
+
+        initTabulator();
+    </script>
+}

@@ -1,0 +1,1229 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Order management";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<style>
+    li a {
+        display: block;
+        width: 100%;
+    }
+
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+                             border-bottom-width: 0px;
+
+                        }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    /*   .tabulator-table .tabulator-row {
+                background-color: white;
+            } */
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customize-btn-another {
+        background: #2CA01C;
+        border: 1px solid black;
+        border-radius: 20px;
+        color: #FFFFFF;
+        border: 1px solid #2CA01C;
+    }
+
+        .customize-btn-another:hover {
+            background: #2CA01C;
+            border: 1px solid black;
+            border-radius: 20px;
+            color: #FFFFFF;
+            border: 1px solid #2CA01C;
+        }
+
+    .customize-btn:hover {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .gear-dropdown.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+        margin-top: 7px;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-bottom: 1px solid #aaaaaa38;
+        border-right: 1px solid #aaaaaa38;
+        /*border-left: 1px solid #aaaaaa38;*/
+        /* padding-left: 2px;*/
+    }
+    /*    .tabulator-row .tabulator-cell, .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+                        border-right: none;
+                        border-left: none;
+                    }*/
+    /*    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+                border-right: 2px solid #aaaaaa38;
+            }*/
+
+    .tabulator-row .tabulator-cell {
+        border-right: none;
+        border-left: none;
+        padding-left: 10px;
+        border: 1px solid #aaaaaa29;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        /*margin-top: 27px;*/
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+        /* Add any other styles you need for the active cell */
+    }
+
+    .tabulator-row {
+        /*   border: 1px solid #aaaaaa38;*/
+        border-left: none;
+        border-right: none;
+    }
+
+    input[type="checkbox"] {
+        width: 20px; /* Set the width */
+        height: 20px; /* Set the height */
+    }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom: 4px solid green;
+    }
+
+        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active:hover {
+            background-color: #F8F8F8;
+            border-top-color: transparent !important;
+            border-left-color: transparent !important;
+            border-right-color: transparent !important;
+        }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link:hover {
+        background-color: #F8F8F8;
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+    }
+
+    .customize-btnew {
+        background: transparent;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btnew:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .tabulator-row .tabulator-cell.tabulator-editing {
+        border: 1px solid #404c5d;
+        outline: none;
+        padding: 0;
+    }
+
+    .tabulator-cell.tabulator-editable[tabulator-field="AccName"] {
+        border: 1px solid #0003;
+        margin-bottom: 10px;
+    }
+
+    .filter-dropdown > .filter-dropdown-class.show {
+        width: 580px;
+    }
+
+    p {
+        margin: 1em 0;
+    }
+
+    .button {
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        position: relative;
+        background: #aa0000;
+        padding: 10px 15px;
+        color: white;
+        box-shadow: 0 2px black;
+        text-decoration: none;
+        border-radius: 5px;
+        /*text-shadow: 0 1px 1px black;*/
+    }
+
+        .button:hover {
+            top: -2px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+        .button:active {
+            top: 1px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+    .unbilledbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .overduebtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .openbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .paidbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .scrollable-offcanvas {
+        /* max-height: 80vh;*/ /* Adjust the maximum height as needed */
+        overflow-y: auto;
+    }
+
+    .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:hover {
+        background-color: deepskyblue;
+    }
+
+    .tabulator .tabulator-footer {
+        background-color: #fff;
+        color: black;
+    }
+
+        .tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row {
+            background: white !important;
+        }
+
+
+    .offcanvas {
+        /* Add position relative to its parent */
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* Ensure offcanvas takes full viewport height */
+    }
+
+    .offcanvas-footer {
+        margin-top: auto; /* Push footer to the bottom */
+        width: 100%; /* Occupy full width */
+    }
+
+    .modal-footer {
+        width: 100%; /* Ensure buttons occupy full width */
+        padding: 10px; /* Add padding for better appearance */
+    }
+
+    .w-15 {
+        width: fit-content !important;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+    }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #999;
+        }
+
+        .separator:not(:empty)::before {
+            margin-right: .25em;
+        }
+
+        .separator:not(:empty)::after {
+            margin-left: .25em;
+        }
+
+    .tabulator-row.tabulator-selected {
+        background-color: #9abcea !important;
+    }
+
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 24px;
+        }
+
+            .rating label:before {
+                content: '\2605'; /* Unicode star character */
+            }
+
+        .rating input:checked ~ label:before {
+            color: gold; /* Change color of selected stars */
+        }
+
+    .child-table-hidden {
+        display: none;
+    }
+
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-calcs {
+        background: #fff !important;
+    }
+
+    .tabulator .tabulator-footer {
+        border-top: 1px solid #fff;
+    }
+
+    #file-drop-area {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    #image-uploadify {
+        display: none;
+    }
+
+    .footerButton {
+        margin-top: 40px;
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 99%;
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+
+    .bottom-bar-css:hover {
+        background: #212529;
+    }
+
+    .bottom-bar-css-s-n-c:hover {
+        background: #007611d6;
+    }
+
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        height: 40px;
+    }
+
+    .select2-container--default .select2-selection--multiple {
+        height: 40px;
+    }
+
+    .select2-container {
+        font-size: 16px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #aaaaaa94;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 23px;
+        }
+    /* Customize the Select2 selection box */
+    .select2-selection {
+        background-color: #f2f2f2;
+        border-radius: 5px;
+        height: 30px;
+        padding-bottom: 37px;
+        border: 1px solid #ced4da
+    }
+
+    .select2-selection__rendered, .select2-selection__arrow {
+        margin-top: 8px;
+    }
+
+</style>
+
+
+<input type="hidden" id="Id" name="Id" value="" />
+<div style="width: 100%; display: flex; justify-content: center;">
+    <div style="width: 60%;" class="shadow p-3 mb-3 bg-body rounded">
+        <h3 style="text-align: center;"><strong>Commercial Invoice</strong></h3>
+    </div>
+</div>
+
+<div style="width: 100%; display: flex; justify-content: center;">
+    
+    <div style="width: 60%;" class="shadow p-3 mb-5 bg-body rounded">
+        <div class="row">
+            <div class="col-lg">
+                <label class="form-label fw-bold">Com. Inv. No</label>
+                <input id="comInvoiceNo" class="form-control" />
+                <span class="text-danger" id="comInvoiceNoValidation"></span>
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Con. Inv. Date</label>
+                <input id="conIvoiceDate" class="form-control" />
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Document Receipt Date</label>
+                <input id="documentReceieptDate" class="form-control" />
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-lg">
+                <label class="form-label fw-bold">Concern</label>
+                <select id="concernId" class="form-control" disabled>
+                    <option value="">Select Concern</option>
+                </select>
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">LC Type</label>
+                <select id="LCTypeId" class="form-control" disabled>
+                    <option value="">Select LC Type</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-lg">
+                <label class="form-label fw-bold">BBLC/RLC No.</label>
+                <select id="BBLCId" class="form-control">
+                    <option value="">Select BBLC No.</option>
+                </select>
+            </div>
+            @* <div class="col-lg">
+                <label class="form-label fw-bold">Regular LC No.</label>
+                <select id="LCId" class="form-control" disabled>
+                    <option value="">Select Regular LC No.</option>
+                </select>
+            </div> *@
+            <div class="col-lg">
+                <label class="form-label fw-bold">Supplier</label>
+                <select id="SupplierId" class="form-control" disabled>
+                    <option value="">Select Supplier</option>
+                </select>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg">
+                <label class="form-label fw-bold">LC Value</label>
+                <input id="BBLValue" class="form-control" disabled/>
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Total PI</label>
+                <input id="TotalPI" class="form-control" />
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Currency</label>
+                <select id="CurrencyId" class="form-control">
+                    <option value="">Select Currency</option>
+                </select>
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Conversion Rate</label>
+                <input id="ConversionRate" class="form-control" />
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-lg">
+                <label class="form-label fw-bold">Bill Of Lading No</label>
+                <input id="BBLCLadingNo" class="form-control" />
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">BL Date</label>
+                <input id="BLDate" class="form-control" />
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Document Status</label>
+                <select id="DocumentStatusId" class="form-control">
+                    <option value="">Select Document</option>
+                </select>
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Doc. Asses. Date</label>
+                <input id="DocAssesmentDate" class="form-control" />
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-lg">
+                <label class="form-label fw-bold">Bill Of Entry No</label>
+                <input id="billOfEntry" class="form-control" />
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Bill Of Entry Date</label>
+                <input id="BillOfEntryDate" class="form-control" />
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Custom Assesment Date</label>
+                <input id="customAssesmentDate" class="form-control" />
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg">
+                <label class="form-label fw-bold">Vassel ETA Date</label>
+                <input id="vasselETADate" class="form-control" />
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">ETB Date</label>
+                <input id="ETBDate" class="form-control" />
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Vasel</label>
+                <input id="Vasel" class="form-control" />
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Good Inhou. Date</label>
+                <input id="GoodInhouseDate" class="form-control" />
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg-3">
+                <label class="form-label fw-bold">Item Group Name</label>
+                <select id="ItemGroupId" class="form-control">
+                    <option value="">Select Group Name</option>
+                </select>
+            </div>
+            <div class="col-lg-7">
+                <label class="form-label fw-bold">Item Description</label>
+                <textarea id="ItemDecId" class="form-control" readonly></textarea>
+                @* <select id="ItemDecId" data-mdb-select-init multiple>
+                </select> *@
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-lg">
+                <label class="form-label fw-bold">Quantity</label>
+                <input id="Quantity" class="form-control" />
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Primary Unit</label>
+                <select id="UnitMasterId" class="form-control">
+                    <option value="">Select Unit Master</option>
+                </select>
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Total Value</label>
+                <input id="TotalVlue" class="form-control" />
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-lg">
+                <label class="form-label fw-bold">Secondary Unit</label>
+                <select id="SecondaryUnitId" class="form-control">
+                    <option value="">Select Unit Master</option>
+                </select>
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Cartoon Roll Quantity</label>
+                <input id="SecondaryQuantity" class="form-control" />
+            </div>
+        </div>
+
+        <div class="mt-4 mb-5">
+            <label class="fw-bold">Remarks</label>
+            <div class="form-floating">
+                <textarea class="form-control" placeholder="Leave a comment here" id="Remarks" style="height: 100px"></textarea>
+            </div>
+        </div>
+
+        @if (ViewBag.ActionType == "Edit")
+        {
+            <div class="bottom-bar">
+                <div>
+                    <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("Import", "Variable", new { Type = "ImportInvoiceCI" })';">Cancel</button>
+                </div>
+                <div>
+                </div>
+                <div class="dropdown">
+                    <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Update</button>
+
+                    <button id="BtnSaveAndClose" class="btn-success  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="" data-purchase-Id="@Model">
+                        Update and close
+                    </button>
+                    <ul class="dropdown-menu" id="ul-id-for-expenses">
+                        <li class="dropdown-item">
+                            <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        }
+        else if (ViewBag.ActionType == "Create")
+        {
+            <div class="bottom-bar">
+                <div>
+                    <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("Import", "Variable", new { Type = "ImportInvoiceCI" })';">Cancel</button>
+                </div>
+                <div class="d-flex">
+                    <div>
+                    </div>
+                    <div id="makeRecurringDiv" style="padding-top: 5px; border-left: 3px solid white;">
+                        <div style="margin-left: 5px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Save</button>
+
+                    <button id="BtnSaveAndClose" class="btn-success  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="" data-purchase-Id="@Model">
+                        Save and close
+                    </button>
+                    <ul class="dropdown-menu" id="ul-id-for-expenses">
+                        <li class="dropdown-item">
+                            <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+
+
+
+@section scripts {
+    <script type="text/javascript">
+        //===========================import commercial invoice functionalities starts=====================
+        let currentActiveInput = null;
+        $('select').select2();
+
+        $('#BtnSave').click(function () {
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            $("#ComId").val(ComId);
+            $("#LuserId").val(UserId);
+
+            var GroupLCID = '@ViewBag.commercialInvoiceId';
+
+            var Model =
+            {
+                ComId: ComId,
+                LuserId: UserId,
+                Id: GroupLCID,
+                CommercialInvoiceNo: $("#comInvoiceNo").val(),
+                CommercialInvoiceDate: $("#conIvoiceDate").val(),
+                DocumentReceiptDate: $("#documentReceieptDate").val(),
+                CommercialCompanyID: $("#concernId  option:selected").val(),
+                CommercialLCTypeId: $("#LCTypeId option:selected").val(),
+                CurrencyId: $("#CurrencyId option:selected").val(),
+                ItemGroupId: $("#ItemGroupId option:selected").val(),
+                ItemDescription: $("#ItemDecId").val(),
+                UnitMasterId: $("#UnitMasterId option:selected").val(),
+                SecondaryUnitId: $("#SecondaryUnitId option:selected").val(),
+                BBLCId: $("#BBLCId option:selected").val(),
+                // MachinaryLCId: $("#LCId option:selected").val(),
+                SupplierId: $("#SupplierId option:selected").val(),
+                DocumentStatusId: $("#DocumentStatusId option:selected").val(),
+                BLNo: $("#BBLCLadingNo").val(),
+                BBLCValue: $("#BBLValue").val(),
+                BLDate: $("#BLDate").val(),
+                DocumentAssesmentDate: $("#DocAssesmentDate").val(),
+                Quantity: $("#Quantity").val(),
+                SecondaryQuantity: $("#SecondaryQuantity").val(),
+                TotalPI: $("#TotalPI").val(),
+                TotalValue: $("#TotalVlue").val(),
+                ConversionRate: $("#ConversionRate").val(),
+                BillOfEntryNo: $("#billOfEntry").val(),
+                BillOfEntryDate: $("#BillOfEntryDate").val(),
+                CustomAssesmentDate: $("#customAssesmentDate").val(),
+                VasselETADate: $("#vasselETADate").val(),
+                ETBDate: $("#ETBDate").val(),
+                MotherVassel: $("#Vasel").val(),
+                GoodsInhouseDate: $("#GoodInhouseDate").val(),
+                Remarks: $("#Remarks").val()
+            };
+
+
+
+            console.log("after save console", Model)
+            var PurchaseIdAbc = 0;
+
+            $.ajax({
+                async: false,
+                type: "POST",
+                url: "@Url.Action("SaveCommercialInvoice", "Variable")",
+                data: JSON.stringify(Model),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //console.log("after save console::", response);
+                    PurchaseIdAbc = response.Id;
+                    setTimeout(function () {
+                        toastr.success(response.message, "", {
+                            "toastClass": "toast-green"
+                        });
+                    }, 1500);
+                    //alert(" Data Saved");
+
+                },
+                error: function (response) {
+                }
+            });
+
+            if (PurchaseIdAbc > 0) {
+                setTimeout(function () {
+                    window.location.href = '@Url.Action("CreateCommercialInvoice", "Variable")?&commercialInvoiceId=' + PurchaseIdAbc;
+                }, 3000)
+            }
+
+
+        });
+
+        $('#BtnSaveAndClose').click(function () {
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            $("#ComId").val(ComId);
+            $("#LuserId").val(UserId);
+
+            var GroupLCID = '@ViewBag.commercialInvoiceId';
+
+
+            //====validation handle ends======
+            var Model =
+            {
+                ComId: ComId,
+                LuserId: UserId,
+                Id: GroupLCID,
+                CommercialInvoiceNo: $("#comInvoiceNo").val(),
+                CommercialInvoiceDate: $("#conIvoiceDate").val(),
+                DocumentReceiptDate: $("#documentReceieptDate").val(),
+                CommercialCompanyID: $("#concernId  option:selected").val(),
+                CommercialLCTypeId: $("#LCTypeId option:selected").val(),
+                CurrencyId: $("#CurrencyId option:selected").val(),
+                ItemGroupId: $("#ItemGroupId option:selected").val(),
+                ItemDescription: $("#ItemDecId").val(),
+                UnitMasterId: $("#UnitMasterId option:selected").val(),
+                SecondaryUnitId: $("#SecondaryUnitId option:selected").val(),
+                BBLCId: $("#BBLCId option:selected").val(),
+                // MachinaryLCId: $("#LCId option:selected").val(),
+                SupplierId: $("#SupplierId option:selected").val(),
+                DocumentStatusId: $("#DocumentStatusId option:selected").val(),
+                BLNo: $("#BBLCLadingNo").val(),
+                BBLCValue: $("#BBLValue").val(),
+                BLDate: $("#BLDate").val(),
+                DocumentAssesmentDate: $("#DocAssesmentDate").val(),
+                Quantity: $("#Quantity").val(),
+                SecondaryQuantity: $("#SecondaryQuantity").val(),
+                TotalPI: $("#TotalPI").val(),
+                TotalValue: $("#TotalVlue").val(),
+                ConversionRate: $("#ConversionRate").val(),
+                BillOfEntryNo: $("#billOfEntry").val(),
+                BillOfEntryDate: $("#BillOfEntryDate").val(),
+                CustomAssesmentDate: $("#customAssesmentDate").val(),
+                VasselETADate: $("#vasselETADate").val(),
+                ETBDate: $("#ETBDate").val(),
+                MotherVassel: $("#Vasel").val(),
+                GoodsInhouseDate: $("#GoodInhouseDate").val(),
+                Remarks: $("#Remarks").val()
+            };
+
+
+
+            console.log("after save console", Model)
+            var PurchaseIdAbc = 0;
+
+            $.ajax({
+                async: false,
+                type: "POST",
+                url: "@Url.Action("SaveCommercialInvoice", "Variable")",
+                data: JSON.stringify(Model),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //console.log("after save console::", response);
+                    PurchaseIdAbc = response.Id;
+                    setTimeout(function () {
+                        toastr.success(response.message, "", {
+                            "toastClass": "toast-green"
+                        });
+                    }, 1500);
+                    //alert(" Data Saved");
+
+                },
+                error: function (response) {
+                }
+            });
+
+            if (PurchaseIdAbc > 0) {
+                setTimeout(function () {
+                    window.location.href = '@Url.Action("Import", "Variable", new { Type = "ImportInvoiceCI" })';
+                }, 3000)
+            }
+
+
+        });
+
+        
+
+        $("#BBLCId").on("change", function () {
+            var val = $(this).val();
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetBBLCData", "Variable")?BBLCId=' + val,
+                datatype: "Json",
+                success: function (data) {
+                    console.log("data for bblc lc chose", data);
+                    if (data[0]!= null) {
+
+                        $("#BBLValue").val(data[0].BBLCValue);
+                        $("#ConversionRate").val(data[0].ConvertRate);
+                        $("#ItemDecId").val(data[0].DescriptionString);
+                        $("#SupplierId").val(data[0].SupplierId).change();
+                        $("#LCTypeId").val(data[0].LCTypeId).change();
+                        $("#concernId").val(data[0].CommercialCompanyId).change();
+                        $("#CurrencyId").val(data[0].CurrencyId).change();
+                        $("#ItemGroupId").val(data[0].ItemGroupId).change();
+                        $("#UnitMasterId").val(data[0].PrimaryUnit).change();
+                        $("#SecondaryUnitId").val(data[0].SecondaryUnit).change();
+                        $("#Quantity").val(data[0].Quantity ?? 0);
+                        $("#SecondaryQuantity").val(data[0].SecondaryQuantity ?? 0);
+                    };
+                }
+            });
+
+        });
+
+        //=============edit mode starts==============
+        var globalStyleNo;
+        if ('@ViewBag.ActionType' == "Edit") {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("getCommercialInvoiceData", "Variable")",
+                data: { "id": '@ViewBag.commercialInvoiceId' },
+                dataType: "json",
+                success: function (response) {
+                    console.log("edit mode er data dekhi:", response);
+                    $("#comInvoiceNo").val(response.CommercialInvoiceNo);
+                        $("#conIvoiceDate").val(response.CommercialInvoiceDate);
+                        $("#documentReceieptDate").val(response.DocumentReceiptDate);
+
+                        $("#BBLCLadingNo").val(response.BLNo);
+                        $("#BBLValue").val(response.BBLCValue);
+                        $("#BLDate").val(response.BLDate);
+                        $("#DocAssesmentDate").val(response.DocumentAssesmentDate);
+                        $("#Quantity").val(response.Quantity);
+                        $("#SecondaryQuantity").val(response.SecondaryQuantity);
+                        $("#TotalPI").val(response.TotalPI);
+                        $("#TotalVlue").val(response.TotalValue);
+                        $("#ConversionRate").val(response.ConversionRate);
+                        $("#billOfEntry").val(response.BillOfEntryNo);
+                        $("#BillOfEntryDate").val(response.BillOfEntryDate);
+                        $("#customAssesmentDate").val(response.CustomAssesmentDate);
+                        $("#vasselETADate").val(response.VasselETADate);
+                        $("#ETBDate").val(response.ETBDate);
+                        $("#Vasel").val(response.MotherVassel);
+                        $("#GoodInhouseDate").val(response.GoodsInhouseDate);
+                        $("#Remarks").val(response.Remarks);
+
+                    setTimeout(function () {
+                        $('#BuyerId').val(response.BuyerId).change();
+                        $('#concern').val(response.CommercialCompanyId).change();
+
+                        $("#concernId").val(response.CommercialCompanyID).change();
+                        $("#LCTypeId").val(response.CommercialLCTypeId).change();
+                            $("#CurrencyId").val(response.CurrencyId).change();
+                        $("#ItemGroupId").val(response.ItemGroupId).change();
+                        $("#ItemDecId").val(response.ItemDescId);
+                        $("#UnitMasterId").val(response.UnitMasterId).change();
+                        $("#SecondaryUnitId").val(response.SecondaryUnitId).change();
+                        $("#BBLCId").val(response.BBLCId).change();
+                        $("#SupplierId").val(response.SupplierID).change();
+                        $("#DocumentStatusId").val(response.DocumentStatusId).change();
+                    }, 1000);
+
+                },
+                error: function (error) {
+                    console.error("Error fetching data: " + error);
+                }
+            });
+
+        }
+        //=============edit mode ends===========
+
+
+
+
+        //duplicate bblc no error  handling
+        var currentPOLId = '@ViewBag.commercialInvoiceId';
+        var BtnSave = document.querySelector('#BtnSave');
+        var BtnSaveAndClose = document.querySelector('#BtnSaveAndClose');
+        function getBBLC(callback) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetCommercialInvoiceList", "Variable")',
+                dataType: "json",
+                success: function (data) {
+                    // console.log("data::", data.data);
+                    var SizeCodeGetArray = [];
+
+                    data.data.forEach(function (item) {
+                        var SizeName = item.CommercialInvoiceNo;
+                        var SizeIdGet = item.Id;
+                        var SizeData = {
+                            SizeName: SizeName,
+                            Id: SizeIdGet
+                        };
+                        SizeCodeGetArray.push(SizeData);
+                    });
+
+                    if (typeof callback === "function") {
+                        callback(SizeCodeGetArray);
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                }
+            });
+        }
+
+        function checkPOLExists(sizeName) {
+            getBBLC(function (data) {
+                var lowercasedSizeName = sizeName.toLowerCase();
+
+                var sizeExists = data.some(function (item) {
+                    // console.log("item.Id", item.Id);
+                    //console.log("currentSizeIdd", currentSizeIdd);
+
+                    if (currentPOLId == item.Id) {
+                        return false;
+                    }
+
+                    return item.SizeName.trim().toLowerCase() === lowercasedSizeName;
+                });
+
+                // console.log("sizeExists", sizeExists);
+
+                if (sizeExists) {
+                    $("#comInvoiceNoValidation").html("Already has the same Invoice No!");
+                    BtnSave.disabled = true;
+                    BtnSaveAndClose.disabled = true;
+                } else {
+                    $("#comInvoiceNoValidation").html("");
+                    BtnSave.disabled = false;
+                    BtnSaveAndClose.disabled = false;
+
+                }
+            });
+        }
+
+        var POLNameHandle = document.getElementById("comInvoiceNo");
+        POLNameHandle.addEventListener("input", function () {
+            //console.log("currentSizeId", currentSizeIdd);
+
+            var enteredSizeName = POLNameHandle.value;
+            checkPOLExists(enteredSizeName);
+        });
+        //==================dropdown populate===============
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("supplierDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#SupplierId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("lctypeDropdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#LCTypeId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("documentStatusDropdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#DocumentStatusId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("bblcnoDropdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#BBLCId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("itemGroupDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#ItemGroupId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("concernDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#concernId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("qtyDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#UnitMasterId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                    $('#SecondaryUnitId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        // $.ajax({
+        //     type: "GET",
+        //     url: '@Url.Action("itemDescriptionDrodpdown", "Variable")',
+        //     datatype: "Json",
+        //     success: function (data) {
+
+        //         $.each(data, function (index, value) {
+        //             // console.log("value dekhi country er", value);
+        //             $('#ItemDecId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+        //         });
+        //     }
+        // });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("currencyDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#CurrencyId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+
+        // $('select').select2();
+        $(function () {
+            $("#conIvoiceDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            })
+            $("#documentReceieptDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#customAssesmentDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#BillOfEntryDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#vasselETADate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#ETBDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#GoodInhouseDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#BLDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#DocAssesmentDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#conIvoiceDate").attr("autocomplete", "off");
+            $("#documentReceieptDate").attr("autocomplete", "off");
+            $("#customAssesmentDate").attr("autocomplete", "off");
+            $("#BillOfEntryDate").attr("autocomplete", "off");
+            $("#vasselETADate").attr("autocomplete", "off");
+            $("#ETBDate").attr("autocomplete", "off");
+            $("#ETBDate").attr("autocomplete", "off");
+            $("#GoodInhouseDate").attr("autocomplete", "off");
+            $("#BLDate").attr("autocomplete", "off");
+            $("#DocAssesmentDate").attr("autocomplete", "off");
+        });
+
+
+
+
+        //===============================import commercial invoice functionaloties end========================
+    </script>
+}

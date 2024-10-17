@@ -1,0 +1,1280 @@
+﻿@*@model IEnumerable<Atrai.Core.Entity.ProductModel>*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Product List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<style>
+/*
+    .row center {
+        display: flex;
+        align-items: center;
+    } */
+
+/*
+    .tbllist th:first-child, .tbllist tbody td:first-child {
+        position: sticky !important;
+        left: 0px;
+        background-color: #f2f2f2e6;
+        z-index: 1;
+    }
+
+    .tbllist tfoot td:first-child {
+        position: sticky;
+        left: 0px;
+        z-index: 1;
+    }
+
+
+    .tbllist th:last-child, .tbllist tbody td:last-child {
+        position: sticky !important;
+        right: 0px;
+        background-color: #f2f2f2e6;
+        z-index: 1;
+    }
+
+    .tbllist tfoot td:last-child {
+        position: sticky;
+        right: 0px;
+        z-index: 1;
+    }*/
+
+/*
+    hr.solid {
+        border-top: 2px solid #bbb;
+        margin-top: .2rem;
+        margin-bottom: .2rem;
+        vertical-align:middle;
+    }*/
+
+/*    p.lineheight {
+        line-height: 6px;
+        vertical-align:middle;
+    }*/
+/*
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+        line-height: 18px;
+        padding-top: 6px;
+        vertical-align: top;
+        vertical-align: middle;
+        text-align: center;
+        color: dimgray;
+        font-family: Poppins;
+    }*/
+
+</style>
+
+
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    @Html.Hidden("FromDate", null, new { @class = "form-control from-control-sm text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+                    @Html.Hidden("ToDate", null, new { @class = "form-control from-control-sm text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+
+                    <div class="card-body">
+
+                        <div class="row mb-2">
+                            <div class="col-md-2 col-6">
+                                @Html.ActionLink("Create Product", "AddProduct", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnCreate" })
+                            </div>
+
+                            <div class="col-md-2 col-6 mt-1">
+                                <div class="row inline">
+                                          <span class="card-title h3" style="color: #1976d2;">Product List
+                                            
+                                              @{
+                                              var businesstype  = HttpContextAccessor.HttpContext.Session.GetString("BusinessType");
+                                              }
+                                              @if (businesstype.ToLower().Contains("walton") || businesstype.ToLower().Contains("marcel")) 
+                                              {
+                                                <span>
+                                        @Html.ActionLink(" ", "ProductSync", null, null, new { @class = "btn btn-sm btn-outline-warning rounded-0 bi bi-arrow-clockwise float-right ml-2", @id = "btnSync" ,title="Sync With Walton / Marcel DB"})
+                                                </span>
+                                              }
+                                          </span>
+                                </div>
+                          
+
+                            </div>
+                            <div class="col-md-3 col-9 pt-2">
+                                <fieldset class="float-right">
+                                    <label class="pr-2"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+                                </fieldset>
+                            </div>
+
+                            <div class="col-md-3 col-12 ">
+                                <form id="myform" method="post" enctype="multipart/form-data" asp-action="UploadFiles" asp-controller="Admin">
+                       
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-btn">
+                                            <span class="btn btn-primary rounded-0" onclick="$(this).parent().find('input[type=file]').click();">Browse</span>
+                                            <input name="uploaded_file" onchange="$(this).parent().parent().find('.form-control').html($(this).val().split(/[\\|/]/).pop());" style="display: none;" type="file" id="FileUpload1">
+                                        </span>
+                                        <span class="form-control border border-primary" style="background: #f2f2f2e6;"></span>
+                                        <input class="rounded-0 btn btn-primary btn-sm" type="submit" id="btnUpload" value="Upload Excel" />
+
+                                    </div>
+                                </form>
+                             
+                            </div>
+                           
+                            <div class="col-md-2 col-12">
+                                <a class="btn btn-block btn-sm rounded-0 btn-purple mb-1" href="Download?file=ProductSample.xlsm" target="_blank">Download Sample</a>
+                            </div>
+
+
+                        </div>
+
+                    <div class="row">
+
+                            <div class="col-md col-6">
+                            <div class="input-group input-group-sm mb-2">
+
+                                @Html.DropDownList("BrandId", null, "Brand", htmlAttributes: new { @id = "BrandId", @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="col-md col-6">
+                            <div class="input-group input-group-sm mb-2">
+
+                                @Html.DropDownList("ModelId", null, "Model", htmlAttributes: new { @id = "ModelId", @class = "form-control" })
+                            </div>
+                        </div>
+                            <div class="col-md col-6">
+                            <div class="input-group input-group-sm mb-2">
+
+                                @Html.DropDownList("WarehouseId", null, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-8 mb-2">
+                                    <div class="form-inline">
+                                         <div class="input-group input-group-sm">
+                                      
+                                            <div class="input-group-text">
+                                            <i class="bi bi-calendar3"></i>
+                                             </div>
+                                 
+                                        <input type="text" class="form-control from-control-sm" name="date" id="daterange-btn">
+                                <button id='btnDec' type="button" class="btn btn-danger rounded-0" title='Decrement month'><i class="bi bi-calendar-minus"></i></button>
+                                <button id='btnInc' type="button" class="btn btn-info  rounded-0" title='Increment month'><i class="bi bi-calendar-plus"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                        <div class="col-md col-4">
+                            @Html.DropDownList("ROL", new List<SelectListItem>
+                                        {
+                                            new SelectListItem() {Text = "-Select Criteria-", Value="All"},
+                                            new SelectListItem() {Text = "Corss First Reorder Level", Value="ROL1"},
+                                            new SelectListItem() {Text = "Corss Secound Reorder Level", Value="ROL2"},
+                                            new SelectListItem() {Text = "Corss Third Reorder Level", Value="ROL3"},
+                                            new SelectListItem() {Text = "Only Corss First ROL", Value="OnlyROL1"},
+                                            new SelectListItem() {Text = "Only Corss Secound ROL", Value="OnlyROL2"},
+                                            new SelectListItem() {Text = "Only Corss Third ROL", Value="OnlyROL3"},
+
+                                        }, new { @class = "form-control form-control-sm" })
+                        </div>
+
+
+                    </div>
+                           
+                            <div class="row center divHiddenItems">
+
+
+                                <div class="col-md-2 col-12">
+                                    <button class="btn btn-sm btn-outline-success mb-1 btn-block rounded-0 mt-md-1" type="button" onclick="ReportPrint('PrintLedger')">Ledger</button>
+                                </div>
+                                <div class="col-md-2 col-12">
+                                    <button class="btn btn-sm btn-outline-success mb-1 btn-block rounded-0 mt-md-1" type="button" onclick="ReportPrint('prdregistervalue')">Register With Value</button>
+                                </div>
+                                <div class="col-md-2 col-12">
+                                    <button class="btn btn-sm btn-outline-success mb-1 btn-block rounded-0 mt-md-1" type="button" onclick="ReportPrint('prdregistervaluesummary')">Register Summary</button>
+                                </div>
+                                <div class="col-md-2 col-12">
+                                    <button class="btn btn-sm btn-outline-success mb-1 btn-block rounded-0 mt-md-1" type="button" onclick="ReportPrint('rptPrdAvgRateCalculation')">Qty & Rate Calculation</button>
+                                </div>
+
+                                <div class="col-md-2 col-12">
+                                    <button class="btn btn-sm btn-outline-success mb-1 btn-block rounded-0 mt-md-1" type="button" onclick="ReportPrint('PrintProductList')">Item List</button>
+                                </div>
+                                <div class="col-md-2 col-12">
+                                    <button class="btn btn-sm btn-outline-success mb-1 btn-block rounded-0 mt-md-1" type="button" onclick="ReportPrint('PrintProductListWithoutZero')">Stock Item List</button>
+                                </div>
+      
+
+                            </div>
+
+
+
+
+                            <div class="table-responsive mt-2">
+                                <table id="tbllist" class="table table-sm tbllist table-striped table-bordered text-nowrap" cellspacing="0" width="100%">
+                                </table>
+                            </div>
+
+
+
+                        </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- End PAge Content -->
+  
+
+
+
+
+        @section Scripts{
+
+            <script type="text/javascript">
+                
+                    var VatViewActivate = '@HttpContextAccessor.HttpContext.Session.GetInt32("VatViewActivate").ToString()';
+                    if (VatViewActivate == 1){$('.divHiddenItems').hide();}
+                    var isHidden = VatViewActivate != 1;
+
+                    @*$('#btnUpload').click(function () {
+
+
+                        //var fileUpload = $("#FileUpload1").get(0);
+                        //var files = fileUpload.files;
+                        //var fileData = new FormData();
+                        //fileData.append(files[0].name, files[0]);
+
+                        //console.log(fileData);
+
+                        var input = document.getElementById('FileUpload1');
+                        //var files = $("#FileUpload1").get(0).files();//.files;
+                        var files = input.files;
+                        var fileData = new FormData();
+
+                        for (var i = 0; i != files.length; i++) {
+                            fileData.append("files", files[i]);
+                        }
+
+
+
+                        $.ajax({
+                            url: '@Url.Action("UploadFiles", "Admin")',
+                            type: "Post",
+                            contentType: false, // Not to set any content header
+                            processData: false, // Not to process data
+                            data: { fileData: fileData },
+                                success: function (result) {
+                                    if (result.Success == "1") {
+                                        //alert('Excel Upload Successfully');
+                                        toastr.success("'Excel Upload Successfully'");
+                                        window.location.href = "@Url.Action("ProductList", "Admin", new {Flag=1})";
+
+                                    }
+                                    else {
+                                        alert(result.ex);
+                                    }
+                                },
+                                error: function (err) {
+                                    alert(err.statusText);
+                                }
+                            });
+
+
+
+                    });*@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                var CategoryId = $('#CategoryId').val();
+                var WarehouseId = $('#WarehouseId').val();
+                var ROL = $('#ROL').val();
+
+
+                loaddata();
+                function format(d) {
+                //console.log(d.Items);
+                var trs = '';
+                var trf = '';
+                var sumbatchqty = 0.00;
+                var sumamount = 0.00;
+
+                //var sumindcostprice = 0.00;
+
+                //alert('found');
+
+
+                var i = 0;
+
+
+
+                $.each($(d.BatchSerial), function (key, value) {
+                //console.log(d.BatchSerial[key]);
+                    //console.log(value);
+                    i++;
+                    var indbatchqty = (parseFloat(d.BatchSerial[key].BatchQty));
+                    var indamount = (parseFloat(d.BatchSerial[key].Amount));
+
+                    //var indcostprice = (parseFloat(d.BatchSerial[key].BatchPirce));
+
+                    sumbatchqty += indbatchqty;
+                    sumamount += indamount;
+
+                    //let allbatchno = ' ; ';
+                    // //console.log(d.SalesItems[key]);
+                    //$.each($(d.SalesItems[key].BatchSerial), function (keyabc, valueabc) {
+                    //    allbatchno +=  d.BatchSerial[key].BatchSerialNo + ' ; ';
+                    //    //console.log(d.SalesItems[key].BatchSerial[keyabc].BatchSerialNo);
+                    //})
+
+
+                trs += '<tr><td>' + i + '</td><td>' + d.BatchSerial[key].BatchSerialNo + '</td><td>' + indbatchqty.toLocaleString() + '</td><td>' + indamount.toLocaleString() + '</td><td>' + d.BatchSerial[key].SupplierName + '</td><td>' + d.BatchSerial[key].PurchaseDate + '</td></tr>';
+
+                })
+
+                if (i > 1) {
+                trf += '<tr><td>Total :</td><td>Item Count : ' + i + '</td><td>' + sumbatchqty.toLocaleString() + '</td><td>' + sumamount.toLocaleString() + '</td><td></td><td></td></tr>';
+
+                }
+
+                if (i == 0)
+                {
+                return '';
+                }
+
+                // `d` is the original data object for the row
+                return '<div class="col-md-6"><table class="table text-center table-sm text-nowrap table-border table-hover">' +
+                    '<thead class="border"><tr>' +
+                    '<th>SLNo.</th>' +
+                    '<th>Batch No</th>' +
+                    '<th>Batch Qty</th>' +
+                    '<th>Amount</th>' +
+                    '<th>Supplier</th>' +
+                    '<th>Purchase Date</th>' +
+                    '</thead></tr><tbody class="border">' +
+
+                    trs +
+                    '</tbody><tfoot class="text-center font-weight-bold border">' + trf + '</tfoot></table></div>';
+            }
+
+
+
+                $('#tbllist tbody').on('click', 'td.details-control', function () {
+                    //alert('hit');
+                        var tr = $(this).closest('tr');
+                        var row = table.row(tr);
+
+                        if (row.child.isShown()) {
+                            // This row is already open - close it
+                            row.child.hide();
+                            tr.removeClass('shown');
+                        }
+                        else {
+                            // Open this row
+                            row.child(format(row.data())).show();
+                            tr.addClass('shown');
+                        }
+                  });
+
+
+
+
+
+      
+
+                function loaddata() {
+
+                    var othersearchvalue = $("#myInput").val() || "";
+
+                    table = $('#tbllist').DataTable({
+                        initComplete: function () {
+
+                            var input = $('.dataTables_filter input'),//.unbind(),
+                                self = this.api(),
+
+                                //$searchButton = $('<button class="btn rounded-0 btn-info btn-sm" tabindex="0" aria-controls="saleslist" TransactionId="button" title="Search"><span><i class="mdi mdi-file-excel"></i></span></button>')
+                                //    .text('Search')
+                                //    .click(function () {
+                                //        if (input.val().length > 0) {
+                                //            self.search(input.val()).draw();
+                                //        }
+                                //        else {
+                                //            loaddata();
+
+                                //        }
+                                //    }),
+                                $OtherSearch = $('<input  class="form-control form-control-sm text-center" id="myInput" name="myInput" placeholder="" title="Search" type="text"  value="'+othersearchvalue+'">')
+                        
+                                $allButton = $('<span class="ml-2 btn rounded-0 btn-primary btn-sm" tabindex="0" aria-controls="saleslist" TransactionId="button" title="Load"><span></span></span>')
+                                    .text('Load')
+                                    .click(function () {
+                                        input.val('');
+                                        loaddata();
+                                    })
+                            $('.dataTables_filter').append($allButton,$OtherSearch);//, $clearButton //, $searchButton
+                            //$('#tbllist_length').append($OtherSearch);//, $clearButton //, $searchButton
+                            
+
+                            
+
+                           $("#myInput").on("click", function () {
+                        
+                            setTimeout(function () {
+                                // whene transaction error then reload page
+                                 table.page.len(10).draw();
+                            }, 1);
+
+                       
+                            });
+
+
+                            $("#myInput").on("keyup", function () {
+                                var value = $(this).val().toLowerCase();
+                                $("#tbllist tr").filter(function () {
+                                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                                    //$(this).addClass("selected");
+                            });
+                    });
+                        },
+                        serverSide: true,  "scrollX": true,
+                        processing: true,
+                        "language": {
+                            sLengthMenu: " _MENU_",
+                            search: "",
+                            searchPlaceholder: "Search..."
+                        },
+                        "destroy": true,
+                        ajax: {
+                            url: '@Url.Action("GetProductList", "Admin")',
+                            data: { CategoryId: $("#CategoryId").val(), ROL: $("#ROL").val(), WarehouseId: $('#WarehouseId').val(), ROL: $('#ROL').val(), BrandId: $('#BrandId').val(), ModelId: $("#ModelId option:selected").text() || "" },
+                            type: "POST",
+                            "datatype": "json"
+                        },
+                        "order": [[0, "desc"]],
+
+                        //order: false,
+                        //columnDefs: [{
+                        //    targets: "_all",
+                        //    orderable: false
+                        //}],
+
+                        select: {
+                            style: 'single',
+                            selector: 'td:nth-child(1),td:nth-child(2),td:nth-child(3),td:nth-child(4),td:nth-child(5),td:nth-child(6),td:nth-child(7),td:nth-child(8),td:nth-child(9),td:nth-child(10)'
+                        },
+                        "pageLength": 5,
+                        "lengthMenu": [[5, 10, 20, 50, 100, 500, 1000], [5, 10, 20, 50, 100, 500, 1000]],
+                        "fnRowCallback" : function(nRow, aData, iDisplayIndex){
+                        $("td:first", nRow).text(iDisplayIndex +1);
+                          $("td:first", nRow).html(iDisplayIndex +1);
+                        //$('td:eq(0)', nRow).html( '<b>A</b>' );
+                            return nRow;
+                        },
+                        //rowId: 'Id',
+                        //dom: 'Bfrtip',
+                         dom: "<'row'<'col-md-10 col-12 'f><'col-md-2 col-12 text-right float-right p-0 m-0'lB>><'row'<'col-sm-12'tr>><'row'<'col-sm-12'ip>>",
+                        //dom: '<"dom_wrapper"flB>tip',
+                        buttons: [
+                            //'copy', 'csv', 'excel', 'pdf', 'print'
+                            { "extend": 'excel', "text": 'Excel', "className": 'btn btn-success rouned-0 btn-sm' }
+                        ],
+                        //success: function (data) {
+                        //    alert('success');
+                        //    console.log(data);
+                        //    //alert(data);
+                        //},
+                        //error: function () {
+                        //    console.log(err);
+                        //},
+                          columns: [
+
+                            { "title": "SLNo", "data": "Id", "visible": true },
+                            { "title": "ProductId", "data": "Id", "visible": false },
+
+                            { "title": "Name", "data": "Name", "searchable": true },
+                                   {
+                                    "class": 'details-control',
+                                    "role": "row",
+                                    "orderable": false,
+                                    "data": null,
+                                    "defaultContent": ''
+                                },
+                            { "title": "Local Name", "data": "LocalName", "searchable": true },
+
+                            
+                            
+                            //{
+                            //    "title": "IMEI / SLNo",
+                            //    "className": "text-nowrap text-center",
+                            //    "searchable": false,
+                            //    "visible" : isHidden,
+                            //    "data": {
+                            //        Id: "Id"
+                            //    },
+                            //    "render": function (data, type, row) {
+
+                            //        //console.log(data.Name);
+
+                            //        let allbatchno = ' ';
+                            //        console.log(data.BatchSerial);
+                            //        $.each($(data.BatchSerial), function (keyabc, valueabc) {
+                            //            allbatchno += data.BatchSerial[keyabc].BatchSerialNo + ':' + data.BatchSerial[keyabc].BatchQty + ' ; ';
+                            //            //console.log(d.SalesItems[key].BatchSerial[keyabc].BatchSerialNo);
+                            //        })
+
+
+                            //        return allbatchno;
+
+
+                            //    }
+
+                            //},
+
+
+
+
+                            { "title": "Code", "data": "Code", "searchable": true },
+                            { "title": "ModelName", "data": "ModelName", "searchable": true },
+
+                            { "title": "ColorName", "data": "ColorName", "searchable": true },
+                            { "title": "SizeName", "data": "SizeName", "searchable": true },
+
+
+                            { "title": "Category", "data": "CategoryName", "searchable": true },
+
+                           // { "title": "Barcode", "data": "ProductBarcode", "searchable": true },
+
+                            { "title": "Description", "data": "Description", "searchable": true },
+
+                            { "title": "Unit", "data": "UnitName", "searchable": true },
+                            { "title": "Brand", "data": "BrandName", "searchable": true },
+                            //{ "title": "ROL", "data": "ROL", "searchable": false },
+                            //{ "title": "ROQ", "data": "ROQ", "searchable": false },
+                            //{ "title": "MOQ", "data": "MOQ", "searchable": false },
+
+
+
+                            //{ "title": "Avg. Cost Price", "data": "CostPrice", "searchable": false },
+
+                            {
+                                "title": "Avg. Cost", "data": "WarehouseList", "className": "nowrap text-nowrap text-center", "searchable": false
+
+                                , "render": function (data, type, row) {
+                                    //console.log(data);
+                                    if (data != null) {
+
+                                        var output = "";
+                                        var totalstock = 0;
+                                        var totalcostingvalue = 0;
+                                        var totalsalesvalue = 0;
+
+                                        var totalstock = 0;
+
+                                        var count = 0;
+                                        for (var i = 0; i < data.length; i++) {
+                                            totalstock = totalstock + data[i].CurrentStock
+                                            totalcostingvalue = totalcostingvalue + data[i].CostingValue
+                                            totalsalesvalue = totalsalesvalue + data[i].SalesValue
+
+                                            count++;
+                                        };
+
+                                        if (totalstock > 0) {
+                                            //if (count > 1) {
+                                            output = (totalcostingvalue / totalstock).toFixed(2);
+                                            //}
+                                        };
+
+                                        //console.log(output);
+                                        //console.log(totalstock);
+
+                                        return output;
+                                    }
+                                    else {
+                                        return null;
+                                    }
+                                }
+
+                            },
+                          
+                            { "title": "Supplier", "data": "SupplierName", "searchable": true },
+
+                            { "title": "CostPrice", "data": "CostPrice", "searchable": false },
+                            { "title": "Price", "data": "Price", "searchable": false },
+             
+
+                    {
+                        "title": "CurrentStock", "data": "WarehouseList", "className": "nowrap text-nowrap text-center", "searchable": false , "visible":false
+
+                        , "render": function (data, type, row) {
+                            //console.log(data);
+                            if (data != null) {
+
+                                var output = "";
+                                var totalstock = 0;
+                                var totalcostingvalue = 0;
+                                var totalsalesvalue = 0;
+
+                                var totalstock = 0;
+
+                                var count = 0;
+                                for (var i = 0; i < data.length; i++) {
+                                    totalstock = totalstock + data[i].CurrentStock
+                                    totalcostingvalue = totalcostingvalue + data[i].CostingValue
+                                    totalsalesvalue = totalsalesvalue + data[i].SalesValue
+
+                                    count++;
+                                };
+
+                                return totalstock;
+                            }
+                            else {
+                                return null;
+                            }
+                        }
+
+                    },
+                    {
+                        "title": "CostingValue", "data": "WarehouseList", "className": "nowrap text-nowrap text-center", "searchable": false , "visible":false
+
+                        , "render": function (data, type, row) {
+                            //console.log(data);
+                            if (data != null) {
+
+                                var output = "";
+                                var totalstock = 0;
+                                var totalcostingvalue = 0;
+                                var totalsalesvalue = 0;
+
+                                var totalstock = 0;
+
+                                var count = 0;
+                                for (var i = 0; i < data.length; i++) {
+                                    totalstock = totalstock + data[i].CurrentStock
+                                    totalcostingvalue = totalcostingvalue + data[i].CostingValue
+                                    totalsalesvalue = totalsalesvalue + data[i].SalesValue
+
+                                    count++;
+                                };
+
+                                return totalcostingvalue;
+                            }
+                            else {
+                                return null;
+                            }
+                        }
+
+                    },
+                    {
+                        "title": "SalesValue", "data": "WarehouseList", "className": "nowrap text-nowrap text-center", "searchable": false , "visible":false
+
+                        , "render": function (data, type, row) {
+                            //console.log(data);
+                            if (data != null) {
+
+                                var output = "";
+                                var totalstock = 0;
+                                var totalcostingvalue = 0;
+                                var totalsalesvalue = 0;
+
+                                var totalstock = 0;
+
+                                var count = 0;
+                                for (var i = 0; i < data.length; i++) {
+                                    totalstock = totalstock + data[i].CurrentStock
+                                    totalcostingvalue = totalcostingvalue + data[i].CostingValue
+                                    totalsalesvalue = totalsalesvalue + data[i].SalesValue
+
+                                    count++;
+                                };
+
+                                return totalsalesvalue;
+                            }
+                            else {
+                                return null;
+                            }
+                        }
+
+                    },
+                            {
+                                "title": "<p class=narrowlineheight> Curr. Stock With </p> <p class=narrowlineheight> Cost & Sales Value </p>", "data": "WarehouseList",
+                                "className": "text-nowrap text-center",
+                                "searchable": false,
+                                "visible" : isHidden,
+                                "render": function (data, type, row) {
+                                    //console.log(data);
+                                    if (data != null) {
+
+                                        var output = "";
+                                        var totalstock = 0;
+                                        var totalcostingvalue = 0;
+                                        var totalsalesvalue = 0;
+
+                                        var totalstock = 0;
+
+                                        var count = 0;
+                                        for (var i = 0; i < data.length; i++) {
+                                            output += '<p class="narrowlineheight">' + data[i].WhShortName + ' : ' + data[i].CurrentStock + ' : ' + data[i].CostingValue.toFixed(2) + ' : ' + data[i].SalesValue;
+                                            totalstock = totalstock + parseFloat(data[i].CurrentStock.toFixed(2))
+                                            totalcostingvalue = totalcostingvalue + parseFloat(data[i].CostingValue.toFixed(2))
+                                            totalsalesvalue = totalsalesvalue + parseFloat(data[i].SalesValue.toFixed(2))
+
+                                            if (i < data.length - 1) {
+                                                output += "  </p>";
+
+                                                //'<p>' + this + '</p>'
+                                            }
+                                            count++;
+                                        };
+
+                                        if (totalstock > 0) {
+                                            if (count > 1) {
+                                                output += '<hr class="solid"> <p class="narrowlineheight" style="font-weight: bold;"> TOTAL : ' + totalstock + '  : ' + totalcostingvalue + '  : ' + totalsalesvalue + ' </p>';
+                                            }
+                                        };
+
+                                        //console.log(output);
+                                        //console.log(totalstock);
+
+                                        return output;
+                                    }
+                                    else {
+                                        return null;
+                                    }
+                                }
+
+                            },
+
+                            {
+                                "title": "<p class=narrowlineheight> ROL 1 </p> <p class=narrowlineheight> ROL 2 </p> <p class=narrowlineheight> ROL 3 </p>",
+                                "data": {
+                                    Id: "Id"
+                                },
+                                "className": "text-nowrap text-center",
+                                "searchable": false,
+                                "visible" : isHidden,
+                                "render": function (data, type, row) {
+                                    //console.log(data);
+                                    if (data != null) {
+
+                                        var output = "";
+                                        var totalstock = 0.00;
+
+                                        var count = 0;
+                                        for (var i = 0; i < data.WarehouseList.length; i++) {
+                                            //output += '<p class="narrowlineheight">' + data[i].CurrentStock;
+                                            //console.log(data.WarehouseList[i].CurrentStock);
+                                            totalstock = totalstock + parseFloat(data.WarehouseList[i].CurrentStock.toFixed(2))
+                                            //if (i < data.length - 1) {
+                                            //    output += "  </p>";
+                                            //    //'<p>' + this + '</p>'
+                                            //}
+                                            count++;
+                                        };
+                                        //console.log(totalstock);
+                                        //console.log(data.ROQ);
+
+
+                                        //if (totalstock > 0) {
+
+                                        if (data.ROL > 0) {
+                                        if (totalstock < data.ROL) {
+                                                output += '<p class="narrowlineheight" style="font-weight: bold; color:red"> Crossed ROL : ' + data.ROL + '</p>';
+                                            }
+                                            else {
+                                                output += '<p class="narrowlineheight" style="font-weight: bold; color:green">Not Crossed ROL : ' + data.ROL + '</p>';
+
+                                        }
+                                        }
+                                        if (data.ROLTwo > 0) {
+                                            if (totalstock < data.ROLTwo) {
+                                                output += '<hr class="solid"> <p class="narrowlineheight" style="font-weight: bold; color:#ff5400"> Crossed ROL 2 : ' + data.ROLTwo + '</p>';
+                                            }
+                                            else {
+                                                output += '<hr class="solid"> <p class="narrowlineheight" style="font-weight: bold; color:green">Not Crossed ROL 2: ' + data.ROLTwo + '</p>';
+
+                                            }
+                                        }
+
+                                        if (data.ROLThree > 0) {
+                                            if (totalstock < data.ROLThree) {
+                                                output += '<hr class="solid"> <p class="narrowlineheight" style="font-weight: bold;"> Crossed ROL 3 : ' + data.ROLThree + '</p>';
+                                            }
+                                            else {
+                                                output += '<hr class="solid"> <p class="narrowlineheight" style="font-weight: bold; color:green"> Not Crossed ROL 3: ' + data.ROLThree + '</p>';
+
+                                            }
+                                        }
+                                            //ROLTwo
+
+                                            //if (count > 1) {
+                                            //    output += '<hr class="solid"> <p class="narrowlineheight" style="font-weight: bold;"> TOTAL : ' + totalstock + '</p>';
+                                            //}
+                                       // };
+
+                                        //console.log(output);
+                                        //console.log(totalstock);
+
+                                        return output;
+                                    }
+                                    else {
+                                        return null;
+                                    }
+                                }
+
+                            },
+
+                            {
+                                "title": "<p class=narrowlineheight >Total Pur. / Rcvd. Qty</p> <p class=narrowlineheight>Last Pur. Date</p>Last Pur. / Rcvd. From",
+                                "className": "text-nowrap text-center",
+                                "searchable": false,
+                                "visible" : isHidden,
+                                "data": {
+                                    Id: "Id"
+                                },
+                                "render": function (data, type, row) {
+                                    var buttons = "";
+                                    if (data.TotalPurchase > 0) {
+                                        buttons += '<p class="narrowlineheight" >  Qty : ' + (data.TotalPurchase - data.TotalPurchaseReturn) + ' ' + data.UnitName + ' </p>';
+                                        buttons += '<p class="narrowlineheight" > ' + data.LastPurchaseDate + ' </p>';
+                                        buttons += '<hr class="solid"> <p class="narrowlineheight" > ' + data.LastPurchaseSupplier + ' </p>';
+                                    }
+                                    return buttons;
+                                }
+
+                            },
+                            {
+                                "title": "<p class=narrowlineheight>Total Sales / Issue Qty</p> <p class=narrowlineheight>Last Sales / Issue Date</p>Last Sales / Issue To",
+                                "className": "text-nowrap text-center",
+                                "searchable": false,
+                                "visible" : isHidden,
+                                "data": {
+                                    Id: "Id"
+                                },
+                                "render": function (data, type, row) {
+                                    var buttons = "";
+                                    if (data.TotalSales > 0 || data.TotalIssue > 0) {
+                                        buttons += '<p class="narrowlineheight" >  Qty : ' + (data.TotalSales + data.TotalIssue + data.TotalDamage - data.TotalSalesReturn) + ' ' + data.UnitName + ' </p>';
+                                        buttons += '<p class="narrowlineheight" > ' + data.LastSalesDate + ' ' + data.LastIssueDate + ' </p>';
+                                        buttons += '<hr class="solid"> <p class="narrowlineheight" > ' + data.LastSalesCustomer + ' </p>';
+
+
+                                    }
+                                    return buttons;
+
+
+                                }
+
+                            },
+
+
+                            //{ "title": "Market Name", "data": "MarketName", "searchable": true },
+                            {
+                                "title": "Image", "data": "ImagePath", "searchable": false, "render": function (data) {
+                                    //console.log(data);
+                                    //return '<img src="..' + data + '" class="img-thumbnail" width="80px">';
+                                    //console.log(data);
+                                    return '<img src="..' + data + '" class="img-thumbnail" width="80px" onerror=this.onerror=null;this.src="../Content/MemberImages/0.png">';
+
+                                }
+                            },
+
+                            {
+                                //"title": "Action",
+                                "data": "Id",
+                                "className": "text-nowrap text-center",
+                                "searchable": false,
+                                "orderable": false,
+
+                                "render": function (data, type, row) {
+
+                                    var tokenabc = $("input[name='Dominate_ANTIFORZERY']").val();
+
+
+                                    var myUrledit = '@Url.Action("EditProduct", "Admin")?productId=' + data;
+                                    var myUrlcopy = '@Url.Action("CopyProduct", "Admin")?productId=' + data;
+                                    //var myUrldelete = '@Url.Action("DeleteProduct", "Admin")?productId=' + data + '&Dominate_ANTIFORZERY=' + tokenabc+'';
+
+                                    //method = "post" action = "/Manage/ChangePassword"
+
+                                    //alert(myUrldelete);
+
+
+                                    var message = `return confirm('Are you sure you want to Remove the Product Information ?')`;
+
+                                    return '<span data-toggle="tooltip" title="Copy"> <a href=\"' + myUrlcopy + '\" class=\"btn btn-icon btn-info btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-copy"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                        '<span> <form class="form-inline d-inline"  onsubmit="return validateForm()"  method="post" action="../Admin/DeleteProduct?productId=' + data + '">@Html.AntiForgeryToken()<input type="submit" value="X" class=\"fa btn btn-danger btn-sm rounded-0  mb-1\"  target=\"_blank\" /></form></span>';
+                                    //    '<span data-toggle="tooltip" title="Delete"> <a  href=\"' + myUrldelete + '\"   message = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-remove"></i> <form> </form >  </a></span>';
+
+                                    return
+                                }
+
+
+
+
+
+                            }
+                        ],
+                                        "order": [0, "desc"],
+                "processing": true,
+                select: {
+                    style: 'multi',
+                    selector: 'td:nth-child(2),td:nth-child(4),td:nth-child(5),td:nth-child(6),td:nth-child(7),td:nth-child(8),td:nth-child(9),td:nth-child(10),td:nth-child(11),td:nth-child(12),td:nth-child(13),td:nth-child(14)'
+                },
+                    "language": {
+                            "lengthMenu": "_MENU_",
+                            //"zeroRecords": "Nothing found - sorry",
+                            //"info": "Showing page _PAGE_ of _PAGES_",
+                            "infoEmpty": "No records available",
+                            "infoFiltered": "(filtered from _MAX_ total records)",
+                            "searchPlaceholder": "Search",
+                             "sSearch" : '<em class="fa fa-search"></em>'
+                        },
+                "destroy": true
+                    });
+
+                }
+
+                function validateForm() {
+
+                    return confirm('Are you sure you want to Remove the Product Information ?');
+
+
+                };
+        $('#BrandId').select2({
+    theme: 'bootstrap-5'
+} );
+
+                $('#BrandId').select2().on("select2:select", function (e) {
+
+                    ModelListLoad();
+                });
+
+
+                        function ModelListLoad() {
+
+                            var BrandId = $('#BrandId option:selected').val();
+                            $.ajax({
+                                url: '@Url.Action("GetModelByBrandId", "Values")',
+                                type: 'POST',
+                                //headers: { "X-CSRF-TOKEN-GTR_ANTIFORZERY": antiForgeryToken },
+                                dataType: 'json',
+                                async: false,
+                                data: { BrandId: BrandId },
+                                success: function (data, status, xhr) {
+                            
+                            
+                                    if (BrandId > 0)
+                                    {
+                                        $("#ModelId option").remove();
+                                        createSelectList(data.item)
+                                    }
+                                    //if (selectedItem!=null) {
+                                    //    $("#ProductId").val(selectedItem).change();
+                                    //}
+                                    //selectedItem = null;
+                                }
+
+                            });
+                        };
+
+                        function createSelectList(itemlist) {
+                            $('#ModelId').append(new Option("Model", "-1"));
+                            for (var i = 0; i < itemlist.length; ++i) {
+                                optionValue = itemlist[i].Value;
+                                optionText = itemlist[i].Text;
+                                $('#ModelId').append(new Option(optionText, optionValue));
+
+                            }
+
+                        }
+
+
+
+
+
+                $(window).bind('keydown', function (event) {
+                    if (event.ctrlKey || event.metaKey) {
+                        switch (String.fromCharCode(event.which).toLowerCase()) {
+                            case 'h':
+                                event.preventDefault();
+                                //alert('ctrl-s');
+                                //alert($('#tblpayments').DataTable().data().count());
+                                //if ($('#tblpayments').DataTable().data().count() == 0) {
+                                //    $("#addpayment").trigger('click');
+                                //}
+
+                                //$("#BtnSave").trigger('click');
+                                //alert('hit');
+                                SomeAction("cntrlh");
+                                return;
+                                //Sales_save();
+                                break;
+                                case 'd':
+                                event.preventDefault();
+                                SomeAction("cntrlu");
+                                //alert('ctrl-s');
+                                Product_delete();
+                                return;
+                                break;
+                                @*case 'n':
+                                event.preventDefault();
+                                //alert('ctrl-n');
+                                window.location.href = '@Url.Action("POSCreate", "Sales")';
+                                break;
+                            case 'r':
+                                event.preventDefault();
+                                //alert('ctrl-r');
+                                window.location.href = '@Url.Action("POSCreate", "Sales")';
+                                break;
+                            case 'b':
+                                event.preventDefault();
+                                //alert('ctrl-b');
+                                window.location.href = '@Url.Action("Index", "Sales")';
+                                //$('#btnBack').click(function () {
+                                //    ///Code
+                                //});
+                                break;*@
+                            }
+                    }
+                });
+
+                function SomeAction(commandtype) {
+
+                    var totalproductlist = $('#tbllist').DataTable();
+                    var rows = totalproductlist.rows('.selected').data();
+                    //console.log(rows.length);
+                    //console.log(rows);
+
+
+                    //var selectedsaleslist = [];
+                    //var pid = 0;
+
+                    //if (rows.length > 0) {
+                    //    pid = rows[0]["Id"];
+                    //}
+
+
+                    var pid = [];
+                    //var doctype = [];
+
+
+
+                    for (var i = 0; i < rows.length; i++) {
+
+                        var rowData = rows[i];
+                        pid.push(rowData["Id"]);
+                        //doctype.push(rowData[5]);
+
+                    }
+
+                    //console.log(pid);
+                    //alert(WarehouseId);
+                    //alert(btnvalue);
+
+                        if ((pid == null) || (pid == "")) {
+                            toastr.error("Please Select Product from the List.");
+                            return true;
+                        }
+
+                    //console.log(rows);
+                    //var doctype = "pdf";
+                    //var criteria = "DownloadReport";
+
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("ProductDeleteAction", "Admin")',
+                        dataType: 'json',
+                        async: true,
+                        data: { ProductId: pid, CommandType: commandtype},
+                        success: function (response) {
+
+                            if (response.Success == "1") {
+                                var selectedRows = totalproductlist.rows(".selected");
+                                selectedRows.remove().draw();
+                                toastr.success(response.ex);
+                                //$("#btnLoad").focus();
+                            }
+                            else if (response.Success == "2") {
+                                toastr.warning(response.ex);
+                            }
+                            //else if (response.Success == "3") {
+                            //    toastr.error(response.ex);
+                            //    setTimeout(function () {
+                            //        // whene transaction error then reload page
+                            //        $("#btnLoad").click();
+                            //    }, 3000);
+                            //}
+                            //else {
+                            //    toastr.error(response.ex);
+                            //}
+
+                            //toastr.success("Command Executed Successfully.");
+                            //window.open(response.Url, '_blank')
+                        },
+                        error: function (ex) {
+                            alert('Failed.' + ex);
+                        }
+
+                    });
+
+
+                }
+
+
+
+
+            function ReportPrint(btnvalue) {
+
+                var peopleList = $('#tbllist').DataTable();
+                var rows = peopleList.rows('.selected').data();
+
+                var CategoryId = $('#CategoryId').val();
+                var reporttype = $("input[name=RptType]:checked").val();
+                var WarehouseId = $('#WarehouseId').val();
+                var BrandId = $('#BrandId').val() || "";
+                var ModelId =$("#ModelId option:selected").text() || "";
+
+
+                var FromDate = $(".FromDate").val();
+                var ToDate = $(".ToDate").val();
+
+                //console.log(BrandId);
+
+                //console.log(rows.length);
+                //console.log(rows);
+
+
+                var productidlist = [];
+                var pid = 0;
+
+                if (rows.length > 0) {
+                    pid = rows[0]["Id"];
+                }
+                //console.log(pid);
+                //alert(WarehouseId);
+                //alert(btnvalue);
+
+
+                if (btnvalue == "PrintLedger") {
+
+                    if ((WarehouseId == null) || (WarehouseId == "")) {
+                        toastr.error("Please Select Store First.");
+                        return true;
+
+                    }
+                    else if ((pid == null) || (pid == ""))
+                    {
+                        toastr.error("Please Select Product from the List.");
+                        return true;
+                    }
+                    //alert('Wait');
+                }
+                else if (btnvalue == "rptPrdAvgRateCalculation") {
+
+                    if ((pid == null) || (pid == "")) {
+                        toastr.error("Please Select Product from the List.");
+                        return true;
+                    }
+                }
+
+
+
+
+
+            //console.log(rows);
+
+
+
+
+            //var doctype = "pdf";
+
+            //var criteria = "DownloadReport";
+
+
+
+
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("ProductReport", "Admin")',
+                dataType: 'json',
+                async: true,
+                data: { rptFormat: reporttype, action: btnvalue, CategoryId: CategoryId , ProductId: pid, FromDate: FromDate, ToDate: ToDate, WarehouseId: WarehouseId,BrandId: BrandId,ModelId: ModelId },
+                success: function (response) {
+
+                    //setTimeout(function () {
+                    //    window.open(response.Url, '_blank')
+                    //}, 3000);
+
+                    window.open(response.Url, '_blank')
+
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+
+        }
+
+
+
+
+        CurrentDate();
+
+        $(".FromDate").datepicker({
+
+            dateFormat: "dd-M-y",
+            changeMonth: true,
+            changeYear: true
+
+        });
+        $(".ToDate").datepicker({
+
+            dateFormat: "dd-M-y",
+            changeMonth: true,
+            changeYear: true
+
+        });
+
+        function CurrentDate() {
+            var date = new Date();
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+
+
+            if ($(".FromDate").val() == '') {
+                $(".FromDate").val(val);
+            }
+            if ($(".ToDate").val() == '') {
+                $(".ToDate").val(val);
+            }
+
+
+        }
+
+
+
+
+
+            </script>
+        }

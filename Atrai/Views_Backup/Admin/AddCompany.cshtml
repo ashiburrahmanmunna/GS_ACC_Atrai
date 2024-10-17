@@ -1,0 +1,217 @@
+﻿@model Atrai.Core.Entity.StoreSettingModel
+@{
+    ViewData["Title"] = "Settings";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>Store Settings</h4>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="admin" asp-action="Settings" method="post" enctype="multipart/form-data">
+                                <input type="hidden" asp-for="Id" />
+                                <input type="hidden" asp-for="SubscriptionTypeId" />
+
+                                <div class="row">
+                                    <div class="col-lg-8">
+
+                                        <div class="form-group">
+                                            <div class="col-md-5 col-md-offset-2">
+                                                <img src="../@Model.Logo" alt="img" id="UploadFile" class="img-thumbnail" style="height: 150px" width="150px" /> <br />
+                                                <input type="file" name="logoPostedFileBase" accept="image/x-png, image/gif, image/jpeg" id="FileUpload" onchange="PreviewImage()" />
+                                            </div>
+                                        </div>
+
+
+
+
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-6 col-12 ">
+
+
+                                                    <label asp-for="StoreName"></label>
+                                                    <input type="text" asp-for="StoreName" class="form-control" placeholder="eg Dominatebd">
+                                                    <span asp-validation-for="StoreName" class="text-danger"></span>
+                                                </div>
+
+                                                <div class="col-md-6 col-12 ">
+
+
+                                                    @Html.LabelFor(x => x.CountryId)
+                                                    @Html.DropDownListFor(x => x.CountryId,
+                                                         new SelectList((IEnumerable<SelectListItem>)ViewBag.Country, "Value", "Text"), "Select Country",
+                                                         htmlAttributes: new { @class = "form-control", id = "CountryId" })
+
+                                                    @*<label asp-for="Currency"></label>
+                            <input type="text" asp-for="Currency" class="form-control" placeholder="eg $">
+                            <span asp-validation-for="Currency" class="text-danger"></span>*@
+                                                </div>
+
+
+                                                <div class="col-md-3 col-12 ">
+                                                    <label asp-for="DecimalField"></label>
+                                                    <input type="text" asp-for="DecimalField" class="form-control" placeholder="eg 2">
+                                                    <span asp-validation-for="DecimalField" class="text-danger"></span>
+                                                </div>
+
+
+
+
+                                                <div class="col-md-2 col-12 ">
+                                                    <label asp-for="RedirectToEcommercePage"></label>
+                                                    <input asp-for="RedirectToEcommercePage" class="form-control" type="checkbox">
+                                                    <span asp-validation-for="RedirectToEcommercePage" class="text-danger"></span>
+                                                </div>
+
+
+
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+
+                                            <div class="row">
+                                                <div class="col-md-4 col-12 ">
+
+                                                    <label asp-for="Email"></label>
+                                                    <input asp-for="Email" class="form-control" type="email" placeholder="Enter Email">
+                                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                                </div>
+                                                <div class="col-md-4 col-12 ">
+                                                    <label asp-for="Web"></label>
+                                                    <input asp-for="Web" class="form-control" type="text" placeholder="Enter Web">
+                                                    <span asp-validation-for="Web" class="text-danger"></span>
+                                                </div>
+                                                <div class="col-md-4 col-12 ">
+                                                    <label asp-for="Facebook"></label>
+                                                    <input asp-for="Facebook" class="form-control" type="text" placeholder="Enter Web">
+                                                    <span asp-validation-for="Facebook" class="text-danger"></span>
+                                                </div>
+
+                                            </div>
+
+
+
+                                        </div>
+                                        <div class="form-group row">
+                                            <div class="col-md-4 col-12 ">
+                                                <label asp-for="Phone"></label>
+                                                <input asp-for="Phone" class="form-control" type="text" placeholder="Enter phone">
+                                                <span asp-validation-for="Phone" class="text-danger"></span>
+
+                                            </div>
+                                            <div class="col-md-4 col-12 ">
+                                                <label asp-for="PhoneTwo"></label>
+                                                <input asp-for="PhoneTwo" class="form-control" type="text" placeholder="Enter phone">
+                                                <span asp-validation-for="PhoneTwo" class="text-danger"></span>
+
+                                            </div>
+
+
+
+                                            <div class="col-md-4 col-12 ">
+
+                                                <div class="form-group">
+                                                    @Html.LabelFor(x => x.BusinessTypeId)
+                                                    @Html.DropDownListFor(x => x.BusinessTypeId,
+                                                                                                 new SelectList((IEnumerable<SelectListItem>)ViewBag.BusinessType, "Value", "Text"), "Select Business Type",
+                                                                                                 htmlAttributes: new { @class = "form-control", id = "BusinessTypeId" })
+                                                    @Html.ValidationMessageFor(x => x.BusinessTypeId, "", new { @class = "text-danger" })
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                        <div class="form-group row">
+
+                                            <div class="col-md-6 col-12 ">
+                                                <label asp-for="CustomizedReportFormatName"></label>
+                                                <input asp-for="CustomizedReportFormatName" class="form-control" type="text" placeholder="Report Caption Small">
+                                                <span asp-validation-for="CustomizedReportFormatName" class="text-danger"></span>
+
+                                            </div>
+
+                                            <div class="col-md-3 col-12 text-center">
+                                                <label asp-for="isTaxExcluded"></label>
+                                                <input asp-for="isTaxExcluded" class="form-control" type="checkbox">
+                                                <span asp-validation-for="isTaxExcluded" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="TaxPer"></label>
+                                                <input type="text" asp-for="TaxPer" class="form-control">
+                                                <span asp-validation-for="TaxPer" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-12 col-12 ">
+                                                <label asp-for="ReportCaptionSmall"></label>
+                                                <input asp-for="ReportCaptionSmall" class="form-control" type="text" placeholder="Report Caption Small">
+                                                <span asp-validation-for="ReportCaptionSmall" class="text-danger"></span>
+
+                                            </div>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <label asp-for="Address"></label>
+                                            <textarea class="form-control" asp-for="Address" rows="6" placeholder="Enter address"></textarea>
+                                            <span asp-validation-for="Address" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="form-group">
+                                            @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+
+
+                                            <button type="submit" class="btn btn-primary  rounded-0"> Save Changes </button>
+
+
+                                            @Html.ActionLink("Back", "CompanyList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                        </div>
+
+
+                                        @*<div class="form-group">
+                    <button type="submit" class="btn btn-primary"> Save Changes </button>
+                </div>*@
+
+
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+
+        });
+
+        function PreviewImage() {
+            var oFReader = new FileReader();
+            oFReader.readAsDataURL(document.getElementById("FileUpload").files[0]);
+
+            oFReader.onload = function (oFREvent) {
+                document.getElementById("UploadFile").src = oFREvent.target.result;
+            };
+        };
+    </script>
+}

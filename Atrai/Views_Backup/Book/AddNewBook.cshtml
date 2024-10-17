@@ -1,0 +1,576 @@
+﻿@*@using Atrai.BookStore.Enums*@
+@*@model Atrai.Core.Entity.BookModel*@
+@*@inject Atrai.BookStore.Repository.ILanguageRepository _languageRepo*@
+@model BookModel
+@{ ViewData["Title"] = "Add new book";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+<style>
+    /*Copied from bootstrap to handle input file multiple*/
+    .btn {
+        display: inline-block;
+        padding: 6px 12px;
+        margin-bottom: 0;
+        font-size: 14px;
+        font-weight: normal;
+        line-height: 1.42857143;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        background-image: none;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+    /*Also */
+    .btn-success {
+        border: 1px solid #c5dbec;
+        background: #D0E5F5;
+        font-weight: bold;
+        color: #2e6e9e;
+    }
+    /* This is copied from https://github.com/blueimp/jQuery-File-Upload/blob/master/css/jquery.fileupload.css */
+    .fileinput-button {
+        position: relative;
+        overflow: hidden;
+    }
+
+        .fileinput-button input {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            opacity: 0;
+            -ms-filter: 'alpha(opacity=0)';
+            font-size: 200px;
+            direction: ltr;
+            cursor: pointer;
+        }
+
+    .thumb {
+        height: 80px;
+        width: 100px;
+        border: 1px solid #000;
+    }
+
+    ul.thumb-Images li {
+        width: 120px;
+        float: left;
+        display: inline-block;
+        vertical-align: top;
+        height: 120px;
+    }
+
+    .img-wrap {
+        position: relative;
+        display: inline-block;
+        font-size: 0;
+    }
+
+    .img-wrap .close {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        z-index: 100;
+        background-color: #D0E5F5;
+        padding: 5px 2px 2px;
+        color: #000;
+        font-weight: bolder;
+        cursor: pointer;
+        opacity: .5;
+        font-size: 23px;
+        line-height: 10px;
+        border-radius: 50%;
+    }
+
+    .img-wrap:hover .close {
+        opacity: 1;
+        background-color: #ff0000;
+    }
+
+    .FileNameCaptionStyle {
+        font-size: 12px;
+    }
+</style>
+<div class="page-wrapper">
+    <div class="container">
+        <h3 class="display-4">Image Upload With Related Info.</h3>
+        <hr />
+        @if (ViewBag.IsSuccess == true)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Congratulations</strong> You have added new book successfully. <br />
+                Click <a asp-controller="Book" asp-action="GetBook" asp-route-id="@ViewBag.BookId">here</a> to view the details
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        <form id="myform" method="post" enctype="multipart/form-data" asp-action="AddNewBook" asp-controller="Book">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group">
+                <label style="font-size: 14px;">
+                    <span style='color:navy;font-weight:bold'>Attachment Instructions :</span>
+                </label>
+                <ul>
+                    <li>
+                        Allowed only files with extension (jpg, png, gif)
+                    </li>
+                    <li>
+                        Maximum number of allowed files 10 with 300 KB for each
+                    </li>
+                    <li>
+                        you can select files from different folders
+                    </li>
+                </ul>
+                <!--To give the control a modern look, I have applied a stylesheet in the parent span.-->
+                <span class="btn btn-success fileinput-button">
+                    <span>Select Attachment</span>
+                    <input type="file" name="files[]" id="files" multiple accept="image/jpeg, image/png, image/gif,"><br />
+                </span>
+                <output id="Filelist"></output>
+
+
+
+
+                @*<label asp-for="GalleryFiles" class="control-label"></label>
+                    <div class="custom-file" id="files">
+                        <input asp-for="GalleryFiles" class="custom-file-input" id="customFile" />
+                        <label class="custom-file-label" for="customFile">Choose file</label>
+                    </div>
+                    <span asp-validation-for="GalleryFiles" class="text-danger"></span>*@
+
+
+
+
+            </div>
+
+
+
+            <div class="form-group row">
+                @*<input type="submit" value="Add book" class="btn btn-primary" />*@
+               <div class="col-md-4">
+                     <button id="create" class="btn btn-primary rounded-0" onclick="SaveData()" type="button">Save</button>
+</div>
+   <div class="col-md-4">
+             
+
+             @Html.ActionLink("Back", "all-books", "Book", null, new { @class = "btn btn-info", @id = "btnback" })
+        </div>
+            </div>
+
+
+
+            @*<div class="form-group">
+                    <label asp-for="BookPdf" class="control-label"></label>
+                    <div class="custom-file">
+                        <input asp-for="BookPdf" class="custom-file-input" id="customFile">
+                        <label class="custom-file-label" for="customFile">Choose file</label>
+                    </div>
+                    <span asp-validation-for="BookPdf" class="text-danger"></span>
+                </div>*@
+
+        </form>
+    </div>
+    </div>
+
+
+
+
+
+    @section Scripts{
+
+        <script type="text/javascript">
+
+
+
+            const MAX_WIDTH = 900
+            const MAX_HEIGHT = 600
+
+            //document.querySelector('input[type="file"]').addEventListener('change', function () {
+   
+            //    if (this.files && this.files[0]) {
+            //        const img = document.querySelector('img');
+            //        img.onerror = function () {
+            //            img.src = 'http://res.cloudinary.com/mykeels/image/upload/v1514796615/error_tlvpwq.png'
+            //        }
+            //        img.onload = function () {
+            //            if (!this.src.startsWith('data:')) {
+            //                this.src = resizeImage(this, MAX_WIDTH, MAX_HEIGHT)
+            //            }
+            //        }
+            //        img.src = URL.createObjectURL(this.files[0]);
+            //    }
+            //})
+
+            const resizeImage = (img, maxWidth, maxHeight) => {
+                var newWidth = img.width, newHeight = img.height
+                if (img.width > img.height && img.width > maxWidth) {
+                    var newHeight = Math.floor(img.height * (maxWidth / img.width))
+                    var newWidth = maxWidth
+                }
+                else if (img.height > maxHeight) {
+                    var newHeight = maxHeight
+                    var newWidth = Math.floor(img.width * (maxHeight / img.height))
+                }
+                const canvas = document.createElement('canvas')
+                canvas.width = newWidth
+                canvas.height = newHeight
+                var ctx = canvas.getContext("2d")
+                ctx.drawImage(img, 0, 0, newWidth, newHeight)
+                return canvas.toDataURL("image/jpeg")
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //I added event handler for the file upload control to access the files properties.
+        document.addEventListener("DOMContentLoaded", init, false);
+
+        //To save an array of attachments
+        var AttachmentArray = [];
+
+        //counter for attachment array
+        var arrCounter = 0;
+
+        //to make sure the error message for number of files will be shown only one time.
+        var filesCounterAlertStatus = false;
+
+        //un ordered list to keep attachments thumbnails
+        var ul = document.createElement('ul');
+        ul.className = ("thumb-Images");
+        ul.id = "imgList";
+
+        function init() {
+            //add javascript handlers for the file upload event
+            document.querySelector('#files').addEventListener('change', handleFileSelect, false);
+        }
+
+        //the handler for file upload event
+        function handleFileSelect(e) {
+            //to make sure the user select file/files
+            if (!e.target.files) return;
+
+            //To obtaine a File reference
+            var files = e.target.files;
+
+            // Loop through the FileList and then to render image files as thumbnails.
+            for (var i = 0, f; f = files[i]; i++) {
+
+                //instantiate a FileReader object to read its contents into memory
+                var fileReader = new FileReader();
+
+                // Closure to capture the file information and apply validation.
+                fileReader.onload = (function (readerEvt) {
+
+                    //if (!this.src.startsWith('data:')) {
+                    //    this.src = resizeImage(this, MAX_WIDTH, MAX_HEIGHT)
+                    //}
+
+
+                    return function (e) {
+
+                        //Apply the validation rules for attachments upload
+                        ApplyFileValidationRules(readerEvt)
+
+                        //Render attachments thumbnails.
+                        RenderThumbnail(e, readerEvt);
+
+                        //Fill the array of attachment
+                        FillAttachmentArray(e, readerEvt)
+                    };
+                })(f);
+
+                // Read in the image file as a data URL.
+                // readAsDataURL: The result property will contain the file/blob's data encoded as a data URL.
+                // More info about Data URI scheme https://en.wikipedia.org/wiki/Data_URI_scheme
+                fileReader.readAsDataURL(f);
+            }
+            document.getElementById('files').addEventListener('change', handleFileSelect, false);
+        }
+
+        //To remove attachment once user click on x button
+        jQuery(function ($) {
+            $('div').on('click', '.img-wrap .close', function () {
+                var id = $(this).closest('.img-wrap').find('img').data('id');
+
+                //to remove the deleted item from array
+                var elementPos = AttachmentArray.map(function (x) { return x.FileName; }).indexOf(id);
+                if (elementPos !== -1) {
+                    AttachmentArray.splice(elementPos, 1);
+                }
+
+                //to remove image tag
+                $(this).parent().find('img').not().remove();
+
+                //to remove div tag that contain the image
+                $(this).parent().find('div').not().remove();
+
+                //to remove div tag that contain caption name
+                $(this).parent().parent().find('div').not().remove();
+
+                //to remove li tag
+                var lis = document.querySelectorAll('#imgList li');
+                for (var i = 0; li = lis[i]; i++) {
+                    if (li.innerHTML == "") {
+                        li.parentNode.removeChild(li);
+                    }
+                }
+
+            });
+        }
+            )
+
+            //document.getElementById('files').onchange = function (evt) {
+            //    ImageTools.resize(this.files[0], {
+            //        width: 320, // maximum width
+            //        height: 240 // maximum height
+            //    }, function (blob, didItResize) {
+            //        // didItResize will be true if it managed to resize it, otherwise false (and will return the original file as 'blob')
+            //            document.getElementById('preview').src = window.URL.createObjectURL(blob);
+
+            //        // you can also now upload this blob using an XHR.
+            //    });
+            //};
+
+        //Apply the validation rules for attachments upload
+        function ApplyFileValidationRules(readerEvt) {
+            //To check file type according to upload conditions
+            if (CheckFileType(readerEvt.type) == false) {
+                alert("The file (" + readerEvt.name + ") does not match the upload conditions, You can only upload jpg/png/gif files");
+                e.preventDefault();
+                return;
+            }
+
+            //To check file Size according to upload conditions
+            if (CheckFileSize(readerEvt.size) == false) {
+                alert("The file (" + readerEvt.name + ") does not match the upload conditions, The maximum file size for uploads should not exceed 300 KB");
+                //e.preventDefault();
+                return;
+            }
+
+            //To check files count according to upload conditions
+            if (CheckFilesCount(AttachmentArray) == false) {
+                if (!filesCounterAlertStatus) {
+                    filesCounterAlertStatus = true;
+                    alert("You have added more than 10 files. According to upload conditions you can upload 10 files maximum");
+                }
+                e.preventDefault();
+                return;
+            }
+        }
+
+        //To check file type according to upload conditions
+        function CheckFileType(fileType) {
+            if (fileType == "image/jpeg") {
+                return true;
+            }
+            else if (fileType == "image/png") {
+                return true;
+            }
+            else if (fileType == "image/gif") {
+                return true;
+            }
+            else {
+                return false;
+            }
+            return true;
+        }
+
+        //To check file Size according to upload conditions
+        function CheckFileSize(fileSize) {
+            if (fileSize < 300000) {
+                return true;
+            }
+            else {
+                return false;
+            }
+            return true;
+        }
+
+        //To check files count according to upload conditions
+        function CheckFilesCount(AttachmentArray) {
+            //Since AttachmentArray.length return the next available index in the array,
+            //I have used the loop to get the real length
+            var len = 0;
+            for (var i = 0; i < AttachmentArray.length; i++) {
+                if (AttachmentArray[i] !== undefined) {
+                    len++;
+                }
+            }
+            //To check the length does not exceed 10 files maximum
+            if (len > 9) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+
+        //Render attachments thumbnails.
+        function RenderThumbnail(e, readerEvt) {
+            var li = document.createElement('li');
+            ul.appendChild(li);
+            li.innerHTML = ['<div class="img-wrap"> <span class="close">&times;</span>' +
+                '<img class="thumb" src="', e.target.result, '" title="', escape(readerEvt.name), '" data-id="',
+            readerEvt.name, '"/>' + '</div>'].join('');
+
+            var div = document.createElement('div');
+            div.className = "FileNameCaptionStyle";
+            li.appendChild(div);
+            div.innerHTML = [readerEvt.name].join('');
+            document.getElementById('Filelist').insertBefore(ul, null);
+        }
+
+        //Fill the array of attachment
+        function FillAttachmentArray(e, readerEvt) {
+            AttachmentArray[arrCounter] =
+            {
+                AttachmentType: 1,
+                ObjectType: 1,
+                FileName: readerEvt.name,
+                FileDescription: "Attachment",
+                NoteText: "",
+                MimeType: readerEvt.type,
+                Content: e.target.result.split("base64,")[1],
+                FileSizeInBytes: readerEvt.size,
+            };
+            arrCounter = arrCounter + 1;
+        }
+
+
+        //var upload = document.getElementById("files");
+
+
+        //var abcdef = null;
+        //upload.onchange = function (e) {
+        //    abcdef = e.target.files;
+
+        //    //var files = e.target.files;
+        //    //var firstFile = files.item(1);
+        //    //var idstokeep = [0, 2]; // keep first `2` files from `multiple` selection
+        //    //var _files = Array.prototype.slice.call(files).splice(idstokeep[0], idstokeep[1]);
+        //    //console.log(files, files.length
+        //    //    , _files, _files.length
+        //    //    , firstFile);
+
+        //    //console.log(files, files.length);
+        //};
+
+
+        function SaveData() {
+
+            //console.log(AttachmentArray);
+            //alert(AttachmentArray);
+
+            //if (!$("#myform").valid()) {
+            //    toastr.error('Please Fill Up All Necessary Information Correctly.');
+            //    $("html, body").animate({ scrollTop: 0 }, 500);
+            //    $("#create").prop("disabled", false);
+            //    return true;
+            //}
+
+            //let formData = new FormData();
+            //formData.append("file", fileupload.files[0]);
+
+            //var testabc = AttachmentArray.files[0];
+            //console.log(testabc);
+
+
+
+            var abc = {
+
+                Id: 0,
+                Title: "",
+                //Filelist: null,
+                GalleryFiles : []
+
+            };
+
+
+
+            //console.log($("#files").val());
+
+            //var upload = document.getElementById('files');
+            //var idstokeep = [0, 2]; // splice , keep first `2` files
+            //var _files = Array.prototype.slice.call(files).splice(idstokeep[0], idstokeep[1]);
+
+
+
+
+            abc.Id = $("#Id").val();
+            abc.Title = $("#Title").val();
+            //abc.Filelist = AttachmentArray;
+            abc.GalleryFiles = AttachmentArray;
+
+            //var data = new FormData();
+
+            //$.each($("input[type='file']")[0].files, function (i, file) {
+            //    data.append('file', file);
+            //});
+            //console.log(data);
+
+
+            //console.log(abc);
+
+            //alert('wait');
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("AddNewBook", "Book")',
+                dataType: 'json',
+                async: 'false',
+                //headers: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                //argumentsheaders: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                data: { bookModel: abc, obj: AttachmentArray},
+                success: function (result) {
+                    if (result.Success == "1") {
+
+                        toastr.success('Image Upload Successfully.');
+
+                        window.location.href = "AddNewBook?isSuccess=True&bookId=" + result.Id;
+                        ///AddNewBook?isSuccess=True&bookId=22
+                    }
+                    else {
+                        alert(result.ex);
+                    }
+                },
+                error: function (ex) {
+                    alert('error');
+                }
+            });
+
+            //$('#TotalQty').attr("disabled", true);
+
+
+        };
+
+
+
+
+
+        </script>
+    }

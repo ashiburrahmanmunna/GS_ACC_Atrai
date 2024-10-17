@@ -1,0 +1,858 @@
+﻿@*@model List<Atrai.Model.Core.Entity.AccountHeadModel>*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model IEnumerable<Atrai.Controllers.AccountsController.BalanceSheetModel>
+@*@model Tuple<List<Atrai.Model.Core.Entity.AccountHeadModel>, IEnumerable<Atrai.Controllers.AccountsController.BalanceSheetModel>>*@
+@{
+    ViewData["Title"] = "Voucher Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+}
+
+<style>
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+             border-bottom-width: 0px;
+
+        }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btn:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .dropdown-menu.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    input[type="checkbox"]:disabled + label {
+        opacity: 0.6; /* Adjust the opacity value as desired */
+        cursor: not-allowed;
+    }
+</style>
+<div class="row" id="change-checkbox">
+    <div class="col-12 col-md-12">
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row m-0 ps-4 upper-form-style pt-2">
+                    <div class="col-md-12 mb-2">
+                        <span class="report-text-style"><i class="bi bi-chevron-left"></i> Back to report list</span>
+                        <h4 class="fw-bold fs-3 mt-3">
+                            Balance Sheet Detail Report
+                        </h4>
+                        <span class="float-end">
+                            <button type="button" class="btn customize-btn fw-bold">Customize</button>
+                            <button type="button" class="btn customization-btn fw-bold">Save Customization</button>
+                        </span>
+                    </div>
+                    <div class="col-md-8 col-12 mb-2">
+
+
+
+                        <div class="row">
+                            <div class="col-md-3 col-12">
+                                <div class="mb-2" id="reportrange">
+                                    <label class="form-label">Report period</label>
+                                    <select onclick="setDateRange()" id="select2" class="form-select">
+                                        @*<option selected="selected" disabled="disabled">Select an Option</option>*@
+                                        <option value="1"> All Dates</option>
+                                        <option value="2">Custom</option>
+                                        <option value="3" selected>Today</option>
+                                        <option value="4">This Week</option>
+                                        <option value="5">This Week-to-date</option>
+                                        <option value="6">This Month</option>
+                                        <option value="7">This Month-to-date</option>
+                                        <option value="8">This Quarter</option>
+                                        <option value="9">This Quater-to-date</option>
+                                        <option value="10">This Year</option>
+                                        <option value="11">This Year-to-date</option>
+                                        <option value="12">This Year-to-last-month</option>
+                                        <option value="13">Yesterday</option>
+                                        <option value="14">Recent</option>
+                                        <option value="15">Last Week</option>
+                                        <option value="16">Last Week-to-date</option>
+                                        <option value="17">Last Month</option>
+                                        <option value="18">Last Month-to-date</option>
+                                        <option value="19">Last Quarter</option>
+                                        <option value="20">Last Quarter-to-date</option>
+                                        <option value="21">Last Year</option>
+                                        <option value="22">Last Year-to-date</option>
+                                        <option value="23">Since 30 days ago</option>
+                                        <option value="24">Since 60 days ago</option>
+                                        <option value="25">Since 90 days ago</option>
+                                        <option value="26">Since 365 days ago</option>
+                                        <option value="27">Next Week</option>
+                                        <option value="28">Next 4 Weeks</option>
+                                        <option value="29">Next Month</option>
+                                        <option value="30">Next Quarter</option>
+                                        <option value="31">Next Year</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-4 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">From Date</label>
+
+                                    <input class="form-control" id="start-date" disabled="disabled" />
+
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">To Date</label>
+
+                                    <input class="form-control" id="end-date" disabled="disabled" />
+
+                                </div>
+                            </div>
+                            @*<div class="col-md-4 col-12">
+                                <div class="mb-2">
+                                <label class="form-label">Show non-zero or active only</label>
+                                <select class="form-select">
+                                <option selected>Active rows/active columns</option>
+                                <option value="1">Months</option>
+                                </select>
+                                </div>
+                                </div>*@
+                            <div class="col-md-8 col-12 mb-12 d-none">
+                                <div class="input-group mb-1">
+
+                                    <span class="input-group-text ">
+                                        Voucher Transaction Group
+                                    </span>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-3 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">Accounting method</label>
+                                    <div class="mt-2">
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                                        <label class="form-label">Cash</label>
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                                        <label class="form-label">Accural</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 col-12 mb-2 mt-5 d-flex justify-content-center">
+                        <div>
+                            <button type="button" class="btn customize-btn fw-bold" style="" onclick="GetReport()">Run Report</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="balance-sheet" class="me-lg-auto ms-lg-auto w-100" style="border: 1px solid #e3eaf3;  margin-top:40px;">
+                    <div class="ms-3 mt-3">
+                        <a class="text-decoration-none text-black cursor-pointer" id="add-notes"><span>Add notes</span></a>
+                        <span class="float-end">
+                            <a type="button" id="printPdfLoaded" href="#" class="text-decoration-none text-black" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <i class="bi bi-envelope me-3 fs-5"></i>
+                            </a>
+                            <a href="#" class="text-decoration-none text-black" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <i class="bi bi-printer me-3 fs-5"></i>
+                            </a>
+                            <span class="dropdown1 me-3">
+                                <a class="dropdown-toggle text-decoration-none text-black cursor-pointer" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="bi bi-upload fs-5"></i>
+                                </a>
+                                @*<button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    </button>*@
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li><a class="dropdown-item" href="#">Export to Excel</a></li>
+                                    <li><a class="dropdown-item" href="#">Export to PDF</a></li>
+                                    <li><a class="dropdown-item" href="#">Export to Google Sheets</a></li>
+                                </ul>
+                            </span>
+                            <span class="dropdown1 me-3">
+                                <a class="text-decoration-none text-black cursor-pointer" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="bi bi-gear fs-5"></i>
+
+                                </a>
+                                @*<button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    </button>*@
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li class="fw-bold ms-3">Display density</li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input title-input" id="compact" value="compact">
+                                                <label class="custom-control-label cursor-pointer" id="compact-label" for="compact">Compact</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </span>
+                            @*<a href="#" class="text-decoration-none text-black">
+                                <i class="bi bi-upload me-3 fs-5"></i>
+                                </a>*@
+                            @*<a href="#" class="text-decoration-none text-black">
+                                <i class="bi bi-gear me-3 fs-5"></i>
+                                </a>*@
+                        </span>
+
+                        @*print modal*@
+                        <!-- Button trigger modal -->
+                        @*<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            Launch demo modal
+                            </button>*@
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content" style="border-radius:0px;">
+                                    <div class="d-flex mt-4 mb-3">
+                                        <h4 class="ms-3 fw-bold">Print, email, or save as PDF</h4>
+                                        <div class="ms-auto"><button type="button" class="btn-close me-2 mt-2" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                                    </div>
+                                    <div class="modal-body">
+                                        To print, right-click the preview and select <span class="fw-bold">Print</span>. Or, click the <span class="fw-bold">Print</span> icon if you see one below.
+                                        <div class="row">
+                                            @*report-print-setting-style*@
+                                            <p class="fw-bold">Report print settings</p>
+                                            <div class="col-lg-1 mt-2">
+                                                Orientation
+                                            </div>
+                                            <div class="col-lg-2">
+                                                <select class="form-select" id="orientation">
+                                                    <option value="portrait" selected>Portrait</option>
+                                                    <option value="landscape">Landscape</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <iframe id="pdf-iframe" name="pdf-iframe" style="width: 100%; height: 500px;"></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 mt-3">
+                                        <button type="button" class="btn ms-5 customize-btn fw-bolder" data-bs-dismiss="modal">Close</button>
+                                        <button id="print-pdf" type="button" class="btn float-end me-5 customization-btn fw-bolder">Print</button>
+                                        <button type="button" class="btn float-end me-2 customize-btn fw-bolder">Save as PDF</button>
+                                        <button type="button" class="btn float-end me-2 customize-btn fw-bolder">Email</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div id="parentDiv">
+                        <div class="row">
+                            <div class="col">
+
+                                <div id="make-editable" class="text-center company-and-other-text-style" onclick="makeEditable()">
+                                    <div class="form-check d-none" id="form-check-visibility">
+                                        <input class="form-check-input float-md-none" type="checkbox" name="flexCheckDefaultforImage" id="flexCheckDefaultforImage">
+                                        <label class="form-check-label" for="flexCheckDefaultforImage">
+                                            Show Image
+                                        </label>
+                                    </div>
+                                    <img id="company-image" style="width:10%" class="d-none" src="~/assets/Custom-URL-Shortener.jpg" />
+                                    <h3 id="company-name">@HttpContextAccessor.HttpContext.Session.GetString("CompanyName")</h3>
+                                    <h6 id="primary-address">@HttpContextAccessor.HttpContext.Session.GetString("PrimaryAddress")</h6>
+                                    <h6 id="trial-balance" class="text-black fw-bolder">
+                                        Balance Sheet Detail
+                                    </h6>
+                                    <h6 id="date-month-year"></h6>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row m-0 p-0">
+                            <div class="table-responsive">
+                                <table class="table table-condensed table-hover tree bg-white border" data-statement-id="balancesheet" id="treegridTable">
+                                    <tbody id="body">
+                                    </tbody>
+                                </table>
+                                @*<div id="loader" class="d-none"></div>*@
+
+                            </div>
+                            <!--<table class="table-borderless table-sm">
+                            <thead style="border-top: 0.5px solid #00000059; border-bottom: 0.5px solid #00000059; ">
+                                <tr id="add-th">
+                                </tr>
+                                <tr id="t-head-rows">-->
+                            @*<th class="w-50" scope="col"></th>
+                                <th class="text-end p-2 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">DEBIT</th>
+                                <th class="text-end pe-3 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">CREDIT</th>*@
+                            <!--</tr>
+                                </thead>
+
+                                <tbody id="t-body">
+                                </tbody>
+                            </table>-->
+                            @*<div id="tableContainer"></div>*@
+                            <div class="form-floating d-none" id="add-notes-textarea">
+                                <textarea class="form-control" placeholder="Add notes or include additional info with your report" id="floatingTextarea2" style="height: 200px"></textarea>
+                                <label for="floatingTextarea2">Add notes or include additional info with your report</label>
+                                <i class="bi bi-x cursor-pointer float-end" id="close-textarea" style="position: absolute; top: -10px; right: 13px; font-size:25px; "></i>
+                                @*<button type="button" class="close" id="close-textarea">&times;</button>*@
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-treegrid/0.2.0/js/jquery.treegrid.bootstrap3.js"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $('#make-editable').mouseover(function () {
+                $('#form-check-visibility').removeClass('d-none').addClass('d-block');
+            });
+            $('#make-editable').mouseout(function () {
+                $('#form-check-visibility').removeClass('d-block').addClass('d-none');
+            });
+        });
+
+        function makeEditable() {
+            $("#form-check-visibility").removeClass("d-none");
+            var checkbox = document.getElementById("flexCheckDefaultforImage");
+            var image = document.getElementById("company-image");
+
+            checkbox.addEventListener("change", function () {
+                if (this.checked) {
+                    image.classList.remove("d-none");
+                } else {
+                    image.classList.add("d-none");
+                }
+            });
+            var companyName = document.getElementById("company-name");
+            var primaryAddress = document.getElementById("primary-address");
+            var trialBalanceName = document.getElementById("trial-balance");
+            var dateMonthYear = document.getElementById("date-month-year");
+            companyName.contentEditable = true;
+            primaryAddress.contentEditable = true;
+            trialBalanceName.contentEditable = true;
+            dateMonthYear.contentEditable = true;
+        }
+        //document.getElementById("change-checkbox").on("click", function () {
+        //    $("#form-check-visibility").toggleClass("d-none");
+        //})
+        $('#compact').change(function() {
+            if ($(this).is(':checked')) {
+                $('#treegridTable th').addClass('pt-3 pb-3');
+                $('.table tbody tr td').addClass('pt-3 pb-3');
+            }
+            else {
+                $('#treegridTable th').removeClass('pt-3 pb-3');
+                $('.table tbody tr td').removeClass('pt-3 pb-3');
+            }
+        });
+        //document.addEventListener("click", function (event) {
+        //    var visibilityDiv = document.getElementById("form-check-visibility");
+        //    var targetElement = event.target;
+        //    if (!targetElement.closest('#make-editible') && !targetElement.closest('#form-check-visibility')) {
+        //        visibilityDiv.removeClass("d-none").classList.add("d-none");
+        //    }
+        //})
+        /*function to goto the add notes text area after click*/
+        $("#add-notes").click(function() {
+            $("#add-notes-textarea").toggleClass("d-none");
+            $("#floatingTextarea2").focus();
+            $("#add-notes").text("Edit notes");
+        });
+
+        /*function to close  text area after click*/
+        $("#close-textarea").click(function() {
+            $("#add-notes-textarea").addClass("d-none");
+            $("#add-notes").text("Add notes");
+            var elem = document.getElementById("add-notes");
+            elem.scrollIntoView();
+        });
+
+        var totallength = "";
+        var ResponseForPdf = [];
+        setDateRange(3);
+        GetReport();
+        function GetReport() {
+            //alert(ChangeValuePercentage);
+            //alert(valueOfPercentOfColumn);
+            //alert(valueOfPP);
+            const parentDiv = document.getElementById("parentDiv");
+            parentDiv.scrollIntoView({ behavior: "smooth" })
+            $("#loader").toggleClass("d-none");
+           /* $("#treegridTable").empty();*/
+        var MyAppUrlSettings = {
+            MyUsefulUrl: '@Url.Action("GetBalanceSheetDetailQuickBook", "Accounts")'
+            }
+            $.ajax({
+                /* * "9-May-2022"*/
+                //$('#end-date').val()"8-Jun-2022
+            //url:"https://raw.githubusercontent.com/kautuk-desai/demo-data/master/datagrid-lib.json",
+            url: MyAppUrlSettings.MyUsefulUrl,
+                data: { FromDate: "20-Jun-2023", ToDate: "20-Jun-2023", rpttype: "TB", criteria: $("#select2 option:selected").text(), isGroup: 0, isViewPageReport: 1}, // , valueOfPercentOfColumn: valueOfPercentOfColumn  $('#end-date').val()  $('#start-date').val()
+            type: "GET",
+            dataType: 'json',
+            //shrinkToFit : false,
+            scrollX: true,
+            buttons: {
+                dom: {
+                    button: {
+                        className: 'btn btn-sm rounded-0'
+                    }
+                },
+                buttons: [
+
+                    {
+                        extend: 'excel',
+                        text: '<i class="bi bi-file-earmark-excel"></i>',
+                        className: 'btn-success',
+                        titleAttr: 'Export to excel'
+                    }
+
+                ],
+            },
+
+                success: function (response) {
+                console.log("Response:", response);
+                ResponseForPdf = [...response.data];
+                $("#balance-sheet")
+                $("#treegrid-thead").remove();
+                const balanceSheet = response.data;
+                console.log("balance sheet respone:", balanceSheet)
+                var trialBalanceDate = `<span>${response.data[0].MonthCaption}</span>`;
+                $("#date-month-year").empty();
+                $("#date-month-year").append(trialBalanceDate);
+
+                const columns = [];
+                const keys = Object.keys(response.data[0]);
+                console.log(keys);
+                const keysWithoutLastElement = keys.slice(0, -3);
+
+                    for (let i = 4; i < keysWithoutLastElement.length; i++) {
+                    columns.push(keys[i]);
+                }
+                $('[data-statement-id="balancesheet"]').prepend(formHeaderColumns(columns));
+
+                // Remove existing tbody element from the table
+                $('#body').empty();
+
+                // Create new tbody element and add it to the table
+                formTable(balanceSheet, undefined, 1);
+                $(".tree").treegrid({
+                    expanderExpandedClass: "bi bi-chevron-down pe-4",
+                    expanderCollapsedClass: "bi bi-chevron-right pe-4"
+                });
+                $("#loader").toggleClass("d-none");
+            }
+
+
+        });
+    };
+        var tbody = $("#body");
+        var formHeaderColumns = function (timeseriesprojections) {
+            var thead = "<thead id='treegrid-thead'><tr><th>DATE</th>";
+            //console.log('thead', thead);
+            $.grep(timeseriesprojections, function (ele, i) {
+             /*   console.log("ele:::", ele);*/
+                thead += "<th>" + ele + "</th>";
+
+            });
+            thead += "</thead>";
+            return thead;
+        };
+
+        var formTable = function (data, ParentId, level) {
+            var colIndex = 2;
+
+            var currentLevel = level;
+            console.log("currentLevel:", currentLevel);
+            $.each(data, function (i, ele) {
+                //console.log("ele.datalevel:", ele.datalevel); // check value of ele.datalevel
+                //console.log("currentLevel:", currentLevel); // check value of currentLevel
+                //console.log("i:", i);
+               /* console.log("ele:", ele);*/
+                //console.log("ele.datalevel::", ele.datalevel)
+                ;
+                ele.datalevel = currentLevel;
+                var tr = "<tr data-account-name='" + ele.AccName + "' class='";
+                tr += "treegrid-" + ele.AccId;
+                if (ParentId !== undefined && ele.AccId !== ParentId) {
+                    tr += " treegrid-parent-" + ParentId;
+                }
+                if (ele.datalevel == 1) {
+                    tr += " root-node'>";
+                } else {
+                    tr += " node'>";
+                }
+
+
+                if (ele.AccType == "G") {
+                    tr += "<td class='text-left text-nowrap font-weight-bold text-black'>" + ele.AccName + "</td>";
+                }
+                else {
+                    tr += "<td class='text-left text-black'>" + ele.AccName + "</td>";
+                }
+
+                if (jQuery.isEmptyObject(ele)) {
+
+                }
+                else {
+                    let sortedData = Object.keys(ele); //.sort();
+                    /*console.log(sortedData[8]);*/
+                    let group = 0;
+                    for (let i in sortedData) {
+                        let key = sortedData[i];
+                        console.log('iiiiiiiii',i);
+                        let value = ele[sortedData[i]];
+                        console.log("value:", value);
+                        console.log("key:", key);
+                        /*console.log(i, ":", sortedData[4], "", ele[sortedData[4]]);*/
+                        //let length = sortedData.length;
+                        //if (ele[sortedData[4]] == "G") {
+                        //    length = sortedData.length - 1;
+                        //}
+                        /*   if (i > 7 &&  i < 10) {*/
+                        if (i > 3 && i < 13) {
+                            //console.log("found");
+                            //console.log("value", value);
+                           /* if (value > 0) {*/
+                                if (group == 1) {
+                                    //console.log( key + ": " + value );
+                                    tr += "<td class='text-end font-weight-bold'>" + value.toLocaleString('en-IN') + "</td>";
+                                }
+                                else {
+
+                                    tr += "<td class=text-end>" + value.toLocaleString('en-IN') + "</td>";
+
+                                }
+                            /*   }*/
+
+                        //    else if (value < 0) {
+                        //        if (group == 1) {
+                        //            //console.log( key + ": " + value );
+                        //            tr += "<td class='text-end font-weight-bold text-red'>" + value.toLocaleString('en-IN') + "</td>";
+                        //        }
+                        //        else {
+
+                        //            tr += "<td class='text-end text-red'>" + value.toLocaleString('en-IN') + "</td>"; //balance sum
+
+                        //        }
+                        //}
+
+                            //else {
+                            //    tr += "<td>-</td>";
+                            //}
+                        }
+                        //else {
+                        //    tr += "<td>-</td>";
+                        //}
+                        //console.log("Key: " + sortedData[i] + "   " + ele.data[sortedData[i]])
+                    }
+                }
+
+                if (ele.projections && ele.projections.length > 0) {
+                    tr += bindAccountValues(ele.projections);
+                }
+
+                tr += "</tr>";
+                tbody.append(tr);
+                ele.ParentId = ParentId;
+                if (ele.hasOwnProperty("Children")) {
+                    formTable(ele.Children, ele.AccId, parseInt(currentLevel + 1));
+                }
+            });
+        };
+
+        var bindAccountValues = function (projections) {
+            var accountValues = "";
+            $.grep(projections, function (ele, i) {
+                accountValues +=
+                    '<td data-account-dt="' + ele.dt + '">' + ele.value + "</td>";
+            });
+            return accountValues;
+        };
+
+
+        $(function () {
+            $("#start-date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#end-date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+        });
+
+        /*     $("#treegridTable").empty();*/
+
+
+        //function for pdf call portrait start
+        window.jsPDF = window.jspdf.jsPDF;
+
+        // Store the references to the print button element and the current PDF document
+        var printButton = document.getElementById("print-pdf");
+        var currentDoc;
+
+        // Event handler for printing the PDF
+        printButton.addEventListener("click", function () {
+            if ($("#orientation").val() === 'portrait') {
+                portrait();
+            } else if ($("#orientation").val() === 'landscape') {
+                landscape();
+            }
+
+            // Auto-print the current PDF document
+            if (currentDoc) {
+                currentDoc.autoPrint();
+                currentDoc.output("dataurlnewwindow");
+            }
+        });
+
+
+        //old slightly ok pdf generation function
+        //function portrait() {
+        //    var element = document.getElementById("parentDiv");
+
+        //    // Set the PDF dimensions and margins for A4 size (in points) for portrait mode
+        //    var pdfWidth = 595.28; // A4 width in points
+        //    var pdfHeight = 841.89; // A4 height in points
+        //    var margin = 40; // Margin size in points
+
+        //    // Create a new jsPDF instance
+        //    var doc = new jsPDF({
+        //        orientation: "portrait",
+        //        unit: "pt",
+        //        format: [pdfWidth, pdfHeight],
+        //    });
+
+        //    // Calculate the inner width and height considering the margins
+        //    var innerWidth = pdfWidth - 2 * margin;
+        //    var innerHeight = pdfHeight - 2 * margin;
+
+        //    // Convert the parentDiv to canvas using html2canvas
+        //    html2canvas(element)
+        //        .then(function (canvas) {
+        //            // Convert the canvas to an image data URL
+        //            var imageData = canvas.toDataURL("image/jpeg");
+
+        //            // Calculate the positioning of the content within the PDF
+        //            var x = margin;
+        //            var y = margin;
+        //            var width = innerWidth;
+        //            var height = (innerWidth / canvas.width) * canvas.height;
+
+        //            // If the height exceeds the inner height, scale down the height
+        //            if (height > innerHeight) {
+        //                height = innerHeight;
+        //                width = (innerHeight / canvas.height) * canvas.width;
+
+        //                // Calculate the horizontal positioning for center alignment
+        //                x = margin + (innerWidth - width) / 2;
+        //            }
+
+        //            // Add the image to the PDF
+        //            doc.addImage(imageData, "JPEG", x, y, width, height);
+
+        //            // Save or display the PDF
+        //            var pdfDataUrl = doc.output("datauristring");
+        //            var pdfIframe = document.getElementById("pdf-iframe");
+        //            pdfIframe.src = pdfDataUrl;
+        //            currentDoc = doc;
+        //            //// Event handler for printing the PDF }
+        //            //document.getElementById("print-pdf").addEventListener("click", function () {
+        //            //    doc.autoPrint();
+        //            //    doc.output("dataurlnewwindow");
+        //            //});
+        //        })
+        //        .catch(function (error) {
+        //            console.error("Error occurred while generating PDF:", error);
+        //        });
+        //}
+
+
+        //New pdf generation code that is applied in trial balance starts
+        //New pdf generation code that is applied in trial balance ends
+
+        function landscape() {
+            var element = document.getElementById("parentDiv");
+
+            // Set the PDF dimensions and margins for A4 size (in points) for portrait mode
+            var pdfWidth = 595.28; // A4 width in points
+            var pdfHeight = 841.89; // A4 height in points
+            var margin = 40; // Margin size in points
+
+            // Create a new jsPDF instance
+            var doc = new jsPDF({
+                orientation: "landscape",
+                unit: "pt",
+                format: [pdfWidth, pdfHeight],
+            });
+
+            // Calculate the inner width and height considering the margins
+            var innerWidth = pdfWidth - 2 * margin;
+            var innerHeight = pdfHeight - 2 * margin;
+
+            // Convert the parentDiv to canvas using html2canvas
+            html2canvas(element)
+                .then(function (canvas) {
+                    // Convert the canvas to an image data URL
+                    var imageData = canvas.toDataURL("image/jpeg");
+
+                    // Calculate the positioning of the content within the PDF
+                    var x = margin;
+                    var y = margin;
+                    var width = innerWidth;
+                    var height = (innerWidth / canvas.width) * canvas.height;
+
+                    // If the height exceeds the inner height, scale down the height
+                    if (height > innerHeight) {
+                        height = innerHeight;
+                        width = (innerHeight / canvas.height) * canvas.width;
+
+                        // Calculate the horizontal positioning for center alignment
+                        x = margin + (innerWidth - width) / 2;
+                    }
+
+                    // Add the image to the PDF
+                    doc.addImage(imageData, "JPEG", x, y, width, height);
+
+                    // Save or display the PDF
+                    var pdfDataUrl = doc.output("datauristring");
+                    var pdfIframe = document.getElementById("pdf-iframe");
+                    pdfIframe.src = pdfDataUrl;
+
+                    currentDoc = doc;
+                })
+                .catch(function (error) {
+                    console.error("Error occurred while generating PDF:", error);
+                });
+        }
+
+        $('#printPdfLoaded').on('click', function () {
+            portrait();
+        })
+
+        //new pdf portrait landscape code start
+        $("#orientation").change(function () {
+            if ($(this).val() === 'portrait') {
+                portrait();
+            }
+            else if ($(this).val() === 'landscape') {
+                landscape();
+            }
+        });
+       //new pdf portrait landscape code end
+
+    </script>
+}

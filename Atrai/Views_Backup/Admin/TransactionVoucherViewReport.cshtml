@@ -1,0 +1,728 @@
+﻿@using Microsoft.AspNetCore.Http
+@using Atrai.Core.Common
+@inject IHttpContextAccessor HttpContextAccessor
+@inject clsProcedure clsproc
+@model Atrai.Core.Entity.TransactionModel
+@{
+    ViewData["Title"] = "Transaction Voucher";
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+    
+    var comimagepath = @HttpContextAccessor.HttpContext.Session.GetString("comImagePath");
+    var IsMobile =@HttpContextAccessor.HttpContext.Session.GetInt32("IsMobile");
+    var IsLogo = 0;
+    int IsSignature = 0;
+    if (Model.CompanyList.storeinfo.FirstOrDefault().IsSignature == true)
+    {
+         IsSignature = 1; 
+    }
+
+    if (Model.CompanyList.storeinfo.FirstOrDefault().SalesReportStyle != null)
+    {
+        if (Model.CompanyList.storeinfo.FirstOrDefault().SalesReportStyle.LogoPlacement == "LeftSide")
+        {
+            IsLogo = 1;
+        }
+        else if (Model.CompanyList.storeinfo.FirstOrDefault().SalesReportStyle.LogoPlacement == "RightSide")
+        {
+            IsLogo = 2;
+        }
+        else
+        {
+            IsLogo = 0;
+            
+            
+        }
+    }
+
+
+
+    System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("bn-BD");
+    if (Model.Currency != null)
+    {
+        var invoicecultureformat = Model.Currency.CultureInfo;
+        @if (invoicecultureformat != null)
+        {
+            BDFormat = new System.Globalization.CultureInfo(invoicecultureformat.ToString());
+        }
+    }
+}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>
+    </title>
+    <script type="text/javascript">
+        function ClosePrint() {
+            var print = document.getElementById("print");
+            print.style.visibility = "hidden";
+            //            print.display = false;
+
+            window.print();
+        }
+    </script>
+
+    <style media="print">
+
+        @@media print {
+            .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,
+            .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+                float: left;
+            }
+
+            .col-md-12 {
+                width: 100%;
+            }
+
+            .col-md-11 {
+                width: 91.66666666666666%;
+            }
+
+            .col-md-10 {
+                width: 83.33333333333334%;
+            }
+
+            .col-md-9 {
+                width: 75%;
+            }
+
+            .col-md-8 {
+                width: 66.66666666666666%;
+            }
+
+            .col-md-7 {
+                width: 58.333333333333336%;
+            }
+
+            .col-md-6 {
+                width: 50%;
+            }
+
+            .col-md-5 {
+                width: 41.66666666666667%;
+            }
+
+            .col-md-4 {
+                width: 33.33333333333333%;
+            }
+
+
+            .col-md-3 {
+                width: 25%;
+            }
+
+            .col-md-2 {
+                width: 16.666666666666666%;
+            }
+
+            .col-md-1 {
+                width: 8.33333333333333%;
+            }
+
+
+            .showHeader thead {
+                display: table-header-group;
+                border: 1px solid #000;
+            }
+        }
+    </style>
+
+    <style type="text/css">
+        .bg-offwhite {
+            background-color: #D3D3D3;
+        }
+
+        .table-bordered td, .table-bordered th, .table-bordered {
+            border: 1px solid black;
+            color: black;
+        }
+
+        .table thead th {
+            border-bottom: inherit;
+        }
+
+        .table th {
+            background: inherit;
+        }
+
+        .bg-asswhite {
+            background-color: #F5F5F5 !important;
+        }
+
+
+
+        .table th:last-child, .table tbody tr.even td:last-child {
+            position: inherit !important;
+            right: 0px;
+            background-color: inherit !important;
+            z-index: 1;
+        }
+
+        .table th, .table td {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+            padding-left: 0.40rem;
+            padding-right: 0.40rem;
+        }
+
+        .whitespaceprewrap {
+            white-space: pre-wrap;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="main">
+        <div class="container">
+ <div class="row mb-2">
+                        @if (IsLogo == 1)
+                        {
+                            <div class="row p-3">
+
+                                <div class="col-md-2 col-2">
+                                    @if (@comimagepath != null)
+                                    {
+                                        <img  class="center img-fluid" style="max-height:120px;" src="..@comimagepath" onerror="this.onerror=null; this.src='.@comimagepath'" alt="" id="main-img">
+                                    }
+                                </div>
+                                <div class="col-md-10 col-10">
+                                    <div class="row p-2">     
+                                        <div class="col-md-12 col-10">
+                                            <h2 class="text-left m-0">@Model.CompanyList.CompanyName</h2>
+                                              <h5 class="text-left  m-0">@Model.CompanyList.storeinfo.FirstOrDefault().ReportCaptionSmall </h5>
+                                        </div>
+                                        <div class="col-md-12 text-left">
+                              
+                                                <h6 class="text-left  m-0">Website : @Model.CompanyList.storeinfo.FirstOrDefault().Web ; Email : @Model.CompanyList.storeinfo.FirstOrDefault().Email ; Facebook : @Model.CompanyList.storeinfo.FirstOrDefault().Facebook</h6>  
+                                     
+                                  
+                                        </div>
+                                        <div class="col-md-12 text-left">
+                                            <h6 class="text-left  m-0">@Model.CompanyList.PrimaryAddress @Model.CompanyList.SecoundaryAddress</h6>
+                                          
+                                        </div>
+                                        <div class="col-md-12">
+                                            <h6 class="text-left  m-0">Phone : @Model.CompanyList.storeinfo.FirstOrDefault().Phone ; @Model.CompanyList.storeinfo.FirstOrDefault().PhoneTwo</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else if (IsLogo == 2)
+                        {
+                            <div class="row p-3">
+                                <div class="col-md-10 col-10">
+                                    <div class="row p-2">     
+                                        <div class="col-md-12 col-10">
+                                            <h2 class="text-left m-0">@Model.CompanyList.CompanyName</h2>
+                                              <h5 class="text-left  m-0">@Model.CompanyList.storeinfo.FirstOrDefault().ReportCaptionSmall </h5>
+                                        </div>
+                                        <div class="col-md-12 text-left">
+                                                <h6 class="text-left  m-0">
+                                                    <i class="fa fa-globe" aria-hidden="true"></i>  @Model.CompanyList.storeinfo.FirstOrDefault().Web ; 
+                                                    <i class="fa fa-envelope" aria-hidden="true"></i> @Model.CompanyList.storeinfo.FirstOrDefault().Email ;
+                                                    @if (@Model.CompanyList.storeinfo.FirstOrDefault().Facebook != null )
+                                                    {
+                                                    if (@Model.CompanyList.storeinfo.FirstOrDefault().Facebook.Length > 1)
+                                                    {
+                                                        <i class="fa fa-facebook-official" aria-hidden="true"></i>   @Model.CompanyList.storeinfo.FirstOrDefault().Facebook
+                                                    }
+                                                }
+                                                    </h6>  
+                                        </div>
+                                        <div class="col-md-12 text-left">
+                                            <h6 class="text-left  m-0"> <i class="fa fa-map-marker" aria-hidden="true"></i>  @Model.CompanyList.PrimaryAddress @Model.CompanyList.SecoundaryAddress</h6>
+                                          
+                                        </div>
+                                        <div class="col-md-12">
+                                            <h6 class="text-left  m-0"> <i class="fa fa-phone" aria-hidden="true"></i>  @Model.CompanyList.storeinfo.FirstOrDefault().Phone ; @Model.CompanyList.storeinfo.FirstOrDefault().PhoneTwo</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-2 float-right">
+                                @if (@comimagepath != null)
+                                {
+                                    <img  class="center img-fluid" style="max-height:120px;" src="..@comimagepath" onerror="this.onerror=null; this.src='.@comimagepath'" alt="" id="main-img">
+                                }
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="col-md-12 text-center">
+                                @if (@comimagepath != null)
+                                {
+                                    <img  class="center img-fluid" style="max-height:120px;" src="..@comimagepath" onerror="this.onerror=null; this.src='.@comimagepath'" alt="" id="main-img">
+                                }
+                                else
+                                {
+                                    <h2 class="text-center m-0">@Model.CompanyList.CompanyName</h2>
+                                }
+                            </div>
+
+                            <div class="col-md-12 text-center">
+                                <h5 class="text-center  m-0">@Model.CompanyList.storeinfo.FirstOrDefault().ReportCaptionSmall </h5>
+                                <h6 class="text-center  m-0">Website : @Model.CompanyList.storeinfo.FirstOrDefault().Web ; Email : @Model.CompanyList.storeinfo.FirstOrDefault().Email ; Facebook : @Model.CompanyList.storeinfo.FirstOrDefault().Facebook</h6>  
+                                <h6 class="text-center  m-0">@Model.CompanyList.PrimaryAddress @Model.CompanyList.SecoundaryAddress</h6>
+                                <h6 class="text-center  m-0">Phone : @Model.CompanyList.storeinfo.FirstOrDefault().Phone ; @Model.CompanyList.storeinfo.FirstOrDefault().PhoneTwo</h6>
+                            </div>
+
+                        }
+            </div>
+                            <hr class="m-0" />
+
+
+            <div class="row mb-2">
+                <div class="col-md-12 text-center">
+                    @{
+
+                        if (@Model.TransactionCategory == "Received" || @Model.TransactionCategory == "Customer" || @Model.TransactionCategory == "Sales")
+                        {
+                            <h3><span class="border-bottom border-dark">Receipt Voucher</span></h3>
+                        }
+                        else if (@Model.TransactionCategory == "Paid" || @Model.TransactionCategory == "Supplier" || @Model.TransactionCategory == "Purchase")
+                        {
+                            <h3><span class="border-bottom border-dark">Payment Voucher</span></h3>
+                        }
+                        else if (@Model.TransactionCategory == "CashContra" || @Model.TransactionCategory == "BankContra" || @Model.TransactionCategory == "Contra")
+                        {
+                            <h3><span class="border-bottom border-dark">Contra Voucher</span></h3>
+                        }
+                        else if (@Model.TransactionCategory == null || @Model.TransactionCategory == "CustomerDiscount" || @Model.TransactionCategory == "SupplierDiscount")
+                        {
+                            <h3><span class="border-bottom border-dark">Journal Voucher</span></h3>
+                        }
+                        else
+                        {
+                            <h3><span class="border-bottom border-dark"> @Model.TransactionCategory</span></h3>
+                        }
+
+                    }
+
+
+                </div>
+
+
+            </div>
+
+            @if (@Model.Customer != null && @Model.TransactionAmount != null)
+            {
+                <div class="col-md-10 offset-md-1 mb-3">
+                    <div class="row text-center bg-offwhite">
+                        <div class="col-md-6">
+                            <h5><span class="border-bottom border-dark">Receipient</span></h5>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><span class="border-bottom border-dark">Amount</span></h5>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-md-6">
+                            <h6>@Model.Customer.Name</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>@Model.TransactionAmount</h6>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="col-md-12 mb-2">
+                <div class="row font-weight-bold text-center">
+                    <div class="col-md-2 border border-dark">
+                        Currency
+                    </div>
+                    <div class="col-md-2 border border-dark">
+                        Amount
+                    </div>
+                    <div class="col-md-4 border border-dark">
+                        Fiscal Year
+                    </div>
+                    <div class="col-md-4 border border-dark">
+                        Voucher No : @Model.TransactionCode
+                    </div>
+                </div>
+                <div class="row font-weight-bold text-center">
+                    <div class="col-md-2 border border-dark">
+                        BDT
+                    </div>
+                    <div class="col-md-2 border border-dark">
+                        @(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount)))
+                    </div>
+                    <div class="col-md-4 border border-dark">
+                        @Model.InputDate.ToString("MMM")  @Model.InputDate.ToString("yyyy")
+                    </div>
+                    <div class="col-md-4 border border-dark">
+                        Voucher Date : @Model.InputDate.ToString("dd-MMM-yy")
+                    </div>
+                </div>
+
+            </div>
+            <table class="table table-bordered border-dark text-dark table-hover table-striped">
+                <thead class="bg-asswhite font-weight-bold">
+                    <tr class="text-nowrap text-center">
+                        <th class="font-weight-bold">Accounts Code</th>
+                        <th class="font-weight-bold">Accounts Name</th>
+                        <th class="font-weight-bold">Debit</th>
+                        <th class="font-weight-bold">Credit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        @if (Model.AccountPayType != null)
+                        {
+                            <tr style="font-family:Arial Narrow;font-size:16px;">
+                                <td>@Html.DisplayFor(modelItem => modelItem.AccountPayType.AccCode) </td>
+                                <td>
+
+                                    @Model.AccountPayType.AccName
+
+                                    @if (Model.Sales != null)
+                                    {
+                                        @if (Model.Sales.CustomerModel.Name.ToUpper().Contains("CUSTOMER"))
+                                        {
+                                            <span class="">-</span>
+                                            @Model.Sales.CustomerName
+                                            ;
+                                        }
+                                        else //if (Model.Sales.CustomerModel != null )
+                                        {
+                                            <span class="">-</span>
+                                        }
+                                    }
+                                </td>
+                                @if (Model.TransactionCategory == "Received" || Model.TransactionCategory == "Customer" || @Model.TransactionType == "Received")
+                                {
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount))) </td>
+                                    <td></td>
+                                }
+                                else if (@Model.TransactionCategory == "Paid" || @Model.TransactionCategory == "Supplier" || @Model.TransactionType == "Paid")
+                                {
+                                    <td></td>
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount))) </td>
+                                }
+                                else if (@Model.TransactionCategory == "CashContra")
+                                {
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount))) </td>
+                                    <td></td>
+                                }
+                                else if (@Model.TransactionCategory == "BankContra")
+                                {
+                                    <td></td>
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount))) </td>
+                                }
+                                else if (@Model.TransactionCategory == "Contra" && @Model.TransactionType == "Received")
+                                {
+                                     <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount))) </td>
+                                    <td></td>
+                                   
+                                }
+                                else if (@Model.TransactionCategory == null && @Model.TransactionType == "Increase")
+                                {
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount))) </td>
+                                    <td></td>
+
+                                }
+                                else
+                                {
+                                    <td></td>
+                                    <td></td>
+                                }
+                            </tr>
+
+                            if (Model.DiscountAmount > 0)
+                            {
+                                    <tr style="font-family:Arial Narrow;font-size:16px;">
+                                <td>@Html.DisplayFor(modelItem => modelItem.AccountPayType.AccCode) </td>
+                                <td>
+
+                                    Discount Expense
+
+                                    @if (Model.Sales != null)
+                                    {
+                                        @if (Model.Sales.CustomerModel.Name.ToUpper().Contains("CUSTOMER"))
+                                        {
+                                            <span class="">-</span>
+                                            @Model.Sales.CustomerName
+                                            ;
+                                        }
+                                        else //if (Model.Sales.CustomerModel != null )
+                                        {
+                                            <span class="">-</span>
+                                        }
+                                    }
+                                </td>
+                                @if (Model.TransactionCategory == "Received" || Model.TransactionCategory == "Customer" || @Model.TransactionType == "Received")
+                                {
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.DiscountAmount))) </td>
+                                    <td></td>
+                                }
+                                else if (@Model.TransactionCategory == "Paid" || @Model.TransactionCategory == "Supplier" || @Model.TransactionType == "Paid")
+                                {
+                                    <td></td>
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.DiscountAmount))) </td>
+                                }
+                                else if (@Model.TransactionCategory == null && @Model.TransactionType == "Increase")
+                                {
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.DiscountAmount))) </td>
+                                    <td></td>
+
+                                }
+                                else
+                                {
+                                    <td></td>
+                                    <td></td>
+                                }
+                            </tr>
+                            }
+                        }
+                        if (Model.Account != null)
+                        {
+                            if (Model.TransactionAmount > 0)
+                            {
+                            <tr style="font-family:Arial Narrow;font-size:16px;">
+                                <td>@Html.DisplayFor(modelItem => modelItem.Account.AccCode) </td>
+                                <td>
+                                    @Model.Account.AccName
+
+                                    @if (Model.Sales != null)
+                                    {
+                                        @if (Model.Sales.CustomerModel.Name.ToUpper().Contains("CUSTOMER"))
+                                        {
+                                            <span class="">-</span>
+                                            @Model.Sales.CustomerName
+                                            ;
+                                        }
+                                        else //if (Model.Sales.CustomerModel != null )
+                                        {
+                                            <span class="">-</span>
+                                            @Model.Sales.CustomerModel.Name;
+                                        }
+                                    }
+
+                                    @*
+                                        @Html.DisplayFor(modelItem => modelItem.Account.AccName  + " " + modelItem.Sales.CustomerModel.Name)
+
+                                    *@
+
+                                </td>
+                                @if (@Model.TransactionCategory == "Received" || @Model.TransactionCategory == "Customer" || @Model.TransactionCategory == "SupplierDiscount" )
+                                {
+                                    <td></td>
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount))) </td>
+
+                                }
+                                else if (@Model.TransactionCategory == "Paid" || Model.TransactionCategory == "Supplier" || @Model.TransactionCategory == "CustomerDiscount")
+                                {
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount))) </td>
+                                    <td></td>
+                                }
+                                else if (@Model.TransactionCategory == "CashContra")
+                                {
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount))) </td>
+                                    <td></td>
+                                }
+                                else if (@Model.TransactionCategory == "BankContra")
+                                {
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount))) </td>
+                                    <td></td>
+
+                                }
+                                else if (@Model.TransactionCategory == null && @Model.TransactionType == "Increase")
+                                {
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount))) </td>
+                                    <td></td>
+
+                                }
+                                else
+                                {
+                                    <td></td>
+                                    <td></td>
+                                }
+                                </tr>
+                            }
+              
+                        }
+                        if (Model.AccountAssetLiability != null)
+                        {
+                            <tr style="font-family:Arial Narrow;font-size:16px;">
+                                <td>@Html.DisplayFor(modelItem => modelItem.AccountAssetLiability.AccCode) </td>
+                                <td>
+                                    @Model.AccountAssetLiability.AccName
+
+
+                                    @if (Model.Sales != null)
+                                    {
+                                        @if (Model.Sales.CustomerModel.Name.ToUpper().Contains("CUSTOMER"))
+                                        {
+                                            <span class="">-</span>
+                                            @Model.Sales.CustomerName
+                                            ;
+                                        }
+                                        else //if (Model.Sales.CustomerModel != null )
+                                        {
+                                            <span class="">-</span>
+                                            @Model.Sales.CustomerModel.Name ;
+                                        }
+                                    }
+                                    @*
+                                        @Html.DisplayFor(modelItem => modelItem.AccountAssetLiability.AccName)
+                                    *@
+
+                                </td>
+                                @if (Model.TransactionCategory == "Received" || Model.TransactionCategory == "Paid")
+                                {
+                                    <td></td>
+                                    <td></td>
+                                }
+                                else if (@Model.TransactionCategory == "Received" || @Model.TransactionCategory == "Supplier")
+                                {
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount + @Model.DiscountAmount))) </td>
+                                    <td></td>
+
+                                }
+                                else if (@Model.TransactionType == "Decrease" || @Model.TransactionCategory == "Paid" || @Model.TransactionCategory == "Customer" || @Model.TransactionCategory == "CustomerDiscount" || @Model.TransactionCategory == "Sales")
+                                {
+                                    <td></td>
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount+ @Model.DiscountAmount))) </td>
+                                }
+                                else if (@Model.TransactionCategory == "Contra" && @Model.TransactionType == "Received")
+                                {
+                                    
+                                    <td></td>
+                                     <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount))) </td>
+                                   
+                                }
+                                 else if (@Model.TransactionCategory == "Journal" && @Model.TransactionType == "Received")
+                                {
+                                    
+                                    <td></td>
+                                     <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount))) </td>
+                                   
+                                }
+                                else if (@Model.TransactionCategory == null && @Model.TransactionType == "Increase")
+                                {
+                                    <td></td>
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount+ @Model.DiscountAmount))) </td>
+
+
+                                }
+                                else if (@Model.TransactionCategory == null && @Model.TransactionType == "Received")
+                                {
+                                    <td></td>
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount+ @Model.DiscountAmount))) </td>
+
+
+                                }
+
+                                else
+                                {
+                                    <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount))) </td>
+                                    <td></td>
+
+                                }
+
+
+
+                            </tr>
+                        }
+
+
+
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="text-right">
+                        <td colspan="2" class="bg-asswhite font-weight-bold"><h6>Total :</h6></td>
+                        <td><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount + @Model.DiscountAmount)))</h6></td>
+                        <td><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.TransactionAmount+ @Model.DiscountAmount)))</h6></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <h6>In Words (Net Payable) : @clsproc.GTRInwordsFormatBD((@Model.TransactionAmount + @Model.DiscountAmount).ToString(), "", "");</h6>
+                            @if (Model.isPost == true)
+                            {
+                                <p class="float-right">
+                                    Posted
+                                </p>
+
+                            }
+
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <p>Narration : @Model.Description</p>
+
+                            @if (Model.SalesId != null)
+                            {
+                                <a href="#">
+                                            @Html.ActionLink(@Model.Sales.SaleCode + "","InvoiceViewReport" , "Sales" , new { SaleId = @Model.Sales.Id , ReportType = "Sales Invoice" }, new { @target = "_blank" , title="Go To The Link"})
+                                </a>
+                            
+                            }
+
+
+
+
+                
+
+
+                            @foreach (var item in @Model.TransactionDetails)
+                            {
+                                if (item.SalesId != null)
+                                {
+                                    <p>@item.Sales.SaleCode - Bill Amount : @item.Sales.NetAmount ;  Received Amount : @item.NetAmount ; Discount : @item.Discount</p>
+                                }
+                                else if (item.PurchaseId != null)
+                                {
+                                     <p>@item.Purchase.PurchaseCode - Bill Amount : @item.Purchase.NetAmount ;  Paid Amount : @item.NetAmount ; Discount : @item.Discount</p>
+                                   
+                                }
+                            }
+
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+
+                            
+            @if (IsSignature == 1)
+            {
+                <div class="row mt-5 pt-4 text-center">
+                    <div class="col-md-4">
+                        <h4 class=" border-top border-dark">Prepared By</h4>
+                    </div>
+                    <div class="col-md-4">
+                        <h4 class=" border-top border-dark">Checked By</h4>
+                    </div>
+                    <div class="col-md-4">
+                        <h4 class=" border-top border-dark">Approved By</h4>
+                    </div>
+
+                </div>
+
+
+                <div class="row  my-5 pt-5 text-center">
+                    <div class="col-md-4">
+                    <h4 class="border-top border-dark"> Received By </h4>
+                </div>
+                <div class="col-md-8"></div>
+
+            </div>
+            }
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h6>Software Generated Report || Developed By : Dominate Software Solution</h6>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+</body>
+</html>

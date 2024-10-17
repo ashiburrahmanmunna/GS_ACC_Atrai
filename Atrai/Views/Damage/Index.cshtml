@@ -1,0 +1,422 @@
+﻿@*@model IEnumerable<Damage.Core.Entity.DamageModel>*@
+    @using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{ ViewData["Title"] = "Damage List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                                  @Html.Hidden("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+                                @Html.Hidden("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+
+                        @*<h5 class="card-header">Damage List</h5>*@
+                        <div class="row mb-2">
+                            <div class="col-md-2 col-12">
+                                @Html.ActionLink("New Damage", "AddDamage", null, null, new { @class = "btn btn-outline-success btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md-2 col-12">
+                                <h4 style="color: #1976d2;">Damage List</h4>
+                            </div>
+                        </div>
+
+
+                        <div class="card p-2 mb-1">
+                            <div class="row">
+                                <div class="col-md-2 col-12">
+                                    <div class="input-group input-group-sm mb-1">
+                                        @Html.DropDownList("Customers", ViewBag.Customers as List<SelectListItem>, "Select Customers", new { id = "CustomerId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+
+                                 <div class="col-md-4 col-12  mb-2">
+                                               <div class="form-inline divHiddenItems">
+                                         <div class="input-group input-group-sm">
+                                        <div >
+                                            <div class="input-group-text">
+                                               <i class="bi bi-calendar"></i>
+                                             </div>
+                                        </div>
+                                        <input type="text" class="form-control from-control-sm" name="date" id="daterange-btn" style="width: auto;">
+                                         <button id='btnDec' type="button" class="btn btn-danger rounded-0" title='Decrement month'><i class="bi bi-calendar-minus" aria-hidden="true"></i></button>
+                                        <button id='btnInc' type="button" class="btn btn-info  rounded-0" title='Increment month'><i class="bi bi-calendar-plus" aria-hidden="true"></i></button>
+                                        </div>
+                                        @*<span type="button" class="btn btn-sm btn-outline-info" id="daterange-btn">
+
+                                            <i class="bi bi-calendar"></i>&nbsp; <span>defaut date</span>
+
+                                            <i class="fa fa-caret-down"></i>
+                                        </span>
+                                        <input id="daterange-btn" size="40" value="">*@
+                                    </div>
+                                </div>
+@*                                <div class="col-md-3 col-12">
+                                    <div class="input-group input-group-sm mb-1">
+                                        <div >
+                                            <span class="input-group-text py-0">
+                                                <label for="FDate">From Date</label>
+                                            </span>
+                                        </div>
+                                        @Html.TextBox("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "Select From Date ", @autocomplete = "off", name = "FromDate" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group input-group-sm mb-1">
+                                        <div >
+                                            <span class="input-group-text py-0">
+                                                <label for="TDate">To Date</label>
+                                            </span>
+                                        </div>
+                                        @Html.TextBox("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "Select To Date ", @autocomplete = "off", name = "ToDate" })
+                                    </div>
+                                </div>*@
+                                <div class="col-md-3 col-12">
+                                    <label class="pr-2"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <div class="table-responsive">
+                            <table id="Damagelist" class="display table table-hover  table-bordered table-striped" cellspacing="0" width="100%">
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+
+
+@section Scripts{
+
+    <script TransactionId="text/javascript">
+
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        //    CurrentDate();
+
+        //    $(".FromDate").datepicker({
+
+        //        dateFormat: "dd-M-y",
+        //        changeMonth: true,
+        //        changeYear: true
+
+        //    });
+
+
+        //$(".ToDate").datepicker({
+
+        //    dateFormat: "dd-M-y",
+        //    changeMonth: true,
+        //    changeYear: true
+
+        //});
+
+        //function CurrentDate() {
+        //    var date = new Date();
+        //    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        //    var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+        //    if ($(".FromDate").val() == '') {
+        //        $(".FromDate").val(val);
+        //    }
+        //    if ($(".ToDate").val() == '') {
+        //        $(".ToDate").val(val);
+        //    }
+        //}
+
+        var CustomerId = $("#CustomerId").val();
+        var fromdate = $("#FromDate").val();
+            var todate = $("#ToDate").val();
+
+                  var permission = false;
+            var UserRole = `@HttpContextAccessor.HttpContext.Session.GetString("UserRole")`;
+            //alert(UserRole);
+            //alert(permission);
+
+            if (UserRole.toLowerCase().includes("admin")) { permission = true; };
+
+        loaddata();
+
+
+        
+        
+
+            function format(d) {
+                //console.log(d.Items);
+                var trs = '';
+                var trf = '';
+                var sumindsalesprice = 0.00;
+                var sumindcostprice = 0.00;
+                var sumindquantity = 0.00;
+
+                var sumindprofit = 0.00;
+                var sumindcomissionamount = 0.00;
+
+                var sumsalesprice = 0.00;
+                var sumcostprice = 0.00;
+                var sumavgcostprice = 0.00;
+
+                var sumprofit = 0.00;
+                var sumcommission = 0.00;
+
+
+
+                var i = 0;
+
+
+
+                $.each($(d.Items), function (key, value) {
+                    //console.log(d.Items[0].Name);
+                    //console.log(value);
+                    i++;
+
+                    var indcostprice = (parseFloat(d.Items[key].Product.CostPrice));
+                    var indavgcostprice = (parseFloat(d.Items[key].AvgCostPrice));
+
+
+                    var indquantity = (parseFloat(d.Items[key].Quantity));
+
+                    var totalcostprice = indcostprice * indquantity;
+                    var totalavgcostprice = indavgcostprice;
+
+
+ 
+                    sumindquantity += parseFloat(indquantity);
+
+                     
+
+
+                    
+                    if (permission == false)
+                    {
+                        indcostprice = 0.00;
+                        indavgcostprice = 0.00;
+                        totalcostprice = 0.00;
+                    }
+                    else 
+                    {
+                    //alert('found');
+                        sumindcostprice += parseFloat(indcostprice);
+
+                        sumcostprice += parseFloat(totalcostprice);
+
+                        sumavgcostprice += parseFloat(totalavgcostprice);
+
+                    }
+
+                    trs += '<tr><td>' + i + '</td><td>' + d.Items[key].Product.Category.Name + '</td><td>' + d.Items[key].Product.Code + '</td><td>' + d.Items[key].Product.Name + '</td><td>' + indquantity.toLocaleString() + '</td><td>' + indcostprice.toLocaleString() + '</td><td>' + indavgcostprice.toLocaleString() + '</td><td>' + totalcostprice.toLocaleString() + '</td></tr>';
+
+                })
+
+                if (i > 1) {
+                    trf += '<tr><td></td><td>Total :</td><td></td><td>Item Count : '+ i +'</td><td>' + sumindquantity.toLocaleString() + '</td><td>' + sumindcostprice.toLocaleString() + '</td><td>' + sumavgcostprice.toLocaleString() + '</td><td>' + sumcostprice.toLocaleString() + '</td></tr>';
+
+                }
+
+                // `d` is the original data object for the row
+                return '<div class="offset-md-1 col-md-6"><table class="table text-center table-sm text-nowrap table-border">' +
+                    '<thead>' +
+                    '<th>SLNo.</th>' +
+                    '<th>Category</th>' +
+                    '<th>Code</th>' +
+                    '<th>Product Name</th>' +
+                    '<th>Quantity</th>' +
+                    '<th>Cost Price</th>' +
+                    '<th>Total Average Cost</th>' +
+                    '<th>Total Cost</th>' +
+                    '</thead><tbody>' +
+
+                    trs +
+                    '</tbody><tfoot class="text-center font-weight-bold">' + trf + '</tfoot></table></div>';
+            }
+
+
+
+            $('#Damagelist tbody').on('click', 'td.details-control', function () {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+
+                if (row.child.isShown()) {
+                    // This row is already open - close it
+                    row.child.hide();
+                    tr.removeClass('shown');
+                }
+                else {
+                    // Open this row
+                    row.child(format(row.data())).show();
+                    tr.addClass('shown');
+                }
+            });
+
+
+        function loaddata() {
+            //alert(CustomerId, FromDate, ToDate);
+
+            table = $('#Damagelist').DataTable({
+                initComplete: function () {
+
+                    var input = $('.dataTables_filter input'),//.unbind(),
+                        self = this.api(),
+
+                        //$searchButton = $('<button class="btn rounded-0 btn-info btn-sm" tabindex="0" aria-controls="Damagelist" TransactionId="button" title="Search"><span><i class="bi bi-file-earmark-excel"></i></span></button>')
+                        //    .text('Search')
+                        //    .click(function () {
+                        //        if (input.val().length > 0) {
+                        //            self.search(input.val()).draw();
+
+                        //        }
+                        //        else {
+                        //            loaddata(fromdate, todate, CustomerId, 1);
+
+                        //        }
+                        //    }),
+                        $allButton = $('<button class="ml-1 btn rounded-0 btn-primary btn-sm" tabindex="0" aria-controls="Damagelist" TransactionId="button" title="Load"><span><i class="bi bi-file-earmark-excel"></i></span></button>')
+                            .text('Load')
+                            .click(function () {
+                                input.val('');
+                                //alert(FromDate);
+                                loaddata();
+                                //table.ajax.reload();
+
+
+                            })
+                    $('.dataTables_filter').append($allButton);//, $clearButton
+                },
+
+                serverSide: true,  "scrollX": true,
+                "orderCellsTop": true,
+
+                "iDisplayLength": 10,
+                "lengthMenu": [[5, 10, 20, 50, -1], [5, 10, 20, 50, "All"]],
+
+                dom: '<"dom_wrapper fh-fixedHeader"lBf>tip',
+
+                buttons: {
+                    dom: {
+                        button: {
+                            className: 'btn btn-sm rounded-0'
+                        }
+                    },
+                    buttons: [
+                    ]
+                },
+                "ajax": {
+                    "url": "@Url.Action("GetDamageList", "Damage")",
+                    "data": { FromDate: $("#FromDate").val(), ToDate: $("#ToDate").val(), CustomerId: $("#CustomerId").val(), isAll: 1 },
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                "columns": [
+                            { "title": "Id", "data": "Id", "visible": false },
+                            { "title": "Damage Code", "data": "DamageCode", "searchable": true },
+                            {
+                                "class": 'details-control',
+                                "role":"row",
+                                "orderable": false,
+                                "data": null,
+                                "defaultContent": ''
+                            },
+
+                            { "title": "Damage Date", "data": "DamageDateString", "searchable": false },
+                            { "title": "Referance One", "data": "ReferanceOne", "searchable": true },
+                            { "title": "Referance Two", "data": "ReferanceTwo", "searchable": true },
+                            { "title": "Notes", "data": "Notes", "searchable": true },
+                            { "title": "Post Status",
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "render": function (data, type, row) {
+                                    var information = '';
+                                    if (!data.isPosted) {
+                                        information = 'Not Posted';
+                                    }
+                                    else
+                                    {
+                                        information = 'Posted';
+                                    }
+                                    return information;
+                                }
+
+                            },
+                            {
+                                "title": "Action",
+                                "className" : "text-nowrap",
+                                //"data": "Id",
+                                "data": {
+                                    Id: "Id" //,
+                                    //VoucherTypeName:"VoucherTypeName",
+                                    //isPosted:"isPosted"
+                                },
+                                "render": function (data, type, row) {
+
+                                    var myUrledit = '@Url.Action("EditDamage", "Damage")?DamageId=' + data.Id;
+                                    var myUrldelete = '@Url.Action("DeleteDamage", "Damage")?DamageId=' + data.Id;
+                                    var myUrlSerialDamageedit = '@Url.Action("EditDamageBySerialSearch", "Damage")?DamageId=' + data.Id;
+
+                                    var myUrlReport = '@Url.Action("DamageReport", "Damage")?DamageId=' + data.Id;
+                                    var message = `return confirm('Are you sure you want to Remove the Damage Information ?')`;
+
+                                    var buttons = '<span data-toggle="tooltip" title="Report"> <a href=\"' + myUrlReport + '\"  class=\"btn btn-icon btn-success btn-sm rounded-0 m-b-5\" target=\"_blank\"><i class="bi bi-printer"></i></a></span>';
+                                    if (!data.isPosted) {
+                                        {
+                                            buttons += '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 m-b-5\" target=\"_blank\"><i class="bi bi-pencil-square"></i></a></span>';
+                                        }
+                                        buttons += '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\"  onclick = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 m-b-5\" target=\"_self\"><i class="bi bi-x"></i></a></span>';
+                                    }
+                                    else
+                                    {
+                                       // buttons += '<span data-toggle="tooltip" title="View"> <a href=\"' + myUrlView + '\" class=\"fa fa-eye text-info px-1 h4\" target=\"_blank\"></a></span>';
+                                    }
+                                    return buttons;
+                                }
+
+                            }
+                        ],
+                //"order": [0, "desc"],
+                "processing": true,
+                "language": {
+                    sLengthMenu: " _MENU_",
+                    search: "",
+                    searchPlaceholder: "Search..."
+                },
+                "destroy": true
+            });
+        }
+
+    });
+
+
+
+    </script>
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+

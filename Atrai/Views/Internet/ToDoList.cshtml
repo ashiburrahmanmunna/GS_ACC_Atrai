@@ -1,0 +1,102 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{ ViewData["Title"] = "To Do List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+
+                    <div class="card-body">
+
+                        <div class="row mb-2">
+                            <div class="col-md-2 col-12">
+                                @Html.ActionLink("User Entry Entry", "AddToDo", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md-2 col-12 m-t-8">
+                                <h4 class="card-header" style="color: #1976d2;">To Do List</h4>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive m-t-10">
+                            <table id="tbllist" class="display nowrap table table-hover  table-bordered" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr></tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr></tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+                $(function () {
+                    var peopleList = $('#tbllist').DataTable({
+
+                        serverSide: true,  "scrollX": true,
+                        processing: true,
+
+                        ajax: {
+                            url: '@Url.Action("GetToDoList", "Internet")',
+                            type: "POST"
+                        },
+                        rowId: 'Id',
+                        columns: [
+
+                            { "title": "Id", "data": "Id", "visible": false },
+                            { "title": "Entry Date", "data": "EntryDateString", "searchable": false },
+                            { "title": "Subject", "data": "Subject", "searchable": true },
+                            { "title": "Desc.", "data": "Description", "searchable": true },
+                            { "title": "User Name", "data": "UserName", "searchable": false },
+                            { "title": "TicketId", "data": "TicketId", "searchable": true },
+                            { "title": "Assaign Fusion Team", "data": "AssaignFusionTeam", "searchable": true },
+                            { "title": "Staff Comment", "data": "StaffComment", "searchable": true },
+                            { "title": "Status", "data": "Status", "searchable": true },
+                            { "title": "Update Date", "data": "UpdateDate", "searchable": true },
+
+                            { "title": "Comment Mngr.", "data": "Comment", "searchable": true },
+
+
+                            {
+                                "title": "Action",
+                                "data": "Id",
+                                "render": function (data, type, row) {
+                                    var myUrledit = '@Url.Action("EditToDo", "Internet")?ToDoId=' + data;
+                                    var myUrldelete = '@Url.Action("DeleteToDo", "Internet")?ToDoId=' + data;
+                                    var message = `return confirm('Are you sure you want to Remove the User Entry Information ?')`;
+
+
+                                    return '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="bi bi-pencil-square"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" "><i class="bi bi-x"></i></a></span>';
+
+                                }
+
+                            }
+                        ]
+                    });
+
+
+                });
+
+
+
+    </script>
+}

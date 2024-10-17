@@ -1,0 +1,562 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@*@model IEnumerable<Atrai.Model.Core.Entity.CustomerModel>*@
+@{
+    ViewData["Title"] = "Customer List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<style>
+    .buttons-columnVisibility span:before{
+        top: 1.5em !important;
+    }  
+</style>
+
+
+<!-- Start Page Content -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+
+            @Html.Hidden("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+            @Html.Hidden("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+
+            <div class="card-body">
+                <div class="row pt-3 pb-4">
+                    <div class="col-md-9">
+                         <h3>Customer List</h3>
+                    </div>
+                          <div class="col-md-2  divHiddenItem  text-end pt-2">
+                        <fieldset class="float-end">
+                            <label class="pr-2"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                            <label class="pr-2"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                            <label class="pr-2"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+                        </fieldset>
+                    </div>
+                    <div class="col-md-1 text-end">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" >
+                                new
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("Add Customer", "AddCustomer", null, null, new { @class = "dropdown-item", @id = "btnBack" })</li>
+                                <li><a class="dropdown-item btn btn-sm" href="Download?file=CustomerSample.xlsx" target="_blank">Download Sample</a></li>
+                                <li class="divHiddenItems"><button class="dropdown-item btn btn-sm" type="button" onclick="ReportPrint('PrintLedger')">Ledger</button></li>
+                                <li class="divHiddenItems"> <button class="dropdown-item btn btn-sm " type="button" onclick="ReportPrint('Customer')">View</button></li>
+                                <li class="divHiddenItems">  <button class="dropdown-item btn btn-sm" type="button" onclick="ReportPrint('CustomerNotPosted')">Not Posted View</button></li>
+                                
+                            </ul>
+                        </div>
+                    </div>
+                     
+                </div>
+                <div class="row">
+                    
+                                        <div class="col-md-1 mb-2">
+                        @Html.DropDownList("Status", new List<SelectListItem>
+                        {
+                        new SelectListItem() {Text = "Due", Value="Due"},
+                        new SelectListItem() {Text = "All", Value="All"}
+                        }, new { @class = "form-select" })
+                    </div>
+                    
+
+
+                    <div class="col-md-3 mb-2">
+                        <div class="form-inline divHiddenItems">
+                            <div class="input-group">
+                               @* <div class="input-group-text btn-primary">
+                                    <i class="bi bi-calendar"></i>
+                                </div>*@
+                                <input type="text" class="form-control form-control-sm" name="date" id="daterange-btn" style="width: auto;">
+                                <button id='btnDec' type="button" class="btn btn-danger rounded-0" title='Decrement month'><i class="bi bi-calendar-minus"></i></button>
+                                <button id='btnInc' type="button" class="btn btn-primary  rounded-0" title='Increment month'><i class="bi bi-calendar-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+              
+                                        <div class="col-md-3 col-12">
+                        <form id="myform" method="post" enctype="multipart/form-data" asp-action="UploadFilesCustomer" asp-controller="Admin">
+
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <span class="btn btn-default" onclick="$(this).parent().find('input[type=file]').click();">Browse</span>
+                                    <input name="uploaded_file" onchange="$(this).parent().parent().find('.form-control').html($(this).val().split(/[\\|/]/).pop());" style="display: none;" type="file" id="FileUpload1">
+                                </span>
+                                <span class="form-control"></span>
+                                <input class="input-group-text" type="submit" id="btnUpload" value="Upload" />
+
+                            </div>
+@*                            <div class="input-group mb-3">
+  <input type="file" class="form-control" id="inputGroupFile02">
+  <label class="input-group-text" for="inputGroupFile02">Upload</label>
+</div>*@
+                        </form>
+                    </div>
+                    
+             
+               @*                <div class="col-md-2 col pt-2 text-end">
+                        <label>
+                            Show All Column
+                            <input type="checkbox" id="myCheck2">
+                        </label>
+                    </div>*@
+
+     
+
+               
+
+                </div>
+
+                <div class="row mb-2">
+
+
+
+
+                </div>
+
+                <div class="table-responsive mt-1">
+                    <table id="tbllist" class="text-nowrap table table-sm table-hover table-striped table-bordered border" style="width:100%">
+                    </table>
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts{
+
+    <script type="text/javascript">
+
+        var VatViewActivate = '@HttpContextAccessor.HttpContext.Session.GetInt32("VatViewActivate").ToString()';
+        if (VatViewActivate == 1) { $('.divHiddenItems').hide(); }
+        var isHidden = VatViewActivate != 1;
+
+        loaddata();
+        var filter = '@ViewBag.filter';
+        $("#Status").val(filter);
+
+        $("#Status").change(function () {
+            loaddata();
+        });
+
+        table = $('#tbllist').DataTable();
+        table.columns([2, 3, 6, 7, 11, 12, 13]).visible(false);
+        $('#myCheck2').change(function () {
+            table.columns([3, 6, 7, 11, 12, 13]).visible($(this).is(':checked'))
+            //table.columns([17]).visible(!$(this).is(':checked'))
+
+        })
+
+        function loaddata() {
+
+
+            table = $('#tbllist').DataTable({
+
+                //serverSide: true, //"scrollX": true,
+                //processing: true,
+
+                //dom: '<"dom_wrapper fh-fixedHeader"flB>tip',
+                   dom: "' <'row''<'col-xs-12'>><<'col-xs-6 dt-buttons survey-export float-end'lB><'col-xs-6'f>r>t<'row'<'col-xs-12 mt-3'i p>>",
+                buttons: {
+                    dom: {
+                        button: {
+                            className: 'btn rounded-0'
+                        }
+                    },
+                    buttons: [
+                        //'copy', 'csv', 'excel', 'pdf', 'print'
+                        //{ "extend": 'excel', "text": 'Excel', "className": 'btn btn-sm btn-success-info fa fa-excel rouned-0' }
+
+                        {
+                            extend: 'excel',
+                            text: '<i class="bi bi-file-earmark-excel"></i>',
+                            className: 'btn-success me-1',
+                            titleAttr: 'Export to excel'
+                        },
+                        {
+                        targets: 1,
+                        text: '<i class="bi bi-gear"></i>',
+                        extend: "colvis",
+                        className: "btn btn-default",
+                        collectionLayout: "fixed columns",
+                        prefixButtons: [
+                            {
+                                extend: "colvisGroup",
+                                text:
+                                    '<span><i class="bi bi-check-all"></i></span> Show all',
+                                className: "show-all",
+                                show: ":hidden"
+                            },
+                            {
+                                extend: "colvisGroup",
+                                text:
+                                    '<span><i class="bi bi-eye-slash"></i></span> Hide all',
+                                className: "hide-all",
+                                hide: ":visible"
+                            },
+                            {
+                                extend: "colvisGroup",
+                                text:'<span><i class="bi bi-arrow-repeat"></i></span> Restore',
+                                className: "restore"
+                              
+                            },
+
+                             'pageLength',
+                                        {
+                                extend: "colvisGroup",
+                                text:
+                                    'Include Inactive',
+                                className: "Include Inactive"
+                              
+                            },
+                        ]
+                    }
+
+                    ],
+                },
+                select: {
+                    style: 'single',
+                    selector: 'td:nth-child(1),td:nth-child(2),td:nth-child(3),td:nth-child(4),td:nth-child(5),td:nth-child(6),td:nth-child(7),td:nth-child(8),td:nth-child(9),td:nth-child(10),td:nth-child(11),td:nth-child(12),td:nth-child(13)'
+                },
+                ajax: {
+                    url: '@Url.Action("GetCustomerList", "Admin")',
+                    "data": { Status: $("#Status").val() },
+                    type: "POST"
+                },
+                rowId: 'Id',
+                "destroy": true,
+                //"scrollX": true,
+                "serverSide": true,
+                "orderCellsTop": true,
+                "scrollX": true,
+                "scrollY": "60vh",
+                "scrollCollapse": true,
+                "info": true,
+                "iDisplayLength": 8,
+                //pagingType: 'full_numbers',
+                //pagingType: $(window).width() < 768 ? "simple" : "simple_numbers"
+
+                "language": {
+                    "lengthMenu": "_MENU_",
+                    //"zeroRecords": "Nothing found - sorry",
+                    //"info": "Showing page _PAGE_ of _PAGES_",
+                    "infoEmpty": "No records available",
+                    "info": "Results: _PAGE_ - _PAGES_ of _MAX_",
+                   "searchPlaceholder": "Filter by name",
+                    "sSearch": '<i class="bi bi-funnel"></i>',
+                    "paginate": {
+                        "previous": '<i class="bi bi-chevron-left"></i>',
+                        "next": '<i class="bi bi-chevron-right"></i>'
+                    }
+                },
+           
+                "lengthMenu": [[5, 8, 10, 20, 50, 20000], [5, 8, 10, 20, 50, "All"]],
+
+                columns: [
+
+                    { "title": "Id", "data": "Id", "visible": false },
+
+                    {
+                        "title": "Name",
+                        "data": "Name",
+                        //"className": "text-wrap",
+                        //"data": {
+                        //    Id: "Name"
+                        //},
+                        "searchable": true,
+                        "className": "text-wrap text-left",
+                        //"sWidth": "180px"
+                        //"render": function (data, InternetUserId, row) {
+
+                        //    var myUrlprint = '@Url.Action("SubsidiaryLedger", "Admin")?Id=' + data.Id + '&Type=Customer';
+                        //    var SupplierName = data.Name;
+                        //    var buttons = '';
+                        //    buttons += '<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\"  class=\"btn btn-icon btn-outline-primary rounded-0 mb-0\" target=\"_blank\"><i class="bi bi-printer"> ' + SupplierName + '</i></a></span>';
+                        //    return buttons;
+                        //}
+                    },
+                    { "title": "Balance", "data": "TotalDue", "searchable": false, "visible": isHidden },
+
+
+                    {
+                        "title": "Email", "data": "Email", "searchable": true
+                        //"className": "text-wrap text-left",
+                        //"sWidth": "150px"
+                    },
+                    // { "title": "Name", "data": "Name", "searchable": true },
+                    {
+                        "title": "Address",
+                        "data": "PrimaryAddress",
+                        "searchable": true,"sWidth": "400px",
+                        "className": "text-wrap text-left",
+                        //"sWidth": "180px"
+                    },
+                    //{
+                    //    "title": "Secoundary Address", "data": "SecoundaryAddress",
+                    //    "searchable": true ,
+                    //    "className": "text-wrap text-left",
+                    //    "style":"width:300px",
+                    //      "sWidth": "180px"
+                    //},
+
+                    { "title": "Phone", "data": "Phone", "searchable": true },
+                    { "title": "Notes", "data": "Notes", "searchable": true },
+                    //{ "title": "Type", "data": "CustType", "searchable": true },
+                    //{ "title": "Group", "data": "ParentCustomer", "searchable": true , "visible":isHidden },
+                    { "title": "Opening", "data": "OpBalance", "searchable": true },
+
+
+                    //{
+                    //    "title": "Total Sales Value", "visible": isHidden,
+                    //    //"className": "text-nowrap text-center",
+
+                    //    "data": {
+                    //        Id: "Id" //,
+                    //    },
+                    //    "searchable": false,
+                    //    "render": function (data, type, row) {
+                    //        var showdata = '';
+                    //        if (data.TotalSalesValue + data.TotalSalesReturnValue > 0) {
+                    //            showdata += '<p class="narrowlineheight" style="color:black"> ' + formatter.format(data.TotalSalesValue + data.TotalSalesReturnValue) + ' </p>';
+                    //        }
+
+                    //        if (data.TotalCollection + data.TotalAmountBack > 0) {
+                    //            showdata += '<p class="narrowlineheight" style="color:black"> ' + formatter.format(data.TotalCollection + data.TotalAmountBack) + ' </p>';
+                    //        }
+
+                    //        if (data.TotalDue > 0) {
+                    //            showdata += '<p class="narrowlineheight" style="color:red"> ' + formatter.format(data.TotalDue) + ' </p>';
+                    //        }
+                    //        else {
+                    //            showdata += '<p class="narrowlineheight" style="color:green"> ' + formatter.format(data.TotalDue) + ' </p>';
+                    //        }
+
+
+                    //        return showdata;
+                    //    }
+                    //},
+
+
+                    {
+                        "title": "Receivable", "visible": isHidden,
+                        //"className": "text-nowrap text-center",
+
+                        "data": {
+                            Id: "Id" //,
+                        },
+                        "searchable": false,
+                        "render": function (data, type, row) {
+                            var showdata = '';
+                            if (data.TotalSalesValue + data.TotalSalesReturnValue > 0) {
+                                showdata += '<span style="color:black"> ' + formatter.format(data.TotalSalesValue + data.TotalSalesReturnValue) + ' </span>';
+                            }
+                            return showdata;
+                        }
+                    },
+                    {
+                        "title": "Collection", "visible": isHidden,
+                        //"className": "text-nowrap text-center",
+                        "data": {
+                            Id: "Id" //,
+                        },
+                        "searchable": false,
+                        "render": function (data, type, row) {
+                            var showdata = '';
+                            if (data.TotalCollection + data.TotalAmountBack > 0) {
+                                showdata += '<span style="color:black"> ' + formatter.format(data.TotalCollection + data.TotalAmountBack) + ' </span>';
+                            }
+                            return showdata;
+                        }
+                    },
+                    {
+                        "title": "Balance", "visible": isHidden,
+                        // "className": "text-nowrap text-center",
+                        "data": {
+                            Id: "Id" //,
+                        },
+                        "render": function (data, type, row) {
+                            var buttons = '';
+                            if (data.TotalDue > 0) {
+                                buttons += '<span style="color:red"> ' + formatter.format(data.TotalDue) + ' </span>';
+                            }
+                            else {
+                                buttons += '<span style="color:green"> ' + formatter.format(data.TotalDue) + ' </span>';
+                            }
+                            return buttons;
+                        }
+                    },
+
+                    { "title": "Last Sales Date", "data": "LastSalesDate", "searchable": false, "visible": isHidden },
+                    { "title": "Last Invoice No", "data": "LastInvoiceNo", "searchable": false, "visible": isHidden },
+                    { "title": "Last Sold Product", "data": "LastSoldProduct", "searchable": false, "visible": isHidden },
+
+                    {
+                        "title": "Action",
+                        "data": "Id",
+                        "orderable": "false",
+                        "render": function (data, type, row) {
+                            var myUrledit = '@Url.Action("EditCustomer", "Admin")?CustomerId=' + data;
+                            var myUrlprint = '@Url.Action("SubsidiaryLedger", "Admin")?Id=' + data + '&Type=Customer';
+
+                            var myUrldelete = '@Url.Action("DeleteCustomer", "Admin")?CustomerId=' + data;
+                            var message = `return confirm('Are you sure you want to Remove the Customer Information ?')`;
+
+
+                            //// '<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"fa fa-file-pdf-o text-success px-1 h4\" target=\"_blank\"></a></span>' +
+                            //return '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"bi bi-pencil-square  fa-2x text-warning \" target=\"_blank\"></a></span>' +
+                            //    '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" class=\"bi bi-trash fa-2x text-danger\" target=\"_blank\"></a></span>';
+                                       return `<div class="btn-group">
+                                      <button type="button" class="btn btn-sm shadow-none blue-custom fw-500"><a href="#">View Register</a></button>
+                                      <button type="button" class="btn btn-sm dropdown-toggle dropdown-toggle-split shadow-none" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden"></span>
+                                      </button>
+                                        <ul class="dropdown-menu"><li><a href="${myUrledit}" class="dropdown-item text-success" target="_blank"><i class="bi bi-pencil me-2"></i>Edit</a></li><li><a href="${myUrldelete}" onclick="${message}" class="dropdown-item  text-danger" target="_blank"><i class="bi bi-x-lg me-2"></i>Delete</a></li></ul>
+                                        </div>`;
+                        }
+
+                    }
+
+                ]
+                //columnDefs: [
+                //    {
+                //        render: function (data, type, full, meta) {
+                //            if (data != null)
+                //            return "<div class='text-wrap'>" + data + "</div>";
+                //        },
+                //         "defaultContent": "",
+                //        targets: [3,4,6],
+                //        'width': '200'
+                //    }
+                // ]
+            });
+
+
+        }
+
+
+
+
+
+        var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+        var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+        var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+            {
+                style: 'currency',
+                currency: CurrencyShortNameViewFormat,///'BDT'
+                minimumFractionDigits: 2,
+            });
+
+
+
+        CurrentDate();
+
+        $(".FromDate").datepicker({
+
+            dateFormat: "dd-M-y",
+            changeMonth: true,
+            changeYear: true
+
+        });
+        $(".ToDate").datepicker({
+
+            dateFormat: "dd-M-y",
+            changeMonth: true,
+            changeYear: true
+
+        });
+
+        function CurrentDate() {
+            var date = new Date();
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+
+
+            if ($(".FromDate").val() == '') {
+                $(".FromDate").val(val);
+            }
+            if ($(".ToDate").val() == '') {
+                $(".ToDate").val(val);
+            }
+
+
+        }
+
+        function ReportPrint(btnvalue) {
+
+            var table = $('#tbllist').DataTable();
+            var rows = table.rows('.selected').data();
+
+            var reporttype = $("input[name=RptType]:checked").val();
+            var FromDate = $(".FromDate").val();
+            var ToDate = $(".ToDate").val();
+
+
+
+
+
+            var productidlist = [];
+            var pid = 0;
+            var type = "Customer";
+
+
+            if (rows.length > 0) {
+                pid = rows[0]["Id"];
+                //type = rows[0]["AccountCategory"];
+
+            }
+            //console.log(pid);
+            //alert(WarehouseId);
+            //alert(btnvalue);
+
+            var isViewPageReport = 1;
+
+            if (btnvalue == "PrintLedger") {
+
+                isViewPageReport = 0;
+                if ((pid == null) || (pid == "")) {
+                    toastr.error("Please Select Account Head from the List.");
+                    return true;
+                }
+                //alert('Wait');
+            }
+            else if (btnvalue == "CustomerNotPosted") {
+                var type = btnvalue;
+            }
+
+
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SubsidiaryLedger", "Admin")',
+                dataType: 'json',
+                async: true,
+                data: { rptFormat: reporttype, action: btnvalue, Id: pid, Type: type, FromDate: FromDate, ToDate: ToDate, isViewPageReport: isViewPageReport },
+                success: function (response) {
+
+                    //setTimeout(function () {
+                    //    window.open(response.Url, '_blank')
+                    //}, 3000);
+
+                    window.open(response.Url, '_blank')
+
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+        }
+
+
+
+
+    </script>
+}

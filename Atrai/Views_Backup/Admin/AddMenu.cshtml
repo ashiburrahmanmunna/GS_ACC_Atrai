@@ -1,0 +1,262 @@
+﻿@model Atrai.Core.Entity.MenuModel
+@{
+    ViewData["Title"] = "AddMenu";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+<!-- Start Page Content -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="text-uppercase">New Menu</h6>
+
+            </div>
+
+            @*@Html.HiddenFor(m => m.Id, new { @value = Model.Id })
+            @Html.HiddenFor(m => m.CreateDate, new { @value = Model.CreateDate })
+            @Html.HiddenFor(m => m.LuserId, new { @value = Model.LuserId })*@
+
+            <div class="card-body">
+                <div class="basic-elements">
+                    <form asp-controller="admin" asp-action="AddMenu" method="post">
+                        @if (Model != null)
+                        {
+                            <input type="hidden" asp-for="Id" />
+                            <input type="hidden" asp-for="CreateDate" />
+                            @*<input type="hidden" asp-for="LuserId" />*@
+                        }
+                        else
+                        {
+                            <input type="hidden" asp-for="Id" value="0" />
+                        }
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-group row mb-3">
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="MenuName"></label>
+                                        <input type="text" asp-for="MenuName" class="form-control" placeholder="eg Enter Menu Caption">
+                                        <span asp-validation-for="MenuName" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+
+                                        <label asp-for="AllActionName"></label>
+                                        <input type="text" asp-for="AllActionName" class="form-control">
+                                        <span asp-validation-for="AllActionName" class="text-danger"></span>
+
+                                    </div>
+
+
+                                </div>
+
+
+
+
+                                <div class="form-group row mb-3">
+                                    <div class="col-md-4 col-12">
+                                        <label asp-for="ControllerName"></label>
+                                        <input type="text" asp-for="ControllerName" class="form-control" placeholder="eg Admin">
+                                        <span asp-validation-for="ControllerName" class="text-danger"></span>
+
+                                    </div>
+
+
+                                    <div class="col-md-4 col-12">
+                                        <label asp-for="ActionName"></label>
+                                        <input type="text" asp-for="ActionName" class="form-control" placeholder="eg Index">
+                                        <span asp-validation-for="ActionName" class="text-danger"></span>
+
+                                    </div>
+                                    <div class="col-md-4 col-12">
+
+                                        <label asp-for="FirstParameter"></label>
+                                        <input type="text" asp-for="FirstParameter" class="form-control" placeholder="eg Id / Filter / Parameter Name">
+                                        <span asp-validation-for="FirstParameter" class="text-danger"></span>
+
+                                    </div>
+                                </div>
+                                <div class="form-group row mb-3">
+                                    <div class="col-md-4 col-12">
+
+                                        <label asp-for="FirstValue"></label>
+                                        <input type="text" asp-for="FirstValue" class="form-control" placeholder="eg 1 , 2  / Active / Expired / Any Kind of Passing Value">
+                                        <span asp-validation-for="FirstValue" class="text-danger"></span>
+
+                                    </div>
+                                    <div class="col-md-4 col-12">
+                                        <label asp-for="MenuGroupName"></label>
+                                        <input asp-for="MenuGroupName" class="form-control" placeholder="eg. Home">
+                                        <span asp-validation-for="MenuGroupName" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-4 col-12">
+
+                                        @Html.LabelFor(x => x.ParentId)
+                                        @Html.DropDownListFor(x => x.ParentId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.ParentMenu, "Value", "Text"), "Select Parent Menu",
+                                        htmlAttributes: new { @class = "form-control", id = "ParentId" })
+                                        @Html.ValidationMessageFor(x => x.ParentId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            
+                                <div class="form-group mb-3">
+                                    <div class="row">
+
+                                        <div class="col-md-4 col-12">
+
+                                            <label asp-for="MenuClass"></label>
+                                            <input asp-for="MenuClass" class="form-control" placeholder="eg. fa fa-tachometer">
+                                            <span asp-validation-for="MenuClass" class="text-danger"></span>
+
+                                        </div>
+
+
+                                        <div class="col-md-4 col-12">
+
+                                            <label asp-for="MenuRemarks"></label>
+                                            <input asp-for="MenuRemarks" class="form-control" placeholder="Enter Remarks">
+                                            <span asp-validation-for="MenuRemarks" class="text-danger"></span>
+
+                                        </div>
+                                        <div class="col-md-4 col-12">
+
+                                            <label asp-for="DisplayOrder"></label>
+                                            <input asp-for="DisplayOrder" class="form-control">
+                                            <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+
+
+                                <div class="form-group mb-3">
+                                    <div class="row">
+
+
+
+                                        @*<div class="col-md-2 col-12 text-center">
+                                        <label asp-for="isBaseMenu"></label>
+                                        <input asp-for="isBaseMenu" class="form-control" type="checkbox">
+                                        <span asp-validation-for="isBaseMenu" class="text-danger"></span>
+                                        </div>*@
+
+                                        <div class="col">
+                                            <div class="form-check">
+                                                <label asp-for="isParent" class="form-check-label"></label>
+                                                <input asp-for="isParent" class="form-check-input" type="checkbox">
+                                                <span asp-validation-for="isParent" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
+                                            <div class="form-check">
+                                                <label asp-for="isGroup" class="form-check-label"></label>
+                                                <input asp-for="isGroup" class="form-check-input" type="checkbox">
+                                                <span asp-validation-for="isGroup" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-check">
+                                                <label asp-for="IsVatMenu" class="form-check-label"></label>
+                                                <input asp-for="IsVatMenu" class="form-check-input" type="checkbox">
+                                                <span asp-validation-for="IsVatMenu" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col">
+                                            <div class="form-check">
+                                                <label asp-for="IsCreateAction" class="form-check-label"></label>
+                                                <input asp-for="IsCreateAction" class="form-check-input" type="checkbox">
+                                                <span asp-validation-for="IsCreateAction" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
+                                            <div class="form-check">
+                                                <label asp-for="IsEditAction" class="form-check-label"></label>
+                                                <input asp-for="IsEditAction" class="form-check-input" type="checkbox">
+                                                <span asp-validation-for="IsEditAction" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
+                                            <div class="form-check">
+                                                <label asp-for="IsDeleteAction" class="form-check-label"></label>
+                                                <input asp-for="IsDeleteAction" class="form-check-input" type="checkbox">
+                                                <span asp-validation-for="IsDeleteAction" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
+                                            <div class="form-check">
+                                                <label asp-for="IsViewAction" class="form-check-label"></label>
+                                                <input asp-for="IsViewAction" class="form-check-input" type="checkbox">
+                                                <span asp-validation-for="IsViewAction" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
+                                            <div class="form-check">
+                                                <label asp-for="IsListAction" class="form-check-label"></label>
+                                                <input asp-for="IsListAction" class="form-check-input" type="checkbox">
+                                                <span asp-validation-for="IsListAction" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col ">
+                                            <div class="form-check">
+                                                <label asp-for="IsReportAction" class="form-check-label"></label>
+                                                <input asp-for="IsReportAction" class="form-check-input" type="checkbox">
+                                                <span asp-validation-for="IsReportAction" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+
+
+
+
+
+                                    </div>
+
+
+                                </div>
+
+
+
+
+
+                                <div class="form-group mb-3">
+
+                                    @if (ViewBag.ActionType == "Create")
+                                    {
+                                        <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" />
+                                    }
+                                    else if (ViewBag.ActionType == "Edit")
+                                    {
+                                        <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" />
+                                    }
+                                    else if (ViewBag.ActionType == "Delete")
+                                    {
+                                        <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>
+                                    }
+
+                                    @Html.ActionLink("Back", "MenuList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End PAge Content -->

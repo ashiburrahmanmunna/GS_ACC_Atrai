@@ -1,0 +1,131 @@
+﻿@model Atrai.Core.Entity.SubscriptionTypeModel
+@{
+    ViewData["Title"] = "AddSubscriptionType";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>New Subscription Type</h4>
+
+                    </div>
+
+                    @*@Html.HiddenFor(m => m.Id, new { @value = Model.Id })
+                    @Html.HiddenFor(m => m.CreateDate, new { @value = Model.CreateDate })
+                    @Html.HiddenFor(m => m.LuserId, new { @value = Model.LuserId })*@
+
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="admin" asp-action="AddSubscriptionType" method="post">
+                                @if (Model != null)
+                                {
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" />
+                                    @*<input type="hidden" asp-for="LuserId" />*@
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Id" value="0" />
+                                }
+
+                                <div class="row">
+                                    <div class="col-md-8 col-12">
+                                        <div class="form-group row">
+
+                                            <div class="col-md-6 col-12">
+                                                <label asp-for="SubscriptionName"></label>
+                                                <input type="text" asp-for="SubscriptionName" class="form-control">
+                                                <span asp-validation-for="SubscriptionName" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-6 col-12">
+                                                @Html.LabelFor(x => x.BusinessTypeId)
+                                                @Html.DropDownListFor(x => x.BusinessTypeId,
+                                                     new SelectList((IEnumerable<SelectListItem>)ViewBag.BusinessType, "Value", "Text"), "Select Business Type",
+                                                     htmlAttributes: new { @class = "form-control", id = "BusinessTypeId" })
+                                                @Html.ValidationMessageFor(x => x.BusinessTypeId, "", new { @class = "text-danger" })
+                                            </div>
+
+                                        </div>
+                                        <div class="form-group row">
+
+                                            <div class="col-md-12 col-12">
+
+                                                <label asp-for="SubscriptionRemarks"></label>
+                                                <input asp-for="SubscriptionRemarks" class="form-control">
+                                                <span asp-validation-for="SubscriptionRemarks" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+                                        <div class="form-group row">
+
+                                            <div class="col-md-6 col-12">
+
+                                                <label asp-for="ValidityDay"></label>
+                                                <input asp-for="ValidityDay" class="form-control" type="number">
+                                                <span asp-validation-for="ValidityDay" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-6 col-12">
+
+                                                <label asp-for="SubscriptionAmount"></label>
+                                                <input asp-for="SubscriptionAmount" class="form-control" type="number">
+                                                <span asp-validation-for="SubscriptionAmount" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+                                        <div class="form-group row">
+
+                                            <div class="col-md-9 col-12">
+
+
+                                                <label asp-for="ValidationRemarks"></label>
+                                                <input asp-for="ValidationRemarks" class="form-control">
+                                                <span asp-validation-for="ValidationRemarks" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-3 col-12 text-center">
+                                                <label asp-for="IsInActive"></label>
+                                                <input asp-for="IsInActive" class="form-control" type="checkbox">
+                                                <span asp-validation-for="IsInActive" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+
+
+
+                                        <div class="form-group">
+                                            @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+
+
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                    <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" /> }
+                                else if (ViewBag.ActionType == "Edit")
+                                {
+                                    <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" /> }
+                                else if (ViewBag.ActionType == "Delete")
+                                {
+                                    <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>}
+
+
+                                            @Html.ActionLink("Back", "SubscriptionTypeList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>

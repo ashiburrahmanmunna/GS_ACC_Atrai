@@ -1,0 +1,743 @@
+﻿@*@model IEnumerable<Atrai.Core.Entity.PurchaseReturnModel>*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{ ViewData["Title"] = "Purchase Return List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        @*<h5 class="card-header">PurchaseReturn List</h5>*@
+                        <div class="row mb-2">
+                            @*<div class="col-md-2 col-12">
+                @Html.ActionLink("Create Invoice", "AddPurchase", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+            </div>
+            <div class="col-md-2 col-12">
+                @Html.ActionLink("POS PurchaseReturn", "POSCreate", null, null, new { @class = "btn btn-outline-primary btn-block rounded-0", @id = "btnBack" })
+            </div>
+            <div class="col-md-2 col-12">
+                @Html.ActionLink("PurchaseReturn With Serial", "AddPurchaseerial", null, null, new { @class = "btn btn-outline-danger btn-block rounded-0", @id = "btnBack" })
+            </div>
+            <div class="col-md-2 col-12">
+                @Html.ActionLink("PurchaseReturn With [ Row Wise Serial]", "AddPurchaseerialSide", null, null, new { @class = "btn btn-outline-primary btn-block rounded-0", @id = "btnBack" })
+            </div>*@
+                            <div class="col-md-2 col-12">
+                                @*                                @Html.ActionLink("New PurchaseReturn With Scan", "AddPurchaseReturnBySerialSearch", null, null, new { @class = "btn btn-outline-success btn-block rounded-0", @id = "btnBack" })*@
+                                @Html.ActionLink("New Purchase Return", "AddPurchaseReturnBySerialSearch", null, null, new { @class = "btn btn-outline-success btn-block rounded-0", @id = "btnBack" })
+
+                            </div>
+                            <div class="col-md-2 col-12 m-t-8">
+
+
+                                <h4 class="card-header" style="color: #1976d2;">Purchase Return List</h4>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="card p-2 mb-2">
+                            <div class="row">
+                                <div class="col-md-2 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Suppliers", ViewBag.Suppliers as List<SelectListItem>, "Select Suppliers", new { id = "SupplierId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                <label for="FDate">From Date</label>
+                                            </span>
+                                        </div>
+                                        @Html.TextBox("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "Select From Date ", @autocomplete = "off", name = "FromDate" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                <label for="TDate">To Date</label>
+                                            </span>
+                                        </div>
+                                        @Html.TextBox("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "Select To Date ", @autocomplete = "off", name = "ToDate" })
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-12">
+                                    <label class="pr-2"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <div class="table-responsive m-t-10">
+                            <table id="Purchasereturnlist" class="display table table-hover  table-bordered table-striped" cellspacing="0" width="100%">
+                            </table>
+                        </div>
+
+                        <div class="p-2 mb-2">
+                            <div class="row">
+                                @*<div class="col">
+                                </div>*@
+
+
+                                <div class="col">
+
+                                    <div class="card p-30" style="background:antiquewhite">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd f-s-40 color-primary"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h2>User Wise Purchase Return</h2>
+                                                <p id="fullinfoone" class="m-b-0"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-30" style="background:lavender">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd f-s-40 color-primary"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h2>User Wise Commission :</h2>
+                                                <p id="fullinfofour" class="m-b-0"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col">
+
+                                    <div class="card p-30" style="background:beige">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd f-s-40 color-primary"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h2>Date Wise Purchase Return :</h2>
+                                                <p id="fullinfotwo" class="m-b-0"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="card p-30" style="background:beige">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd f-s-40 color-primary"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h2>Post / Unpost Purchase Return :</h2>
+                                                <p id="fullinfoeight" class="m-b-0"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col">
+
+                                    <div class="card p-30" style="background:lavender">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd f-s-40 color-primary"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h2>Receive By Head</h2>
+                                                <p id="fullinfothree" class="m-b-0"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="card p-30" style="background:lavender">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd f-s-40 color-primary"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h2>Top purchase Supplier :</h2>
+                                                <p id="fullinfoseven" class="m-b-0"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col">
+
+                                    <div class="card p-30" style="background:lavender">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd f-s-40 color-primary"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h2>Top purchase Item :</h2>
+                                                <p id="fullinfofive" class="m-b-0"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="card p-30" style="background:lavender">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd f-s-40 color-primary"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h2>Top Due Supplier :</h2>
+                                                <p id="fullinfosix" class="m-b-0"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+        </div>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+
+
+@section Scripts{
+
+
+
+
+
+    <script TransactionId="text/javascript">
+
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            CurrentDate();
+
+            $(".FromDate").datepicker({
+
+                dateFormat: "dd-M-y",
+                changeMonth: true,
+                changeYear: true
+
+            });
+
+
+        $(".ToDate").datepicker({
+
+            dateFormat: "dd-M-y",
+            changeMonth: true,
+            changeYear: true
+
+        });
+
+        function CurrentDate() {
+            var date = new Date();
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+            if ($(".FromDate").val() == '') {
+                $(".FromDate").val(val);
+            }
+            if ($(".ToDate").val() == '') {
+                $(".ToDate").val(val);
+            }
+        }
+
+        var SupplierId = $("#SupplierId").val();
+        var fromdate = $("#FromDate").val();
+        var todate = $("#ToDate").val();
+
+
+            var permission = false;
+            var UserRole = `@HttpContextAccessor.HttpContext.Session.GetString("UserRole")`;
+            //alert(UserRole);
+            //alert(permission);
+
+            if (UserRole.toLowerCase().includes("admin")) { permission = true; };
+            //alert(permission);
+
+
+
+        loaddata(fromdate, todate, SupplierId ,1);
+
+            loadsummarydata($("#FromDate").val(), $("#ToDate").val());
+
+
+
+
+
+        function loaddata(FromDate = "", ToDate = "", SupplierId = "", isAll = 1) {
+            //alert(SupplierId, FromDate, ToDate);
+
+
+
+
+
+
+
+
+            table = $('#Purchasereturnlist').DataTable({
+                initComplete: function () {
+
+                    var input = $('.dataTables_filter input').unbind(),
+                        self = this.api(),
+
+                        $searchButton = $('<button class="btn rounded-0 btn-info btn-sm" tabindex="0" aria-controls="Purchasereturnlist" TransactionId="button" title="Search"><span><i class="mdi mdi-file-excel"></i></span></button>')
+                            .text('Search')
+                            .click(function () {
+                                if (input.val().length > 0) {
+                                    self.search(input.val()).draw();
+
+                                }
+                                else {
+                                    loaddata(fromdate, todate, SupplierId, 1);
+
+                                }
+                            }),
+                        //$clearButton = $('<button class="btn rounded-0 btn-warning btn-sm" tabindex="0" aria-controls="Purchasereturnlist" TransactionId="button" title="Export to PDF"><span><i class="mdi mdi-file-pdf"></i></span></button>')
+                        //    .text('Clear')
+                        //    .click(function () {
+                        //        input.val('');
+                        //        $searchButton.click();
+                        //    }),
+                        $allButton = $('<button class="ml-1 btn rounded-0 btn-primary btn-sm" tabindex="0" aria-controls="Purchasereturnlist" TransactionId="button" title="Load"><span><i class="mdi mdi-file-excel"></i></span></button>')
+                            .text('Load')
+                            .click(function () {
+                                input.val('');
+                                //alert(FromDate);
+                                loaddata(fromdate, todate, SupplierId, 1);
+
+                                loadsummarydata($("#FromDate").val(), $("#ToDate").val());
+
+
+                                //table.ajax.reload();
+
+
+                            })
+                    $('.dataTables_filter').append($allButton, $searchButton);//, $clearButton
+                },
+
+                serverSide: true,  "scrollX": true,
+                "orderCellsTop": true,
+
+                "iDisplayLength": 10,
+                "lengthMenu": [[5, 10, 20, 50, -1], [5, 10, 20, 50, "All"]],
+
+                dom: '<"dom_wrapper fh-fixedHeader"lBf>tip',
+
+                buttons: {
+                    dom: {
+                        button: {
+                            className: 'btn rounded-0'
+                        }
+                    },
+                    buttons: [
+                    ]
+                },
+                "ajax": {
+                    "url": "@Url.Action("GetPurchaseReturnList", "PurchaseReturn")",
+                    "data": { FromDate: $("#FromDate").val(), ToDate: $("#ToDate").val(), SupplierId: $("#SupplierId").val(), isAll: isAll },
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                "columns": [
+                            { "title": "Id", "data": "Id", "visible": false },
+                        //    { "title": "Purchase Code", "data": "PurchaseReturnCode", "searchable": true },
+
+
+                                {
+                                    "title": "Purchase Return Code",
+                                    "className": "text-nowrap",
+                                    "data": {
+                                        Id: "PurchaseReturnCode"
+                                    },
+                                    "searchable": true,
+
+                                    "render": function (data, InternetUserId, row) {
+
+                                        var myUrlprint = '@Url.Action("PurchaseReturnReport", "PurchaseReturn")?PurchasereturnId=' + data.Id;
+                                        var PurchaseReturnCode = data.PurchaseReturnCode;
+                                        var buttons = '';
+                                        buttons += '<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"btn btn-icon btn-success btn m-b-0\" target=\"_blank\"><i class="fa fa-print"> ' + PurchaseReturnCode + '</i></a></span>';
+                                        return buttons;
+                                    }
+                                },
+
+
+
+
+                            { "title": "PurchaseReturn Date", "data": "PurchaseReturnDateString", "searchable": false },
+                            { "title": "Supplier Name", "data": "SupplierName", "searchable": true },
+                            { "title": "Primary Address", "data": "PrimaryAddress", "searchable": true },
+                            { "title": "Phone No", "data": "PhoneNo", "searchable": true },
+                            { "title": "Notes", "data": "Notes", "searchable": true },
+                            { "title": "Total", "data": "Total", "searchable": true },
+                            { "title": "Discount", "data": "Discount", "searchable": true },
+                            { "title": "Net Amount", "data": "NetAmount", "searchable": true },
+                            //{ "title": "Status", "data": "Status", "searchable": true },
+                            { "title": "Received Amt.", "data": "PaidAmt", "searchable": false },
+                            //{ "title": "Received By", "data": "ReceivingHead", "searchable": false },
+
+                            {
+                                "title": "Received By", "data": "PurchaseReturnPayments", "className": "nowrap text-nowrap text-center", "searchable": false
+
+                                , "render": function (data, type, row) {
+                                    //console.log(data);
+
+
+
+                                    //for (var i = 0; i < data.length; i++) {
+                                    //    //output += '<p class="lineheight">' + data[i].WhShortName + ' : ' + data[i].CurrentStock + ' : ' + data[i].CostingValue.toFixed(2) + ' : ' + data[i].PurchaseReturnValue;
+                                    //    //totalPurchasereturnvalue = totalPurchasereturnvalue + parseFloat(data[i].PurchaseReturnValue.toFixed(2))
+
+                                    //    if (i < data.length - 1) {
+                                    //        output += "  </p>";
+
+                                    //        //'<p>' + this + '</p>'
+                                    //    }
+                                    //    count++;
+                                    //};
+
+
+                                    if (data.length != 0) {
+
+                                        var output = "";
+
+                                        for (var i = 0; i < data.length; i++) {
+                                            if (data[i].vChartofAccounts != null) {
+                                                //console.log(data[i]);
+                                                output += '<p class="lineheight" style="font-weight: bold; color:black">' + data[i].vChartofAccounts.AccName + " : " + data[i].Amount
+                                            }
+
+                                            if (i < data.length - 1) {
+                                                output += "  </p>";
+
+                                                //'<p>' + this + '</p>'
+                                            }
+                                        };
+
+                                        //console.log(output);
+
+                                        return output;
+                                    }
+                                    else {
+
+                                        var output = '<p style="font-weight: bold; color:red">Due</p>';
+                                        return output;
+
+                                        //return null;
+                                    }
+                                }
+
+                            },
+
+
+
+                            { "title": "Total Cost", "data": "FinalCostingPrice", "searchable": false, "visible": permission  },
+                            { "title": "Profit", "data": "Profit", "searchable": false, "visible": permission },
+                            { "title": "Profit %", "data": "ProfitPercentage", "searchable": false, "visible": permission },
+
+
+                            { "title": "Post Status",
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "render": function (data, type, row) {
+                                    var information = '';
+                                    if (!data.isPosted) {
+                                        information = 'Not Posted';
+                                    }
+                                    else
+                                    {
+                                        information = 'Posted';
+                                    }
+                                    return information;
+                                }
+
+                            },
+                            {
+                                "title": "Action",
+                                "className" : "text-nowrap",
+                                //"data": "Id",
+                                "data": {
+                                    Id: "Id" //,
+                                    //VoucherTypeName:"VoucherTypeName",
+                                    //isPosted:"isPosted"
+                                },
+                                "render": function (data, type, row) {
+
+                                    var myUrledit = '@Url.Action("EditPurchaseReturn", "PurchaseReturn")?PurchasereturnId=' + data.Id;
+                                    var myUrldelete = '@Url.Action("DeletePurchaseReturn", "PurchaseReturn")?PurchasereturnId=' + data.Id;
+                                    var myUrlposedit = '@Url.Action("POSEdit", "PurchaseReturn")?PurchasereturnId=' + data.Id;
+                                    //var myUrlSerialPurchaseReturnedit = '@Url.Action("EditPurchaseReturnBySerialSearch", "PurchaseReturn")?PurchasereturnId=' + data.Id;
+
+                                    var myUrlReport = '@Url.Action("PurchaseReturnReport", "PurchaseReturn")?PurchasereturnId=' + data.Id;
+                                    var message = `return confirm('Are you sure you want to Remove the PurchaseReturn Information ?')`;
+
+                                    var buttons = '';// '<span data-toggle="tooltip" title="Report"> <a href=\"' + myUrlReport + '\"  class=\"btn btn-icon btn-success btn-sm rounded-0 m-b-5\" target=\"_blank\"><i class="fa fa-print"></i></a></span>';
+                                    if (!data.isPosted) {
+                                        if (data.isPOSPurchaseReturn) {
+                                            buttons += '<span data-toggle="tooltip" title="POS Edit"> <a href=\"' + myUrlposedit + '\" class=\"btn btn-icon btn-info btn-sm rounded-0 rounded-0 m-b-5\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>';
+                                        }
+                                        //else if (data.isSerialPurchaseReturn) {
+                                        //    buttons += '<span data-toggle="tooltip" title="Barcode Scan PurchaseReturn Edit"> <a href=\"' + myUrlSerialPurchaseReturnedit + '\" class=\"btn btn-icon btn-default btn-sm rounded-0 rounded-0 m-b-5\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>';
+                                        //}
+                                        else { 
+                                            buttons += '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 m-b-5\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>';
+                                        }
+                                        buttons += '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\"  onclick = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 m-b-5\" target=\"_self\"><i class="fa fa-remove"></i></a></span>';
+                                    }
+                                    else
+                                    {
+                                       // buttons += '<span data-toggle="tooltip" title="View"> <a href=\"' + myUrlView + '\" class=\"fa fa-eye text-info px-1 h4\" target=\"_blank\"></a></span>';
+                                    }
+                                    return buttons;
+
+                                    //if (!data.isPOSPurchaseReturn) {
+                                    //    return '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                    //        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick=return confirm("Are you sure you want to Remove this Supplier ?")  class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-remove"></i></a></span>' +
+                                    //        '<span data-toggle="tooltip" title="Report"> <a href=\"' + myUrlReport + '\"  class=\"btn btn-icon btn-success btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-print"></i></a></span>';
+                                    //}
+                                    //else {
+                                    //    return '<span data-toggle="tooltip" title="POS Edit"> <a href=\"' + myUrlposedit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                    //        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick=return confirm("Are you sure you want to Remove this Supplier ?")  class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-remove"></i></a></span>' +
+                                    //        '<span data-toggle="tooltip" title="Report"> <a href=\"' + myUrlReport + '\"  class=\"btn btn-icon btn-success btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-print"></i></a></span>';
+                                    //}
+                                }
+
+                            }
+                ],
+
+                "columnDefs": [
+                    { "width": "10px", "targets": 0 },
+                    { "width": "40px", "targets": 1 },
+                    { "width": "100px", "targets": 2 },
+                    { "width": "120px", "targets": 3 },
+                    { "width": "70px", "targets": 4 },
+                    { "width": "70px", "targets": 5 }
+                ],
+                //"order": [0, "desc"],
+                "processing": true,
+                "language": {
+                    sLengthMenu: " _MENU_",
+                    search: "",
+                    searchPlaceholder: "Search..."
+                },
+                "destroy": true
+            });
+            //$('#Purchasereturnlist_filter input').unbind();
+            // alert('Load Successfully');
+            //$('.dataTables_filter input').bind('keyup', function (e) {
+            //    if (e.keyCode == 13) {
+            //        //alert('enter');
+            //        table.search(this.value).draw();
+            //    }
+            //});
+        }
+
+
+
+
+
+             function loadsummarydata(abcFromDate = "", abcToDate = "") {
+
+                 //alert($("#FromDate").val());
+
+                 var x = $("#FromDate").val();
+                 var y = $("#ToDate").val()
+
+                 //alert(x , y);
+                $.ajax({
+
+                        url: '@Url.Action("GetPurchaseReturnSummaryInfo", "PurchaseReturn")',
+                        data: { FromDate: x, ToDate: y},
+                        //data: JSON.stringify(purchasesmain),
+                        //type: 'POST',
+                        //async: true,
+                        contentType: 'application/json;',
+                        dataType: 'json',
+                        success: function (result) {
+                            console.log(result);
+                            //console.log(result.Purchasereturnbyuser);
+                            //console.log(result.Purchasereturnreceivebyhead);
+
+
+                            var output = "";
+                            if (result.Purchasereturnbyuser.length != 0) {
+                                for (var i = 0; i < result.Purchasereturnbyuser.length; i++) {
+                                    if (result.Purchasereturnbyuser[i] != null) {
+                                        console.log(result.Purchasereturnbyuser[i]);
+                                        output += '<p class="lineheight"  ; color:black">' + result.Purchasereturnbyuser[i].UserName + " : " + result.Purchasereturnbyuser[i].TotalPurchaseReturnCount + " : " + result.Purchasereturnbyuser[i].TotalPurchaseReturnSum + ' </p>'
+                                    }
+                                };
+                            }
+                            document.getElementById("fullinfoone").innerHTML = output;
+
+
+
+                            output = "";
+                            if (result.commissionbyuser.length != 0) {
+                                for (var i = 0; i < result.commissionbyuser.length; i++) {
+                                    if (result.commissionbyuser[i] != null) {
+                                        //console.log(result.commissionbyuser[i]);
+                                        output += '<p class="lineheight"  ; color:black">' + result.commissionbyuser[i].UserName + " : " + result.commissionbyuser[i].TotalPurchaseReturnCount + " : " + result.commissionbyuser[i].TotalCommissionAmount + ' </p>'
+                                    }
+                                };
+                            }
+                            document.getElementById("fullinfofour").innerHTML = output;
+
+
+
+
+
+
+                            output = "";
+                            if (result.totalPurchasereturnsummary.length != 0) {
+                                for (var i = 0; i < result.totalPurchasereturnsummary.length; i++) {
+                                    if (result.totalPurchasereturnsummary[i] != null) {
+                                        console.log(result.totalPurchasereturnsummary[i]);
+                                        output += '<p class="lineheight"  > Total PurchaseReturn :' + result.totalPurchasereturnsummary[i].TotalPurchaseReturnCount + ' </p>'
+                                        output += '<p class="lineheight"  > Total PurchaseReturn Value : ' + result.totalPurchasereturnsummary[i].TotalPurchaseReturnValue + ' </p>'
+                                        output += '<p class="lineheight"  > Total Costing : ' + result.totalPurchasereturnsummary[i].TotalCosting + ' </p>'
+                                        output += '<p class=""  > Total Profit : '  + result.totalPurchasereturnsummary[i].TotalProfit + ' </p>'
+                                    }
+
+                                };
+                            }
+                            document.getElementById("fullinfotwo").innerHTML = output;
+
+
+
+                            output = "";
+                            if (result.Purchasereturnreceivebyhead.length != 0) {
+                                for (var i = 0; i < result.Purchasereturnreceivebyhead.length; i++) {
+                                    if (result.Purchasereturnreceivebyhead[i] != null) {
+                                        console.log(result.Purchasereturnreceivebyhead[i]);
+                                        output += '<p class="lineheight"  ; color:black">' + result.Purchasereturnreceivebyhead[i].AccName + " : " + result.Purchasereturnreceivebyhead[i].Amount + ' </p>'
+                                    }
+                                };
+                            }
+                            document.getElementById("fullinfothree").innerHTML = output;
+
+
+                            var output = "";
+                            if (result.toppurchaseitem.length != 0) {
+                                for (var i = 0; i < result.toppurchaseitem.length; i++) {
+                                    if (result.toppurchaseitem[i] != null) {
+                                        //console.log(result.toppurchaseitem[i]);
+                                        output += '<p class="lineheight"  ; color:black">' + result.toppurchaseitem[i].ProductName + " : " + result.toppurchaseitem[i].ProductCount + ' </p>'
+                                    }
+                                };
+                            }
+                            document.getElementById("fullinfofive").innerHTML = output;
+
+
+
+                            output = "";
+                            if (result.toppurchaseSupplier.length != 0) {
+                                for (var i = 0; i < result.toppurchaseSupplier.length; i++) {
+                                    if (result.toppurchaseSupplier[i] != null) {
+                                        //console.log(result.toppurchaseSupplier[i]);
+                                        output += '<p class="lineheight"  ; color:black">' + result.toppurchaseSupplier[i].SupplierName + " : " + result.toppurchaseSupplier[i].PurchaseReturnAmount + ' </p>'
+                                    }
+                                };
+                            }
+                            document.getElementById("fullinfoseven").innerHTML = output;
+
+
+
+                            output = "";
+                            if (result.topdueSupplier.length != 0) {
+                                for (var i = 0; i < result.topdueSupplier.length; i++) {
+                                    if (result.topdueSupplier[i] != null && result.topdueSupplier[i].DueAmount > 0) {
+                                        //var dueamout = result.topdueSupplier[i].TotalPurchaseReturn - result.topdueSupplier[i].ReceivedAmount;
+                                        //console.log(result.topdueSupplier[i]);
+                                        output += '<p class="lineheight"  ; color:black">' + result.topdueSupplier[i].SupplierName + " : " + result.topdueSupplier[i].DueAmount + ' </p>'
+                                    }
+                                };
+                            }
+                            document.getElementById("fullinfosix").innerHTML = output;
+
+
+
+                            output = "";
+                            if (result.postunpostcount.length != 0) {
+                                for (var i = 0; i < result.postunpostcount.length; i++) {
+                                    if (result.postunpostcount[i] != null && result.postunpostcount[i].DocCount > 0 && result.postunpostcount[i].isPosted == false) {
+                                        output += '<p class="lineheight"  ; color:black">' + "Not Posted : " + result.postunpostcount[i].DocCount + ' </p>'
+                                    }
+                                    else {
+                                        output += '<p class="lineheight"  ; color:black">' + "Posted : " + result.postunpostcount[i].DocCount + ' </p>'
+                                    }
+                                };
+                            }
+                            document.getElementById("fullinfoeight").innerHTML = output;
+
+
+                            toastr.success('PurchaseReturn Summary Load Successfully.');
+                            //alert('Wait');
+                        },
+                        error: function () {
+                            toastr.error('Unable to Load');
+                            //alert('Unable to Save');
+                        }
+                    });
+
+
+            };
+
+
+    });
+
+
+
+        @*var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+        var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+        var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+            {
+            style: 'currency',
+            currency: CurrencyShortNameViewFormat,///'BDT'
+            minimumFractionDigits: 2,
+        });*@
+
+    </script>
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+

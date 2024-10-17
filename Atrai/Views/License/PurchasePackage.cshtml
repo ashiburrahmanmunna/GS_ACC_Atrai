@@ -1,0 +1,598 @@
+﻿@model IEnumerable<Atrai.Model.Core.Entity.SoftwarePackageModel>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{ 
+    //var weburl = @HttpContextAccessor.HttpContext.Session.GetString("weburl").ToLower();
+    var CallBackUrlLink = @HttpContextAccessor.HttpContext.Session.GetString("CallBackUrlLink").ToLower();
+    var ComId = @HttpContextAccessor.HttpContext.Session.GetInt32("ComId");
+    var UserId = @HttpContextAccessor.HttpContext.Session.GetInt32("UserId");
+
+
+    ViewData["Title"] = "SoftwarePackage List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+
+@*@model IEnumerable<SalesPageDesign.Models.Sale>
+
+    @{
+        ViewData["Title"] = "Index";
+    }*@
+
+
+<style>
+    .card {
+        background: ivory;
+    }
+    .scrollable-offcanvas {
+        overflow-y: auto;
+    }
+    .cancelbtn {
+        border: 1px solid black;
+        border-radius: 30px;
+        background: white;
+        color: black;
+        font-weight: 600;
+    }
+
+    .savebtn {
+        border: none;
+        border-radius: 30px;
+        background: #0b970bd9;
+        color: white;
+        font-weight: 600;
+    }
+</style>
+<div class="page-wrapper">
+
+
+    <div class="row">
+        <!--start content-->
+        <!--breadcrumb-->
+        <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+            <div class="breadcrumb-title pe-3">Pricing Tables</div>
+            <div class="ps-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 p-0">
+                        <li class="breadcrumb-item">
+                            <a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Pricing Tables</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="ms-auto">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary">Settings</button>
+                    <button type="button" class="btn btn-primary split-bg-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                        <span class="visually-hidden">Toggle Dropdown</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-end">
+                        <a class="dropdown-item" href="javascript:;">Action</a>
+                        <a class="dropdown-item" href="javascript:;">Another action</a>
+                        <a class="dropdown-item" href="javascript:;">Something else here</a>
+                        <div class="dropdown-divider"></div>	<a class="dropdown-item" href="javascript:;">Separated link</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--end breadcrumb-->
+
+        <div class="row company-name" style="margin-left: 200px">
+            <div class="col-lg-3">
+                <p class="fw-bold">Company ID</p>
+                <p class="fw-bold">Payment Method</p>
+            </div>
+            <div class="col-lg">
+                <p class="fw-bold">@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()</p>
+                <div>
+                    <div id="add-p-tag">
+
+                    </div>
+                    <i class="bi bi-pen cursor-pointer" data-bs-toggle="offcanvas" data-bs-target="#paymentMethodList" aria-controls="paymentMethodList"></i>
+                </div>
+            </div>
+        </div>
+
+        @*offcanvas list starts*@
+        <div class="offcanvas offcanvas-end w-25 scrollable-offcanvas" tabindex="-1" id="paymentMethodList" aria-labelledby="paymentMethodListLabel">
+            <div class="offcanvas-header">
+                <h5 id="paymentMethodListLabel">Edit payment </h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <h5 class="text-center mb-5">Select a payment method</h5>
+                <div id="parent-div-of-list">
+                    
+                  </div>
+                </div>
+                <hr />
+                <button class="buttons-colvis px-4 float-lg-end" style="border: 3px solid #00800082; border-radius: 20px;" data-bs-toggle="offcanvas" data-bs-target="#paymentMethodEntry" aria-controls="paymentMethodEntry">Add new</button>
+                <button class="buttons-colvis px-5 py-2 text-white mt-4" style="border:none; background: #0b970bd9;; border-radius: 20px;" data-bs-toggle="offcanvas" data-bs-target="#paymentMethodEntry" aria-controls="paymentMethodEntry">Use this payment method</button>
+            </div>
+        </div>
+        @*offcanvas list ends*@
+
+        @*offcanvas entry starts*@
+    <div class="offcanvas offcanvas-end w-25 scrollable-offcanvas" tabindex="-1" id="paymentMethodEntry" aria-labelledby="paymentMethodEntryLabel">
+        <div class="offcanvas-header">
+            <h5 id="paymentMethodEntryLabel">Edit payment </h5>
+            <button onclick="clearOffCanvasData()" type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <h5>New payment method</h5>
+            <div class="d-flex">
+                <div>
+                    <input type="hidden" id="Id" name="Id" value="" />
+                    <input class="form-check-input" type="radio" value="0" id="credit-debit-card" name="a" checked>
+                    <label class="form-check-label" for="credit-debit-card">Credit/Debit Card</label>
+                </div>
+                <div class="ms-4">
+                    <input class="form-check-input" type="radio" value="1" id="paypal" name="a">
+                    <label class="form-check-label" for="paypal">PayPal</label>
+                </div>
+            </div>
+            <label class="mt-5">Credit or debit card number</label><br />
+            <input id="credit-debit-card-number" class="py-2 w-100" style="border: 1px solid #00000030; border-radius: 7px" /><br />
+
+            <label class="mt-3">Card nickname (optional)</label><br />
+            <input id="card-nickname" class="py-2 w-100" placeholder="Card nickname" style="border: 1px solid #00000030; border-radius: 7px" /><br />
+
+            <div class="d-flex">
+                <div>
+                    <label class="mt-3">Expiration</label><br />
+                    <div class="d-flex">
+                        <div>
+                            <select class="form-select" id="month">
+                                <option value="0">Month</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                            </select>
+                        </div>
+                        <div class="ms-3">
+                            <select class="form-select" id="year">
+                                <option value="0">Year</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 ms-3">
+                    <label>CW</label><br />
+                    <input id="cw" class="py-2" placeholder="" style="border: 1px solid #00000030; border-radius: 7px" />
+                </div>
+            </div>
+
+
+            <h5 class="mt-5">Billing address</h5>
+            <label>Country</label><br />
+            <select class="form-select" id="country">
+            </select><br />
+
+            <label>Address</label><br />
+            <input id="address" class="py-2 w-100" style="border: 1px solid #00000030; border-radius: 7px" /><br />
+            <label class="mt-3">City</label><br />
+            <input id="city" class="py-2 w-100" style="border: 1px solid #00000030; border-radius: 7px" /><br />
+
+            <div class="d-flex mt-3">
+                <div>
+                    <label>State</label><br />
+                    <input id="state" class="py-2" style="border: 1px solid #00000030; border-radius: 7px" />
+                </div>
+                <div class="ms-3">
+                    <label>Postal Code</label><br />
+                    <input id="postal-code" class="py-2" style="border: 1px solid #00000030; border-radius: 7px" />
+                </div>
+            </div>
+
+
+
+            <h5 class="mt-5">Company information</h5>
+            <label>BIN (Business Identification Number)</label><br />
+            <input id="busibess-id-number" class="py-2 w-100" style="border: 1px solid #00000030; border-radius: 7px" /><br />
+
+            <h5 class="mt-5">Company address</h5><br />
+            <input class="form-check-input" type="checkbox" value="0" id="legal-business-address" name="b" checked>
+            <label class="form-check-label" for="legal-business-address">Use this as my legal business address</label><br />
+
+            <div class="d-none" id="lega-addresses-parent">
+                <label class="mt-3">Address</label><br />
+                <input id="lega-address" class="py-2 w-100" style="border: 1px solid #00000030; border-radius: 7px" /><br />
+                <label class="mt-3">City</label><br />
+                <input id="lega-city" class="py-2 w-100" style="border: 1px solid #00000030; border-radius: 7px" /><br />
+
+                <div class="d-flex mt-3">
+                    <div>
+                        <label>State</label><br />
+                        <input id="lega-state" class="py-2" style="border: 1px solid #00000030; border-radius: 7px" />
+                    </div>
+                    <div class="ms-3">
+                        <label>Postal Code</label><br />
+                        <input id="lega-postal-code" class="py-2" style="border: 1px solid #00000030; border-radius: 7px" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <input class="form-check-input" type="checkbox" value="0" id="" name="c">
+                <label class="form-check-label" for="">Save payment method to my Intuit profile</label>
+            </div>
+            <br />
+            <div class="mt-3">
+                <input class="form-check-input" type="checkbox" value="0" id="" name="c">
+                <label class="form-check-label" for="">By selecting Save and use, I understand that I am enrolling in a QuickBooks Online subscription program. I authorise Intuit, using electronic signature, to charge my payment method for the subscription(s) selected, unless I cancel. To cancel, sign in and go to Billing Page. If you are receiving discounted pricing, you will automatically be charged the full price when the discount period ends. </label>
+            </div>
+        </div>
+
+
+
+
+        <button onclick="clearOffCanvasData()" class="cancelbtn mb-5 py-2 px-4 ms-4" id="BtnCancel">Cancel</button>
+        <button class="savebtn mb-5 py-2 px-4" id="BtnSave" type="submit">Save</button>
+
+    </div>
+        @*offcanvas entry ends*@
+
+
+
+
+
+
+
+
+
+
+
+
+        @* <h6 class="mb-0 text-uppercase">Pricing Table</h6>*@
+        <hr />
+        <div class="row row-cols-1 row-cols-lg-4">
+            @foreach (var item in Model)
+            {
+                <div class="col">
+                    <div class="card rounded-0">
+                        <div class="card-body">
+                            <div class="text-center">
+                                <h5 class="mb-4">@Html.DisplayFor(modelItem => item.Name)</h5>
+                                <h1 class="card-price">
+                                    @{ var abc = 0.00;
+
+                                        if (item.DurationType.DurationName == "Year")
+                                        {
+                                            abc = Math.Round(item.PackagePrice / 12 / item.UserCount);
+                                        }
+                                        else if (item.DurationType.DurationName == "Month")
+                                        {
+                                            abc = Math.Round(item.PackagePrice / item.UserCount);
+                                        }
+                                        else
+                                        {
+                                            abc = Math.Round(item.PackagePrice / item.UserCount);
+                                        }
+                                        <span class="fs-6 text-secondary pe-1">@item.Country.CurrencyShortName</span>@abc<span class="fs-6 text-secondary">/mo</span>
+
+                                    }
+
+
+                                </h1>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><i class="bi bi-check-circle me-2"></i>3 Months Support</li>
+                                <li class="list-group-item"><i class="bi bi-check-circle me-2"></i>Demo Instalation</li>
+                                <li class="list-group-item"><i class="bi bi-check-circle me-2"></i>Automatic Updates</li>
+                                <li class="list-group-item"><i class="bi bi-check-circle me-2"></i>Theme Documentation</li>
+                                <li class="list-group-item"><i class="bi bi-check-circle me-2"></i>Free Subdomain</li>
+                                <li class="list-group-item"><i class="bi bi-check-circle me-2"></i>Community Access</li>
+                                <li class="list-group-item"><i class="bi bi-check-circle me-2"></i>Dedicated Phone Support</li>
+                            </ul>
+                            <div class="text-center mt-3 d-grid d-lg-block">
+
+                                @if (CallBackUrlLink.Contains("w2u.io"))
+                                {
+                                    <a href="https://pqstec.com/invoiceapps/License/BkashAutoCheckOut?packageid=@item.Id&UserId=@UserId&CallBackURL=@CallBackUrlLink" class="btn btn-outline-primary rounded-0 px-4 shadow"> BUY NOW</a>
+                                    @*<a href="http://localhost:2553/License/BkashAutoCheckOut?packageid=@item.Id&UserId=@UserId&CallBackURL=@weburl" class="btn btn-primary mb-3">Test Buy Package</a>*@
+                                }
+                                else
+                                {
+                                    <a asp-controller="License" asp-action="CheckOut" asp-route-packageid="@item.Id" class="btn btn-outline-primary rounded-0 px-4 shadow"> BUY NOW</a>
+                                }
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="col">
+                <div class="card rounded-0 border border-3 border-primary">
+                    <div class="card-body">
+                        <div class="text-center">
+                            <h5 class="mb-4">Small Business</h5>
+                            <h1 class="card-price"><span class="fs-6 text-secondary">$</span>299<span class="fs-6 text-secondary">/mo</span></h1>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><i class="bi bi-check-circle me-2"></i>3 Months Support</li>
+                            <li class="list-group-item"><i class="bi bi-check-circle me-2"></i>Demo Instalation</li>
+                            <li class="list-group-item"><i class="bi bi-check-circle me-2"></i>Automatic Updates</li>
+                            <li class="list-group-item"><i class="bi bi-check-circle me-2"></i>Theme Documentation</li>
+                            <li class="list-group-item"><i class="bi bi-check-circle me-2"></i>Free Subdomain</li>
+                            <li class="list-group-item"><i class="bi bi-check-circle me-2"></i>Community Access</li>
+                            <li class="list-group-item"><i class="bi bi-check-circle me-2"></i>Dedicated Phone Support</li>
+                        </ul>
+                        <div class="text-center mt-3 d-grid d-lg-block">
+                            <a href="javascript:;" class="btn btn-primary rounded-0 px-4 shadow">BUY NOW</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          
+        </div>
+    </div>
+
+    @section scripts{
+        <script>
+        $.ajax({
+            url: '@Url.Action("GetCountry", "License")',
+            success: function (data) {
+                //console.log("tax ajax data::", data);
+                const select = document.querySelector('#country');
+
+                for (var i = 0; i < data.length; i++) {
+                    const option = document.createElement('option');
+                    //console.log(" data[i]::", data[i]);
+                    option.value = data[i].Value;
+                    option.text = data[i].Text;
+                    select.appendChild(option);
+                }
+            }
+        });
+            //document.addEventListener('DOMContentLoaded', function () {
+            //    var offcanvas = new bootstrap.Offcanvas(document.getElementById('paymentMethodList'));
+            //    offcanvas.show();
+            //});
+            document.addEventListener('DOMContentLoaded', function () {
+                var yearSelect = document.getElementById('year');
+
+                // Get the current year
+                var currentYear = new Date().getFullYear();
+
+                // Populate the dropdown with years from the current year to the next 20 years
+                for (var i = 0; i <= 20; i++) {
+                    var yearOption = document.createElement('option');
+                    yearOption.value = currentYear + i;
+                    yearOption.text = currentYear + i;
+                    yearSelect.add(yearOption);
+                }
+            });
+            /*$("#month").select2();*/
+            $('#legal-business-address').change(function () {
+                var legalName = $('#lega-addresses-parent');
+
+                if (!$(this).prop('checked')) {
+                    legalName.toggleClass('d-none');
+                } else {
+                    legalName.toggleClass('d-none');
+                }
+            });
+
+            //save data
+            $('#BtnSave').click(function () {
+                var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+                var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+                $("#ComId").val(ComId);
+                $("#LuserId").val(UserId);
+
+                var model = {
+                    Id : $("#Id").val() || 0,
+                    CardNumber: $('#credit-debit-card-number').val(),
+                    CardNickName: $('#card-nickname').val(),
+                    NameOnCard: "",
+
+                    CountryId: $('#country').val(),
+                    IsDebitCredit: $('#credit-debit-card').prop('checked'),
+                    IsPayPal: $('#paypal').prop('checked'),
+
+                    Month: $('#month').val(),
+                    Year: $('#year').val(),
+                    CW: $('#cw').val(),
+
+                    Address: $('#address').val(),
+                    City: $('#city').val(),
+                    State: $('#state').val(),
+                    ZipCode: $('#postal-code').val(),
+
+                    LegalAddress: $('#lega-address').val(),
+                    LegalCityAddress: $('#lega-city').val(),
+                    LegalState: $('#lega-state').val(),
+                    LegalZipCode: $('#lega-postal-code').val(),
+
+                    BusinessIdNo: $('#busibess-id-number').val(),
+
+                    @*StoreSettingId: Number(@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString())*@
+                };
+
+                console.log("Model", model);
+                var Id = 0;
+
+
+                $.ajax({
+                    async: false,
+                    type: "POST",
+                    url: "@Url.Action("PaymentMethodEntry", "License")",
+                    data: JSON.stringify(model),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        console.log("after save console::", response);
+                        clearOffCanvasData();
+                        mainPage();
+                        setTimeout(function () {
+                            toastr.success(response.message, "", {
+                                "toastClass": "toast-green"
+                            });
+                        }, 1500);
+
+                    },
+                    error: function (response) {
+                    }
+                });
+
+            });
+
+
+
+            //edit mode
+            mainPage();
+            function mainPage() {
+       $.ajax({
+        url: '@Url.Action("GetPaymentMethod", "License")',
+        success: function (data) {
+            console.log("get data::", data);
+
+            $("#add-p-tag").html("");
+            $("#parent-div-of-list").html("");
+            $.each(data, function (index, item) {
+                var Edit = `editPaymentMethod(${item.Id})`;
+                    var cardNumber = `<p class="fw-bold">${item.CardNickName} ${item.CardNumber}
+
+                                   </p>`;
+                    $("#add-p-tag").append(cardNumber);
+
+                    var list = `
+                    <div class="row mb-4">
+                    <div class="col-lg-2">
+                        <input class="form-check-input fs-5" type="radio" value="" id="flexCheckDefault" name="card-check">
+                    </div>
+                    <div class="col-lg-8">
+                        <p>${item.CardNickName}  *5770</p>
+                        <p>Expires: ${item.Month}/${item.Year} </p>
+                        <p>${item.Address}</p>
+                        <p>${item.City} ${item.State} ${item.CountryName} ${item.ZipCode}</p>
+
+                      </div>
+                      <div class="col-lg-2">
+                        <i onclick=${Edit} id="${item.Id}" class="bi bi-pen cursor-pointer" data-bs-toggle="offcanvas" data-bs-target="#paymentMethodEntry" aria-controls="paymentMethodEntry"></i>
+                      </div>
+
+                    </div>
+                      `;
+                    $("#parent-div-of-list").append(list);
+
+                });
+            }
+        });
+
+            }
+
+
+        //single edit
+
+
+        function editPaymentMethod(data) {
+            var myUrlGet = '@Url.Action("EditPaymentMethod", "License")?Id=' + data;
+            $.ajax({
+                type: "GET",
+                url: myUrlGet,
+                success: function (result) {
+                    console.log(result);
+                     console.log("dekhi result::",result);
+                    $("#paymentMethodEntry").offcanvas("show");
+                    $("#Id").val(result.Id);
+                    $("#card-nickname").val(result.CardNickName);
+                    $("#country").val(result.CountryId);
+                    $("#credit-debit-card-number").val(result.CardNumber);
+                    $("#credit-debit-card").prop("checked", result.IsDebitCredit);
+                    $("#paypal").prop("checked", result.IsPayPal);
+                    $("#month").val(result.Month);
+                    $("#year").val(result.Year);
+                    $("#cw").val(result.CW);
+                    $("#address").val(result.Address);
+                    $("#city").val(result.City);
+                    $("#state").val(result.State);
+                    $("#postal-code").val(result.ZipCode);
+                    $("#lega-address").val(result.LegalAddress);
+                    $("#lega-city").val(result.LegalCityAddress);
+                    $("#lega-state").val(result.LegalState);
+                    $("#lega-postal-code").val(result.LegalZipCode);
+                    $("#busibess-id-number").val(result.BusinessIdNo);
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert("Error: " + xhr.status);
+                }
+            });
+            }
+
+
+
+
+            //to set legal business address
+            const id = $("#Id").val();
+            if (id == 0) {
+                $.ajax({
+                    url: '@Url.Action("GetStoreSettings", "License")',
+                    success: function (data) {
+                        console.log("get storesettings data::", data);
+
+                        if (data.length > 0) {
+                            var storeSettings = data[0];
+
+                            $("#lega-address").val(storeSettings.Address);
+                            $("#lega-city").val(storeSettings.City);
+                            $("#lega-state").val(storeSettings.State);
+                            $("#lega-postal-code").val(storeSettings.ZipCode);
+                        }
+                    }
+                });
+
+            }
+
+
+
+
+            //To clear data after closing edit modal
+            function clearOffCanvasData() {
+                $("#paymentMethodEntry").offcanvas("hide");
+                $("#Id").val('');
+                $("#card-nickname").val('');
+                $("#country").val('');
+                $("#credit-debit-card-number").val('');
+                $("#credit-debit-card  option:selected").val("0");
+                $("#paypal  option:selected").val("0");
+                $("#month").val('');
+                $("#year").val('');
+                $("#cw").val('');
+                $("#address").val('');
+                $("#city").val('');
+                $("#state").val('');
+                $("#postal-code").val('');
+                $("#lega-address").val('');
+                $("#lega-city").val('');
+                $("#lega-state").val('');
+                $("#lega-postal-code").val('');
+                $("#busibess-id-number").val('');
+            }
+
+
+
+
+
+
+            $(document).ready(function () {
+                $('#animationfahad').animate({ left: 0 });
+
+            });
+
+        </script>
+
+
+    }
+
+

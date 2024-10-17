@@ -1,0 +1,153 @@
+﻿@model Atrai.Core.Entity.CategoryModel
+@{
+    ViewData["Title"] = "AddCategory";
+    @if (ViewBag.IsPartialView == 1)
+    {
+        Layout = "~/Views/Shared/_PrintLayout.cshtml";
+
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_adminLayout.cshtml";
+        
+    }
+}
+
+    <link href="~/media/css/media-select.css" rel="stylesheet" />
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+
+            <section class="my-3">
+        <div class="row">
+            <div class="col-md-8 col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>New Category</h4>
+
+                    </div>
+
+                    @*@Html.HiddenFor(m => m.Id, new { @value = Model.Id })
+                    @Html.HiddenFor(m => m.CreateDate, new { @value = Model.CreateDate })
+                    @Html.HiddenFor(m => m.LuserId, new { @value = Model.LuserId })*@
+
+                    <div class="card-body  py-5">
+                      
+                            <form asp-controller="admin" asp-action="AddCategory" method="post">
+                                @if (Model != null)
+                                {
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" />
+                                    <input type="hidden" asp-for="LuserId" />
+                                    <input type="hidden" asp-for="IsPartialView" />
+
+                                    
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Id" value="0" />
+                                }
+
+
+
+
+                                    <div class"form-inline">
+                                        <div class="mb-3">
+
+                                                                    <div su-media-section>
+                                            <div>
+                                                <img class="img-fluid mb-1" su-media-preview
+                                                     src="../@(Model.ProductPicturePreview1 != null? Model.ProductPicturePreview1 : "/media/images/no-image.png")"
+                                                     alt="Product picture 1">
+                                                <i class="fa fa-times"></i>
+                                            </div>
+                                            <button type="button" class="btn btn-light btn-xs mt-1 px-2" su-media-popup>Select</button>
+                                            <input su-media-selected-input type="text" asp-for="ImagePath" hidden>
+                                        </div>
+
+@*                                            <div su-media-section>
+                                                <div>
+                                                    <img class="img-fluid mb-1" su-media-preview src="/media/images/no-image.png" alt="Category picture">
+                                                    <i class="fa fa-times"></i>
+                                                </div>
+                                                <button type="button" class="btn btn-light btn-xs mt-1 px-2" su-media-popup>Select</button>
+                                               
+                                                <input su-media-selected-input  type="text" asp-for="ImagePath"hidden>
+
+                                            </div>*@
+ @*<input su-media-selected-input="multiple"  type="text" asp-for="ProductPicture1"hidden>*@
+@*                                            <div su-media-section>
+                                                <div>
+                                                    <img class="img-fluid mb-1" su-media-preview src="/media/images/no-image.png" alt="Category picture">
+                                                    <i class="fa fa-times"></i>
+                                                </div>
+                                                <button type="button" class="btn btn-light btn-xs mt-1 px-2" su-media-popup>Select</button>
+                                                <input su-media-selected-input type="text" asp-for="ImagePath" hidden>
+                                            </div>*@
+
+                                        </div>
+                                    </div>
+
+
+                                  <div class="mb-3">
+                                            <label asp-for="Name"></label>
+                                            <input type="text" asp-for="Name" class="form-control" placeholder="eg Enter Category">
+                                            <span asp-validation-for="Name" class="text-danger"></span>
+                                        </div>
+                                         <div class="mb-3">
+                                            <label asp-for="Description"></label>
+                                            <input asp-for="Description" class="form-control" placeholder="Description">
+                                            <span asp-validation-for="Description" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            @Html.LabelFor(x => x.CategoryParentId)
+                                            @Html.DropDownListFor(x => x.CategoryParentId,
+                                                                                  new SelectList((IEnumerable<SelectListItem>)ViewBag.CategoryGroupHead, "Value", "Text"), "Select Parent Category",
+                                                                                  htmlAttributes: new { @class = "form-control", id = "CategoryParentId" })
+                                            @Html.ValidationMessageFor(x => x.CategoryParentId, "", new { @class = "text-danger" })
+                                        </div>
+
+
+                                         <div class="mb-3">
+                                            @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+
+
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                    <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" /> }
+                                else if (ViewBag.ActionType == "Edit")
+                                {
+                                    <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" /> }
+                                else if (ViewBag.ActionType == "Delete")
+                                {
+                                    <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>}
+
+                                     @if (ViewBag.IsPartialView != 1)
+                                     {
+                                            @Html.ActionLink("Back", "CategoryList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+                                     }
+                                        </div>
+
+
+                                     
+             
+
+                            </form>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+                                         <partial name="_MediaSelector" />
+
+                                                @section Scripts{
+    <script src="~/media/js/media-select.js"></script>
+}

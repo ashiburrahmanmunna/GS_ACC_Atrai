@@ -1,0 +1,288 @@
+﻿@model Atrai.Model.Core.ViewModel.SigninViewModel
+@{
+    ViewData["Title"] = "Signup";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .customSubHead{
+            font-weight: 400;
+    font-size: 15px;
+    color: #839496;
+
+        }
+    .customHeadline{
+            font-weight: 600;
+    font-size: 30px;
+    color: #403D3D;
+        }
+    .customLebel{
+        color:#839496;
+     font-weight: 700;
+    font-size: 16px;
+    margin-bottom:7px;
+    }
+</style>
+
+@Html.AntiForgeryToken()
+
+
+<div class="row justify-content-center mt-5 pt-5">
+
+
+    <div class="card col-md-3 col-12 shadow border-0">
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12 ">
+                    <h1 class="text-center customHeadline">
+                        Sign up
+                    </h1>
+                    <p class="text-center customSubHead">
+                        Create accont to start
+                        using Atrai
+                    </p>
+                </div>
+
+            </div>
+
+            @if (TempData["UserSignUpFailed"] != null)
+            {
+                <p class="alert alert-danger">@TempData["UserLoginFailed"]</p>
+            }
+            <form id="myform" asp-action="AtraiSignupURL" asp-controller="Home" method="post" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+
+                <div class="row">
+                    <div class="col-md-12 col-12 mb-2">
+                        <label class="control-label customLebel">Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-person"></i></span>
+                            <input asp-for="ContactName" class="form-control border-start-0  ps-0" placeholder="Enter your name" />
+                            <div asp-validation-for="ContactName" class="text-danger"></div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-12 col-12 mb-2">
+                        <label asp-for="Email" class="control-label customLebel"></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-envelope"></i></span>
+                            <input asp-for="Email" class="form-control border-start-0  ps-0" placeholder="Enter your email" />
+                            <div asp-validation-for="Email" class="text-danger"></div>
+                        </div>
+
+
+                    </div>
+                    <div class="col-md-12 col-12 mb-2">
+
+                        <label asp-for="PhoneNumber" class="control-label customLebel"></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-telephone"></i></span>
+                            <input asp-for="PhoneNumber" class="form-control border-start-0  ps-0" placeholder="Enter your phone number" />
+                            <div asp-validation-for="PhoneNumber" class="text-danger"></div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-12 col-12 mb-2">
+                        <label asp-for="Password" class="control-label customLebel"></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-lock"></i></span>
+                            <input type="password" asp-for="Password" class="form-control border-start-0 ps-0" placeholder="Enter your password" />
+                            <div asp-validation-for="Password" class="text-danger"></div>
+                        </div>
+
+                    </div>
+                    <div class="col-md-12 col-12 mb-2">
+                        <label asp-for="ConfirmPassword" class="control-label customLebel"></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-lock"></i></span>
+                            <input type="password" asp-for="ConfirmPassword" class="form-control border-start-0 ps-0" placeholder="confirmed your password" />
+                            <div asp-validation-for="ConfirmPassword" class="text-danger"></div>
+                        </div>
+                
+                    </div>
+
+                </div>
+                <div class="row">
+
+                    <div class="col-md-12 col-12 my-3 d-grid">
+                        <button id="create" class="btn btn-primary" onclick="SaveCompanyInfo()" type="button">Register</button>
+
+                    </div>
+                </div>
+
+
+
+
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+@section scripts {
+    <script type="text/javascript">
+
+
+
+
+        var antiForgeryToken;
+        var billeddateglobal = new Date();
+        antiForgeryToken = $("input[name='Dominate_ANTIFORZERY']").val();
+
+        $(document).ready(function () {
+
+        });
+
+
+        function SaveCompanyInfo() {
+
+            //var d = parseFloat($("#TotalQty").val());
+            //if (d > 15) {
+            //    $("#TotalQty").removeClass(" yellow");
+            //    $("#TotalQty").addClass("important red");
+            //    $("#TotalQty").css({ 'color': 'yellow', 'font-size': '150%' });
+            //    toastr.error('Load qty must not be greter than 15 metric ton');
+            //    return true;
+            //}
+            //else {
+            //    $("#TotalQty").removeClass("important red");
+            //    $("#TotalQty").addClass(" yellow");
+            //    $("#TotalQty").css({ 'color': 'green', 'font-size': '100%' });
+            //}
+
+
+            //$('select').removeAttr('disabled');
+
+
+            if (!$("#myform").valid()) {
+                toastr.error('Please Fill Up All Necessary Information Correctly.');
+                $("html, body").animate({ scrollTop: 0 }, 500);
+                $("#create").prop("disabled", false);
+                return true;
+            }
+
+
+
+            var signinmodel = {
+
+                Id: 0,
+
+                Email: "",
+                Web: "",
+                Password: "",
+                ConfirmPassword: "",
+                CompanyName: "",
+                ContactName: "",
+                ContactDesig: "",
+                CompanyShortName: "",
+
+
+                PhoneNumber: "",
+                BusinessAddress: "",
+                SubscriptionTypeId: "",
+                CountryId: "",
+                BusinessTypeId: ""
+            };
+
+
+
+            signinmodel.Id = $("#Id").val();
+            signinmodel.Email = $("#Email").val();
+
+            signinmodel.Web = "=N/A=";//$("#Web").val();
+            signinmodel.Password = $("#Password").val();
+            signinmodel.ConfirmPassword = $("#ConfirmPassword").val();
+
+            signinmodel.CompanyName = $("#CompanyName").val();
+            signinmodel.ContactName = $("#ContactName").val();
+            signinmodel.ContactDesig = $("#ContactDesig").val();
+            signinmodel.CompanyShortName = "";//$("#CompanyShortName").val();
+
+
+            signinmodel.PhoneNumber = $("#PhoneNumber").val();
+            signinmodel.BusinessAddress = $("#BusinessAddress").val();
+            signinmodel.SubscriptionTypeId = 1;//$("#SubscriptionTypeId").val();
+            signinmodel.CountryId = $("#CountryId").val();
+
+            signinmodel.BusinessTypeId = 1;//$("#BusinessTypeId").val();
+
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SignupURL", "Home")',
+                dataType: 'json',
+                async: 'false',
+                headers: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                data: { signinmodel: signinmodel },
+                success: function (result) {
+                    if (result.Success == "1") {
+
+                        toastr.success('Registration Done Successfully.Please Check Your eMail to finalize your Registration.');
+                        //var signinmodelidprint = result.Id;
+                        //var urllink = '@Url.Action("InvoiceBillPrint", "Home", new { InvoiceBillId = "xxxx" })'.replace("xxxx", signinmodelidprint);
+
+                        //window.open(urllink, '_blank');
+
+                        setTimeout(
+                            function () {
+                                //do something special
+
+                                @*var urllinknew = '@Url.Action("EmailConfirmation", "Home")';*@
+                                var urllinknew = '@Url.Action("OTPConfirmation", "Home")';
+
+                                window.open(urllinknew, "_self");
+
+        @*if ($('#Update').length) {
+
+                                var urllinknew = '@Url.Action("Login", "Home")';
+                                window.open(urllinknew, "_self");
+                                /* it exists */
+                                }
+                                else {
+                                $("#create").prop("disabled", false);
+                                //$("#TruckNumber").val(result.TruckNumber);
+                                ClearData();
+                                /* it doesn't exist */
+                                }*@
+
+
+
+                                                                                    }, 3000);
+
+
+
+                    }
+                    else {
+                        toastr.warning(result.ex);
+
+                        alert(result.ex);
+                    }
+                },
+                error: function (ex) {
+                    alert('error');
+                }
+            });
+
+            //$('#TotalQty').attr("disabled", true);
+
+
+        };
+
+    </script>
+
+    <!-- Event snippet for Sign-up conversion page -->
+    <script>
+        gtag('event', 'conversion', { 'send_to': 'AW-10853655508/L5I-CNajsaEDENTHtrco' });
+    </script>
+
+}
+

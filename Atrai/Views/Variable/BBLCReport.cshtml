@@ -1,0 +1,1407 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Order management";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<style>
+    /*li {
+            cursor: pointer;
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+        }*/
+
+    /* Set the anchor tag to have full width */
+    li a {
+        display: block;
+        width: 100%;
+    }
+
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+                         border-bottom-width: 0px;
+
+                    }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    /*   .tabulator-table .tabulator-row {
+            background-color: white;
+        } */
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customize-btn-another {
+        background: #2CA01C;
+        border: 1px solid black;
+        border-radius: 20px;
+        color: #FFFFFF;
+        border: 1px solid #2CA01C;
+    }
+
+        .customize-btn-another:hover {
+            background: #2CA01C;
+            border: 1px solid black;
+            border-radius: 20px;
+            color: #FFFFFF;
+            border: 1px solid #2CA01C;
+        }
+
+    .customize-btn:hover {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .gear-dropdown.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+        margin-top: 7px;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-bottom: 1px solid #aaaaaa38;
+        border-right: 1px solid #aaaaaa38;
+        /*border-left: 1px solid #aaaaaa38;*/
+        /* padding-left: 2px;*/
+    }
+    /*    .tabulator-row .tabulator-cell, .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+                    border-right: none;
+                    border-left: none;
+                }*/
+    /*    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+            border-right: 2px solid #aaaaaa38;
+        }*/
+
+    .tabulator-row .tabulator-cell {
+        border-right: none;
+        border-left: none;
+        padding-left: 10px;
+        border: 1px solid #aaaaaa29;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        /*margin-top: 27px;*/
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+        /* Add any other styles you need for the active cell */
+    }
+
+    .tabulator-row {
+        /*   border: 1px solid #aaaaaa38;*/
+        border-left: none;
+        border-right: none;
+    }
+
+    input[type="checkbox"] {
+        width: 20px; /* Set the width */
+        height: 20px; /* Set the height */
+    }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom: 4px solid green;
+    }
+
+        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active:hover {
+            background-color: #F8F8F8;
+            border-top-color: transparent !important;
+            border-left-color: transparent !important;
+            border-right-color: transparent !important;
+        }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link:hover {
+        background-color: #F8F8F8;
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+    }
+
+    .customize-btnew {
+        background: transparent;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btnew:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .tabulator-row .tabulator-cell.tabulator-editing {
+        border: 1px solid #404c5d;
+        outline: none;
+        padding: 0;
+    }
+
+    .tabulator-cell.tabulator-editable[tabulator-field="AccName"] {
+        border: 1px solid #0003;
+        margin-bottom: 10px;
+    }
+
+    .filter-dropdown > .filter-dropdown-class.show {
+        width: 580px;
+    }
+
+    p {
+        margin: 1em 0;
+    }
+
+    .button {
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        position: relative;
+        background: #aa0000;
+        padding: 10px 15px;
+        color: white;
+        box-shadow: 0 2px black;
+        text-decoration: none;
+        border-radius: 5px;
+        /*text-shadow: 0 1px 1px black;*/
+    }
+
+        .button:hover {
+            top: -2px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+        .button:active {
+            top: 1px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+    .unbilledbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .overduebtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .openbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .paidbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .scrollable-offcanvas {
+        /* max-height: 80vh;*/ /* Adjust the maximum height as needed */
+        overflow-y: auto;
+    }
+
+    .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:hover {
+        background-color: deepskyblue;
+    }
+
+    .tabulator .tabulator-footer {
+        background-color: #fff;
+        color: black;
+    }
+
+        .tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row {
+            background: white !important;
+        }
+
+
+    .offcanvas {
+        /* Add position relative to its parent */
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* Ensure offcanvas takes full viewport height */
+    }
+
+    .offcanvas-footer {
+        margin-top: auto; /* Push footer to the bottom */
+        width: 100%; /* Occupy full width */
+    }
+
+    .modal-footer {
+        width: 100%; /* Ensure buttons occupy full width */
+        padding: 10px; /* Add padding for better appearance */
+    }
+
+    .w-15 {
+        width: fit-content !important;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+    }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #999;
+        }
+
+        .separator:not(:empty)::before {
+            margin-right: .25em;
+        }
+
+        .separator:not(:empty)::after {
+            margin-left: .25em;
+        }
+
+    .tabulator-row.tabulator-selected {
+        background-color: #9abcea !important;
+    }
+
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 24px;
+        }
+
+            .rating label:before {
+                content: '\2605'; /* Unicode star character */
+            }
+
+        .rating input:checked ~ label:before {
+            color: gold; /* Change color of selected stars */
+        }
+
+    .child-table-hidden {
+        display: none;
+    }
+
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-calcs {
+        background: #fff !important;
+    }
+
+    .tabulator .tabulator-footer {
+        border-top: 1px solid #fff;
+    }
+
+    #file-drop-area {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    #image-uploadify {
+        display: none;
+    }
+
+    .footerButton {
+        margin-top: 40px;
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 99%;
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+
+    .bottom-bar-css:hover {
+        background: #212529;
+    }
+
+    .bottom-bar-css-s-n-c:hover {
+        background: #007611d6;
+    }
+
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        height: 40px;
+    }
+
+    .select2-container--default .select2-selection--multiple {
+        height: 40px;
+    }
+
+    .select2-container {
+        font-size: 16px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #aaaaaa94;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 23px;
+        }
+    /* Customize the Select2 selection box */
+    .select2-selection {
+        background-color: #f2f2f2;
+        border-radius: 5px;
+        height: 30px;
+        padding-bottom: 37px;
+        border: 1px solid #ced4da
+    }
+
+    .select2-selection__rendered, .select2-selection__arrow {
+        margin-top: 8px;
+    }
+
+</style>
+
+<input type="hidden" id="Id" name="Id" value="" />
+<input type="hidden" id="TruckInfoId" name="Id" value="" />
+<div class="row mt-3"> @* Munna *@
+    <div class="col-md-3 col-3">
+        <label class="form-label fw-bold">BBLC NO/ Import Document</label>
+        <input type="text" placeholder="Search " name="Search" id="Search" class="form-control">
+        <input type="text" placeholder="Search Product" name="Search" id="bblcId" class="form-control" hidden>
+        <input type="text"  id="CIId" class="form-control" hidden>
+
+        <div class="d-none">
+            <select id="bblcNo" class="form-control">
+                <option value="">Select BBLC NO</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-md-3 col-3">
+        <label class="form-label fw-bold">REF No</label><span class="text-danger  fw-bold"></span>
+        <input id="RefNo" class="form-control " />
+    </div>
+    <div class="col-md-3 col-3">
+        <label class="form-label fw-bold">Percentage</label><span class="text-danger  fw-bold"></span>
+        <input id="Percentage" class="form-control " />
+    </div>
+    <div class="col-md-3 col-3">
+        <label class="form-label fw-bold">Print Date</label><span class="text-danger  fw-bold"></span>
+        <input id="PrintDate" class="form-control " />
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md-3 col-3">
+        <button id="SaveOrUpdate" class="btn btn-primary w-100 mt-4">Save/Update RefNo</button>
+    </div>
+    <div class="col-md-3 col-3">
+        <label class="form-label fw-bold">Truck Number</label><span class="text-danger  fw-bold"></span>
+        <input id="TruckNumber" class="form-control " />
+    </div>
+    <div class="col-md-3 col-3">
+        <label class="form-label fw-bold">Driver Name</label><span class="text-danger  fw-bold"></span>
+        <input id="DriverName" class="form-control " />
+    </div>
+    <div class="col-md-3 col-3">
+        <label class="form-label fw-bold">Driver Mobile</label><span class="text-danger  fw-bold"></span>
+        <input id="DriverMobile" class="form-control " />
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md-3 col-3">
+        <label><strong>Group LC</strong></label>
+        <select id="GroupLC" class="form-control" onchange="GroupLCSelect()">
+            <option value="">Please Select</option>
+        </select>
+    </div>
+    <div class="row-md-3 col-3">
+        <label><strong>Sales Contact/Export LC</strong></label>
+        <select data-mdb-select-init multiple id="SalesContact">
+            
+        </select>
+    </div>
+    <div class="row-md-3 col-3">
+        <label><strong>Item Group</strong></label>
+        <select class="form-control" id="ItemGroup" onchange="ItemGroupSelect()">
+            <option value="">Please Select</option>
+        </select>
+    </div>
+    <div class="row-md-3 col-3">
+        <label><strong>Proforma Invoice</strong></label>
+        <select data-mdb-select-init multiple id="ProformaInvoice">
+            
+        </select>
+    </div>
+</div>
+
+<div class="mt-5">
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="RptType" id="inlineRadio1" value="PDF" checked>
+        <label class="form-check-label" for="inlineRadio1">PDF</label>
+    </div>
+
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="RptType" id="inlineRadio2" value="EXCEL">
+        <label class="form-check-label" for="inlineRadio2">EXCEL</label>
+    </div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="RptType" id="inlineRadio3" value="WORD">
+        <label class="form-check-label" for="inlineRadio3">WORD</label>
+    </div>
+</div>
+
+<div class="row shadow p-3 mb-5 bg-white rounded mt-5" style="padding: 20px;">   
+    <div class="col-md-12 col-12">
+        <div class="row mt-5">
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintBBLCOpen')">BBLC OPEN</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintCOP', 'BBLC')">PROCEEDS COLLECTION</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintFBOE', 'BBLC')">BILL OF EXHANGE</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintBC', 'BBLC')">BENIFICIARY CERTIFICATE</a>
+            </div>          
+            
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintSalesContract', 'BBLC')">SALES CONTRACT (1)</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintSalesContractImport', 'CI')">SALES CONTRACT (2)</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintCI', 'BBLC')">COMMERCIAL INVOICE (1)</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintCommercialInvoice', 'CI')">COMMERCIAL INVOICE (2)</a>
+            </div>           
+            
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintPL', 'BBLC')">PACKING LIST (1)</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintPackingListImport', 'CI')">PACKING LIST (2)</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintDetailPackingList', 'CI')">DETAILS PACKING LIST</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintDC', 'BBLC')">DELIVERY CHALLAN</a>
+            </div>           
+           
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintTC', 'BBLC')">TRUCK CHALLAN</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintCOO', 'BBLC')">CERTIFICATE OF ORIGIN</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintPSIC', 'BBLC')">PRE SHIPMENT INS. CER.</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintRegularLCOpen', 'BBLC')">REGULAR LC OPEN</a>
+            </div>          
+            
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintFTT', 'BBLC')">FIT ISSUE</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintFDD', 'BBLC')">FDD ISSUE</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintBILLDISCOUNTING', 'BBLC')">BILL DISCOUNTING</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintAllReport', 'BBLC')">ALL REPORT MERGE</a>
+            </div>         
+                                                 
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintCityBankLetter', 'BBLC')">CITY BANK FORM</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintUCBLBankLetter', 'BBLC')">UCBL BANK FORM</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintShahjalalBankLetter', 'BBLC')">SHAHJALAL BANK FORM</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintABBankLetter', 'BBLC')">AB BANK FORM</a>
+            </div>
+                        
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintCNFNOC', 'CI')">C&F NOC</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintRiskBond', 'CI')">RISK BOND-1000</a>
+            </div>
+            <div class="col-lg">
+                <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintUND300', 'CI')">UND-300</a>
+            </div>
+        </div>
+
+    </div>
+    
+</div>
+
+
+
+
+@* @if (ViewBag.ActionType == "Edit")
+{
+    <div class="bottom-bar">
+        <div>
+            <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("Import", "Variable")';">Cancel</button>
+        </div>
+        <div>
+        </div>
+        <div class="dropdown">
+            <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Update</button>
+
+            <button id="BtnSaveAndClose" class="btn-success  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="" data-purchase-Id="@Model">
+                Update and close
+            </button>
+            <ul class="dropdown-menu" id="ul-id-for-expenses">
+                <li class="dropdown-item">
+                    <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+else if (ViewBag.ActionType == "Create")
+{
+    <div class="bottom-bar">
+        <div>
+            <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("Import", "Variable")';">Cancel</button>
+        </div>
+        <div class="d-flex">
+            <div>
+            </div>
+            <div id="makeRecurringDiv" style="padding-top: 5px; border-left: 3px solid white;">
+                <div style="margin-left: 5px;">
+                </div>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Save</button>
+
+            <button id="BtnSaveAndClose" class="btn-success  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="" data-purchase-Id="@Model">
+                Save and close
+            </button>
+            <ul class="dropdown-menu" id="ul-id-for-expenses">
+                <li class="dropdown-item">
+                    <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+} *@
+@section scripts {
+    <script type="text/javascript">
+        //===========================document acceptance functionalities starts=====================
+
+        // JavaScript to add serial numbers
+        document.addEventListener("DOMContentLoaded", function () {
+            let buttons = document.querySelectorAll('.col-lg a');
+            buttons.forEach((button, index) => {
+                button.innerHTML = (index + 1) + ". " + button.innerHTML;
+            });
+        });
+
+        $("#GroupLC").select2();
+        $("#ItemGroup").select2();
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetGroupLC", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#GroupLC').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetItemGroup", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#ItemGroup').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetSalesContract", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#SalesContact').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+
+        function GroupLCSelect()
+        {
+            var groupLC = $("#GroupLC").val();
+
+            if (groupLC !== "") {
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("upgradeSalesContract", "Variable")',
+                    data: { id: groupLC },
+                    datatype: "Json",
+                    success: function (response) {
+                        $('#SalesContact').empty();
+                        $.each(response.groupLC, function (index, value) {
+                            $('#SalesContact').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                        });
+                        $('#ProformaInvoice').empty();
+                        $.each(response.proformaInvoice, function (index, value) {
+                            $('#ProformaInvoice').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                        });
+                    }
+                });
+            }
+            else {
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetSalesContract", "Variable")',
+                    datatype: "Json",
+                    success: function (data) {
+
+                        $.each(data, function (index, value) {
+                            $('#SalesContact').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                        });
+                    }
+                });
+            }
+
+            
+        }
+
+        function ItemGroupSelect() {
+            var itemGroup = $("#ItemGroup").val();
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("upgradeProformaInvoice", "Variable")',
+                data: { id: itemGroup },
+                datatype: "Json",
+                success: function (response) {
+                    
+                    $('#ProformaInvoice').empty();
+                    $.each(response.proformaInvoice, function (index, value) {
+                        $('#ProformaInvoice').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                    });
+                }
+            });
+        }
+
+
+        $('#BtnSave').click(function () {
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            $("#ComId").val(ComId);
+            $("#LuserId").val(UserId);
+
+            var documentAcceptanceDeatils = MainTable.getData();
+
+            var BBLCID = '@ViewBag.DocumentAcceptanceid';
+
+
+            //====validation handle ends======
+            var Model =
+            {
+                ComId: ComId,
+                Id: BBLCID,
+                BillOfExchangeRef: $("#daNo").val(),
+                BillDate: $("#billDate").val(),
+                BillMaturityDate: $("#billMaturityDate").val(),
+                BillPaymentDate: $("#billPaymnentDate").val(),
+                BBLCId: $("#bblcId").val(),
+                COM_DocumentAcceptance_Details: documentAcceptanceDeatils,
+            };
+
+
+
+            console.log("after save console", Model)
+            var PurchaseIdAbc = 0;
+
+            $.ajax({
+                async: false,
+                type: "POST",
+                url: "@Url.Action("SaveDocumentAcceptance", "Variable")",
+                data: JSON.stringify(Model),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //console.log("after save console::", response);
+                    PurchaseIdAbc = response.Id;
+                    setTimeout(function () {
+                        toastr.success(response.message, "", {
+                            "toastClass": "toast-green"
+                        });
+                    }, 1500);
+                    //alert(" Data Saved");
+
+                },
+                error: function (response) {
+                }
+            });
+
+            if (PurchaseIdAbc > 0) {
+                setTimeout(function () {
+                    window.location.href = '@Url.Action("CreateDocumentAcceptance", "Variable")?&DocumentAcceptanceid=' + PurchaseIdAbc;
+                }, 3000)
+            }
+
+
+        });
+
+        $('#BtnSaveAndClose').click(function () {
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            $("#ComId").val(ComId);
+            $("#LuserId").val(UserId);
+
+
+            var documentAcceptanceDeatils = MainTable.getData();
+
+            var BBLCID = '@ViewBag.DocumentAcceptanceid';
+
+
+            //====validation handle ends======
+
+            var Model =
+            {
+                ComId: ComId,
+                Id: BBLCID,
+                BillOfExchangeRef: $("#daNo").val(),
+                BillDate: $("#billDate").val(),
+                BillMaturityDate: $("#billMaturityDate").val(),
+                BillPaymentDate: $("#billPaymnentDate").val(),
+                BBLCId: $("#bblcId").val(),
+                COM_DocumentAcceptance_Details: documentAcceptanceDeatils,
+            };
+
+
+
+            console.log("after save console", Model)
+            var PurchaseIdAbc = 0;
+
+            $.ajax({
+                async: false,
+                type: "POST",
+                url: "@Url.Action("SaveDocumentAcceptance", "Variable")",
+                data: JSON.stringify(Model),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //console.log("after save console::", response);
+                    PurchaseIdAbc = response.Id;
+                    setTimeout(function () {
+                        toastr.success(response.message, "", {
+                            "toastClass": "toast-green"
+                        });
+                    }, 1500);
+                    //alert(" Data Saved");
+
+                },
+                error: function (response) {
+                }
+            });
+
+            if (PurchaseIdAbc > 0) {
+                setTimeout(function () {
+                    window.location.href = '@Url.Action("Import", "Variable")';
+                }, 3000)
+            }
+
+
+        });
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("getBBLCDrodpwn", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    //console.log("value dekhi buyer er",value);
+                    $('#bblcNo').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+
+        autocompletefunction();
+        function autocompletefunction() {
+            $("#Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '@Url.Action("BBLCSearch", "Variable")',
+                        dataType: "json",
+                        data: { query: $("#Search").val() },
+                        success: function (data) {
+                            console.log(data);
+                            response($.map(data, function (item) {
+                                return { label: item.BBLCNo, value: item.Id };
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                autoFocus: true,
+                minLength: 1,
+                select: function (event, ui) {
+                    console.log("ui", ui.item);
+                    var SupplierID = ui.item.value;
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("getOtherDataForBBLCReport", "Variable")?BBLCId=' + SupplierID,
+                        datatype: "Json",
+                        success: function (data) {
+                            console.log("data for master after group lc chose", data);
+                            if (!data) {
+                                $("#RefNo").val();
+                                $("#Percentage").val();
+                                $("#PrintDate").val();
+                                $("#RefNo").val();
+                            }
+                        }
+                    });
+
+                    // $('#Search').val(ui.item.label);
+                    // $('#bblcId').val(ui.item.value);
+                    $('#Search').val(ui.item.label);
+                    if (ui.item.label.includes('_CI')) 
+                    {
+                        $('#bblcId').val(0);
+                        $('#CIId').val(ui.item.value);
+                    } else 
+                    {
+                        $('#bblcId').val(ui.item.value);
+                        $('#CIId').val(0);
+                    }
+                    return false;
+                }
+
+            });
+        }
+
+
+
+        $("#TruckNumber").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("TruckInfoSearch", "Variable")',
+                    dataType: "json",
+                    data: { query: $("#Search").val() },
+                    success: function (data) {
+                        console.log(data);
+                        response($.map(data, function (item) {
+                            return { label: item.TruckNo, value: item.Id };
+                        }));
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error");
+                    },
+                });
+            },
+            autoFocus: true,
+            minLength: 1,
+            select: function (event, ui) {
+                // console.log("ui", ui.item);
+                $('#TruckNumber').val(ui.item.label);
+                $('#TruckInfoId').val(ui.item.value);
+                return false;
+            }
+
+        });
+        $("#DriverName").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("TruckInfoSearch", "Variable")',
+                    dataType: "json",
+                    data: { query: $("#Search").val() },
+                    success: function (data) {
+                        console.log(data);
+                        response($.map(data, function (item) {
+                            return { label: item.DriverName, value: item.Id };
+                        }));
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error");
+                    },
+                });
+            },
+            autoFocus: true,
+            minLength: 1,
+            select: function (event, ui) {
+                // console.log("ui", ui.item);
+                $('#DriverName').val(ui.item.label);
+                $('#TruckInfoId').val(ui.item.value);
+                return false;
+            }
+
+        });
+        $("#DriverMobile").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("TruckInfoSearch", "Variable")',
+                    dataType: "json",
+                    data: { query: $("#Search").val() },
+                    success: function (data) {
+                        console.log(data);
+                        response($.map(data, function (item) {
+                            return { label: item.MobileNo, value: item.Id };
+                        }));
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error");
+                    },
+                });
+            },
+            autoFocus: true,
+            minLength: 1,
+            select: function (event, ui) {
+                // console.log("ui", ui.item);
+                $('#DriverMobile').val(ui.item.label);
+                $('#TruckInfoId').val(ui.item.value);
+                return false;
+            }
+
+        });
+
+
+
+        $("#SaveOrUpdate").on("click", function () {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("UpsertBBLCRefNo", "Variable")",
+                data: { "BBLCId": $("#bblcId").val(), "RefNo": $("#RefNo").val(), "Percentage": $("#Percentage").val(), "PrintDate": $("#PrintDate").val() },
+                dataType: "json",
+                success: function (response) {
+                    //console.log("after save console::", response);
+                    PurchaseIdAbc = response.Id;
+                    setTimeout(function () {
+                        toastr.success(response.message, "", {
+                            "toastClass": "toast-green"
+                        });
+                    }, 1500);
+                },
+
+                error: function (error) {
+                    console.error("Error fetching data: " + error);
+                }
+            });
+
+        });
+        
+        //=============edit mode starts==============
+        var globalStyleNo;
+        if ('@ViewBag.ActionType' == "Edit") {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("getDocumentAcceptanceData", "Variable")",
+                data: { "id": '@ViewBag.DocumentAcceptanceid' },
+                dataType: "json",
+                success: function (response) {
+                    console.log("edit mode er data dekhi:", response);
+                    var detailsTableData = response.DocumentCceptanceDetails;
+                    console.log("detailsTableData", detailsTableData);
+                    var MainTableData = detailsTableData;
+
+                    MainTable.setData(detailsTableData);
+
+                    $("#billDate").val(response.BillDate);
+                    $("#billMaturityDate").val(response.BillMaturityDate);
+                    $("#daNo").val(response.BillOfExchangeRef);
+                    $("#billPaymnentDate").val(response.BillPaymentDate);
+                    $('#bblcId').val(response.BBLCId);
+                    $('#Search').val(response.BBLCNo);
+
+                    setTimeout(function () {
+                        $('#bblcNo').val(response.BBLCId).change();
+                    }, 2000);
+
+                },
+                error: function (error) {
+                    console.error("Error fetching data: " + error);
+                }
+            });
+        }
+        //=============edit mode ends===========
+
+        //===supplier chose table data generate starts=====
+
+        // $("#bblcNo").on("change", function () {
+        //     var SupplierID = $(this).val();
+        //     // console.log("SupplierID", SupplierID);
+        //     $.ajax({
+        //         type: "POST",
+        //         url: '@Url.Action("getCommercialInvoiceProcData", "Variable")?BBLCID=' + SupplierID,
+        //         datatype: "Json",
+        //         success: function (data) {
+        //             // console.log("data for master after group lc chose", data.data.Table[0]);
+        //             var masterdata = data.data.Table[0];
+        //             $("#concern").val(masterdata.CompanyName);
+        //             $("#supplier").val(masterdata.SupplierName);
+        //             $("#groupLC").val(masterdata.GroupLCRefName);
+        //             $("#masterLC").val(masterdata.LCRefNo);
+        //             $("#conversionRate").val(masterdata.ConversionRate);
+        //             $("#currency").val(masterdata.CurrencyShortName);
+        //             $("#buyer").val(masterdata.CompanyName);
+        //             $("#bblcAmount").val(masterdata.BBLCValue);
+        //             $("#previousAccepted").val(masterdata.CompanyName);
+        //             $("#payableAmounty").val(masterdata.CompanyName);
+        //         }
+        //     });
+        // });
+
+
+        //===supplier chose table data generate ends=======
+
+        // $('select').select2();
+        $(function () {
+            $("#PrintDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#PrintDate").attr("autocomplete", "off");
+        });
+
+
+
+
+        $('select').select2();
+
+        function ReportPrint(btnvalue, type) {
+
+            var bblcid = 0;
+            bblcid = $('#bblcId').val();
+
+            var ciid = 0;
+            ciid = $('#CIId').val();
+
+            refno = $('#RefNo').val();
+            var Percentage = $('#Percentage').val();
+
+            printdate = $('#PrintDate').val();
+            var PIId = '';
+            var GroupLCId = '';
+            var ItemGroupId = '';
+
+            var MasterLCId = '';
+
+            GroupLCId = $('#GroupLC').val();
+            ItemGroupId = $('#ItemGroup').val();
+
+            PIId = $('#ProformaInvoice').val();
+            MasterLCId = $('#SalesContact').val();
+
+
+
+            truckno = $('#TruckNumber').val();
+            drivername = $('#DriverName').val();
+            drivermobileno = $('#DriverMobile').val();
+
+
+            if (btnvalue == "PrintBBLCOpen") {
+
+
+                if (GroupLCId == '-1') {
+                    //toastr.error('Please Select Group LC From List');
+                    toastr.error('Please Select Group LC From List', "", {
+                        "toastClass": "toast-red",
+                    });
+                    return;
+
+                }
+                if (PIId == '') {
+                    //toastr.error('Please Select Proforma Invoice From List');
+                    toastr.error('Please Select Proforma Invoice From List', "", {
+                        "toastClass": "toast-red",
+                    });
+                    return;
+                }
+
+
+            }
+            else if (btnvalue == "PrintCityBankLetter" || btnvalue == "PrintUCBLBankLetter" || btnvalue == "PrintShahjalalBankLetter" || btnvalue == "PrintABBankLetter") {
+
+                if (GroupLCId == '-1' && ItemGroupId == '') {
+                    toastr.error('Please Select Group LC From List for BBLC');
+                    toastr.error('or Item Group From List for Regular LC');
+                    return;
+
+                }
+
+
+                if (PIId == '') {
+                    //toastr.error('Please Select Proforma Invoice From List');
+                    toastr.error('Please Select Proforma Invoice From List', "", {
+                        "toastClass": "toast-red",
+                    });
+                    return;
+                }
+
+            }
+            else if (btnvalue == "PrintRegularLCOpen") {
+
+                console.log('Regular LC');
+                console.log(ItemGroupId);
+                if (ItemGroupId == '') {
+                    //toastr.error('Please Select LC Type / Item Type From List');
+                    toastr.error('Please Select LC Type / Item Type From List', "", {
+                        "toastClass": "toast-red",
+                    });
+                    return;
+
+                }
+                if (PIId == '') {
+                    //toastr.error('Please Select Proforma Invoice From List');
+                    toastr.error('Please Select Proforma Invoice From List', "", {
+                        "toastClass": "toast-red",
+                    });
+                    return;
+                }
+
+
+            }
+            else if (btnvalue == "PrintFTT" || btnvalue == "PrintFDD") { //btnvalue == "PrintBILLDISCOUNTING"
+
+                if (PIId == '') {
+                    //toastr.error('Please Select Proforma Invoice From List');
+                    toastr.error('Please Select Proforma Invoice From List', "", {
+                        "toastClass": "toast-red",
+                    });
+                    return;
+                }
+            }
+            else {
+                if (bblcid == '') {
+                    //toastr.error('Please Select BBLC From List');
+                    toastr.error('Please Select BBLC From List', "", {
+                        "toastClass": "toast-red",
+                    });
+                    return;
+                }
+
+            }
+
+          
+            if (refno == '') {               
+                toastr.error('Please Type Ref. No', "", {
+                    "toastClass": "toast-red",
+                });
+                return;
+            } if (printdate == '') {                
+                toastr.error('Please Select Document Print Date', "", {
+                    "toastClass": "toast-red",
+                });
+                return;
+            }
+
+            var reporttype = $("input[name=RptType]:checked").val();
+            
+            if (reporttype == "option3") { 
+                reporttype = "PDF";
+            }
+
+            // alert(reporttype);
+
+            if (bblcid == 0 && type == 'BBLC') {
+                toastr.error('Please Select BBLC No.', "", {
+                    "toastClass": "toast-red",
+                });
+                return;
+            }
+            if (ciid == 0 && type == 'CI') {
+                toastr.error('Please Select CI No.', "", {
+                    "toastClass": "toast-red",
+                });
+                return;
+            }
+          
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SetSession", "Variable")',
+                dataType: 'json',
+                async: true,
+                data: { reporttype: reporttype, action: btnvalue, reportid: bblcid, ciid: ciid, refno: refno, printdate: printdate, truckno: truckno, drivername: drivername, drivermobileno: drivermobileno, grouplcid: GroupLCId, multipleproformainvoice: PIId.toString(), Percentage: Percentage, multiplemasterlc: MasterLCId.toString() },
+                success: function (response) {
+                    //  window.location.href = response.Url;
+
+                    window.open(response.Url, '_blank')
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+            
+           
+                                 
+        }
+    </script>
+}

@@ -1,0 +1,472 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "Ecommerce";
+    Layout = "~/Views/Shared/_EcommerceLayout.cshtml";
+}
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+@*<link href="~/AdminEla/Assets/css/lib/data-table/buttons.bootstrap.min.css" rel="stylesheet" />
+    <link href="~/AdminEla/Assets/css/lib/data-table/buttons.dataTables.min.css" rel="stylesheet" />*@
+
+<style>
+
+    /* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+        for details on configuring this project to bundle and minify static web assets. */
+
+
+
+    a.navbar-brand {
+        white-space: normal;
+        text-align: center;
+        word-break: break-all;
+    }
+
+    /* Provide sufficient contrast against white background */
+    a {
+        color: #0366d6;
+    }
+
+    .btn-primary {
+        color: #fff;
+        background-color: #1b6ec2;
+        border-color: #1861ac;
+    }
+
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+        color: #fff;
+        background-color: #1b6ec2;
+        border-color: #1861ac;
+    }
+
+    /* Sticky footer styles
+        -------------------------------------------------- */
+    html {
+        font-size: 14px;
+    }
+
+    @@media (min-width: 768px) {
+        html {
+            font-size: 16px;
+        }
+    }
+
+    .border-top {
+        border-top: 1px solid #e5e5e5;
+    }
+
+    .border-bottom {
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    .box-shadow {
+        box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+    }
+
+    button.accept-policy {
+        font-size: 1rem;
+        line-height: inherit;
+    }
+
+    /* Sticky footer styles
+        -------------------------------------------------- */
+    html {
+        position: relative;
+        min-height: 100%;
+    }
+
+    body {
+        /* Margin bottom by footer height */
+        margin-bottom: 30px;
+        margin-top: 30px;
+    }
+
+    .footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        white-space: nowrap;
+        line-height: 60px; /* Vertically center the text there */
+    }
+
+    .cards tbody tr {
+        width: 164px;
+        border: 1px solid #D3D3D3;
+        text-align: center;
+        transition: transform .2s;
+        justify-content: center;
+        align-items: center;
+        display: inline-block;
+        margin: 3px 3px;
+    }
+
+    /*    .cards tbody tr {
+            width: 170px;
+            border: 1px solid #D3D3D3;
+            text-align: center;
+            transition: transform .2s;
+            justify-content: center;
+            align-items: center;
+            display: inline-block;
+            margin: 5px 10px;
+        }*/
+
+    .cards tbody td {
+        display: block;
+    }
+
+    .fa-star {
+        color: #F8C53C;
+    }
+
+
+
+
+    .cards thead {
+        display: none;
+    }
+
+
+
+    .cards td:before {
+        content: attr(data-label);
+        position: relative;
+        float: left;
+        color: #808080;
+        min-width: 4rem;
+        margin-left: 0;
+        margin-right: 1rem;
+        text-align: left;
+    }
+
+    tr.selected td:before {
+        color: #CCC;
+    }
+    /*
+        .tbl .avatar {
+            width: 50px;
+        }*/
+
+    .cards .avatar {
+        /*        width: 165px;
+            height: 170px;*/
+        height: 170px;
+        width: 100%;
+    }
+
+    .product-description {
+        font-size: 14px;
+        min-height: 20px;
+        overflow: hidden;
+        font-family: 'Arial Narrow';
+    }
+
+        .product-description:hover {
+            color: #602069;
+        }
+
+    .cards tbody tr:hover {
+        border-radius: 0px;
+        box-shadow: 3px 3px 4px #ededed, -3px -3px 4px #ededed;
+        transition: ease-in-out .2s;
+        transform: translateY(2px);
+    }
+
+    .cards .avatar:hover {
+        transform: translateY(2px);
+        transition: ease-in-out .2s;
+    }
+
+    .product-price {
+        color: #F47E6D;
+        font-weight: bold;
+        margin-bottom: 8px;
+        font-size: 16px;
+    }
+
+    .old-price {
+        margin-left: 2px;
+    }
+
+    .money {
+        font-size: 16px;
+        font-weight: bold;
+        /*font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;*/
+    }
+</style>
+
+
+<div class="container">
+    <div class="form-group row">
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-5 mt-3">
+            <div class="input-group  my-2" id="divCategory">
+                <div class="input-group-prepend">
+                    <span class="input-group-text py-0">
+                        Category
+                    </span>
+                </div>
+                @Html.DropDownList("Category", ViewBag.Category as List<SelectListItem>, new { id = "Category", @class = "form-control" })
+            </div>
+        </div>
+
+    </div>
+
+    @*<div>
+        <div data-role="rangeslider">
+        <label for="range-10a">Rangeslider:</label>
+        <input type="range" name="range-10a" id="range-10a" min="0" max="10" step=".1" value="2.6">
+        <label for="range-10b">Rangeslider:</label>
+        <input type="range" name="range-10b" id="range-10b" min="0" max="10" step=".1" value="5.4">
+        </div>
+        </div>*@
+
+    <div class="form-group row">
+        <div class="col-md-12">
+            <table class="tbl cards table-sm no-footer text-center dataTable" cellspacing="0" width="100%" id="tblProductSearc">
+            </table>
+        </div>
+    </div>
+
+</div>
+@section Scripts{
+    @*<script src="~/AdminEla/Assets/js/lib/datatables/datatables.min.js"></script>*@
+
+
+
+<script type="text/javascript">
+
+
+         var iscompanysession = '@HttpContextAccessor.HttpContext.Session.GetString("iscompany").ToString()';
+
+
+         var isTrueSet = (iscompanysession === 'true');
+
+    var tblProductSearc;
+
+        $(document).ready(function () {
+
+
+
+                function myFunction() {
+
+                    ///var oTable = $('#tblProductSearc').DataTable();   //pay attention to capital D, which is mandatory to retrieve "api" datatables' object, as //Lionel said
+                    $('#myInput').keyup(function () {
+                        tblProductSearc.search($(this).val()).draw();
+                    })
+
+
+                }
+
+
+                CategorySearch(0);
+                //$('.dataTables_wrapper').addClass('col-md-12'); // <-- add this line
+
+                $("#Category").change(function () {
+                    tblProductSearc.destroy();
+
+                    CategorySearch($('#Category').val());
+                });
+
+
+
+
+                function CategorySearch(CategoryId) {
+
+                    //alert(CategoryId);
+                    ///var oTable = $('#tblProductSearc').DataTable();   //pay attention to capital D, which is mandatory to retrieve "api" datatables' object, as //Lionel said
+
+                    //var CategoryId = $("#categorygrid tbody tr.selected td:nth-child(2)").text();
+
+                    tblProductSearc = $('#tblProductSearc').DataTable({
+                        serverSide: true,  "scrollX": true,
+                        //processing: true,
+
+                        //"bInfo" : false,
+                        //searchDelay: 1,
+                        ajax: {
+                            url: '@Url.Action("GetProductListClick", "Home")',
+                            "data": { CategoryId: CategoryId , iscompany : isTrueSet },
+
+                            type: "POST"
+                        },
+                        columns: [
+                            //{ "title": "ProductId", "data": "ProductId", "visible": false, "searchable": false },
+                            {
+                                "title": "Image", "data": "ImagePath", "searchable": false,
+                                "render": function (data) {
+                                    return '<img src="..' + data + '" class="avatar" onerror=this.onerror=null;this.src="../Content/ProductImages/0.png">';
+                                }
+                            },
+                            {
+
+                                "data": "Rating",
+                                "render": function (data, type, row) {
+
+                                    return '<span class="fa fa-star checked"></span>' +
+                                        '<span class="fa fa-star checked"></span>' +
+                                        '<span class="fa fa-star checked"></span>';
+
+                                }
+
+                            },
+                            {
+                                "title": "Product",
+                                "data": "ProductName",
+                                "searchable": true,
+                                "render": function (data) {
+                                    var res = data.toString().replace(".", " ").substring(0, 25).toString();
+                                    var finaltext = res;//pad(res, 17);
+                                    return '<div class="product-description"> ' + finaltext + '</div>';
+                                }
+                            },
+                            {
+                                "title": "Brand",
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "searchable": true,
+                                "render": function (data) {
+                                    var res = data.BrandName.toString().replace(".", " ").substring(0, 17).toString() + data.SizeName;
+                                    var finaltext = res;//pad(res, 17);
+                                    return '<div class="product-description"> ' + finaltext + '</div>';
+                                }
+                            },
+                            {
+                                "title": "Color", "data": "ColorName", "searchable": true, "render": function (data) {
+                                    var res = data.toString().replace(".", " ").substring(0, 17).toString();
+                                    var finaltext = res;//pad(res, 17);
+                                    return '<div class="product-description"> ' + finaltext + '</div>';
+                                }
+                            },
+                            //{
+                            //    "title": "Size", "data": "SizeName", "searchable": true, "render": function (data) {
+                            //        var res = data.toString().replace(".", " ").substring(0, 17).toString();
+                            //        var finaltext = res;//pad(res, 17);
+                            //        return '<div class="product-description"> ' + finaltext + '</div>';
+                            //    }
+                            //},
+
+
+                            {
+
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "render": function (data, type, row) {
+                                    var showdata = '';
+
+                                    if (data.OldPrice > 0) {
+                                        showdata=   '  <div class="product-price">  <span class="money">৳</span>' + data.SalesPrice + ' <span class="old-price"><del class="money">৳ ' + data.OldPrice + '</del></span> </div> ';
+                                    }
+                                    else {
+                                        showdata =  '  <div class="product-price">  <span class="money">৳</span>' + data.SalesPrice + ' <span class="old-price"></span> </div> ';
+
+                                    }
+                                    return  showdata ;
+                                }
+                            },
+
+                            {
+                                "title": "Action",
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "render": function (data, type, row) {
+                                    var myurldetails = '@Url.Action("ProductDetails", "home")?ProductId=' + data.ProductId;
+                                    var content = '<span data-toggle="tooltip" title="Details"> <a href=\"' + myurldetails + '\" class=\"btn btn-sm btn-dark rounded-0\" target=\"_self\">Details</a></span>';
+                                    content += '<a href="#" data-id="' + data.ProductId + '" data-name="' + data.ProductName + '"    data-price=' + data.SalesPrice + ' data-size = "' + data.SizeName + '"  data-color="' + data.ColorName + '" data-brand="' + data.BrandName + '"  class="btn btn-sm btn-success rounded-0 add-to-cart">Add to cart </a>';
+                                    return content;
+                                }
+
+                            }
+
+
+
+                        ],
+                        "paging": true,
+                        "ordering": false,
+                        //"searching": true,
+                        //'select': true,
+                        //language: {
+                        //    sLengthMenu: " _MENU_",
+                        //    search: '',
+                        //    searchPlaceholder: "Search..."
+                        //},
+                        "bSortable": false ,
+                        //"info": true,
+                        "iDisplayLength": 6,
+                        "lengthMenu": [[4, 6 , 5, 8, 10, 12, 25, 50, -1], [4,6, 5, 8, 10, 12, 25, 50, "All"]],
+                        "bLengthChange": false, //thought this line could hide the LengthMenu
+                        //"dom": '<"top"i>flp<"bottom"rt><"clear">'
+                        "bInfo": false,
+                        "dom": '<"top"<"row"<"col"><"col"f><"col">>>rt<"bottom"<"row"<"col"><"col"p><"col">>><"clear">'
+                       // "dom": '<"top"fl>rt<"bottom"pi><"row view-pager"<"col-sm-12"<"text-center"pi><"clear">'
+                        //"dom":'<"row"<"col-sm-4"><"col-sm-4 text-center"f><"col-sm-4">>'
+
+                    });
+                }
+
+
+
+            //$('.add-to-cart-table').click(function (event) {
+            //    event.preventDefault();
+            //    var id = $(this).data('ProductId');
+            //    var name = $(this).data('ProductName');
+            //    var price = Number($(this).data('SalesPrice'));
+            //    shoppingCart.addItemToCart(id, name, price, 1);
+            //    displayCart();
+            //});
+
+
+            $('#tblProductSearc tbody').on('click', '.add-to-cart', function () {
+                var table = $('#tblProductSearc').DataTable();
+
+                var data = table.row($(this).parents('tr')).data();
+                //console.log(data);
+                //console.log(data.ProductId);
+                //console.log(data.ProductName);
+                //console.log(data.SalesPrice);
+
+                shoppingCart.addItemToCart(data.ProductId, data.ProductName, data.SalesPrice, 1, data.ColorName, data.BrandName, data.SizeName);
+                displayCart();
+
+
+                $('html, body').animate({
+                    'scrollTop': $(".cart_anchor").position().top
+                });
+                //Select item image and pass to the function
+                //console.log($(this).parent('td').parent('tr').find('img'));
+
+                var itemImg = $(this).parent('td').parent('tr').find('img').eq(0);
+                flyToElement($(itemImg), $('.cart_anchor'));
+
+                //alert(data[0] + "'s salary is: " + data[3]);
+
+                //table.row($(this).parents('tr')).remove().draw();
+                //var x = "1300.00";
+                //var y = $('#tblpayments').height();
+                //var z = parseFloat(x) + parseFloat(y);
+
+                //$("html, body").animate({ scrollTop: z }, 1300);
+
+
+                //calculateSum();
+
+            });
+
+
+            //$('#tblProductSearc tbody').on('click', '.btn', function () {
+            //    var table = $('#tblpayments').DataTable();
+            //        var data = tblProductSearc.row($(this).parents('tr')).data();
+            //        alert(data[0] + "'s salary is: " + data[3]);
+            //    });
+
+            });
+
+
+</script>
+}

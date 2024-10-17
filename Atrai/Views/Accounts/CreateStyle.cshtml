@@ -1,0 +1,1799 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Order management";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<style>
+    /*li {
+        cursor: pointer;
+        padding: 10px;
+        margin: 5px;
+        border: 1px solid #ccc;
+    }*/
+
+    /* Set the anchor tag to have full width */
+    li a {
+        display: block;
+        width: 100%;
+    }
+
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+                     border-bottom-width: 0px;
+
+                }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    /*   .tabulator-table .tabulator-row {
+        background-color: white;
+    } */
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customize-btn-another {
+        background: #2CA01C;
+        border: 1px solid black;
+        border-radius: 20px;
+        color: #FFFFFF;
+        border: 1px solid #2CA01C;
+    }
+
+        .customize-btn-another:hover {
+            background: #2CA01C;
+            border: 1px solid black;
+            border-radius: 20px;
+            color: #FFFFFF;
+            border: 1px solid #2CA01C;
+        }
+
+    .customize-btn:hover {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .gear-dropdown.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+        margin-top: 7px;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-bottom: 1px solid #aaaaaa38;
+        border-right: 1px solid #aaaaaa38;
+        /*border-left: 1px solid #aaaaaa38;*/
+        /* padding-left: 2px;*/
+    }
+    /*    .tabulator-row .tabulator-cell, .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+                border-right: none;
+                border-left: none;
+            }*/
+/*    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }*/
+
+    .tabulator-row .tabulator-cell {
+        border-right: none;
+        border-left: none;
+        padding-left: 10px;
+        border: 1px solid #aaaaaa29;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        /*margin-top: 27px;*/
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+        /* Add any other styles you need for the active cell */
+    }
+
+    .tabulator-row {
+        /*   border: 1px solid #aaaaaa38;*/
+        border-left: none;
+        border-right: none;
+    }
+
+    input[type="checkbox"] {
+        width: 20px; /* Set the width */
+        height: 20px; /* Set the height */
+    }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom: 4px solid green;
+    }
+
+        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active:hover {
+            background-color: #F8F8F8;
+            border-top-color: transparent !important;
+            border-left-color: transparent !important;
+            border-right-color: transparent !important;
+        }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link:hover {
+        background-color: #F8F8F8;
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+    }
+
+    .customize-btnew {
+        background: transparent;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btnew:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .tabulator-row .tabulator-cell.tabulator-editing {
+        border: 1px solid #404c5d;
+        outline: none;
+        padding: 0;
+    }
+
+    .tabulator-cell.tabulator-editable[tabulator-field="AccName"] {
+        border: 1px solid #0003;
+        margin-bottom: 10px;
+    }
+
+    .filter-dropdown > .filter-dropdown-class.show {
+        width: 580px;
+    }
+
+    p {
+        margin: 1em 0;
+    }
+
+    .button {
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        position: relative;
+        background: #aa0000;
+        padding: 10px 15px;
+        color: white;
+        box-shadow: 0 2px black;
+        text-decoration: none;
+        border-radius: 5px;
+        /*text-shadow: 0 1px 1px black;*/
+    }
+
+        .button:hover {
+            top: -2px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+        .button:active {
+            top: 1px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+    .unbilledbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .overduebtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .openbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .paidbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .scrollable-offcanvas {
+        /* max-height: 80vh;*/ /* Adjust the maximum height as needed */
+        overflow-y: auto;
+    }
+
+    .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:hover {
+        background-color: deepskyblue;
+    }
+
+    .tabulator .tabulator-footer {
+        background-color: #fff;
+        color: black;
+    }
+
+        .tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row {
+            background: white !important;
+        }
+
+
+    .offcanvas {
+        /* Add position relative to its parent */
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* Ensure offcanvas takes full viewport height */
+    }
+
+    .offcanvas-footer {
+        margin-top: auto; /* Push footer to the bottom */
+        width: 100%; /* Occupy full width */
+    }
+
+    .modal-footer {
+        width: 100%; /* Ensure buttons occupy full width */
+        padding: 10px; /* Add padding for better appearance */
+    }
+
+    .w-15 {
+        width: fit-content !important;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+    }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #999;
+        }
+
+        .separator:not(:empty)::before {
+            margin-right: .25em;
+        }
+
+        .separator:not(:empty)::after {
+            margin-left: .25em;
+        }
+
+    .tabulator-row.tabulator-selected {
+        background-color: #9abcea !important;
+    }
+
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 24px;
+        }
+
+            .rating label:before {
+                content: '\2605'; /* Unicode star character */
+            }
+
+        .rating input:checked ~ label:before {
+            color: gold; /* Change color of selected stars */
+        }
+
+    .child-table-hidden {
+        display: none;
+    }
+
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-calcs {
+        background: #fff !important;
+    }
+
+    .tabulator .tabulator-footer {
+        border-top: 1px solid #fff;
+    }
+
+    #file-drop-area {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    #image-uploadify {
+        display: none;
+    }
+
+    .footerButton {
+        margin-top: 40px;
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 99%;
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+
+    .bottom-bar-css:hover {
+        background: #212529;
+    }
+
+    .bottom-bar-css-s-n-c:hover {
+        background: #007611d6;
+    }
+
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        height: 40px;
+    }
+
+    .select2-container--default .select2-selection--multiple {
+        height: 40px;
+    }
+    .select2-container {
+        font-size: 16px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #aaaaaa94;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 23px;
+        }
+    /* Customize the Select2 selection box */
+    .select2-selection {
+        background-color: #f2f2f2;
+        border-radius: 5px;
+        height: 30px;
+        padding-bottom: 37px;
+        border: 1px solid #ced4da
+    }
+
+    .select2-selection__rendered, .select2-selection__arrow {
+        margin-top: 8px;
+    }
+
+</style>
+
+<input type="hidden" id="Id" name="Id" value="" />
+
+    <div class="row">
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Style No</label><span class="text-danger  fw-bold"> *</span>
+            <input id="styleNo" class="form-control" />
+            <span class="text-danger" id="styleNoValidation"></span>
+        </div>
+    <div class="col-md-2">
+        <label class="form-label fw-bold">Style Name</label><span class="text-danger  fw-bold"> *</span>
+        <input id="styleName" class="form-control" />
+        <span class="text-danger" id="styleNoValidation"></span>
+    </div>
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Description of Goods</label><span class="text-danger  fw-bold"> *</span>
+            <input id="GoodsDescription" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Buyer</label>
+            <select id="Buyer-Id" class="form-control">
+                <option value="">Select Buyer</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label fw-bold">Style Date</label>
+            <input id="Style_date" class="form-control" type="text">
+        </div>
+    <div class="col-md-1">
+        <label class="form-label fw-bold">Unit Price</label><span class="text-danger  fw-bold"> </span>
+        <input id="UnitPrice" class="form-control" />
+    </div>
+    <div class="col-md-1">
+        <label class="form-label fw-bold">HS Code</label><span class="text-danger  fw-bold"> </span>
+        <input id="HSCode" class="form-control" />
+    </div>
+    </div>
+
+<div class="row" style="padding-bottom: 100px;">
+    <div class="col-lg-6">
+        <div class="mt-5" id="tabulatorColorGrid"></div>
+        <button id="add-row-color-table" class="btn mt-5" style="border: 1px solid;margin-right: 30px;">Add Row</button>
+        <button id="clear-color-table" class="btn mt-5" style="border: 1px solid;margin-right: 30px;">Clear All Rows</button>
+    </div>
+    <div class="col-lg-6">
+        <div class="mt-5" id="tabulatorSizeGrid"></div>
+        <button id="add-row-size-table" class="btn mt-5" style="border: 1px solid;margin-right: 30px;">Add Row</button>
+        <button id="clear-size-table" class="btn mt-5" style="border: 1px solid;margin-right: 30px;">Clear All Rows</button>
+    </div>
+</div>
+@if (ViewBag.ActionType == "Edit")
+{
+    <div class="bottom-bar">
+        <div>
+            <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("ordermanagement", "Accounts", new { Type = "Styles" })';">Cancel</button>
+        </div>
+        <div>
+        </div>
+        <div class="dropdown">
+            <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Update</button>
+
+            <button id="BtnSaveAndClose" class="btn-success  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="" data-purchase-Id="@Model">
+                Update and close
+            </button>
+            <ul class="dropdown-menu" id="ul-id-for-expenses">
+                <li class="dropdown-item">
+                    <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+else if (ViewBag.ActionType == "Create")
+{
+    <div class="bottom-bar">
+        <div>
+            <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("ordermanagement", "Accounts", new { Type = "Styles" })';">Cancel</button>
+        </div>
+        <div class="d-flex">
+            <div>
+            </div>
+            <div id="makeRecurringDiv" style="padding-top: 5px; border-left: 3px solid white;">
+                <div style="margin-left: 5px;">
+                </div>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Save</button>
+
+            <button id="BtnSaveAndClose" class="btn-success  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="" data-purchase-Id="@Model">
+                Save and close
+            </button>
+            <ul class="dropdown-menu" id="ul-id-for-expenses">
+                <li class="dropdown-item">
+                    <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+@section scripts{
+    <script type="text/javascript">
+                //===========================style functionalities starts=====================
+        var ColorTable;
+        var SizeTable;
+        var sampletablColorData = [
+            { StyleId: '@ViewBag.StyleId' } //SLNo: 1,
+        ];
+        var sampletablSizeData = [
+            { StyleId: '@ViewBag.StyleId' }
+        ];
+
+        var today = new Date();
+        var day = today.getDate();
+        var month = today.toLocaleString('default', { month: 'short' });
+        var year = today.getFullYear();
+
+        var formattedDay = (day < 10 ? '0' : '') + day;
+
+        var formattedDate = formattedDay + '-' + month + '-' + year;
+
+        if ('@ViewBag.ActionType' == "Create") {
+            document.getElementById('Style_date').value = formattedDate;
+        }
+
+        $(function () {
+
+                    $("#Style_date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+
+            
+        });
+
+        let currentActiveInput = null;
+
+        var localFieldsForColorTable = [
+            {
+                headerSort: false,
+                field: "drag",
+                formatter: function (cell, formatterParams) {
+                    return "<i class='fas fa-bars drag-icon'></i>";
+                },
+                width: 30,
+                headerSort: false,
+                rowHandle: true,
+
+
+            },
+            {
+                title: "Unique Column",
+                field: "UniqueColumData",
+                headerSort: false,
+                width: 100,
+                movable: false,
+                editor: false,
+                visible: false
+            },
+            { title: "Id", field: "Id", movable: false, headerSort: false, visible: false },
+            { title: "SL.", field: "SLNo", headerSort: false, frozen: true, width: '3px', bottomCalc: "count", hozAlign: "right", visible: true },
+            { title: "ComId", field: "ComId", movable: false, headerSort: false, visible: false },
+            { title: "StyleId", field: "StyleId", movable: false, headerSort: false, visible: false },
+            { title: "ColorId", field: "ColorId", movable: false, headerSort: false, visible: false },
+            {
+                title: "COLOR",
+                field: "ColorName",
+                frozen: false,
+                editable: true,
+                headerSort: true,                
+                headerHozAlign: "center",
+                formatter: "html",
+                editor: colorEditor,
+                //bottomCalc: "count",
+                editorParams: {
+                    listOnEmpty: true,
+                    autocomplete: true,
+                },
+            },
+        ];
+
+
+        var localFieldsForSizeTable = [
+            {
+                headerSort: false,
+                field: "drag",
+                frozen: true,
+                formatter: function (cell, formatterParams) {
+                    return "<i class='fas fa-bars drag-icon'></i>";
+                },
+                width: 30,
+                headerSort: false,
+                rowHandle: true,
+            },
+            {
+                title: "Unique Column",
+                field: "UniqueColumData",
+                headerSort: false,
+                width: 100,
+                movable: false,
+                editor: false,
+                visible: false
+            },
+            { title: "Id", field: "Id", movable: false, headerSort: false, visible: false },
+            { title: "SL.", field: "SLNo", headerSort: false, frozen: true, width: '3px', bottomCalc: "count", hozAlign: "right", visible: true },
+            { title: "ComId", field: "ComId", movable: false, headerSort: false, visible: false },
+            { title: "StyleId", field: "StyleId", movable: false, headerSort: false, visible: false },
+            { title: "SizeId", field: "SizeId", movable: false, headerSort: false, visible: false },
+            {
+                title: "SIZE",
+                field: "SizeName",
+                frozen: false,
+                editable: true,
+                headerSort: false,
+                //bottomCalc: "count",
+                headerHozAlign: "center",
+                formatter: "html",
+                editor: sizeEditor,
+                editorParams: {
+                    listOnEmpty: true,
+                    autocomplete: true,
+                },
+            }
+        ];
+
+
+        ColorTable = new Tabulator("#tabulatorColorGrid", {
+            height: "auto",
+            layout: "fitColumns",
+            movableRows: true,
+            data: sampletablColorData,
+            columns: [
+                ...localFieldsForColorTable,
+                {
+                    title: "",
+                    field: "Delete",
+                    movable: false,
+
+                    formatter: function (cell, formatterParams) {
+                        return "<i id='delete-row' class='fas fa-trash-alt delete-icon'></i>";
+                    },
+                    width: "6px",
+                    headerSort: false,
+                    cellClick: function (e, cell) {
+                        var rowData = cell.getRow().getData();
+                        var row = cell.getRow();
+                        deleteRowForColor(row);
+                        //table1.clearData();
+                        //setTaxAmount();
+                    }
+                }
+            ],
+            cellEdited: function (cell) {
+                // Check if the "Amount" cell is empty (value is not provided)
+                if (cell.getColumn().getField() === "Amount" && cell.getValue() === null) {
+                    // Display an error message in the specified <span> element
+                    $("#item-table-validation").text("Please enter an amount.");
+                }
+                if (cell.getColumn().getField() === "Quantity" && cell.getValue() === null) {
+                    // Display an error message in the specified <span> element
+                    $("#item-table-validation").text("Please enter an quantity.");
+                }
+                if (cell.getColumn().getField() === "Rate" && cell.getValue() === null) {
+                    // Display an error message in the specified <span> element
+                    $("#item-table-validation").text("Please enter an rate.");
+                }
+                else {
+                    // Clear the error message if the "Amount" cell has a value
+                    $("#item-table-validation").text("");
+                }
+            },
+            rowMoved: function (row) {
+                renumberRowsColor();
+            }
+
+        });
+        SizeTable = new Tabulator("#tabulatorSizeGrid", {
+            height: "auto",
+            layout: "fitColumns",
+            data: sampletablSizeData,
+            columns: [
+                ...localFieldsForSizeTable,
+                {
+                    title: "",
+                    field: "Delete",
+                    movable: false,
+
+                    formatter: function (cell, formatterParams) {
+                        return "<i id='delete-row' class='fas fa-trash-alt delete-icon'></i>";
+                    },
+                    width: "6px",
+                    headerSort: false,
+                    cellClick: function (e, cell) {
+                        var rowData = cell.getRow().getData();
+                        var row = cell.getRow();
+                        deleteRowForSize(row);
+                        //table1.clearData();
+                        //setTaxAmount();
+                    }
+                }
+            ],
+            cellEdited: function (cell) {
+                // Check if the "Amount" cell is empty (value is not provided)
+                if (cell.getColumn().getField() === "Amount" && cell.getValue() === null) {
+                    // Display an error message in the specified <span> element
+                    $("#item-table-validation").text("Please enter an amount.");
+                }
+                if (cell.getColumn().getField() === "Quantity" && cell.getValue() === null) {
+                    // Display an error message in the specified <span> element
+                    $("#item-table-validation").text("Please enter an quantity.");
+                }
+                if (cell.getColumn().getField() === "Rate" && cell.getValue() === null) {
+                    // Display an error message in the specified <span> element
+                    $("#item-table-validation").text("Please enter an rate.");
+                }
+                else {
+                    // Clear the error message if the "Amount" cell has a value
+                    $("#item-table-validation").text("");
+                }
+            },
+            rowMoved: function (row) {
+                renumberRowsSize();
+            },
+
+            movableRows: true,
+            movableColumns: true,
+
+            responsiveLayout: true
+
+        });
+
+        SizeTable.on("rowMoved", function (row) {
+            renumberRowsSize();
+        });
+
+        ColorTable.on("rowMoved", function (row) {
+            renumberRowsColor();
+        });
+
+        function sizeEditor(cell, onRendered, success, cancel, editorParams) {
+
+                     //create and style editor
+                 var editor = document.createElement("select");
+
+                editor.setAttribute("class", "select2");
+                //editor.setAttribute("name", "favcolor[]");
+                //editor.setAttribute("onchange", "successFunc()");
+                editor.setAttribute("id", "p-"+cell.getRow().getPosition());
+
+                //create and style input
+                editor.style.width = "100%";
+
+                     onRendered(function () {
+                         $(editor).select2({
+                             closeOnSelect: false,
+                             // data: colorsToAccessSelect,
+                             ajax: {
+                                 delay: 500,
+                                // url: '@Url.Action("ProductSearch", "Accounts")',
+                                 url: '@Url.Action("GetSizeSearchList", "Accounts")',
+                                 dataType: 'json',
+                                 data: function (params) {
+                      var query = {
+                        dropdownSearch: params.term,
+                        pageNo: params.page || 1
+                      }
+
+      // Query parameters will be ?search=[term]&page=[page]
+      return query;
+    },
+                 processResults: function (data) {
+                    // console.log("size data", data);
+                    //let gropus=[];
+                    //let option=[]
+                    //for(let i in data.ProductList){
+                    //    if (!gropus.includes(data.ProductList[i].SizeName)){
+                    //        gropus.push(data.ProductList[i].SizeName);
+                    //        let child = data.ProductList.filter(f => f.SizeName == data.ProductList[i].SizeName).map(m=>{
+                    //        return {
+                    //            id:m.Id,
+                    //            text: m.SizeName
+                    //        }
+                    //        });
+                    //        option.push({
+                    //            text: data.ProductList[i].SizeName,
+                    //            children:child
+                    //        });
+
+
+
+                    //    }
+                    //}
+                     return {
+                         results: data.ProductList
+                     };
+                 },
+                 cache: false
+             },
+
+
+         });
+         //editor.focus();
+         editor.style.css = "100%";
+         $(editor).select2('open');
+        // $(".select2-search__field").focus();
+                    var ll = $("[aria-controls='select2-p-" + cell.getRow().getPosition() + "-results']");
+                    ll[0].focus();
+     });
+     function successFunc(e) {
+        var data = e.params.data;
+        console.log(data);
+                    cell.getRow().update({ "SizeId": editor.value, "SizeName": data.text});
+
+         success(data.text);
+         $(editor).select2('close');
+
+     }
+     $(editor).on("select2:select", successFunc);
+     $(editor).on("select2:close", DestroyFunc);
+
+     function DestroyFunc() {
+
+             cancel();
+             cell.navigateRight();
+
+
+    }
+     return editor;
+        }
+
+
+
+                function colorEditor(cell, onRendered, success, cancel, editorParams) {
+                 var editor = document.createElement("select");
+                editor.setAttribute("class", "select2");
+                editor.setAttribute("id", "p-"+cell.getRow().getPosition());
+                editor.style.width = "100%";
+
+                     onRendered(function () {
+                         $(editor).select2({
+                             closeOnSelect: false,
+                             // data: colorsToAccessSelect,
+                             ajax: {
+                                 delay: 500,
+                                // url: '@Url.Action("ProductSearch", "Accounts")',
+                                 url: '@Url.Action("GetColorSearchList", "Accounts")',
+                                 dataType: 'json',
+                                 data: function (params) {
+                      var query = {
+                        dropdownSearch: params.term,
+                        pageNo: params.page || 1
+                      }
+      return query;
+    },
+                 processResults: function (data) {
+                     console.log("color data",data);
+                    //let gropus=[];
+                    //let option=[]
+                    //for(let i in data.ProductList){
+                    //    if (!gropus.includes(data.ProductList[i].ColorName)){
+                    //        gropus.push(data.ProductList[i].ColorName);
+                    //        let child = data.ProductList.filter(f => f.ColorName == data.ProductList[i].ColorName).map(m=>{
+                    //        return {
+                    //            id:m.Id,
+                    //            text: m.ColorName
+                    //        }
+                    //        });
+                    //        option.push({
+                    //            text: data.ProductList[i].ColorName,
+                    //            children:child
+                    //        });
+                    //    }
+                    //}
+                     return {
+                         results: data.ProductList//option
+                     };
+                 },
+                 cache: false
+             },
+
+
+         });
+         editor.style.css = "100%";
+         $(editor).select2('open');
+                    var ll = $("[aria-controls='select2-p-" + cell.getRow().getPosition() + "-results']");
+                    ll[0].focus();
+     });
+     function successFunc(e) {
+        var data = e.params.data;
+                    cell.getRow().update({ "ColorId": editor.value, "ColorName": data.text});
+
+         success(data.text);
+         $(editor).select2('close');
+
+     }
+     $(editor).on("select2:select", successFunc);
+     $(editor).on("select2:close", DestroyFunc);
+
+     function DestroyFunc() {
+
+             cancel();
+             cell.navigateRight();
+
+
+    }
+     return editor;
+                }
+
+
+
+function buyerEditor(cell, onRendered, success, cancel, editorParams) {
+    var editor = document.createElement("select");
+    editor.setAttribute("class", "select2");
+    editor.setAttribute("id", "p-" + cell.getRow().getPosition());
+    editor.style.width = "100%";
+    onRendered(function () {
+        $(editor).select2({
+            closeOnSelect: false,
+            ajax: {
+                delay: 500,
+                url: "@Url.Action("GetCustomer", "Admin")",
+                dataType: 'json',
+                data: function (params) {
+                    var query = {
+                        dropdownSearch: params.term,
+                        pageNo: params.page || 1
+                    };
+                    return query;
+                },
+                processResults: function (data) {
+                    var option = data.map(item => {
+                        return {
+                            text: item.Name,
+                            id: item.Id
+                        };
+                    });
+                    return {
+                        results: option
+                    };
+                },
+                cache: false
+            }
+        });
+
+        $(editor).select2('open');
+        var ll = $("[aria-controls='select2-p-" + cell.getRow().getPosition() + "-results']");
+        ll[0].focus();
+    });
+
+    function successFunc(e) {
+        var data = e.params.data;
+
+        cell.getRow().update({
+            "BuyerId": data.id,
+            "BuyerName": data.text
+        });
+
+        success(data.text);
+        $(editor).select2('close');
+    }
+    $(editor).on("select2:select", successFunc);
+    $(editor).on("select2:close", DestroyFunc);
+
+    function DestroyFunc() {
+        cancel();
+        cell.navigateRight();
+    }
+
+    return editor;
+}
+
+
+
+
+        function deleteRowForColor(row) {
+            // Show a confirmation dialog and delete the row if confirmed
+            if (confirm("Are you sure you want to delete this row?")) {
+                var deletedSLNo = row.getData().SLNo; // Store the SLNo of the deleted row
+                var rowData = [row.getData()]; // Store the data of the deleted row
+
+                // Delete the row from the tableCategory
+                ColorTable.deleteRow(row);
+
+                //console.log("Row deleted successfully.", rowData);
+                //var tableData = table2.getData(); // Get the existing data in table2
+
+                rowData.forEach(function (item) {
+                    var PurchaseId = item.PurchaseId;
+                    var salesDate = new Date(item.PurchaseDate);
+                    var formattedSalesDate = salesDate.getDate() + '-' +
+                        salesDate.toLocaleString('default', { month: 'short' }) + '-' +
+                        salesDate.getFullYear();
+
+                    var description = '<div class="border border-dark rounded" style="padding: 5px;">' +
+                        'Total:  ' + 'TK' + item.NetAmount + '<br/>' +
+                        'Balance:  ' + 'TK' + item.NetAmount + '<br/>' +
+                        formattedSalesDate + '<br>' +
+                        '<div style="display: flex; justify-content: space-between;">' +
+                        '<a href="#" onclick="handleAddClick(' + PurchaseId + ')"><p style="font-weight: bold">Add</p></a>' +
+                        '<a href="#"><p style="font-weight: bold">Open</p></a>' + '</div>' +
+                        '</div';
+                });
+
+                // After deletion, update SLNo for the remaining rows in ColorTable
+                //updateSLNoForRemainingRows(ColorTable, deletedSLNo);
+
+                //calculation();
+            }
+        }
+
+        function deleteRowForSize(row) {
+            // Show a confirmation dialog and delete the row if confirmed
+            if (confirm("Are you sure you want to delete this row?")) {
+                var deletedSLNo = row.getData().SLNo; // Store the SLNo of the deleted row
+                var rowData = [row.getData()]; // Store the data of the deleted row
+
+                // Delete the row from the tableCategory
+                SizeTable.deleteRow(row);
+
+                //console.log("Row deleted successfully.", rowData);
+                //var tableData = table2.getData(); // Get the existing data in table2
+
+                rowData.forEach(function (item) {
+                    var PurchaseId = item.PurchaseId;
+                    var salesDate = new Date(item.PurchaseDate);
+                    var formattedSalesDate = salesDate.getDate() + '-' +
+                        salesDate.toLocaleString('default', { month: 'short' }) + '-' +
+                        salesDate.getFullYear();
+
+                    var description = '<div class="border border-dark rounded" style="padding: 5px;">' +
+                        'Total:  ' + 'TK' + item.NetAmount + '<br/>' +
+                        'Balance:  ' + 'TK' + item.NetAmount + '<br/>' +
+                        formattedSalesDate + '<br>' +
+                        '<div style="display: flex; justify-content: space-between;">' +
+                        '<a href="#" onclick="handleAddClick(' + PurchaseId + ')"><p style="font-weight: bold">Add</p></a>' +
+                        '<a href="#"><p style="font-weight: bold">Open</p></a>' + '</div>' +
+                        '</div';
+                });
+
+                // After deletion, update SLNo for the remaining rows in ColorTable
+                //updateSLNoForRemainingRows(ColorTable, deletedSLNo);
+
+                //calculation();
+            }
+        }
+
+
+          function renumberRowsColor() {
+              var rowsSecondTable = ColorTable.getRows();
+            rowsSecondTable.forEach(function (row, index) {
+                  row.update({ StyleId: '@ViewBag.StyleId', SLNo: index + 1 });
+              });
+              // rowsSecondTable.forEach(function (row, index) {
+              //     if (!row.getData().Id && !row.getData().Quantity) {
+              //       row.update({ StyleId: '@ViewBag.StyleId', SLNo: index + 1 }); ///SLNo: index + 1,
+              //     }
+              // });
+          }
+
+          function renumberRowsSize() {
+            var rowsSecondTable = SizeTable.getRows();
+            rowsSecondTable.forEach(function (row, index) {
+                row.update({ StyleId: '@ViewBag.StyleId', SLNo: index + 1 });
+            });
+              // rowsSecondTable.forEach(function (row, index) {
+              //     if (!row.getData().Id && !row.getData().Quantity) {
+              //       row.update({ StyleId: '@ViewBag.StyleId', SLNo: index + 1 }); ///SLNo: index + 1,
+              //     }
+              // });
+          }
+
+        document.getElementById("add-row-color-table").addEventListener("click", function () {
+            editingModeTrigger = 1;
+            ColorTable.addRow();
+            renumberRowsColor();
+            // calculation();
+        });
+        document.getElementById("clear-color-table").addEventListener("click", function () {
+            ColorTable.clearData()
+        });
+        document.getElementById("add-row-size-table").addEventListener("click", function () {
+            editingModeTrigger = 1;
+            SizeTable.addRow();
+            renumberRowsSize();
+            // calculation();
+        });
+        document.getElementById("clear-size-table").addEventListener("click", function () {
+            SizeTable.clearData()
+        });
+        //===========================style functionalities ends=======================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        function customerEditor(cell, onRendered, success, cancel, editorParams) {
+
+                    var selected = cell.getValue();
+                    if (typeof selected === "undefined") {
+                        selected = null;
+                    }
+
+                    // Handle the null value and set an empty string
+                    if (selected === null) {
+                        selected = "";
+                    }
+                    var arrowIcon = document.createElement("span");
+                    arrowIcon.innerHTML = '<i class="fas fa-chevron-down"></i>';
+                    arrowIcon.className = "arrow-icon";
+                    //arrowIcon.style.position = "absolute";
+                    //arrowIcon.style.right = "5px";
+                    //arrowIcon.style.top = "70%";
+                    //arrowIcon.style.transform = "translateY(-50%)";
+                    arrowIcon.style.cursor = "pointer";
+                    arrowIcon.style.fontWeight = "bold";
+
+                    // Update the CSS to vertically align the text and the arrow icon
+                    var inputContainer = document.createElement("div");
+                    //inputContainer.style.position = "relative";
+                    inputContainer.style.display = "flex";
+                    inputContainer.style.alignItems = "center";
+
+                    var input = document.createElement("input");
+                    input.type = "text";
+                    input.setAttribute("name", cell.getField());
+                    input.setAttribute("autocomplete", "off");
+                    input.style.flex = "1"; // Take up the remaining space in the container
+
+                    inputContainer.appendChild(input);
+                    inputContainer.appendChild(arrowIcon);
+
+                    arrowIcon.addEventListener("click", function () {
+                        $(input).autocomplete("search", $(input).val());
+                        $(input).select();
+                    });
+
+                    input.addEventListener("focus", function () {
+                        currentActiveInput = this;
+                        // Add keydown event listener to the input field to prevent default behavior of arrow keys
+                        this.addEventListener("keydown", function (e) {
+                            if (e.keyCode === 40 || e.keyCode === 38) {
+                                e.preventDefault();
+                            }
+                        });
+                    });
+                    onRendered(function () {
+                     $(input).autocomplete("search", $(input).val());
+                      });
+                    $(input).autocomplete({
+
+                        source: function (request, response) {
+
+                            setTimeout(function () {
+                                //console.log(request.term);
+                                $.ajax({
+                                    url: "@Url.Action("GetCustomer", "Admin")",
+                                    dataType: "json",
+                                    data: {
+                                        dropdownSearch: request.term,
+                                        type: "public",
+                                        pageSize: 5,
+                                        minimumInputLength: 0
+                                    },
+                                    success: function (data) {
+                                        ////console.log("Console for customer List:", data);
+                                        ////console.log("data item Name::", data);
+                                        var results = [];
+                                        var categoryNames = $.unique($.map(data, function (item) {
+                                            ////console.log("customer item Name::", item);
+                                            return item;
+                                        }));
+
+                                        $.each(categoryNames, function (index, categoryName) {
+                                            ////console.log("categoryName::", categoryName);
+                                            var group = {
+                                                label: categoryName.Name,
+                                                children: []
+                                            };
+
+                                            group.children = $.grep(data, function (item) {
+                                                ////console.log("item::", item);
+                                                return item.Name == group.label;
+                                            });
+
+                                            group.children = $.map(group.children, function (item) {
+
+                                                //currencyrate='';
+
+                                                //currencyId=item.CurrencyShortName;
+                                                return {
+                                                   // label: item.Name,
+                                                    label: item.ClBalance,//item.Name + ' - ' /*+ item.AccCode + '  -----  ' + item.AccountCategory+ ','*/ + item.ClBalance,
+                                                    value: item.Id,
+
+                                                };
+                                            });
+
+                                            results.push(group);
+                                        });
+
+                                        response(results);
+                                    }
+                                });
+
+                            }, 200);
+
+                        },
+                        select: function (event, ui) {
+                            // var selectedId = ui;
+                            // //console.log(ui);
+                            if (ui.item.children) {
+
+                                autocompleteId = ui.item.children[0].value;
+
+                                var accIdField = "CustomerId";
+                                var accIdValue = autocompleteId; /* Get the corresponding AccId based on the selected AccName */
+                                var row = cell.getRow();
+                                row.update({ [accIdField]: accIdValue});
+                                //console.log(row);
+                                success(ui.item.value);
+                            cell.navigateRight();
+                            } else {
+                                // handle selection of item here
+                            }
+                        },
+                        focus: function (event, ui) {
+                            if (ui.item.children) {
+                                return true;
+                            } else {
+                                // handle focus on item here
+                            }
+                        },
+
+                        minLength: 0,
+                        autoFocus: true,
+                        allowCustomValue: false,
+                        delay: 0,
+                        //cacheLength: 0,
+                        open: function () {
+                            $(this).removeClass("ui-corner-all").addClass("ui-corner-top");
+                        },
+                        close: function () {
+                            $(this).removeClass("ui-corner-top").addClass("ui-corner-all");
+                                     cancel();
+                        },
+                        change: function (event, ui) {
+                            if (ui.item === null) {
+                                $(this).val('');
+                                autocompleteId = 0;
+                                //  $('#field_id').val('');
+                            }
+                        },
+                        create: function () {
+                            $(this).data('ui-autocomplete')._renderItem = function (ul, item) {
+                                var trs = '';
+
+                                if (item) {
+                                    trs = '<p class="text-sm-left" style="font-size:12px">  '; // Remove the font-italic class from here   category :
+                                    $.each($(item), function (key, value) {
+
+                                        ////console.log(value);
+                                        // Determine the balance value
+                                        const balance = value.children[0].label;
+
+                                        // Add class based on balance value
+                                        //const balanceClass = balance <= 0 ? 'red-text' : 'green-text';
+
+                                        // Append the entire category text with the corresponding class (including the italic style)
+                                        trs += '<span class="italic-text"> ' + /*value.children[0].label.AccName + ' - ' +*/ /*value.children[0].label.AccountCategory +*/ ' </span>   - <span class="">Balance :' + balance + '</span>  ';
+                                    })
+                                    trs += '</p>';
+                                }
+
+
+                                return $("<li>")
+                                    .append("<div class=m-0>" + item.label + trs + "</div>")
+                                    .appendTo(ul);
+                            };
+                             $(this).data('ui-autocomplete').menu.element.css({
+                                'max-height': '200px', // Set your desired maximum height
+                                'overflow-y': 'auto',
+                            });
+                        },
+                        focus: function () {
+                            return false; // Prevent default focus behavior
+                        }
+
+
+
+                    }).focus(function () {
+                        $(this).autocomplete("search", $(this).val());
+                        $(this).select();
+
+
+                    });
+
+                    input.addEventListener("keydown", function (e) {
+                        // Prevent default behavior of arrow keys (40 for down, 38 for up)
+                        if (e.keyCode === 40 || e.keyCode === 38) {
+                            e.preventDefault();
+                        }
+                    });
+
+
+
+                    if (currentActiveInput !== null) {
+                        currentActiveInput.focus();
+                    }
+
+                    // Set the value of the input element to the current field value
+                    input.value = selected;
+
+
+                    return inputContainer;
+
+
+
+        }
+
+
+
+
+                        $('#BtnSave').click(function () {
+                    var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+                    var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+                    $("#ComId").val(ComId);
+                            $("#LuserId").val(UserId);
+
+                            var ColorsChild = ColorTable.getData();
+                            let SizesChild = SizeTable.getData();
+                            console.log("ColorsChild data see", ColorsChild);
+                            //console.log("SizesChild data see", SizesChild);
+
+
+
+                            var filteredColors = ColorsChild.filter(item => item.ColorId !== undefined && item.ColorId !== null);
+
+                            // Use reduce to get unique items based on ColorId
+                            var uniqueColors = filteredColors.reduce((unique, item) => {
+                                if (!unique.find(existingItem => existingItem.ColorId === item.ColorId)) {
+                                    unique.push(item);
+                                }
+                                return unique;
+                            }, []);
+
+
+
+                            var filteredSizes = SizesChild.filter(item => item.SizeId !== undefined && item.SizeId !== null);
+
+                            // Use reduce to get unique items based on ColorId
+                            var uniqueSizes = filteredSizes.reduce((unique, item) => {
+                                if (!unique.find(existingItem => existingItem.SizeId === item.SizeId)) {
+                                    unique.push(item);
+                                }
+                                return unique;
+                            }, []);
+
+                            console.log("abc",uniqueColors);
+
+                            var StyleId = '@ViewBag.StyleId';  //$('#Id').val() || 0;
+                            var styleNo = $("#styleNo").val();
+                            var styleName = $("#styleName").val();
+                            var GoodsDescription = $("#GoodsDescription").val();
+                            var StyleDate = $("#Style_date").val();
+                            var UnitPrice = $("#UnitPrice").val();
+                            var HSCode = $("#HSCode").val();
+                            var BuyerId = Number($('#Buyer-Id option:selected').val());
+
+
+                    //====validation handle ends======
+
+                     var styleModel =
+                        {
+                         ComId: ComId,
+                         Id: StyleId,
+                         StyleNo: styleNo,
+                         StyleName: styleName,
+                         GoodsDescription: GoodsDescription,
+                         UnitPrice: UnitPrice,
+                         HSCode: HSCode,
+                         StyleDate: StyleDate,
+                         BuyerId: BuyerId,
+                         ColorsChilds: uniqueColors,
+                         SizesChilds: uniqueSizes,
+                        };
+
+
+
+                    console.log(styleModel)
+                    var PurchaseIdAbc = 0;
+
+                    $.ajax({
+                        async: false,
+                        type: "POST",
+                        url: "@Url.Action("AddStyle", "Accounts")",
+                        data: JSON.stringify(styleModel),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (response) {
+                            //console.log("after save console::", response);
+                            PurchaseIdAbc = response.Id;
+                            Doctype = response.Doctype;
+                            ////console.log(response);
+                            //console.log("response.message::", response.message);
+                            //if (response.message =="Data updated successfully") {
+                            //    $("#bill-no").on("focus", function () {
+                            //        $("#styleNoValidation").html(""); // Clear the validation message
+                            //    });
+                            //}
+                            setTimeout(function () {
+                                toastr.success(response.message, "", {
+                                    "toastClass": "toast-green"
+                                });
+                            }, 1500);
+                            //alert(" Data Saved");
+
+                        },
+                        error: function (response) {
+                        }
+                    });
+
+                    if (PurchaseIdAbc > 0) {
+                        setTimeout(function () {
+                            window.location.href = '@Url.Action("CreateStyle", "Accounts")?&StyleId=' + PurchaseIdAbc;
+                        },3000)
+                    }
+
+
+                });
+
+        $('#BtnSaveAndClose').click(function () {
+                    var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+                    var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+                    $("#ComId").val(ComId);
+                            $("#LuserId").val(UserId);
+
+                            let ColorsChild = ColorTable.getData();
+                            let SizesChild = SizeTable.getData();
+                            console.log("ColorsChild data see", ColorsChild);
+                            //console.log("SizesChild data see", SizesChild);
+
+                                    var filteredColors = ColorsChild.filter(item => item.ColorId !== undefined && item.ColorId !== null);
+
+                                    // Use reduce to get unique items based on ColorId
+                                    var uniqueColors = filteredColors.reduce((unique, item) => {
+                                        if (!unique.find(existingItem => existingItem.ColorId === item.ColorId)) {
+                                            unique.push(item);
+                                        }
+                                        return unique;
+                                    }, []);
+
+
+
+                                    var filteredSizes = SizesChild.filter(item => item.SizeId !== undefined && item.SizeId !== null);
+
+                                    // Use reduce to get unique items based on ColorId
+                                    var uniqueSizes = filteredSizes.reduce((unique, item) => {
+                                        if (!unique.find(existingItem => existingItem.SizeId === item.SizeId)) {
+                                            unique.push(item);
+                                        }
+                                        return unique;
+                                    }, []);
+
+                                    console.log("abc",uniqueColors);
+
+                                    var StyleId = '@ViewBag.StyleId';  //$('#Id').val() || 0;
+                                    var styleNo = $("#styleNo").val();
+                                    var styleName = $("#styleName").val();
+                                    var GoodsDescription = $("#GoodsDescription").val();
+                                    var StyleDate = $("#Style_date").val();
+                                    var UnitPrice = $("#UnitPrice").val();
+                                    var HSCode = $("#HSCode").val();
+                                    var BuyerId = Number($('#Buyer-Id option:selected').val());
+
+
+                            //====validation handle ends======
+
+                             var styleModel =
+                                {
+                                 ComId: ComId,
+                                 Id: StyleId,
+                                 StyleNo: styleNo,
+                                 StyleName: styleName,
+                                 GoodsDescription : GoodsDescription,
+                                 StyleDate : StyleDate,
+                                 UnitPrice: UnitPrice,
+                                 HSCode: HSCode,
+                                 BuyerId: BuyerId,
+                                 ColorsChilds: uniqueColors,
+                                 SizesChilds: uniqueSizes,
+                                };
+
+
+
+                    console.log(styleModel)
+                    var PurchaseIdAbc = 0;
+
+                    $.ajax({
+                        async: false,
+                        type: "POST",
+                        url: "@Url.Action("AddStyle", "Accounts")",
+                        data: JSON.stringify(styleModel),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (response) {
+                            //console.log("after save console::", response);
+                            PurchaseIdAbc = response.Id;
+                            Doctype = response.Doctype;
+                            ////console.log(response);
+                            //console.log("response.message::", response.message);
+                            //if (response.message =="Data updated successfully") {
+                            //    $("#bill-no").on("focus", function () {
+                            //        $("#styleNoValidation").html(""); // Clear the validation message
+                            //    });
+                            //}
+                            setTimeout(function () {
+                                toastr.success(response.message, "", {
+                                    "toastClass": "toast-green"
+                                });
+                            }, 1500);
+                            //alert(" Data Saved");
+
+                        },
+                        error: function (response) {
+                        }
+                    });
+
+                    if (PurchaseIdAbc > 0) {
+                        setTimeout(function () {
+                        window.location.href = '@Url.Action("OrderManagement", "Accounts", new { Type = "Styles" })';
+                        },3000)
+                    }
+
+
+                });
+
+                 $.ajax({
+             type: "GET",
+             url: '@Url.Action("GetCustomer", "Admin")',
+             datatype: "Json",
+             success: function (data) {
+
+                 $.each(data, function (index, value) {
+                     //console.log("value dekhi buyer er",value);
+                     $('#Buyer-Id').append('<option value="' + value.Id + '" >' + value.Name + '</option>');
+                 });
+             }
+                 });
+
+                       //=============edit mode starts==============
+        var globalStyleNo;
+        function formatDateToCustomDate(originalDate) {
+            const months = [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+
+            const dateObj = new Date(originalDate);
+            const day = dateObj.getDate();
+            const month = months[dateObj.getMonth()];
+            const year = dateObj.getFullYear();
+
+            return `${day}-${month}-${year}`;
+        }
+      if ('@ViewBag.ActionType' == "Edit") {
+                  $.ajax({
+                  type: "GET",
+                  url: "@Url.Action("GetStyle", "Accounts")",
+                  data: { "id": '@ViewBag.StyleId'},
+                  dataType: "json",
+                  success: function (response) {
+                      console.log("edit mode er data dekhi:", response.data);
+                      var masterRes = response.data.Table[0];
+                      var colorChildRes = response.data.Table1;
+                      var sizeChildRes = response.data.Table2;
+
+                      var colorTableData = colorChildRes;
+                      var sizeTableData = sizeChildRes;
+
+                      ColorTable.setData(colorTableData);
+                      SizeTable.setData(sizeTableData);
+                      globalStyleNo = masterRes.StyleNo;
+                      $("#styleNo").val(masterRes.StyleNo);
+                      $("#styleName").val(masterRes.StyleName);
+                      $("#GoodsDescription").val(masterRes.GoodsDescription);
+                      if(masterRes.StyleDate !== null)
+                      {
+                                  $("#Style_date").val(formatDateToCustomDate(masterRes.StyleDate));
+                      }
+                      
+                      $("#UnitPrice").val(masterRes.UnitPrice);
+                      $("#HSCode").val(masterRes.HSCode);
+                      //$("#buyer").val(masterRes.BuyerId).change();
+                      setTimeout(function () {
+                          $('#Buyer-Id').val(masterRes.BuyerId).change();
+                      }, 2000);
+
+                  },
+                  error: function (error) {
+                      console.error("Error fetching data: " + error);
+                  }
+              });
+
+      }
+      //=============edit mode ends===========
+
+
+
+
+        //duplicate style no error  handling
+       function getAllPurchase(callback) {
+     $.ajax({
+         type: "GET",
+         url: '@Url.Action("GetStyleList", "Accounts")', //"../Admin/GetPurchaseList",Accounts/GetStyleList
+         dataType: "json",
+         success: function (data) {
+             //console.log("data::", data);
+             var purchaseCodeGetArray = [];
+
+             data.data.forEach(function (item) {
+                 var purchaseCodeGet = item.StyleNo;
+                 var purchaseIdGet = item.Id;
+                 var purchaseData = {
+                     PurchaseCode: purchaseCodeGet,
+                     Id: purchaseIdGet
+                 };
+                 purchaseCodeGetArray.push(purchaseData);
+             });
+
+             if (typeof callback === "function") {
+                 callback(purchaseCodeGetArray);
+             }
+         },
+         error: function (error) {
+             console.error("Error:", error);
+         }
+     });
+ }
+
+
+        var billNoHandle = document.getElementById("styleNo");
+        var PurchaseCode = $('#styleNo').val();
+        var PurchaseId = '@ViewBag.StyleId';
+        ////console.log("purchase id dekhi", PurchaseId);
+        var btnSave = document.querySelector('#BtnSave');
+        var btnSaveAndClose = document.querySelector('#BtnSaveAndClose');
+
+     if(billNoHandle !== null)
+     {
+         billNoHandle.addEventListener("input", function () {
+             var PurchaseCode = $('#styleNo').val();
+         if (PurchaseCode) {
+             getAllPurchase(function (purchaseCodeGetArray) {
+                 // Filter the purchaseCodeGetArray to exclude entries with the same PurchaseId
+                 var filteredPurchaseCodes = purchaseCodeGetArray.filter(function (item) {
+                     return item.Id !== PurchaseId;
+                 });
+
+                 var existingPurchaseCodes = filteredPurchaseCodes.map(function (item) {
+                     return item.PurchaseCode;
+                 });
+                 if (PurchaseCode == globalStyleNo) {
+                     $("#styleNoValidation").html("");
+                     btnSave.disabled = false;
+                     btnSaveAndClose.disabled = false;
+                 }
+                 else if (existingPurchaseCodes.includes(PurchaseCode)) {
+                     //console.log("globalStyleNo", globalStyleNo);
+                     //console.log("PurchaseCode", PurchaseCode);
+                     $("#styleNoValidation").html("Already has the same style no!");
+                     btnSave.disabled = true;
+                     btnSaveAndClose.disabled = true;
+                 } else {
+                     $("#styleNoValidation").html("");
+                     btnSave.disabled = false;
+                     btnSaveAndClose.disabled = false;
+                 }
+             });
+         } else {
+             $("#styleNoValidation").html(""); // Clear any previous validation message
+             btnSave.disabled = false; // Enable the button when the input is empty
+             btnSaveAndClose.disabled = false;
+         }
+     });
+     }
+        $('#Buyer-Id').select2();
+
+
+        //===============================style functionaloties end========================
+    </script>
+}

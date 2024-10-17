@@ -1,0 +1,1170 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Online Order </title>
+    <!-- Bootstrap core CSS -->
+    <link href="~/AdminEla/Assets/bootstrap-4.5.3/css/bootstrap.min.css" rel="stylesheet" />
+
+    @*    <link href="~/AdminEla/Assets/css/helper.css" rel="stylesheet">*@
+    @*<link href="~/AdminEla/Assets/css/style.css" rel="stylesheet">*@
+
+    <link href="~/AdminEla/Assets/css/lib/datatables/1.10.19/css/dataTables.bootstrap4.css" rel="stylesheet" />
+    <link href="~/AdminEla/Assets/css/lib/data-table/buttons.dataTables.min.css" rel="stylesheet" />
+    <link href="~/AdminEla/Assets/js/lib/datatables/cdn.datatables.net/buttons/buttons.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/css/EcommerceSite.css" rel="stylesheet" />
+    
+    <link href="~/Ecommerce/swiper-7.0.6/swiper-bundle.min.css " rel="stylesheet" />
+
+
+
+    <!-- Custom fonts for this template -->
+    <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    @*<link href="~/adminFront/css/one-page-wonder.css" rel="stylesheet">*@
+
+    <link href="~/AdminEla/Assets/toastr/toastr.min.css" rel="stylesheet" />
+    <link href="~/AdminEla/Assets/css/barcode.css" rel="stylesheet" />
+
+</head>
+
+<body class="container-xl bg-light">
+
+
+
+    <style>
+
+        .navbar-custom {
+            padding-top: -1rem !important;
+            padding-bottom: -1rem !important;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        body{
+        
+        overflow-x: hidden;
+        }
+        /*body {
+                            font-family: Arial;
+                            font-size: 13px;
+                            padding: 4px;
+                        }
+
+                        * {
+                            box-sizing: border-box;
+                        }
+
+                        .row {
+                            display: -ms-flexbox;*/ /* IE10 */
+        /*display: flex;
+                            -ms-flex-wrap: wrap;*/ /* IE10 */
+        /*flex-wrap: wrap;
+                            margin: 0 -16px;
+                        }
+
+                        .col-25 {
+                            -ms-flex: 25%;*/ /* IE10 */
+        /*flex: 25%;
+                        }
+
+                        .col-50 {
+                            -ms-flex: 50%;*/ /* IE10 */
+        /*flex: 50%;
+                        }
+
+                        .col-75 {
+                            -ms-flex: 75%;*/ /* IE10 */
+        /*flex: 75%;
+                        }
+
+                        .col-25,
+                        .col-50,
+                        .col-75 {
+                            padding: 0 16px;
+                        }*/
+
+        /*.container {
+                          background-color: #f2f2f2;
+                          padding: 5px 20px 15px 20px;
+                          border: 1px solid lightgrey;
+                          border-radius: 3px;
+                        }*/
+
+
+
+        input[type=text] {
+            width: 100%;
+            /*margin-bottom: 20px;*/
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        label {
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .icon-container {
+            margin-bottom: 20px;
+            padding: 7px 0;
+            font-size: 24px;
+        }
+
+        /*.btn {
+                          background-color: #04AA6D;
+                          color: white;
+                          padding: 12px;
+                          margin: 10px 0;
+                          border: none;
+                          width: 100%;
+                          border-radius: 3px;
+                          cursor: pointer;
+                          font-size: 17px;
+                        }*/
+
+        /*        .btn:hover {
+                            background-color: #45a049;
+                        }*/
+        /*
+                        a {
+                            color: #2196F3;
+                        }*/
+
+/*        hr {
+            border: 1px solid lightgrey;
+        }*/
+
+        span.price {
+            float: right;
+            color: grey;
+        }
+
+        /* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other (also change the direction - make the "cart" column go on top) */
+        /*        @@media (max-width: 800px) {
+                            .row {
+                                flex-direction: column-reverse;
+                            }
+
+                            .col-25 {
+                                margin-bottom: 20px;
+                            }
+                        }*/
+
+
+
+
+
+
+
+
+
+        /*        .caption {height: 130px;overflow: hidden;}
+                        .caption h4 {white-space: nowrap;font-size: 16px;}
+                        .ratings {padding-right: 10px;padding-left: 10px;color: #d17581;}
+                        .thumbnail {padding: 0;}
+                        .thumbnail .caption-full {padding: 9px;color: #333;}*/
+
+        /* cart icon */
+        /*.cart_anchor{ float:right;  margin-right: 50px;vertical-align:top; background: url('http://demos.codexworld.com/fly-to-cart-effect-using-jquery/images/cart-icon.png') no-repeat center center / 100% auto;width: 50px;height: 50px; margin-bottom: 50px;}*/
+        .wrapper {
+            clear: both;
+            float: left;
+            width: 100%;
+            margin: auto;
+            text-align: center;
+        }
+
+        .thumbnail {
+            border: 1px solid #666;
+            border-radius: 5px;
+            width: 20%;
+            display: inline-block;
+            margin-right: 1%;
+            box-sizing: border-box;
+            padding: 20px;
+        }
+
+            .thumbnail img {
+                max-width: 100%;
+                max-height: 100%;
+                display: block;
+                margin: auto;
+            }
+        /*.add-to-cart{font-family: 'arial';background: #5cb85c;padding: 10px 5px;color: #fff;border-radius: 5px;text-decoration: none;margin: 15px 0 0;display: inline-block;float: left;width: 100%;text-align: center;}*/
+
+        @@media only screen and (max-width:767px) {
+            div.thumbnail {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+
+
+        .card {
+              position: relative;
+              display: -ms-flexbox;
+              display: flex;
+              -ms-flex-direction: column;
+              flex-direction: column;
+              min-width: 0;
+              word-wrap: break-word;
+              background-color: #fff;
+              background-clip: border-box;
+              border: none;
+              /*border-radius: 2.25rem;*/
+              min-height: 218px;
+            }
+
+            .card-footer:last-child {
+              border-radius: 0 0 calc(2.25rem - 1px) calc(2.25rem - 1px);
+            }
+
+
+
+        .hover14 .card {
+            position: relative;
+        }
+
+        .hover14 .card::before {
+            position: absolute;
+            top: 0;
+            left: -5%;
+            z-index: 2;
+            display: block;
+            content: '';
+            width: 35%;
+            height: 81%;
+            background: -webkit-linear-gradient(left, rgba(255,255,255,0) 0%, rgba(255,255,255,.3) 100%);
+            background: linear-gradient(to right, rgba(248, 249, 250, 0.02) 0%, rgba(248, 249, 250, 0.04) 100%);
+            -webkit-transform: skewX(-25deg);
+            transform: skewX(-25deg);
+            animation-iteration-count: 2;
+            animation: hover14 5s infinite;
+
+            /*border:1px solid blue;*/
+        /*    animation-iteration-count: 2;
+            animation: hover14 5s infinite;*/
+        }
+
+        .hover14 .card:hover::before {
+            -webkit-animation: shine 2s;
+            animation: shine 2s;
+        }
+
+        .zoom:hover {
+          transform: scale(1.05); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+        }
+
+        @@-webkit-keyframes shine {
+            100% {
+                left: 50%;
+            }
+        }
+
+        @@keyframes shine {
+            100% {
+                left: 50%;
+            }
+        }
+
+        .card:hover {
+        /*border: 1px solid #e8a6bf47;*/
+        -webkit-box-shadow: 1px 3px 35px rgb(212, 112, 88);
+        box-shadow: 1px 3px 35px rgba(170, 158, 155, 0.65);
+
+
+        }
+
+        .card_red, .card_red .title .fa {
+          background: linear-gradient(-45deg, #ffec61, #f321d7);
+          color:white;
+        }
+        .card_red a , .card_violet a , .card_three a, .card_four a , .card_five a, .card_six a , .card_seven a, .card_eight a , .card_nine a, .card_ten a , .card_eleven a,.card_tweleve a {
+          color:white;
+          vertical-align:middle;
+        }
+
+
+        .card_violet, .card_violet .title .fa  {
+          background: linear-gradient(-45deg, #f403d1, #64b5f6);
+          color:white;
+        }
+
+
+
+        .card_three, .card_three .title .fa  {
+          background: linear-gradient(-45deg, #24ff72, #9a4eff);
+          color:white;
+        }
+
+
+
+        .card_four, .card_four .title .fa  {
+          background: linear-gradient(-45deg, #ff9524, #4e72ff);
+          color:white;
+        }
+        .card_four a{
+          color:white;
+        }
+
+        .card_five, .card_five .title .fa {
+            background: linear-gradient(-45deg, #f75524, #8d9ee2);
+            color: white;
+        }
+        .card_five a{
+                color:white;
+        }
+
+          .card_six, .card_six .title .fa {
+            background: linear-gradient(-45deg, #ae39ff, #ffcf3db3);
+            color: white;
+        }
+        .card_six a{
+                color:white;
+        }
+
+
+          .card_seven, .card_seven .title .fa {
+            background: linear-gradient(-45deg, #3c1c36cc, #8d9ee2);
+            color: white;
+        }
+        .card_seven a{
+                color:white;
+        }
+
+
+
+          .card_eight, .card_eight .title .fa {
+            background: linear-gradient(-45deg, #2f6cb9, #055d719c);
+            color: white;
+        }
+        .card_eight a{
+                color:white;
+        }
+
+
+         .card_nine, .card_nine .title .fa {
+            background: linear-gradient(-45deg, #e53690e3, #c9e024);
+            color: white;
+        }
+        .card_nine a{
+                color:white;
+        }
+
+
+
+         .card_ten, .card_ten .title .fa {
+            background: linear-gradient(-45deg, #005b17, #7283c5);
+            color: white;
+        }
+        .card_ten a{
+                color:white;
+        }
+
+
+               .card_eleven, .card_eleven .title .fa {
+            background: linear-gradient(-45deg, #5c2121ed, #d3b16f);
+            color: white;
+        }
+        .card_eleven a{
+                color:white;
+        }
+
+
+
+               .card_tweleve, .card_tweleve .title .fa {
+            background: linear-gradient(-45deg, #b16ea2f2, #196b7ee8);
+            color: white;
+        }
+        .card_tweleve a{
+                color:white;
+        }
+
+        /*
+                        div.dataTables_length {
+                            float: right;
+                        }
+
+                        div.dataTables_wrapper div.dataTables_paginate {
+                            float: right;
+                            text-align: center;
+                            align-content: center;
+                        }*/
+
+    </style>
+
+     
+    <div class="row mt-2"> 
+
+
+
+        <div class="row">
+
+            <nav class="navbar navbar-expand-md navbar-light shadow-sm bg-light fixed-top">
+                @if (HttpContextAccessor.HttpContext.Session.GetInt32("IsMobile") != 1)
+                {
+                    <a class="navbar-brand" href="@Url.Action("index")">
+                        @*<span style="font-weight:600"> Easy</span> <strong>Invoice</strong>*@
+
+                        @if (@ViewBag.comImagePath != null)
+                        {
+                            <img width="38" class="img-circle" src="..@ViewBag.comImagePath" onerror="this.style.display='none'" id="main-img">
+                        }
+                        else
+                        {
+                            <img width="10" class="img-circle" src="../Content/ProductImages/0.png" id="main-img">
+                        }
+
+                    </a>
+
+                    <div class="collapse navbar-collapse" id="navbarResponsive">
+                        <ul class="navbar-nav ml-auto">
+                                @*<li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("DeliveryService")">Delivery Service</a>
+                                </li>*@
+                        @*    <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("EcommerceIndex", "Home", new { IsMobile = "0" })">Ecommerce</a>
+                            </li>*@
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Login")">Log In</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("signup")">Sign Up</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="form-inline my-2 my-lg-0">
+                        <button type="button" class="btn btn-primary rounded-0 cart_anchor border-0" data-bs-toggle="modal" data-bs-target="#cart">Cart (<span class="total-count"></span>) <i class="fa fa-shopping-cart"> </i></button>
+                        <button class="clear-cart btn btn-danger rounded-0 border-0">Clear</button>
+                    </div>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                }
+                else
+                {
+                    <a class="navbar-brand" href="@Url.Action("index")">
+                        @if (@ViewBag.comImagePath != null)
+                        {
+                            <img width="38" class="img-circle" src="..@ViewBag.comImagePath" onerror="this.style.display='none'" id="main-img">
+                        }
+                        else
+                        {
+                            <img width="10" class="img-circle" src="../Content/ProductImages/0.png" id="main-img">
+                        }
+
+                    </a>
+                    <div class="form-inline my-2 my-lg-0">
+                        <button type="button" class="btn btn-primary rounded-0 cart_anchor border-0" data-bs-toggle="modal" data-bs-target="#cart">Cart (<span class="total-count"></span>) <i class="fa fa-shopping-cart"> </i></button>
+                        <button class="clear-cart btn btn-danger rounded-0 border-0">Clear</button>
+                    </div>
+                }
+            </nav>
+        </div>
+
+
+    </div>
+    <div class="mt-3">
+
+
+
+        @RenderBody()
+
+
+        <div class="modal fade" id="cart" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content card">
+                    <div class="modal-header card-header bg-success text-white">
+                        <h5 class="modal-title" id="exampleModalLabel">Cart</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class=" card p-2">
+                            <div class="table-responsive">
+                                <table id="tbldetails" class="table display table-striped table-hover" cellspacing="0" width="100%" style="font-weight:500; font-size:10px;">
+                                    <thead class="text-center">
+                                        <tr>
+                                            <th class="d-none">Product Id</th>
+                                            <th>Product</th>
+                                            <th>U.Price</th>
+                                            <th>Quantity</th>
+                                            <th>Amount</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody class="show-cart">
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <h4 class="text-center pl-5">Total Amount: <span class="total-cart"></span></h4>
+                        </div>
+
+                        <hr />
+                        <div>
+
+
+                            <div class=" card p-4">
+
+                                <div>
+
+                                    <span style="display:none">
+                                        @ViewBag.weburl
+                                        @ViewBag.ComId
+                                        <input type="hidden" id="LuserId" value="1" />
+                                        <input type="hidden" id="ComId" value=@ViewBag.ComId ?? 1 />
+                                        <input type="hidden" id="Notes" value=@ViewBag.weburl />
+                                    </span>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h3>Billing Address</h3>
+
+                                            <div class="row">
+                                                <div class="col-md-4 col-12">
+                                                    <label for="fname"><i class="fa fa-user"></i> Full Name</label>
+                                                    <input type="text" id="CustomerName" name="firstname" placeholder="John M. Doe" autocomplete="on">
+                                                </div>
+                                                <div class="col-md-4 col-12">
+                                                    <label for="phone"><i class="fa fa-mobile"></i> Phone</label>
+                                                    <input type="text" id="PhoneNo" name="phone" autocomplete="on">
+                                                </div>
+                                                <div class="col-md-4 col-12">
+                                                    <label for="email"><i class="fa fa-envelope"></i> Email</label>
+                                                    <input type="text" id="EmailId" name="email" placeholder="john@example.com" autocomplete="on">
+                                                </div>
+                                            </div>
+
+
+                                            <div class="row mt-1">
+                                                <div class="col-md-8 col-12">
+                                                    <label for="adr"><i class="fa fa-address-card-o"></i> Address</label>
+                                                    @*<input type="text"  id="PrimaryAddress" name="address" placeholder="542 W. 15th Street">*@
+                                                    <textarea class="form-control" id="PrimaryAddress" name="address" placeholder="542 W. 15th Street" autocomplete="on"></textarea>
+                                                </div>
+                                                <div class="col-md-4 col-12">
+                                                    <label for="notes"><i class="fa fa-sticky-note-o"></i> Notes</label>
+                                                    <textarea class="form-control" id="notes" name="notes" placeholder=""></textarea>
+                                                </div>
+                                            </div>
+
+                                            @*<div class="row">
+                                                <div class="col-md-4">
+                                                <label for="city"><i class="fa fa-institution"></i> City</label>
+                                                <input type="text" id="City" name="city" placeholder="New York">
+                                                </div>
+                                                <div class="col-md-4">
+                                                <label for="state">State</label>
+                                                <input type="text" id="SecoundaryAddress" name="state" placeholder="NY">
+                                                </div>
+                                                <div class="col-md-4">
+                                                <label for="zip">Zip</label>
+                                                <input type="text" id="PostalCode" name="zip" placeholder="10001">
+                                                </div>
+                                                </div>*@
+                                        </div>
+
+
+
+                                    </div>
+                                    @*<label>
+                                        <input type="checkbox" checked="checked" name="sameadr"> Shipping address same as billing
+                                        </label>*@
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+
+                    <div class="modal-footer">
+                        <button id="modalclose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button id="dataSave" type="button" class="btn btn-primary">Order now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <img class="img-fluid" src="https://demo.easyfieds.com/Content/images/site/city-skyline.png">
+
+
+    <footer class="footer">
+        <div class="container mt-1">
+            <div class="row text-center align-items-center small">
+                <div class="col-12 col-lg-auto">
+                    <ul class="list-inline list-inline-dots mb-0">
+                        <li class="list-inline-item">
+                            © 2022
+                            <a href="/" class="link-secondary">Dominate Online</a>.
+                            All rights reserved.
+                            <a href="/sitemap" class="link-secondary">Sitemap</a>.
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-auto ms-lg-auto mt-3 mt-lg-0">
+                    <ul class="list-inline list-inline-dots mb-0">
+                        <li class="list-inline-item">
+                            <span class="copyrights"><i class="fas fa-laptop-code text-teal" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Software" aria-label="Software"></i> Powered by <a href="https://www.dominatebd.com/" target="_blank">Dominate</a>.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+
+    <script src="~/adminFront/vendor/jquery/jquery.js"></script>
+    <script src="~/AdminEla/Assets/js/lib/bootstrap/js/popper.min.js"></script>
+    <script src="~/AdminEla/Assets/bootstrap-4.5.3/js/bootstrap.min.js"></script>
+
+    <script src="~/AdminEla/Assets/css/lib/datatables/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="~/AdminEla/Assets/css/lib/datatables/1.10.19/js/dataTables.bootstrap4.js"></script>
+
+
+
+    @*<script src="~/AdminEla/Assets/js/lib/datatables/select/dataTables.select.min.js"></script>*@
+
+    @*<script src="~/lib/jquery/dist/jquery.js"></script>*@
+    @*<script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+        <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>*@
+    @*<script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>*@
+
+
+    @*<script src="~/AdminEla/Assets/css/lib/datatables/1.10.19/js/jquery.dataTables.min.js"></script>*@
+
+    @*<script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>*@
+    <script src="~/js/site.min.js" asp-append-version="true"></script>
+    <script src="~/AdminEla/Assets/toastr/toastr.min.js"></script>
+    <script src="~/AdminEla/Assets/toastr/toaster_custom.js"></script>
+         <script src="~/Ecommerce/swiper-7.0.6/swiper-bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+    <script>
+
+
+
+        var shoppingCart = (function () {
+            // =============================
+            // Private methods and propeties
+            // =============================
+            cart = [];
+
+            // Constructor
+            function Item(id, name, price, count, color, brand, size) {
+                this.id = id;
+                this.name = name;
+                this.price = price;
+                this.color = color;
+                this.brand = brand;
+                this.size = size;
+
+                this.count = count;
+            }
+
+            // Save cart
+            function saveCart() {
+                localStorage.setItem('shoppingCart', JSON.stringify(cart));
+            }
+
+            // Load cart
+            function loadCart() {
+                cart = JSON.parse(localStorage.getItem('shoppingCart'));
+            }
+            if (localStorage.getItem("shoppingCart") != null) {
+                loadCart();
+            }
+
+
+            // =============================
+            // Public methods and propeties
+            // =============================
+            var obj = {};
+
+            // Add to cart
+            obj.addItemToCart = function (id, name, price, count, color, brand, size) {
+                //alert(count);
+                for (var item in cart) {
+                    if (cart[item].id === id) {
+                        cart[item].count++;
+                        saveCart();
+                        return;
+                    }
+                }
+                var item = new Item(id, name, price, count, color, brand, size);
+                cart.push(item);
+                //console.log(item);
+                saveCart();
+            }
+            // Set count from item
+            obj.setCountForItem = function (id, count) {
+                for (var i in cart) {
+                    if (cart[i].id === id) {
+                        cart[i].count = count;
+                        break;
+                    }
+                }
+            };
+            // Remove item from cart
+            obj.removeItemFromCart = function (id) {
+                for (var item in cart) {
+                    if (cart[item].id === id) {
+                        cart[item].count--;
+                        if (cart[item].count === 0) {
+                            cart.splice(item, 1);
+                        }
+                        break;
+                    }
+                }
+                saveCart();
+            }
+
+            // Remove all items from cart
+            obj.removeItemFromCartAll = function (id) {
+                for (var item in cart) {
+                    if (cart[item].id === id) {
+                        cart.splice(item, 1);
+                        break;
+                    }
+                }
+                saveCart();
+            }
+
+            // Clear cart
+            obj.clearCart = function () {
+                cart = [];
+                saveCart();
+            }
+
+            // Count cart
+            obj.totalCount = function () {
+                var totalCount = 0;
+                for (var item in cart) {
+                    totalCount += cart[item].count;
+                }
+                return totalCount;
+            }
+
+            // Total cart
+            obj.totalCart = function () {
+                var totalCart = 0;
+                for (var item in cart) {
+                    totalCart += cart[item].price * cart[item].count;
+                }
+                return Number(totalCart.toFixed(2));
+            }
+
+            // List cart
+            obj.listCart = function () {
+                var cartCopy = [];
+                for (i in cart) {
+                    item = cart[i];
+                    itemCopy = {};
+                    for (p in item) {
+                        itemCopy[p] = item[p];
+                    }
+                    itemCopy.total = Number(item.price * item.count).toFixed(2);
+                    cartCopy.push(itemCopy)
+                }
+                return cartCopy;
+            }
+
+            // cart : Array
+            // Item : Object/Class
+            // addItemToCart : Function
+            // removeItemFromCart : Function
+            // removeItemFromCartAll : Function
+            // clearCart : Function
+            // countCart : Function
+            // totalCart : Function
+            // listCart : Function
+            // saveCart : Function
+            // loadCart : Function
+            return obj;
+        })();
+
+
+        // *****************************************
+        // Triggers / Events
+        // *****************************************
+        // Add item
+        $('.add-to-cart').click(function (event) {
+            event.preventDefault();
+            var id = $(this).data('id');
+            var name = $(this).data('name');
+            var price = Number($(this).data('price'));
+            var color = $(this).data('color');
+            var brand = $(this).data('brand');
+            var size = $(this).data('size');
+
+
+
+            shoppingCart.addItemToCart(id, name, price, 1, color, brand, size);
+            displayCart();
+        });
+
+        // Clear items
+        $('.clear-cart').click(function () {
+            shoppingCart.clearCart();
+            displayCart();
+        });
+
+
+        function displayCart() {
+            var cartArray = shoppingCart.listCart();
+            //console.log(cartArray);
+            var output = "";
+            for (var i in cartArray) {
+                output += "<tr>"
+                    + "<td class=d-none>" + cartArray[i].id + "</td>"
+                    + "<td class='col col-3 p-1 text-center'>" + cartArray[i].name + "  " + cartArray[i].color + "  " + cartArray[i].size + "  " + cartArray[i].brand +"</td>"
+                    + "<td class='col col-2  p-1 text-center' >" + cartArray[i].price + "</td>"
+                    + "<td class='col-md-2 col-4  p-1 text-center'><div class='input-group'><button class='minus-item input-group-prepend btn btn-sm btn-primary rounded-0' data-id=" + cartArray[i].id + ">-</button>"
+                    + "<input type='text' class='item-count form-control form-control-sm text-center' data-id='" + cartArray[i].id + "' value='" + cartArray[i].count + "'>"
+                    + "<button class='plus-item btn btn-sm btn-primary  rounded-0 input-group-append' data-id=" + cartArray[i].id + ">+</button></div></td>"
+                    + " = "
+                    + "<td class='col col-2  p-1  text-center'>" + cartArray[i].total + "</td>"
+
+                    + "<td class='col col-1  p-0 text-center'><button class='btn btn-sm delete-item btn-danger rounded-0' data-id=" + cartArray[i].id + ">X</button></td>"
+                    + "</tr>";
+            }
+            $('.show-cart').html(output);
+            $('.total-cart').html(shoppingCart.totalCart());
+            $('.total-count').html(shoppingCart.totalCount());
+        }
+
+        // Delete item button
+
+        $('.show-cart').on("click", ".delete-item", function (event) {
+            var id = $(this).data('id')
+            shoppingCart.removeItemFromCartAll(id);
+            displayCart();
+        })
+
+
+        // -1
+        $('.show-cart').on("click", ".minus-item", function (event) {
+            var id = $(this).data('id')
+            shoppingCart.removeItemFromCart(id);
+            displayCart();
+        })
+        // +1
+        $('.show-cart').on("click", ".plus-item", function (event) {
+            var id = $(this).data('id')
+            shoppingCart.addItemToCart(id);
+            displayCart();
+        })
+
+        // Item count input
+        $('.show-cart').on("change", ".item-count", function (event) {
+            var id = $(this).data('id');
+            var count = Number($(this).val());
+            shoppingCart.setCountForItem(id, count);
+            displayCart();
+        });
+
+        displayCart();
+
+
+        function flyToElement(flyer, flyingTo) {
+            var $func = $(this);
+            var divider = 3;
+            var flyerClone = $(flyer).clone();
+            $(flyerClone).css({ position: 'absolute', top: $(flyer).offset().top + "px", left: $(flyer).offset().left + "px", opacity: 1, 'z-index': 1000 });
+            $('body').append($(flyerClone));
+            var gotoX = $(flyingTo).offset().left + ($(flyingTo).width() / 2) - ($(flyer).width() / divider) / 2;
+            var gotoY = $(flyingTo).offset().top + ($(flyingTo).height() / 2) - ($(flyer).height() / divider) / 2;
+
+            $(flyerClone).animate({
+                opacity: 0.4,
+                left: gotoX,
+                top: gotoY,
+                width: $(flyer).width() / divider,
+                height: $(flyer).height() / divider
+            }, 700,
+                function () {
+                    $(flyingTo).fadeOut('fast', function () {
+                        $(flyingTo).fadeIn('fast', function () {
+                            $(flyerClone).fadeOut('fast', function () {
+                                $(flyerClone).remove();
+                            });
+                        });
+                    });
+                });
+        }
+
+
+
+        var table = $('#tbldetails').DataTable({
+            "dom": 'T<"clear">lfrtip',
+            "bLengthChange": false,
+            "bFilter": false,
+            "bSort": false,
+            "searching": false,
+            "paging": false
+            //columnDefs: [
+
+            //    {
+            //        "targets": 3,
+            //        "render": function (data, type, row) {
+            //            return '<input class="form-control form-control-sm SmallInput  text-center quantity" id="quantity" name="quantity" type="text" data-val="true" value=' + data + '>';
+            //        }
+
+            //    }
+
+            //],
+
+        });
+
+
+        function Generator() { };
+        Generator.prototype.rand = Math.floor(Math.random() * 26) + Date.now();
+        Generator.prototype.getId = function () {
+            return this.rand++;
+        };
+
+
+        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+            "Aug", "Sep", "Oct", "Nov", "Dec"];
+        var value = new Date();
+        var ret = value.getDate() + "-" + months[value.getMonth()] + "-" + value.getFullYear(); //value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
+
+
+
+
+            $("#dataSave").click(function () {
+                // Step 1: Read View Data and Create JSON Object
+
+                //alert('found');
+                // Creating OrderItem Json Object
+                var OrderItem = { "Id": "", "ProductId": "", "Price": "", "Quantity": "", "Amount": "", "OrdersId": "" };
+                var OrdersPayment = { "Id": "", "PaymentCardNo": "", "Amount": "", "OrdersId": "","RowNo":"" };
+
+
+
+                // Creating Orders Json Object
+                var Orders = {
+
+                    "Id": "0", "OrderCode": "", "Notes": "", "OrdersDate": "",
+                    "CustomerId": "", "CustomerName": "", "PrimaryAddress": "", "SecoundaryAddress": "", "PhoneNo": "", "EmailId": "", "PostalCode": "",
+
+                    "Status": "", "GrandTotal": "0", "DisPer": "0.00", "DisAmt": "0.00",
+                    "ServiceCharge": "0.00", "Shipping": "0.00", "TotalVat": "0.00", "NetAmount": "0",
+
+                    "Items": [],
+                    "OrdersPayments" : []
+
+                };
+
+                var idGen = new Generator();
+
+                // Set Home Main Value
+                //Orders.Id = $("#Id").val();
+                Orders.OrderCode = idGen.getId();
+                Orders.OrdersDate = ret;
+
+                //Orders.Notes = $("#Notes").val();
+
+                Orders.CustomerId = null;//$("#Customer").val();
+                Orders.CustomerName = $("#CustomerName").val();
+                Orders.PrimaryAddress = $("#PrimaryAddress").val();
+                Orders.Notes = $("#notes").val();
+
+
+                Orders.PhoneNo = $("#PhoneNo").val() || "";
+                Orders.EmailId = $("#EmailId").val();
+
+
+                //Orders.City = $("#City").val();
+                //Orders.PostalCode = $("#PostalCode").val();
+                //Orders.SecoundaryAddress = $("#SecoundaryAddress").val();
+
+
+                //Orders.Status = $("#Status").val();
+                //Orders.GrandTotal = $("#GrandTotal").val();
+                //Orders.DisPer = $("#DisPer").val();
+                //Orders.DisAmt = $("#DisAmt").val();
+                //Orders.ServiceCharge = $("#ServiceCharge").val();
+                //Orders.Shipping = $("#Shipping").val();
+                //Orders.TotalVat = $("#TotalVat").val();
+                //Orders.NetAmount = $("#NetAmount").val();
+                Orders.ComId = $("#ComId").val();
+                Orders.LuserId = $("#LuserId").val();
+                Orders.Notes = $("#Notes").val();
+
+
+                Orders.GrandTotal = shoppingCart.totalCart();
+                //Orders.TotalItem = shoppingCart.totalCount();
+                Orders.Status = "Received";
+
+
+
+
+
+                //var rows = $('#tbldetails').dataTable().fnGetNodes();
+                //console.log(rows);
+
+
+                ////console.log(column);
+
+                //////Home subs data
+                //var oTable = $('#tbldetails').dataTable().fnGetData();
+                //console.log(oTable);
+
+                //alert(rows[0].cells[4].children[0].value);
+                //alert(oTable[0][3]);
+
+                //console.log(shoppingCart)
+                //var abcdcart = JSON.parse(localStorage.getItem('shoppingCart'));
+                //console.log(abcdcart)
+                //alert('wait');
+
+                var cartArray = shoppingCart.listCart();
+                var output = "";
+                for (var i in cartArray) {
+                    output += "<tr>"
+                        + "<td class=d-none>" + cartArray[i].id + "</td>"
+
+                    OrderItem.Id = 0;
+                    OrderItem.OrdersId = 0;
+                    OrderItem.ProductId = cartArray[i].id;
+                    OrderItem.Price = cartArray[i].price;
+                    OrderItem.Quantity = cartArray[i].count;
+                    OrderItem.Amount = (cartArray[i].price * cartArray[i].count).toFixed(2);
+                    OrderItem.ComId = $("#ComId").val();
+                    OrderItem.LuserId = $("#LuserId").val();
+
+                    // adding to Orders.OrderItem List Item
+                    Orders.Items.push(OrderItem);
+
+                    OrderItem = { "Id": "", "ProductId": "", "Price": "", "Quantity": "", "Amount": "", "OrdersId": "" };
+
+                }
+
+
+
+
+                //for (var i = 0; i < oTable.length; i++) {
+
+                //    //console.log(rows[i].cells[3].children[0].children[1].value);
+
+                //    var oTableRow = oTable[i];
+                //    //alert(oTableRow);
+                //    OrderItem.RowNo = i + 1;
+
+
+                //    //// IF This view is for edit then it will read Id from Hidden field
+                //    //if ($('h2').text() == "Invoice Edit") {
+                //    //    OrderItem.OrdersId = $('#Id').val();
+
+                //    //}
+                //    //else {
+                //    //    OrderItem.OrdersId = 0;
+                //    //}
+
+                //    OrderItem.Id = 0;
+                //    OrderItem.OrdersId = 0;
+                //    OrderItem.ProductId = oTable[i][0];
+                //    OrderItem.Price = oTable[i][2];//rows[i].cells[2].children[0].value;
+                //    OrderItem.Quantity = rows[i].cells[3].children[0].children[1].value;
+                //    OrderItem.Amount = oTable[i][4];//rows[i].cells[3].children[0].value * rows[i].cells[4].children[0].value;
+                //    OrderItem.ComId = $("#ComId").val();
+                //    OrderItem.LuserId = $("#LuserId").val();
+
+                //    // adding to Orders.OrderItem List Item
+                //    Orders.Items.push(OrderItem);
+
+                //    OrderItem = { "Id": "", "ProductId": "", "Price": "", "Quantity": "", "Amount": "", "OrdersId": "" };
+
+                //}
+
+                //console.log(Orders);
+
+
+                //console.log(Orders);
+                //var antiForgeryToken = $("input[name=Dominate_ANTIFORZERY]").val();
+                $.ajax({
+                    type: 'POST',
+
+                    //url: '/Home/Create',
+                    url: '@Url.Action("EcomIndex", "Home")',
+                    dataType: 'json',
+                    async: 'true',
+                    //headers: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                    // data: JSON.stringify(Orders),
+                    data: { model: Orders },
+                    success: function (result) {
+
+                        if (result.Success == "1") {
+                            //window.location.href = "/Home/index";
+
+
+                            ///alert($("#Id").val());
+                            if ($("#Id").val() > 0) {
+                                toastr.warning("Order Placed Successfully.");
+                                shoppingCart.clearCart();
+                                displayCart();
+
+                                var currentOrdersid = result.Id;
+                                var urllink = '@Url.Action("OrdersReport", "Home", new { OrderId = "xxxx"})'.replace("xxxx", currentOrdersid);
+                                window.open(urllink, '_blank');
+
+        @*window.setTimeout(function () {
+            window.location.href = '@Url.Action("Index", "Home")';
+            }, 500);*@
+                                //$("#Id").val(0);
+
+                            }
+                            else {
+                                toastr.success("Order Placed Successfully.");
+                                shoppingCart.clearCart();
+                                displayCart();
+                                //$("#modalclose").trigger("Click");
+                                $("#modalclose").click();
+                                //$("#Id").val(0);
+                                //resetData();
+                                //StopSpinner(".spinnerclass");
+                                var currentOrdersid = result.Id;
+                                var urllink = '@Url.Action("OrdersReport", "Home", new { OrderId = "xxxx"})'.replace("xxxx", currentOrdersid);
+                                window.open(urllink, '_blank');
+                            }
+                            //StopSpinner(".spinnerclass");
+
+                        }
+                        else {
+                            alert(result.message);
+                            //StopSpinner(".spinnerclass");
+                        }
+                    }
+                });
+
+
+
+            });
+
+
+    </script>
+
+
+</body>
+</html>

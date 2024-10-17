@@ -1,0 +1,295 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model Atrai.Core.ViewModel.CustomerDashboardViewModel
+@{ 
+    ViewData["Title"] = "Customer";
+    Layout = "~/Views/Shared/_customerLayout.cshtml";
+    //int i = 1;
+    //int ii = 1;
+    //int iii = 1;
+    //int iiii = 1; 
+}
+<style>
+
+    .p-15 {
+        padding: 10px 13px 15px 13px !important;
+    }
+
+    .card-dashboard p {
+        font-size: 14px;
+        font-family: arial narrow;
+    }
+
+    .media p {
+        font-size: 13px;
+        font-family: "Arial Narrow";
+    }
+
+    .media {
+        font-size: 15px;
+        font-family: "Arial Narrow";
+        text-align: right;
+        padding-bottom: 2px !important;
+    }
+
+    a {
+        color: #0a275ec9;
+    }
+
+/*    tbody tr td {
+        font-family: "Arial Narrow";
+        font-size: 13px;
+    }*/
+</style>
+
+<div class="">
+    <!-- Bread crumb -->
+    <div class="row page-titles">
+        <div class="col-md-5 align-self-center">
+            <h5 class="text-primary">Customer Dashboard</h5>
+        </div>
+        <div class="col-md-7 align-self-center">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
+                <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
+        </div>
+    </div>
+    <!-- End Bread crumb -->
+    <!-- Container fluid  -->
+    <div class="container">
+        <!-- Start Page Content -->
+        <div class="row mb-5">
+
+            <div class="col-md-6 col-12 animated slideInUp">
+                @*<a href="@Url.Action("AddShortLink", "Admin")">*@
+                    <div class="card-dashboard p-15">
+                        <div class="media">
+                            <div class="media-left media media-middle">
+                                <span><i class="fa fa-cart-plus f-s-40 fontshadow color-warning"></i></span>
+                            </div>
+                    
+                            <div class="media-body media-text-right px-3 py-2">
+                                <div class="row">
+
+                                <div class="col-md-6 col-6">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                From
+                                            </span>
+                                        </div>
+                                        @Html.TextBox("FromDate", null, new { @class = "form-control form-control-sm text-center FromDate", @placeholder = "Select From Date ", @autocomplete = "off", name = "FromDate" })
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-6">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                To
+                                            </span>
+                                        </div>
+                                        @Html.TextBox("ToDate", null, new { @class = "form-control form-control-sm  text-center ToDate", @placeholder = "Select To Date ", @autocomplete = "off", name = "ToDate" })
+                                    </div>
+                                </div>
+                                  
+                                </div>
+                            <h4 class="mb-0 text-primary">Ledger Balance: @string.Format("{0:n0}", Double.Parse(Model.LedgerBalance.ToString())) </h4>
+                                <div class="row">
+                              
+                                <div class="col-md col mb-2">
+                                    @*<a class="btn btn-primary" href="@Url.Action("PurchasePackage", "License")">Ledger</a>*@
+                                    <button class="btn btn-sm btn-outline-success mb-0 btn-block rounded-0" type="button" onclick="ReportPrint('PrintLedger')">Ledger</button>
+                                </div>
+
+                                    <div class="col-md col mb-2">
+
+                                    <button class="btn btn-sm btn-outline-info mb-0 btn-block rounded-0" type="button" onclick="ReportPrint('Customer')">View</button>
+                                </div>
+
+                         
+                                </div>
+
+                              
+                          
+                            </div>
+                        </div>
+                  
+                    </div>
+                @*</a>*@
+            </div>
+
+            <div class="col-md-6 col-12 animated slideInUp">
+                @*<a href="@Url.Action("AddShortLink", "Admin")">*@
+                    <div class="card-dashboard p-15">
+                        <div class="media">
+                            <div class="media-left media media-middle">
+                                <span><i class="fa fa-cart-plus f-s-40 fontshadow color-warning"></i></span>
+                            </div>
+                    
+                            <div class="media-body media-text-right p-1">
+                                <h5>Online Order</h5>
+
+                                    <a class="btn btn-outline-primary rounded-0 mr-2" href="@Url.Action("CustomerOrder", "Home")">Place Order</a>
+                                    <a class="btn btn-outline-success rounded-0 " href="@Url.Action("OnlineOrderList", "Sales")">Order List</a>
+
+                            </div>
+                        </div>
+
+                    </div>
+                @*</a>*@
+            </div>
+
+
+            
+            <div class="col-md-6 col-12 animated slideInUp">
+                    <div class="card-dashboard p-15">
+                        <div class="media">
+                            <div class="media-left media media-middle">
+                                <span><i class="fa fa-support f-s-40 fontshadow color-primary"></i></span>
+                            </div>
+                            <div class="media-body media-text-right p-1 color-danger">
+                                <h5 class="text-primary">
+                                    Proudct List With Stock
+                                </h5>
+                                <h3>
+                                    <a class="btn btn-outline-primary rounded-0 " href="@Url.Action("CustomerProductList", "Admin")">View List</a>
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+
+
+            <div class="col-md-6 col-12 animated slideInUp">
+                    <div class="card-dashboard p-15">
+                        <div class="media">
+                            <div class="media-left media media-middle">
+                                <span><i class="fa fa-support f-s-40 fontshadow color-primary"></i></span>
+                            </div>
+                            <div class="media-body media-text-right p-1 color-danger">
+                                <h5>
+                                @*@Model.UserExpiredDate.ToString("dd-MMM-yy hh:mm:tt")*@
+                                01709-383003
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="m-b-0">HotLine for Support</p>
+                        </div>
+                    </div>
+            </div>
+        </div>
+
+
+
+    </div>
+</div>
+
+        @section Scripts{
+
+            <script type="text/javascript">
+
+
+                var CategoryId = $('#CategoryId').val();
+                var WarehouseId = $('#WarehouseId').val();
+                var ROL = $('#ROL').val();
+
+
+                 CurrentDate();
+                
+            $(".FromDate").datepicker({
+
+                dateFormat: "dd-M-y",
+                changeMonth: true,
+                changeYear: true
+
+            });
+
+
+        $(".ToDate").datepicker({
+
+            dateFormat: "dd-M-y",
+            changeMonth: true,
+            changeYear: true
+
+        });
+
+        function CurrentDate() {
+            var date = new Date();
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+            if ($(".FromDate").val() == '') {
+                $(".FromDate").val(val);
+            }
+            if ($(".ToDate").val() == '') {
+                $(".ToDate").val(val);
+            }
+        }
+
+
+        function ReportPrint(btnvalue) {
+
+                var reporttype = 'pdf';//$("input[name=RptType]:checked").val();
+                var FromDate = $(".FromDate").val();
+                var ToDate = $(".ToDate").val();
+
+                var customerid = '@HttpContextAccessor.HttpContext.Session.GetInt32("CustomerId").ToString()';
+                //var productidlist = [];
+                var pid = customerid;
+                var type = "Customer";
+
+
+                //if (rows.length > 0) {
+                //    pid = rows[0]["Id"];
+                //    //type = rows[0]["AccountCategory"];
+
+                //}
+                //console.log(pid);
+                //alert(WarehouseId);
+                //alert(btnvalue);
+         
+
+                var isViewPageReport = 0;
+                if (btnvalue == "PrintLedger") {
+
+                    if ((pid == null) || (pid == ""))
+                    {
+                        toastr.error("Please login with Customer Portal.");
+                        return true;
+                    }
+                    //alert('Wait');
+                }
+                else if (btnvalue == "Customer") {
+                    isViewPageReport = 1;
+                }
+
+
+
+                
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SubsidiaryLedger", "Admin")',
+                dataType: 'json',
+                async: true,
+                    data: { rptFormat: reporttype, action: btnvalue, Id: pid, Type: type, FromDate: FromDate, ToDate: ToDate, isViewPageReport: isViewPageReport },
+                success: function (response) {
+
+                    //setTimeout(function () {
+                    //    window.open(response.Url, '_blank')
+                    //}, 3000);
+
+                    window.open(response.Url, '_blank')
+
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+          }
+
+
+        </script>
+        }

@@ -1,0 +1,4021 @@
+﻿@using Microsoft.AspNetCore.Http
+@*@model Atrai.Core.Entity.PurchaseReturnModel*@
+@inject IHttpContextAccessor HttpContextAccessor
+@model int
+@{ ViewData["Title"] = "AddPurchaseReturn";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+
+<style type="text/css">
+    /*
+    .ui-autocomplete {
+
+        height: 200px;
+    }*/
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--multiple {
+        height: auto !important;
+        /*overflow: hidden !important;*/
+    }
+
+
+
+    ul.ui-autocomplete {
+        z-index: 1100;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #acadfb;
+        border: 1px solid #fff;
+        /*margin-right: 2px;*/
+        margin-top: 3px;
+        padding: 0px 5px;
+        font-weight: 500;
+        /*margin-left: 1px;*/
+        color: #041c3c;
+    }
+     
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .table th {
+        text-align: center;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > td > input {
+        /*        line-height: 32px;*/
+        vertical-align: middle;
+        font-size: 13px;
+        font-weight: 500;
+        font-family: Arial 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        /*       border: none;*/
+        background: whitesmoke;
+    }
+
+    .table td, .table th {
+        padding-right: .20rem;
+        padding-top: 0.10rem;
+        padding-bottom: 0.15rem;
+        padding-left: 0.15rem;
+        padding-right: 0.45rem;
+        border-top: none;
+    }
+
+    .dataTables_scrollHeadInner {
+        width: 100% !important;
+    }
+        .dataTables_scrollHeadInner table {
+            width: 100% !important;
+        }
+
+    .select2-selection {
+        overflow: hidden !important;
+        height: 42px !important;
+        /*vertical-align:middle;*/
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered,
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        /*    color: #444;
+    line-height: 28px;*/
+        margin-top: 7px;
+    }
+
+    .bg_1 {
+        background-color: green;
+    }
+
+    .bg_2 {
+        background-color: gray;
+    }
+
+    .error_msg {
+        color: #f00;
+        display: none;
+    }
+
+    .table {
+        /* width: 100%; */
+        /* max-width: 100%; */
+        margin-bottom: 0px;
+    }
+
+    .dataTables_empty {
+        text-align: center !important;
+    }
+
+
+
+
+    .ui-combobox {
+        display: inline-block;
+        margin: 0;
+        margin-right: 1.8em;
+        position: relative;
+    }
+
+    .ui-combobox-input {
+        padding: 0.2em;
+        margin: 0;
+    }
+
+    .ui-combobox-button {
+        position: absolute;
+        width: 1.8em !important;
+        margin: 0;
+        margin-left: -1px;
+        top: 0;
+        bottom: 0;
+    }
+
+        .ui-combobox-button .ui-button-text {
+            padding: 0em;
+        }
+
+    .ui-combobox .ui-autocomplete {
+        max-height: 10em;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+</style>
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <input type="hidden" id="isSerialPurchaseReturn" name="isSerialPurchaseReturn" value="" />
+
+
+                    </div>
+                    <div class="card-body" id="masterPurchase">
+                        @*<input type="hidden" id="PurchasereturnId" />*@
+                        <div class="card p-2">
+
+                                <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-md-4 col-12">
+                                        <div class="form-group">
+                                            <div class="input-group  mb-2">
+                                                @*<div class="input-group-prepend">
+                        <span class="input-group-text py-0">
+                            Supplier :
+                        </span>
+                    </div>*@
+
+                                                <select id="Supplier" class="form-control" onchange="blankme(this.id)">
+                                                    <option value="">Select Supplier</option>
+                                                </select>
+                                                <small id="error_Supplier" class="form-text error_msg">Select Supplier from list</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2 col-12">
+                                        <div class="form-group">
+                                            <div class="input-group  mb-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text py-0">
+                                                        Code :
+                                                    </span>
+                                                </div>
+
+
+                                                @Html.TextBox("Code", null, new { @class = "form-control", @placeholder = "Enter Purchase No", onkeyup = "blankme(this.id)", autocomplete = "off", @readonly = "readonly" })
+                                                <small id="error_Code" class="form-text error_msg col-md-offset-2 "> Purchase Code is Required</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2 col-12">
+                                        <div class="form-group">
+                                            <div class="input-group  mb-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text py-0">
+                                                        Date :
+                                                    </span>
+                                                </div>
+                                                @Html.TextBox("Date", null, new { @class = "form-control mydatepicker", @placeholder = "Select Purchase Date ", onchange = "blankme(this.id)", autocomplete = "off" })
+                                                <small id="error_Date" class="form-text error_msg col-md-offset-2 ">Purchase Date is Required</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2 col-12">
+                                        <div class="form-group">
+                                            <h2 style="color:red">
+                                                Purchase Return
+                                            </h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                        <div class="row" id="Supplierinfo">
+                                            <div class="col-md-3 col-12">
+                                                <div class="form-group">
+
+                                                    <div class="input-group  mb-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text py-0">
+                                                                Supplier Name  &nbsp
+                                                            </span>
+                                                        </div>
+
+
+                                                        @Html.TextBox("SupplierName", null, new { @class = "form-control", @placeholder = "Enter Supplier Name", autocomplete = "off" })
+                                                        <small id="error_SupplierName" class="form-text error_msg col-md-offset-2 "> Supplier Name Required</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3 col-12">
+                                                <div class="form-group">
+
+                                                    <div class="input-group  mb-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text py-0">
+                                                                Phone No  &nbsp
+                                                            </span>
+                                                        </div>
+
+                                                        @Html.TextBox("PhoneNo", null, new { @class = "form-control", @placeholder = "Enter Phone No", autocomplete = "off" })
+                                                        <small id="error_PhoneNo" class="form-text error_msg col-md-offset-2 "> Supplier Phone No Required</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 col-12">
+                                                <div class="form-group">
+
+                                                    <div class="input-group  mb-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text py-0">
+                                                                Address  &nbsp
+                                                            </span>
+                                                        </div>
+
+
+                                                        @Html.TextBox("SupplierAddress", null, new { @class = "form-control", @placeholder = "Select Supplier Address", autocomplete = "off" })
+                                                        <small id="error_SupplierAddress" class="form-text error_msg col-md-offset-2 "> Supplier Address Required</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                            <div class="col-md-12">
+
+
+                                        <div class="row">
+
+                                            <div class="col-md-5 col-12">
+
+
+                                                <div class="input-group  col-md-10">
+
+
+                                                    @*<div class="input-group-prepend">
+                            <span class="input-group-text py-0">
+                                Search Product &nbsp
+                            </span>
+                        </div>*@
+
+                                                    <span class="input-group-btn"><button class="btn btn-primary rounded-0" type="submit"><i class="ti-search"></i></button></span>
+                                                    <input type="text" placeholder="Search Product" name="Search" id="Search" class="form-control">
+                                                    <div class="input-group-append">
+                                                        <button type="button" class="btn-primary btn-sm rounded-0" data-toggle="modal" data-target="#productinfoModal"><i class="fa fa-plus"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-12">
+                                                @*<label class="col-md-8">Scan Barcode / Serial</label>*@
+                                                <div class="input-group  col-md-10">
+                                                    <span class="input-group-btn"><button class="btn btn-info rounded-0" type="submit"><i class="ti-search"></i></button></span>
+                                                    <input type="text" placeholder="Search Serial" name="Search" id="SearchSerial" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-12">
+                                                <div class="input-group  col-md-12">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text py-0">
+                                                            Warehouse &nbsp
+                                                        </span>
+                                                    </div>
+
+
+                                                    @Html.DropDownList("Warehouse", ViewBag.Warehouse as List<SelectListItem>, new { id = "Warehouse", @class = "form-control" })
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="row" style="display:none">
+                                        <div class="col-md-8 col-12">
+
+
+
+
+
+
+
+                                        </div>
+                                        <div class="col-md-4 col-12">
+
+                                            <div id="qr-reader" style="width:300px"></div>
+                                            <div id="qr-reader-results"></div>
+
+
+                                        </div>
+                                    </div>
+
+                                    <br />
+
+                                </div>
+
+
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="PurchaseReturnItems" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th class="d-none">Id</th>
+                                        <th class="d-none">Product Id</th>
+                                        <th class="d-none">Warehouse Id</th>
+                                        <th style="min-width:200px">Name</th>
+                                        <th style="min-width:200px">SLNO / Description</th>
+                                        <th style="min-width:80px">Warehouse</th>
+                                        <th style="min-width:80px;max-width:100px">Unit Price</th>
+                                        <th style="min-width:80px;max-width:100px">Quantity</th>
+                                        <th style="min-width:80px;max-width:100px">Amount</th>
+                                        <th style="min-width:80px;max-width:100px"></th>
+                                        <th style="min-width:80px;max-width:100px">Batch Info</th>
+                                        <th>IsDelete</th>
+                                        <th>IsTransaction</th>
+                                        <th class="d-none">Cost Price</th>
+                                        <th class="d-none">Commission</th>
+                                        <th class="d-none">Commission Per</th>
+                                        <th class="d-none">User Commission</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itemDetails">
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td class="d-none"></td>
+                                        <td class="d-none"></td>
+                                        <td class="d-none"></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td> <strong> Total:</strong> </td>
+                                        <td> <strong id="TotalQty">  </strong> </td>
+                                        <td> <strong id="SubTotal">  </strong> </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="d-none"></td>
+                                        <td class="d-none"></td>
+                                        <td class="d-none"></td>
+                                        <td class="d-none"></td>
+
+
+
+
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <small id="error_SubTotal" class="form-text error_msg">Atleast add one item</small>
+
+
+                        <div class="row p-3">
+
+
+                            <div class="card p-2 col-md-5">
+
+                                @*<div class="form-group row">
+            <div class="col-md-6 col-12">
+                <label for="Date"> Payment Method : </label>
+                @Html.DropDownList("Payment", new List<SelectListItem>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {
+                new SelectListItem() {Text = "Cash", Value="Cash"},
+                new SelectListItem() {Text = "Check", Value="Check"},
+            }, "Select Payment", new { @class = "form-control", onchange = "blankme(this.id)" })
+                <small id="error_Payment" class="form-text error_msg">Select Payment Method</small>
+            </div>
+
+            <div class="col-md-6 col-12">
+                <label for="Status"> Status : </label>
+                @Html.DropDownList("Status", new List<SelectListItem>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             {
+                new SelectListItem() {Text = "Due", Value="Due"},
+                new SelectListItem() {Text = "Paid", Value="Paid"},
+                new SelectListItem() {Text = "Advance", Value="Advance"},
+            }, "Select Status", new { @class = "form-control", onchange = "blankme(this.id)" })
+                <small id="error_Status" class="form-text error_msg">Select Purchase Status</small>
+            </div>
+
+        </div>
+
+
+
+        <div class="form-group row">
+
+            <div class="col-md-7 col-12">
+                <label for="Name">Account Head &nbsp  </label>
+                <select id="AccountHead" class="form-control" onchange="blankme(this.id)">
+                    <option value="">Select Receiving Head</option>
+                </select>
+                <small id="error_AccountHead" class="form-text error_msg">Select account Head from list</small>
+
+            </div>
+
+
+            <div class="col-md-5 col-12">
+                <label for="GrandTotal"> Grand Total : </label>
+                <input type="text" id="GrandTotal" class="form-control text-right" readonly style="font-size:22px;color:purple;font-weight:bold" />
+                <small id="error_GrandTotal" class="form-text error_msg">Total is empty</small>
+            </div>
+        </div>*@
+
+                                @*<div class="col-md-5">
+
+            Selected labels:
+            <input type="text" id="labels">
+            <br>
+            Selected values:
+            <input type="text" id="values">
+
+        </div>*@
+
+                                @*<div class="form-group row">
+
+
+                                    <div class="col-md-6 col-12">
+                                        <label for="PaidAmt"> Advance Amount : </label>
+                                        @Html.TextBox("PaidAmt", null, new { @class = "form-control text-right", @Value = 0, @type = "input", @placeholder = "Advance Amount", onchange = "calculateSum()" })
+                                        <small id="error_TotalPaidAmount" class="form-text error_msg">Paid Amount Can't be empty</small>
+                                    </div>
+
+                                    <div class="col-md-6 col-12">
+            <label for="DueAmt"> Due Amount : </label>
+            @Html.TextBox("DueAmt", null, new { @class = "form-control text-right", @Value = 0, @type = "input", @placeholder = "Total Paid Amount", onchange = "calculateSum()" })
+            <small id="error_TotalPaidAmount" class="form-text error_msg">Paid Amount Can't be empty</small>
+        </div>
+
+                                    <div class="col-md-6 col-12">
+                                        <label for="Notes"> Cheque No: </label>
+                                        @Html.TextBox("ChequeNo", null, new { @class = "form-control", @type = "input", @placeholder = "ChequeNo" })
+                                    </div>
+                                    <div class="col-md-6 col-12">
+            <label for="ChequeDate">Cheque Date  &nbsp</label>
+            @Html.TextBox("ChequeDate", null, new { @class = "form-control mydatepicker", @placeholder = "Select Cheque Date ", onchange = "blankme(this.id)", autocomplete = "off" })
+            <small id="error_Date" class="form-text error_msg col-md-offset-2 ">Cheque Date is Required</small>
+        </div>
+
+                                </div>*@
+
+                                <div class="row">
+
+                                    <div class="col-md-4 col-12">
+
+                                        <div class="input-group  mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-0">
+                                                    VAT :
+                                                </span>
+                                            </div>
+
+                                            @Html.TextBox("TotalVat", null, new { @class = "form-control text-right", @Value = 0, @type = "input", @placeholder = "Total Vat Charge", onchange = "calculateSum()" })
+                                            <small id="error_TotalVAT" class="form-text error_msg">Total VAT can't be empty</small>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-4 col-12">
+                                        <div class="input-group  mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-0">
+                                                    Service :
+                                                </span>
+                                            </div>
+
+                                            @Html.TextBox("ServiceCharge", null, new { @class = "form-control text-right", @Value = 0, @type = "input", @placeholder = "Service Charge Amount ", onchange = "calculateSum()" })
+                                            <small id="error_ServiceCharge" class="form-text error_msg">Service Charge can't be empty</small>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-4 col-12">
+
+                                        <div class="input-group  mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-0">
+                                                    Shipping :
+                                                </span>
+                                            </div>
+
+                                            @Html.TextBox("Shipping", null, new { @class = "form-control text-right", @Value = 0, @type = "input", @placeholder = "Total Shipping Charge", onchange = "calculateSum()" })
+                                            <small id="error_Shipping" class="form-text error_msg">Total Shipping can't be empty</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                                <div class="row">
+
+
+
+
+                                    <div class="col-md-6 col-12">
+                                        <div class="input-group  mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-0">
+                                                    Discount :
+                                                </span>
+                                            </div>
+
+                                            @Html.TextBox("Discount", null, new { @class = "form-control text-right", @Value = 0, @type = "input", @placeholder = "Discount Amount ", onchange = "calculateSum()" })
+                                            <small id="error_Discount" class="form-text error_msg">Discount can't be empty</small>
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="col-md-6 col-12">
+                                        <div class="input-group  mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-0">
+                                                    Grand Total :
+                                                </span>
+                                            </div>
+
+                                            <input type="text" id="GrandTotal" class="form-control text-right" readonly style="font-size:22px;color:purple;font-weight:bold" />
+                                            <small id="error_GrandTotal" class="form-text error_msg">Total is empty</small>
+                                        </div>
+
+                                    </div>
+
+
+
+                                </div>
+
+
+
+
+                                <div class="row">
+                                    <div class="col-md-12 col-12">
+                                        <label for="Notes"> Notes: </label>
+                                        @Html.TextArea("Notes", new { @class = "form-control", @rows = "3", @placeholder = "Enter Notes" })
+                                    </div>
+
+                                    @*<div class="col-md-12 col-12">
+
+                                        <div class="input-group  mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-0">
+                                                    User Commission Amount :
+                                                </span>
+                                            </div>
+
+                                            @Html.TextBox("UserCommission", null, new { @class = "form-control text-right", @Value = 0, @type = "input", @placeholder = "User Comission Amount", onchange = "calculateSum()" , @readonly="readonly"})
+                             
+                                        </div>
+                                    </div>*@
+
+                                </div>                                   
+
+                            </div>
+
+                            <div class="col-md-1 col-md-offset-2"></div>
+                            <div class="col-md-6">
+
+                                <div class="card p-1">
+                                    <div class="table-responsive">
+                                        <table id="tblpayments" class="table tblpayments display table-striped table-hover text-nowrap" cellspacing="0" width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th class="d-none text-center">Purchase Return Payment Id</th>
+                                                    <th class="d-none text-center">Payment Type Id</th>
+                                                    <th class="text-center">Payment Type</th>
+                                                    <th class="d-none text-center">AccountHeadId</th>
+                                                    <th class="text-center">Accounts Head</th>
+                                                    <th class="text-center">Amount</th>
+                                                    <th class="text-center">Card No</th>
+                                                    <th class="text-center"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="paymentdetails">
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td class="d-none"></td>
+                                                    <td class="d-none"></td>
+                                                    <td></td>
+                                                    <td class="d-none"></td>
+                                                    <td> <strong> Total:</strong> </td>
+                                                    <td> <strong id="TotalCollectionAmount">  </strong> </td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+
+                                    </div>
+
+                                    <div class="row my-2">
+                                        @*<div class="col-md-6 col-12">
+                                            <div class="input-group  mb-2" id="divPurchaseReturnPayments">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text py-0">
+                                                        Payment Method :
+                                                    </span>
+                                                </div>
+
+                                                <select id="PaymentTypes" class="form-control">
+                                                    <option value="">Select Receiving Head</option>
+
+
+                                                </select>
+                                            </div>
+                                        </div>*@
+
+                                        @*@Html.DropDownList("PaymentTypes", new List<SelectListItem>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {
+                        new SelectListItem() {Text = "Cash", Value="Cash"},
+                        new SelectListItem() {Text = "Check", Value="Check"},
+                        new SelectListItem() {Text = "Bkash", Value="Bkash"},
+                        new SelectListItem() {Text = "Due", Value="Due"},
+                    }, "Select Payment", new { @class = "form-control" })
+        }, null, new { @class = "form-control" })*@
+
+
+
+                                        <div class="col-md-6 col-12">
+                                            <div class="input-group  mb-2" id="divPurchaseReturnPayments">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text py-0">
+                                                        <label for="Name">Account Head &nbsp  </label>
+                                                    </span>
+                                                </div>
+                                                <select id="AccountHeadRow" class="form-control" onchange="blankme(this.id)">
+                                                    @*<option value="">Select Receiving Head</option>*@
+
+
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 col-12">
+                                            <div class="input-group  mb-2" id="divPaymentAmount">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text py-0">
+                                                        Amount
+                                                    </span>
+                                                </div>
+                                                @Html.TextBox("PaymentAmount", "0", new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9 col-12">
+                                            <div class="input-group  mb-2" id="divPaymentCardNo">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text py-0">
+                                                        Card No / Bkash Number / Cheque
+                                                    </span>
+                                                </div>
+                                                @Html.TextBox("PaymentCardNo", "0", new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 col-12">
+                                            <button type="button" onclick="AddPayments()" class="btn btn-success mb-2 btn-block rounded-0">Add</button>
+                                            @*<button type="button" onclick="DeleteRow()" class="btn btn-success mb-2 btn-block" id="btnDelete" value="Delete"/>*@
+
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+
+                                <div class="form-group row">
+
+                                    <div class="col-md-6 col-12">
+                                        @*<button type="submit" class="btn btn-success"> Save Changes </button>*@
+
+
+                                        @if (ViewBag.ActionType == "Create")
+                                        {
+                            <input id="BtnSave" data-Purchase-Id="@Model" class="btn  btn-primary btn-block  rounded-0" type="submit" value="Save" /> @*<button type="button" id="BtnSave"  class="btn btn-success btn-block rounded-0">Save</button>*@ }
+                        else if (ViewBag.ActionType == "Edit")
+                        { @*<input type="submit" id="BtnSave" value="Update" class="btn btn-warning btn-block rounded-0" />*@
+                                        <input id="BtnSave" data-Purchase-Id="@Model" class="btn btn-warning btn-block rounded-0" type="submit" value="Update Purchase" /> } @*else if (ViewBag.ActionType == "Delete")
+                    {
+                        <button class="btn btn-danger btn-block rounded-0" type="button" onclick="PurchaseReturn_delete()">Delete</button>
+                    }*@
+
+                                    </div>
+
+                                    <div class="col-md-6 col-12">
+                                        @Html.ActionLink("Back", "Index", "PurchaseReturn", null, new { @class = "btn btn-info btn-block rounded-0", @id = "btnBack" })
+
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+
+
+
+
+
+
+                        @*<div class="form-horizontal">
+            <label> </label>
+            <input id="BtnSave" class="btn btn-success col-md-3 pull-right" type="submit" value="Save Purchase" />
+        </div>*@
+
+                    </div>
+                
+                </div>
+                <!-- panel-body -->
+            </div>
+            <!-- panel -->
+        </div>
+    </div>
+
+
+</div>
+
+<div class="modal" id="productinfoModal" tabindex="-1" role="dialog" aria-labelledby="productinfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productinfoModalLabel">Add Product</h5>
+                <button id="btnclose" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="productinfo" class="row">
+                    <div class="col-md-12">
+
+                        <div class="from-group row">
+
+                            <div class="col-md-12 mb-2">
+                                <label>Name</label>
+                                <input type="text" id="Name" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-md-6 col-12 ">
+                                <label>Category</label>
+                                @Html.DropDownList("CategoryId", new SelectList((IEnumerable<SelectListItem>)ViewBag.Category, "Value", "Text"), "Select Category", htmlAttributes: new { @class = "form-control", id = "CategoryId" })
+                            </div>
+
+                            <div class="col-md-6 col-12 ">
+                                <label>Unit</label>
+                                @Html.DropDownList("UnitId", new SelectList((IEnumerable<SelectListItem>)ViewBag.Unit, "Value", "Text"), "Select Unit", htmlAttributes: new { @class = "form-control", id = "UnitId" })
+                            </div>
+                            <div class="col-md-6 col-12 mb-2">
+                                <label>Product Code</label>
+                                <input type="text" id="ProductCode" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-md-6 col-12 mb-2">
+                                <label>Brand</label>
+                                <input type="text" id="BrandName" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-md-6 col-12 mb-2">
+                                <label>Color</label>
+                                <input type="text" id="ColorName" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-md-6 col-12 mb-2">
+                                <label>Size</label>
+                                <input type="text" id="SizeName" class="form-control form-control-sm" />
+                            </div>
+
+                            <div class="col-md-6 col-12 mb-2">
+                                <label>Cost Price</label>
+                                <input type="text" id="CostPrice" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-md-6 col-12 mb-2">
+                                <label>Selling Price</label>
+                                <input type="text" id="Price" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label>Description</label>
+                                <input type="text" id="Description" class="form-control form-control-sm" />
+                            </div>
+
+                            <br />
+
+                        </div>
+
+
+
+                    </div>
+                </div>  @*Datatable Initializer tblproductserialsearch*@
+            </div>
+            <div class="modal-footer">
+                @*<div class="col-md-12 mb-2" style="text-align:center">
+                        <button type="button" onclick="Saveproductinfo()" class="btn btn-success rounded-0">Save Product</button>
+                    </div>*@
+                <button type="button" class="btn btn-primary" onclick="Saveproductinfo()">Add New Product</button>
+
+                <button type="button" id="btnCloseProductModal" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="checkModal" tabindex="-2" role="dialog" aria-labelledby="checkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header d-none">
+                <h5 class="modal-title text-center" id="checkModalLabel">Batch Serial </h5>
+                @*<button id="btncloseabc" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>*@
+                <div class="from-group row">
+                    @*<div class="col mb-2">
+                            <input type="text" id="myInputSearch" class="form-control form-control-sm" onkeyup="myFunctionSearch()" onmouseover="this.focus();" placeholder="Search for PONO." title="Type in a name">
+                        </div>*@
+                    <div class="col mb-2">
+                        <input type="text" id="slnoPrefix" class="form-control form-control-sm" placeholder="Prefix" title="Prefix">
+                    </div>
+
+                </div>
+                <div class="from-group row">
+
+                    <div class="col mb-2">
+                        <input type="number" id="BatchFromNo" class="form-control form-control-sm" placeholder="From NO." title="From No">
+                    </div>
+
+                </div>
+                <div class="from-group row">
+
+                    <div class="col mb-2">
+                        <input type="number" id="BatchToNo" class="form-control form-control-sm" placeholder="To NO." title="To No">
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="checkModalLabel">Batch Serial Search</h5>
+                @*<div class="from-group row">
+                        <div class="col-12 mb-2">
+                            <input type="text" id="slnoSearch" class="form-control form-control-sm" placeholder="Search Serail No" title="SearchSerial">
+                        </div>
+
+                    </div>*@
+            </div>
+
+
+            <div id="BatchSerialListModal" class="modal-body">
+
+                <div class="from-group row  mb-3">
+                    <div class="input-group  col-md-12">
+                        <span class="input-group-btn"><button class="btn btn-primary rounded-0" type="submit"><i class="ti-search"></i></button></span>
+                        <input type="text" placeholder="Search Product Serial" name="Search" id="slnoSearch" class="form-control">
+                    </div>
+
+                </div>
+
+
+                <div class="row">
+                    <div class="col order-md-1 mb-2">
+
+
+                        <form class="card p-2">
+                            <br />
+
+                            @*<div class="table-responsive text-nowrap">
+
+                                <table id="BatchSerialList" class="table display nowrap table-striped table-hover no-footer text-center" cellspacing="0" width="100%">*@
+
+
+                            <div class="table-responsive">
+                                <table class="table table-hover text-nowrap" id="BatchSerialList" style="width:100%">
+
+                                    <thead>
+                                        <tr>
+                                            <th class="d-none">Batch Id</th>
+                                            <th class="d-none">Return Items Id</th>
+                                            <th class="d-none">Product Id</th>
+                                            <th>Product Serial</th>
+                                            <th>SL No</th>
+                                            <th>Action</th>
+                                            <th class="">Is Delete</th>
+                                            <th class="">Is Used</th>
+                                            <th class="">IsTransaction</th>
+                                            <th class=""> PurchaseBatchId</th>
+
+
+
+
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemDetails">
+                                    </tbody>
+                                    @*<tfoot>
+                                            <tr>
+                                                <td class="text-right" colspan="1">
+                                                    <h6>Total Qty :</h6>
+                                                </td>
+                                                <td> <strong id="TotalQtyBatch">  </strong> </td>
+                                                <td></td>
+                                                <td></td>
+
+                                            </tr>
+
+                                        </tfoot>*@
+                                </table>
+                            </div>
+                            <br />
+
+                        </form>
+
+                        <div class="row">
+
+                            @*<div class="col ">
+                                    <button type="button" onclick="AddSerialDataAuto()" class="btn btn-sm btn-primary mb-2 btn-block rounded-0">Auto</button>
+                                </div>
+                                <div class="col ">
+                                    <button type="button" onclick="AddSerialData()" class="btn btn-sm btn-success mb-2 btn-block rounded-0">Add</button>
+                                </div>*@
+                            <div class="col ">
+                                <button type="button" onclick="ShowAllPackingList()" class="btn btn-sm btn-info mb-2 btn-block rounded-0">Show All</button>
+                            </div>
+                            <div class="col ">
+                                <button type="button" class="btn btn-sm btn-danger mb-2 rounded-0 btn-simple btn-block" data-dismiss="modal">Close</button>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts {
+    @*<script src="~/js/site.js" asp-append-version="true"></script>*@
+
+<script src="~/AdminEla/Assets/js/lib/barcodescaner/html5-qrcode.min.js"></script>
+
+
+<script type="text/javascript">
+
+
+
+
+
+
+    $('#tblpayments').dataTable({
+        "aoColumns": [
+            { "sClass": "PurchaseReturnPaymentSubId", "visible": false },
+            { "sClass": "PaymentTypeId", "visible": false },
+            { "sClass": "TypeShortName", "visible": false },
+            { "sClass": "AccountHeadId", "visible": false },
+            { "sClass": "Name", "visible": true },
+            { "sClass": "Amount", "visible": true },
+            { "sClass": "PaymentCardNo", "visible": true },
+            null
+        ],
+        "dom": 'T<"clear">lfrtip',
+        "tableTools": {
+            "sRowSelector": "td:not(:first-child)"
+        },
+        select: {
+            style: 'os',
+            selector: 'td:first-child'
+        },
+        //drawCallback: function () {
+        //    var sum = $('#example').DataTable().column(2).data().sum();
+        //    $('#TotalCollectionAmount').html(sum);
+        //},	
+        //"order": [[1, "asc"]],
+        "bLengthChange": false,
+        "bFilter": false,
+        "bSort": false,
+        "bInfo": false,
+        "paging": false
+    })
+
+
+
+    $('#tblpayments tbody').on('click', '.dlttrashpayments', function () {
+        var table = $('#tblpayments').DataTable();
+
+        table.row($(this).parents('tr')).remove().draw();
+        var x = "1300.00";
+        var y = $('#tblpayments').height();
+        var z = parseFloat(x) + parseFloat(y);
+
+        $("html, body").animate({ scrollTop: z }, 1300);
+
+
+        calculateSum();
+
+    });
+
+
+
+
+
+
+
+
+    ///newly added for payment method
+    function AddPayments() {
+
+        $('#tblpayments').dataTable().fnAddData([
+            "0",
+            null,//$('#PaymentTypes').val(),
+            '',//$('#PaymentTypes option:selected').text(),
+            $('#AccountHeadRow').val(),
+            $('#AccountHeadRow option:selected').text(),
+            $('#PaymentAmount').val(),
+            $('#PaymentCardNo').val(),
+            '<a data-itemId="0" href="#" class="dlttrashpayments deleteItem"> <i class="fa fa-trash"></i></a >']);
+
+            $('#PaymentAmount').val("0");
+        $('#PaymentCardNo').val("=N/A=");
+
+
+        calculateSum();
+
+    }
+
+   
+
+
+
+
+
+
+
+
+
+
+    function docReady(fn) {
+        // see if DOM is already available
+        if (document.readyState === "complete"
+            || document.readyState === "interactive") {
+            // call on next available tick
+            setTimeout(fn, 1);
+        } else {
+            document.addEventListener("DOMContentLoaded", fn);
+        }
+    }
+
+    docReady(function () {
+        var resultContainer = document.getElementById('qr-reader-results');
+        var lastResult, countResults = 0;
+        function onScanSuccess(decodedText, decodedResult) {
+            if (decodedText !== lastResult) {
+                ++countResults;
+                lastResult = decodedText;
+                // Handle on success condition with the decoded message.
+                console.log(`Scan result ${decodedText}`, decodedResult);
+                beep();
+                //alert(decodedText);
+                $("#SearchSerial").val(decodedText);
+                $("#SearchSerial").focus();
+                //autocompletefunctionBarcodeScan();
+            }
+        }
+
+        var html5QrcodeScanner = new Html5QrcodeScanner(
+            "qr-reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render(onScanSuccess);
+    });
+
+
+    function beep() {
+        (new Audio("data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vmz+ Zt//+mm3Wm3Q576v////+32///5/EOgAAADVghQAAAAA//uQZAUAB1WI0PZugAAAAAoQwAAAEk3nRd2qAAAAACiDgAAAAAAABCqEEQRLCgwpBGMlJkIz8jKhGvj4k6jzRnqasNKIeoh5gI7BJaC1A1AoNBjJgbyApVS4IDlZgDU5WUAxEKDNmmALHzZp0Fkz1FMTmGFl1FMEyodIavcCAUHDWrKAIA4aa2oCgILEBupZgHvAhEBcZ6joQBxS76AgccrFlczBvKLC0QI2cBoCFvfTDAo7eoOQInqDPBtvrDEZBNYN5xwNwxQRfw8ZQ5wQVLvO8OYU+mHvFLlDh05Mdg7BT6YrRPpCBznMB2r//xKJjyyOh+cImr2/4doscwD6neZjuZR4AgAABYAAAABy1xcdQtxYBYYZdifkUDgzzXaXn98Z0oi9ILU5mBjFANmRwlVJ3/6jYDAmxaiDG3/6xjQQCCKkRb/6kg/wW+kSJ5//rLobkLSiKmqP/0ikJuDaSaSf/6JiLYLEYnW/+kXg1WRVJL/9EmQ1YZIsv/6Qzwy5qk7/+tEU0nkls3/zIUMPKNX/6yZLf+kFgAfgGyLFAUwY//uQZAUABcd5UiNPVXAAAApAAAAAE0VZQKw9ISAAACgAAAAAVQIygIElVrFkBS+Jhi+EAuu+lKAkYUEIsmEAEoMeDmCETMvfSHTGkF5RWH7kz/ESHWPAq/kcCRhqBtMdokPdM7vil7RG98A2sc7zO6ZvTdM7pmOUAZTnJW+NXxqmd41dqJ6mLTXxrPpnV8avaIf5SvL7pndPvPpndJR9Kuu8fePvuiuhorgWjp7Mf/PRjxcFCPDkW31srioCExivv9lcwKEaHsf/7ow2Fl1T/9RkXgEhYElAoCLFtMArxwivDJJ+bR1HTKJdlEoTELCIqgEwVGSQ+hIm0NbK8WXcTEI0UPoa2NbG4y2K00JEWbZavJXkYaqo9CRHS55FcZTjKEk3NKoCYUnSQ 0rWxrZbFKbKIhOKPZe1cJKzZSaQrIyULHDZmV5K4xySsDRKWOruanGtjLJXFEmwaIbDLX0hIPBUQPVFVkQkDoUNfSoDgQGKPekoxeGzA4DUvnn4bxzcZrtJyipKfPNy5w+9lnXwgqsiyHNeSVpemw4bWb9psYeq//uQZBoABQt4yMVxYAIAAAkQoAAAHvYpL5m6AAgAACXDAAAAD59jblTirQe9upFsmZbpMudy7Lz1X1DYsxOOSWpfPqNX2WqktK0DMvuGwlbNj44TleLPQ+Gsfb+GOWOKJoIrWb3cIMeeON6lz2umTqMXV8Mj30yWPpjoSa9ujK8SyeJP5y5mOW1D6hvLepeveEAEDo0mgCRClOEgANv3B9a6fikgUSu/DmAMATrGx7nng5p5iimPNZsfQLYB2sDLIkzRKZOHGAaUyDcpFBSLG9MCQALgAIgQs2YunOszLSAyQYPVC2YdGGeHD2dTdJk1pAHGAWDjnkcLKFymS3RQZTInzySoBwMG0QueC3gMsCEYxUqlrcxK6k1LQQcsmyYeQPdC2YfuGPASCBkcVMQQqpVJshui1tkXQJQV0OXGAZMXSOEEBRirXbVRQW7ugq7IM7rPWSZyDlM3IuNEkxzCOJ0ny2ThNkyRai1b6ev//3dzNGzNb//4uAvHT5sURcZCFcuKLhOFs8mLAAEAt4UWAAIABAAAAAB4qbHo0tIjVkUU//uQZAwABfSFz3ZqQAAAAAngwAAAE1HjMp2qAAAAACZDgAAAD5UkTE1UgZEUExqYynN1qZvqIOREEFmBcJQkwdxiFtw0qEOkGYfRDifBui9MQg4QAHAqWtAWHoCxu1Yf4VfWLPIM2mHDFsbQEVGwyqQoQcwnfHeIkNt9YnkiaS1oizycqJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7 FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb//////////////////////////// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU="
+        )).play();
+    }
+
+</script>
+
+
+<script type="text/javascript">
+
+
+
+
+
+
+        (function ($) {
+            $.fn.inputFilter = function (inputFilter) {
+                return this.on("input keydown keyup mousedown mouseup select contextmenu drop", function () {
+                    if (inputFilter(this.value)) {
+                        this.oldValue = this.value;
+                        this.oldSelectionStart = this.selectionStart;
+                        this.oldSelectionEnd = this.selectionEnd;
+                    } else if (this.hasOwnProperty("oldValue")) {
+                        this.value = this.oldValue;
+                        this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                    } else {
+                        this.value = "";
+                    }
+                });
+            };
+        }(jQuery));
+
+        $(document).ready(function () {
+
+
+
+            var rowone
+            $('#PurchaseReturnItems tbody').on('click', 'td', function (e) {
+
+
+                var table = $('#PurchaseReturnItems').DataTable();
+                rowone = $(this).parent();
+
+
+                var data = table.row(rowone).data();
+                //alert(data);
+                data[12] = 'True';
+                $(this).closest('tr').children('td.IsTransaction').text('True');
+
+                calculateSum();
+            });
+
+
+            var row;
+
+            $('#PurchaseReturnItems tbody').on('click', '.dlttrashsubsection', function (e) {
+
+                var table = $('#PurchaseReturnItems').DataTable();
+                row = $(this).parent().parent();
+                var data = table.row(row).data();
+                data[11] = 'True';
+                //alert('hit');
+                $(this).parent().parent().hide(); ///fahad for checking.
+                toastr.error("Items Row Deleted");
+
+
+
+                $(this).closest('tr').children('td.IsDelete').text('True');
+
+                var x = "100.00";
+                var y = $('#PurchaseReturnItems').height();
+                var z = parseFloat(x) + parseFloat(y);
+
+                table.draw();
+
+                $("html, body").animate({ scrollTop: z }, 500);
+                $(".dataTables_scrollBody").scrollTop(9999);
+
+                calculateSum();
+
+            });
+
+
+
+
+            $('#BatchSerialList tbody').on('click', 'td', function (e) {
+
+
+                var table = $('#BatchSerialList').DataTable();
+                rowone = $(this).parent();
+
+
+                var data = table.row(rowone).data();
+                //alert(data);
+                data[8] = 'True';
+                $(this).closest('tr').children('td.IsTransaction').text('True');
+
+                calculateSum();
+            });
+
+
+
+
+            $('#BatchSerialList tbody').on('click', '.dlttrash', function (e) {
+
+                var targetTablepl = $('#BatchSerialList').DataTable();
+                row = $(this).parent().parent();
+                var data = targetTablepl.row(row).data();
+                data[6] = 'True';
+
+                $(this).parent().parent().hide(); ///fahad for checking.
+                toastr.error("Serial Row Deleted")
+
+
+
+                $(this).closest('tr').children('td.IsDelete').text('True');
+
+                var x = "100.00";
+                var y = $('#BatchSerialList').height();
+                var z = parseFloat(x) + parseFloat(y);
+
+                targetTablepl.draw();
+
+                $("html, body").animate({ scrollTop: z }, 500);
+                $(".dataTables_scrollBody").scrollTop(9999);
+
+
+
+
+                var xcount = targetTablepl.rows(':visible').count();
+                //alert(xcount);
+                var table = $('#PurchaseReturnItems').DataTable();
+                //var datacurrentvalue = table.row($('input[type=checkbox]:checked').parents('tr')).data();
+                var rownovouchersub = table.row($('input[type=checkbox]:checked').parents('tr')).index();
+                //alert(rownovouchersub);
+
+                var cellprice = $('#PurchaseReturnItems tbody tr').filter(':has(:checkbox:checked)').find('.price').val();
+                //console.log(cellprice);
+                //cellprice.data(xcount);
+
+                var cellqty = table.cell(rownovouchersub, 7);
+                cellqty.data(xcount);
+
+
+                var cellamount = table.cell(rownovouchersub, 8);
+                cellamount.data(xcount * cellprice);
+
+                alert('enter');
+
+
+                var commissionamountrow = $('#PurchaseReturnItems tbody tr').filter(':has(:checkbox:checked)').find('.commissionamount').val();
+                alert(commissionamountrow);
+                console.log(commissionamountrow.data());
+                var cellcommissionamount = table.cell(rownovouchersub, 15);
+                cellcommissionamount.data(xcount * commissionamountrow);
+
+
+                calculateSum();
+
+            });
+
+
+
+
+
+
+            $("#ServiceCharge , #Shipping , #TotalVat , #Discount  ").inputFilter(function (value) {
+                return /^-?\d*[.,]?\d{0,2}$/.test(value);
+            });
+
+
+            $(".price").inputFilter(function (value) {
+                return /^-?\d*[.,]?\d{0,2}$/.test(value);
+            });
+            });
+
+
+
+        function AddSerialData() {
+            alert('enter');
+            var check = $('#PurchaseReturnItems').find('input[type=checkbox]:checked').length;
+            //alert(check);
+
+            if (check > 0) {
+                //alert(check);
+                //alert("Checkbox Selected");
+            }
+            else {
+                alert("At least One Row Should Be Selected");
+                e.preventDefault();
+            }
+            // alert(serialno);
+            // alert('test');
+
+            var targetTablepl = $("#BatchSerialList").DataTable();
+
+            var rowCountpl = targetTablepl
+                .column(0)
+                .data()
+                .length;
+
+
+            //$('#BatchSerialList').dataTable().fnAddData([
+            //    0,
+            //    PurchaseReturnItemId,
+            //    newDetailsId,
+            //    0,
+            //    rowCountpl + 1,
+            //    '<a data-itemId="0" href="#" class="dlttrash deleteItem"> <i class="fa fa-trash"></i></a >',
+            //    false
+            //]);
+
+
+            $('#BatchSerialList').dataTable().fnAddData([
+                0,
+                PurchaseReturnItemId,
+                ProductId,
+                "",
+                rowCountpl + 1,
+                '<a data-itemId="0" href="#" class="dlttrash deleteItem"> <i class="fa fa-trash"></i></a >',
+                false,
+                false,
+                true,
+                0
+            ]);
+
+
+
+            var xcount = targetTablepl.rows(':visible').count();
+            //alert(xcount);
+            var table = $('#PurchaseReturnItems').DataTable();
+            //var datacurrentvalue = table.row($('input[type=checkbox]:checked').parents('tr')).data();
+            var rownovouchersub = table.row($('input[type=checkbox]:checked').parents('tr')).index();
+            //alert(rownovouchersub);
+
+            var cellprice  = $('#PurchaseReturnItems tbody tr').filter(':has(:checkbox:checked)').find('.price').val();
+            console.log(cellprice);
+            //cellprice.data(xcount);
+
+            var cellqty = table.cell(rownovouchersub, 7);
+            cellqty.data(xcount);
+            var cellamount = table.cell(rownovouchersub, 8);
+            cellamount.data(xcount * cellprice);
+
+
+            var commissionamountrow = $('#PurchaseReturnItems tbody tr').filter(':has(:checkbox:checked)').find('.commissionamount').val();
+            alert(commissionamountrow);
+            console.log(commissionamountrow.data());
+            var cellcommissionamount = table.cell(rownovouchersub, 15);
+            cellcommissionamount.data(xcount * commissionamountrow);
+
+            calculateSum();
+
+        }
+
+        function AddSerialDataAuto() {
+
+            alert('enter 123');
+
+
+            var check = $('#PurchaseReturnItems').find('input[type=checkbox]:checked').length;
+            //alert(check);
+
+            if (check > 0) {
+                //alert(check);
+                //alert("Checkbox Selected");
+            }
+            else {
+                alert("At least One Row Should Be Selected");
+                e.preventDefault();
+            }
+            // alert(serialno);
+            // alert('test');
+
+            var targetTablepl = $("#BatchSerialList").DataTable();
+
+            var rowCountpl = targetTablepl
+                .column(0)
+                .data()
+                .length;
+
+
+            //$('#BatchSerialList').dataTable().fnAddData([
+            //    0,
+            //    PurchaseReturnItemId,
+            //    newDetailsId,
+            //    0,
+            //    rowCountpl + 1,
+            //    '<a data-itemId="0" href="#" class="dlttrash deleteItem"> <i class="fa fa-trash"></i></a >',
+            //    false
+            //]);
+
+            var from = $("#BatchFromNo").val();
+            var to = $("#BatchToNo").val();
+            var prefix = $("#slnoPrefix").val();
+
+
+            if (prefix.length > 0 && from.length > 0 && to.length > 0) {
+                for (var i = from; i <= to; i++) {
+                    $('#BatchSerialList').dataTable().fnAddData([
+                        0,
+                        PurchaseReturnItemId,
+                        ProductId,
+                        prefix + i,
+                        i,//rowCountpl + 1,
+                        '<a data-itemId="0" href="#" class="dlttrash deleteItem"> <i class="fa fa-trash"></i></a >',
+                        false,
+                        false,
+                        true,
+                        0
+                    ]);
+                }
+            }
+            else {
+                toastr.error("Please fill up Necessary Info.")
+            };
+
+
+
+
+            var xcount = targetTablepl.rows(':visible').count();
+            //alert(xcount);
+            var table = $('#PurchaseReturnItems').DataTable();
+            //var datacurrentvalue = table.row($('input[type=checkbox]:checked').parents('tr')).data();
+            var rownovouchersub = table.row($('input[type=checkbox]:checked').parents('tr')).index();
+            //alert(rownovouchersub);
+
+            var cellprice  = $('#PurchaseReturnItems tbody tr').filter(':has(:checkbox:checked)').find('.price').val();
+            console.log(cellprice);
+            //cellprice.data(xcount);
+
+            var cellqty = table.cell(rownovouchersub, 7);
+            cellqty.data(xcount);
+            var cellamount = table.cell(rownovouchersub, 8);
+            cellamount.data(xcount * cellprice);
+
+
+            var commissionamountrow = $('#PurchaseReturnItems tbody tr').filter(':has(:checkbox:checked)').find('.commissionamount').val();
+            alert(commissionamountrow);
+            console.log(commissionamountrow.data());
+            var cellcommissionamount = table.cell(rownovouchersub, 15);
+            cellcommissionamount.data(xcount * commissionamountrow);
+
+            calculateSum();
+
+
+        }
+
+
+        $('body').on('expanded.pushMenu collapsed.pushMenu', function () {
+            setTimeout(function () {
+                $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+            }, 350);
+        });
+
+
+        function ShowAllPackingList() {
+            var cbs = document.getElementsByClassName("clickchk");
+            for (var i = 0; i < cbs.length; i++) {
+                cbs[i].checked = false;
+            }
+
+            $('#BatchSerialList tbody tr').each(function () {
+                $(this).show();
+            });
+
+        }
+
+
+        var BatchSerialList = $('#BatchSerialList').DataTable({
+            "aoColumns": [
+                { "sClass": "BatchId d-none", "visible": true },
+                { "sClass": "PurchaseReturnItemId d-none", "visible": true },
+                { "sClass": "ProductId d-none", "visible": true },
+
+                {
+                    "sClass": "BatchSerialNoRow ",
+                    "visible": true
+                },
+
+                { "sClass": "SLNo d-none", "visible": true },
+                { "sClass": "dltrashimage", "visible": true },
+                { "sClass": "IsDelete d-none", "visible": true },
+                { "sClass": "IsUsed d-none", "visible": true },
+                { "sClass": "IsTransaction d-none", "visible": true },
+                { "sClass": "PurchaseBatchId d-none", "visible": true }
+
+
+
+
+            ],
+            columnDefs: [
+                {
+                    "render": function (data, type, row) {
+                        var IsUsed = row[7];
+                        if (IsUsed == false) {
+                            return '<input class="form-control form-control-sm BatchSerialNo  text-center" id="BatchSerialNo"  name="BatchSerialNo" type="text"  value = ' + data + '  >';
+                        }
+                        else {
+                            return '<input class="form-control form-control-sm BatchSerialNo  text-center" id="BatchSerialNo"  name="BatchSerialNo" type="text"  value = ' + data + ' , readonly=readonly  >';
+                        }
+
+                    },
+                    "targets": 3
+
+                }
+            ],
+            rowCallback: function (row) {
+                $(row).addClass('RowBatchSerialList');
+            },
+            scrollY: "300px",
+            scrollX: true,
+            //"scrollCollapse": true,
+            'paging': false,
+            'info': false,
+            'ordering': false,
+            'searching': false,
+            language: { search: '', searchPlaceholder: "Search..." }
+            //, sorting: false
+        });
+
+
+
+    //$("#Search").keyup(function (ev) {
+    //    // 13 is ENTER
+    //    if (ev.which === 13) {
+    //        // do something
+    //        alert('hit');
+    //    }
+    //});
+
+
+   function Saveproductinfo() {
+
+
+        var Code = $("#ProductCode").val();
+        var Name = $("#Name").val();
+        var CostPrice = $("#CostPrice").val();
+        var Price = $("#Price").val();
+        var Description = $("#Description").val();
+
+        var ColorName = $("#ColorName").text();
+        var SizeName = $("#SizeName").text();
+        var BrandName = $("#BrandName").val();
+        var UnitId = $("#UnitId").val();
+        var CategoryId = $("#CategoryId").val();
+
+
+
+
+        var Product = {
+            Code: Code,
+            Name: Name,
+            CostPrice: CostPrice,
+            Price: Price,
+            Description: Description,
+
+            ColorName: ColorName,
+            SizeName: SizeName,
+            BrandName: BrandName,
+            UnitId: UnitId,
+            CategoryId: CategoryId
+
+        }
+        console.log(Product);
+        //alert(`${Code} ${Name} ${CostPrice} ${Price}`);
+
+        $.ajax({
+
+
+
+
+            url: '@Url.Action("SaveProductModal", "Admin")',
+            data: JSON.stringify(Product), //use id here
+            //data: JSON.stringify(purchasesmain),
+            type: 'POST',
+            async: true,
+            contentType: 'application/json;',
+            dataType: 'json',
+            success: function (result) {
+                //alert(result);
+                $("#Search").val($("#Name").val());
+                $("#ProductCode").val("");
+                $("#Name").val("");
+                $("#CostPrice").val("");
+                $("#Price").val("");
+                $("#Description").val("");
+
+                $("#SizeName").val("");
+                $("#BrandName").val("");
+                $("#ColorName").val("");
+                $("#CategoryId").val(null);
+                $("#UnitId").val(0);
+
+                //productinfo_Info();
+                toastr.success('Product Added Successfully.');
+                $("#btnCloseProductModal").trigger("click");
+
+
+
+                autocompletefunction();
+                $("#Search").focus();
+                var e = jQuery.Event("keydown");
+                e.keyCode = 50;
+                $("#search").trigger(e);
+
+            },
+            error: function () {
+                toastr.error('Unable to Save');
+                //alert('Unable to Save');
+            }
+        });
+    }
+
+
+        $('#Supplierinfo').hide();
+
+
+        function Supplierinfohide() {
+
+            if ($('#Supplier option:selected').text().toUpperCase() == "Cash Supplier".toUpperCase() || $('#Supplier option:selected').text().toUpperCase() == "Walk In Supplier".toUpperCase()) {
+
+                $('#Supplierinfo').show();
+
+
+            }
+            else {
+                $('#Supplierinfo').hide();
+                $('#SupplierName').val('');
+                $('#PhoneNo').val('');
+                $('#SupplierAddress').val('');
+            }
+        }
+
+
+
+        $('#Supplier').select2({})
+        .on("select2:select", function (e) {
+
+            Supplierinfohide();
+
+
+        });
+
+        function blankme(id) {
+
+            var val = document.getElementById(id).value;
+            var error_id = "error_" + id;
+
+            if (val == "" || val === 0.00) {
+
+                document.getElementById(error_id).style.display = "block";
+            }
+            else {
+                document.getElementById(error_id).style.display = "none";
+            }
+        }
+        function submitValidation() {
+            var Supplier = document.getElementById("Supplier").value;
+            //var accounthead = document.getElementById("AccountHead").value;
+
+            var code = document.getElementById("Code").value;
+            var date = document.getElementById("Date").value;
+            //var paymentmethod = document.getElementById("Payment").value;
+            //var pStaus = document.getElementById("Status").value;
+            var total = parseFloat($("#SubTotal").text());
+            var gtotal = parseFloat($("#GrandTotal").val());
+
+            //if (Supplier == "" || pStaus == "" || code == "" || date == "" || paymentmethod == "" || (total == "" || total == 0.00 || isNaN(total)) || (gtotal == "" || gtotal == 0.00 || isNaN(gtotal))) {
+                if (Supplier == "" ||  code == "" || date == "" || (total == "" || total == 0.00 || isNaN(total)) || (gtotal == "" || gtotal == 0.00 || isNaN(gtotal))) {
+
+
+                //if (pStaus == "") {
+                //    document.getElementById("error_Status").style.display = "block";
+                //}
+                //else {
+                //    document.getElementById("error_Status").style.display = "none";
+                //}
+
+                if (Supplier == "") {
+                    document.getElementById("error_Supplier").style.display = "block";
+                }
+                else {
+                    document.getElementById("error_Supplier").style.display = "none";
+                }
+
+
+                //if (accounthead == "") {
+                //    document.getElementById("error_AccountHead").style.display = "block";
+                //}
+                //else {
+                //    document.getElementById("error_AccountHead").style.display = "none";
+                //}
+
+
+                if (code == "") {
+                    document.getElementById("error_Code").style.display = "block";
+                }
+                else {
+                    document.getElementById("error_Code").style.display = "none";
+                }
+                if (date == "") {
+                    document.getElementById("error_Date").style.display = "block";
+                }
+                else {
+                    document.getElementById("error_Date").style.display = "none";
+                }
+                //if (paymentmethod == "") {
+                //    document.getElementById("error_Payment").style.display = "block";
+                //}
+                //else {
+                //    document.getElementById("error_Payment").style.display = "none";
+                //}
+                if (total == "" || total === 0.00 || isNaN(total)) {
+                    document.getElementById("error_SubTotal").style.display = "block";
+                }
+                else {
+                    document.getElementById("error_SubTotal").style.display = "none";
+                }
+                if (gtotal == "" || gtotal === 0.00 || isNaN(gtotal)) {
+                    document.getElementById("error_GrandTotal").style.display = "block";
+                }
+                else {
+                    document.getElementById("error_GrandTotal").style.display = "none";
+                }
+
+                return false;
+            }
+            else {
+                return true;
+            }
+
+
+        }
+
+
+
+        $(document).ready(function () {
+           // console.log("ready!");
+
+
+
+            //$("#Status").val("Paid");
+            //$("#Payment").val("Cash");
+
+
+
+             $('#masterPurchase').ready(function () {
+
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var value = new Date();
+            var ret = value.getDate() + "-" + months[value.getMonth()] + "-" + value.getFullYear(); //value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
+            $("#Date").val(ret);
+
+
+
+
+
+            function getPurchase(id) {
+                return $.ajax({
+                    type: 'GET',
+                    datatype: "Json",
+                    url: "../PurchaseReturn/GetPurchaseReturn",
+                    data: "PurchasereturnId=" + id
+                });
+            }
+
+            var PurchasereturnId = $("#BtnSave").attr("data-Purchase-Id");
+
+            if (PurchasereturnId > 0) {
+                $.when(getPurchase(PurchasereturnId)).then(function (res) {
+                    console.log(res);
+                    var detArr = [];
+
+                    var stringarray = [""];
+                    var arr = [];
+
+                    $("#Code").val(res.PurchaseReturnCode);
+
+                    var value = new Date(res.PurchaseReturnDate);
+
+                    var ret = value.getDate() + "-" + months[value.getMonth()] + "-" + value.getFullYear(); //value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
+
+
+                    $("#Date").val(ret);
+
+                    $("#SupplierName").val(res.SupplierName);
+                    $("#PhoneNo").val(res.PhoneNo);
+                    $("#SupplierAddress").val(res.PrimaryAddress);
+
+
+                    $("#Notes").val(res.Notes);
+                    //$("#Payment").val(res.PaymentMethod);
+                    //$("#Status").val(res.Status);
+                    $("#isSerialPurchaseReturn").val(res.isSerialPurchaseReturn);
+
+                    $("#SubTotal").text(res.Total);
+
+                    $("#TotalVat").val(res.TotalVat);
+                    $("#ServiceCharge").val(res.ServiceCharge);
+                    $("#Shipping").val(res.Shipping);
+
+
+                    $("#Discount").val(res.Discount);
+                    $("#GrandTotal").val(res.GrandTotal);
+
+
+
+                    //if ($("#Status").val() == "Paid") {
+                    //    //alert($("#Status").val());
+                    //    $("#GrandTotal").val(res.GrandTotal);
+                    //    //$("#DueAmt").val(0);
+                    //    //alert(paidamt);
+                    //}
+                    //else if ($("#Status").val() == "Advance") {
+                    //    $("#PaidAmt").val(res.PaidAmt);
+                    //    //$("#DueAmt").val(res.DueAmt);
+
+                    //}
+                    //else {
+                    //    //$("#DueAmt").val(res.DueAmt);
+                    //    //alert('not found');
+                    //}
+
+
+                    $.each(res.Items, function (i, v) {
+
+                        //var rowid = generateRandom();
+
+                        //alert(v.SerialItem)
+
+                        $('#PurchaseReturnItems').dataTable().fnAddData([v.Id, v.ProductId, v.WarehouseId, v.Product.Name, v.Description, v.vWarehouse.WhShortName, v.Price, v.Quantity, v.Amount, '<a data-itemId="0" href="#" class="dlttrashsubsection deleteItem"> <i class="fa fa-trash"></i></a>', null, false, false, v.CostPrice, v.CommissionAmount, v.CommissionPer, v.UserCommissionAmount]);
+
+
+
+                        //console.log(v.BatchSerialItems);
+
+                        $.each(v.BatchSerialItems, function (ii, vv) {
+
+                            //var rowid = generateRandom();
+                            //alert(vv.ProductId);
+
+                            var deletestring = '<a data-itemId="0" href="#" class="dlttrash deleteItem"> <i class="fa fa-trash"></i></a >';
+                            if (vv.IsUsed == true) { deletestring = '<h5 style="color:Red; font-weight:bold">Sold</h5>' }
+
+                            $('#BatchSerialList').dataTable().fnAddData([
+                                vv.Id,
+                                vv.PurchaseReturnItemId,
+                                vv.ProductId,
+                                vv.BatchSerialNo,
+                                0,//vv.SLNo,//rowCountpl + 1,
+                                deletestring,
+                                false,
+                                vv.IsUsed,
+                                false,
+                                vv.PurchaseBatchId
+                            ]);
+
+                        });
+                        //BatchSerialList.draw();
+
+
+
+                        var rowid = finalrowid;
+
+                        //$("#N" + rowid).val(v.Name);
+                        //$("#D" + rowid).val(v.Description);
+                        //$("#P" + rowid).val(v.Price);
+
+
+                        $("#N" + rowid).autocomplete({
+                            source: function (request, response) {
+                                $.ajax({
+                                    url: '../admin/ProductSearchAvgCosting/',
+                                    dataType: "json",
+                                    data: { query: $("#N" + rowid).val(), WarehouseId: $("#WHI" + rowid).val() },
+                                    success: function (data) {
+                                        //console.log(data);
+                                        response($.map(data, function (item) {
+                                            return { ProductId: item.Id, Description: item.Description, label: item.Category.Name + ' ' + item.Name + ' ' + item.Description + ' ' + item.Code, Price: item.Price, CostPrice: item.CostPrice, CommissionAmount: v.CommissionAmount, CommissionPer: v.CommissionPer };
+                                        }));
+                                    },
+                                    error: function (xhr, status, error) {
+                                        alert("Error");
+                                    },
+                                });
+                            },
+                            minLength: 3,
+                            select: function (event, uirow) {
+                                $("#PI" + rowid).html(uirow.item.ProductId);
+                                //$("#WHI" + rowid).html(uirow.item.ProductId);
+
+                                $("#P" + rowid).val(uirow.item.Price);
+                                $("#CP" + rowid).val(uirow.item.CostPrice);
+                                $("#CA" + rowid).val(uirow.item.CommissionAmount);
+                                $("#CPR" + rowid).val(uirow.item.CommissionPer);
+                                $("#UCA" + rowid).val(uirow.item.CommissionAmount * quantity);
+                                
+
+
+                                $("#D" + rowid).val(uirow.item.Description);
+                                var quantity = $("#Q" + rowid).val();
+                                $("#A" + rowid).html(uirow.item.Price * quantity);
+                                calculateSum();
+
+
+                                ////for multi select by fahad
+                                //var terms = split(this.value);
+                                //// remove the current input
+                                //terms.pop();
+                                //// add the selected item
+                                //terms.push(ui.item.value);
+                                //// add placeholder to get the comma-and-space at the end
+                                //terms.push("");
+                                //this.value = terms.join(", ");
+                                //return false;
+
+
+                            }
+
+                        });
+
+
+
+
+
+                        $("#D" + rowid).select2({
+                            minimumResultsForSearch: Infinity
+                        });
+
+
+                        $("#D" + rowid).empty();
+                        arr.length = 0;
+
+
+                        //alert($("#PI" + rowid).html());
+
+                        //alert(v.Quantity);
+
+
+                        $.ajax({
+                            type: 'POST',
+                            url: '@Url.Action("ProductsBatchSerialMultiSelect", "Admin")',
+                            dataType: 'json',
+                            async: false,
+                            data: { ProductId: $("#PI" + rowid).html(), PurchasereturnId: $("#BtnSave").attr("data-Purchase-Id") },
+                            success: function (data) {
+
+                                $("#D" + rowid).select2({
+                                    data: data,
+                                    escapeMarkup: function (markup) {
+                                        return markup;
+                                    },
+                                    templateResult: function (data) {
+                                        return data.html;
+                                    },
+                                    templateSelection: function (data) {
+                                        return data.text;
+                                    }
+
+                                })
+
+
+
+
+                                ////console.log(data);
+                                //var s = '';//'<option value="-1">Please Select Product</option>';
+                                ////alert(data.length);
+                                //for (var i = 0; i < data.length; i++) {
+                                //    s += '<option value="' + data[i].Value + '">' + data[i].Text + '</option>';
+                                //}
+                                ////console.log(s);
+
+
+                                //$("#D" + rowid).html(s);
+
+                                //arr = s;
+                            },
+                            error: function (ex) {
+                                alert('Failed.' + ex);
+                            }
+
+                        });
+
+                        console.log(v.SerialItemArray);
+
+                        $("#D" + rowid).val(v.SerialItemArray).change();//v.SerialItem
+                        //return false;
+
+
+
+
+
+                    });
+
+
+                    $.each(res.PurchaseReturnPayments, function (i, v) {
+
+                        //var rowid = generateRandom();
+
+                        //alert(v.SerialItem)
+
+                        //$('#tblpayments').dataTable().fnAddData([v.Id, v.PaymentTypeId, v.vPaymentType.TypeShortName, v.AccountHeadId, v.vChartofAccounts.AccName, v.Amount, v.PaymentCardNo, '<a data-itemId="0" href="#" class="dlttrashpayments deleteItem"> <i class="fa fa-trash"></i></a >']);
+
+                        $('#tblpayments').dataTable().fnAddData([v.Id, null, "", v.AccountHeadId, v.vChartofAccounts.AccName, v.Amount, v.PaymentCardNo, '<a data-itemId="0" href="#" class="dlttrashpayments deleteItem"> <i class="fa fa-trash"></i></a >']);
+
+                    });
+
+
+                    $("#Supplier").val(res.SupplierId).change();
+                    $("#Warehouse").val(res.WarehouseIdMain).change();
+
+                    //$("#AccountHead").val(res.AccountPayTypeId).change();
+                    Supplierinfohide();
+
+
+                    calculateSum();
+
+                    //$("#orderMasterId").val(res.result.MasterId);
+
+                }).fail(function (err) {
+                    console.log(err);
+                });
+            }
+            else {
+                var idGen = new Generator();
+                $('#Code').val("PR-"+idGen.getId());
+
+                $('#Discount').val(0);
+                $('#Shipping').val(0);
+                $('#TotalVat').val(0);
+                $('#ServiceCharge').val(0);
+                $('#PaidAmt').val(0);
+
+            }
+
+
+                 if (PurchasereturnId == 0) {
+                     $(document).on('click', 'a.deleteItem', function (e) {
+                         e.preventDefault();
+                         var $self = $(this);
+                         $(this).parents('tr').css("background-color", "#1f306f").fadeOut(800, function () {
+                             $(this).remove();
+                             calculateSum();
+                         });
+                     });
+                 };
+
+
+             });
+
+            $.ajax({
+                type: "GET",
+                url: "../PurchaseReturn/GetSuppliers",
+                datatype: "Json",
+                success: function (data) {
+
+                    $.each(data, function (index, value) {
+                        $('#Supplier').append('<option value="' + value.Id + '">' + value.SupplierName + '</option>');
+                    });
+                }
+            });
+
+
+            $.ajax({
+                type: "GET",
+                url: "../PurchaseReturn/GetAccountHead",
+                datatype: "Json",
+                success: function (data) {
+                    //console.log(data);
+
+                    $.each(data, function (index, value) {
+                        $('#AccountHead').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                    });
+
+
+
+                    $.each(data, function (index, value) {
+                        $('#AccountHeadRow').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                    });
+                    //$('#AccountHeadRow').append('<option value=null>=N/A=</option>');
+
+                }
+            });
+
+
+
+            $.ajax({
+                type: "GET",
+                url: "../PurchaseReturn/GetPaymentTypes",
+                datatype: "Json",
+                success: function (data) {
+
+                    $.each(data, function (index, value) {
+                        $('#PaymentTypes').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                    });
+                }
+            });
+
+
+        });
+
+        function Generator() { };
+        Generator.prototype.rand = Math.floor(Math.random() * 26) + Date.now();
+        Generator.prototype.getId = function () {
+            return this.rand++;
+        };
+
+
+        $('.mydatepicker').datepicker({
+            dateFormat: 'dd-M-yy',
+            todayHighlight: true,
+            autoclose: true
+        });
+
+        $('#PurchaseReturnItems').on('change', ".quantity , .price ", update);
+
+        function update() {
+
+            //alert('hit');
+            var qty = parseFloat($(this).parents('tr').find(".quantity").val());
+            var price = parseFloat($(this).parents('tr').find(".price").val());
+            var amount = qty * price;
+            $(this).parents('tr').find(".amount").text(amount);
+
+
+
+            var commissionper = parseFloat($(this).parents('tr').find(".commissionper").text());
+            var commissionamount = parseFloat($(this).parents('tr').find(".commissionamount").text());
+            var usercommisionamount = qty * commissionamount;
+
+            //alert(commissionamount);
+            if (commissionper > 0) {
+                usercommisionamount = (amount * commissionper)/100
+            }
+
+            $(this).parents('tr').find(".usercommissionamount").text(usercommisionamount);
+            //alert('abc');
+            calculateSum();
+        }
+
+
+        //$('#PurchaseReturnItems').on('change', ".prdname , .description", AddRow);
+
+        //function AddRow() {
+
+        //    var x = PurchaseReturnItems.row(':last-child').data();
+        //    console.log(x);
+        //    //var qty = parseFloat($(this).parents('tr').find(".quantity").val());
+        //    //var price = parseFloat($(this).parents('tr').find(".price").val());
+        //    //var amount = qty * price;
+        //    //$(this).parents('tr').find(".amount").text(amount);
+        //    //calculateSum();
+        //}
+
+
+
+
+        function generateRandom() {
+            const randomNum = 100000 + Math.random() * 100000;
+            return Math.round(randomNum / 10) * 10;
+        }
+        var finalrowid = 'N1234';
+
+
+
+        var PurchaseReturnItems = $('#PurchaseReturnItems').DataTable({
+            dom: '<"dom_wrapper fh-fixedHeader"fl>tip',
+            'aoColumns': [
+                { 'sClass': 'id d-none', 'visible': true },
+                { 'sClass': 'productid d-none', 'visible': true },
+                { 'sClass': 'warehouseid d-none', 'visible': true },
+
+                { 'sClass': 'prdname_row', 'visible': true },
+                { 'sClass': 'description_row', 'visible': true },
+                { 'sClass': 'warehouse_row text-center', 'visible': true },
+
+                { 'sClass': 'price_row', 'visible': true },
+                { 'sClass': 'quantity_row', 'visible': true },
+                { 'sClass': 'amount text-right', 'visible': true },
+                null,
+                {
+                    "sClass": "checkbox",
+                    "visible": true,
+                    "render": function () {
+                        return '<input type="checkbox" class="clickchk"  onchange ="cbChange(this)"  data-toggle="modal" data-target="#checkModal" >';
+                    }
+                },
+                { "sClass": "IsDelete d-none", "visible": true },
+                { "sClass": "IsTransaction d-none", "visible": true },
+                { 'sClass': 'costprice d-none', 'visible': true },
+                { 'sClass': 'commissionamount d-none', 'visible': true },
+                { 'sClass': 'commissionper d-none', 'visible': true },
+                { 'sClass': 'usercommissionamount d-none', 'visible': true }
+            ],
+            columnDefs: [
+                {
+                    'render': function (data, type, row) {
+                        return '<input class="prdname form-control" name="prdname" type="text" value="' + data + '" >';
+
+                    },
+                    'targets': 3
+                },
+                {
+                    "render": function (data, type, row) {
+                        //<input class="input-tags" type="text" data-role="tagsinput">
+                        //return '<input class="input-tags description form-control" name="description" type="text" data-val="true"  value="' + data + '">';
+                        return '<select class="description form-control" name="description" data-val="true" value="' + data + '" multiple = "multiple">';
+
+
+                    },
+                    "targets": 4
+                },
+                {
+                    'render': function (data, type, row) {
+                        return '<input class="form-control price text-center" name="price" type="number" data-val="true"  value="' + data + '"  autocomplete = "off" >';
+                    },
+                    'targets': 6
+                },
+                {
+                    "render": function (data, type, row) {
+
+                        return '<input class="form-control quantity text-center" name="quantity" type="number"   value="' + data + '"  autocomplete = "off"  >';
+                    },
+                    "targets": 7
+                }
+            ],
+            "fnCreatedRow": function (nRow, aData, iDataIndex) {
+                var rowid = generateRandom();
+                //alert(aData);
+                $(nRow).attr('id', 'rowid' + rowid);
+                $('td:eq(1)', nRow).attr('id', 'PI' + rowid);
+                $('td:eq(2)', nRow).attr('id', 'WHI' + rowid);
+                $('td:eq(3)', nRow).find("input[name='prdname']").attr('id', 'N' + rowid);
+                $('td:eq(4)', nRow).find("select[name='description']").attr('id', 'D' + rowid);
+                $('td:eq(5)', nRow).find("input[name='warehouse']").attr('id', 'W' + rowid);
+                $('td:eq(6)', nRow).find("input[name='price']").attr('id', 'P' + rowid);
+                $('td:eq(7)', nRow).find("input[name='quantity']").attr('id', 'Q' + rowid);
+                $('td:eq(8)', nRow).attr('id', 'A' + rowid);
+                $('td:eq(12)', nRow).attr('id', 'T' + rowid);
+                $('td:eq(13)', nRow).attr('id', 'CP' + rowid);
+                $('td:eq(14)', nRow).attr('id', 'CA' + rowid);
+                $('td:eq(15)', nRow).attr('id', 'CPR' + rowid);
+                $('td:eq(16)', nRow).attr('id', 'UCA' + rowid);
+
+
+
+
+                finalrowid = rowid;
+
+
+                var serialrowid = "#D" + rowid;
+                //alert(serialrowid);
+                $(document).on('change', serialrowid, function () {
+
+                    var countlength = $(serialrowid + ' :selected').length;
+
+                    //alert('found');
+                    //alert(countlength);
+
+                    if (countlength > 0) {
+                        $("#Q" + rowid).val(countlength);
+                        var price = parseFloat($("#P" + rowid).val());
+
+                        var amount = countlength * price;
+                        //alert(amount);
+                        $("#A" + rowid).text(amount);
+                        $("#T" + rowid).text('True');
+
+
+                        var CommissionAmount = parseFloat($("#CA" + rowid).text());
+                        var commissionper = parseFloat($("#CPR" + rowid).text());
+
+
+                        var usercommissionamount = countlength * CommissionAmount;
+
+                        //alert(commissionamount);
+                        if (commissionper > 0) {
+                            usercommissionamount = (amount * commissionper) / 100
+                        }
+
+
+             
+                        //alert(amount);
+                        $("#UCA" + rowid).text(usercommissionamount);
+                    }
+
+                    //$('#PurchaseReturnItems').on('change', ".quantity , .price", update);
+
+                    //function update() {
+
+                        //alert('hit');
+                        //var qty = parseFloat(countlength);
+
+
+                        calculateSum();
+                    //}
+
+                    //calculateSum();
+                    //alert(countlength);
+                });
+
+
+
+            },
+            'paging': false,
+            'info': false,
+            'ordering': false,
+            'searching': false,
+
+            language: { search: '', searchPlaceholder: "Search..." }
+        });
+
+        //$(document).on('click', 'a.f', function (e) {
+        //    e.preventDefault();
+        //    var $self = $(this);
+        //    $(this).parents('tr').css("background-color", "#1f306f").fadeOut(800, function () {
+        //        $(this).remove();
+        //        calculateSum();
+        //    });
+        //});
+
+    autocompletefunction();
+    function autocompletefunction() {
+        $("#Search").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '../admin/ProductSearchAvgCosting/',
+                    dataType: "json",
+                    data: { query: $("#Search").val(), WarehouseId: $("#Warehouse").val()  },
+                    success: function (data) {
+                        //console.log(data);
+                        response($.map(data, function (item) {
+                            //return { ProductId: item.Id, Description: item.Description, label: item.Name, Price: item.Price, Code: item.Code };
+                            return { ProductId: item.Id, Description: item.Description, ProductName: item.Name + ' ' + item.Description, label: item.Category.Name + ' ' + item.Name + ' ' + item.Description + ' ' + item.Code, Price: item.Price, CostPrice: item.CostPrice, CommissionAmount: item.CommissionAmount, CommissionPer: item.CommissionPer };
+                        }));
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error");
+                    },
+                });
+            },
+            autoFocus: true,
+            minLength: 3,
+            select: function (event, ui) {
+
+
+                var duplicatefound = 0;
+
+                $('#PurchaseReturnItems tbody tr').each(function () {
+                    //alert('searching');
+                    //alert(ui.item.ProductId);
+                    //alert($(this).find('.BatchSerialNo').val());
+                    //alert(ui.item.label);
+
+                    //alert($(this).find('.BatchSerialNo').val());
+                    if ($.trim($(this).find('.ProductId').text()) == ui.item.ProductId) {
+                        //alert('Duplicate Found !!');
+                        toastr.error('Duplicate Found !! ' + ui.item.label);
+                        return true;
+                    }
+
+                });
+
+
+                if (duplicatefound == 0) {
+                    //$('#PurchaseReturnItems').dataTable().fnAddData([
+                    //    0,
+                    //    PurchaseReturnItemId,
+                    //    ProductId,
+                    //    ui.item.label,
+                    //    0,//rowCountpl + 1,
+                    //    '<a data-itemId="0" href="#" class="dlttrash deleteItem"> <i class="fa fa-trash"></i></a >',
+                    //    false,
+                    //    false,
+                    //    true,
+                    //    ui.item.BatchSerialId
+                    //]);
+                    newrowwithui(ui);
+
+                }
+
+
+
+
+
+                //newrowwithui(ui);
+
+                calculateSum();
+                $('#Search').val("");
+
+
+                return false;
+            }
+        });
+    }
+
+
+
+
+
+    autocompletefunctionBarcodeScan();
+    function autocompletefunctionBarcodeScan() {
+        $("#SearchSerial").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '../admin/ProductsSerialSearchByBarcode/',
+                    dataType: "json",
+                    data: { query: $("#SearchSerial").val() },
+                    success: function (data) {
+                        //console.log(data);
+                        response($.map(data, function (item) {
+                            return { SerialId: item.Id, ProductId: item.ProductId, label: item.BatchSerialNo + ' ' + item.ProductName, ProductName: item.ProductName, Description: item.Descriptionm, BatchSerialNo: item.BatchSerialNo, Price: item.PurchasePrice, CostPrice: item.CostPrice, CommissionAmount: item.CommissionAmount, CommissionPer: item.CommissionPer };
+                        }));
+
+
+                        //function autoselectfunction() {
+
+
+
+                        //};
+                        //$(this).data('ui-autocomplete').menu.element.children().first().click();
+                        //$('#SearchSerial').val("");
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error");
+                    },
+                });
+            },
+            //response: function (event, ui) {
+            //    // Make your preferred selection here
+            //    //var item = ui.content[0].label;
+
+            //    //$(this).val(item).trigger('change');
+            //    //$(this).data('ui-autocomplete').menu.element.children().first().click();
+            //    //var e = $.Event("keypress", { which: 9 });
+            //    //$('#SearchSerial').trigger(e);
+
+
+            //    var downKeyEvent = $.Event("keydown");
+            //    downKeyEvent.keyCode = $.ui.keyCode.DOWN; // event for pressing "down" key
+
+            //    var enterKeyEvent = $.Event("keydown");
+            //    enterKeyEvent.keyCode = $.ui.keyCode.ENTER; // event for pressing "enter" key
+            //    ////alert('found');
+
+            //    ////$("#SearchSerial").val("SSD20"); // enter text to trigger autocomplete
+            //    $("#SearchSerial").trigger(downKeyEvent); // First downkey invokes search
+            //    $("#SearchSerial").trigger(downKeyEvent); // Second downkey highlights first item
+
+
+            //    $("#SearchSerial").trigger(enterKeyEvent); // Enter key selects
+
+            //},
+            autoFocus: true,
+            focus: function (event, ui) { event.preventDefault(); },
+            minLength: 1,
+            select: function (event, ui) {
+
+
+                var duplicatefound = 0;
+
+                $('#PurchaseReturnItems tbody tr').each(function () {
+                    if ($.trim($(this).find('.ProductId').text()) == ui.item.ProductId) {
+                        //alert('Duplicate Found !!');
+                        //toastr.warning('Product Already Included Here !! ' + ui.item.label);
+
+                        var array = $(this).find('.description').val();
+                        var quantityval = $(this).find('.quantity').val();
+
+
+                        $(this).find('.IsTransaction').val(true);
+
+
+                        //var arrayforappend = $(this).find('.description').val();
+
+                        //console.log(array);
+                        //var stringtext = $(this).find('.description option:selected').text();
+                        //console.log(stringtext);
+
+                        //var option_all = $(this).find('.description option:selected').map(function () {
+                        //    return $(this).text();
+                        //}).get().join(',');
+                        //console.log(option_all);
+
+                        //var arraytext = option_all.split(",");
+                        //console.log(arraytext);
+
+                        //duplicatefound = 1;
+
+                        var serialtextboxid = $(this).find('.description').attr('id');
+                        var quantityid = $(this).find('.quantity ').attr('id');
+
+                        //alert(serialtextboxid);
+
+
+                        $.each(array, function (key, value) {
+                            //alert(ui.item.SerialId);
+                            //alert(key + ": " + value);
+
+                            if (value == ui.item.SerialId) {
+                                toastr.error('Dupliacte Serial Found !! ' + ui.item.label);
+
+                            }
+                            else {
+
+                                //$.trim($(this).find('.ProductId').text())
+                                //var vendorsArray = [532, 533];
+                                array.push(ui.item.SerialId.toString());
+                                //console.log(arrayforappend);
+                                //$(this).find('.description').push(ui.item.SerialId.toString());
+                                //alert(serialtextboxid);
+
+                                 $("#" + serialtextboxid).val(array).trigger('change');
+                                //$("#" + quantityid).val(parseFloat(quantityval)+1).trigger('change');
+
+                                //alert('poppuatedropdown');
+                                return true;
+                                //serialtextboxid.val(array).trigger('change');
+
+                                //var serialtextboxid = $(this).find('.description').getAttribute('id');
+                                //var id = $(this).find('.description').attr('id');
+                                //console.log(id);
+                                //id.val(array);
+                                //$("#D" + rowid).val(v.SerialItemArray);//v.SerialItem
+                            }
+
+
+                        });
+
+
+                        //alert('get all data');
+
+
+                        duplicatefound = 1;
+                        return true;
+                    }
+
+                });
+
+
+                if (duplicatefound == 0) {
+                    newrowwithuiBarcode(ui);
+                }
+
+
+
+
+
+                //newrowwithuiBarcode(ui);
+
+                calculateSum();
+                $('#SearchSerial').val("");
+
+
+                return false;
+            }
+        }).on("focus", function () {
+            if ($("#SearchSerial").val().length > 0)
+            {
+                $(this).autocomplete("search", '');
+                //$(this).data('ui-autocomplete').menu.element.children().first().click();
+                //var e = $.Event("keypress", { which: 9 });
+                //$('#SearchSerial').trigger(e);
+            };
+
+        });
+    }
+
+    //$("#openButton").click(function () {
+    //    $('#SearchSerial').focus();
+    //});
+        //var tag = $('#SearchSerial');
+    //tag.on("autocompleteopen", function (event, ui) {
+    //    var items = tag.autocomplete('instance').menu.element.children();
+    //    if (items.length > 0 && autoPick) {
+    //        items.eq(0).trigger('click')
+    //        autoPick = false;
+    //    }
+    //});
+
+    ////fahad working testing
+    //$("#SearchSerial").val("SSD20212084");
+    //$("#SearchSerial").focus();
+
+    //if ($("#SearchSerial").val().length > 0) {
+    //    $("#SearchSerial").data("ui-autocomplete").menu.element.children().first().click();
+    //  //  $("ul.ui-autocomplete")
+    //        //.find("li:contains(JavaScript)")
+    //        //.trigger("click");
+    //    //$("#SearchSerial").data("ui-autocomplete").menu.element.children().first().click();
+    //    //$("#SearchSerial").val("");
+    //}
+
+
+    //$("#SearchSerial").on('keydown focusout', function (event) {
+    //    if (event.keyCode != $.ui.keyCode.TAB && !(event.type == "focusout")) return;
+
+    //    event.keyCode = $.ui.keyCode.DOWN;
+    //    event.type = "keydown";//change the event from focusout
+    //    $(this).trigger(event);
+
+    //    event.keyCode = $.ui.keyCode.ENTER;
+    //    $(this).trigger(event);
+    //});
+
+
+    //var e = $.Event("keypress", { which: 9 });
+    //$('#SearchSerial').trigger(e);
+    //alert('enter key hit');
+    //autocompletefunctionBarcodeScan();
+
+
+
+    autocompleteSerialSearchfunction();
+
+    function autocompleteSerialSearchfunction() {
+        //var tableserial = $('#PurchaseReturnItems').DataTable();
+        //var dataforserial = tableserial.row($('input[type=checkbox]:checked').parents('tr')).data();
+        //console.log(dataforserial);
+        //var PurchaseItemIdSerial = dataforserial[0];
+        //var ProductIdSerial = dataforserial[1];
+
+        $("#slnoSearch").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '../admin/ProductsBatchSerial/',
+                    dataType: "json",
+                    data: { query: $("#slnoSearch").val(), ProductId: ProductId },
+                    success: function (data) {
+                        //console.log(data);
+                        //alert(data);
+                        response($.map(data, function (item) {
+                            //return { ProductId: item.Id, Description: item.Description, label: item.Name, Price: item.Price, Code: item.Code };
+                            return { BatchSerialId: item.Id, label: item.BatchSerialNo };
+                        }));
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error");
+                    },
+                });
+            },
+            autoFocus: true,
+            minLength: 3,
+            select: function (event, ui) {
+
+                var duplicatefound = 0;
+
+                $('#BatchSerialList tbody tr').each(function () {
+
+                    //alert($(this).find('.BatchSerialNo').val());
+                    //alert(ui.item.label);
+
+                    //alert($(this).find('.BatchSerialNo').val());
+                    if ($(this).find('.BatchSerialNo').val() == ui.item.label) {
+                        //alert('Duplicate Found !!');
+                        toastr.error('Duplicate Found !! ' + ui.item.label);
+                        duplicatefound = 1;
+                        return true;
+                    }
+
+                });
+
+
+                if (duplicatefound == 0) {
+                    $('#BatchSerialList').dataTable().fnAddData([
+                        0,
+                        PurchaseReturnItemId,
+                        ProductId,
+                        ui.item.label,
+                        0,//rowCountpl + 1,
+                        '<a data-itemId="0" href="#" class="dlttrash deleteItem"> <i class="fa fa-trash"></i></a >',
+                        false,
+                        false,
+                        true,
+                        ui.item.BatchSerialId
+                    ]);
+
+                }
+
+
+                var targetTablepl = $("#BatchSerialList").DataTable();
+
+                var xcount = targetTablepl.rows(':visible').count();
+                //alert(xcount);
+                var table = $('#PurchaseReturnItems').DataTable();
+                //var datacurrentvalue = table.row($('input[type=checkbox]:checked').parents('tr')).data();
+                var rownovouchersub = table.row($('input[type=checkbox]:checked').parents('tr')).index();
+                //alert(rownovouchersub);
+
+                var cellprice  = $('#PurchaseReturnItems tbody tr').filter(':has(:checkbox:checked)').find('.price').val();
+                console.log(cellprice);
+                //cellprice.data(xcount);
+
+                var cellqty = table.cell(rownovouchersub, 7);
+                cellqty.data(xcount);
+                var cellamount = table.cell(rownovouchersub, 8);
+                cellamount.data(xcount * cellprice);
+
+
+
+                var commissionamountrow = $('#PurchaseReturnItems tbody tr').filter(':has(:checkbox:checked)').find('.commissionamount').val();
+                alert(commissionamountrow);
+                console.log(commissionamountrow.data());
+                var cellcommissionamount = table.cell(rownovouchersub, 15);
+                cellcommissionamount.data(xcount * commissionamountrow);
+
+
+                //update();
+
+                calculateSum();
+
+
+                $('#slnoSearch').val("");
+                $('#slnoSearch').text("");
+
+
+                return false;
+
+                //calculateSum();
+
+
+            }
+        });
+    }
+
+
+
+
+
+
+        var PurchaseReturnItemId;
+        var ProductId;
+
+        var newDetailsId;
+        var newOrderNo;
+        var newUnitPrice;
+
+
+
+        function cbChange(obj) {
+            //calculateQtyBatch();
+
+            var cbs = document.getElementsByClassName("clickchk");
+            for (var i = 0; i < cbs.length; i++) {
+                cbs[i].checked = false;
+            }
+            obj.checked = true;
+            //alert('hit');
+            //console.log(obj);
+
+
+            var table = $('#PurchaseReturnItems').DataTable();
+            //var tableserial = $('#tblserial').DataTable();
+            var data = null;
+
+            if (obj.checked == true) {
+                //alert('working');
+                //table = $('#tbl').DataTable();
+                //table.draw();
+
+                data = table.row($('input[type=checkbox]:checked').parents('tr')).data();
+
+                PurchaseReturnItemId = data[0];
+                ProductId = data[1];
+
+
+                //alert('clicked');
+                //console.log(data);
+
+                //alert(data[3]);
+                //var termsid = data[0];
+                ////////serialno = data[4];
+
+                ////////PurchaseReturnItemId = data[2];
+                ////////newDetailsId = data[1];
+                ////////newOrderNo = data[4];
+                ////////newUnitPrice = data[9];
+
+                //alert(serialno);
+
+
+                $('#BatchSerialList tbody tr').show();
+                //alert('working');
+                $('#BatchSerialList tbody tr').each(function () {
+                    //$(this).hide();
+
+                    //alert($.trim($(this).find('.IsDelete').text()));
+
+
+                    if ($.trim($(this).find('.ProductId').text()) == ProductId && $.trim($(this).find('.IsDelete').text()) == 'false') { // if V is selected, hide
+                        //  alert('found');
+                        $(this).show();
+                    }
+                    else {
+                        $(this).hide();
+                    }
+                });
+
+
+                var targetTablepl = $("#BatchSerialList").DataTable();
+
+                var xcount = targetTablepl.rows(':visible').count();
+                //alert(xcount);
+                var table = $('#PurchaseReturnItems').DataTable();
+                //var datacurrentvalue = table.row($('input[type=checkbox]:checked').parents('tr')).data();
+                var rownovouchersub = table.row($('input[type=checkbox]:checked').parents('tr')).index();
+                //alert(rownovouchersub);
+
+                var cellprice  = $('#PurchaseReturnItems tbody tr').filter(':has(:checkbox:checked)').find('.price').val();
+                console.log(cellprice.data());
+                //cellprice.data(xcount);
+
+                var cellqty = table.cell(rownovouchersub, 7);
+                cellqty.data(xcount);
+                var cellamount = table.cell(rownovouchersub, 8);
+                cellamount.data(xcount * cellprice);
+
+
+
+                var commissionamountrow = $('#PurchaseReturnItems tbody tr').filter(':has(:checkbox:checked)').find('.commissionamount').val();
+                alert(commissionamountrow);
+                console.log(commissionamountrow.data());
+                var cellcommissionamount = table.cell(rownovouchersub, 15);
+                cellcommissionamount.data(xcount * commissionamountrow);
+
+                calculateSum();
+
+
+            }
+            else {
+                // alert('You Un-Checked it');
+            }
+
+        }
+
+        function newblankrow() {
+
+
+            var rowid = generateRandom();
+            $('#PurchaseReturnItems').dataTable().fnAddData(['0', 0, "", '', "", 0, '0', 0, '<a data-itemId="0" href="#" class="dlttrashsubsection deleteItem"> <i class="fa fa-trash"></i></a>', null, false, true,0,0,0]);
+
+            rowid = finalrowid;
+            $("#N" + rowid).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '../admin/ProductSearchAvgCosting/',
+                        dataType: "json",
+                        data: { query: $("#N" + rowid).val(), WarehouseId: $("#WHI" + rowid).val()  },
+                        //data: { query: prdnametest },
+
+                        success: function (data) {
+                            //console.log(data);
+                            response($.map(data, function (item) {
+                                //return { ProductId: item.Id, Description: item.Description, label: item.Name, Price: item.Price, Code: item.Code };
+                                return { ProductId: item.Id, Description: item.Description, label: item.Category.Name + ' ' + item.Name + ' ' + item.Description + ' ' + item.Code, Price: item.Price, CostPrice: item.CostPrice, CommissionAmount: item.CommissionAmount, CommissionPer: item.CommissionPer };
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                minLength: 3,
+                select: function (event, uirow) {
+
+
+                    //alert("#P" + rowid);
+                    $("#PI" + rowid).html(uirow.item.ProductId);
+                    //alert('hit');
+                    $("#D" + rowid).val(uirow.item.Description);
+
+                    $("#P" + rowid).val(uirow.item.Price);
+                    $("#CP" + rowid).val(uirow.item.CostPrice);
+                    $("#CA" + rowid).val(uirow.item.CommissionAmount);
+                    $("#CPR" + rowid).val(uirow.item.CommissionPer);
+                    $("#UCA" + rowid).val(uirow.item.CommissionAmount * quantity);
+
+
+                    var quantity = $("#Q" + rowid).val();
+
+                    $("#A" + rowid).html(uirow.item.Price * quantity);
+
+
+                    //var myTab = document.getElementById('PurchaseReturnItems');
+
+
+                    // GET THE CELLS COLLECTION OF THE CURRENT ROW.
+                    //var objCells = myTab.rows.item(2).cells;
+                    //console.log(objCells[1].attr('id'));
+                    //alert($().val());
+
+                    //$('#PurchaseReturnItems').data.reload();
+
+
+                    //var table123 = $('#PurchaseReturnItems').DataTable();
+
+                    //let lastRow = table123.rows[table123.rows.length - 1];
+                    //console.log(lastRow);
+
+                    //var x = table123.row(':last-child').data();
+                    //var z = x[1];
+                    //console.log(x);
+
+                    //var z = $('#PurchaseReturnItems tbody tr').length;
+                    ////alert(z);
+                    //var abc = $('#PurchaseReturnItems').dataTable().fnGetData()
+                    //console.log(abc);
+                    ////var aData = table123.row(z).data()[5];
+                    ////alert(aData[z][1]);// will show first column data
+
+                    //if (z > 0) {
+                    //    newblankrow();
+                    //}
+                }
+            });
+
+
+
+
+        }
+
+
+        //function split(val) {
+        //    return val.split(/,\s*/);
+        //}
+        //function extractLast(term) {
+        //    return split(term).pop();
+        //}
+
+
+        function newrowwithui(ui) {
+
+
+            var rowid = generateRandom();
+
+            $('#PurchaseReturnItems').dataTable().fnAddData(['0', ui.item.ProductId, $("#Warehouse").val(), ui.item.ProductName, ui.item.Description, $('#Warehouse option:selected').text(), ui.item.Price, '1', ui.item.Price, '<a data-itemId="0" href="#" class="dlttrashsubsection deleteItem"> <i class="fa fa-trash"></i></a>', null, false, true, ui.item.CostPrice, ui.item.CommissionAmount, ui.item.CommissionPer ,ui.item.CommissionAmount]);
+            //alert('found');
+            rowid = finalrowid;
+
+            $("#N" + rowid).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '../admin/ProductSearchAvgCosting/',
+                        dataType: "json",
+                        data: { query: $("#N" + rowid).val(), WarehouseId: $("#WHI" + rowid).val() },
+                        //data: { query: prdnametest },
+
+                        success: function (data) {
+                            //console.log(data);
+                            response($.map(data, function (item) {
+                                //return { ProductId: item.Id, Description: item.Description, label: item.Name, Price: item.Price, Code: item.Code };
+                                return { ProductId: item.Id, Description: item.Description, label: item.Category.Name + ' ' + item.Name + ' ' + item.Description + ' ' + item.Code, Price: item.Price, CostPrice: item.CostPrice, CommissionAmount: item.CommissionAmount, CommissionPer: item.CommissionPer };
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                minLength: 3,
+                autoFocus: true,
+                select: function (event, uirow) {
+
+                    //alert('hit');
+                    //alert(rowid);
+
+                    //alert("#P" + rowid);
+                    $("#PI" + rowid).html(uirow.item.ProductId);
+                    $("#D" + rowid).val(uirow.item.Description);
+                    $("#P" + rowid).val(uirow.item.Price);
+
+                    $("#CP" + rowid).val(uirow.item.CostPrice);
+                    $("#CA" + rowid).val(uirow.item.CommissionAmount);
+                    $("#CPR" + rowid).val(uirow.item.CommissionPer);
+
+                    $("#UCA" + rowid).val(uirow.item.CommissionAmount * quantity);
+
+                    var quantity = $("#Q" + rowid).val();
+                    $("#A" + rowid).html(uirow.item.Price * quantity);
+                    //newblankrow();
+
+                    //alert(rowid);
+
+                    //var serialrowid = "#D" + rowid;
+                    ////alert(serialrowid);
+                    //$(document).on('change', serialrowid, function () {
+
+                    //    var countlength = $(serialrowid +' :selected').length;
+                    //    $("#Q" + rowid).val(countlength);
+                    //    //alert(countlength);
+                    //});
+
+
+
+                    $("#D" + rowid).empty();
+                    $("#D" + rowid).val(null);
+                    //$("#D" + rowid).select2();
+
+                    //arr.length = 0;
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("ProductsBatchSerialMultiSelect", "Admin")',
+                        dataType: 'json',
+                        async: false,
+                        data: { ProductId: $("#PI" + rowid).html()  },
+                        success: function (data) {
+                            console.log(data);
+
+
+                            $("#D" + rowid).select2({
+                                data: data,
+                                escapeMarkup: function (markup) {
+                                    return markup;
+                                },
+                                templateResult: function (data) {
+                                    return data.html;
+                                },
+                                templateSelection: function (data) {
+                                    return data.text;
+                                }
+
+                            })
+
+                            //console.log(data);
+                            //var s = '';//'<option value="-1">Please Select Product</option>';
+                            ////alert(data.length);
+                            //for (var i = 0; i < data.length; i++) {
+                            //    s += '<option value="' + data[i].Value + '">' + data[i].Text + '</option>';
+                            //}
+                            ////console.log(s);
+
+
+                            //$("#D" + rowid).html(s);
+
+                            //arr = s;
+                        },
+                        error: function (ex) {
+                            alert('Failed.' + ex);
+                        }
+
+                    });
+
+                }
+            });
+
+
+
+
+            var stringarray = [""];
+            var arr = [];
+
+            var arr_pincode = {};//JSON.parse(`{"24":[${stringarray}]}`);
+            //var selected_state = [24, 27];
+            //var selected_pin = JSON.parse('["380001"]');
+
+            //var already_slc_pin = [];
+            //var current_pin = [];
+
+
+            $("#D" + rowid).select2({
+                minimumResultsForSearch: Infinity
+            });
+
+
+            $("#D" + rowid).empty();
+            arr.length = 0;
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("ProductsBatchSerialMultiSelect", "Admin")',
+                dataType: 'json',
+                async: false,
+                data: { ProductId: $("#PI" + rowid).html()  },
+                success: function (data) {
+                   // console.log(data);
+
+
+
+                    $("#D" + rowid).select2({
+                        data: data,
+                        escapeMarkup: function (markup) {
+                            return markup;
+                        },
+                        templateResult: function (data) {
+                            return data.html;
+                        },
+                        templateSelection: function (data) {
+                            return data.text;
+                        }
+
+                    });
+
+                    //var s = '';//'<option value="-1">Please Select Product</option>';
+                    ////alert(data.length);
+                    //for (var i = 0; i < data.length; i++) {
+                    //    s += '<option value="' + data[i].Value + '">' + data[i].Text + '</option>';
+                    //}
+                    ////console.log(s);
+
+
+                    //$("#D" + rowid).html(s);
+
+                    //arr = s;
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+            return false;
+        };
+
+
+            function newrowwithuiBarcode(ui) {
+
+                var rowid = generateRandom();
+                $('#PurchaseReturnItems').dataTable().fnAddData(['0', ui.item.ProductId, $("#Warehouse").val(), ui.item.ProductName, ui.item.Description, $('#Warehouse option:selected').text(), ui.item.Price, '1', ui.item.Price, '<a data-itemId="0" href="#" class="dlttrashsubsection deleteItem"> <i class="fa fa-trash"></i></a>', null, false, true, ui.item.CostPrice, ui.item.CommissionAmount, ui.item.CommissionPer, ui.item.CommissionAmount]);
+
+
+
+            rowid = finalrowid;
+
+            $("#N" + rowid).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '../admin/ProductSearchAvgCosting/',
+                        dataType: "json",
+                        data: { query: $("#N" + rowid).val(), WarehouseId: $("#WHI" + rowid).val()  },
+                        //data: { query: prdnametest },
+
+                        success: function (data) {
+                            //alert('wait');
+
+                            //console.log(data);
+                            response($.map(data, function (item) {
+                                //return { ProductId: item.Id, Description: item.Description, label: item.Name, Price: item.Price, Code: item.Code };
+                                return { ProductId: item.Id, Description: item.Description, label: item.Category.Name + ' ' + item.Name + ' ' + item.Description + ' ' + item.Code, Price: item.Price, CostPrice: item.CostPrice, CommissionAmount: item.CommissionAmount, CommissionPer: item.CommissionPer };
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                minLength: 3,
+                autoFocus: true,
+                select: function (event, uirow) {
+
+                    //alert("#P" + rowid);
+                    $("#PI" + rowid).html(uirow.item.ProductId);
+                    $("#D" + rowid).val(uirow.item.Description);
+                    $("#P" + rowid).val(uirow.item.Price);
+
+                    $("#CP" + rowid).val(uirow.item.CostPrice);
+                    $("#CA" + rowid).val(uirow.item.CommissionAmount);
+                    $("#CPR" + rowid).val(uirow.item.CommissionPer);
+
+                    $("#UCA" + rowid).val(uirow.item.CommissionAmount * quantity);
+
+
+                    var quantity = $("#Q" + rowid).val();
+                    $("#A" + rowid).html(uirow.item.Price * quantity);
+                    //newblankrow();
+
+                    //alert(rowid);
+
+
+                    $("#D" + rowid).empty();
+                    $("#D" + rowid).val(null);
+                    //$("#D" + rowid).select2();
+
+                    //arr.length = 0;
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("ProductsBatchSerialMultiSelect", "Admin")',
+                        dataType: 'json',
+                        async: false,
+                        data: { ProductId: $("#PI" + rowid).html()  },
+                        success: function (data) {
+
+
+                            $("#D" + rowid).select2({
+                                data: data,
+                                escapeMarkup: function (markup) {
+                                    return markup;
+                                },
+                                templateResult: function (data) {
+                                    return data.html;
+                                },
+                                templateSelection: function (data) {
+                                    return data.text;
+                                }
+
+                            })
+
+                            //alert('wait');
+                            //console.log(data);
+                            //var s = '';//'<option value="-1">Please Select Product</option>';
+                            ////alert(data.length);
+                            //for (var i = 0; i < data.length; i++) {
+                            //    s += '<option value="' + data[i].Value + '">' + data[i].Text + '</option>';
+                            //}
+                            ////console.log(s);
+
+
+                            //$("#D" + rowid).html(s);
+
+                            //arr = s;
+                        },
+                        error: function (ex) {
+                            alert('Failed.' + ex);
+                        }
+
+                    });
+
+                }
+            });
+
+
+
+
+            var stringarray = [""];
+            var arr = [];
+
+            var arr_pincode = {};//JSON.parse(`{"24":[${stringarray}]}`);
+            //var selected_state = [24, 27];
+            //var selected_pin = JSON.parse('["380001"]');
+
+            //var already_slc_pin = [];
+            //var current_pin = [];
+
+
+            $("#D" + rowid).select2({
+                minimumResultsForSearch: Infinity
+            });
+
+
+            $("#D" + rowid).empty();
+            arr.length = 0;
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("ProductsBatchSerialMultiSelect", "Admin")',
+                dataType: 'json',
+                async: false,
+                data: { ProductId: $("#PI" + rowid).html()  },
+                success: function (data) {
+
+
+
+                    $("#D" + rowid).select2({
+                        data: data,
+                        escapeMarkup: function (markup) {
+                            return markup;
+                        },
+                        templateResult: function (data) {
+                            return data.html;
+                        },
+                        templateSelection: function (data) {
+                            return data.text;
+                        }
+
+                    })
+
+                    //console.log(data);
+                    //var s = '';//'<option value="-1">Please Select Product</option>';
+                    ////alert(data.length);
+                    //for (var i = 0; i < data.length; i++) {
+                    //    s += '<option value="' + data[i].Value + '">' + data[i].Text + '</option>';
+                    //}
+                    ////console.log(s);
+
+
+                    //$("#D" + rowid).html(s);
+
+                    //arr = s;
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+
+                $("#D" + rowid).val(ui.item.SerialId);
+                $("#D" + rowid).change();
+
+
+            return false;
+        };
+
+
+
+
+
+        function calculateSum() {
+            var sum = 0;
+            var sumQty = 0;
+
+            // iterate through each td based on class and add the values
+            //$("#PurchaseReturnItems > tbody  > tr .amount").each(function () {
+
+            //    var value = $(this).text();
+            //    // add only if the value is number
+            //    if (!isNaN(value) && value.length !== 0) {
+            //        sum += parseFloat(value);
+            //    }
+            //});
+
+
+
+            $("#PurchaseReturnItems > tbody  > tr .amount:visible").each(function () {
+
+                //var value = parseInt($(this).find('.amount').val());// $('.amount', this).text().replace(/[\$,]/g, '');//$(this).text();
+                var value = $(this).text();
+
+                //alert(value)
+                // add only if the value is number
+                if (!isNaN(value) && value.length !== 0) {
+                    sum += parseFloat(value);
+                }
+            });
+
+
+            if (sum == 0.0) {
+                $('#Discount').text("0");
+                $('#GrandTotal').text("0");
+                $('#TotalVat').text("0");
+                $('#ServiceCharge').text("0");
+                $('#Shipping').text("0");
+
+            }
+
+
+            $.each($("#BatchSerialList tbody tr"), function () {
+
+                var Quantity = parseInt($(this).find('.SLNo').val());
+                if (!isNaN(Quantity) && Quantity.length !== 0) {
+                    sumQty++;
+                }
+            });
+
+
+            $.each($("#PurchaseReturnItems tbody tr"), function () {
+
+                var Quantity = parseInt($(this).find('.quantity').val());
+                if (!isNaN(Quantity) && Quantity.length !== 0) {
+                    sumQty += parseFloat(Quantity);
+                }
+            });
+
+
+            //console.log(sum);
+            $('#SubTotal').text(sum.toFixed(2));
+            $('#GrandTotal').val(sum.toFixed(2));
+
+            $('#TotalQty').text(sumQty.toFixed(2));
+
+            var discount = parseFloat($('#Discount').val()).toFixed(2);
+            if (isNaN(discount)) return;
+            var subtotal = parseFloat(sum).toFixed(2);
+
+
+            var isTaxExcluded = '@HttpContextAccessor.HttpContext.Session.GetInt32("isTaxExcluded").ToString()';
+            var TaxPer = '@HttpContextAccessor.HttpContext.Session.GetString("TaxPer").ToString()';
+            var TotalVat = 0.00;
+
+
+            if (TaxPer > 0)
+            {
+                //alert(isTaxExcluded);
+                //alert(subtotal);
+                //alert(TaxPer);
+
+                $('#TotalVat').attr('readonly', true);
+
+                if (isTaxExcluded == 1) {
+
+                    var taxamount = (subtotal * (parseFloat(TaxPer)*100)) / 100;
+
+                    $('#TotalVat').val(taxamount.toFixed(2));
+                    TotalVat = taxamount.toFixed(2);
+                }
+                else {
+
+
+                    var taxmount = subtotal -  (subtotal / (parseFloat(TaxPer) + 1));
+
+                    $('#TotalVat').val(taxmount.toFixed(2));
+                    //alert(taxmount);
+                }
+
+
+            }
+
+
+
+            //var TotalVat = parseFloat($('#TotalVat').val()).toFixed(2);
+
+
+
+            var ServiceCharge = parseFloat($('#ServiceCharge').val()).toFixed(2);
+            var Shipping = parseFloat($('#Shipping').val()).toFixed(2);
+
+            //console.log(TotalVat);
+            //console.log(ServiceCharge);
+            //console.log(Shipping);
+            //console.log(subtotal);
+            //console.log(Shipping);
+
+
+            var grandtotal = parseFloat(parseFloat(TotalVat) + parseFloat(ServiceCharge) + parseFloat(Shipping) + parseFloat(subtotal) - parseFloat(discount)).toFixed(2);
+            $('#GrandTotal').val(grandtotal);
+            //$('#PaymentAmount').val(grandtotal);
+
+
+            //var tableabc = $('#tblpayments').DataTable();
+            //var column = tableabc.column(5);
+            //$(column.footer()).html(
+            //    column.data().reduce(function (a, b) {
+            //        return a + b;
+            //    })
+            //);
+
+
+            var sumpayment = 0.00;
+            $("#tblpayments > tbody  > tr .Amount").each(function () {
+
+                var value = $(this).text();
+                // add only if the value is number
+                if (!isNaN(value) && value.length !== 0) {
+                    sumpayment += parseFloat(value);
+                }
+            });
+
+
+
+
+
+            //alert(sumpayment);
+
+            $('#TotalCollectionAmount').text(sumpayment.toFixed(2));
+            $('#PaymentAmount').val(grandtotal - sumpayment);
+
+            
+
+            var totalcommissionamount = 0.00;
+            $("#PurchaseReturnItems > tbody  > tr .usercommissionamount").each(function () {
+
+                var value = $(this).text();
+                // add only if the value is number
+                if (!isNaN(value) && value.length !== 0) {
+                    totalcommissionamount += parseFloat(value);
+                }
+            });
+            //alert(totalcommissionamount);
+            $('#UserCommission').val(totalcommissionamount.toFixed(2));
+
+
+            //var sum = $('#tblpayments').DataTable().column(5).data().sum();
+            //$('#TotalCollectionAmount').html(sum);
+
+            //$.each($("#tblpayments tbody tr"), function () {
+
+            //    var payamount = parseFloat($(this).find('.Amount').val());
+
+            //    alert(payamount);
+
+            //    if (!isNaN(payamount) && payamount.length !== 0) {
+            //        sumQty += parseFloat(payamount);
+            //    }
+            //});
+
+
+
+            //$('#TotalCollectionAmount').text(sumQty.toFixed(2));
+
+
+
+            //console.log(grandtotal);
+        };
+
+        //function DiscountAmount() {
+        //    //blankme("Discount");
+        //    //blankme("GrandTotal");
+        //    var discount = parseFloat($('#Discount').val()).toFixed(2);
+        //    if (isNaN(discount)) return;
+        //    var subtotal = parseFloat($('#SubTotal').text()).toFixed(2);
+        //    var grandtotal = parseFloat(a - b).toFixed(2);
+        //    $('#GrandTotal').val(grandtotal);
+        //}
+
+        @*function saveOrder(data) {
+
+            //alert('Fahad found PurchaseReturn');
+            //console.log(data);
+            return $.ajax({
+                contentType: 'application/json; charset=utf-8',
+                //contentType: "application/json",
+                dataType: 'json',
+                type: 'POST',
+                url: "../PurchaseReturn/AddPurchaseReturn",
+                data: data,
+                success: function (result) {
+                    //console.log(result);
+                    //alert('Wait');
+                    if (result.Success == "1") {
+                        toastr.success("Data Save Successfully");
+
+                        window.setTimeout(function () {
+                            // Move to a new location or you can do something else
+                                 window.location.href = '@Url.Action("Index", "PurchaseReturn")';
+                        }, 1000);
+
+                }
+                else {
+                    toastr.error(result.ex);
+                }
+            },
+            error: function (result) {
+
+                if (result.ex = "") {
+                    toastr.error("Unable To Save The Data");
+                } else {
+                    toastr.error(result.ex);
+
+                }
+            }
+            });
+        }*@
+
+        $("#BtnSave").click(function (e) {
+            e.preventDefault();
+
+            if (submitValidation()) {
+
+                var discount;
+                if (parseFloat($('#Discount').val()).toFixed(2) == "NaN") {
+                    discount = 0;
+                }
+                else {
+                    discount = $('#Discount').val();
+                }
+
+
+                if ($('#tblpayments').length == 0) {
+                    $('#PaymentAmount').val($('#mainpaidamount').val());
+                    //$('#PaymentTypes').val().change();
+
+
+                    AddPayments();
+                }
+
+
+
+                var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+                var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+
+
+                var orderArr = [];
+                orderArr.length = 0;
+                var i = 0
+                $.each($("#PurchaseReturnItems tbody tr"), function () {
+                   // i++;
+                   // alert(i);
+
+                    //alert($(this).find('td:eq(3)').html());
+                    //alert($(this).find('td:eq(3)').text());
+
+
+
+
+                    //alert($(this).find('.description').val());
+                    //alert($(this).find('.description').html());
+                    //alert($(this).find('.description').text());
+
+
+                    var array = $(this).find('.description').val();
+                    var stringtext = $(this).find('.description option:selected').text();
+                    //$('#ItemDescId option:selected').text()
+
+                    //alert(arraytext);
+
+                    //console.log(serialliststring);
+                    //var array = serialliststring.split(',');
+
+                    //var arraytext = stringtext.split(",");
+
+                    //$.each(arraytext, function (i) {
+                    //    alert(arraytext[i]);
+                    //});
+
+
+                    var option_all = $(this).find('.description option:selected').map(function () {
+                        return $(this).text();
+                    }).get().join(',');
+                    console.log(option_all);
+                    //$('#result').text(option_all);
+
+
+                    var arraytext = option_all.split(",");
+
+                    //$.each(arraytext, function (i) {
+                    //    alert(arraytext[i]);
+                    //});
+
+                    var firstPurchasereturnitemid = $(this).find('td:eq(0)').html();
+                    var firstproductid = $(this).find('td:eq(1)').html();
+
+
+                    var orderbatchArr = [];
+                    orderbatchArr.length = 0;
+
+                    console.log(array);
+                    //alert('Wait for array');
+
+                    $.each(array, function (i) {
+
+
+                        orderbatchArr.push({
+                            Id: 0,
+                            PurchaseReturnItemId: firstPurchasereturnitemid,
+                            ProductId: firstproductid,
+                            BatchSerialNo: arraytext[i],
+                            SLNo: 0,
+                            IsDelete: false,
+                            IsUsed: false,
+                            IsTransaction: false,
+                            ComId: ComId,
+                            PurchaseBatchId: array[i]
+                        });
+
+
+                    });
+
+                    //alert($(this).find('td:eq(11)').html());
+                    //alert($(this).find('.quantity').val());
+
+                    if ($(this).find('td:eq(0)').html() == 0 && $(this).find('td:eq(11)').html() == 'false') {
+
+
+                        orderArr.push({
+
+                            Id: $(this).find('td:eq(0)').html(),
+                            ProductId: $(this).find('td:eq(1)').html(),
+                            PurchaseReturnId: parseInt($("#BtnSave").attr("data-Purchase-Id")),
+                            WarehouseId: $(this).find('td:eq(2)').html(), //$('#Warehouse option:selected').text()
+                            //Name: $(this).find('td:eq(2)').html(),
+                            Name: $(this).find('.prdname').val(),
+                            //Description: $(this).find('.description').val(),
+                            Price: $(this).find('.price').val(),
+                            CostPrice: $(this).find('td:eq(13)').html(),
+                            CommissionAmount: $(this).find('td:eq(14)').html(),
+                            CommissionPer: $(this).find('td:eq(15)').html(),
+                            UserCommissionAmount: $(this).find('td:eq(16)').html(),
+
+
+
+
+
+                            //Price: parseFloat($(this).find('td:eq(4)').html()),
+                            Quantity: parseFloat($(this).find('.quantity').val()),
+                            Amount: parseFloat($(this).find('td:eq(8)').html()),
+                            BatchSerialItems: orderbatchArr,
+                            SerialItem: array.toString(),
+                            IsDelete: $(this).find('td:eq(11)').html(),
+                            IsTransaction: $(this).find('td:eq(12)').html(),
+                            ComId: ComId
+                            //SerialItem: $(this).find('.description').val()
+                        });
+
+
+                    }
+                    else {
+
+
+                        orderArr.push({
+
+                            Id: $(this).find('td:eq(0)').html(),
+                            ProductId: $(this).find('td:eq(1)').html(),
+                            PurchaseReturnId: parseInt($("#BtnSave").attr("data-Purchase-Id")),
+                            WarehouseId: $(this).find('td:eq(2)').html(), //$('#Warehouse option:selected').text()
+                            //Name: $(this).find('td:eq(2)').html(),
+                            Name: $(this).find('.prdname').val(),
+                            //Description: $(this).find('.description').val(),
+                            Price: $(this).find('.price').val(),
+                            CostPrice: $(this).find('td:eq(13)').html(),
+                            CommissionAmount: $(this).find('td:eq(14)').html(),
+                            CommissionPer: $(this).find('td:eq(15)').html(),
+                            UserCommissionAmount: $(this).find('td:eq(16)').html(),
+
+                            //Price: parseFloat($(this).find('td:eq(4)').html()),
+                            Quantity: parseFloat($(this).find('.quantity').val()),
+                            Amount: parseFloat($(this).find('td:eq(8)').html()),
+                            BatchSerialItems: orderbatchArr,
+                            SerialItem: array.toString(),
+                            IsDelete: $(this).find('td:eq(11)').html(),
+                            IsTransaction: $(this).find('td:eq(12)').html(),
+                            ComId: ComId
+                            //SerialItem: $(this).find('.description').val()
+                        });
+
+                    }
+
+                });
+
+                //alert($("#BtnSave").attr("data-Purchase-Id"));
+
+                //alert($("#AccountHead").val());
+
+
+                //var paidamt = 0;
+                //var dueamt = parseFloat($('#GrandTotal').val()).toFixed(2);
+                //if ($("#Status").val() == "Paid") {
+                //    //alert($("#Status").val());
+                //    paidamt = parseFloat($('#GrandTotal').val()).toFixed(2);
+                //    dueamt = 0;
+                //    //alert(paidamt);
+                //}
+                //else {
+                //    //alert('not found');
+                //}
+
+                var paidamt = 0;
+                //var dueamt = parseFloat($('#GrandTotal').val()).toFixed(2);
+                //if ($("#Status").val() == "Paid") {
+                //    //alert($("#Status").val());
+                //    paidamt = parseFloat($('#GrandTotal').val()).toFixed(2);
+                //    dueamt = 0;
+                //    //alert(paidamt);
+                //}
+                //else if ($("#Status").val() == "Advance") {
+                //    paidamt = parseFloat($('#PaidAmt').val()).toFixed(2);
+                //    dueamt = parseFloat($('#GrandTotal').val()).toFixed(2) - parseFloat($('#PaidAmt').val()).toFixed(2);
+                //}
+                //else {
+                //    dueamt = parseFloat($('#GrandTotal').val()).toFixed(2);
+                //    //alert('not found');
+                //}
+
+
+                //($("#Status").val() == "Paid") { parseFloat($('#GrandTotal').val()).toFixed(2);} else { 0;};
+
+
+
+                var PurchaseReturnPaymentSub = { "Id": "", "PurchaseReturnId": "", "PaymentTypeId": "", "AccountHeadId": "", "Amount": "", "PaymentCardNo": "", "ComId": "", "LuserId": "", "RowNo": "", };
+                var paymentArr = [];
+                paymentArr.length = 0;
+                var i = 0
+                var oTablePayment = $('#tblpayments').dataTable().fnGetData();
+                for (var i = 0; i < oTablePayment.length; i++) {
+
+
+                    
+                    PurchaseReturnPaymentSub.Id = 0;//oTablePayment[i][0] || 0;
+                    PurchaseReturnPaymentSub.PaymentTypeId= oTablePayment[i][1];
+                    PurchaseReturnPaymentSub.PurchaseReturnId = parseInt($("#BtnSave").attr("data-Purchase-Id"));
+
+                    PurchaseReturnPaymentSub.AccountHeadId = oTablePayment[i][3];
+                    //alert(AccountHeadId);
+                    PurchaseReturnPaymentSub.Amount = oTablePayment[i][5];
+                    PurchaseReturnPaymentSub.ComId = ComId;
+                    PurchaseReturnPaymentSub.LuserId = UserId;
+                    PurchaseReturnPaymentSub.RowNo = i;
+
+
+                    PurchaseReturnPaymentSub.PaymentCardNo = oTablePayment[i][6];
+                    console.log(PurchaseReturnPaymentSub);
+
+                    paymentArr.push(PurchaseReturnPaymentSub);
+                    PurchaseReturnPaymentSub = { "Id": "0", "PurchaseReturnId": "", "PaymentTypeId": "", "AccountHeadId": "", "Amount": "", "PaymentCardNo": "", "ComId": "", "LuserId": "", "RowNo": "" };
+
+                }
+                console.log(paymentArr);
+
+
+
+
+                var data = JSON.stringify({
+                    Id: parseInt($("#BtnSave").attr("data-Purchase-Id")),
+                    SupplierId: $("#Supplier").val(),
+                    WarehosueIdMain: $("#Warehosue").val(),
+
+                    //AccountPayTypeId: $("#AccountHead").val(),
+
+                    SupplierName: $("#SupplierName").val(),
+                    PhoneNo: $("#PhoneNo").val() || 0,
+                    PrimaryAddress: $("#SupplierAddress").val(),
+
+                    PurchaseReturnCode: $("#Code").val(),
+                    PurchaseReturnDate: $("#Date").val(),
+                    //PaymentMethod: $("#Payment").val(),
+                    Total: parseFloat($("#SubTotal").text()),
+                    Notes: $("#Notes").val(),
+                    //Status: $("#Status").val(),
+                    isSerialPurchaseReturn: 'True',
+                    Discount: discount,
+
+                    TotalVat: $("#TotalVat").val(),
+                    ServiceCharge: $("#ServiceCharge").val(),
+                    Shipping: $("#Shipping").val(),
+
+                    GrandTotal: parseFloat($('#GrandTotal').val()).toFixed(2),
+                    NetAmount: parseFloat($('#GrandTotal').val()).toFixed(2),
+                    totalcommissionamount: parseFloat($('#UserCommission').val()).toFixed(2),
+
+
+                    //PaidAmt: paidamt,
+                    DisAmt: discount,
+                    //DueAmt: dueamt,
+
+                    Items: orderArr,
+                    PurchaseReturnPayments: paymentArr
+                });
+
+
+
+                 //console.log(data);
+                    $.ajax({
+                        contentType: 'application/json; charset=utf-8',
+                        //contentType: "application/json",
+                        dataType: 'json',
+                        type: 'POST',
+                        url: "../PurchaseReturn/AddPurchaseReturn",
+                        data: data,
+                        success: function (result) {
+                            //console.log(result);
+                            //alert('Wait');
+                            if (result.Success == "1") {
+                                toastr.success("Data Save Successfully");
+
+                                window.setTimeout(function () {
+                                    // Move to a new location or you can do something else
+                                         window.location.href = '@Url.Action("Index", "PurchaseReturn")';
+                                }, 1000);
+
+                        }
+                        else {
+                            toastr.error(result.ex);
+                        }
+                        },
+                        error: function (result) {
+
+                            if (result.ex = "") {
+                                toastr.error("Unable To Save The Data");
+                            } else {
+                                toastr.error(result.ex);
+
+                            }
+                        }
+                      });
+
+                ////console.log(data);
+                ////alert('Wait');
+                //$.when(saveOrder(data)).then(function (response) {
+                //    //console.log(response);
+                //    //location.href = "../PurchaseReturn/index";
+                //}).fail(function (err) {
+
+                //});
+            }
+        });
+
+        //$('#BtnUpdate').click(function (e) {
+        //    e.preventDefault();
+
+        //    if (submitValidation()) {
+
+
+
+        //        var discount;
+        //        if (parseFloat($('#Discount').val()).toFixed(2) == "NaN") {
+        //            discount = 0;
+        //        }
+        //        else {
+        //            discount = $('#Discount').val();
+        //        }
+
+
+        //        var orderArr = [];
+        //        orderArr.length = 0;
+
+        //        $.each($("#PurchaseReturnItems tbody tr"), function () {
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //            orderArr.push({
+
+        //                Id: $(this).find('td:eq(0)').html(),
+        //                ProductId: $(this).find('td:eq(1)').html(),
+        //                WarehouseId: $(this).find('td:eq(2)').html(),
+
+        //                //Name: $(this).find('td:eq(2)').html(),
+        //                Name: $(this).find('.name').val(),
+        //                //WarehouseName: $(this).find('.warehouse_row').val(),
+
+        //                Description: $(this).find('.description').val(),
+        //                Price: $(this).find('.price').val(),
+
+        //                //Price: parseFloat($(this).find('td:eq(4)').html()),
+        //                Quantity: parseInt($(this).find('.quantity').val()),
+        //                Amount: parseFloat($(this).find('td:eq(8)').html()),
+        //                BatchSerialItems: orderbatchArr,
+        //                ComId: ComId
+
+        //                //Id: $(this).find('td:eq(0)').html(),
+        //                //ProductId: $(this).find('td:eq(1)').html(),
+
+        //                //Name: $(this).find('td:eq(2)').html(),
+        //                ////Description: $(this).find('td:eq(3)').html(),
+        //                //Description: $(this).find('.description').val(),
+
+        //                //Price: parseFloat($(this).find('td:eq(4)').html()),
+        //                //Quantity: parseInt($(this).find('.quantity').val()),
+        //                //Amount: parseFloat($(this).find('td:eq(6)').html())
+        //            });
+        //        });
+
+
+        //        var paidamt = 0;
+        //        var dueamt = parseFloat($('#GrandTotal').val()).toFixed(2);
+        //        if ($("#Status").val() == "Paid") {
+        //            paidamt = parseFloat($('#GrandTotal').val()).toFixed(2);
+        //            dueamt = 0;
+        //            //alert(paidamt);
+        //        }
+
+
+        //        var paidamt = 0;
+        //        var dueamt = parseFloat($('#GrandTotal').val()).toFixed(2);
+        //        if ($("#Status").val() == "Paid") {
+        //            //alert($("#Status").val());
+        //            paidamt = parseFloat($('#GrandTotal').val()).toFixed(2);
+        //            dueamt = 0;
+        //            //alert(paidamt);
+        //        }
+        //        else if ($("#Status").val() == "Advance") {
+        //            paidamt = parseFloat($('#PaidAmt').val()).toFixed(2);
+        //            dueamt = parseFloat($('#GrandTotal').val()).toFixed(2) - parseFloat($('#PaidAmt').val()).toFixed(2);
+        //        }
+        //        else {
+        //            dueamt = parseFloat($('#GrandTotal').val()).toFixed(2);
+        //            //alert('not found');
+        //        }
+
+
+
+
+
+        //        var data = {
+
+        //            Id: parseInt($("#BtnSave").attr("data-Purchase-Id")),
+        //            //Id: parseInt($("#BtnUpdate").attr("data-Purchase-Id")),
+        //            SupplierId: parseInt($("#Supplier").val()),
+        //            AccountPayTypeId: $("#AccountHead").val(),
+
+        //            PurchaseReturnCode: $("#Code").val(),
+        //            PurchaseReturnDate: $("#Date").val(),
+        //            PaymentMethod: $("#Payment").val(),
+        //            Total: parseFloat($("#SubTotal").text()),
+        //            Notes: $("#Notes").val(),
+        //            Status: $("#Status").val(),
+
+
+        //            TotalVat: $("#TotalVat").val(),
+        //            ServiceCharge: $("#ServiceCharge").val(),
+        //            Shipping: $("#Shipping").val(),
+
+
+        //            Discount: discount,//parseFloat($('#Discount').val()).toFixed(2),
+        //            GrandTotal: parseFloat($('#GrandTotal').val()).toFixed(2),
+        //            NetAmount: parseFloat($('#GrandTotal').val()).toFixed(2),
+        //            PaidAmt: paidamt,
+        //            DisAmt: discount,
+        //            DueAmt: dueamt,
+
+
+
+        //            Items: orderArr
+        //        };
+
+        //        //console.log(data);
+        //        //$.when(updateOrder(data)).then(function (response) {
+        //        $.when(saveOrder(data)).then(function (response) {
+        //            console.log(response);
+        //            location.href = "../PurchaseReturn/index";
+        //        }).fail(function (err) {
+        //            console.log(err);
+        //        });
+        //    }
+
+        //});
+</script>
+                            }
+

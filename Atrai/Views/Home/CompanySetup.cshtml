@@ -1,0 +1,655 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model Atrai.Model.Core.Entity.StoreSettingModel
+@{
+    ViewData["Title"] = "Settings";
+    //Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var VatViewActivate = HttpContextAccessor.HttpContext.Session.GetInt32("VatViewActivate").ToString();
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+<link href="~/admin_theme_gtr/assets/css/custommultistepformcss.css" rel="stylesheet" />
+  
+<style>
+  /*added this style by shahinur 7 feb 24*/
+.upload-image-preview {
+  width: 65px;
+  height: 65px;
+}
+
+.upload-image-preview img{
+  width: 100%;
+  height:  100%;
+}
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option{
+    font-size:14px;
+    border-bottom:0.5px solid #F2EFE5;
+}
+/*end this style by shahinur 7 feb 24*/
+</style>
+<div class="page-wrapper">
+    <div class="collapse navbar-collapse justify-content-end d-none" id="navbarResponsive"></div>
+    <div class="container mt-5">
+        <div class="row d-flex justify-content-center align-items-center">
+            <div class="col-md-8">
+                <form id="regForm" enctype="multipart/form-data">
+                    <h1 id="register">Comapny Settings</h1>
+                    <div class="all-steps mb-5" id="all-steps">
+                        <span class="step ms-2"><i class="fa fa-user"></i></span>
+                        <span class="step ms-2"><i class="fa fa-map-marker"></i></span>
+                        <span class="step ms-2"><i class="fa fa-shopping-bag"></i></span>
+                        <span class="step ms-2"><i class="fa fa-car"></i></span>
+                        <span class="step ms-2"><i class="fa fa-phone"></i></span>
+                        <span class="step ms-2"><i class="fa fa-address-book"></i></span>
+                        <span class="step ms-2"><i class="fa fa-bookmark"></i></span>
+                    </div>
+
+                    <div class="tab">
+                        <h6>Name of your Company</h6>
+                        <p>
+                            <input placeholder="Name of your Company" id="CompanyName" name="CompanyName">
+                        </p>
+
+                    </div>
+                    <div class="tab">
+                        <h6>Upload your logo & customize theme color</h6>
+                       <div class="row upload-image">
+                            <div class="col-md-8 col-8">
+                            <input name="CompanyImage" id="image-uploadify" type="file" accept=".xlsx,.xls,image/*,.doc,audio/*,.docx,video/*,.ppt,.pptx,.txt,.pdf" multiple>
+                        @*<p><input placeholder="City"   name="dd"></p>*@
+                    </div>
+                    <div class="col-md-4 col-4">
+                          <div class="upload-image-preview">
+                     </div>
+                    </div>
+                    </div>
+                    </div>
+                    <div class="tab">
+                        <div class="row">
+                            <div class="col-md-4 col-12">
+                                <h6>Country</h6>
+                                @Html.DropDownList("Country", null, htmlAttributes: new { @id = "CountryId", @class = "form-control form-control-sm" })
+                            </div>
+                            <div class="col-md-4 col-12">
+                                <h6>Your currency</h6>
+                                @*<select class="form-select" id="Currency" name="Currency">
+                                        <option selected value="0">BDT</option>
+                                        <option value="1">USD</option>
+                                    </select>*@
+                                <select class="form-control form-control-sm" id="CurrencyId" name="Currency" aria-label="Floating label select">
+                                </select>
+                                @*<p><input placeholder="Favourite Shopping site"   name="email"></p>*@
+                            </div>
+                            <div class="col-md-4 col-12">
+                                <h6>Fiscal year colosing date</h6>
+                                @Html.DropDownList("FiscalYearType", null, htmlAttributes: new { @id = "FiscalYearId", @class = "form-control form-control-sm" })
+                                @*<p><input placeholder="Favourite Shopping site"   name="email"></p>*@
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12 col-12 mb-3">
+                                <h6>Time zone</h6>
+                                @Html.DropDownList("TimeZoneSettings", null, htmlAttributes: new { @id = "TimeZoneId", @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab">
+                         <div class="row">
+                         <div class="col-md-12 col-12 mb-3">
+                        <h6>Company type</h6>
+                        @*<p><input placeholder="Company type" id="BusinessType" name="BusinessType"></p>*@
+                        @Html.DropDownList("BusinessType", null, htmlAttributes: new { @id = "BusinessTypeId", @class = "form-control form-control-sm" })
+
+
+                        <h6 class="mt-3">Subscription type</h6>
+                        @*<p><input placeholder="Subscription type" id="Subscription" name="Subscription"></p>*@
+                        @Html.DropDownList("SubscriptionType", null, htmlAttributes: new { @id = "SubscriptionTypeId", @class = "form-control form-control-sm" })
+                    </div>
+                    </div>
+                    </div>
+
+                    <div class="tab">
+                        <h6>Company email / phone</h6>
+                        <p><input placeholder="Company Email / phone" id="CompanyEmail" name="CompanyEmail"></p>
+                        <p><input placeholder="Company Phone" id="CompanyPhone" name="CompanyPhone"></p>
+                    </div>
+
+
+                    <div class="tab">
+                        <h6>Company address</h6>
+                        <p><input placeholder="Company address" id="BusinessAddress" name="BusinessAddress"></p>
+                    </div>
+                    <div class="tab">
+                        <h6>Company website</h6>
+                        <p><input placeholder="Company website" id="CompanyWebsite" name="CompanyWebsite"></p>
+                    </div>
+                    <div class="thanks-message text-center" id="text-message">
+                        <img src="" width="100" class="mb-4">
+                        <h3>
+                            That's it. Now go and change the world!
+                        </h3> <span>And don't forget to have fun</span>
+                    </div>
+                    <div style="overflow:auto;" id="nextprevious">
+                        <div style="float:right;">
+                            <button type="button" id="prevBtn" onclick="nextPrev(-1)"><i class="fa fa-angle-double-left"></i></button>
+                            <button type="button" id="nextBtn" onclick="nextPrev(1)">Next</button>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="loginUrl" value="@Url.Action("Login", "Home")" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!--<form id="myForm">-->
+<!-- form inputs here -->
+<!--<input type="text" name="Name" id="Name" placeholder="Name" />
+    <input type="text" name="Address" id="Address" placeholder="Address" />
+    <input type="file" name="image" id="image" />
+    <input type="button" value="Submit" onclick="submitForm()" />
+</form>-->
+
+@section scripts{
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+
+                      $("input[name=CompanyImage]").change(function () {
+                if (this.files && this.files[0]) {
+                    var reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        var img = $('<img>').attr('src', e.target.result);
+                        $('.upload-image-preview').html(img);
+                    };
+
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            //$("form").submit(function () {
+            //    $("#BusinessTypeId").prop("disabled", false);
+            //});
+            //alert('hit');
+            $('#navbarResponsive').hide();
+            var VatViewActivate = '@HttpContextAccessor.HttpContext.Session.GetInt32("VatViewActivate").ToString()';
+            if (VatViewActivate == 1) { $('.divHiddenItems').hide(); }
+
+
+        });
+
+        function PreviewImage() {
+            var oFReader = new FileReader();
+            oFReader.readAsDataURL(document.getElementById("FileUpload").files[0]);
+
+            oFReader.onload = function (oFREvent) {
+                document.getElementById("UploadFile").src = oFREvent.target.result;
+            };
+        };
+
+
+
+        $("#TimeZoneId, #CurrencyId, #BusinessTypeId, #SubcriptionTypeId, #CountryId, #FiscalYearId, #SubscriptionTypeId").select2({
+            theme: 'bootstrap-5'
+        });
+       /* $("#FiscalYearId").select2();*/
+
+        //multi step form
+        var currentTab = 0;
+        document.addEventListener("DOMContentLoaded", function (event) {
+
+
+            showTab(currentTab);
+
+        });
+
+        function showTab(n) {
+            var x = document.getElementsByClassName("tab");
+            x[n].style.display = "block";
+            if (n == 0) {
+                document.getElementById("prevBtn").style.display = "none";
+            } else {
+                document.getElementById("prevBtn").style.display = "inline";
+            }
+            if (n == (x.length - 1)) {
+                document.getElementById("nextBtn").innerHTML = 'Finish';
+            } else {
+                document.getElementById("nextBtn").innerHTML = 'Next';
+            }
+            fixStepIndicator(n)
+        }
+
+        function nextPrev(n) {
+            var x = document.getElementsByClassName("tab");
+            if (n == 1 && !validateForm()) return false;
+            x[currentTab].style.display = "none";
+            currentTab = currentTab + n;
+            if (currentTab >= x.length) {
+
+                document.getElementById("nextprevious").style.display = "none";
+                document.getElementById("all-steps").style.display = "none";
+                document.getElementById("register").style.display = "none";
+                document.getElementById("text-message").style.display = "block";
+            }
+            showTab(currentTab);
+        }
+
+        function validateForm() {
+            var x, y, i, valid = true;
+            x = document.getElementsByClassName("tab");
+            y = x[currentTab].getElementsByTagName("input");
+            for (i = 0; i < y.length; i++) {
+                if (y[i].value == "") {
+                    y[i].className += " invalid";
+                    valid = false;
+                }
+
+
+            }
+            if (valid) {
+                document.getElementsByClassName("step")[currentTab].className += " finish";
+            }
+            return valid;
+        }
+
+        function fixStepIndicator(n) {
+            var i, x = document.getElementsByClassName("step");
+            for (i = 0; i < x.length; i++) {
+                x[i].className = x[i].className.replace(" active", "");
+            }
+            x[n].className += " active";
+        }
+
+        //Trial form submit
+        //function submitForm() {
+        //    var formData = {
+        //        Name: $("#Name").val(),
+        //        Address: $("#Address").val(),
+        //        image: $("#image")[0].files[0]
+        //    };
+
+        //    $.ajax({
+        //        type: "POST",
+        //        url: "/Home/Action",
+        //        data: JSON.stringify(formData),
+        //        contentType: "application/json; charset=utf-8",
+        //        dataType: "json",
+        //        success: function (data) {
+        //            // handle success
+        //            alert('passed');
+        //        },
+        //        error: function (error) {
+        //            // handle error
+        //            alert('blocked');
+
+        //        }
+        //    });
+        //}
+
+        //code to get Currency dropdown
+        $.ajax({
+                //async: false,
+                url: '@Url.Action("GetCurrencyDropdown", "Admin")',//url: "https://www.pqstec.com/InvoiceApps/values/GetCustomerDropdown",
+                success: function(data) {
+                    const select = document.querySelector('#CurrencyId');
+                    for (var i = 0; i < data.length; i++) {
+                        console.log("data to see currecncy", data);
+                        const option = document.createElement('option');
+                        option.value = data[i].Value;
+                        option.text = data[i].Text
+                        select.appendChild(option);
+                    }
+                }
+            });
+
+        //Final code for passing input,select,image to controller
+       let currentStep = 0;
+
+        const form = document.getElementById("regForm");
+        const nextButton = document.querySelector("#nextBtn");
+        nextButton.addEventListener("click", e => {
+            e.preventDefault();
+            currentStep++;
+            var file = $("#image-uploadify")[0].files[0];
+            var formData = new FormData();
+            formData.append("CompanyName", $("#CompanyName").val());
+            formData.append("CompanyImage", file);
+            formData.append("CountryId", $("#CountryId").val());
+            formData.append("CurrencyId", $("#CurrencyId").val());
+            formData.append("TimeZoneId", $("#TimeZoneId").val());
+            formData.append("FiscalYearId", $("#FiscalYearId").val());
+            formData.append("SubscriptionTypeId", $("#SubscriptionTypeId").val());
+            formData.append("BusinessTypeId", $("#BusinessTypeId").val());
+            formData.append("CompanyEmail", $("#CompanyEmail").val());
+            formData.append("CompanyPhone", $("#CompanyPhone").val());
+
+            formData.append("BusinessAddress", $("#BusinessAddress").val());
+            if (currentStep === 7) {
+                $.ajax({
+                    type: "POST",
+                     url: '@Url.Action("CompanySetup", "Home")',
+                     @*url: '@Url.Action("GetCurrencyDropdown", "Admin")',*@
+                   /* url: "/Home/CompanySetup",*/
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        console.log(response);
+                         if (response.ff === 0) {
+                             console.log('url sent');
+                            // Redirect to the desired URL when ff equals 0
+                            window.location.href = response.redirectUrl;
+                        }
+                        else {
+                            console.log('url not sent');
+                             var abc = '@Url.Action("Login", "Home")';
+                                window.location = abc;   
+                        }
+ 
+                    },
+                    error: function (error) {
+                        // handle error
+                        alert('not saved');
+                        console.log("Error");
+                    }
+                });
+            }
+        })
+
+
+        //upload image
+        //$("#image-uploadify").on("change", function () {
+        //    var file = this.files[0];
+        //    var formData = new FormData();
+        //    formData.append("CompanyImage", file);
+
+        //    $.ajax({
+        //        type: "POST",
+        //        url: "/Home/CompanySetup",
+        //        data: formData,
+        //        contentType: false,
+        //        processData: false,
+        //        success: function (response) {
+        //            // handle response
+        //        },
+        //        error: function (error) {
+        //            // handle error
+        //        }
+        //    });
+        //});
+
+        //upload image with inputs & selects 11.25am code 16-01-23
+        //$("#image-uploadify").on("change", function () {
+        //    var file = this.files[0];
+        //    var formData = new FormData();
+        //    formData.append("CompanyImage", file);
+        //    formData.append("CompanyName", $("#CompanyName").val());
+        //    formData.append("Currency", $("#Currency").val());
+        //    formData.append("TimeZone", $("#TimeZone").val());
+        //    formData.append("FiscalYear", $("#FiscalYear").val());
+        //    formData.append("BusinessType", $("#BusinessType").val());
+        //    formData.append("CompanyEmail", $("#CompanyEmail").val());
+        //    formData.append("BusinessAddress", $("#BusinessAddress").val());
+
+        //    $.ajax({
+        //        type: "POST",
+        //        url: "/Home/CompanySetup",
+        //        data: formData,
+        //        contentType: false,
+        //        processData: false,
+        //        success: function (response) {
+        //            // handle response
+        //            console.log("Passed");
+        //        },
+        //        error: function (error) {
+        //            // handle error
+        //            console.log("Error");
+        //        }
+        //    });
+        //});
+
+
+//old code
+@*let currentStep = 0;
+
+const form = document.getElementById("regForm");
+const nextButton = document.querySelector("#nextBtn");
+nextButton.addEventListener("click", e => {
+    e.preventDefault();
+    currentStep++;
+    const formData = new FormData();
+    const inputElements = form.querySelectorAll("input");
+    const selectElements = form.querySelectorAll("select");
+    for (const input of inputElements) {
+        if (input.type === "file") {
+            for (var i = 0; i < files.length; i++) {
+                fileData.append("image", files[i]);
+            }
+
+        } else {
+            formData.append(input.name, input.value);
+        }
+    }
+
+    for (const select of selectElements) {
+        formData.append(select.name, select.value);
+    }
+
+    const inputObject = {};
+    for (const [key, value] of formData.entries()) {
+        inputObject[key] = value;
+    }
+
+    if (currentStep === 7) {
+        console.log(inputObject);
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("CompanySetup","Home")',
+            data: inputObject,
+            success: function (response) {
+                console.log(response);
+            }
+        });
+    }
+});*@
+
+
+
+
+
+//        //code for handling previous button
+//        const prevButton = document.querySelector("#prevBtn");
+//        prevButton.addEventListener("click", e => {
+//            e.preventDefault();
+//            currentStep--;
+//        });
+
+
+        ////Example code
+        //document.getElementById("next-button").addEventListener("click", function () {
+        //    document.getElementById("regForm").submit();
+        //});
+
+        //const form = document.getElementById("regForm");
+        //const nextButton = document.querySelector("#nextbtn");
+        //nextButton.addEventListener("click", e => {
+        //    e.preventDefault();
+        //    const formData = new FormData();
+        //    const inputElements = form.querySelectorAll("input");
+        //    for (const input of inputElements) {
+        //        if (input.type === "file") {
+        //            for (const file of input.files) {
+        //                formData.append(input.name, file);
+        //            }
+        //        } else {
+        //            formData.append(input.name, input.value);
+        //        }
+        //    }
+
+        //    const inputObject = {};
+        //    for (const [key, value] of formData.entries()) {
+        //        inputObject[key] = value;
+        //    }
+        //    console.log(inputObject);
+        //});
+
+
+
+        //All input data
+        //const form = document.getElementById("regForm");
+        //const nextButton = document.querySelector("#nextbtn");
+        //nextButton.addEventListener("click", e => {
+        //    e.preventDefault();
+        //    const formData = new FormData();
+        //    const inputElements = form.querySelectorAll("input");
+        //    const selectElements = form.querySelectorAll("select");
+        //    for (const input of inputElements) {
+        //        if (input.type === "file") {
+        //            for (const file of input.files) {
+        //                formData.append(input.name, file);
+        //            }
+        //        } else {
+        //            formData.append(input.name, input.value);
+        //        }
+        //    }
+
+        //    for (const select of selectElements) {
+        //        formData.append(select.name, select.value);
+        //    }
+
+        //    const inputObject = {};
+        //    for (const [key, value] of formData.entries()) {
+        //        inputObject[key] = value;
+        //    }
+        //    console.log(inputObject);
+        //});
+
+        //const form = document.getElementById("regForm");
+        //const nextButton = document.querySelector("#nextbtn");
+        //let currentStep = 0;
+        //const totalSteps = document.querySelectorAll(".tab").length;
+
+        //nextButton.addEventListener("click", e => {
+        //    e.preventDefault();
+        //    const formData = new FormData();
+        //    const inputElements = form.querySelectorAll("input");
+        //    const selectElements = form.querySelectorAll("select");
+        //    for (const input of inputElements) {
+        //        if (input.type === "file") {
+        //            for (const file of input.files) {
+        //                formData.append(input.name, file);
+        //            }
+        //        } else {
+        //            formData.append(input.name, input.value);
+        //        }
+        //    }
+
+        //    for (const select of selectElements) {
+        //        formData.append(select.name, select.value);
+        //    }
+
+        //    const inputObject = {};
+        //    for (const [key, value] of formData.entries()) {
+        //        inputObject[key] = value;
+        //    }
+        //    currentStep++;
+        //    if (currentStep === totalSteps) {
+        //        console.log(inputObject);
+        //    }
+        //});
+
+        //code for handling next button and save input
+        //Upload image using ajax
+        @*$("#image-uploadify").on("change", function () {
+            var file = this.files[0];
+            var formData = new FormData();
+            formData.append("image", file);
+            formData.append("CompanyData", JSON.stringify(model));
+            console.log(file)
+             $.ajax({
+                url: '@Url.Action("CompanySetup","Admin")',
+                type: "POST",
+                data: { CompanyInfo: CompanyData, formData: formData },
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    console.log(response);
+                }
+            });
+        });*@
+
+        //Tried matching with fahad vai's code
+        @* let currentStep = 0;
+
+        const form = document.getElementById("regForm");
+        const nextButton = document.querySelector("#nextBtn");
+        nextButton.addEventListener("click", async (e) => {
+            e.preventDefault();
+            currentStep++;
+            const formData = new FormData();
+            const inputElements = form.querySelectorAll("input");
+            const selectElements = form.querySelectorAll("select");
+            for (const input of inputElements) {
+                if (input.type === "file") {
+                    for (const file of input.files) {
+                        formData.append(input.name, file);
+                    }
+                } else {
+                    formData.append(input.name, input.value);
+                }
+            }
+            for (const select of selectElements) {
+                formData.append(select.name, select.value);
+            }
+
+            var abc = {
+                Id: 0,
+                CompanyName: "",
+                Currency="",
+                TimeZone="",
+                FiscalYear="",
+                BusinessType="",
+                CompanyEmail="",
+                BusinessAddress="",
+                CompanyWebsite="",
+                GalleryFiles: []
+            };
+            abc.Id = document.getElementById("Id").value;
+            abc.CompanyName = document.getElementById("CompanyName").value;
+            abc.Currency = document.getElementById("Currency").value;
+            abc.TimeZone = document.getElementById("TimeZone").value;
+            abc.FiscalYear = document.getElementById("FiscalYear").value;
+            abc.BusinessType = document.getElementById("BusinessType").value;
+            abc.CompanyEmail = document.getElementById("CompanyEmail").value;
+            abc.BusinessAddress = document.getElementById("BusinessAddress").value;
+            abc.CompanyWebsite = document.getElementById("CompanyWebsite").value;
+            abc.GalleryFiles = AttachmentArray;
+
+            if (currentStep === 7) {
+                try {
+                    const response = await fetch('@Url.Action("CompanySetupy", "Home")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ bookModel: abc, obj: AttachmentArray })
+                    });
+                    const result = await response.json();
+                    if (result.Success == "1") {
+                        toastr.success('Image Upload Successfully.');
+                        window.location.href = "AddNewBook?isSuccess=True&bookId=" + result.Id;
+                    } else {
+                        alert(result.ex);
+                    }
+                } catch (error) {
+                    alert('error');
+                }
+            }
+        });*@
+    </script>
+    }

@@ -1,0 +1,1454 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Order management";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<style>
+    /*li {
+            cursor: pointer;
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+        }*/
+
+    /* Set the anchor tag to have full width */
+    li a {
+        display: block;
+        width: 100%;
+    }
+
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+                         border-bottom-width: 0px;
+
+                    }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    /*   .tabulator-table .tabulator-row {
+            background-color: white;
+        } */
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customize-btn-another {
+        background: #2CA01C;
+        border: 1px solid black;
+        border-radius: 20px;
+        color: #FFFFFF;
+        border: 1px solid #2CA01C;
+    }
+
+        .customize-btn-another:hover {
+            background: #2CA01C;
+            border: 1px solid black;
+            border-radius: 20px;
+            color: #FFFFFF;
+            border: 1px solid #2CA01C;
+        }
+
+    .customize-btn:hover {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .gear-dropdown.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+        margin-top: 7px;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-bottom: 1px solid #aaaaaa38;
+        border-right: 1px solid #aaaaaa38;
+        /*border-left: 1px solid #aaaaaa38;*/
+        /* padding-left: 2px;*/
+    }
+    /*    .tabulator-row .tabulator-cell, .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+                    border-right: none;
+                    border-left: none;
+                }*/
+    /*    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+            border-right: 2px solid #aaaaaa38;
+        }*/
+
+    .tabulator-row .tabulator-cell {
+        border-right: none;
+        border-left: none;
+        padding-left: 10px;
+        border: 1px solid #aaaaaa29;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        /*margin-top: 27px;*/
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+        /* Add any other styles you need for the active cell */
+    }
+
+    .tabulator-row {
+        /*   border: 1px solid #aaaaaa38;*/
+        border-left: none;
+        border-right: none;
+    }
+
+    input[type="checkbox"] {
+        width: 20px; /* Set the width */
+        height: 20px; /* Set the height */
+    }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom: 4px solid green;
+    }
+
+        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active:hover {
+            background-color: #F8F8F8;
+            border-top-color: transparent !important;
+            border-left-color: transparent !important;
+            border-right-color: transparent !important;
+        }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link:hover {
+        background-color: #F8F8F8;
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+    }
+
+    .customize-btnew {
+        background: transparent;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btnew:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .tabulator-row .tabulator-cell.tabulator-editing {
+        border: 1px solid #404c5d;
+        outline: none;
+        padding: 0;
+    }
+
+    .tabulator-cell.tabulator-editable[tabulator-field="AccName"] {
+        border: 1px solid #0003;
+        margin-bottom: 10px;
+    }
+
+    .filter-dropdown > .filter-dropdown-class.show {
+        width: 580px;
+    }
+
+    p {
+        margin: 1em 0;
+    }
+
+    .button {
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        position: relative;
+        background: #aa0000;
+        padding: 10px 15px;
+        color: white;
+        box-shadow: 0 2px black;
+        text-decoration: none;
+        border-radius: 5px;
+        /*text-shadow: 0 1px 1px black;*/
+    }
+
+        .button:hover {
+            top: -2px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+        .button:active {
+            top: 1px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+    .unbilledbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .overduebtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .openbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .paidbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .scrollable-offcanvas {
+        /* max-height: 80vh;*/ /* Adjust the maximum height as needed */
+        overflow-y: auto;
+    }
+
+    .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:hover {
+        background-color: deepskyblue;
+    }
+
+    .tabulator .tabulator-footer {
+        background-color: #fff;
+        color: black;
+    }
+
+        .tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row {
+            background: white !important;
+        }
+
+
+    .offcanvas {
+        /* Add position relative to its parent */
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* Ensure offcanvas takes full viewport height */
+    }
+
+    .offcanvas-footer {
+        margin-top: auto; /* Push footer to the bottom */
+        width: 100%; /* Occupy full width */
+    }
+
+    .modal-footer {
+        width: 100%; /* Ensure buttons occupy full width */
+        padding: 10px; /* Add padding for better appearance */
+    }
+
+    .w-15 {
+        width: fit-content !important;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+    }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #999;
+        }
+
+        .separator:not(:empty)::before {
+            margin-right: .25em;
+        }
+
+        .separator:not(:empty)::after {
+            margin-left: .25em;
+        }
+
+    .tabulator-row.tabulator-selected {
+        background-color: #9abcea !important;
+    }
+
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 24px;
+        }
+
+            .rating label:before {
+                content: '\2605'; /* Unicode star character */
+            }
+
+        .rating input:checked ~ label:before {
+            color: gold; /* Change color of selected stars */
+        }
+
+    .child-table-hidden {
+        display: none;
+    }
+
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-calcs {
+        background: #fff !important;
+    }
+
+    .tabulator .tabulator-footer {
+        border-top: 1px solid #fff;
+    }
+
+    #file-drop-area {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    #image-uploadify {
+        display: none;
+    }
+
+    .footerButton {
+        margin-top: 40px;
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 99%;
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+
+    .bottom-bar-css:hover {
+        background: #212529;
+    }
+
+    .bottom-bar-css-s-n-c:hover {
+        background: #007611d6;
+    }
+
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        height: 40px;
+    }
+
+    .select2-container--default .select2-selection--multiple {
+        height: 40px;
+    }
+
+    .select2-container {
+        font-size: 16px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #aaaaaa94;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 23px;
+        }
+    /* Customize the Select2 selection box */
+    .select2-selection {
+        background-color: #f2f2f2;
+        border-radius: 5px;
+        height: 30px;
+        padding-bottom: 37px;
+        border: 1px solid #ced4da
+    }
+
+    .select2-selection__rendered, .select2-selection__arrow {
+        margin-top: 8px;
+    }
+
+</style>
+
+<input type="hidden" id="Id" name="Id" value="" />
+<div class="shadow p-3 mb-3 bg-body rounded">
+    <h5><strong>Document Acceptance</strong></h5>
+</div>
+<div class="shadow p-3 mb-3 bg-body rounded">
+    <div class="row">
+        <div class="col-lg">
+            <label class="form-label fw-bold">DA No.</label><span class="text-danger  fw-bold"> *</span>
+            <input id="daNo" class="form-control w-15" />
+            <span class="text-danger" id="daNoValidation"></span>
+        </div>
+        <div class="col-lg">
+            <label class="form-label fw-bold">Bill Date</label>
+            <input id="billDate" class="form-control w-15" />
+        </div>
+        <div class="col-lg">
+            <label class="form-label fw-bold">Bill Maturity Date</label>
+            <input id="billMaturityDate" class="form-control w-15" />
+        </div>
+        <div class="col-lg">
+            <label class="form-label fw-bold">Bill Payment Date</label>
+            <input id="billPaymnentDate" class="form-control w-15" />
+        </div>
+        <div class="col-lg">
+            <label class="form-label fw-bold">BBLC NO</label>
+            <input type="text" placeholder="Search BBLC No" name="Search" id="Search" class="form-control">
+            <input type="text" placeholder="Search Product" name="Search" id="bblcId" class="form-control" hidden>
+
+            <div class="d-none">
+                <select id="bblcNo" class="form-control">
+                    <option value="">Select BBLC NO</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-lg">
+            <label class="form-label fw-bold">Concern</label>
+            <input id="concern" class="form-control" disabled />
+
+            @*   <select id="concern" class="form-control" disabled>
+            <option value="">Select Concern</option>
+            </select> *@
+        </div>
+        <div class="col-lg">
+            <label class="form-label fw-bold">Supplier</label>
+            <input id="supplier" class="form-control" disabled />
+
+            @*    <select id="supplier" class="form-control" disabled>
+            <option value="">Select Supplier</option>
+            </select> *@
+        </div>
+        <div class="col-lg">
+            <label class="form-label fw-bold">Group LC No</label>
+            <input id="groupLC" class="form-control" disabled />
+
+            @*     <select id="groupLC" class="form-control" disabled>
+            <option value="">Select Group LC No</option>
+            </select> *@
+        </div>
+        <div class="col-lg">
+            <label class="form-label fw-bold">Group LC Value</label>
+            <input id="masterLC" class="form-control" disabled />
+        </div>
+        <div class="col-lg">
+            <label class="form-label fw-bold">ConversionRate</label>
+            <input id="conversionRate" class="form-control" disabled />
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-lg">
+            <label class="form-label fw-bold">Currency</label>
+            <input id="currency" class="form-control" disabled />
+
+            @*   <select id="currency" class="form-control" disabled>
+            <option value="">Select Currency</option>
+            </select> *@
+        </div>
+        <div class="col-lg">
+            <label class="form-label fw-bold">BuyerId</label>
+            <input id="buyer" class="form-control" disabled />
+
+            @*     <select id="buyer" class="form-control" disabled>
+            <option value="">Select BuyerId</option>
+            </select> *@
+        </div>
+        <div class="col-lg">
+            <label class="form-label fw-bold">BBLC Amount</label>
+            <input id="bblcAmount" class="form-control" disabled />
+        </div>
+        <div class="col-lg">
+            <label class="form-label fw-bold">Previous Accepted</label>
+            <input id="previousAccepted" class="form-control" disabled />
+        </div>
+        <div class="col-lg">
+            <label class="form-label fw-bold">Payable Amount</label>
+            <input id="payableAmounty" class="form-control" disabled />
+        </div>
+    </div>
+
+    
+</div>
+
+<div class="d-flex">
+    <div class="w-50 shadow p-3 mb-3 bg-body rounded" style="margin-left: 5px;">
+        <div class="mt-2" id="SampleTable"></div>
+        <button id="add-row-color-table" class="btn mt-5 d-none" style="border: 1px solid;margin-right: 30px;">Add Row</button>
+        <button id="clear-color-table" class="btn mt-5 d-none" style="border: 1px solid;margin-right: 30px;">Clear All Rows</button>
+    </div>
+    <div class="w-50 shadow p-3 mb-3 bg-body rounded">
+        <div class="mt-2" id="MainTable"></div>
+        <button id="add-row-size-table" class="btn mt-5 d-none" style="border: 1px solid;margin-right: 30px;">Add Row</button>
+        <button id="clear-size-table" class="btn mt-5 d-none" style="border: 1px solid;margin-right: 30px;">Clear All Rows</button>
+    </div>
+</div>
+@if (ViewBag.ActionType == "Edit")
+{
+    <div class="bottom-bar">
+        <div>
+            <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("Import", "Variable", new { Type = "DocumentAcceptance" })';">Cancel</button>
+        </div>
+        <div>
+        </div>
+        <div class="dropdown">
+            <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Update</button>
+
+            <button id="BtnSaveAndClose" class="btn-success  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="" data-purchase-Id="@Model">
+                Update and close
+            </button>
+            <ul class="dropdown-menu" id="ul-id-for-expenses">
+                <li class="dropdown-item">
+                    <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+else if (ViewBag.ActionType == "Create")
+{
+    <div class="bottom-bar">
+        <div>
+            <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("Import", "Variable", new { Type = "DocumentAcceptance" })';">Cancel</button>
+        </div>
+        <div class="d-flex">
+            <div>
+            </div>
+            <div id="makeRecurringDiv" style="padding-top: 5px; border-left: 3px solid white;">
+                <div style="margin-left: 5px;">
+                </div>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Save</button>
+
+            <button id="BtnSaveAndClose" class="btn-success  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="" data-purchase-Id="@Model">
+                Save and close
+            </button>
+            <ul class="dropdown-menu" id="ul-id-for-expenses">
+                <li class="dropdown-item">
+                    <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+
+@section scripts {
+    <script type="text/javascript">
+        //===========================document acceptance functionalities starts=====================
+        var SampleTable;
+        var MainTable;
+        var samplePiData = [
+            { StyleId: '@ViewBag.DocumentAcceptanceid' } //SLNo: 1,
+        ];
+        var mainPiData = [
+            { StyleId: '@ViewBag.DocumentAcceptanceid' }
+        ];
+
+
+
+        let currentActiveInput = null;
+
+        var localFieldsForSampleTable = [
+            {
+                headerSort: false,
+                field: "drag",
+                formatter: function (cell, formatterParams) {
+                    return "<i class='fas fa-bars drag-icon'></i>";
+                },
+                width: 30,
+                headerSort: false,
+                rowHandle: true,
+
+
+            },
+            { title: "Id", field: "CommercialInvoiceId", movable: false, headerSort: false, visible: false },
+            { title: "BBLCMainId", field: "DocumentAcceptanceMasterId", movable: false, headerSort: false, visible: false },
+            { title: "Com. Inv.No.", field: "CommercialInvoiceNo", headerSort: false, frozen: true, hozAlign: "right", visible: true },
+            { title: "Conv. Rate", field: "ConversionRate", movable: false, headerSort: false, visible: true },
+            { title: "Currency", field: "CurrencyShortName", movable: false, headerSort: false, visible: true },
+            { title: "Item Group", field: "ItemGroupName", movable: false, headerSort: false, visible: true },
+            { title: "Item Des.", field: "ItemDescName", movable: false, headerSort: false, visible: true },
+            { title: "Primary Unit", field: "PrimaryUnit", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+            { title: "Primary Qty", field: "PrimaryQuantity", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+            { title: "Sec. Unit", field: "SecondaryUnit", movable: false, headerSort: false, visible: true },
+            { title: "Sec. Qty", field: "SecondaryQty", movable: false, headerSort: false, visible: false, bottomCalc: "sum" },
+            { title: "Total Value", field: "TotalValue", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+        ];
+
+        var BBLCIDSet = [
+            { BLCMainId: @ViewBag.DocumentAcceptanceid }
+        ];
+        var localFieldsForMainTable = [
+            {
+                headerSort: false,
+                field: "drag",
+                formatter: function (cell, formatterParams) {
+                    return "<i class='fas fa-bars drag-icon'></i>";
+                },
+                width: 30,
+                headerSort: false,
+                rowHandle: true,
+
+
+            },
+            { title: "Id", field: "Id", movable: false, headerSort: false, visible: false },
+            { title: "BBLCMainId", field: "DocumentAcceptanceMasterId", movable: false, headerSort: false, visible: false },
+            { title: "Id", field: "CommercialInvoiceId", movable: false, headerSort: false, visible: false },
+            { title: "Com. Inv.No.", field: "CommercialInvoiceNo", headerSort: false, frozen: true, hozAlign: "right", visible: true },
+            { title: "Conv. Rate", field: "ConversionRate", movable: false, headerSort: false, visible: true },
+            { title: "Currency", field: "CurrencyShortName", movable: false, headerSort: false, visible: true },
+            { title: "Item Group", field: "ItemGroupName", movable: false, headerSort: false, visible: true },
+            { title: "Item Des.", field: "ItemDescName", movable: false, headerSort: false, visible: true },
+            { title: "Primary Unit", field: "PrimaryUnit", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+            { title: "Primary Qty", field: "PrimaryQuantity", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+            { title: "Sec. Unit", field: "SecondaryUnit", movable: false, headerSort: false, visible: true },
+            { title: "Sec. Qty", field: "SecondaryQty", movable: false, headerSort: false, visible: false, bottomCalc: "sum" },
+            { title: "Total Value", field: "TotalValue", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+        ];
+        //===========================style functionalities ends=======================
+
+
+        $('#BtnSave').click(function () {
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            $("#ComId").val(ComId);
+            $("#LuserId").val(UserId);
+
+            var documentAcceptanceDeatils = MainTable.getData();
+
+            var BBLCID = '@ViewBag.DocumentAcceptanceid';
+
+
+            //====validation handle ends======
+            var Model =
+            {
+                ComId: ComId,
+                LuserId: UserId,
+                Id: BBLCID,
+                BillOfExchangeRef: $("#daNo").val(),
+                BillDate: $("#billDate").val(),
+                BillMaturityDate: $("#billMaturityDate").val(),
+                BillPaymentDate: $("#billPaymnentDate").val(),
+                BBLCId: $("#bblcId").val(),
+                COM_DocumentAcceptance_Details: documentAcceptanceDeatils,
+            };
+
+            if (Model.COM_DocumentAcceptance_Details.length == 0) {
+                setTimeout(function () {
+                    toastr.success("Include Commercial Invoice", "", {
+                        "toastClass": "toast-red",
+                    });
+                }, 1500);
+            }
+            else {
+                console.log("after save console", Model)
+                var PurchaseIdAbc = 0;
+
+                $.ajax({
+                    async: false,
+                    type: "POST",
+                    url: "@Url.Action("SaveDocumentAcceptance", "Variable")",
+                    data: JSON.stringify(Model),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        //console.log("after save console::", response);
+                        PurchaseIdAbc = response.Id;
+                        setTimeout(function () {
+                            toastr.success(response.message, "", {
+                                "toastClass": "toast-green"
+                            });
+                        }, 1500);
+                        //alert(" Data Saved");
+
+                    },
+                    error: function (response) {
+                    }
+                });
+
+                if (PurchaseIdAbc > 0) {
+                    setTimeout(function () {
+                        window.location.href = '@Url.Action("CreateDocumentAcceptance", "Variable")?&DocumentAcceptanceid=' + PurchaseIdAbc;
+                    }, 3000)
+                }
+
+            }
+
+            
+
+        });
+
+        $('#BtnSaveAndClose').click(function () {
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            $("#ComId").val(ComId);
+            $("#LuserId").val(UserId);
+
+
+            var documentAcceptanceDeatils = MainTable.getData();
+
+            var BBLCID = '@ViewBag.DocumentAcceptanceid';
+
+
+            //====validation handle ends======
+
+            var Model =
+            {
+                ComId: ComId,
+                LuserId: UserId,
+                Id: BBLCID,
+                BillOfExchangeRef: $("#daNo").val(),
+                BillDate: $("#billDate").val(),
+                BillMaturityDate: $("#billMaturityDate").val(),
+                BillPaymentDate: $("#billPaymnentDate").val(),
+                BBLCId: $("#bblcId").val(),
+                COM_DocumentAcceptance_Details: documentAcceptanceDeatils,
+            };
+
+            if (Model.COM_DocumentAcceptance_Details.length == 0) {
+                setTimeout(function () {
+                    toastr.success("Include Commercial Invoice", "", {
+                        "toastClass": "toast-red",
+                    });
+                }, 1500);
+            }
+            else {
+                console.log("after save console", Model)
+                var PurchaseIdAbc = 0;
+
+                $.ajax({
+                    async: false,
+                    type: "POST",
+                    url: "@Url.Action("SaveDocumentAcceptance", "Variable")",
+                    data: JSON.stringify(Model),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        //console.log("after save console::", response);
+                        PurchaseIdAbc = response.Id;
+                        setTimeout(function () {
+                            toastr.success(response.message, "", {
+                                "toastClass": "toast-green"
+                            });
+                        }, 1500);
+                        //alert(" Data Saved");
+
+                    },
+                    error: function (response) {
+                    }
+                });
+
+                if (PurchaseIdAbc > 0) {
+                    setTimeout(function () {
+                        window.location.href = '@Url.Action("Import", "Variable", new { Type = "DocumentAcceptance" })';
+                    }, 3000)
+                }
+            }
+
+            
+
+
+        });
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("getBBLCDrodpwn", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    //console.log("value dekhi buyer er",value);
+                    $('#bblcNo').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        SampleTable = new Tabulator("#SampleTable", {
+            height: "auto",
+            layout: "fitDataTable",
+            // data: data.data.Table1,
+            columns: [
+                ...localFieldsForSampleTable,
+                {
+                    title: "",
+                    field: "Delete",
+                    movable: false,
+                    frozen: true,
+                    formatter: function (cell, formatterParams) {
+                        return "<i id='attach-row' class='bi bi-plus-circle'></i>";
+                    },
+                    width: "6px",
+                    headerSort: false,
+                    cellClick: function (e, cell) {
+                        var rowData = cell.getRow().getData();
+                        var row = cell.getRow();
+                        attachchRow(row);
+                    }
+                }
+            ],
+        });
+
+        autocompletefunction();
+        function autocompletefunction() {
+            $("#Search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '@Url.Action("BBLCSearch", "Variable")',
+                        dataType: "json",
+                        data: { query: $("#Search").val() },
+                        success: function (data) {
+                            console.log(data);
+                            response($.map(data, function (item) {
+                                return { label: item.BBLCNo, value: item.Id };
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                autoFocus: true,
+                minLength: 1,
+                select: function (event, ui) {
+                    console.log("ui", ui.item);
+                    var SupplierID = ui.item.value;
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("getCommercialInvoiceProcData", "Variable")?BBLCID=' + SupplierID,
+                        datatype: "Json",
+                        success: function (data) {
+                            console.log("data for master after group lc chose", data.data);
+                            var masterdata = data.data.Table[0];
+                            $("#concern").val(masterdata.CompanyName);
+                            $("#supplier").val(masterdata.SupplierName);
+                            $("#groupLC").val(masterdata.GroupLCRefName);
+                            $("#masterLC").val(masterdata.TotalGroupLCValue);
+                            $("#conversionRate").val(masterdata.ConvertRate);
+                            $("#currency").val(masterdata.CurrencyShortName);
+                            $("#buyer").val(masterdata.CustomerName);
+                            $("#bblcAmount").val(masterdata.BBLCValue);
+                            $("#previousAccepted").val(masterdata.PrevBBLCValue);
+                            $("#payableAmounty").val(masterdata.TotalValue);
+                            SampleTable.setData(data.data.Table1);
+                            //MainTable.setData(data.data.Table2);
+
+                            // console.log("data after group lc chose", data.data.Table1);
+                        }
+                    });
+                    // $('#Search').val(ui.item.value);
+                    $('#Search').val(ui.item.label);
+                    $('#bblcId').val(ui.item.value);
+                    return false;
+                }
+
+            });
+        }
+        //=============edit mode starts==============
+        var globalStyleNo;
+        if ('@ViewBag.ActionType' == "Edit") {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("getDocumentAcceptanceData", "Variable")",
+                data: { "id": '@ViewBag.DocumentAcceptanceid' },
+                dataType: "json",
+                success: function (response) {
+                    console.log("edit mode er data dekhi:", response);
+                    var detailsTableData = response.DocumentCceptanceDetails;
+                    console.log("detailsTableData", detailsTableData);
+                    var MainTableData = detailsTableData;
+
+                    MainTable.setData(detailsTableData);
+
+                    $("#billDate").val(response.BillDate);
+                    $("#billMaturityDate").val(response.BillMaturityDate);
+                    $("#daNo").val(response.BillOfExchangeRef);
+                    $("#billPaymnentDate").val(response.BillPaymentDate);
+                    $('#bblcId').val(response.BBLCId);
+                    $('#Search').val(response.BBLCNo);
+
+                    setTimeout(function () {
+                        $('#bblcNo').val(response.BBLCId).change();
+                    }, 2000);
+
+                },
+                error: function (error) {
+                    console.error("Error fetching data: " + error);
+                }
+            });
+        }
+        //=============edit mode ends===========
+
+
+
+
+        //duplicate bblc no error  handling
+        var currentPOLId = '@ViewBag.DocumentAcceptanceid';
+        var BtnSave = document.querySelector('#BtnSave');
+        var BtnSaveAndClose = document.querySelector('#BtnSaveAndClose');
+        function getBBLC(callback) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetDocumentAcceptanceList", "Variable")',
+                dataType: "json",
+                success: function (data) {
+                    // console.log("data::", data.data);
+                    var SizeCodeGetArray = [];
+
+                    data.data.forEach(function (item) {
+                        var SizeName = item.BillOfExchangeRef;
+                        var SizeIdGet = item.Id;
+                        var SizeData = {
+                            SizeName: SizeName,
+                            Id: SizeIdGet
+                        };
+                        SizeCodeGetArray.push(SizeData);
+                    });
+
+                    if (typeof callback === "function") {
+                        callback(SizeCodeGetArray);
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                }
+            });
+        }
+
+        function checkPOLExists(sizeName) {
+            getBBLC(function (data) {
+                var lowercasedSizeName = sizeName.toLowerCase();
+
+                var sizeExists = data.some(function (item) {
+                    // console.log("item.Id", item.Id);
+                    //console.log("currentSizeIdd", currentSizeIdd);
+
+                    if (currentPOLId == item.Id) {
+                        return false;
+                    }
+
+                    return item.SizeName.trim().toLowerCase() === lowercasedSizeName;
+                });
+
+                // console.log("sizeExists", sizeExists);
+
+                if (sizeExists) {
+                    $("#daNoValidation").html("Already has the same DA No!");
+                    BtnSave.disabled = true;
+                    BtnSaveAndClose.disabled = true;
+                } else {
+                    $("#daNoValidation").html("");
+                    BtnSave.disabled = false;
+                    BtnSaveAndClose.disabled = false;
+
+                }
+            });
+        }
+
+        var POLNameHandle = document.getElementById("daNo");
+        POLNameHandle.addEventListener("input", function () {
+            // console.log("currentSizeId", currentSizeIdd);
+
+            var enteredSizeName = POLNameHandle.value;
+            checkPOLExists(enteredSizeName);
+        });
+        //==================dropdown populate===============
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("supplierDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#supplierID').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("itemGroupDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#itemGroup').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("concernDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#concern').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("groupLCMainDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#groupLc').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("shipModeDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#shipMode').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("concernBankDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#concernBank').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("supplierBankDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#supplierBank').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("currencyDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#currency').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("incoTermDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#incoTerms').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("paymentTermsDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#payemntTerms').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("dayListDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#days').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("dayTermDescDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi day terms er", value);
+                    $('#daysTermDesc').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("portOFLoadingDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#portOfLoading').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("destinationDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#destination').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+
+
+
+
+        //===group lc chose table data generate starts=====
+        var totalGroupLCValue;
+        $("#groupLc").on("change", function () {
+            var groupLcId = $(this).val();
+            // console.log("groupLcId", groupLcId);
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("getMasterLCData", "Variable")?groupLCid=' + groupLcId,
+                datatype: "Json",
+                success: function (data) {
+                    console.log("grouplc wise pi value dekhi", data);
+                    // console.log("grouplc wise pi value dekhi", data.datasetabc.Table[0].TotalValue);
+                    var previouslyCreatedBBLCValue
+                    if (data.datasetabc != null) {
+                        $("#previousbblcValue").val(data.datasetabc.Table[0].TotalValue);
+                        previouslyCreatedBBLCValue = data.datasetabc.Table[0].TotalValue || 0;
+
+                    }
+
+                    totalGroupLCValue = data.sumAmount || 0;
+                    var finalValue = $("#finalValue").val() || 0;
+                    var Balance = ((previouslyCreatedBBLCValue + finalValue) - totalGroupLCValue) || 0;
+                    $("#balance").val(Balance);
+
+
+                    var margin = (((totalGroupLCValue / Balance) * 100).toFixed(2)) || 0;
+                    if (margin == 0) {
+                        $("#margin").val(data.margin);
+                        $("#marginPercent").val(data.margin);
+                    }
+                    else {
+
+                        $("#margin").val(margin);
+                        $("#marginPercent").val(margin);
+                    }
+
+                    $("#groupLCValue").val(totalGroupLCValue);
+                }
+            });
+        });
+
+
+        //===group lc chose table data generate ends=======
+
+        //===supplier chose table data generate starts=====
+        function attachchRow(row) {
+            var rowData = row.getData();
+            SampleTable.deleteRow(row);
+            MainTable.addRow(rowData);
+
+        }
+        function detachRow(row) {
+            var rowData = row.getData();
+            MainTable.deleteRow(row);
+            SampleTable.addRow(rowData);
+        }
+
+        $("#bblcNo").on("change", function () {
+            var SupplierID = $(this).val();
+            // console.log("SupplierID", SupplierID);
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("getCommercialInvoiceProcData", "Variable")?BBLCID=' + SupplierID,
+                datatype: "Json",
+                success: function (data) {
+                    // console.log("data for master after group lc chose", data.data.Table[0]);
+                    var masterdata = data.data.Table[0];
+                    $("#concern").val(masterdata.CompanyName);
+                    $("#supplier").val(masterdata.SupplierName);
+                    $("#groupLC").val(masterdata.GroupLCRefName);
+                    $("#masterLC").val(masterdata.TotalGroupLCValue);
+                    $("#conversionRate").val(masterdata.ConvertRate);
+                    $("#currency").val(masterdata.CurrencyShortName);
+                    $("#buyer").val(masterdata.CompanyName);
+                    $("#bblcAmount").val(masterdata.BBLCValue);
+                    $("#previousAccepted").val(masterdata.CompanyName);
+                    $("#payableAmounty").val(masterdata.CompanyName);
+
+                    // console.log("data after group lc chose", data.data.Table1);
+                    SampleTable = new Tabulator("#SampleTable", {
+                        height: "auto",
+                        layout: "fitDataTable",
+                        data: data.data.Table1,
+                        columns: [
+                            ...localFieldsForSampleTable,
+                            {
+                                title: "",
+                                field: "Delete",
+                                movable: false,
+                                frozen: true,
+                                formatter: function (cell, formatterParams) {
+                                    return "<i id='attach-row' class='bi bi-plus-circle'></i>";
+                                },
+                                width: "6px",
+                                headerSort: false,
+                                cellClick: function (e, cell) {
+                                    var rowData = cell.getRow().getData();
+                                    var row = cell.getRow();
+                                    attachchRow(row);
+                                }
+                            }
+                        ],
+                    });
+                }
+            });
+        });
+
+
+        //===supplier chose table data generate ends=======
+
+
+
+
+        // Function to handle detaching rows
+        function handleDetachRow(e, cell) {
+            var rowData = cell.getRow().getData();
+            var row = cell.getRow();
+            alert("qqq");
+        }
+        MainTable = new Tabulator("#MainTable", {
+            height: "auto",            
+            // data: BBLCIDSet,
+            columns: [
+                ...localFieldsForMainTable,
+                {
+                    title: "",
+                    field: "Delete",
+                    movable: false,
+                    frozen: true,
+                    formatter: function (cell, formatterParams) {
+                        return "<i id='detach-row' class='fas fa-trash-alt delete-icon'></i>";
+                    },
+                    width: "6px",
+                    headerSort: false,
+                    cellClick: function (e, cell) {
+                        var rowData = cell.getRow().getData();
+                        var row = cell.getRow();
+                        detachRow(row);
+                    }
+                }
+            ],
+
+            // Define custom functions to update input field value
+            dataFiltered: function (filters, rows) {
+                updateInputFieldValue();
+            },
+            dataLoaded: function (data) {
+                updateInputFieldValue();
+            },
+            movableRows: true,
+            movableColumns: true,            
+
+        });
+
+        function updateInputFieldValue() {
+            var sum = MainTable.getCalcResults().bottom.ImportQty || 0; // Get the sum of "IMPORT QTY" column
+            console.log("sum", sum);
+            document.getElementById('bblcQty').value = sum; // Update the value of the input field
+        }
+
+        var today = new Date();
+        var day = today.getDate();
+        var month = today.toLocaleString('default', { month: 'short' });
+        var year = today.getFullYear();
+
+        var formattedDay = (day < 10 ? '0' : '') + day;
+
+        var formattedDate = formattedDay + '-' + month + '-' + year;
+        $('#billDate').val(formattedDate);
+        $('#billMaturityDate').val(formattedDate);
+        $('#billPaymnentDate').val(formattedDate);
+        // $('select').select2();
+        $(function () {
+            $("#billDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            })
+            $("#billMaturityDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#billPaymnentDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#billDate").attr("autocomplete", "off");
+            $("#billMaturityDate").attr("autocomplete", "off");
+            $("#billPaymnentDate").attr("autocomplete", "off");
+        });
+
+
+
+
+        $('select').select2();
+        //===============================document acceptance functionaloties end========================
+    </script>
+}

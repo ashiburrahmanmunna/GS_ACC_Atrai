@@ -1,0 +1,200 @@
+﻿@model Atrai.Core.Entity.SoftwarePackageModel
+@{ ViewData["Title"] = "AddSoftwarePackage";
+                Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+<link href="~/js/simditor-2.3.28/site/assets/styles/simditor.css" rel="stylesheet" />
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-md-7 col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>New Software Package</h4>
+
+                    </div>
+
+                    @*@Html.HiddenFor(m => m.Id, new { @value = Model.Id })
+                        @Html.HiddenFor(m => m.CreateDate, new { @value = Model.CreateDate })
+                        @Html.HiddenFor(m => m.LuserId, new { @value = Model.LuserId })*@
+
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="admin" asp-action="AddSoftwarePackage" method="post">
+                                @if (Model != null)
+                                {
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" /> @*<input type="hidden" asp-for="LuserId" />*@ 
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Id" value="0" />
+                                }
+                    
+                                        <div class="form-group row">
+                                            <div class="col-md-4 col-12 ">
+                                                <label asp-for="SoftwarePackageCode"></label>
+                                                <input type="text" asp-for="SoftwarePackageCode" class="form-control" placeholder="eg Enter Code">
+                                                <span asp-validation-for="SoftwarePackageCode" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-4 col-12 ">
+                                                <label asp-for="BusinessType"></label>
+                                                @Html.DropDownList("BusinessTypeId", new SelectList((IEnumerable<SelectListItem>)ViewBag.BusinessType, "Value", "Text"), "Select BusinessType",
+                                                          htmlAttributes: new { @class = "form-control", id = "BusinessTypeId" })
+                                            </div>
+                                            <div class="col-md-4 col-12 ">
+                                                <label asp-for="Name"></label>
+                                                <input type="text" asp-for="Name" class="form-control" placeholder="eg Enter Package Name">
+                                                <span asp-validation-for="Name" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                    
+                                            <div class="col-md-6 col-12 ">
+                                                <label asp-for="PackagePrice"></label>
+                                                <input type="text" asp-for="PackagePrice" class="form-control" placeholder="eg Enter Price">
+                                                <span asp-validation-for="PackagePrice" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-6 col-12 ">
+                                                <label asp-for="UserCount"></label>
+                                                <input type="text" asp-for="UserCount" class="form-control" placeholder="eg Total User">
+                                                <span asp-validation-for="UserCount" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+
+                                            <div class="col-md-6 col-12 ">
+                                                <label asp-for="DurationId"></label>
+                                                @Html.DropDownList("DurationId", new SelectList((IEnumerable<SelectListItem>)ViewBag.Duration, "Value", "Text"), "Select Duration",
+                                                                    htmlAttributes: new { @class = "form-control", id = "DurationId" })
+                                            </div>
+                                            <div class="col-md-6 col-12 ">
+                                                <label asp-for="TotalDays"></label>
+                                                <input type="text" asp-for="TotalDays" class="form-control" placeholder="eg Enter Price">
+                                                <span asp-validation-for="TotalDays" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
+
+                                            <div class="col-md-6 col-12 ">
+                                                <label asp-for="CurrencyId"></label>
+                                                @Html.DropDownList("CurrencyId", new SelectList((IEnumerable<SelectListItem>)ViewBag.Country, "Value", "Text"), "Select Currency",
+                                                htmlAttributes: new { @class = "form-control", id = "CurrencyId" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
+                                            <div class="col-md-12 col-12 ">
+                                                <label asp-for="SoftwarePackageDescription" class="control-label"></label>
+                                                <textarea asp-for="SoftwarePackageDescription" id="SoftwarePackageDescription" class="form-control"> </textarea>
+                                                <span asp-validation-for="SoftwarePackageDescription" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+
+
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                        <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" /> }
+                                            else if (ViewBag.ActionType == "Edit")
+                                            {
+                                                <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" /> }
+                                            else if (ViewBag.ActionType == "Delete")
+                                            {
+                                        <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>}
+                                                @Html.ActionLink("Back", "SoftwarePackageList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                        </div>
+
+
+                                        @*<div class="row text-center m-2">
+            <br />
+            <div class="col-md-1"></div>
+            <div class="col-md-4 col-xs-12 d-block mx-auto">
+
+                @if (ViewBag.ActionType == "Create")
+                {
+                    <input type="submit" value="Save" class="btn  btn-success btn-block  rounded-0" />
+                }
+                else if (ViewBag.ActionType == "Edit")
+                {
+                    <input type="submit" value="Update" class="btn btn-warning btn-block rounded-0" />
+                }
+                else if (ViewBag.ActionType == "Delete")
+                {
+                    <button class="btn btn-danger btn-block rounded-0" type="button" onclick="Bank_delete()">Delete</button>
+                }
+
+
+            </div>
+
+            <div class="col-md-4 col-xs-12 d-block mx-auto">
+                @Html.ActionLink("Back", "SoftwarePackageList", "Admin", null, new { @class = "btn btn-info btn-block rounded-0", @id = "btnBack" })
+
+            </div>
+            <div class="col-md-3"></div>
+
+        </div>*@
+                            
+                   
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+<script src="~/js/simditor-2.3.28/site/assets/scripts/jquery.min.js"></script>
+<script src="~/js/simditor-2.3.28/site/assets/scripts/module.js"></script>
+<script src="~/js/simditor-2.3.28/site/assets/scripts/hotkeys.js"></script>
+<script src="~/js/simditor-2.3.28/site/assets/scripts/uploader.js"></script>
+<script src="~/js/simditor-2.3.28/site/assets/scripts/simditor.js"></script>
+
+<script>
+    var editor = new Simditor({
+        textarea: $('#SoftwarePackageDescription'),
+
+        placeholder: '',
+        defaultImage: 'images/image.png',
+        params: {},
+        upload: true,
+        tabIndent: true,
+        toolbar: [
+            'title',
+            'bold',
+            'italic',
+            'underline',
+            'strikethrough',
+            'fontScale',
+            'color',
+            'ol',
+            'ul',
+            'blockquote',
+            'code',
+            'table',
+            'link',
+            'image',
+            'hr',
+            'indent',
+            'outdent',
+            'alignment',
+        ],
+        toolbarFloat: true,
+        toolbarFloatOffset: 0,
+        toolbarHidden: false,
+        pasteImage: true,
+        cleanPaste: false,
+    });
+</script>

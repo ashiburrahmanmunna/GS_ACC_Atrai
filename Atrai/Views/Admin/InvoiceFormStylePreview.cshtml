@@ -1,0 +1,3369 @@
+﻿@using Microsoft.AspNetCore.Http
+@using System.Linq
+@*@inject HttpContextAccessor HttpContextAccessor*@
+@model Atrai.Model.Core.Entity.CustomFormStyleModel
+
+@{
+    ViewData["Title"] = "Custom Form Style";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    //var VatViewActivate = HttpContextAccessor.HttpContext.Session.GetInt32("VatViewActivate").ToString();
+    var x = Model;
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
+
+
+<style>
+    /*    .tabulator .tabulator-header .tabulator-col {
+            background: black;
+        }*/
+    /*#container {
+            display: flex;
+        }
+    */
+    #sidebar {
+        width: 20%;
+        padding: 20px;
+    }
+
+    #formTemplateAiryClassic, #formTemplateAiryNew, #formTemplateFriendly,
+    #formTemplateBold,
+    #formTemplateFresh,
+    #formTemplateModern {
+        width: 80%;
+        padding: 20px;
+        border: 1px solid #ccc;
+        max-height: 1237px /*1115px*/; /*1000px;*/
+        position: relative;
+    }
+
+    #footerTxtP {
+        position: static;
+        bottom: 0;
+        max-height: 1235px;
+        margin-top: auto;
+    }
+
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .M {
+        width: 56%;
+    }
+
+    .S {
+        width: 48%;
+    }
+
+    .L {
+        width: 66%;
+    }
+
+    #ParentTemplateForTemplate, #ParentTemplateForLogo {
+        display: flex;
+        justify-content: space-between; /* Adjust as needed */
+    }
+
+    .logoButtonClass {
+        border: 1px solid black;
+        border-radius: 30px;
+        background: white;
+        color: black;
+        font-weight: 600;
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .colors {
+        display: block;
+        height: 30px;
+        width: 30px;
+        border-radius: 50%;
+        margin: 5px;
+    }
+
+    .selectedColors {
+        display: block;
+        height: 70px;
+        width: 70px;
+        border-radius: 50%;
+        margin: 5px;
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 99%;
+        /*background-color: #333;*/
+        border-top: 1px solid #0000001c;
+        color: #fff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+
+    .tabulator {
+        border: none;
+    }
+
+    #formTemplateAiryClassic .tabulator .tabulator-header .tabulator-col, #formTemplateAiryNew .tabulator .tabulator-header .tabulator-col,
+    #formTemplateModern .tabulator .tabulator-header .tabulator-col {
+        background: #f4749b;
+    }
+
+    #formTemplateFresh .tabulator .tabulator-header .tabulator-col, #formTemplateBold .tabulator .tabulator-header .tabulator-col,
+    #formTemplateFriendly .tabulator .tabulator-header .tabulator-col {
+        background: #96bc2d;
+    }
+
+    #formTemplateFriendly #taxInvoiceParent {
+        background: #96bc2d;
+    }
+
+    #formTemplateFresh #Taxinvoice, #formTemplateFresh #Date, #formTemplateFresh #DueDate, #formTemplateFresh #Terms, #formTemplateFresh #balanceDueLabel {
+        background: #96bc2d;
+    }
+
+    #formTemplateModern #billTo {
+        background: #f4749b;
+    }
+
+    .tabulator .tabulator-row:hover {
+        color: white;
+    }
+</style>
+
+
+<form asp-controller="admin" asp-action="CustomFormStyle" method="post" enctype="multipart/form-data">
+    @{
+        var test = 123;
+    }
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="DocTypeId" id="doctype" />
+    <input type="hidden" asp-for="CreateDate" />
+    <input type="hidden" asp-for="UpdateDate" />
+    <input type="hidden" asp-for="LuserId" />
+    <input type="hidden" asp-for="LuserIdUpdate" />
+    <input type="hidden" asp-for="ComId" />
+    <input type="hidden" asp-for="ColumnOrder" id="columnOrders" />
+    <div class="row">
+        <div class="col-lg-6">
+            @*<div id="container">*@
+            <div id="sidebar" class="w-100">
+                <nav class="mb-5">
+                    <div class="nav nav-tabs pt-3" id="nav-tab" role="tablist">
+                        <a class="nav-item nav-link active" id="nav-design-tab" data-bs-toggle="tab" href="#nav-design" role="tab" aria-controls="nav-design" aria-selected="true">Design</a>
+                        <a class="nav-item nav-link" id="nav-content-tab" data-bs-toggle="tab" href="#nav-content" role="tab" aria-controls="nav-content" aria-selected="true">Content</a>
+                        <a class="nav-item nav-link " id="nav-emails-tab" data-bs-toggle="tab" href="#nav-emails" role="tab" aria-controls="nav-emails" aria-selected="true">Emails</a>
+
+                    </div>
+
+                    @*btn btn-sm btn-outline-info rounded-0*@
+                </nav>
+                <div class="tab-content mt-4" id="nav-tabContent">
+                    @*-----------------design tab left side options starts-----------------*@
+                    <div class="tab-pane fade show active " id="nav-design" role="tabpanel" aria-labelledby="nav-design-tab">
+                        <input asp-for="Name" placeholder="Enter name of the custom form style" style=" border: 1px solid #80808075; width: 50%; height: 35px;" />
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="bi bi-card-list fs-1 me-2"></i>
+                            <span class="fs-6 cursor-pointer" id="changetemplate">Change up the template</span>
+                        </div>
+                        <div class="d-none" id="ParentTemplateForTemplate">
+                            <div>
+                                <input asp-for="Template" class="template-radio" type="radio" value="" id="airyNew">
+                                <label class="form-check-label" for="airyNew">
+                                    <i class="bi bi-card-heading fs-1"></i>
+                                    <p>Airy new</p>
+                                </label>
+                            </div>
+                            <div>
+                                <input asp-for="Template" class="template-radio" type="radio" value="" id="airyClassis">
+                                <label class="form-check-label" for="airyClassis">
+                                    <i class="bi bi-card-text fs-1"></i>
+                                    <p>Airy classis</p>
+                                </label>
+                            </div>
+                            <div>
+                                <input asp-for="Template" class="template-radio" type="radio" value="" id="modern">
+                                <label class="form-check-label" for="modern">
+                                    <i class="bi bi-journal-richtext fs-1"></i>
+                                    <p>Modern</p>
+                                </label>
+                            </div>
+                            <div>
+                                <input asp-for="Template" class="template-radio" type="radio" value="" id="fresh">
+                                <label class="form-check-label" for="fresh">
+                                    <i class="bi bi-journal-text fs-1"></i>
+                                    <p>Fresh</p>
+                                </label>
+                            </div>
+                            <div>
+                                <input asp-for="Template" class="template-radio" type="radio" value="" id="bold">
+                                <label class="form-check-label" for="bold">
+                                    <i class="bi bi-journal-medical fs-1"></i>
+                                    <p>Bold</p>
+                                </label>
+                            </div>
+                            <div>
+                                <input asp-for="Template" class="template-radio" type="radio" value="" id="Friendly">
+                                <label class="form-check-label" for="Friendly">
+                                    <i class="bi bi-card-heading fs-1"></i>
+                                    <p>Friendly</p>
+                                </label>
+                            </div>
+                        </div>
+
+                        @{
+                            var xx = 2;
+                        }
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="bi bi-plus-square fs-1 me-2"></i>
+                            <span class="fs-6 cursor-pointer" id="LogoEdit">Make logo edits</span>
+                        </div>
+                        <div class="row d-none" id="PrentDivOfLogo">
+                            <div class="col-lg-4">
+                                <img style="width: 50%;" id="logo-set" /> <br />
+                                <a href="#" id="hideLogo">Hide logo</a>
+                                <a href="#" class="d-none" id="showLogo">Show logo</a>
+                            </div>
+                            <div class="col-lg-4" id="logoSizeParent">
+                                <label>Size</label><br />
+                                <input asp-for="LogoSize" type="radio" value="" id="LogoSizeS">
+                                <label class="logoButtonClass mt-2" for="LogoSizeS">S</label>
+
+                                <input asp-for="LogoSize" type="radio" value="" id="LogoSizeM">
+                                <label class="logoButtonClass mt-2" for="LogoSizeM">M</label>
+
+                                <input asp-for="LogoSize" type="radio" value="" id="LogoSizeL">
+                                <label asp-for="LogoSize" class="logoButtonClass mt-2" for="LogoSizeL">L</label>
+
+                            </div>
+                            <div class="col-lg-4" id="logoPlacemetParent">
+                                <label>Placement</label><br />
+                                <input asp-for="LogoPlacement" type="radio" value="" id="LogoPlaceLeft" />
+                                <label class="logoButtonClass mt-2" for="LogoPlaceLeft">
+                                    <i class="bi bi-justify-left"></i>
+                                </label>
+
+                                <input asp-for="LogoPlacement" type="radio" value="" id="LogoPlaceCenter" />
+                                <label class="logoButtonClass mt-2" for="LogoPlaceCenter">
+                                    <i class="bi bi-justify"></i>
+                                </label>
+
+                                <input asp-for="LogoPlacement" type="radio" value="" id="LogoPlaceRight" />
+                                <label class="logoButtonClass mt-2" for="LogoPlaceRight">
+                                    <i class="bi bi-justify-right"></i>
+                                </label>
+
+                            </div>
+                        </div>
+
+                        @{
+                            var yy = 2;
+                        }
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="bi bi-palette fs-1 me-2"></i>
+                            <span class="fs-6 cursor-pointer" id="tryColor">try other colors</span>
+                        </div>
+                        <div class="d-flex d-none" id="colorsGrandParentDiv">
+                            <div>
+                                <span class="selectedColors" data-color="#bdbdbd" style="background-color: #bdbdbd;"></span>
+                                <input id="selectedColorCode" disabled style="width: 80px; height: 28px; border: 1px solid #808080a6;" />
+                            </div>
+                            <div class="colorsParentDiv">
+                                <div class="d-flex">
+                                    <input asp-for="Color" type="radio" value="#bdbdbd" id="one" />
+                                    <label class="colors" value="" data-color="#bdbdbd" id="bdbdbd" for="one" style="background-color: #bdbdbd;"></label>
+                                    <input asp-for="Color" type="radio" value="#636363" id="onee" />
+                                    <label class="colors" value="" for="onee" data-color="#636363" id="636363" style="background-color: #636363;"></label>
+                                    <input asp-for="Color" type="radio" value="#000000" id="two" />
+                                    <label for="two" class="colors" value="" data-color="#000000" id="000000" style="background-color: #000000;"></label>
+                                    <input asp-for="Color" for="one" type="radio" value="#a6bddb" id="three" />
+                                    <label for="three" class="colors" value="" data-color="#a6bddb" id="a6bddb" style="background-color: #a6bddb;"></label>
+                                    <input asp-for="Color" type="radio" value="#7889a1" id="four" />
+                                    <label for="four" class="colors" value="" data-color="#7889a1" id="7889a1" style="background-color: #7889a1;"></label>
+                                    <input asp-for="Color" type="radio" value="#48565f" id="five" />
+                                    <label for="five" class="colors" value="" data-color="#48565f" id="48565f" style="background-color: #48565f;"></label>
+                                    <input asp-for="Color" type="radio" value="#79BD58" id="six" />
+                                    <label for="six" class="colors" value="" data-color="#79BD58" id="79BD58" style="background-color: #79BD58;"></label>
+                                    <input asp-for="Color" type="radio" value="#0e909a" id="seven" />
+                                    <label for="seven" class="colors" value="" data-color="#0e909a" id="0e909a" style="background-color: #0e909a;"></label>
+                                    <input asp-for="Color" type="radio" value="#202e5a" id="eight" />
+                                    <label for="eight" class="colors" value="" data-color="#202e5a" id="202e5a" style="background-color: #202e5a;"></label>
+                                </div>
+                                <div class="d-flex">
+                                    <input asp-for="Color" type="radio" value="#96bc2d" id="nine" />
+                                    <label for="nine" class="colors" value="" data-color="#96bc2d" id="96bc2d" style="background-color: #96bc2d;"></label>
+                                    <input asp-for="Color" type="radio" value="#2a651d" id="ten" />
+                                    <label for="ten" class="colors" value="" data-color="#2a651d" id="2a651d" style="background-color: #2a651d;"></label>
+                                    <input asp-for="Color" type="radio" value="#004254" id="eleven" />
+                                    <label for="eleven" class="colors" value="" data-color="#004254" id="004254" style="background-color: #004254;"></label>
+                                    <input asp-for="Color" type="radio" value="#ff8c00" id="twelve" />
+                                    <label for="twelve" class="colors" value="" data-color="#ff8c00" id="ff8c00" style="background-color: #ff8c00;"></label>
+                                    <input asp-for="Color" type="radio" value="#82001d" id="thirteen" />
+                                    <label for="thirteen" class="colors" value="" data-color="#82001d" id="82001d" style="background-color: #82001d;"></label>
+                                    <input asp-for="Color" type="radio" value="#6b1438" id="fourteen" />
+                                    <label for="fourteen" class="colors" value="" data-color="#6b1438" id="6b1438" style="background-color: #6b1438;"></label>
+                                    <input asp-for="Color" type="radio" value="#f4749b" id="fifteen" />
+                                    <label for="fifteen" class="colors" value="" data-color="#f4749b" id="f4749b" style="background-color: #f4749b;"></label>
+                                    <input asp-for="Color" type="radio" value="#950069" id="sixteen" />
+                                    <label for="sixteen" class="colors" value="#950069" data-color="#950069" id="950069" style="background-color: #950069;"></label>
+                                    <input asp-for="Color" type="radio" value="#542852" id="eighteen" />
+                                    <label for="eighteen" class="colors" value="" data-color="#542852" id="542852" style="background-color: #542852;"></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex d-none mt-2 align-items-center" id="FontColorsGrandParentDiv">
+                            <div>
+                                <span class="selectedColors" data-color="#bdbdbd" style="background-color: #bdbdbd;"></span>
+                                <input id="FontselectedColorCode" disabled style="width: 80px; height: 28px; border: 1px solid #808080a6;" />
+                            </div>
+                            <div class="FontColorsParentDiv">
+                                <div class="d-flex">
+                                    <input asp-for="FontColor" type="radio" value="#fffcfc" id="FOne" />
+                                    <label for="FOne" class="colors border" value="" data-color="#fffcfc" id="fffcfc" style="background-color: #fffcfc;"></label>
+                                    <input asp-for="FontColor" type="radio" value="#202e5a" id="FTwo" />
+                                    <label for="FTwo" class="colors" value="" data-color="#202e5a" id="202e5a" style="background-color: #202e5a;"></label>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="bi bi-file-earmark-font fs-1 me-2"></i>
+                            <span class="fs-6 cursor-pointer" id="selectDifferentFont">Select a different font</span>
+                        </div>
+                        <div class="d-flex d-none" id="fontParent">
+                            <select asp-for="FontFamily" class="form-select w-25" id="fontFamily">
+                            </select>
+                            <select asp-for="FontSize" class="form-select w-25 ms-2" id="fontSize">
+                            </select>
+                        </div>
+
+
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="bi bi-house fs-1 me-2"></i>
+                            <span class="fs-6 cursor-pointer" id="addEftDetails">Add your EFT details</span>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="bi bi-box-seam fs-1 me-2"></i>
+                            <span class="fs-6 cursor-pointer " id="editPrintSetting">Edit print settings</span>
+                        </div>
+                        <div class="d-none" id="pageMarginParent">
+                            <label>Page margins</label>
+                            <div class="d-flex mb-2">
+                                <div>
+                                    <label class="fw-bold">Top</label><br />
+                                    <input asp-for="PageMarginTop" id="topMargin" style="width: 80px; height: 28px; border: 1px solid #808080a6;" />
+                                </div>
+                                <div class="ms-3">
+                                    <label class="fw-bold">Left</label><br />
+                                    <input asp-for="PageMarginLeft" id="leftMargin" style="width: 80px; height: 28px; border: 1px solid #808080a6;" />
+                                </div>
+                                <div class="ms-3">
+                                    <label class="fw-bold">Bottom</label><br />
+                                    <input asp-for="PageMarginBottom" id="bottomMargin" style="width: 80px; height: 28px; border: 1px solid #808080a6;" />
+                                </div>
+                                <div class="ms-3">
+                                    <label class="fw-bold">Right</label><br />
+                                    <input asp-for="PageMarginRight" id="rightMargin" style="width: 80px; height: 28px; border: 1px solid #808080a6;" />
+                                </div>
+                                <a class="mt-4 ms-2 cursor-pointer" id="reset">Reset</a>
+                            </div>
+                            <div class="form-check d-flex align-items-center ms-2">
+                                <input asp-for="IsFitPrinted" class="form-check-input fs-5" type="checkbox" id="FitPrinted">
+                                <label class="form-check-label ms-2 mt-1" for="FitPrinted">
+                                    Fit printed form with pay slip in window envelope
+                                </label>
+                            </div>
+                            <div class="form-check d-flex align-items-center ms-2">
+                                <input asp-for="IsLetterHeadUsed" class="form-check-input fs-5" type="checkbox" id="UseLetterHead">
+                                <label class="form-check-label ms-2 mt-1" for="UseLetterHead">
+                                    Use letterhead paper
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*-----------------design tab left side options ends-------------------*@
+
+
+
+
+                    @*-----------------content tab left side options starts-----------------*@
+                    <div class="tab-pane fade show" id="nav-content" role="tabpanel" aria-labelledby="nav-content-tab">
+                        <label>Change content of:</label>
+                        <select class="form-select w-25" id="contents">
+                            <option value="Header">Header</option>
+                            <option value="Table">Table</option>
+                            <option value="Footer">Footer</option>
+                        </select>
+
+
+
+
+                        @*HEADR PART*@
+                        <div id="HeaderParenDiv" class="mt-3">
+                            <h3>Header</h3>
+                            <p>The company info settings apply to all form styles</p>
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsBusinessNameShow" class="form-check-input fs-5" type="checkbox" id="BusinessName">
+                                <label class="form-check-label ms-2 mt-1 fw-bold" for="BusinessName">
+                                    Business name
+                                </label>
+                            </div>
+                            <input class="ms-4" id="BusinessNameInput" asp-for="BusinessName" style=" border: 1px solid #80808075; width: 50%; height: 35px;" />
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsPhoneShow" class="form-check-input fs-5" type="checkbox" id="Phone">
+                                <label class="form-check-label ms-2 mt-1 fw-bold" for="Phone">
+                                    Phone
+                                </label>
+                            </div>
+                            <input class="ms-4" id="PhoneNameInput" asp-for="Phone" style=" border: 1px solid #80808075; width: 50%; height: 35px;" />
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsEmailShow" class="form-check-input fs-5" type="checkbox" id="Email">
+                                <label class="form-check-label ms-2 mt-1 fw-bold" for="Email">
+                                    Email
+                                </label>
+                            </div>
+                            <input class="ms-4" id="EmailInput" asp-for="Email" style=" border: 1px solid #80808075; width: 50%; height: 35px;" />
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsComRegShow" class="form-check-input fs-5" type="checkbox" id="ComRegNo">
+                                <label class="form-check-label ms-2 mt-1 fw-bold" for="ComRegNo">
+                                    Company registration number
+                                </label>
+                            </div>
+                            <input class="ms-4" id="ComRegNoInput" asp-for="ComRegNo" style=" border: 1px solid #80808075; width: 50%; height: 35px;" />
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsBusinessAddrsShow" class="form-check-input fs-5" type="checkbox" id="BusinessAdress">
+                                <label class="form-check-label ms-2 mt-1 fw-bold" for="BusinessAdress">
+                                    Business adress
+                                </label>
+                            </div>
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsWebsiteShow" class="form-check-input fs-5" type="checkbox" id="Website">
+                                <label class="form-check-label ms-2 mt-1 fw-bold" for="Website">
+                                    Website
+                                </label>
+                            </div>
+                            <input class="ms-4" id="WebsiteInput" asp-for="Website" style=" border: 1px solid #80808075; width: 50%; height: 35px;" />
+
+                            <hr />
+
+
+                            <h4>Form</h4>
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input class="form-check-input fs-5" type="checkbox" id="FormNames">
+                                <label class="form-check-label ms-2 mt-1 fw-bold" for="FormNames">
+                                    Form names
+                                </label>
+                            </div>
+                            <label>Invoice</label>
+                            <input class="" asp-for="Invoice" style="border: 1px solid #80808075; width: 30%; height: 35px; margin-left: 51px " /> <br />
+                            <label class="mt-4">Tax invoice</label>
+                            <input class="ms-4" asp-for="TaxInvoice" style=" border: 1px solid #80808075; width: 30%; height: 35px;" />
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsFormNumbers" class="form-check-input fs-5" type="checkbox" id="FormNumbers">
+                                <label class="form-check-label ms-2 mt-1" for="FormNumbers">
+                                    Form numbers
+                                </label>
+                            </div>
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsCustomTranUsed" class="form-check-input fs-5" type="checkbox" id="CustomTranNo">
+                                <label class="form-check-label ms-2 mt-1" for="CustomTranNo">
+                                    Use custom transaction numbers (This setting applies to all form styles)
+                                </label>
+                            </div>
+
+                            <hr />
+                            <h4>Display</h4>
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsBillingAddress" class="form-check-input fs-5" type="checkbox" id="BillingAddress">
+                                <label class="form-check-label ms-2 mt-1" for="BillingAddress">
+                                    Billing address
+                                </label>
+                            </div>
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsShipping" class="form-check-input fs-5" type="checkbox" id="Shipping">
+                                <label class="form-check-label ms-2 mt-1" for="Shipping">
+                                    Shipping (This setting applies to all form styles)
+                                </label>
+                            </div>
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsDueDate" class="form-check-input fs-5" type="checkbox" id="ContentDueDate">
+                                <label class="form-check-label ms-2 mt-1" for="ContentDueDate">
+                                    Due date
+                                </label>
+                            </div>
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsCustomVatNo" class="form-check-input fs-5" type="checkbox" id="CustomerVatNumber">
+                                <label class="form-check-label ms-2 mt-1" for="CustomerVatNumber">
+                                    Customer VAT number
+                                </label>
+                            </div>
+                        </div>
+
+
+
+                        @*TABLE PART*@
+                        <div id="TableParentDiv" class="mt-3 d-none">
+                            <h3>Table</h3>
+                            <p>Account summary</p>
+                            <p>Account summary shows your transaction history for a customer's account. It includes: Balance Forward, Payments and Credits, New Charges, Total Amount Due</p>
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsShowOnInvoice" class="form-check-input fs-5" type="checkbox" id="showOnInvoice">
+                                <label class="form-check-label ms-2 mt-1 fw-bold" for="showOnInvoice">
+                                    Show on invoice
+                                </label>
+                            </div>
+
+                            <p>Activity table</p>
+                            <p>COLUMNS</p>
+                            <ul id="TableColumnList" class="list-group">
+                            </ul>
+
+
+
+                        </div>
+
+
+                        @*FOOTER PART*@
+                        <div id="FooterParentDiv" class="mt-3 d-none">
+                            <h3>Footer</h3>
+                            <p>Display</p>
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsDiscounted" class="form-check-input fs-5" type="checkbox" id="discountCheck">
+                                <label class="form-check-label ms-2 mt-1 fw-bold" for="discountCheck">
+                                    Discount
+                                </label>
+                            </div>
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsDeposited" class="form-check-input fs-5" type="checkbox" id="Deposit">
+                                <label class="form-check-label ms-2 mt-1 fw-bold" for="Deposit">
+                                    Deposit
+                                </label>
+                            </div>
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsTaxSummary" class="form-check-input fs-5" type="checkbox" id="TaxSummary">
+                                <label class="form-check-label ms-2 mt-1 fw-bold" for="TaxSummary">
+                                    Tax summary
+                                </label>
+                            </div>
+
+                            <div class="form-check d-flex align-items-center ms-2 mt-2">
+                                <input asp-for="IsEstimateSummary" class="form-check-input fs-5" type="checkbox" id="EstimateSummary">
+                                <label class="form-check-label ms-2 mt-1 fw-bold" for="EstimateSummary">
+                                    Estimate summary
+                                </label>
+                            </div>
+                            <label class="mt-2">Message to customer</label><br />
+                            <div class="form-floating">
+                                <textarea asp-for="MessageToCustomer" class="form-control w-50" placeholder="We appreciate your business and look forward to helping you again soon." id="messageTocustomer" style="height: 100px"></textarea>
+                            </div>
+
+                            <select class="form-select w-25 mt-2" id="fontSizeForMessage">
+                            </select>
+
+                            <label class="mt-2">Add footer text</label><br />
+                            <div class="form-floating">
+                                <textarea asp-for="FooterText" class="form-control w-50" placeholder="Add any extra information your customer needs to know." id="footerText" style="height: 100px"></textarea>
+                            </div>
+
+                            <select asp-for="FooterTextSize" class="form-select w-25 mt-2" id="fontSizeForFooter">
+                            </select>
+
+                            <select asp-for="FootertextPlacement" class="form-select w-25 mt-2" id="footerPlacement">
+                            </select>
+
+                        </div>
+
+
+                    </div>
+                    @*-----------------content tab left side options ends-------------------*@
+
+
+
+
+                    @*-----------------email tab left side options starts-----------------*@
+                    <div class="tab-pane fade show " id="nav-emails" role="tabpanel" aria-labelledby="nav-email-tab">
+                        <label>Change content of:</label>
+                        <select class="form-select w-25" id="emailOptions">
+                            <option selected>Select</option>
+                            <option value="StandardEmail">Standard email</option>
+                            <option value="ReminderEmail">Reminder email</option>
+                        </select>
+                        <h3 class="mt-3">How your invoice appears in emails</h3>
+                        <p>(This setting applies to all form styles)</p>
+
+                        <input asp-for="IsFullDetails" class="template-radio mt-2" type="radio" value="" id="fullDetails" name="a">
+                        <label class="form-check-label" for="fullDetails">Full details</label><br />
+                        <input asp-for="IsSummarizedDetails" class="template-radio mt-2" type="radio" value="" id="summarizedDetails" name="a">
+                        <label class="form-check-label" for="summarizedDetails">Summarised details</label><br />
+                        <input asp-for="IsPdfAttached" class="template-radio mt-2" type="checkbox" value="" id="pdf-Attached">
+                        <label class="form-check-label" for="pdf-Attached">PDF Attached</label><br />
+                        <hr />
+                        <h3 class="mt-3">Standard email</h3>
+                        <p>Edit the email your customers get with every invoice</p>
+
+                        <div id="stdrdEmailParent" class="d-none">
+                            <label class="fw-bold">Subject</label><br />
+                            <input asp-for="StandardEmailSubject" placeholder="Subject" id="StandardEmailSubject" style=" border: 1px solid #80808075; width: 50%; height: 35px;" /><br />
+                            <span>(This setting applies to all invoices)</span> <br />
+
+                            <div class="d-flex mt-3">
+                                <div class="d-flex align-items-center">
+                                    <input asp-for="IsStandardEmialGreetingUsed" class="template-radio mt-2" type="checkbox" value="" id="useStandardGreeting">
+                                    <label class="form-check-label ms-2 mt-2" for="useGreeting">Use greeting</label>
+                                </div>
+
+                                <select asp-for="StandardEmailGreetingsAppeal" class="form-select w-25 ms-4" id="StandardGreetingAppearances">
+                                </select>
+                                <select asp-for="StandardEmailGreetingFullName" class="form-select w-25 ms-4" id="StandardGreetingNames">
+                                </select>
+                            </div>
+
+                            <label class="mt-3">Message to customer</label><br />
+                            <div class="form-floating">
+                                <textarea asp-for="StandardEmailMsgToCustomer" class="form-control w-50" placeholder="We appreciate your business and look forward to helping you again soon." id="StandardMessageTocustomer" style="height: 100px"></textarea>
+                            </div>
+                        </div>
+                        <hr />
+                        <h3 class="mt-3">Reminder email</h3>
+                        <p>Edit the email your customers get with every invoice</p>
+
+                        <div id="reminderEmailParent" class="d-none">
+                            <label class="fw-bold">Subject</label><br />
+                            <input asp-for="ReiminderEmailSubject" placeholder="Subject" id="ReminderEmailsubject" style=" border: 1px solid #80808075; width: 50%; height: 35px;" /><br />
+                            <span>(This setting applies to all invoices)</span> <br />
+
+                            <div class="d-flex mt-3">
+                                <div class="d-flex align-items-center">
+                                    <input asp-for="IsReiminderEmailGreetingUsed" class="template-radio mt-2" type="checkbox" value="" id="useReminderGreeting">
+                                    <label class="form-check-label ms-2 mt-2" for="useGreeting">Use greeting</label>
+                                </div>
+
+                                <select asp-for="ReiminderEmailGreetingsAppeal" class="form-select w-25 ms-4" id="ReminderGreetingAppearances">
+                                </select>
+                                <select asp-for="ReiminderEmailGreetingFullName" class="form-select w-25 ms-4" id="ReminderGreetingNames">
+                                </select>
+                            </div>
+
+                            <label class="mt-3">Message to customer</label><br />
+                            <div class="form-floating">
+                                <textarea asp-for="ReiminderEmailMsgToCustomer" class="form-control w-50" placeholder="We appreciate your business and look forward to helping you again soon." id="ReminderMessageTocustomer" style="height: 100px"></textarea>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    @*-----------------email tab left side options starts-----------------*@
+
+                </div>
+
+            </div>
+            @*</div>*@
+
+        </div>
+        <div class="col-lg-6" id="Templates">
+            @*<div id="Templates">*@
+            @*=======default template starts============*@
+            <div id="formTemplateAiryClassic" class="ms-auto px-5 py-5 w-100 entirePageParent forTemplateDefault">
+                <div id="setMargins">
+                    @*<partial name="/Views/Shared/_companyImagePartialView.cshtml" />*@
+                    <div class="d-flex">
+                        <div id="comDetails">
+                            <h5 id="comName">GTRBD</h5>
+                            @*<span>DHAKA</span><br />*@
+                            <span id="comAddress"></span><br />
+                            <span id="comPhone"></span><br />
+                            <span id="comEmail"></span><br />
+                            <span id="comRegNum"></span><br />
+                            <span id="comWeb"></span>
+                        </div>
+                        <div id="formTemplateAiryClassicParagraph" class="mt-3 ms-3"><img id="company-image" style="width: 21%" /></div>
+                    </div>
+                    <h6 class="mt-5 fw-bold" id="taxInvoiceLabel">Tax Invoice</h6> <p id="FormNo"></p>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <h6 class="fw-bold" id="billTo">BILL TO</h6>
+                            <span id="BillToComName"></span><br />
+                            <span id="BillToAddress"></span><br />
+                            <sapn id="VatRegLabel">VAT Registration No. </sapn> <span id="billToVatNo"></span>
+                        </div>
+                        <div class="col-lg-4">
+                            <h6 class=" fw-bold" id="ShipTo">SHIP TO</h6>
+                            <span id="ShipToComName"></span><br />
+                            <span id="ShipToAddress"></span><br />
+                            <span id="VatRegLabel">VAT Registration No. </span> <span id="ShipToVatNo">GB987654321 </span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="Taxinvoice">TAX INVOICE#</span>  <span id="TaxinvoiceData"></span><br />
+                            <span class="fw-bold" id="Date">DATE</span>  <span id="DateData"></span><br />
+                            <span class="fw-bold" id="DueDate">DUE DATE</span>  <span id="DueDateData"></span><br />
+                            <span class="fw-bold" id="Terms">TERMS</span>  <span id="TermsData"></span><br />
+                        </div>
+                    </div>
+                    <div id="PaySlip" class="text-center mt-2 d-none" style="border-bottom: dotted;">
+                        <p>Please detach top portion and return with your payment</p>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipDate">SHIP DATE</span><br />
+                            <span id="ShipDateData"></span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipVia">SHIP VIA</span><br />
+                            <span id="ShipViaData"></span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipTrackNo">TRACKING NO.</span><br />
+                            <span id="ShipTrackNoData"></span>
+                        </div>
+                    </div>
+                    <div id="invoiceTable" class="mt-3 d-none"></div>
+                    <div id="firtsTable" class="mt-3"></div>
+                    <div class="row">
+                        <div class="col-lg-6 mt-5">
+                            <textarea id="msgToCust" asp-for="MessageToCustomer" class="border-0 w-100" hidden></textarea>
+                            <div id="msgToCustDiv"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex float-lg-end mt-5 me-3 mb-3">
+                                <div class="me-4">
+                                    <h6 class="text-start">SUBTOTAL</h6>
+                                    <h6 class="text-start d-none" id="discountLabel">DISCOUNT</h6>
+                                    <h6 class="text-start d-none" id="depositLabel">DEPOSIT</h6>
+                                    <h6 class="text-start">TOTAL TAX</h6>
+                                    <h6 class="text-start">TOTAL</h6>
+                                    <h6 class="text-start" style="font-weight: bold;">BALANCE DUE</h6>
+                                </div>
+                                <div>
+                                    <h6 class="text-end" id="subtotal"></h6>
+                                    <h6 class="text-end d-none" id="discount"></h6>
+                                    <h6 class="text-end d-none" id="depositt"></h6>
+                                    <h6 class="text-end" id="totalTax"></h6>
+                                    <h6 class="text-end" id="total"></h6>
+                                    <h6 class="text-end fw-bold" id="balanceDue"></h6>
+                                </div>
+                                <br />
+                            </div>
+                        </div>
+                    </div>
+
+                    <table> </table>
+                    <div class="mt-3" id="secondTable" style="margin-bottom: 60px;"></div>
+                    <input asp-for="FooterText" id="footerTxt" class="border-0 mt-5" hidden />
+                    <p id="footerTxtP"></p>
+                </div>
+                <div id="taxTable" class="mt-3 d-none"></div>
+            </div>
+            @*=======default template ends============*@
+
+            @*=======template airy new starts============*@
+            <div id="formTemplateAiryNew" class="ms-auto px-5 py-5 w-100 entirePageParent forTemplateOne d-none">
+                <div id="setMargins">
+                    @*<partial name="/Views/Shared/_companyImagePartialView.cshtml" />*@
+                    <div class="d-flex">
+                        <div id="comDetails">
+                            <h5 id="comName">GTRBD</h5>
+                            @*<span>DHAKA</span><br />*@
+                            <span id="comAddress"></span><br />
+                            <span id="comPhone"></span><br />
+                            <span id="comEmail"></span><br />
+                            <span id="comRegNum"></span><br />
+                            <span id="comWeb"></span>
+
+                        </div>
+                        <div id="formTemplateAiryClassicParagraph" class="mt-3"><img id="company-image" style="width: 21%" /></div>
+                    </div>
+                    <h6 class="mt-5 fw-bold" id="taxInvoiceLabel">Tax Invoice</h6> <p id="FormNo"></p>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <h6 class="fw-bold" id="billTo">BILL TO</h6>
+                            <span id="BillToComName"></span><br />
+                            <span id="BillToAddress"></span><br />
+                            <sapn id="VatRegLabel">VAT Registration No. </sapn> <span id="billToVatNo"></span>
+                        </div>
+                        <div class="col-lg-4">
+                            <h6 class=" fw-bold" id="ShipTo">SHIP TO</h6>
+                            <span id="ShipToComName"></span><br />
+                            <span id="ShipToAddress"></span><br />
+                            <span id="VatRegLabel">VAT Registration No. </span> <span id="ShipToVatNo">GB987654321 </span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="Taxinvoice">TAX INVOICE#</span>  <span id="TaxinvoiceData"></span><br />
+                            <span class="fw-bold" id="Date">DATE</span>  <span id="DateData"></span><br />
+                            <span class="fw-bold" id="DueDate">DUE DATE</span>  <span id="DueDateData"></span><br />
+                            <span class="fw-bold" id="Terms">TERMS</span>  <span id="TermsData"></span><br />
+                        </div>
+                    </div>
+                    <div id="PaySlip" class="text-center mt-2 d-none" style="border-bottom: dotted;">
+                        <p>Please detach top portion and return with your payment</p>
+                    </div>
+                    <div id="PaySlip" class="text-center mt-2 d-none" style="border-bottom: dotted;">
+                        <p>Please detach top portion and return with your payment</p>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipDate">SHIP DATE</span><br />
+                            <span id="ShipDateData"></span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipVia">SHIP VIA</span><br />
+                            <span id="ShipViaData"></span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipTrackNo">TRACKING NO.</span><br />
+                            <span id="ShipTrackNoData"></span>
+                        </div>
+                    </div>
+                    <div id="invoiceTable" class="mt-3 d-none" style="border-bottom: dotted;"></div>
+                    <div id="firtsTable" class="mt-3" style="border-bottom: dotted;"></div>
+                    <div class="row">
+                        <div class="col-lg-6 mt-5">
+                            <textarea id="msgToCust" asp-for="MessageToCustomer" class="border-0 w-100" hidden></textarea>
+                            <div id="msgToCustDiv"></div>
+                        </div>
+                        <div class="col-lg-6 mt-5">
+                            <div class="d-flex float-lg-end mt-5 me-3 mb-3">
+                                <div class="me-4">
+                                    <h6 class="text-start">SUBTOTAL</h6>
+                                    <h6 class="text-start d-none" id="discountLabel">DISCOUNT</h6>
+                                    <h6 class="text-start d-none" id="depositLabel">DEPOSIT</h6>
+                                    <h6 class="text-start">TOTAL TAX</h6>
+                                    <h6 class="text-start">TOTAL</h6>
+                                    <div class="mb-3" style=" border-bottom: dotted; width: 144%;"></div>
+                                    <h6 class="text-start" style="font-weight: bold;">BALANCE DUE</h6>
+                                </div>
+                                <div>
+                                    <h6 class="text-end" id="subtotal"></h6>
+                                    <h6 class="text-end d-none" id="discount"></h6>
+                                    <h6 class="text-end d-none" id="depositt"></h6>
+                                    <h6 class="text-end" id="totalTax"></h6>
+                                    <h6 class="text-end" id="total"></h6>
+                                    <h6 class="text-end fw-bold" id="balanceDue" style=" margin-top: 26px "></h6>
+                                </div>
+                                <br />
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <table> </table>
+                    <div class="mt-3" id="secondTable" style="border-bottom: dotted;"></div>
+                    <input asp-for="FooterText" id="footerTxt" class="border-0 mt-5" hidden />
+                    <p id="footerTxtP"></p>
+                </div>
+                <div id="taxTable" class="mt-3 d-none"></div>
+            </div>
+            @*=======template  airy new ends============*@
+
+            @*=======template modern starts============*@
+            <div id="formTemplateModern" class="ms-auto px-5 py-5 w-100 entirePageParent forTemplateTwo d-none">
+                <div id="setMargins">
+                    @*<partial name="/Views/Shared/_companyImagePartialView.cshtml" />*@
+                    <div class="d-flex">
+                        <div id="comDetails">
+                            <h5 id="comName">GTRBD</h5>
+                            @*<span>DHAKA</span><br />*@
+                            <span id="comAddress"></span><br />
+                            <span id="comPhone"></span><br />
+                            <span id="comEmail"></span><br />
+                            <span id="comRegNum"></span><br />
+                            <span id="comWeb"></span>
+
+                        </div>
+                        <div id="formTemplateAiryClassicParagraph" class="mt-3"><img id="company-image" style="width: 21%" /></div>
+                    </div>
+                    <h6 class="mt-5 fw-bold" id="taxInvoiceLabel">Tax Invoice</h6> <p id="FormNo"></p>
+                    <div class="row">
+                        <div class="col-lg-4" style="border: 1px solid #80808069;">
+                            <h6 class="fw-bold" id="billTo">BILL TO</h6>
+                            <span id="BillToComName"></span><br />
+                            <span id="BillToAddress"></span><br />
+                            <sapn id="VatRegLabel">VAT Registration No. </sapn> <span id="billToVatNo"></span>
+                        </div>
+                        <div class="col-lg-4 d-none">
+                            <h6 class=" fw-bold" id="ShipTo">SHIP TO</h6>
+                            <span id="ShipToComName"></span><br />
+                            <span id="ShipToAddress"></span><br />
+                            <span id="VatRegLabel">VAT Registration No. </span> <span id="ShipToVatNo">GB987654321 </span>
+                        </div>
+                        <div class="col-lg-4 d-none">
+                            <span class="fw-bold" id="Taxinvoice">TAX INVOICE#</span>  <span id="TaxinvoiceData"></span><br />
+                            <span class="fw-bold" id="Date">DATE</span>  <span id="DateData"></span><br />
+                            <span class="fw-bold" id="DueDate">DUE DATE</span>  <span id="DueDateData"></span><br />
+                            <span class="fw-bold" id="Terms">TERMS</span>  <span id="TermsData"></span><br />
+                        </div>
+                    </div>
+                    <div id="PaySlip" class="text-center mt-2 d-none" style="border-bottom: dotted;">
+                        <p>Please detach top portion and return with your payment</p>
+                    </div>
+                    <div class="row mt-3 d-none">
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipDate">SHIP DATE</span><br />
+                            <span id="ShipDateData"></span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipVia">SHIP VIA</span><br />
+                            <span id="ShipViaData"></span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipTrackNo">TRACKING NO.</span><br />
+                            <span id="ShipTrackNoData"></span>
+                        </div>
+                    </div>
+                    <div id="taxTable" class="mt-3"></div>
+                    <p class="fw-bold mt-3">SALES REPRESENTATIVE</p>
+                    <p>CUSTOM-1</p>
+                    <div id="invoiceTable" class="mt-3 d-none"></div>
+                    <div id="firtsTable" class="mt-3"></div>
+                    <div class="row">
+                        <div class="col-lg-6 mt-5">
+                            <textarea id="msgToCust" asp-for="MessageToCustomer" class="border-0 w-100" hidden></textarea>
+                            <div id="msgToCustDiv"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex float-lg-end mt-5 me-3 mb-3">
+                                <div class="me-4">
+                                    <h6 class="text-start">SUBTOTAL</h6>
+                                    <h6 class="text-start d-none" id="discountLabel">DISCOUNT</h6>
+                                    <h6 class="text-start d-none" id="depositLabel">DEPOSIT</h6>
+                                    <h6 class="text-start">TOTAL TAX</h6>
+                                    <h6 class="text-start">TOTAL</h6>
+                                    <h6 class="text-start" style="font-weight: bold;">BALANCE DUE</h6>
+                                </div>
+                                <div>
+                                    <h6 class="text-end" id="subtotal"></h6>
+                                    <h6 class="text-end d-none" id="discount"></h6>
+                                    <h6 class="text-end d-none" id="depositt"></h6>
+                                    <h6 class="text-end" id="totalTax"></h6>
+                                    <h6 class="text-end" id="total"></h6>
+                                    <h6 class="text-end fw-bold" id="balanceDue"></h6>
+                                </div>
+                                <br />
+                            </div>
+                        </div>
+                    </div>
+
+                    <table> </table>
+                    <div class="mt-3" id="secondTable" style="margin-bottom: 60px;"></div>
+                    <input asp-for="FooterText" id="footerTxt" class="border-0 mt-5" hidden />
+                    <p id="footerTxtP"></p>
+
+                </div>
+
+            </div>
+            @*=======template modern ends============*@
+
+
+            @*=======template fresh starts============*@
+            <div id="formTemplateFresh" class="ms-auto px-5 py-5 w-100 entirePageParent forTemplateThree d-none">
+                <div id="setMargins">
+                    <partial name="/Views/Shared/_companyImagePartialView.cshtml" />
+                    <div class="d-flex">
+                        <div id="comDetails">
+                            <h5 id="comName">GTRBD</h5>
+                            <span>DHAKA</span><br />
+                            <span id="comAddress"></span><br />
+                            <span id="comPhone"></span><br />
+                            <span id="comEmail"></span><br />
+                            <span id="comRegNum"></span><br />
+                            <span id="comWeb"></span>
+
+                        </div>
+                        <div id="formTemplateAiryClassicParagraph" class="mt-3"><img id="company-image" style="width: 21%" /></div>
+                    </div>
+                    <h6 class="mt-5 fw-bold" id="taxInvoiceLabel">Tax Invoice</h6> <p id="FormNo"></p>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <h6 class="fw-bold" id="billTo">BILL TO</h6>
+                            <span id="BillToComName"></span><br />
+                            <span id="BillToAddress"></span><br />
+                            <sapn id="VatRegLabel">VAT Registration No. </sapn> <span id="billToVatNo"></span>
+                        </div>
+                        <div class="col-lg-4 d-none">
+                            <h6 class=" fw-bold" id="ShipTo">SHIP TO</h6>
+                            <span id="ShipToComName"></span><br />
+                            <span id="ShipToAddress"></span><br />
+                            <span id="VatRegLabel">VAT Registration No. </span> <span id="ShipToVatNo">GB987654321 </span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="Taxinvoice">TAX INVOICE#</span>  <span id="TaxinvoiceData"></span><br />
+                            <span class="fw-bold" id="Date">DATE</span>  <span id="DateData"></span><br />
+                            <span class="fw-bold" id="DueDate">DUE DATE</span>  <span id="DueDateData"></span><br />
+                            <span class="fw-bold" id="Terms">TERMS</span>  <span id="TermsData"></span><br />
+                        </div>
+                    </div>
+                    <div id="PaySlip" class="text-center mt-2 d-none" style="border-bottom: dotted;">
+                        <p>Please detach top portion and return with your payment</p>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipDate">SHIP DATE</span><br />
+                            <span id="ShipDateData"></span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipVia">SHIP VIA</span><br />
+                            <span id="ShipViaData"></span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipTrackNo">TRACKING NO.</span><br />
+                            <span id="ShipTrackNoData"></span>
+                        </div>
+                    </div>
+                    <div id="invoiceTable" class="mt-3 d-none"></div>
+                    <div id="firtsTable" class="mt-3"></div>
+                    <div class="row">
+                        <div class="col-lg-6 mt-5">
+                            <textarea id="msgToCust" asp-for="MessageToCustomer" class="border-0 w-100" hidden></textarea>
+                            <div id="msgToCustDiv"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex float-lg-end mt-5 me-3 mb-3">
+                                <div class="me-4">
+                                    <h6 class="text-start">SUBTOTAL</h6>
+                                    <h6 class="text-start d-none" id="discountLabel">DISCOUNT</h6>
+                                    <h6 class="text-start d-none" id="depositLabel">DEPOSIT</h6>
+                                    <h6 class="text-start">TOTAL TAX</h6>
+                                    <h6 class="text-start">TOTAL</h6>
+                                    <h6 class="text-start" style="font-weight: bold;" id="balanceDueLabel">BALANCE DUE</h6>
+                                </div>
+                                <div>
+                                    <h6 class="text-end" id="subtotal"></h6>
+                                    <h6 class="text-end d-none" id="discount"></h6>
+                                    <h6 class="text-end d-none" id="depositt"></h6>
+                                    <h6 class="text-end" id="totalTax"></h6>
+                                    <h6 class="text-end" id="total"></h6>
+                                    <h6 class="text-end fw-bold" id="balanceDue"></h6>
+                                </div>
+                                <br />
+                            </div>
+                        </div>
+                    </div>
+
+                    <table> </table>
+                    <div class="mt-3" id="secondTable" style="margin-bottom: 60px;"></div>
+                    <input asp-for="FooterText" id="footerTxt" class="border-0 mt-5" hidden />
+                    <p id="footerTxtP"></p>
+
+                </div>
+                <div id="taxTable" class="mt-3 d-none"></div>
+            </div>
+            @*=======template fresh ends============*@
+
+            @*=======template bold starts============*@
+            <div id="formTemplateBold" class="ms-auto px-5 py-5 w-100 entirePageParent forTemplateBold d-none" style="background: #a6bddb;">
+                <div id="setMargins">
+                    <partial name="/Views/Shared/_companyImagePartialView.cshtml" />
+                    <div class="d-flex">
+                        <div id="comDetails">
+                            <h5 id="comName">GTRBD</h5>
+                            <span>DHAKA</span><br />
+                            <span id="comAddress"></span><br />
+                            <span id="comPhone"></span><br />
+                            <span id="comEmail"></span><br />
+                            <span id="comRegNum"></span><br />
+                            <span id="comWeb"></span>
+
+                        </div>
+                        <div id="formTemplateAiryClassicParagraph" class="mt-3"><img id="company-image" style="width: 21%" /></div>
+                    </div>
+                    <h6 class="mt-5 fw-bold" id="taxInvoiceLabel">Tax Invoice</h6> <p id="FormNo"></p>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <h6 class="fw-bold" id="billTo">BILL TO</h6>
+                            <span id="BillToComName"></span><br />
+                            <span id="BillToAddress"></span><br />
+                            <sapn id="VatRegLabel">VAT Registration No. </sapn> <span id="billToVatNo"></span>
+                        </div>
+                        <div class="col-lg-4 d-none">
+                            <h6 class=" fw-bold" id="ShipTo">SHIP TO</h6>
+                            <span id="ShipToComName"></span><br />
+                            <span id="ShipToAddress"></span><br />
+                            <span id="VatRegLabel">VAT Registration No. </span> <span id="ShipToVatNo">GB987654321 </span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="Taxinvoice">TAX INVOICE#</span>  <span id="TaxinvoiceData"></span><br />
+                            <span class="fw-bold" id="Date">DATE</span>  <span id="DateData"></span><br />
+                            <span class="fw-bold" id="DueDate">DUE DATE</span>  <span id="DueDateData"></span><br />
+                            <span class="fw-bold" id="Terms">TERMS</span>  <span id="TermsData"></span><br />
+                        </div>
+                    </div>
+                    <div id="PaySlip" class="text-center mt-2 d-none" style="border-bottom: dotted;">
+                        <p>Please detach top portion and return with your payment</p>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipDate">SHIP DATE</span><br />
+                            <span id="ShipDateData"></span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipVia">SHIP VIA</span><br />
+                            <span id="ShipViaData"></span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipTrackNo">TRACKING NO.</span><br />
+                            <span id="ShipTrackNoData"></span>
+                        </div>
+                    </div>
+                    <div id="invoiceTable" class="mt-3 d-none"></div>
+                    <div id="firtsTable" class="mt-3"></div>
+                    <div class="row">
+                        <div class="col-lg-6 mt-5">
+                            <textarea id="msgToCust" asp-for="MessageToCustomer" class="border-0 w-100" hidden></textarea>
+                            <div id="msgToCustDiv"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex float-lg-end mt-5 me-3 mb-3">
+                                <div class="me-4">
+                                    <h6 class="text-start">SUBTOTAL</h6>
+                                    <h6 class="text-start d-none" id="discountLabel">DISCOUNT</h6>
+                                    <h6 class="text-start d-none" id="depositLabel">DEPOSIT</h6>
+                                    <h6 class="text-start">TOTAL TAX</h6>
+                                    <h6 class="text-start">TOTAL</h6>
+                                    <h6 class="text-start" style="font-weight: bold;" id="balanceDueLabel">BALANCE DUE</h6>
+                                </div>
+                                <div>
+                                    <h6 class="text-end" id="subtotal"></h6>
+                                    <h6 class="text-end d-none" id="discount"></h6>
+                                    <h6 class="text-end d-none" id="depositt"></h6>
+                                    <h6 class="text-end" id="totalTax"></h6>
+                                    <h6 class="text-end" id="total"></h6>
+                                    <h6 class="text-end fw-bold" id="balanceDue"></h6>
+                                </div>
+                                <br />
+                            </div>
+                        </div>
+                    </div>
+
+                    <table> </table>
+                    <div class="mt-3" id="secondTable" style="margin-bottom: 60px;"></div>
+                    <input asp-for="FooterText" id="footerTxt" class="border-0 mt-5" hidden />
+                    <p id="footerTxtP"></p>
+
+                </div>
+                <div id="taxTable" class="mt-3 d-none"></div>
+            </div>
+            @*=======template bold ends============*@
+
+
+            @*=======template Friendly starts============*@
+            <div id="formTemplateFriendly" class="ms-auto px-5 py-5 w-100 entirePageParent forTemplateFriendly d-none">
+                <div id="setMargins">
+                    <partial name="/Views/Shared/_companyImagePartialView.cshtml" />
+                    <div class="d-flex">
+                        <div id="comDetails">
+                            <h5 id="comName">GTRBD</h5>
+                            <span>DHAKA</span><br />
+                            <span id="comAddress"></span><br />
+                            <span id="comPhone"></span><br />
+                            <span id="comEmail"></span><br />
+                            <span id="comRegNum"></span><br />
+                            <span id="comWeb"></span>
+
+                        </div>
+                        <div id="formTemplateAiryClassicParagraph" class="mt-3"><img id="company-image" style="width: 21%" /></div>
+                    </div>
+                    <h6 class="mt-5 fw-bold" id="taxInvoiceLabel">Tax Invoice</h6> <p id="FormNo"></p>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <h6 class="fw-bold" id="billTo">BILL TO</h6>
+                            <span id="BillToComName"></span><br />
+                            <span id="BillToAddress"></span><br />
+                            <sapn id="VatRegLabel">VAT Registration No. </sapn> <span id="billToVatNo"></span>
+                        </div>
+                        <div class="col-lg-4 d-none">
+                            <h6 class=" fw-bold" id="ShipTo">SHIP TO</h6>
+                            <span id="ShipToComName"></span><br />
+                            <span id="ShipToAddress"></span><br />
+                            <span id="VatRegLabel">VAT Registration No. </span> <span id="ShipToVatNo">GB987654321 </span>
+                        </div>
+                        <div class="col-lg-4" id="taxInvoiceParent">
+                            <span class="fw-bold d-none" id="Taxinvoice">TAX INVOICE#</span>  <span class=" d-none" id="TaxinvoiceData"></span><br />
+                            <div><span class="fw-bold" id="Date">DATE</span>  <span id="DateData"></span></div>
+                            <div><span class="fw-bold" id="Amount">PLEASE PAY</span>  <span id="AmountData"></span></div>
+                            <div><span class="fw-bold" id="DueDate">DUE DATE</span>  <span id="DueDateData"></span></div>
+                            <span class="fw-bold d-none" id="Terms">TERMS</span>  <span class=" d-none" id="TermsData"></span><br />
+                        </div>
+                    </div>
+                    <div id="PaySlip" class="text-center mt-2 d-none" style="border-bottom: dotted;">
+                        <p>Please detach top portion and return with your payment</p>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipDate">SHIP DATE</span><br />
+                            <span id="ShipDateData"></span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipVia">SHIP VIA</span><br />
+                            <span id="ShipViaData"></span>
+                        </div>
+                        <div class="col-lg-4">
+                            <span class="fw-bold" id="ShipTrackNo">TRACKING NO.</span><br />
+                            <span id="ShipTrackNoData"></span>
+                        </div>
+                    </div>
+                    <div id="invoiceTable" class="mt-3 d-none"></div>
+                    <div id="firtsTable" class="mt-3"></div>
+                    <div class="row">
+                        <div class="col-lg-6 mt-5">
+                            <textarea id="msgToCust" asp-for="MessageToCustomer" class="border-0 w-100" hidden></textarea>
+                            <div id="msgToCustDiv"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="d-flex float-lg-end mt-5 me-3 mb-3">
+                                <div class="me-4">
+                                    <h6 class="text-start">SUBTOTAL</h6>
+                                    <h6 class="text-start d-none" id="discountLabel">DISCOUNT</h6>
+                                    <h6 class="text-start d-none" id="depositLabel">DEPOSIT</h6>
+                                    <h6 class="text-start">TOTAL TAX</h6>
+                                    <h6 class="text-start">TOTAL</h6>
+                                    <h6 class="text-start" style="font-weight: bold;" id="balanceDueLabel">BALANCE DUE</h6>
+                                </div>
+                                <div>
+                                    <h6 class="text-end" id="subtotal"></h6>
+                                    <h6 class="text-end d-none" id="discount"></h6>
+                                    <h6 class="text-end d-none" id="depositt"></h6>
+                                    <h6 class="text-end" id="totalTax"></h6>
+                                    <h6 class="text-end" id="total"></h6>
+                                    <h6 class="text-end fw-bold" id="balanceDue"></h6>
+                                </div>
+                                <br />
+                            </div>
+                        </div>
+                    </div>
+
+                    <table> </table>
+                    <div class="mt-3" id="secondTable" style="margin-bottom: 60px;"></div>
+                    <input asp-for="FooterText" id="footerTxt" class="border-0 mt-5" hidden />
+                    <p id="footerTxtP"></p>
+
+                </div>
+                <div id="taxTable" class="mt-3 d-none"></div>
+            </div>
+            @*=======template Friendly ends============*@
+            @*</div>*@
+
+        </div>
+
+
+        <div class="col-lg-6 border d-none" id="StandardEmailTemplate" style="height: 580px;">
+            <div class="mt-3">
+                <span class="fw-bold">Subject</span> <span class="ms-3" id="StandardSubSpan"></span> <input class="ms-3 border-0" id="StandardSub" hidden></input> <br />
+                <span class="fw-bold">From</span><span class="ms-3" id="StandardFormSpan"></span> <input class="ms-3 border-0" id="StandardFrom" style="width:90%"></input>
+            </div>
+            <hr />
+            <div>
+                <img id="stdr-company-image" style="width: 21%" />
+                <h5 id="stdr-comName">GTRBD</h5>
+            </div>
+            <div style="background-color: #d3d3d34d; height: 200px; " class="d-flex">
+                <div class="mx-3 mt-4">
+                    <p>INVOICE</p>
+                    <p class="invoiceNong"></p>
+                </div>
+                <div class="mx-3 mt-4">
+                    <p>DUE DATE</p>
+                    <p class="dueDateNong"></p>
+                </div>
+                <div class="mx-3 mt-4">
+                    <p>BALANCE DUE</p>
+                    <p class="balanceDueNong"></p>
+                </div>
+                <div class="ms-5 mt-4">
+                    <button class="border-0 btn-success py-3 px-4">Pay invoice</button>
+                </div>
+            </div>
+            <div class="mt-4">
+                <span id="stndrDear"></span> <span class="ms-3" id="stndrName"></span>
+                <input id="stndrDearInput" hidden />
+                <input id="stndrNameInput" hidden />
+                <p id="stdrMsg"></p>
+                <input id="stdrMsgInput" hidden />
+            </div>
+
+        </div>
+
+
+
+
+        <div class="col-lg-6 border d-none" id="ReminderEmailTemplate" style="height: 580px;">
+            <div class="mt-3">
+                <span class="fw-bold">Subject</span> <span class="ms-3" id="reminderSubSpan"></span> <input class="ms-3 border-0" id="reminderSub" hidden></input> <br />
+                <span class="fw-bold">From</span><span class="ms-3" id="reminderFormSpan"></span> <input class="ms-3 border-0" id="reminderFrom" style="width:90%"></input>
+            </div>
+            <hr />
+            <div>
+                <img id="reminder-company-image" style="width: 21%" />
+                <h5 id="reminder-comName">GTRBD</h5>
+            </div>
+            <div style="background-color: #d3d3d34d; height: 200px; " class="d-flex">
+                <div class="mx-3 mt-4">
+                    <p>INVOICE</p>
+                    <p class="invoiceNong"></p>
+                </div>
+                <div class="mx-3 mt-4">
+                    <p>DUE DATE</p>
+                    <p class="dueDateNong"></p>
+                </div>
+                <div class="mx-3 mt-4">
+                    <p>BALANCE DUE</p>
+                    <p class="balanceDueNong"></p>
+                </div>
+                <div class="ms-5 mt-4">
+                    <button class="border-0 btn-success py-3 px-4">Pay invoice</button>
+                </div>
+            </div>
+            <div class="mt-4">
+                <span id="reminderDear"></span> <span class="ms-3" id="reminderName"></span>
+                <input id="reminderDearInput" hidden />
+                <input id="reminderNameInput" hidden />
+                <p id="reminderMsg"></p>
+                <input id="reminderMsgInput" hidden />
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="bottom-bar">
+        <div>
+            <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '/Accounts/billlistqb';">Cancel</button>
+        </div>
+        <div>
+            <button class="text-white border-0 py-1" style="background: transparent;" id="printButton">Print</button>
+        </div>
+        <div class="dropdown">
+            @if (Model.Id == 0)
+            {
+                <button id="btnSave" class="btn-success px-3  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="submit">Save</button>
+            }
+            else
+            {
+                <a href='@Url.Action("CustomFormStylePreview", "Admin", new { type = ViewBag.DocTypeId, id = Model.Id })' class="radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;">Preview PDF</a>
+                <button id="btnSave" class="btn-success px-3  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="submit">Update</button>
+            }
+            <ul class="dropdown-menu" id="ul-id-for-expenses">
+                <li class="dropdown-item">
+                    <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</form>
+
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.3.0/js/tabulator.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        //================================design tab functionalities starts==============================================
+        //----change template functionaloties starts----------
+            var taxTable;
+            var firstTable;
+            var secondTable;
+            var thirdTable;
+
+            var getTemplate = $(".forTemplateDefault").attr("id");
+          /*  var getTemplate = $(".forTemplateFriendly").attr("id");*/
+
+            $(".template-radio").on("change", function () {
+                var selectedValue = $("input[name='Template']:checked").val();
+                if (selectedValue == "Airy new") {
+                    getTemplate = $(".forTemplateOne").attr("id");
+                    console.log("getTemplate", getTemplate);
+                    $(".forTemplateDefault").addClass("d-none");
+                    $(".forTemplateOne").removeClass("d-none");
+                    $(".forTemplateTwo").addClass("d-none");
+                    $(".forTemplateThree").addClass("d-none");
+                    $(".forTemplateBold").addClass("d-none");
+                    $(".forTemplateFriendly").addClass("d-none");
+                    getFormData();
+                }
+            });
+            $(".template-radio").on("change", function () {
+                var selectedValue = $("input[name='Template']:checked").val();
+                if (selectedValue == "Airy classic") {
+                    getTemplate = $(".forTemplateDefault").attr("id");
+                    $(".forTemplateDefault").removeClass("d-none");
+                    $(".forTemplateOne").addClass("d-none");
+                    $(".forTemplateTwo").addClass("d-none");
+                    $(".forTemplateThree").addClass("d-none");
+                    $(".forTemplateBold").addClass("d-none");
+                    $(".forTemplateFriendly").addClass("d-none");
+                    getFormData();
+                }
+            });
+            $(".template-radio").on("change", function () {
+                var selectedValue = $("input[name='Template']:checked").val();
+                if (selectedValue == "Modern") {
+                    getTemplate = $(".forTemplateTwo").attr("id");
+                    $(".forTemplateDefault").addClass("d-none");
+                    $(".forTemplateOne").addClass("d-none");
+                    $(".forTemplateTwo").removeClass("d-none");
+                    $(".forTemplateThree").addClass("d-none");
+                    $(".forTemplateBold").addClass("d-none");
+                    $(".forTemplateFriendly").addClass("d-none");
+                    getFormData();
+                }
+            });
+            $(".template-radio").on("change", function () {
+                var selectedValue = $("input[name='Template']:checked").val();
+                if (selectedValue == "Fresh") {
+                    getTemplate = $(".forTemplateThree").attr("id");
+                    $(".forTemplateDefault").addClass("d-none");
+                    $(".forTemplateOne").addClass("d-none");
+                    $(".forTemplateTwo").addClass("d-none");
+                    $(".forTemplateThree").removeClass("d-none");
+                    $(".forTemplateBold").addClass("d-none");
+                    $(".forTemplateFriendly").addClass("d-none");
+                    getFormData();
+                }
+            });
+            $(".template-radio").on("change", function () {
+                var selectedValue = $("input[name='Template']:checked").val();
+                if (selectedValue == "Bold") {
+                    getTemplate = $(".forTemplateBold").attr("id");
+                    $(".forTemplateDefault").addClass("d-none");
+                    $(".forTemplateOne").addClass("d-none");
+                    $(".forTemplateTwo").addClass("d-none");
+                    $(".forTemplateThree").addClass("d-none");
+                    $(".forTemplateBold").removeClass("d-none");
+                    $(".forTemplateFriendly").addClass("d-none");
+                    getFormData();
+                }
+            });
+            $(".template-radio").on("change", function () {
+                var selectedValue = $("input[name='Template']:checked").val();
+                if (selectedValue == "Friendly") {
+                    getTemplate = $(".forTemplateFriendly").attr("id");
+                    $(".forTemplateDefault").addClass("d-none");
+                    $(".forTemplateOne").addClass("d-none");
+                    $(".forTemplateTwo").addClass("d-none");
+                    $(".forTemplateThree").addClass("d-none");
+                    $(".forTemplateBold").addClass("d-none");
+                    $(".forTemplateFriendly").removeClass("d-none");
+                    getFormData();
+                }
+            });
+        //----change template functionaloties ends------------
+        $("#UseLetterHead").on("change", function () {
+            let val = $(this).is(":checked");
+            if (val) {
+                $("#" + getTemplate + " #comDetails").addClass("d-none");
+                $("#" + getTemplate + " #formTemplateAiryClassicParagraph").addClass("d-none");
+            }
+            else {
+                $("#" + getTemplate + " #comDetails").removeClass("d-none");
+                $("#" + getTemplate + " #formTemplateAiryClassicParagraph").removeClass("d-none");
+            }
+        })
+
+
+
+        //-----set template in edit mode starts------
+
+        var gettemplate = '@Model.Template';
+        if (gettemplate == "Airy new") {
+            getTemplate = $(".forTemplateOne").attr("id");
+            console.log("getTemplate", getTemplate);
+            $(".forTemplateDefault").addClass("d-none");
+            $(".forTemplateOne").removeClass("d-none");
+            $(".forTemplateTwo").addClass("d-none");
+            $(".forTemplateThree").addClass("d-none");
+            $(".forTemplateBold").addClass("d-none");
+            $(".forTemplateFriendly").addClass("d-none");
+            getFormData();
+        };
+        if (gettemplate == "Airy classic") {
+            getTemplate = $(".forTemplateDefault").attr("id");
+            $(".forTemplateDefault").removeClass("d-none");
+            $(".forTemplateOne").addClass("d-none");
+            $(".forTemplateTwo").addClass("d-none");
+            $(".forTemplateThree").addClass("d-none");
+            $(".forTemplateBold").addClass("d-none");
+            $(".forTemplateFriendly").addClass("d-none");
+            getFormData();
+        };
+        if (gettemplate == "Modern") {
+            getTemplate = $(".forTemplateTwo").attr("id");
+            $(".forTemplateDefault").addClass("d-none");
+            $(".forTemplateOne").addClass("d-none");
+            $(".forTemplateTwo").removeClass("d-none");
+            $(".forTemplateThree").addClass("d-none");
+            $(".forTemplateBold").addClass("d-none");
+            $(".forTemplateFriendly").addClass("d-none");
+            getFormData();
+        };
+        if (gettemplate == "Fresh") {
+            getTemplate = $(".forTemplateThree").attr("id");
+            $(".forTemplateDefault").addClass("d-none");
+            $(".forTemplateOne").addClass("d-none");
+            $(".forTemplateTwo").addClass("d-none");
+            $(".forTemplateThree").removeClass("d-none");
+            $(".forTemplateBold").addClass("d-none");
+            $(".forTemplateFriendly").addClass("d-none");
+            getFormData();
+        };
+        if (gettemplate == "Bold") {
+            getTemplate = $(".forTemplateBold").attr("id");
+            $(".forTemplateDefault").addClass("d-none");
+            $(".forTemplateOne").addClass("d-none");
+            $(".forTemplateTwo").addClass("d-none");
+            $(".forTemplateThree").addClass("d-none");
+            $(".forTemplateBold").removeClass("d-none");
+            $(".forTemplateFriendly").addClass("d-none");
+            getFormData();
+        };
+        if (gettemplate == "Friendly") {
+            getTemplate = $(".forTemplateFriendly").attr("id");
+            $(".forTemplateDefault").addClass("d-none");
+            $(".forTemplateOne").addClass("d-none");
+            $(".forTemplateTwo").addClass("d-none");
+            $(".forTemplateThree").addClass("d-none");
+            $(".forTemplateBold").addClass("d-none");
+            $(".forTemplateFriendly").removeClass("d-none");
+            getFormData();
+        };
+        //-----set template in edit mode ends--------
+
+
+        $("#doctype").val('@ViewBag.DocTypeId');
+        $("#changetemplate").click(function () {
+            $("#ParentTemplateForTemplate").toggleClass("d-none");
+        });
+        $("#LogoEdit").click(function () {
+            $("#PrentDivOfLogo").toggleClass("d-none");
+        });
+        $("#selectDifferentFont").click(function () {
+            $("#fontParent").toggleClass("d-none");
+        });
+        $("#tryColor").click(function () {
+            $("#colorsGrandParentDiv").toggleClass("d-none");
+            $("#FontColorsGrandParentDiv").toggleClass("d-none");
+        });
+        $("#editPrintSetting").click(function () {
+            $("#pageMarginParent").toggleClass("d-none");
+        });
+        $("#addEftDetails").click(function () {
+            $("#nav-content-tab").click();
+        });
+        $.ajax({
+                type: "get",
+                url: '@Url.Action("GetTemplates", "Admin")',
+                success: function (res) {
+                    //console.log("template res", res);
+                    $("#airyNew").val(res[0].Text);
+                    $("#airyClassis").val(res[1].Text);
+                    $("#modern").val(res[2].Text);
+                    $("#fresh").val(res[3].Text);
+                    $("#bold").val(res[4].Text);
+                    $("#Friendly").val(res[5].Text);
+                    // Create a mapping between template IDs and input IDs
+                    var templateInputMap = {
+                        'airyNew': res[0].Text,
+                        'airyClassis': res[1].Text,
+                        'modern': res[2].Text,
+                        'fresh': res[3].Text,
+                        'bold': res[4].Text,
+                        'Friendly': res[5].Text
+                    };
+                    Object.keys(templateInputMap).forEach(function (inputId) {
+                        var templateText = templateInputMap[inputId];
+                        $("#" + inputId).prop("checked", templateText === '@Model.Template');
+                    });
+                }
+            });
+     // Get Font Sizes
+      $.ajax({
+    type: "get",
+    url: '@Url.Action("GetFontSizes", "Admin")',
+    success: function (res) {
+        //console.log("GetFontSizes res", res);
+        var selectedFontSize = '@Model.FontSize';
+        const selectFontSize = document.querySelector('#fontSize');
+        const selectFontSizeForMessageText = document.querySelector('#fontSizeForMessage');
+        const selectFontSizeForFooterext = document.querySelector('#fontSizeForFooter');
+
+        for (var i = 0; i < res.length; i++) {
+            // Create a new option element for each iteration
+            const option = document.createElement('option');
+            option.value = res[i].Text;
+            option.text = res[i].Text;
+
+            // Set 'selected' attribute if the option's text matches the selected value
+            if (res[i].Text === selectedFontSize) {
+                option.selected = true;
+            }
+
+            // Append the option to each select
+            selectFontSize.appendChild(option);
+
+            // Create new option elements for each select
+            const optionForMessage = option.cloneNode(true);
+            const optionForFooter = option.cloneNode(true);
+
+            selectFontSizeForMessageText.appendChild(optionForMessage);
+            selectFontSizeForFooterext.appendChild(optionForFooter);
+        }
+    }
+});
+
+
+// Get Font Families
+        $.ajax({
+            type: "get",
+            url: '@Url.Action("GetFontFamilies", "Admin")',
+            success: function (res) {
+                //console.log("GetFontFamilies res", res);
+                const selectFontFamily = document.querySelector('#fontFamily');
+                var selectedFontFamily = '@Model.FontFamily';
+
+                for (var i = 0; i < res.length; i++) {
+                    const option = document.createElement('option');
+                    option.value = res[i].Text;
+                    option.text = res[i].Text;
+
+                    // Set 'selected' attribute if the option's text matches the selected value
+                    if (res[i].Text === selectedFontFamily) {
+                        option.selected = true;
+                    }
+
+                    selectFontFamily.appendChild(option);
+                }
+            }
+        });
+
+
+
+          // Get greeting appeals
+      $.ajax({
+    type: "get",
+    url: '@Url.Action("GetGreetingAppeals", "Admin")',
+    success: function (res) {
+        //console.log("GetFontSizes res", res);
+        var StandardGreetingAppealModel = '@Model.StandardEmailGreetingsAppeal';
+        const StandardGreetingAppeal = document.querySelector('#StandardGreetingAppearances');
+
+        var ReminderGreetingAppealModel = '@Model.StandardEmailGreetingFullName';
+        const ReminderGreetingAppeal = document.querySelector('#ReminderGreetingAppearances');
+
+        for (var i = 0; i < res.length; i++) {
+            // Create a new option element for each iteration
+            const option = document.createElement('option');
+            option.value = res[i].Text;
+            option.text = res[i].Text;
+
+            // Set 'selected' attribute if the option's text matches the selected value
+            if (res[i].Text === StandardGreetingAppealModel) {
+                option.selected = true;
+            }
+            // Set 'selected' attribute if the option's text matches the selected value
+            if (res[i].Text === ReminderGreetingAppealModel) {
+                option.selected = true;
+            }
+
+            // Append the option to each select
+            StandardGreetingAppeal.appendChild(option);
+            ReminderGreetingAppeal.appendChild(option.cloneNode(true));
+        }
+    }
+});
+          // Get greeting name
+      $.ajax({
+    type: "get",
+    url: '@Url.Action("GetGreetingNames", "Admin")',
+    success: function (res) {
+       /* console.log("GetAllVariableForGreetingName res", res);*/
+        var StandardEmailGreetingModel = '@Model.StandardEmailGreetingFullName';
+        const StandardEmailGreeting = document.querySelector('#StandardGreetingNames');
+
+        var ReminderEmailGreetingModel = '@Model.ReiminderEmailGreetingFullName';
+        const ReminderEmailGreeting = document.querySelector('#ReminderGreetingNames');
+
+        for (var i = 0; i < res.length; i++) {
+            // Create a new option element for each iteration
+            const option = document.createElement('option');
+            option.value = res[i].Text;
+            option.text = res[i].Text;
+
+            // Set 'selected' attribute if the option's text matches the selected value
+            if (res[i].Text === StandardEmailGreetingModel) {
+                option.selected = true;
+            }
+            if (res[i].Text === ReminderEmailGreetingModel) {
+                option.selected = true;
+            }
+
+            // Append the option to each select
+            StandardEmailGreeting.appendChild(option);
+            ReminderEmailGreeting.appendChild(option.cloneNode(true));
+        }
+    }
+});
+
+
+
+
+
+                // Get Logo Placements
+        $.ajax({
+            type: "get",
+            url: '@Url.Action("GetLogoPlacements", "Admin")',
+            success: function (res) {
+                //console.log("GetLogoPlacements res", res);
+                var selectedLogoPlacements = '@Model.LogoPlacement';
+                $("#LogoPlaceLeft").val(res[0].Text);
+                $("#LogoPlaceCenter").val(res[1].Text);
+                $("#LogoPlaceRight").val(res[2].Text);
+                // Create a mapping between Logo Placement IDs and input IDs
+                var logoPlacementInputMap = {
+                    'LogoPlaceLeft': res[0].Text,
+                    'LogoPlaceCenter': res[1].Text,
+                    'LogoPlaceRight': res[2].Text
+                };
+
+                // Iterate through the mapping and set the 'checked' property
+                Object.keys(logoPlacementInputMap).forEach(function (inputId) {
+                    var logoPlacementText = logoPlacementInputMap[inputId];
+                    $("#" + inputId).prop("checked", logoPlacementText === selectedLogoPlacements);
+                });
+
+
+
+
+
+        var selectedFontSize = '@Model.FootertextPlacement';
+                const selectFontSize = document.querySelector('#footerPlacement');
+
+            for (var i = 0; i < res.length; i++) {
+                // Create a new option element for each iteration
+                const option = document.createElement('option');
+                option.value = res[i].Text;
+                option.text = res[i].Text;
+
+                // Set 'selected' attribute if the option's text matches the selected value
+                if (res[i].Text === selectedFontSize) {
+                    option.selected = true;
+                }
+
+                // Append the option to each select
+                selectFontSize.appendChild(option);
+            }
+
+
+
+            }
+        });
+
+// Get Logo Sizes
+        $.ajax({
+            type: "get",
+            url: '@Url.Action("GetLogoSizes", "Admin")',
+            success: function (res) {
+                var selectedLogoSize = '@Model.LogoSize';
+                //console.log("GetLogoSizes res", res);
+                $("#LogoSizeS").val(res[0].Text);
+                $("#LogoSizeM").val(res[1].Text);
+                $("#LogoSizeL").val(res[2].Text);
+                // Create a mapping between Logo Size IDs and input IDs
+                var logoSizeInputMap = {
+                    'LogoSizeS': res[0].Text,
+                    'LogoSizeM': res[1].Text,
+                    'LogoSizeL': res[2].Text
+                };
+
+                // Iterate through the mapping and set the 'checked' property
+                Object.keys(logoSizeInputMap).forEach(function (inputId) {
+                    var logoSizeText = logoSizeInputMap[inputId];
+                    $("#" + inputId).prop("checked", logoSizeText === selectedLogoSize);
+                });
+            }
+        });
+
+
+         //--right side form style change functionalities acctording to options starts---
+            document.addEventListener("DOMContentLoaded", function () {
+                var parentDiv = document.getElementById('logoSizeParent');
+                var radioButtons = parentDiv.querySelectorAll('input[type="radio"]');
+
+                function setStyle(selectedValue) {
+                    if (selectedValue == "S") {
+                        $("#" + getTemplate + " #company-image").css("width", "15%");
+                    } else if (selectedValue == "M") {
+                        $("#" + getTemplate + "   #company-image").css("width", "21%");
+                    } else if (selectedValue == "L") {
+                        $("#" + getTemplate + "   #company-image").css("width", "30%");
+                    }
+                }
+                radioButtons.forEach(function (radioButton) {
+                    radioButton.addEventListener('change', function () {
+                        var selectedValue = this.value;
+                        setStyle(selectedValue);
+                        //console.log('Selected Size:', selectedValue);
+                    });
+                });
+                var valueFromDatabase = '@Model.LogoSize';
+                setStyle(valueFromDatabase);
+                //console.log('Initial Size:', valueFromDatabase);
+            });
+
+            document.addEventListener("DOMContentLoaded", function () {
+                var parentDiv = document.getElementById('logoPlacemetParent');
+                var radioButtons = parentDiv.querySelectorAll('input[type="radio"]');
+
+                function setStyle(selectedValue) {
+                    if (selectedValue == "Left") {
+                        // Left alignment
+                        $("#" + getTemplate + ' #comDetails').css('order', '1');
+                        $("#" + getTemplate + ' #company-image').css('order', '0');
+
+                        // Remove styles for Center and Right
+                        $("#" + getTemplate + ' #company-image').css('margin-left', '');
+                        $("#" + getTemplate + ' #company-image').css('float', '');
+                    }
+                    else if (selectedValue == "Center") {
+                        // Center alignment
+                        $("#" + getTemplate + ' #comDetails').css('order', '0');
+                        $("#" + getTemplate + ' #company-image').css('order', '1');
+                        $("#" + getTemplate + ' #company-image').css('margin-left', '30%');
+
+                        // Remove styles for Left and Right
+                        $("#" + getTemplate + ' #company-image').css('float', '');
+                        $("#" + getTemplate + ' #company-image').css('order', '1');
+                    }
+                    else if (selectedValue == "Right") {
+                        // Right alignment
+                        $("#" + getTemplate + ' #comDetails').css('order', '0');
+                        $("#" + getTemplate + ' #company-image').css('order', '1');
+                        $("#" + getTemplate + ' #company-image').css('margin-left', '0%');
+                        $("#" + getTemplate + ' #company-image').css('float', 'inline-end');
+
+                        // Remove styles for Left and Center
+                        $("#" + getTemplate + ' #company-image').css('margin-left', '');
+                    }
+
+
+                }
+                radioButtons.forEach(function (radioButton) {
+                    radioButton.addEventListener('change', function () {
+                        var selectedValue = this.value;
+                        setStyle(selectedValue);
+                        //console.log('Selected Size:', selectedValue);
+                    });
+                });
+                var valueFromDatabase = '@Model.LogoPlacement';
+                setStyle(valueFromDatabase);
+                //console.log('Initial Size:', valueFromDatabase);
+            });
+
+            $("#hideLogo").click(function () {
+                $(" #logo-set").addClass("d-none");
+                $(" #company-image").addClass("d-none");
+                $(" #showLogo").removeClass("d-none");
+                $(" #hideLogo").addClass("d-none");
+                $(" #logoSizeParent").addClass("d-none");
+                $(" #logoPlacemetParent").addClass("d-none");
+            })
+
+            $("#showLogo").click(function () {
+                $(" #logo-set").removeClass("d-none");
+                $(" #hideLogo").removeClass("d-none");
+                $(" #showLogo").addClass("d-none");
+                $(" #logoSizeParent").removeClass("d-none");
+                $(" #logoPlacemetParent").removeClass("d-none");
+            })
+
+            //color ar template related ager hijibiji code
+             document.addEventListener("DOMContentLoaded", function () {
+                 var radioButtons = document.querySelectorAll('.colorsParentDiv input[type="radio"]');
+                 function setStyle(selectedValue, SelectedValueOfTemplate) {
+                     $("#selectedColorCode").val(selectedValue);
+                     console.log("selectedValuessss", selectedValue);
+                     console.log("selectedValuessss", SelectedValueOfTemplate);
+                     var selectedTValue = $("input[name='Template']:checked").val();
+                    if (selectedValue === "#bdbdbd") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#bdbdbd");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#bdbdbd").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#bdbdbd").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#bdbdbd" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#bdbdbd" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#bdbdbd" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#bdbdbd" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#bdbdbd" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $("#formTemplateBold").css({ "background-color": "#bdbdbd" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#bdbdbd" });
+                        }
+                    }
+
+                    else if (selectedValue == "#636363") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#636363");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#636363").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#636363").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#636363" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#636363" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#636363" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#636363" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#636363" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#636363" });
+                        }
+
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#636363" });
+                        }
+                    }
+                    else if (selectedValue == "#000000") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#000000");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#000000").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#000000").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#000000" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#000000" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#000000" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#000000" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#000000" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#000000" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#000000" });
+                        }
+                    }
+                    else if (selectedValue == "#a6bddb") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#a6bddb");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#a6bddb").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#a6bddb").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#a6bddb" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#a6bddb" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#a6bddb" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#a6bddb" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#a6bddb" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#a6bddb" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#a6bddb" });
+                        }
+                    }
+                    else if (selectedValue == "#7889a1") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#7889a1");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#7889a1").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#7889a1").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#7889a1" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#7889a1" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#7889a1" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#7889a1" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#7889a1" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#7889a1" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#7889a1" });
+                        }
+                    }
+                    else if (selectedValue == "#48565f") {
+                        $(" #taxInvoiceLabel").css("color", "#48565f");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#48565f").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#48565f").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#48565f" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#48565f" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#48565f" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#48565f" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#48565f" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#48565f" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#48565f" });
+                        }
+                    }
+                    else if (selectedValue == "#79BD58") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#79BD58");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#79BD58").prop("important", "true");
+                        $("#" + getTemplate + " #billTo").css("background", "#79BD58").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#79BD58").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#79BD58" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#79BD58" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#79BD58" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#79BD58" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#79BD58" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#79BD58" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#79BD58" });
+                        }
+                    }
+                    else if (selectedValue == "#0e909a") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#0e909a");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#0e909a").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#0e909a").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#0e909a" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#0e909a" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#0e909a" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#0e909a" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#0e909a" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#0e909a" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#0e909a" });
+                        }
+                    }
+                    else if (selectedValue == "#202e5a") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#202e5a");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#202e5a").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#202e5a").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#202e5a" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#202e5a" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#202e5a" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#202e5a" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#202e5a" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#202e5a" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#202e5a" });
+                        }
+                    }
+                    else if (selectedValue == "#96bc2d") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#96bc2d");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#96bc2d").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#96bc2d").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#96bc2d" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#96bc2d" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#96bc2d" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#96bc2d" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#96bc2d" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#96bc2d" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#96bc2d" });
+                        }
+                    }
+                    else if (selectedValue == "#2a651d") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#2a651d");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#2a651d").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#2a651d").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#2a651d" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#2a651d" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#2a651d" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#2a651d" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#2a651d" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#2a651d" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#2a651d" });
+                        }
+                    }
+                    else if (selectedValue == "#004254") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#004254");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#004254").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#004254").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#004254" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#004254" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#004254" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#004254" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#004254" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#004254" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#004254" });
+                        }
+                    }
+                    else if (selectedValue == "#ff8c00") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#ff8c00");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#ff8c00").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#ff8c00").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#ff8c00" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#ff8c00" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#ff8c00" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#ff8c00" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#ff8c00" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#ff8c00" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#ff8c00" });
+                        }
+                    }
+                    else if (selectedValue == "#82001d") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#82001d");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#82001d").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#82001d").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#82001d" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#82001d" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#82001d" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#82001d" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#82001d" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#82001d" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#82001d" });
+                        }
+                    }
+                    else if (selectedValue == "#6b1438") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#6b1438");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#6b1438").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#6b1438").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#6b1438" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#6b1438" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#6b1438" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#6b1438" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#6b1438" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#6b1438" });
+                        }
+                        if (selectedTValue == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#6b1438" });
+                        }
+                    }
+                    else if (selectedValue == "#f4749b") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#f4749b");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#f4749b").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#f4749b").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#f4749b" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#f4749b" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#f4749b" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#f4749b" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#f4749b" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#f4749b" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#f4749b" });
+                        }
+                    }
+                    else if (selectedValue == "#950069") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#950069");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#950069").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#950069").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#950069" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#950069" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#950069" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#950069" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#950069" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#950069" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#950069" });
+                        }
+                    }
+                    else if (selectedValue == "#542852") {
+                        $("#" + getTemplate + " #taxInvoiceLabel").css("color", "#542852");
+                        $("#" + getTemplate + " .tabulator .tabulator-header .tabulator-col").css("background", "#542852").prop("important", "true");
+                        if (SelectedValueOfTemplate == "Modern") {
+                            $("#" + getTemplate + " #billTo").css("background", "#542852").prop("important", "true");
+                        }
+                        if (SelectedValueOfTemplate == "Fresh") {
+                            $("#" + getTemplate + " #Taxinvoice").css({ "background-color": "#542852" });
+                            $("#" + getTemplate + " #Date").css({ "background-color": "#542852" });
+                            $("#" + getTemplate + " #DueDate").css({ "background-color": "#542852" });
+                            $("#" + getTemplate + " #Terms").css({ "background-color": "#542852" });
+                            $("#" + getTemplate + " #balanceDueLabel").css({ "background-color": "#542852" });
+                        }
+                        if (SelectedValueOfTemplate == "Bold") {
+                            $(" #formTemplateBold").css({ "background-color": "#542852" });
+                        }
+                        if (SelectedValueOfTemplate == "Friendly") {
+                            $("#taxInvoiceParent").css({ "background-color": "#542852" });
+                        }
+                    }
+                }
+                radioButtons.forEach(function (radioButton) {
+                    radioButton.addEventListener('change', function () {
+                        var selectedValue = this.value;
+                        setStyle(selectedValue);
+                        console.log('Selected Size:', selectedValue);
+                    });
+                });
+                 var valueFromDatabase = '@Model.Color';
+                 var valueFromDatabaseOfTemplate = '@Model.Template';
+                 if (valueFromDatabase) {
+                     setTimeout(function () {
+                         setStyle(valueFromDatabase, valueFromDatabaseOfTemplate);
+                     }, 2000);
+                 }
+                //console.log('Initial Size:', valueFromDatabase);
+             });
+
+
+
+
+
+
+             document.addEventListener("DOMContentLoaded", function () {
+                 var radioButtons = document.querySelectorAll('.FontColorsParentDiv input[type="radio"]');
+                 function setStyle(selectedValue) {
+                     $("#FontselectedColorCode").val(selectedValue);
+                     if (selectedValue === "#fffcfc") {
+                         var entirePageParent = $('.entirePageParent');
+                         //entirePageParent.find('*').css('color', '"#fffcfc"');
+                         $("#" + getTemplate + " .tabulator .tabulator-header").css("color", "#fffcfc").prop("important", "true");
+                    }
+                     else if (selectedValue === "#202e5a") {
+                         var entirePageParent = $('.entirePageParent');
+                         //entirePageParent.find('*').css('color', '"#202e5a"');
+                         $("#" + getTemplate + " .tabulator .tabulator-header").css("color", "#202e5a").prop("important", "true");
+                    }
+                }
+                radioButtons.forEach(function (radioButton) {
+                    radioButton.addEventListener('change', function () {
+                        var selectedValue = this.value;
+                        setStyle(selectedValue);
+                    });
+                });
+                 var valueFromDatabase = '@Model.FontColor';
+                 if (valueFromDatabase) {
+                     setTimeout(function () {
+                         setStyle(valueFromDatabase);
+                     }, 2000);
+                 }
+                //console.log('Initial Size:', valueFromDatabase);
+             });
+
+
+
+
+
+
+
+
+
+             $(document).ready(function () {
+                 var fontFamilyDropdown = $('  #fontFamily');
+            fontFamilyDropdown.on('change', function () {
+                var selectedValue = $(this).val();
+                setStyle(selectedValue);
+            });
+            function setStyle(selectedValue) {
+                var entirePageParent = $('.entirePageParent');
+                if (selectedValue == "Helvetica") {
+                    entirePageParent.find('*').css('font-family', 'Helvetica, Arial, sans-serif');
+                }
+                else if (selectedValue == "Arial Unicode MS") {
+                    entirePageParent.find('*').css('font-family', '"Arial Unicode MS", sans-serif');
+                }
+                else if (selectedValue == "Times New Roman") {
+                    entirePageParent.find('*').css('font-family', '"Times New Roman", serif');
+                }
+            }
+                 var valueFromDatabase = '@Model.FontFamily';
+
+            setStyle(valueFromDatabase);
+             });
+
+             $(document).ready(function () {
+             var fontFamilyDropdown = $('#fontSize');
+
+            fontFamilyDropdown.on('change', function () {
+                var selectedValue = $(this).val();
+                setStyle(selectedValue);
+            });
+
+            function setStyle(selectedValue) {
+                var entirePageParent = $(".entirePageParent");
+                //var entirePageParent = $("#" + getTemplate + " .entirePageParent");
+
+                if (selectedValue == "10pt") {
+                    entirePageParent.find('*').css('font-size', '10pt');
+                }
+                else if (selectedValue == "12pt") {
+                    entirePageParent.find('*').css('font-size', '12pt');
+                }
+                else if (selectedValue == "14pt") {
+                    entirePageParent.find('*').css('font-size', '14pt');
+                }
+            }
+            var valueFromDatabase = '@Model.FontSize';
+            setStyle(valueFromDatabase);
+             });
+
+
+             $(document).ready(function () {
+
+                 var fontSizeMessageToCust = $('  #fontSizeForMessage');
+
+                 fontSizeMessageToCust.on('change', function () {
+                var selectedValue = $(this).val();
+                setStyle(selectedValue);
+            });
+
+            function setStyle(selectedValue) {
+                if (selectedValue == "10pt") {
+                    $("#" + getTemplate + " #msgToCustDiv").css('font-size', '10pt');
+                }
+                else if (selectedValue == "12pt") {
+                    $("#" + getTemplate + " #msgToCustDiv").css('font-size', '12pt');
+                }
+                else if (selectedValue == "14pt") {
+                    $("#" + getTemplate + " #msgToCustDiv").css('font-size', '14pt');
+                }
+            }
+            var valueFromDatabase = '@Model.MessageToCustTextSize';
+            setStyle(valueFromDatabase);
+        });
+
+             $(document).ready(function () {
+
+                 var fontSizeMessageToCust = $('  #fontSizeForFooter');
+
+                 fontSizeMessageToCust.on('change', function () {
+                var selectedValue = $(this).val();
+                setStyle(selectedValue);
+            });
+
+            function setStyle(selectedValue) {
+                if (selectedValue == "10pt") {
+                    $("#" + getTemplate + " #footerTxtP").css('font-size', '10pt');
+                }
+                else if (selectedValue == "12pt") {
+                    $("#" + getTemplate + " #footerTxtP").css('font-size', '12pt');
+                }
+                else if (selectedValue == "14pt") {
+                    $("#" + getTemplate + " #footerTxtP").css('font-size', '14pt');
+                }
+            }
+            var valueFromDatabase = '@Model.FooterTextSize';
+            setStyle(valueFromDatabase);
+             });
+
+
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var fontSizeMessageToCust = $('  #footerPlacement');
+
+            fontSizeMessageToCust.on('change', function () {
+                     var selectedValue = $(this).val();
+                     setStyle(selectedValue);
+            });
+            function setStyle(selectedValue) {
+                var $footerTxtP = $("#" + getTemplate + " #footerTxtP");
+
+                // Remove previous alignment classes
+                $footerTxtP.removeClass("text-start text-center text-end");
+
+                if (selectedValue === "Left") {
+                    $footerTxtP.addClass("text-start");
+                }
+                else if (selectedValue === "Center") {
+                    $footerTxtP.addClass("text-center");
+                }
+                else if (selectedValue === "Right") {
+                    $footerTxtP.addClass("text-end");
+                }
+            }
+
+
+                 //function setStyle(selectedValue) {
+                 //    if (selectedValue == "Left") {
+                 //        $("#" + getTemplate + " #footerTxtP").css({
+                 //            "margin-left": "-4%"
+                 //        });
+                 //    }
+                 //    else if (selectedValue == "Center") {
+                 //        $("#" + getTemplate + " #footerTxtP").css("margin-left", "42%", "float","none");
+                 //    }
+                 //    else if (selectedValue == "Right") {
+                 //        $("#" + getTemplate + " #footerTxtP").css({
+                 //            "margin-left": "88%"
+                 //        });
+                 //    }
+                 //}
+
+                var valueFromDatabase = '@Model.FootertextPlacement';
+                setStyle(valueFromDatabase);
+                //console.log('Initial Size:', valueFromDatabase);
+            });
+
+
+
+        $("#leftMargin").on("blur", function () {
+            if ($(this).val() > 3.25 || $(this).val() < 0.5) {
+                Swal.fire({
+                    title: "Left margin should be between 0.5 and 3.25",
+                    showClass: {
+                        popup: `
+                      animate__animated
+                      animate__fadeInUp
+                      animate__faster
+                    `
+                    },
+                    hideClass: {
+                        popup: `
+                      animate__animated
+                      animate__fadeOutDown
+                      animate__faster
+                    `
+                    }
+                });
+            }
+        });
+
+        $("#bottomMargin").on("blur", function () {
+            if ($(this).val() > 3.25 || $(this).val() < 0.5) {
+                Swal.fire({
+                    title: "Bottom margin should be between 0.5 and 3.25",
+                    showClass: {
+                        popup: `
+                      animate__animated
+                      animate__fadeInUp
+                      animate__faster
+                    `
+                    },
+                    hideClass: {
+                        popup: `
+                      animate__animated
+                      animate__fadeOutDown
+                      animate__faster
+                    `
+                    }
+                });
+            }
+        });
+
+        $("#rightMargin").on("blur", function () {
+            if ($(this).val() > 3.25 || $(this).val() < 0.5) {
+                Swal.fire({
+                    title: "Right margin should be between 0.5 and 3.25",
+                    showClass: {
+                        popup: `
+                      animate__animated
+                      animate__fadeInUp
+                      animate__faster
+                    `
+                    },
+                    hideClass: {
+                        popup: `
+                      animate__animated
+                      animate__fadeOutDown
+                      animate__faster
+                    `
+                    }
+                });
+            }
+        });
+
+        $("#topMargin").on("blur", function () {
+            if ($(this).val() > 3.25 || $(this).val() < 0.5) {
+                Swal.fire({
+                    title: "Top margin should be between 0.5 and 3.25",
+                    showClass: {
+                        popup: `
+                      animate__animated
+                      animate__fadeInUp
+                      animate__faster
+                    `
+                    },
+                    hideClass: {
+                        popup: `
+                      animate__animated
+                      animate__fadeOutDown
+                      animate__faster
+                    `
+                    }
+                });
+            }
+        });
+
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+  var topMarginInput = document.getElementById('topMargin');
+  var leftMarginInput = document.getElementById('leftMargin');
+  var bottomMarginInput = document.getElementById('bottomMargin');
+  var rightMarginInput = document.getElementById('rightMargin');
+
+  var setMarginsElement = $("#" + getTemplate + " #setMargins");
+
+  function updateMargins() {
+    var topMarginValue = topMarginInput.value;
+    var leftMarginValue = leftMarginInput.value;
+    var bottomMarginValue = bottomMarginInput.value;
+    var rightMarginValue = rightMarginInput.value;
+
+    var TopInchesToPixels = topMarginValue > 3.25 || topMarginValue < 0.5 ? topMarginValue === 0.5 : topMarginValue * 96;
+    var LeftInchesToPixels = leftMarginValue > 3.25 || leftMarginValue < 0.5 ? leftMarginValue === 0.5 : leftMarginValue * 96;
+    var BottomInchesToPixels = bottomMarginValue > 3.25 || bottomMarginValue < 0.5 ? bottomMarginValue === 0.5 : bottomMarginValue * 96;
+    var RightInchesToPixels = rightMarginValue > 3.25 || rightMarginValue < 0.5 ? rightMarginValue === 0.5 : rightMarginValue * 96;
+
+    // Use jQuery methods to set styles
+    setMarginsElement.css({
+      marginTop: TopInchesToPixels + 'px',
+      marginLeft: LeftInchesToPixels + 'px',
+      marginBottom: BottomInchesToPixels + 'px',
+      marginRight: RightInchesToPixels + 'px'
+    });
+  }
+
+  $("#reset").on("click", function (e) {
+    // Use jQuery to set values
+    $("#topMargin, #leftMargin, #bottomMargin, #rightMargin").val(0.5);
+
+    // Use vanilla JavaScript to set values
+    topMarginInput.value = 0.5;
+    leftMarginInput.value = 0.5;
+    bottomMarginInput.value = 0.5;
+    rightMarginInput.value = 0.5;
+
+    updateMargins();
+  });
+
+  // Use jQuery to add event listeners
+  $(topMarginInput).on('input', updateMargins);
+  $(leftMarginInput).on('input', updateMargins);
+  $(bottomMarginInput).on('input', updateMargins);
+  $(rightMarginInput).on('input', updateMargins);
+
+  // Assuming that '@Model.PageMarginTop', '@Model.PageMarginLeft', '@Model.PageMarginBottom', and '@Model.PageMarginRight' are numeric values
+  // Use jQuery to set values
+  $("#" + getTemplate + " #topMargin").val('@Model.PageMarginTop');
+  $("#" + getTemplate + " #leftMargin").val('@Model.PageMarginLeft');
+  $("#" + getTemplate + " #bottomMargin").val('@Model.PageMarginBottom');
+  $("#" + getTemplate + " #rightMargin").val('@Model.PageMarginRight');
+
+  updateMargins();
+});
+
+
+
+
+
+
+
+
+        //ager hijibiji code
+      @*document.addEventListener("DOMContentLoaded", function () {
+      var topMarginInput = document.getElementById('topMargin');
+      var leftMarginInput = document.getElementById('leftMargin');
+      var bottomMarginInput = document.getElementById('bottomMargin');
+      var rightMarginInput = document.getElementById('rightMargin');
+
+      var setMarginsElement =  document.getElementById('setMargins');  //$("#" + getTemplate +
+      function updateMargins() {
+        var topMarginValue = topMarginInput.value;
+        var leftMarginValue = leftMarginInput.value;
+        var bottomMarginValue = bottomMarginInput.value;
+          var rightMarginValue = rightMarginInput.value;
+
+          var TopInchesToPixels = topMarginValue > 3.25 || topMarginValue < 0.5 ? topMarginValue === 0.5 : topMarginValue * 96;
+          var LeftInchesToPixels = leftMarginValue > 3.25 || leftMarginValue < 0.5 ? leftMarginValue === 0.5 : leftMarginValue * 96;
+          var BottomInchesToPixels = bottomMarginValue > 3.25 || bottomMarginValue < 0.5 ? bottomMarginValue === 0.5 : bottomMarginValue * 96;
+          var RightInchesToPixels = rightMarginValue > 3.25 || rightMarginValue < 0.5 ? rightMarginValue === 0.5 : rightMarginValue * 96;
+
+
+          setMarginsElement.style.marginTop = TopInchesToPixels + 'px';
+          setMarginsElement.style.marginLeft = LeftInchesToPixels + 'px';
+          setMarginsElement.style.marginBottom = BottomInchesToPixels + 'px';
+          setMarginsElement.style.marginRight = RightInchesToPixels + 'px';
+      }
+        $("#reset").on("click", function (e) {
+            $("#topMargin").val(0.5);
+            $("#leftMargin").val(0.5);
+            $("#bottomMargin").val(0.5);
+            $("#rightMargin").val(0.5);
+            topMarginInput.value = 0.5;
+            leftMarginInput.value = 0.5;
+            bottomMarginInput.value = 0.5;
+            rightMarginInput.value = 0.5;
+
+            updateMargins();
+        });
+      topMarginInput.addEventListener('input', updateMargins);
+      leftMarginInput.addEventListener('input', updateMargins);
+      bottomMarginInput.addEventListener('input', updateMargins);
+      rightMarginInput.addEventListener('input', updateMargins);
+
+      topMarginInput.value = '@Model.PageMarginTop';
+      leftMarginInput.value = '@Model.PageMarginLeft';
+      bottomMarginInput.value = '@Model.PageMarginBottom';
+      rightMarginInput.value = '@Model.PageMarginRight';
+
+      updateMargins();
+    });*@
+
+    console.log("asassas",'@Model.PageMarginTop', '@Model.PageMarginLeft', '@Model.PageMarginBottom', '@Model.PageMarginRight');
+
+         //--right side form style change functionalities acctording to options ends-----
+
+        '@Model.IsLetterHeadUsed' === 'True' ? $("#" + getTemplate + ' #comDetails').addClass('d-none') && $("#" + getTemplate + ' #formTemplateAiryClassicParagraph').addClass('d-none') : $("#" + getTemplate + ' #formTemplateAiryClassicParagraph').removeClass('d-none') && $("#" + getTemplate + ' #comDetails').removeClass('d-none');
+
+
+          $('#FitPrinted').on('change', function () {
+              if ($('#FitPrinted').is(':checked')) {
+                  '@Model.IsFitPrinted' === 'True' ? $("#" + getTemplate + ' #PaySlip').removeClass('d-none') && $("#" + getTemplate + ' #comDetails').addClass('d-none') && $("#" + getTemplate + ' #formTemplateAiryClassicParagraph').addClass('d-none') : $("#" + getTemplate + ' #PaySlip').addClass('d-none') && $("#" + getTemplate + ' #formTemplateAiryClassicParagraph').removeClass('d-none') && $("#" + getTemplate + ' #comDetails').removeClass('d-none');
+
+                  $("#" + getTemplate + " #PaySlip").removeClass('d-none');
+                  $("#" + getTemplate + " #formTemplateAiryClassicParagraph").addClass('d-none');
+                  $("#" + getTemplate + " #comDetails").addClass('d-none');
+            }
+            else {
+                  $("#" + getTemplate + " #PaySlip").addClass('d-none');
+                  $("#" + getTemplate + " #formTemplateAiryClassicParagraph").removeClass('d-none');
+                  $("#" + getTemplate + " #comDetails").removeClass('d-none');
+            }
+        });
+        //=====================================design tab functionalities ends==============================================
+
+
+
+            //================================content tab functionalities starts==============================================
+        //--checkbox wise form data handling starts----
+        $('#BusinessName').on('change', function () {
+            if ($('#BusinessName').is(':checked')) {
+                '@Model.IsBusinessNameShow' === 'True' ? $("#" + getTemplate + ' #comName').removeClass('d-none') : $("#" + getTemplate + ' #comName').addClass('d-none');
+                $("#" + getTemplate + " #comName").removeClass('d-none');
+            }
+            else {
+                $("#" + getTemplate + " #comName").addClass('d-none');
+            }
+        });
+
+
+        $('#Phone').on('change', function () {
+            if ($('#Phone').is(':checked')) {
+                 '@Model.IsPhoneShow' === 'True' ? $("#" + getTemplate + ' #comPhone').removeClass('d-none') : $("#" + getTemplate + ' #comPhone').addClass('d-none');
+                $("#" + getTemplate + " #comPhone").removeClass('d-none');
+            }
+            else {
+                $("#" + getTemplate + " #comPhone").addClass('d-none');
+            }
+        });
+
+
+
+        $('#Email').on('change', function () {
+            if ($('#Email').is(':checked')) {
+                '@Model.IsEmailShow' === 'True' ? $("#" + getTemplate + ' #comEmail').removeClass('d-none') : $("#" + getTemplate + ' #comEmail').addClass('d-none');
+                $("#" + getTemplate + " #comEmail").removeClass('d-none');
+            }
+            else {
+                $("#" + getTemplate + " #comEmail").addClass('d-none');
+            }
+        });
+
+
+
+        $('#BusinessAdress').on('change', function () {
+            if ($('#BusinessAdress').is(':checked')) {
+                  '@Model.IsBusinessAddrsShow' === 'True' ? $("#" + getTemplate + ' #comAddress').removeClass('d-none') : $("#" + getTemplate + ' #comAddress').addClass('d-none');
+                $("#" + getTemplate + " #comAddress").removeClass('d-none');
+            }
+            else {
+                $("#" + getTemplate + " #comAddress").addClass('d-none');
+            }
+        });
+
+        '@Model.IsComRegShow' === 'True' ? $("#" + getTemplate + ' #comRegNum').removeClass('d-none') : $("#" + getTemplate + ' #comRegNum').addClass('d-none');
+        $('#ComRegNo').on('change', function () {
+            if ($('#ComRegNo').is(':checked')) {
+                $("#" + getTemplate + " #comRegNum").removeClass('d-none');
+            }
+            else {
+                $("#" + getTemplate + " #comRegNum").addClass('d-none');
+            }
+        });
+
+
+        $('#Website').on('change', function () {
+            if ($('#Website').is(':checked')) {
+                '@Model.IsWebsiteShow' === 'True' ? $("#" + getTemplate + ' #comWeb').removeClass('d-none') : $("#" + getTemplate + ' #comWeb').addClass('d-none');
+                $("#" + getTemplate + " #comWeb").removeClass('d-none');
+            }
+            else {
+                $("#" + getTemplate + " #comWeb").addClass('d-none');
+            }
+        });
+        var id = $("#Id");
+        $("#" + getTemplate + " #FormNo").text(id);
+
+        '@Model.IsFormNumbers' === 'True' ? $("#" + getTemplate + ' #FormNo').removeClass('d-none') : $("#" + getTemplate + ' #FormNo').addClass('d-none');
+        $('#FormNumbers').on('change', function () {
+            if ($('#FormNumbers').is(':checked')) {
+                $("#" + getTemplate + " #FormNo").removeClass('d-none');
+            }
+            else {
+                $("#" + getTemplate + " #FormNo").addClass('d-none');
+            }
+        });
+
+        '@Model.IsCustomVatNo' === 'True' ? $("#" + getTemplate + ' #VatRegLabel').removeClass('d-none') : $("#" + getTemplate + ' #VatRegLabel').addClass('d-none');
+        '@Model.IsCustomVatNo' === 'True' ? $("#" + getTemplate + ' #billToVatNo').removeClass('d-none') : $("#" + getTemplate + ' #billToVatNo').addClass('d-none');
+        $('#CustomerVatNumber').on('change', function () {
+            if ($('#CustomerVatNumber').is(':checked')) {
+                $("#" + getTemplate + " #VatRegLabel").removeClass('d-none');
+                $("#" + getTemplate + " #billToVatNo").removeClass('d-none');
+            }
+            else {
+                $("#" + getTemplate + " #VatRegLabel").addClass('d-none');
+                $("#" + getTemplate + " #billToVatNo").addClass('d-none');
+            }
+        });
+
+        '@Model.IsDeposited' === 'True' ? $("#" + getTemplate + ' #depositt').removeClass('d-none') : $("#" + getTemplate + ' #depositt').addClass('d-none');
+        '@Model.IsDeposited' === 'True' ? $("#" + getTemplate + ' #depositLabel').removeClass('d-none') : $("#" + getTemplate + ' #depositLabel').addClass('d-none');
+        $('#Deposit').on('change', function () {
+            if ($('#Deposit').is(':checked')) {
+                $("#" + getTemplate + " #depositt").removeClass('d-none');
+                $("#" + getTemplate + " #depositLabel").removeClass('d-none');
+            }
+            else {
+                $("#" + getTemplate + " #depositt").addClass('d-none');
+                $("#" + getTemplate + " #depositLabel").addClass('d-none');
+            }
+        });
+
+        '@Model.TaxInvoice' != "" ? $("#" + getTemplate + " #taxInvoiceLabel").text('@Model.TaxInvoice') : $("#" + getTemplate + " #taxInvoiceLabel").text('Tax Invoice');
+
+
+
+
+
+        '@Model.IsDiscounted' === 'True' ? $("#" + getTemplate + ' #discount').removeClass('d-none') : $("#" + getTemplate + ' #discount').addClass('d-none');
+        '@Model.IsDiscounted' === 'True' ? $("#" + getTemplate + ' #discountLabel').removeClass('d-none') : $("#" + getTemplate + ' #discountLabel').addClass('d-none');
+        $('#discountCheck').on('change', function () {
+            if ($('#discountCheck').is(':checked')) {
+                $("#" + getTemplate + " #discount").removeClass('d-none');
+                $("#" + getTemplate + " #discountLabel").removeClass('d-none');
+            }
+            else {
+                $("#" + getTemplate + " #discount").addClass('d-none');
+                $("#" + getTemplate + " #discountLabel").addClass('d-none');
+            }
+        });
+
+        '@Model.IsTaxSummary' === 'True' ? $("#" + getTemplate + ' #secondTable').removeClass('d-none') : $("#" + getTemplate + ' #secondTable').addClass('d-none');
+        $('#TaxSummary').on('change', function () {
+            if ($('#TaxSummary').is(':checked')) {
+                $("#" + getTemplate + " #secondTable").removeClass('d-none');
+            }
+            else {
+                $("#" + getTemplate + " #secondTable").addClass('d-none');
+            }
+        });
+
+        '@Model.IsShowOnInvoice' === 'True' ? $("#" + getTemplate + ' #invoiceTable').removeClass('d-none') : $("#" + getTemplate + ' #invoiceTable').addClass('d-none');
+
+        $('#showOnInvoice').on('change', function () {
+            if ($('#showOnInvoice').is(':checked')) {
+                $("#" + getTemplate + " #invoiceTable").removeClass('d-none');
+            }
+            else {
+                $("#" + getTemplate + " #invoiceTable").addClass('d-none');
+            }
+        });
+
+       $("#messageTocustomer").on("input", function (e) {
+        if (e.keyCode === 13) {
+            // If Enter key is pressed, append a <br> instead of a newline character
+            $(this).val($(this).val() + "<br>");
+        }
+
+        var val = $(this).val();
+        $("#" + getTemplate + " #msgToCust").val(val);
+        $("#" + getTemplate + " #msgToCustDiv").html(val.replace(/\n/g, '<br>'));
+        });
+
+        let Msgtext = '@Model.MessageToCustomer';
+        Msgtext = Msgtext.replace(/(&#xD;&#xA;|&#xA;|&#xD;|\r\n|\r|\n)/g, '<br>');
+        console.log("Msgtext", Msgtext);
+        $("#" + getTemplate + " #msgToCustDiv").html(Msgtext).css("text-align", "justify");
+
+
+        $("#footerText").on("input", function (e) {
+        if (e.keyCode === 13) {
+            // If Enter key is pressed, append a <br> instead of a newline character
+            $(this).val($(this).val() + "<br>");
+        }
+
+        var val = $(this).val();
+            $("#" + getTemplate + " #footerTxt").val(val);
+            $("#" + getTemplate + " #footerTxtP").html(val.replace(/\n/g, '<br>'));
+        });
+
+        let footertext = '@Model.FooterText';
+        footertext = footertext.replace(/(&#xD;&#xA;|&#xA;|&#xD;|\r\n|\r|\n)/g, '<br>');
+        $("#" + getTemplate + " #footerTxtP").html(footertext).css("text-align", "justify");
+
+
+        @*$("#footerText").on("keyup", function () {
+            let val = $(this).val();
+            $("#" + getTemplate + " #footerTxt").val(val);
+            $("#" + getTemplate + " #footerTxtP").text(val);
+        });
+        let text = '@Model.FooterText';
+        text = text.replace(/(\r\n|\r|\n)/g, '<br>');
+        console.log("text", text);
+        //$("#" + getTemplate + " #footerTxtP").html(text);
+        $("#" + getTemplate + " #footerTxtP").text('@Model.FooterText');*@
+
+                //--checkbox wise form data handling ends----
+
+        $('#contents').change(function () {
+            var selectedValue = $(this).val();
+            if (selectedValue == "Header") {
+                $("#HeaderParenDiv").removeClass("d-none");
+                $("#TableParentDiv").addClass("d-none");
+                $("#FooterParentDiv").addClass("d-none");
+            }
+            if (selectedValue == "Table") {
+                $("#HeaderParenDiv").addClass("d-none");
+                $("#TableParentDiv").removeClass("d-none");
+                $("#FooterParentDiv").addClass("d-none");
+            }
+            if (selectedValue == "Footer") {
+                $("#HeaderParenDiv").addClass("d-none");
+                $("#TableParentDiv").addClass("d-none");
+                $("#FooterParentDiv").removeClass("d-none");
+            }
+        });
+         //================================content tab functionalities ends================================================
+
+
+         //================================email tab functionalities starts================================================
+        $("#nav-emails-tab").on("click", function () {
+            $("#Templates").addClass("d-none");
+        });
+        $("#nav-content-tab").on("click", function () {
+            $("#Templates").removeClass("d-none");
+            $("#StandardEmailTemplate").addClass("d-none");
+            $("#ReminderEmailTemplate").addClass("d-none");
+        });
+        $("#nav-design-tab").on("click", function () {
+            $("#Templates").removeClass("d-none");
+            $("#StandardEmailTemplate").addClass("d-none");
+            $("#ReminderEmailTemplate").addClass("d-none");
+        });
+
+        $("#StandardEmailSubject").on("keyup", function () {
+            let val = $(this).val();
+            $("#StandardSub").val(val);
+            $("#StandardSubSpan").text(val);
+        });
+        $("#StandardSub").val('@Model.StandardEmailSubject');
+        $("#StandardSubSpan").text('@Model.StandardEmailSubject');
+
+        $("#ReminderEmailsubject").on("keyup", function () {
+            let val = $(this).val();
+            $("#reminderSub").val(val);
+            $("#reminderSubSpan").text(val);
+        });
+        $("#reminderSub").val('@Model.ReiminderEmailSubject');
+        $("#reminderSubSpan").text('@Model.ReiminderEmailSubject');
+
+
+        $("#StandardGreetingAppearances").on("change", function () {
+            let val = $(this).val();
+            $("#stndrDearInput").val(val);
+            $("#stndrDear").text(val);
+        });
+        $("#stndrDearInput").val('@Model.StandardEmailGreetingsAppeal');
+        $("#stndrDear").text('@Model.StandardEmailGreetingsAppeal');
+
+         $("#ReminderGreetingAppearances").on("change", function () {
+            let val = $(this).val();
+            $("#reminderDearInput").val(val);
+            $("#reminderDear").text(val);
+        });
+        $("#reminderDearInput").val('@Model.ReiminderEmailGreetingsAppeal');
+        $("#reminderDear").text('@Model.ReiminderEmailGreetingsAppeal');
+
+        $("#StandardGreetingNames").on("change", function () {
+            let val = $(this).val();
+            $("#stndrNameInput").val(val);
+            $("#stndrName").text(val);
+        });
+        $("#stndrNameInput").val('@Model.StandardEmailGreetingFullName');
+        $("#stndrName").text('@Model.StandardEmailGreetingFullName');
+
+        $("#ReminderGreetingNames").on("change", function () {
+            let val = $(this).val();
+            $("#reminderNameInput").val(val);
+            $("#reminderName").text(val);
+        });
+        $("#reminderNameInput").val('@Model.ReiminderEmailGreetingFullName');
+        $("#reminderName").text('@Model.ReiminderEmailGreetingFullName');
+
+        @*$("#StandardMessageTocustomer").on("keyup", function () {
+            let val = $(this).val();
+            $("#stdrMsgInput").val(val);
+            $("#stdrMsg").text(val);
+        });
+        $("#stdrMsgInput").val('@Model.StandardEmailMsgToCustomer');
+        $("#stdrMsg").text('@Model.StandardEmailMsgToCustomer');*@
+
+        $("#StandardMessageTocustomer").on("input", function (e) {
+        if (e.keyCode === 13) {
+            $(this).val($(this).val() + "<br>");
+        }
+
+        var val = $(this).val();
+            $("#stndrNameInput").val(val);
+            $("#stdrMsg").html(val.replace(/\n/g, '<br>'));
+        });
+
+        let Msgtextsrd = '@Model.StandardEmailMsgToCustomer';
+        Msgtextsrd = Msgtextsrd.replace(/(&#xD;&#xA;|&#xA;|&#xD;|\r\n|\r|\n)/g, '<br>');
+        console.log("Msgtextsrd", Msgtextsrd);
+        $("#stdrMsg").html(Msgtextsrd).css("text-align", "justify");
+
+
+        $("#ReminderMessageTocustomer").on("input", function (e) {
+        if (e.keyCode === 13) {
+            $(this).val($(this).val() + "<br>");
+        }
+
+        var val = $(this).val();
+            $("#reminderMsgInput").val(val);
+            $("#reminderMsg").html(val.replace(/\n/g, '<br>'));
+        });
+
+        let Msgtextrem = '@Model.ReiminderEmailMsgToCustomer';
+        Msgtextrem = Msgtextrem.replace(/(&#xD;&#xA;|&#xA;|&#xD;|\r\n|\r|\n)/g, '<br>');
+        $("#reminderMsg").html(Msgtextrem).css("text-align", "justify");
+
+        @*$("#ReminderMessageTocustomer").on("keyup", function () {
+            let val = $(this).val();
+            $("#reminderMsgInput").val(val);
+            $("#reminderMsg").text(val);
+        });
+        $("#reminderMsgInput").val('@Model.ReiminderEmailMsgToCustomer');
+        $("#reminderMsg").text('@Model.ReiminderEmailMsgToCustomer');*@
+
+
+        $('#emailOptions').change(function () {
+            var selectedValue = $(this).val();
+            if (selectedValue == "StandardEmail") {
+                $("#stdrdEmailParent").removeClass("d-none");
+                $("#StandardEmailTemplate").removeClass("d-none");
+
+                $("#reminderEmailParent").addClass("d-none");
+                $("#ReminderEmailTemplate").addClass("d-none");
+            }
+            if (selectedValue == "ReminderEmail") {
+                $("#stdrdEmailParent").addClass("d-none");
+                $("#StandardEmailTemplate").addClass("d-none");
+
+                $("#ReminderEmailTemplate").removeClass("d-none");
+                $("#reminderEmailParent").removeClass("d-none");
+            }
+        });
+         //================================email tab functionalities ends================================================
+
+
+        //===========get data for form data populate starts========
+            getFormData();
+
+        function getFormData() {
+            alert("sas");
+
+                        $.ajax({
+            type: "get",
+             url: '@Url.Action("GetDataForCustomFormStyleForPdf", "Admin")SalesId=' +'@ViewBag.id',
+            success: function (res) {
+                var response = res.data;
+                //populating form tag data according to data from procedure satrts---
+                $("#BusinessNameInput").on("keyup", function () {
+                    var val = $(this).val();
+                    console.log("length dekhi", val.length);
+                    if (val.length == 0) {
+                        $("#" + getTemplate + " #comName").text(response.Table[0].StoreName);
+                    }
+                    else {
+                        $("#" + getTemplate + " #comName").text(val);
+                    }
+                });
+
+
+
+                '@Model.BusinessName' ? $("#" + getTemplate + " #comName").text('@Model.BusinessName') : $("#" + getTemplate + " #comName").text(response.Table[0].StoreName);
+
+                '@Model.BusinessName' ? $("#stdr-comName").text('@Model.BusinessName') : $("#stdr-comName").text(response.Table[0].StoreName);
+
+                '@Model.BusinessName' ? $("#reminder-comName").text('@Model.BusinessName') : $("#reminder-comName	").text(response.Table[0].StoreName);
+
+                $("#" + getTemplate + " #comAddress").text(response.Table[0].Address);
+
+                $("#PhoneNameInput").on("keyup", function () {
+                    var val = $(this).val();
+                    if (val.length == 0) {
+                        $("#" + getTemplate + " #comPhone").text(response.Table[0].Phone);
+                    }
+                    else {
+                        $("#" + getTemplate + " #comPhone").text(val);
+                    }
+                });
+
+                '@Model.Phone' ? $("#" + getTemplate + " #comPhone").text('@Model.Phone') : $("#" + getTemplate + " #comPhone").text(response.Table[0].Phone);
+
+
+                $("#EmailInput").on("keyup", function () {
+                    var val = $(this).val();
+                    if (val.length == 0) {
+                        $("#" + getTemplate + " #comEmail").text(response.Table[0].Email);
+                    }
+                    else {
+                        $("#" + getTemplate + " #comEmail").text(val);
+                    }
+                });
+
+                '@Model.Email' ? $("#" + getTemplate + " #comEmail").text('@Model.Email') : $("#" + getTemplate + " #comEmail").text(response.Table[0].Email);
+                $("#ComRegNoInput").on("keyup", function () {
+                    var val = $(this).val();
+                    if (val.length == 0) {
+                        $("#" + getTemplate + " #comRegNum").text('@Model.ComRegNo');
+                    }
+                    else {
+                        $("#" + getTemplate + " #comRegNum").text(val);
+                    }
+                });
+
+                '@Model.ComRegNo' ? $("#" + getTemplate + " #comRegNum").text('@Model.ComRegNo') : "";
+
+                $("#WebsiteInput").on("keyup", function () {
+                    var val = $(this).val();
+                    if (val.length == 0) {
+                        $("#" + getTemplate + " #comWeb").text('@Model.Website');
+                    }
+                    else {
+                        $("#" + getTemplate + " #comWeb").text(val);
+                    }
+                });
+
+                '@Model.Website' ? $("#" + getTemplate + " #comWeb").text('@Model.Website') : "";
+
+                $("#TaxInvoice").on("keyup", function () {
+                    var val = $(this).val();
+                    if (val.length == 0) {
+                        $("#" + getTemplate + " #taxInvoiceLabel").text('@Model.TaxInvoice');
+                    }
+                    else {
+                        $("#" + getTemplate + " #taxInvoiceLabel").text(val);
+                    }
+                });
+
+                '@Model.TaxInvoice' ? $("#" + getTemplate + " #FormNo").text('@Model.TaxInvoice') : "";
+
+                @*setTimeout(function() {
+                    $("#" + getTemplate + " #taxInvoiceLabel").text('@Model.TaxInvoice' || 'Tax Invoice');
+                }, 2000)*@
+
+
+
+                $("#" + getTemplate + " #company-image").attr("src", ".." + response.Table1[0].Logo);
+
+                $("#stdr-company-image").attr("src", ".." + response.Table1[0].Logo);
+                $("#reminder-company-image").attr("src", ".." + response.Table1[0].Logo);
+
+                $(" #logo-set").attr("src", ".." + response.Table1[0].Logo);
+
+                $("#" + getTemplate + " #BillToComName").text(response.Table2[0].BillTo);
+                $("#" + getTemplate + " #BillToAddress").text(response.Table2[0].BillAddress);
+                $("#" + getTemplate + " #billToVatNo").text(response.Table2[0].VATRegistrationNo);
+
+                $("#" + getTemplate + " #ShipToComName").text(response.Table7[0].ShipTo);
+                $("#" + getTemplate + " #ShipToAddress").text(response.Table7[0].ShipAddress);
+                $("#" + getTemplate + " #ShipToVatNo").text(response.Table7[0].ShipVATRegistrationNo);
+
+                $("#" + getTemplate + " #TaxinvoiceData").text(response.Table3[0].TaxInvoice);
+                $("#" + getTemplate + " #DateData").text(response.Table3[0].Date); //.toLocaleDateString('en-GB')
+                $("#" + getTemplate + " #DueDateData").text(response.Table3[0].DueDate);
+                $("#" + getTemplate + " #TermsData").text(response.Table3[0].Terms);
+
+                $("#" + getTemplate + " #ShipDateData").text(response.Table8[0].ShipDate);
+                $("#" + getTemplate + " #ShipViaData").text(response.Table8[0].ShipVia);
+                $("#" + getTemplate + " #ShipTrackNoData").text(response.Table8[0].TrackingNo);
+
+                $("#" + getTemplate + " #subtotal").text(response.Table5[0].SubTotal);
+                $("#" + getTemplate + " #totalTax").text(response.Table5[0].TotalTax);
+                $("#" + getTemplate + " #total").text(response.Table5[0].total);
+                $("#" + getTemplate + " #balanceDue").text(response.Table5[0].BalanceDue);
+                $("#" + getTemplate + " #depositt").text(response.Table5[0].Deposit);
+                $("#" + getTemplate + " #discount").text(response.Table5[0].Discount);
+                //populating form tag data according to data from procedure ends-----
+
+                //populating data for email template starts---
+                $(".invoiceNong").text(response.Table10[0].Invoice);
+                $(".dueDateNong").text(response.Table10[0].Amount);
+                $(".balanceDueNong").text(response.Table10[0].BalanceDue);
+                //populating data for email template ends-----
+
+
+                //tax table data populating starts-----
+                var taxableData = res.data.Table3;
+                taxTable = new Tabulator("#" + getTemplate + " #taxTable", {
+                    data: taxableData,
+                    layout: "fitColumns",
+
+                    columns: [
+                        { title: "TAX INVOICE#", headerHozAlign: "left", field: "TaxInvoice", hozAlign: "left", visible: true },
+                        { title: "DATE", headerHozAlign: "left", field: "Date", hozAlign: "left", visible: true },
+                        { title: "TOTAL DUE", headerHozAlign: "left", field: "TotalDue", hozAlign: "left", visible: true },
+                        { title: "DUE DATE", headerHozAlign: "right", field: "DueDate", hozAlign: "right", visible: true },
+                        { title: "TERMS", headerHozAlign: "right", field: "Terms", hozAlign: "right", visible: true },
+                        { title: "ENCLOSED", headerHozAlign: "right", field: "Enclose", hozAlign: "right", visible: true },
+                    ],
+                });
+                //tax table data populating ends-----
+
+                //first table data populating starts-----
+                $(document).ready(function () {
+
+                    var GlobalColumns = [
+                        { title: "DATE", headerHozAlign: "left", field: "Date", hozAlign: "left", visible: true },
+                        { title: "ACTIVITY", headerHozAlign: "left", field: "Activity", hozAlign: "left", visible: true },
+                        { title: "DESCRIPTION", headerHozAlign: "left", field: "Description", hozAlign: "left", visible: true },
+                        { title: "QTY", headerHozAlign: "right", field: "QTY", hozAlign: "right", visible: true },
+                        { title: "RATE", headerHozAlign: "right", field: "Rate", hozAlign: "right", visible: true },
+                        { title: "AMOUNT", headerHozAlign: "right", field: "Amount", hozAlign: "right", visible: true },
+                    ];
+                    var firstTableData = res.data.Table4;
+                    console.log("firstTableData", firstTableData);
+
+                    function GenerateColumnList(columnOrders) {
+                        // Generate the list of checkboxes
+                        let items = columnOrders.map(column => `
+        <li class="list-group-item text-bold my-1 p-2">
+            <div class="custom-control custom-checkbox d-flex" >
+                <i class="bi bi-arrows-move my-handle" aria-hidden="true"></i>
+                <input type="checkbox" class="custom-control-input title-input ms-3" id="${column.title}" value="${column.title}">
+                <label class="custom-control-label w-100 cursor-pointer ms-2" id="${column.title}" for="${column.title}">${column.title}</label>
+            </div>
+        </li>`
+                        );
+
+                        // Update the list with the generated items
+                        const listWithHandle = document.getElementById('TableColumnList');
+                        listWithHandle.innerHTML = items.join('');
+
+                        // Attach event listeners to checkboxes
+                        columnOrders.forEach(column => {
+                            const checkboxId = column.title;
+                            const checkbox = document.getElementById(checkboxId);
+
+                            checkbox.addEventListener('change', function () {
+                                const isChecked = this.checked;
+
+                                // Show/hide column based on checkbox state
+                                if (isChecked) {
+                                    firstTable.showColumn(column.field);
+                                    column.visible = true;
+                                } else {
+                                    firstTable.hideColumn(column.field);
+                                    column.visible = false;
+                                }
+
+                                // Update the column order and save to hidden input
+                                const updatedColumnOrder = columnOrders.map(col => ({ ...col }));
+                                GlobalColumns = updatedColumnOrder;
+                                $('#columnOrders').val(JSON.stringify(updatedColumnOrder));
+                                console.log("updatedColumnOrder", updatedColumnOrder);
+                                console.log("GlobalColumns", GlobalColumns);
+                            });
+
+                            // Set initial state of checkboxes based on column visibility
+                            checkbox.checked = column.visible;
+                        });
+
+                        // Make the list sortable
+                        new Sortable(listWithHandle, {
+                            handle: '.my-handle',
+                            animation: 150,
+                            onEnd: function (evt) {
+                                const movedColumn = GlobalColumns.splice(evt.oldIndex, 1)[0];
+                                GlobalColumns.splice(evt.newIndex, 0, movedColumn);
+                                firstTable.setColumns(GlobalColumns);
+                                firstTable.redraw();
+                                const updatedColumnOrder = GlobalColumns.map(column => column.title);
+                                console.log("updatedColumnOrder", GlobalColumns);
+                                console.log("etar ki obostha", GlobalColumns);
+                                console.log("column order dekhi", updatedColumnOrder);
+                                $('#columnOrders').val(JSON.stringify(GlobalColumns));
+                            }
+                        });
+                    }
+                    const orderedColumnNamesString = $('#columnOrders').val();
+                    //console.log("etao dekhi", orderedColumnNamesString);
+
+                    if (orderedColumnNamesString) {
+                        const orderedColumnNames = JSON.parse(orderedColumnNamesString);
+                        GlobalColumns = Array.isArray(orderedColumnNames) ? orderedColumnNames : [];
+                        //console.log("Parsed Result:", orderedColumnNames);
+                    }
+                    firstTable = new Tabulator("#" + getTemplate + " #firtsTable", {
+                        data: firstTableData,
+                        layout: "fitColumns",
+                        columns: GlobalColumns,
+                    });
+                    console.log("orderedColumnNamesString", orderedColumnNamesString);
+                    if (orderedColumnNamesString) {
+                        const orderedColumnNames = JSON.parse(orderedColumnNamesString);
+                        GenerateColumnList(orderedColumnNames);
+                    }
+                    else if (!orderedColumnNamesString) {
+                        GenerateColumnList(GlobalColumns);
+                    }
+                    function updateColumnOrders() {
+                        const orderedColumnNamesString = $('#columnOrders').val();
+
+                        if (orderedColumnNamesString) {
+                            const orderedColumnNames = JSON.parse(orderedColumnNamesString);
+                            //console.log("eta dekha jak", orderedColumnNames);
+                            GenerateColumnList(orderedColumnNames);
+                        }
+                    }
+                    updateColumnOrders();
+
+                });
+                //first table data populating ends-----
+
+
+                //first table data populating starts-----
+                var secondTableData = res.data.Table6;
+                secondTable = new Tabulator("#" + getTemplate + " #secondTable", {
+                    data: secondTableData,
+                    layout: "fitColumns",
+
+                    columns: [
+                        { title: "RATE", headerHozAlign: "center", field: "Rate", hozAlign: "center", visible: true },
+                        { title: "TAX", headerHozAlign: "center", field: "TAX", hozAlign: "center", visible: true },
+                        { title: "NET", headerHozAlign: "left", field: "NET", hozAlign: "left", visible: true }
+                    ],
+                });
+
+                var thirdTableData = res.data.Table9;
+                invoiceTable = new Tabulator("#" + getTemplate + " #invoiceTable", {
+                    data: thirdTableData,
+                    layout: "fitColumns",
+
+                    columns: [
+                        { title: "DATE", headerHozAlign: "center", field: "Date", hozAlign: "center", visible: true },
+                        { title: "ACCOUNT SUMMARY", headerHozAlign: "center", field: "AccountSummary", hozAlign: "center", visible: true },
+                        { title: "AMOUNT", headerHozAlign: "right", field: "Amount", hozAlign: "right", visible: true }
+                    ],
+                });
+                //first table data populating ends-----
+
+
+            },
+            error: function (err) {
+                console.error("Error fetching data:", err);
+            }
+        });
+
+        }
+
+        //=============get data for form data populate ends============
+    </script>
+}

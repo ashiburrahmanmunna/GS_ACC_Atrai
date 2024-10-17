@@ -1,0 +1,663 @@
+﻿@*@model List<Atrai.Model.Core.Entity.AccountHeadModel>*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model IEnumerable<Atrai.Controllers.AccountsController.BalanceSheetModel>
+@*@model Tuple<List<Atrai.Model.Core.Entity.AccountHeadModel>, IEnumerable<Atrai.Controllers.AccountsController.BalanceSheetModel>>*@
+@{
+    ViewData["Title"] = "Voucher Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+}
+
+<style>
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+             border-bottom-width: 0px;
+
+        }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    .tabulator-table .tabulator-row {
+        background-color: white;
+    }
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btn:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .dropdown-menu.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+    }
+/*    .tabulator-row .tabulator-cell, .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: none;
+        border-left: none;
+    }*/
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+</style>
+<div class="row" id="change-checkbox">
+    <div class="col-12 col-md-12">
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row m-0 ps-4 upper-form-style pt-2">
+                    <div class="col-md-12 mb-2">
+                        <span class="report-text-style"><i class="bi bi-chevron-left"></i> Back to report list</span>
+                        <h4 class="fw-bold fs-3 mt-3">
+                            General Ledger Report
+                        </h4>
+                        <span class="float-end">
+                            <button type="button" class="btn customize-btn fw-bold">Customize</button>
+                            <button type="button" class="btn customization-btn fw-bold">Save Customization</button>
+                        </span>
+                    </div>
+                    <div class="col-md-8 col-12 mb-2">
+
+
+
+                        <div class="row">
+                            <div class="col-lg-4 col-12">
+                                <div class="mb-2" id="reportrange">
+                                    <label class="form-label">Report period</label>
+                                    <select onclick="setDateRange()" id="select2" class="form-select">
+                                        @*<option selected="selected" disabled="disabled">Select an Option</option>*@
+                                        <option value="1">All Dates</option>
+                                        <option value="2">Custom</option>
+                                        <option value="3" selected>Today</option>
+                                        <option value="4">This Week</option>
+                                        <option value="5">This Week-to-date</option>
+                                        <option value="6">This Month</option>
+                                        <option value="7">This Month-to-date</option>
+                                        <option value="8">This Quarter</option>
+                                        <option value="9">This Quater-to-date</option>
+                                        <option value="10">This Year</option>
+                                        <option value="11">This Year-to-date</option>
+                                        <option value="12">This Year-to-last-month</option>
+                                        <option value="13">Yesterday</option>
+                                        <option value="14">Recent</option>
+                                        <option value="15">Last Week</option>
+                                        <option value="16">Last Week-to-date</option>
+                                        <option value="17">Last Month</option>
+                                        <option value="18">Last Month-to-date</option>
+                                        <option value="19">Last Quarter</option>
+                                        <option value="20">Last Quarter-to-date</option>
+                                        <option value="21">Last Year</option>
+                                        <option value="22">Last Year-to-date</option>
+                                        <option value="23">Since 30 days ago</option>
+                                        <option value="24">Since 60 days ago</option>
+                                        <option value="25">Since 90 days ago</option>
+                                        <option value="26">Since 365 days ago</option>
+                                        <option value="27">Next Week</option>
+                                        <option value="28">Next 4 Weeks</option>
+                                        <option value="29">Next Month</option>
+                                        <option value="30">Next Quarter</option>
+                                        <option value="31">Next Year</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-lg-4 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">From Date</label>
+
+                                    <input class="form-control" id="start-date" disabled="disabled" />
+
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">To Date</label>
+
+                                    <input class="form-control" id="end-date" disabled="disabled" />
+
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                @*<div class="col-lg-6 col-12">
+                                    <div class="mb-2">
+                                        <label class="form-label">Display columns by</label>
+                                        <select class="form-select" id="select-form">
+                                            <option value="0" selected>Total Only</option>
+                                            <option value="1">Days</option>
+                                            <option value="2">Weeks</option>
+                                            <option value="2">Months</option>
+                                            <option value="2">Quarters</option>
+                                            <option value="2">Years</option>
+                                            <option value="2">Customers</option>
+                                            <option value="2">Vendors</option>
+                                            <option value="2">Products/Services</option>
+                                        </select>
+                                    </div>
+                                </div>*@
+                                <div class="col-lg-4 col-12">
+                                    <div class="mb-2">
+                                        <label class="form-label">Rows/columns <span class="text-danger fw-bolder fst-italic">[Function Is Under Construction!!]</span></label>
+                                        <select class="form-select" id="select-form">
+                                            <option value="0" selected>None</option>
+                                            <option value="1">Account</option>
+                                            <option value="2">Vendor</option>
+                                            <option value="2">Day</option>
+                                            <option value="2">Week</option>
+                                            <option value="2">Month</option>
+                                            <option value="2">Quarter</option>
+                                            <option value="2">Year</option>
+                                        </select>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4 col-12 mb-2 mt-5 d-flex justify-content-center">
+                        <div>
+                            <button type="button" class="btn customize-btn fw-bold" style="" onclick="GetReport()">Run Report</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="balance-sheet" class="me-lg-auto ms-lg-auto w-75" style="border: 1px solid #e3eaf3;  margin-top:40px;">
+                    <div class="ms-3 mt-3">
+                        <a class="text-decoration-none text-black cursor-pointer" id="add-notes"><span>Add notes</span></a>
+                        <span class="float-end">
+                            <a type="button" id="printPdfLoaded" href="#" class="text-decoration-none text-black" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <i class="bi bi-envelope me-3 fs-5"></i>
+                            </a>
+                            <a href="#" class="text-decoration-none text-black" id="print-table">
+                                <i class="bi bi-printer me-3 fs-5"></i>
+                            </a>
+                            <span class="dropdown1 me-3">
+                                <a class="dropdown-toggle text-decoration-none text-black cursor-pointer" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="bi bi-upload fs-5"></i>
+                                </a>
+                                @*<button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    </button>*@
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li><a class="dropdown-item" href="#" id="export-excel">Export to Excel</a></li>
+                                    <li><a class="dropdown-item" href="#" id="export-csv">Export to CSV</a></li>
+                                    @*<li><a class="dropdown-item" href="#">Export to Google Sheets</a></li>*@
+                                </ul>
+                            </span>
+                            <span class="dropdown1 me-3">
+                                <a class="text-decoration-none text-black cursor-pointer" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="bi bi-gear fs-5"></i>
+
+                                </a>
+                                @*<button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    </button>*@
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li class="fw-bold ms-3">Display density</li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input title-input" id="compact" value="compact">
+                                                <label class="custom-control-label cursor-pointer" id="compact-label" for="compact">Compact</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </span>
+                            @*<a href="#" class="text-decoration-none text-black">
+                                <i class="bi bi-upload me-3 fs-5"></i>
+                                </a>*@
+                            @*<a href="#" class="text-decoration-none text-black">
+                                <i class="bi bi-gear me-3 fs-5"></i>
+                                </a>*@
+                        </span>
+
+                        @*print modal*@
+                        <!-- Button trigger modal -->
+                        @*<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            Launch demo modal
+                            </button>*@
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content" style="border-radius:0px;">
+                                    <div class="d-flex mt-4 mb-3">
+                                        <h4 class="ms-3 fw-bold">Print, email, or save as PDF</h4>
+                                        <div class="ms-auto"><button type="button" class="btn-close me-2 mt-2" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                                    </div>
+                                    <div class="modal-body">
+                                        To print, right-click the preview and select <span class="fw-bold">Print</span>. Or, click the <span class="fw-bold">Print</span> icon if you see one below.
+                                        <div class="row">
+                                            @*report-print-setting-style*@
+                                            <p class="fw-bold">Report print settings</p>
+                                            <div class="col-lg-1 mt-2">
+                                                Orientation
+                                            </div>
+                                            <div class="col-lg-2">
+                                                <select class="form-select" id="orientation">
+                                                    <option value="portrait" selected>Portrait</option>
+                                                    <option value="landscape">Landscape</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <iframe id="pdf-iframe" name="pdf-iframe" style="width: 100%; height: 500px;"></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 mt-3">
+                                        <button type="button" class="btn ms-5 customize-btn fw-bolder" data-bs-dismiss="modal">Close</button>
+                                        <button id="print-pdf" type="button" class="btn float-end me-5 customization-btn fw-bolder">Print</button>
+                                        <button type="button" class="btn float-end me-2 customize-btn fw-bolder">Save as PDF</button>
+                                        <button type="button" class="btn float-end me-2 customize-btn fw-bolder">Email</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div id="parentDiv">
+                        <div class="row">
+                            <div class="col">
+
+                                <div id="make-editable" class="text-center company-and-other-text-style" onclick="makeEditable()">
+                                    <div class="form-check d-none" id="form-check-visibility">
+                                        <input class="form-check-input float-md-none" type="checkbox" name="flexCheckDefaultforImage" id="flexCheckDefaultforImage">
+                                        <label class="form-check-label" for="flexCheckDefaultforImage">
+                                            Show Image
+                                        </label>
+                                    </div>
+                                    <img id="company-image" style="width:10%" class="d-none" src="~/assets/Custom-URL-Shortener.jpg" />
+                                    <h3 id="company-name">@HttpContextAccessor.HttpContext.Session.GetString("CompanyName")</h3>
+                                    <h6 id="primary-address">@HttpContextAccessor.HttpContext.Session.GetString("PrimaryAddress")</h6>
+                                    <h6 id="trial-balance" class="text-black fw-bolder">General Ledger</h6>
+                                    <h6 id="date-month-year"></h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end mb-2">
+                            <button id="toggle-fullscreen"> <i class="bi bi-arrows-fullscreen"></i> </button>
+                        </div>
+                        <div id="tableContainer">
+                            <div id="incomeStatementTable"></div>
+                        </div>
+
+                        <div class="row m-0 p-0">
+                            <div class="table-responsive">
+                                <table class="table table-condensed table-hover tree bg-white border" data-statement-id="balancesheet" id="treegridTable">
+                                    <tbody id="body" class="treegrid-body">
+                                    </tbody>
+                                </table>
+                                @*<div id="loader" class="d-none"></div>*@
+
+                            </div>
+                            <!--<table class="table-borderless table-sm">
+                            <thead style="border-top: 0.5px solid #00000059; border-bottom: 0.5px solid #00000059; ">
+                                <tr id="add-th">
+                                </tr>
+                                <tr id="t-head-rows">-->
+                            @*<th class="w-50" scope="col"></th>
+                                <th class="text-end p-2 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">DEBIT</th>
+                                <th class="text-end pe-3 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">CREDIT</th>*@
+                            <!--</tr>
+                                </thead>
+
+                                <tbody id="t-body">
+                                </tbody>
+                            </table>-->
+                            @*<div id="tableContainer"></div>*@
+                            <div class="form-floating d-none" id="add-notes-textarea">
+                                <textarea class="form-control" placeholder="Add notes or include additional info with your report" id="floatingTextarea2" style="height: 200px"></textarea>
+                                <label for="floatingTextarea2">Add notes or include additional info with your report</label>
+                                <i class="bi bi-x cursor-pointer float-end" id="close-textarea" style="position: absolute; top: -10px; right: 13px; font-size:25px; "></i>
+                                @*<button type="button" class="close" id="close-textarea">&times;</button>*@
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts{
+   
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-treegrid/0.2.0/js/jquery.treegrid.bootstrap3.js"></script>
+ 
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+
+              $('#treegrid').treegrid();
+
+
+            $('#make-editable').mouseover(function () {
+                $('#form-check-visibility').removeClass('d-none').addClass('d-block');
+            });
+            $('#make-editable').mouseout(function () {
+                $('#form-check-visibility').removeClass('d-block').addClass('d-none');
+            });
+        });
+
+
+
+
+         //Tabulator function starts
+        GetReport();
+        function GetReport() {
+
+            function buildTree(dataArray) {
+                const tree = [];
+                const parentMap = {};
+
+                //dataArray.sort((a, b) => a.Numeric_SLNo - b.Numeric_SLNo);
+
+                dataArray.forEach(item => {
+                    // console.log("see item::", item);
+                    ///below ok code commented
+                    //item.AccName = item.AccName.trim(); // Remove extra whitespace from account names
+
+                    if (item.ParentId === 0) {
+                        // Root level node
+                        //item.AccName = "<p>"+item.AccName+"</p>";
+
+                        tree.push(item);
+                    } else {
+                        // Child node
+                        const parent = parentMap[item.ParentId];
+                        if (!parent.hasOwnProperty('children')) {
+                            parent.children = [];
+                        }
+                        parent.children.push(item);
+                    }
+
+                    parentMap[item.AccId] = item;
+                });
+                return tree;
+            }
+
+
+
+            var parentDiv = document.getElementById("parentDiv");
+            var trialBalanceDate;
+            parentDiv.scrollIntoView({ behavior:"smooth" });
+                        $("#loader").toggleClass("d-none");
+
+            function fetchDataFromServer() {
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetLedgerReportQB", "Accounts")'
+                };
+                return $.ajax({
+                    url: MyAppUrlSettings.MyUsefulUrl,
+                    data: { FromDate: '1-jan-23', ToDate: '31-dec-23', rpttype: "TB", criteria: $("#select2 option:selected").text(), isGroup: 0, isViewPageReport: 1, Months: "Total Only" }, // $("#select-form option:selected").text()
+                    dataType: "json",
+                });
+            }
+
+            function removeExportEventListeners() {
+                var printBtn = document.getElementById("print-table");
+                var exportCsvBtn = document.getElementById("export-csv");
+                var exportExcelBtn = document.getElementById("export-excel");
+
+                var printBtnClone = printBtn.cloneNode(true);
+                var exportCsvBtnClone = exportCsvBtn.cloneNode(true);
+                var exportExcelBtnClone = exportExcelBtn.cloneNode(true);
+
+                printBtn.parentNode.replaceChild(printBtnClone, printBtn);
+                exportCsvBtn.parentNode.replaceChild(exportCsvBtnClone, exportCsvBtn);
+                exportExcelBtn.parentNode.replaceChild(exportExcelBtnClone, exportExcelBtn);
+            }
+
+            fetchDataFromServer().done(function (response) {
+
+                console.log("notrmal response:",response.data);
+                //var dataTable = response.data.Table;
+                var dataTable = buildTree(response.data.Table);
+                console.log("data table:", dataTable);
+                trialBalanceDate = `<span>${response.data.Table[0].MonthCaption}</span>`;
+                $("#date-month-year").empty();
+                $("#date-month-year").append(trialBalanceDate);
+                var columnsToExclude = ["MonthCaption", "AccId", "AccCode","AccType","ParentId","DataLevel","children"]; // Define columns to be excluded
+
+                var columns = Object.keys(dataTable[0]).map((column) => {
+                    if (!columnsToExclude.includes(column)) {
+                        var columnDefinition = {
+                            title: column,
+                            field: column,
+                            formatter: function (cell, formatterParams) {
+
+                                return cell.getValue();
+                            },
+                            hozAlign: (column === "AccName") ? "left" : "right",
+                            frozen: column === "AccName" ? true : (column === "AccCode" ? true : false),
+                        };
+
+                        // Apply bottomCalc: 'sum' only to numeric columns
+                        //if (column !== "CustomerName" && !isNaN(parseFloat(dataTable[0][column]))) {
+                        //    columnDefinition.bottomCalc = 'sum';
+                        //}
+
+                        return columnDefinition;
+                    }
+                }).filter((column) => column !== undefined);
+
+                removeExportEventListeners();
+
+
+                var table = new Tabulator("#incomeStatementTable", {
+                    data: dataTable,
+                    dataTree: true,
+                    dataTreeStartExpanded: true ,
+                    dataTreeChildField: "children",
+                    layout: "datafit",
+                    frozenRows: 1,
+                    columns: columns, //updatedColumns
+                    //    columns.map(column => {
+                    //    return {
+                    //        ...column,
+                    //        headerSort: false, // Disable sorting for each column in the columns array
+                    //    };
+                    //}),
+                    dataBound: function () {
+                        // Freeze the top 1 row (index 0) after the table is created
+                        var rows = table.getRows();
+                        if (rows.length > 0) {
+                            var cells = rows[0].getCells();
+                            cells.forEach(cell => {
+                                cell.freeze();
+                            });
+                        }
+                    },
+                });
+                document.getElementById("print-table").addEventListener("click", function () {
+                    table.print(false, true);
+                });
+                document.getElementById("export-csv").addEventListener("click", function () {
+                    table.download("csv", "table.csv");
+                });
+                document.getElementById("export-excel").addEventListener("click", function () {
+                    // Use the same columns array that is used for rendering the table
+                    table.download("xlsx", "table.xlsx", { sheetName: "Table Data", columns: updatedColumns });
+                });
+                //document.getElementById("export-excel").addEventListener("click", function () {
+                //    table.download("xlsx", "table.xlsx", { sheetName: "Table Data" });
+                //});
+            });
+        };
+        document.getElementById("toggle-fullscreen").addEventListener("click", function () {
+            var tableContainer = document.getElementById("incomeStatementTable");
+
+            if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                // If not in fullscreen, enter fullscreen
+                if (tableContainer.requestFullscreen) {
+                    tableContainer.requestFullscreen();
+                } else if (tableContainer.mozRequestFullScreen) { /* Firefox */
+                    tableContainer.mozRequestFullScreen();
+                } else if (tableContainer.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                    tableContainer.webkitRequestFullscreen();
+                } else if (tableContainer.msRequestFullscreen) { /* IE/Edge */
+                    tableContainer.msRequestFullscreen();
+                }
+            } else {
+                // If already in fullscreen, exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) { /* Firefox */
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE/Edge */
+                    document.msExitFullscreen();
+                }
+            }
+        });
+
+        //Tabulator function ends
+
+
+
+
+
+        $(function () {
+            $("#start-date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#end-date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+        });
+
+
+    </script>
+}

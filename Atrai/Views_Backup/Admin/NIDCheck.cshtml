@@ -1,0 +1,308 @@
+﻿@model Atrai.Core.Entity.VoterModel
+@{
+    ViewData["Title"] = "NID Verification";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<style media="print">
+
+       
+
+    </style>
+
+<div class="page-wrapper">
+    @using (Html.BeginForm("NIDCheck", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <form class="needs-validation" novalidate>
+            @Html.AntiForgeryToken()
+            <div class="container-sm">
+
+
+
+                <div  class="card">
+                                            <div class="card-header bg-success text-white mb-2">
+                            <h4 class="text-center">ভোটার আইডি কার্ড যাচাইকরণ ।</h4>
+                        </div>
+                      <div class="col-md-12 mb-1 form-inline">
+                                 <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text py-0">
+                                            <label asp-for="voterNo"></label>
+                                        </span>
+                                    </div>
+
+                                    <span class="input-group">
+                                        @Html.EditorFor(model => model.voterNo, new { htmlAttributes = new { @class = "form-control" } })
+      
+                                        @Html.ValidationMessageFor(model => model.voterNo, "", new { @class = "text-danger" })
+                                    </span>
+                            </div>
+                                                            <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text py-0">
+                                            <label asp-for="dob">জন্ম তারিখ [YYYY-MM-DD] :</label>
+                                        </span>
+                                    </div>
+
+                                    @*<input asp-for="dob" class="form-control" type="date">*@
+                                    @*@Html.TextBoxFor("dob", null, new { @class = "form-control form-control-sm text-center dob", @placeholder = "Date of Birth", @autocomplete = "off", name = "FromDate" })*@
+                                    @Html.TextBoxFor(model => model.DateOfBirth, new { @id = "dob", name = "dob", @class = "form-control dob",@placeholder = "yyyy-mm-dd" })
+
+                                                                      <span class="input-group-append">
+                                            <button id="btnmusterlcid" class="btn btn-danger btn-sm" type="button" onclick="Scan_load()"><i class="fa fa-search fa-2x"></i></button>
+                                        </span>
+                                    <span asp-validation-for="dob" class="text-danger"></span>
+                                </div>
+
+                            </div>
+
+                    <div id="modalbodyrakin" class="col-md-12 p-0 m-0">
+
+                        <div class="card-body py-1">
+
+                            @if (TempData["Error"] != null)
+                            {
+                                <p class="alert alert-danger">@TempData["Error"]</p>
+                            }
+
+
+          
+                            <hr>
+                   
+                              <div class="row">
+                                               <div class="col-md-6 row mx-0 p-0">                               @*@Html.ValidationSummary(true, "", new { @class = "text-danger" })*@
+                            @if (Model != null)
+                            {
+
+                                <input type="hidden" id="Id" name="voterId" value="@Model.Id" />
+                                <input type="hidden" id="LuserId" name="LuserId" value="@Model.LuserId" />
+
+                            }
+                            else
+                            {
+
+                                <input type="hidden" id="LuserId" name="LuserId" value="" />
+                                @*<input type="hidden" id="comid" name="comid" value="" />*@
+                            }
+
+                  
+                                            <div class="col-md-12">
+                                        <span>  <h6>ভোটার নাম্বার : @Model.voterNo     </h6>  </span>  
+                            </div>
+                                      <div class="col-md-12">
+                                        <span>  <h6>জন্ম তারিখ  : @Model.DateOfBirth     </h6>  </span>  
+                            </div>
+
+                            <div class="col-md-12">
+                                        <span>  <h6>নাম  : @Model.name     </h6>  </span>  
+                            </div>
+
+                             <div class="col-md-12">
+                            <span>  <h6>ইংরেজি নাম  : @Model.nameEn     </h6>  </span>  
+                            </div>
+                            
+                             <div class="col-md-12">
+                                <span>  <h6> পত্নীর নাম  : @Model.spouse     </h6>  </span>  
+                            </div>
+
+
+                              <div class="col-md-12">
+                                 <span>  <h6>  পেশা : @Model.profession     </h6>  </span>  
+                            </div>
+
+
+            
+
+                           <div class="col-md-12">
+                                 <span>  <h6>  পিতার নাম : @Model.father     </h6>  </span>  
+                            </div>
+
+
+                              <div class="col-md-12">
+                                    <span>  
+                                        <h6>   মাতার নাম : @Model.mother     </h6> 
+                                     
+                                    </span>   
+                            </div>    
+
+
+
+
+
+                            <div class="col-md-12">
+                                <span>  <h5>    স্থায়ী ঠিকানা : </h5> </span>  <label> <p>  @Model.permanentAddress   </p> </label>
+                            </div>
+
+
+                             <div class="col-md-12">
+                               <span>  <h5>  বর্তমান ঠিকানা : </h5> </span>  <label> <p>  @Model.presentAddressBN   </p> </label>
+                            </div>
+                            </div>
+
+
+
+                            <div class="d-block">
+                                <div class="row">
+
+
+                                <div class="col-md-10 offset-md-2">
+                                    @Html.HiddenFor(model => model.photo, new { htmlAttributes = new { @class = "form-control" } })
+                                    @Html.HiddenFor(model => model.photoPath, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                    @Html.HiddenFor(model => model.photoExtension, new { htmlAttributes = new { @class = "form-control" } })
+
+
+                                    @*@Html.LabelFor(model => model.photo)*@
+
+
+                                    @if (Model == null)
+                                    {
+                                    }
+                                    else
+                                    {
+                                        if (Model.photo == null)
+                                        {
+                                            <img src="@Url.Content("/Content/EmployeeImages/"+0 + ".png")" class="img-thumbnail" />
+                                        }
+                                        else
+                                        {
+                                            <img src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.photo))" class="img-thumbnail" style="max-width:300px">
+                                        }
+                                    }
+
+                                    @Html.ValidationMessageFor(model => model.photo, "", new { @class = "text-danger" })
+                                    @*<input type="file" class="image-upload" name="fileLogo" id="myFile" />*@
+
+                                    <br />
+@*                                    <img src="" height="200" id='image_X' alt="Image preview...">
+                                    <div class="images">
+                                    </div>*@
+                                    
+                                </div>
+                            </div>
+                                </div>
+
+                        </div>
+                        </div>
+
+
+                  
+
+
+
+
+
+                    </div>
+                    <hr>
+                                            <div class="card-footer">
+                            @*@Html.ActionLink("Voter List", "NIDList", "Admin", null, new { @class = "btn btn-info" })*@
+                                            <span class=""   onclick="ClosePrint()">
+                    <i class="fabprint fa fa-print text-white align-middle btn btn-success" >
+                    </i>
+                </span>
+
+@*                                <span class=""   onclick="createPDF()">
+                    <i class="fabpdf fa fa-file-pdf-o text-white align-middle btn btn-danger" >
+                    </i>
+                </span>*@
+                            <span class="float-right">
+                                          <label>Credit Cost : @Model.CreditCurrent </label>
+                                      <label>Credit Current : @Model.CreditCost</label>
+
+                            </span> 
+                  
+                        </div>
+                </div>
+            </div>
+
+
+        </form>
+    }
+</div>
+
+@section Scripts{
+
+
+
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            $(function() {
+                $('#voterNo').keyup(function() {
+                    this.value = this.value.toUpperCase();
+                });
+            });
+
+
+
+        });
+
+
+
+        function Scan_load() {
+            var scanid = $('#voterNo').val();
+            var dateofbirth = $('#dob').val();
+
+            console.log(dateofbirth);
+            alert(dateofbirth);
+
+
+            if (scanid.length > 6) {
+
+                //MasterLCId = $('#MasterLCId').val();
+                var y = "Create";
+                // var y = "@ViewBag.Title";
+                if (y == "Create") {
+                    window.location.href = "NIDCheck?VoterIdCardScan=" + scanid + "&dateOfBirth=" + dateofbirth;
+                }
+                else {
+                    window.location.href = "?VoterIdCardScan=" + scanid + "&dateOfBirth=" + dateofbirth;
+                }
+
+            }
+            else {
+
+                alert("Voter No is not in Correct Format.");
+
+            }
+
+
+
+        };
+
+
+           $(".dob").datepicker({
+
+                dateFormat: "yy-mm-dd",
+                changeMonth: true,
+                changeYear: true
+
+            });
+
+
+            function ClosePrint() {
+                var myPrintContent = document.getElementById('modalbodyrakin');
+                var myPrintWindow = window.open('','','');
+                myPrintWindow.document.write('<html><head>');
+                myPrintWindow.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" >');
+                myPrintWindow.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">');
+                myPrintWindow.document.write('</head><title>Print  Report</title><body class="container"><div class="card mt-4"><div class="card-header"> <h4 class="text-center">ভোটার আইডি কার্ড যাচাইকরণ ।</h4></div><div class="row p-1 m-1"><div class="offset-md-1 col-md-10 col-12"');
+                myPrintWindow.document.write(myPrintContent.innerHTML);
+                myPrintWindow.document.write('</div></div></div></body></html>');            
+                myPrintWindow.document.getElementById('hidden_div').style.display = 'block';
+                myPrintWindow.document.close();
+                myPrintWindow.focus();
+                myPrintWindow.print();
+                return false;
+            }
+
+
+    </script>
+
+
+
+
+}
+
+
+

@@ -1,0 +1,280 @@
+﻿@model Atrai.Core.Entity.FiscalYearTypeModel
+@{
+    ViewData["Title"] = "AddFiscalYearType";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<link href="~/AdminEla/Assets/css/floatingLable.css" rel="stylesheet" />
+
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-md-6 col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4 class="text-primary">New Business Type</h4>
+
+                    </div>
+
+                        @*@Html.HiddenFor(m => m.Id, new { @value = Model.Id })
+                        @Html.HiddenFor(m => m.CreateDate, new { @value = Model.CreateDate })
+                        @Html.HiddenFor(m => m.LuserId, new { @value = Model.LuserId })*@
+
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="admin" asp-action="AddFiscalYearType" method="post" class="needs-validation" novalidate>
+                                @if (Model != null)
+                                {
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" />
+
+                                    @*<input type="hidden" asp-for="LuserId" />*@
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Id" value="0" />
+                                }
+
+
+
+
+                                <div class="row">
+                                    <div class="col-md-12 col-12">
+
+                                        <div class="row">
+                                            <div class="col-md-12 col-12">
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" asp-for="FYName" class="form-control" placeholder=" " required autofocus>
+                                                    <label asp-for="FYName"></label>
+                                                    @*<div class="input-group-append">
+                                                        <div class="input-group-text">*</div>
+                                                        </div>*@
+                                                    <span asp-validation-for="FYName" class="text-danger"></span>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-md-6 col-12">
+                                             <div class="form-floating mb-3">
+                                                    <input type="number" asp-for="FYStartMonth" class="form-control" placeholder="" autocomplete="off">
+                                                    <label asp-for="FYStartMonth"></label>
+                                                    <span asp-validation-for="FYStartMonth" class="text-danger"></span>
+                                                </div>
+                                            </div>
+
+                                                             <div class="col-md-6 col-12">
+                                             <div class="form-floating mb-3">
+                                                    <input type="number" asp-for="FYStartDate" class="form-control" placeholder="" autocomplete="off">
+                                                    <label asp-for="FYStartDate"></label>
+                                                    <span asp-validation-for="FYStartDate" class="text-danger"></span>
+                                                </div>
+                                            </div>
+
+                                            
+                                            <div class="col-md-6 col-12">
+                                             <div class="form-floating mb-3">
+                                                    <input type="number" asp-for="FYEndMonth" class="form-control" placeholder="" autocomplete="off">
+                                                    <label asp-for="FYEndMonth"></label>
+                                                    <span asp-validation-for="FYEndMonth" class="text-danger"></span>
+                                                </div>
+                                            </div>
+
+                                            
+                                             <div class="col-md-6 col-12">
+                                             <div class="form-floating mb-3">
+                                                    <input type="number" asp-for="FYEndDate" class="form-control" placeholder="" autocomplete="off">
+                                                    <label asp-for="FYEndDate"></label>
+                                                    <span asp-validation-for="FYEndDate" class="text-danger"></span>
+                                                </div>
+                                            </div>
+
+
+
+                                              <div class="col-md-12 col-12">
+                                               <div class="form-floating mb-3">
+                                                    <input type="checkbox" asp-for="IsInActive" class="form-control">
+                                                    <label asp-for="IsInActive"></label>
+                                                    <span asp-validation-for="IsInActive" class="text-danger"></span>
+                                                </div>
+                                            </div>
+
+
+
+
+                                            <div class="col-md-6 col-12">
+                                                @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+                                                @if (ViewBag.ActionType == "Create")
+                                                {
+                                                    <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" />
+                                                }
+                                                else if (ViewBag.ActionType == "Edit")
+                                                {
+                                                    <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" />
+                                                }
+                                                else if (ViewBag.ActionType == "Delete")
+                                                {
+                                                    <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>
+                                                }
+                                                @Html.ActionLink("Back", "FiscalYearTypeList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+                                            </div>
+
+
+
+
+
+
+
+                                        </div>
+
+
+                                        @*  <div class="col-md-9 col-12 text-center">
+
+                                            <label asp-for="FiscalYearTypeName"></label>
+                                            <input type="text" asp-for="FiscalYearTypeName" class="form-control" placeholder="eg Enter FiscalYearType">
+                                            <span asp-validation-for="FiscalYearTypeName" class="text-danger"></span>
+
+                                            </div>
+
+                                            <div class="col-md-3 col-12 text-center">
+
+                                            <label asp-for="AppsName"></label>
+                                            <input asp-for="AppsName" class="form-control" placeholder="Apps Name">
+                                            <span asp-validation-for="AppsName" class="text-danger"></span>
+
+                                            </div>
+
+
+
+                                            <div class="col-md-9 col-12 text-center">
+
+                                            <label asp-for="FiscalYearTypeRemarks"></label>
+                                            <input asp-for="FiscalYearTypeRemarks" class="form-control" placeholder="Description">
+                                            <span asp-validation-for="FiscalYearTypeRemarks" class="text-danger"></span>
+
+                                            </div>
+
+
+                                            <div class="col-md-3 col-12 text-center">
+                                            <label asp-for="IsInActive"></label>
+                                            <input asp-for="IsInActive" class="form-control" type="checkbox">
+                                            <span asp-validation-for="IsInActive" class="text-danger"></span>
+                                            </div>*@
+
+                                    </div>
+
+
+
+
+
+                                    @*<div class="row text-center m-2">
+                                        <br />
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-4 col-xs-12 d-block mx-auto">
+
+                                        @if (ViewBag.ActionType == "Create")
+                                        {
+                                        <input type="submit" value="Save" class="btn  btn-success btn-block  rounded-0" />
+                                        }
+                                        else if (ViewBag.ActionType == "Edit")
+                                        {
+                                        <input type="submit" value="Update" class="btn btn-warning btn-block rounded-0" />
+                                        }
+                                        else if (ViewBag.ActionType == "Delete")
+                                        {
+                                        <button class="btn btn-danger btn-block rounded-0" type="button" onclick="Bank_delete()">Delete</button>
+                                        }
+
+
+                                        </div>
+
+                                        <div class="col-md-4 col-xs-12 d-block mx-auto">
+                                        @Html.ActionLink("Back", "FiscalYearTypeList", "Admin", null, new { @class = "btn btn-info btn-block rounded-0", @id = "btnBack" })
+
+                                        </div>
+                                        <div class="col-md-3"></div>
+
+                                        </div>*@
+                                </div>
+
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+<script>
+    
+    
+    (function() {
+  'use strict';
+  window.addEventListener('load', function() {
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.getElementsByClassName('needs-validation');
+    // Loop over them and prevent submission
+    var validation = Array.prototype.filter.call(forms, function(form) {
+      form.addEventListener('submit', function(event) {
+        if (form.checkValidity() === false) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
+
+
+
+//        var elements = document.getElementById("my-form").elements;
+
+//for (var i = 0, element; element = elements[i++];) {
+//    if (element.type === "text" && element.value === "")
+//        console.log("it's an empty textfield")
+//}
+
+
+        //$.each( form, function( index, value ){
+        //    //sum += value;
+        //     //console.log($(this));
+        //     //console.log(value);
+
+
+        //     $(this).each(function() {
+        //      $.each(this.attributes, function() {
+
+
+
+        //        // this.attributes is not a plain object, but an array
+        //        // of attribute nodes, which contain both the name and value
+        //        if(this.specified) {
+        //          //console.log(this.name, this.value);
+                  
+        //          if (this.name == "data-val-required" && this.value.contains('required'))
+        //          {
+        //          alert('hit');
+        //          }
+
+        //        }
+        //      });
+        //    });
+
+
+        //     //var x = $(this).attr("aria-invalid");
+        //     ////var x  = value.attr("aria-invalid").val();
+        //     //alert(x);
+        //});
+
+
+
+
+
+        form.classList.add('was-validated');
+      }, false);
+    });
+  }, false);
+})();
+    </script>

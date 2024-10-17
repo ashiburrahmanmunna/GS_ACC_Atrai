@@ -1,0 +1,523 @@
+﻿<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+
+@{
+    ViewData["Title"] = "Taxes";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<style>
+    #offcanvasForTax {
+        width: 40%;
+    }
+
+    .customDiv:hover {
+        background-color: #f0f0f0; /* Change the background color on hover */
+    }
+</style>
+
+<div>
+    <div class="row justify-content-between">
+        <div class="col-md-2 col-2">
+            <h4>Tax Custom</h4>
+        </div> 
+        <div class="col-md-3 col-3">
+            <div class="row"> 
+                <div class="col-md-7 col-7">
+                    <button class="btn btn-outline-dark">Edit Custom tax</button>
+                </div>
+                <div class="col-md-5 col-5">
+                    <button type="button" class="btn btn-outline-dark" data-bs-toggle="offcanvas" data-bs-target="#offcanvasForTax" aria-controls="">Add tax</button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-end overflow-scroll" tabindex="-1" id="offcanvasForTax" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasRightLabel">Add tax</h5>
+        <button onclick="PrimaryFunction()" type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        
+    </div>
+    <p style="margin-left: 15px; font-size: 12px; font-weight: bold;" id="afterHeading">What type of tax do you want to add?</p>
+    
+    <input type="hidden" id="Id" value="0" /> @* ----------Primary key---------- *@
+
+    <div class="offcanvas-body vertical-scroll" style="padding:0!important">
+        <div id="TaxCategoryList" style="border-top: 1px solid black;" class="cursor-pointer mx-3">
+            <div class="customDiv" style="border-bottom: 1px solid black; padding:20px;" onclick="showTaxRate()">
+                <p style="font-size: 12px; font-weight: bold;">Tax rate</p>
+                <p style="font-size: 12px; font-weight: bold;">Add another tax rate for Tax Custom, such as a local tax not already inclulded.</p>
+            </div>
+            <div class="customDiv" style="border-bottom: 1px solid black; padding:20px;" onclick="showGroupRate()">
+                <p style="font-size: 12px; font-weight: bold;">Group rate</p>
+                <p style="font-size: 12px; font-weight: bold;">Combine multiple taxes and make applying them to your transactions easier. All taxes you include are calculated and charged at once, but we track them seperately for you.</p>
+            </div>
+            <div class="customDiv" style="border-bottom: 1px solid black; padding:20px;" onclick="showCustomRate()">
+                <p style="font-size: 12px; font-weight: bold;">Custom tax</p>
+                <p style="font-size: 12px; font-weight: bold;">Add a tax agency and a tax percentage, such as an enviromental levy, hotel, or pertrol tax.</p>
+            </div>
+        </div>
+
+        <div id="TaxRate" class="cursor-pointer mx-3 d-none" style="padding:10px; border-top: 1px solid black;">
+            <p>Create a name for your tax rate and give us a few details about how you want to apply it.</p>
+            <div class="my-4">
+                <label style="font-weight: bold; font-size: 12px;">Tax name</label><br />
+                <input type="text" id="tax_name" style="width: 60%;"/>
+            </div>
+            <div class="my-4">
+                <label style="font-weight: bold; font-size: 12px;">Description</label><br />
+                <input type="text" id="description" style="width: 70%;" />
+            </div>
+            <div class="my-4">
+                <label style="font-weight: bold; font-size: 12px;">Tax agency</label>
+                @Html.DropDownList("Agency", new List<SelectListItem>(), "Select an tax agency", new { id = "Agency", @class = "form-select form-select-sm" , style = "width: 50%;"})
+            </div>
+            
+            <div class="d-none" id="RestTaxRate">
+                <div class="my-4">
+                    <label style="font-weight: bold; font-size: 12px;">Sales rate</label><br />
+                    <span><input type="text" id="tax_rate" style="margin-right:5px; width:10%" />%</span>
+                </div>
+                <div class="my-4">
+                    <label style="font-weight: bold; font-size: 12px;">Account</label>
+                    @Html.DropDownList("Account", new List<SelectListItem>(), "Select an account", new { id = "Account", @class = "form-select form-select-sm" , style = "width: 60%;"})
+                </div>
+                <div class="my-4">
+                    <label style="font-weight: bold; font-size: 12px;">Show tax amount on return line</label>
+                    @Html.DropDownList("ShowTaxAmount", new List<SelectListItem>(), "Select", new { id = "ShowTaxAmount", @class = "form-select form-select-sm" , style = "width: 60%;"})
+                </div>
+                <div class="my-4">
+                    <label style="font-weight: bold; font-size: 12px; ">Show net amount on return line</label>
+                    @Html.DropDownList("ShowNetAmount", new List<SelectListItem>(), "Select", new { id = "ShowNetAmount", @class = "form-select form-select-sm" , style = "width: 60%;"})
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-end" style="margin-top: 50px;">
+                <button class="btn btn-success h-100 radius-30" type="button" onclick="">
+                    Save
+                </button>
+            </div>
+        </div>
+
+        <div id="GroupRate" class="cursor-pointer mx-3 d-none" style="padding:10px; border-top: 1px solid black;">
+            <p>Give your group rate a name and select which existing tax rates to include.</p>
+            <div class="my-4">
+                <label style="font-weight: bold; font-size: 12px;">Group name</label><br />
+                <input type="text" id="group_name" style="width: 60%;" />
+            </div>
+            <div class="my-4">
+                <label style="font-weight: bold; font-size: 12px;">Description</label><br />
+                <input type="text" id="group_description" style="width: 70%;" />
+            </div>
+            <div class="row">
+                <div class="col-md-6 col-6 my-4">
+                    <label style="font-weight: bold; font-size: 12px;">Tax rate</label>
+                    @Html.DropDownList("TaxList", new List<SelectListItem>(), "Choose a rate", new { id = "TaxList", @class = "form-select form-select-sm" , style = "width: 80%;", onclick="GetTaxList('TaxList')"})
+                </div>
+                <div class="col-md-6 col-6 my-4">
+                    <label style="font-weight: bold; font-size: 12px;">Applicable on</label>
+                    @Html.DropDownList("ApplicableOn", new List<SelectListItem>(), "Select an amount", new { id = "ApplicableOn", @class = "form-select form-select-sm" , style = "width: 80%;", onclick="GetApplicableList('ApplicableOn')"})
+                </div>
+            </div>
+            <div id="dynamicDivContainer">
+
+            </div>
+            <a href="#" onclick="addTaxRate()">Add tax rate</a>
+            <div class="d-flex justify-content-end" style="margin-top: 50px;">
+                <button class="btn btn-success h-100 radius-30" type="button" onclick="">
+                    Save
+                </button>
+            </div>
+        </div>
+        
+        <div id="CustomRate" class="cursor-pointer mx-3 d-none" style="padding:10px; border-top: 1px solid black;">
+            <p>Create a name for your custom tax rate, and give us a few details about how you track it.</p>
+            <div class="my-4">
+                <label style="font-weight: bold; font-size: 12px;">Tax name</label><br />
+                <input type="text" id="custom_tax_name" style="width: 50%;" />
+            </div>
+
+            <div class="my-4">
+                <label style="font-weight: bold; font-size: 12px;">Description</label><br />
+                <input type="text" id="custom_description" style="width: 60%; height: 70px;" />
+            </div>
+
+            <div class="my-4">
+                <label style="font-weight: bold; font-size: 12px;">Tax agency name</label><br />
+                <input type="text" id="custom_agency_name" style="width: 50%; " />
+            </div>
+
+            <div class="my-4">
+                <label style="font-weight: bold; font-size: 12px;">Business ID No.<span style="color:#dcdcdc; font-style: normal;"> optional</span></label><br />
+                <input type="text" id="custom_agency_name" style="width: 50%;" />
+            </div>
+
+            <div class="my-4">
+                <label style="font-weight: bold; font-size: 12px;">Start of current tax period</label>
+                @Html.DropDownList("Month", new List<SelectListItem>(), "Start of current tax period", new { id = "Month", @class = "form-select form-select-sm" , style = "width: 50%;"})
+            </div>
+
+            <div class="my-4">
+                <label style="font-weight: bold; font-size: 12px;">Filling frequency</label>
+                @Html.DropDownList("Frequency", new List<SelectListItem>(), "Choose a frequency", new { id = "Frequency", @class = "form-select form-select-sm" , style = "width: 50%;"})
+            </div>
+
+            <div class="my-4">
+                <label style="font-weight: bold; font-size: 12px;">Reporting method</label>
+                @Html.DropDownList("ReportMethod", new List<SelectListItem>(), "Choose a method", new { id = "ReportMethod", @class = "form-select form-select-sm" , style = "width: 50%;"})
+            </div>
+
+            <div class="my-4">
+                <input class="form-check-input" type="checkbox" value="" id="collectedSales">
+                <label class="form-check-label" for="flexCheckChecked" style="font-weight: bold; font-size: 12px;">
+                    This tax is collected on sales
+                </label>
+                <div class="mx-4 my-1 d-none" id="custom_sales_rate">
+                    <label style="font-weight: bold; font-size: 12px;">Sales rate</label><br />
+                    <span><input type="text" id="sale_tax_rate" style="margin-right:5px; width:10%" />%</span>
+                </div>
+            </div>
+            <div class="my-4">
+                <input class="form-check-input" type="checkbox" value="" id="collectedPurchases">
+                <label style="font-weight: bold; font-size: 12px;" class="form-check-label" for="flexCheckChecked">
+                    This tax is collected on purchases
+                </label>
+                <div class="mx-4 my-1 d-none" id="purchaseDetails">
+                    <label style="font-weight: bold; font-size: 12px;">Purchase rate</label><br />
+                    <span><input type="text" id="purchase_tax_rate" style="margin-right:5px; width:10%" />%</span><br />
+
+                    <div class="mt-2">
+                        <input class="form-check-input" type="checkbox" value="" id="reclaimable">
+                        <label style="font-weight: bold; font-size: 12px;" class="form-check-label" for="flexCheckChecked">
+                            Purchase tax is reclaimable
+                        </label>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="d-flex justify-content-end" style="margin-top: 50px;">
+                <button class="btn btn-success h-100 radius-30" type="button" onclick="">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script>
+
+        $(document).ready(function () {
+            fetchMonthList();
+            fetchFrequencyList();
+            reportingMethodList();
+
+            $('#collectedSales').on('change', function () {
+                if ($(this).is(':checked')) {
+                    $('#custom_sales_rate').removeClass('d-none');
+                } else {
+                    $('#custom_sales_rate').addClass('d-none');
+                }
+            });
+
+            $('#collectedPurchases').on('change', function () {
+                if ($(this).is(':checked')) {
+                    $('#purchaseDetails').removeClass('d-none');
+                } else {
+                    $('#purchaseDetails').addClass('d-none');
+                }
+            });
+        });
+        function fetchAgencyList() {
+            $.ajax({
+                url: '/Admin/GetAgencyList',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    var dropdown = $('#Agency');
+                    var selectedAgency = dropdown.val(); // Save the selected agency
+                    dropdown.empty();
+
+                    // Add options to the dropdown
+                    $.each(data, function (index, item) {
+                        dropdown.append($('<option></option>').attr('value', item.Value).text(item.Text));
+                    });
+
+                    // Set the selected value back after updating the list
+                    dropdown.val(selectedAgency);
+                },
+                error: function (error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
+
+        $('#Agency').on('click', function () {
+            fetchAgencyList();
+            $("#RestTaxRate").removeClass("d-none");
+        });
+
+        
+        function fetchMonthList() {
+            const monthNames = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+
+            const dropdown = $('#Month');
+            const selectedMonth = dropdown.val(); 
+
+            dropdown.empty();
+
+            dropdown.append('<option value="">Start of current tax period</option>');
+
+            monthNames.forEach((month, index) => {
+                dropdown.append(`<option value="${month}">${month}</option>`);
+            });
+
+            dropdown.val(selectedMonth);
+        }
+
+        function fetchFrequencyList() {
+            const frequencyNames = [
+                "Monthly", "Quarterly", "Half-yearly", "Yearly"
+            ];
+
+            const dropdown = $('#Frequency');
+            const selectedFrequency = dropdown.val(); 
+
+            dropdown.empty();
+
+            dropdown.append('<option value="">Choose a frequency</option>');
+
+            frequencyNames.forEach((frequency, index) => {
+                dropdown.append(`<option value="${frequency}">${frequency}</option>`);
+            });
+
+            dropdown.val(selectedFrequency);
+        }
+
+        function reportingMethodList() {
+            const methodNames = [
+                "Accrual", "Cash"
+            ];
+
+            const dropdown = $('#ReportMethod');
+            const selectedFrequency = dropdown.val();
+
+            dropdown.empty();
+
+            dropdown.append('<option value="">Choose a frequency</option>');
+
+            methodNames.forEach((method, index) => {
+                dropdown.append(`<option value="${method}">${method}</option>`);
+            });
+
+            dropdown.val(selectedFrequency);
+        }
+
+        function GetApplicableList(id) {
+            const monthNames = [
+                "Net amount", "Tax amount", "Net + Tax amount"
+            ];
+
+            const dropdown = $('#' + id);
+            const selectedMonth = dropdown.val();
+
+            dropdown.empty();
+
+            monthNames.forEach((month, index) => {
+                dropdown.append(`<option value="${month}">${month}</option>`);
+            });
+
+            dropdown.val(selectedMonth);
+        }
+
+        function showTaxRate() {
+            $("#TaxCategoryList").addClass("d-none");
+            $("#TaxRate").removeClass("d-none");
+            $("#GroupRate").addClass("d-none");
+
+            var afterHeading = document.getElementById('afterHeading');
+
+            var taxRateText = document.createElement('span');
+            taxRateText.innerText = 'Tax rate'; 
+            taxRateText.style.fontSize = '12px'; 
+            taxRateText.style.fontWeight = 'bold';
+
+            var changeLink = document.createElement('a');
+            changeLink.href = '#';
+            changeLink.innerText = 'Change';
+            changeLink.onclick = function () {
+                PrimaryFunction();
+            };
+
+            
+            afterHeading.innerHTML = ''; 
+            afterHeading.appendChild(taxRateText);
+            taxRateText.appendChild(document.createTextNode(' ')); 
+            taxRateText.appendChild(changeLink);
+        }
+
+        function showGroupRate()
+        {
+            $("#TaxCategoryList").addClass("d-none");
+            $("#GroupRate").removeClass("d-none");
+
+            var afterHeading = document.getElementById('afterHeading');
+
+            var taxRateText = document.createElement('span');
+            taxRateText.innerText = 'Group rate';
+            taxRateText.style.fontSize = '12px';
+            taxRateText.style.fontWeight = 'bold';
+
+            var changeLink = document.createElement('a');
+            changeLink.href = '#';
+            changeLink.innerText = 'Change';
+            changeLink.onclick = function () {
+                PrimaryFunction();
+            };
+
+
+            afterHeading.innerHTML = '';
+            afterHeading.appendChild(taxRateText);
+            taxRateText.appendChild(document.createTextNode(' '));
+            taxRateText.appendChild(changeLink);
+        }
+
+        function showCustomRate()
+        {
+            $("#TaxCategoryList").addClass("d-none");
+            $("#CustomRate").removeClass("d-none");
+
+            var afterHeading = document.getElementById('afterHeading');
+
+            var taxRateText = document.createElement('span');
+            taxRateText.innerText = 'Group rate';
+            taxRateText.style.fontSize = '12px';
+            taxRateText.style.fontWeight = 'bold';
+
+            var changeLink = document.createElement('a');
+            changeLink.href = '#';
+            changeLink.innerText = 'Change';
+            changeLink.onclick = function () {
+                PrimaryFunction();
+            };
+
+
+            afterHeading.innerHTML = '';
+            afterHeading.appendChild(taxRateText);
+            taxRateText.appendChild(document.createTextNode(' '));
+            taxRateText.appendChild(changeLink);
+        }
+
+        function PrimaryFunction()
+        {
+            $("#TaxCategoryList").removeClass("d-none");
+            $("#TaxRate").addClass("d-none");
+            $("#GroupRate").addClass("d-none");
+            $("#CustomRate").addClass("d-none");
+
+            var afterHeading = document.getElementById('afterHeading');
+
+            var taxRateText = document.createElement('span');
+            taxRateText.innerText = 'What type of tax do you want to add?';
+
+            afterHeading.innerHTML = '';
+            afterHeading.appendChild(taxRateText);
+
+            clearTaxRateForm();
+            removeAllDynamicDivs();
+            clearInputs();
+        }
+
+        function addTaxRate() {
+            var dynamicDivContainer = $('#dynamicDivContainer');
+
+            var dynamicDiv = $('<div class="row"><div class="col-md-6 col-6 my-4"></div><div class="col-md-5 col-5 my-4"></div></div>');
+
+            var uniqueId = Date.now(); 
+
+            var firstSetWrapper = $('<div class="dynamic-set"></div>');
+            firstSetWrapper.append('<label style="font-weight: bold; font-size: 12px;">Tax Rate</label>');
+            firstSetWrapper.append('<select id="NewTaxList_' + uniqueId + '" class="form-select form-select-sm" style="width: 80%;" onclick="GetTaxList(\'NewTaxList_' + uniqueId + '\')"><option value="">Choose a rate</option></select>');
+            var secondSetWrapper = $('<div class="dynamic-set"></div>');
+            secondSetWrapper.append('<label style="font-weight: bold; font-size: 12px;">Applicable on</label>');
+            secondSetWrapper.append('<select id="NewApplicableOn_' + uniqueId + '" class="form-select form-select-sm" style="width: 100%;" onclick ="GetApplicableList(\'NewApplicableOn_' + uniqueId + '\')"><option value="">Select an amount</option></select>');
+
+            dynamicDiv.find(':nth-child(1)').append(firstSetWrapper);
+            dynamicDiv.find(':nth-child(2)').append(secondSetWrapper);
+
+            dynamicDiv.append('<i class="col-md-1 col-1 bi bi-x-circle" style="font-size: 20px; color: red; margin-top: 40px;" onclick="removeDynamicDiv(this)"></i>');
+
+
+            dynamicDivContainer.append(dynamicDiv);
+        }
+
+        function removeDynamicDiv(button) {
+            $(button).closest('.row').remove();
+        }
+
+        function removeAllDynamicDivs() {
+            document.getElementById('group_name').value = '';
+            document.getElementById('group_description').value = '';
+            var dynamicDivContainer = $('#dynamicDivContainer');
+            dynamicDivContainer.empty(); 
+        }
+
+        function clearTaxRateForm() {
+            document.getElementById('tax_name').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('tax_rate').value = '';
+
+            clearDropdown('Agency');
+            clearDropdown('Account');
+            clearDropdown('ShowTaxAmount');
+            clearDropdown('ShowNetAmount');
+        }
+        function clearDropdown(dropdownId) {
+            var dropdown = document.getElementById(dropdownId);
+            dropdown.selectedIndex = 0; 
+        }
+
+        function clearInputs() {
+            $("#CustomRate input[type='text']").val('');
+            $("#CustomRate select").val('');
+            $("#CustomRate input[type='checkbox']").prop('checked', false);
+            $('#custom_sales_rate').addClass('d-none');
+            $('#purchaseDetails').addClass('d-none');
+        }
+
+        function GetTaxList(dropdownId) {
+            $.ajax({
+                url: '/Admin/GetTaxList',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    var dropdown = $('#' + dropdownId);
+                    var selectedAgency = dropdown.val();
+                    dropdown.empty();
+
+                    $.each(data, function (index, item) {
+                        dropdown.append($('<option></option>').prop('value', item.Value).text(item.Text));
+                    });
+
+                    dropdown.val(selectedAgency);
+                },
+                error: function (error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
+    </script>
+   
+}

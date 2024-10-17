@@ -1,0 +1,454 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Document Prefix Creation";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    #modal-content2 {
+        background-color: #fefefe;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 30%;
+    }
+
+    #example-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+    .offcanvas-container {
+        overflow: auto;
+    }
+
+    .offcanvas-body {
+        padding: 20px;
+        background-color: #F8F8F8;
+    }
+
+
+    #offcanvasRight {
+        width: 30%;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btn:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+</style>
+
+<div>
+    <h3>Unit Conversion Settings</h3>
+    <div class="d-flex justify-content-end">
+        <button type="button" class="btn customize-btn fw-bold" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" onclick="clearUnitModalData()">New Unit Conversion</button>
+    </div>
+
+    <div class="d-flex justify-content-end mt-2">
+        <button title="Print" class="btn btn-white border-0" type="button" id="salesPrint-pdf" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-printer fs-5" style=" margin-right: 0px; "></i>
+        </button>
+        <button title="Export to excel" class="btn btn-white border-0" type="button" id="salesPrint-excel" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-file-earmark-excel fs-5" style=" margin-right: 0px; "></i>
+        </button>
+    </div>
+    <div id="example-table"></div>
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasRightLabel" style="margin-top: 20px;">Unit Conversion</h5>
+            <button onclick="clearUnitModalData()" type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body mx-2">
+            <div id="accountSave">
+                <input type="hidden" id="UniConversionId" value="0" />
+
+                <div class="row mt-4">
+                    <div class="col-md-6 col-6">
+                        <label><strong>Primary Unit</strong></label>
+                        <select id="PrimaryUnitId" class="form-control select2">
+                            <option value="">Select from list</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 col-6">
+                        <label><strong>Secondary Unit</strong></label>
+                        <select id="SecondaryUnitId" class="form-control select2">
+                            <option value="">Select from list</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-4" id="showWhenSelected">
+                    <div class="col-md-6 col-6">
+                        <strong><span>1<span id="primaryText"></span><span> = </span><input id="ConversionRate" style="width: 60px;" /><span id="secondaryText"></span></span></strong>
+                        
+                        
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer my-2">
+            <button type="button" class="btn btn-outline-danger" data-bs-dismiss="offcanvas" id="cancelUnit">Cancel</button>
+            <button id="conversionSaveBtn" type="button" class="btn btn-success" style="margin-left: 10px;">Save</button>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-2  col-2">
+    <div id="customModal" class="modal">
+        <div class="modal-content" id="modal-content2">
+            <p>Are you sure you want to delete?</p>
+            <div class="row">
+                <div class="col-md-6 col-6">
+                    <button id="confirmBtn" class="btn btn-success" style="width: 100px">OK</button>
+                </div>
+                <div class="col-md-6 col-6 d-flex justify-content-end">
+                    <button id="cancelBtn" class="btn btn-danger" style="width: 100px">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+    <script>
+        document.getElementById("cancelUnit").addEventListener("click", function () {
+            clearUnitModalData();
+        });
+        function clearUnitModalData() {
+            $("#PrimaryUnitId").val('').trigger('change');
+            $("#SecondaryUnitId").val('').trigger('change');
+            $('#primaryText').text('');
+            $('#secondaryText').text('');
+            $('#showWhenSelected').hide();
+            $("#UniConversionId").val('0');
+            $("#ConversionRate").val('');
+        }
+        $(document).ready(function () {
+            $(".select2").select2();
+            $("#offcanvasRight .select2").select2({
+                dropdownParent: $("#offcanvasRight")
+            });
+            
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetUnit", "BuyerOrder")',
+            dataType: "json",
+            success: function (data) {
+                $.each(data, function (index, value) {
+
+                    $('#PrimaryUnitId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                    $('#SecondaryUnitId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+
+
+                $('#PrimaryUnitId').trigger('change');
+                $('#SecondaryUnitId').trigger('change');
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching units:', error);
+            }
+
+        });
+
+        
+        function checkSelection() {
+            var primarySelected = $('#PrimaryUnitId').val();
+            var secondarySelected = $('#SecondaryUnitId').val();
+
+            if (primarySelected) {
+                var primaryText = $('#PrimaryUnitId option:selected').text();
+                $('#primaryText').text(" " + primaryText);
+            } else {
+                $('#primaryText').text('');
+            }
+
+            if (secondarySelected) {
+                var secondaryText = $('#SecondaryUnitId option:selected').text();
+                $('#secondaryText').text(" " + secondaryText);
+            } else {
+                $('#secondaryText').text('');
+            }
+
+            // Show the div if both selects have values selected
+            if (primarySelected && secondarySelected) {
+                if (primarySelected != secondarySelected)
+                {
+                    $('#showWhenSelected').show();
+                } else {
+                    $('#showWhenSelected').hide();
+                }
+                
+            } else {
+                $('#showWhenSelected').hide();
+            }
+        }
+
+        // Bind change event to both selects
+        $('#PrimaryUnitId, #SecondaryUnitId').on('change', function () {
+            checkSelection();
+        });
+
+        function editUrl(Id, ConversionRate, PrimaryUnitId, SecondaryUnitId) {
+            $("#UniConversionId").val(Id);
+            $("#PrimaryUnitId").val(PrimaryUnitId).trigger('change');
+            $("#SecondaryUnitId").val(SecondaryUnitId).trigger('change');
+            $("#ConversionRate").val(ConversionRate);
+            $("#offcanvasRight").offcanvas('show');
+            $('#showWhenSelected').show();
+        }
+
+        function setInactiveUrl(data) {
+            var myUrlInactive = '@Url.Action("DeleteUnitConversion", "Accounts")';
+
+            var modal = document.getElementById("customModal");
+            modal.style.display = "block";
+
+            document.getElementById("confirmBtn").onclick = function () {
+                $.ajax({
+                    type: "get",
+                    data: { Id: data },
+                    url: myUrlInactive,
+                    success: function (response) {
+                        if (response.success == "1") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-green",
+                            });
+                            initTabulator();
+                        }
+                        else if (response.success == "0") {
+                            toastr.success("Error while deleting", "", {
+                                "toastClass": "toast-red",
+                            });
+                        }
+                    }
+                });
+                modal.style.display = "none";
+            };
+
+            // Handle cancel button click
+            document.getElementById("cancelBtn").onclick = function () {
+                modal.style.display = "none";
+            };
+        }
+        var column = [
+            {
+                title: "Primary Unit", field: "PrimaryUnit", hozAlign: "center", vertAlign: "middle"
+            },
+            {
+                title: "Secondary Unit", field: "SecondaryUnit", hozAlign: "center", vertAlign: "middle"
+            },
+            {
+                title: "Conversion Rate", field: "ConversionRate", hozAlign: "center", vertAlign: "middle"
+            },
+
+            {
+                title: "Actions",
+                field: "button",
+                headerHozAlign: "center",
+                vertAlign: "middle",
+                headerSort: false,
+                hozAlign: "right",
+                resizable: false,
+                formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getRow().getData();
+                    console.log("see data::", data);
+                    var jsonData = JSON.stringify(data).replace(/'/g, "&#39;");
+
+                    var inActive = `setInactiveUrl(${data.Id})`; // Use the appropriate property of 'data'
+                    var edit = `editUrl('${data.Id}', '${data.ConversionRate}', '${data.PrimaryUnitId}', '${data.SecondaryUnitId}')`; 
+
+                    var editHtml = `
+                    <a onclick="${edit}" class="text-decoration-none text-black ms-3 mt-1">
+                        <i class="bi bi-pencil-square pe-1"></i> <span>Edit</span> <br />
+                    </a>
+                    <div class="dropdown-divider m-0"></div>`;
+
+                    var deleteHtml = `
+                    <a onclick="${inActive}" class="text-decoration-none text-black ms-3 mt-1" href="#" id="InActive">
+                        <i class="bi bi-trash3"></i><span class="ms-1 mt-2">Delete</span><br />
+                    </a>`;
+
+                    var statusDependentHtml = editHtml + deleteHtml;
+
+                    var html = `
+                        <div class="dropdown ms-1">
+                            <button class="btn text-black ms-3 mt-1" type="button" onclick="${edit}">
+                                <i class="bi bi-pencil-square pe-1"></i> <span>Edit</span>
+                            </button>
+                            <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="visually-hidden">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu item-menu" aria-labelledby="dropdownMenuButton1">
+                                ${statusDependentHtml}
+                            </ul>
+                        </div>`;
+
+                    return html;
+                },
+                visible: true,
+                cellClick: function (e, cell) {
+                    cell.getElement().classList.add('active-cell');
+                }
+            }
+
+
+        ];
+
+        function initTabulator() {
+            function fetchDataFromServer() {
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetUnitConversionList", "Accounts")'
+                };
+                return $.ajax({
+                    url: MyAppUrlSettings.MyUsefulUrl,
+
+                    dataType: "json",
+                });
+            }
+
+            fetchDataFromServer().done(function (response) {
+
+                console.log("notrmal response:", response.data);
+                var dataTable = response.data;
+
+
+                salesApiUrl = '@Url.Action("GetUnitConversionList", "Accounts")',
+                    salesTable = new Tabulator("#example-table", {
+
+                        layout: "fitColumns",
+                        minHeight: 400,
+                        pagination: true,
+                        movableColumns: true,
+                        data: dataTable,
+                        columns: column,
+
+                    });
+                document.getElementById("salesPrint-pdf").addEventListener("click", function () {
+                    salesTable.print(false, true);
+                });
+                document.getElementById("salesPrint-excel").addEventListener("click", function () {
+                    salesTable.download("xlsx", "data.xlsx", { sheetName: "Table Data" });
+                });
+            });
+        }
+
+        initTabulator();
+
+        function SaveConversioninfo()
+        {
+            var AgentId = $("#UniConversionId").val();
+            var PrimaryUnitId = $("#PrimaryUnitId").val();
+            var SecondaryUnitId = $("#SecondaryUnitId").val();
+            var ConversionRate = $("#ConversionRate").val();
+
+
+            var AgencyModel = {
+                Id: AgentId,
+                PrimaryUnitId: PrimaryUnitId,
+                SecondaryUnitId: SecondaryUnitId,
+                ConversionRate: ConversionRate
+            }
+            console.log(AgencyModel);
+
+            $.ajax({
+                url: '@Url.Action("UnitConversionCreation", "Accounts")',
+                data: { model: AgencyModel },
+                type: 'POST',
+                async: true,
+                dataType: 'json',
+                success: function (result) {
+                    if (result.success == "1") {
+                        toastr.success(result.message, "", {
+                            "toastClass": "toast-green",
+                        });
+                    }
+                    clearUnitModalData();
+                    setTimeout(function () {
+                        window.location.href = '@Url.Action("UnitConversion", "Accounts")';
+                    }, 1000);
+                },
+                error: function () {
+                    toastr.error('Unable to Save');
+                }
+            });
+        }
+
+        $("#conversionSaveBtn").click(function () {
+            SaveConversioninfo();
+            setTimeout(function () { $("#offcanvasRight").offcanvas('hide'); }, 1400);
+        });
+    </script>
+
+
+}

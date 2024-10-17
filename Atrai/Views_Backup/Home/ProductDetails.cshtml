@@ -1,0 +1,233 @@
+﻿@model ProductResultDemo
+@{ ViewData["Title"] = "Product Detials";
+    Layout = "~/Views/Shared/_EcommerceLayout.cshtml"; }
+
+<style>
+    .small-img-group {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .small-img-col {
+        flex-basis: 24%;
+        cursor: pointer;
+    }
+
+/*    .add-to-cart {
+        padding: 12px 30px;
+        border: none;
+        color: #fff;
+        background: #333;
+        cursor: pointer;
+        margin-top: 2em;
+    }*/
+
+
+
+/*        .add-to-cart:hover {
+            color: #333;
+            background: #fff;
+            border: 1px solid #333;
+            text-decoration: none;
+        }*/
+
+/*    .back-btn {
+        padding: 10px 30px;
+        color: #333;
+        background: #fff;
+        border: 1px solid #333;
+        cursor: pointer;
+        margin-top: 2em;
+    }*/
+/*
+        .back-btn:hover {
+            border: none;
+            color: #fff;
+            background: #333;
+        }*/
+
+    #exzoom {
+        position: absolute;
+        top: 50%;
+        left: 25%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+    }
+
+    .money {
+        font-size: 16px;
+        font-weight: bold;
+        font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    }
+
+    .price {
+        color: #F58C7E;
+    }
+
+    .fa-star {
+        color: #F8C53C;
+    }
+
+    #main-img {
+        max-width: 300px;
+        
+        }
+
+    .small-img {
+        height: 100px;
+    }
+</style>
+
+
+<br />
+<br />
+
+
+
+
+<div class="container">
+    <div class="single-product pt-5">
+        <div class="row py-5 m-5" style="border: 1px solid #87767659; box-shadow: 8px 15px 54px #c0bfc5;">
+
+
+            <div class="col-md-6 col-12">
+
+                @if (@Model.ImagePath != null)
+                {
+                    <img class="img-fluid w-100 mb-1 example float-right" src="..@Model.ImagePath" id="main-img" onerror="this.onerror=null;this.src='../Content/ProductImages/0.png'" alt="this.src='/Content/ProductImages/0.png'">
+
+                }
+                else
+                {
+                    <img class="img-fluid w-100 mb-1 example float-right" src="../Content/ProductImages/0.png" id="main-img">
+                }
+
+                @*<div class="small-img-group">
+            <div class="small-img-col">
+                <img src="@Model.ImagePath" width="100%" class="small-img " alt="">
+            </div>
+            <div class="small-img-col">
+                <img src="@Model.ImagePath" width="100%" class="small-img" alt="">
+            </div>
+            <div class="small-img-col">
+                <img src="@Model.ImagePath" width="100%" class="small-img" alt="">
+            </div>
+            <div class="small-img-col">
+                <img src="@Model.ImagePath" width="100%" class="small-img" alt="">
+            </div>
+        </div>*@
+
+
+            </div>
+
+
+            <!-- Left Side For Description -->
+            <div class="col-md-6 col-12 col-12">
+                <h6> Category : @Html.DisplayFor(model => model.CategoryName) </h6>
+                <h6> Supplier Name : @Html.DisplayFor(model => model.CompanyName) </h6>
+                <h6> Contact No : @Html.DisplayFor(model => model.CompanyPhone) </h6>
+
+
+                <h3 class="my-4 name">@Html.DisplayFor(model => model.ProductName)   @Html.DisplayFor(model => model.SizeName)</h3>
+                <h3 class="my-4 brand">@Html.DisplayFor(model => model.BrandName)</h3>
+                <h3 class="my-4 color">@Html.DisplayFor(model => model.ColorName)</h3>
+                <h4 class="mb-4 price">
+                    <span class="money">৳ </span> <span class="discounted-price">@Html.DisplayFor(model => model.SalesPrice)</span>
+                    @if (Model.OldPrice > 0)
+                    {
+                        <span class="product-price"><del><span class="money">৳ </span> @Html.DisplayFor(model => model.OldPrice) </del></span>
+                    }
+                    else
+                    {
+                        <span class="product-price"></span>
+                    }
+                </h4>
+                <div class="rating">
+
+
+                    @{
+
+                        var xyz = @Model.ProductReviews.Count();
+                    }
+                    @if (xyz > 0)
+                    {
+                        for (int i = 0; i < Model.ProductReviews.Average(x => x.Ratings); i++)
+                        {
+                            <span class="fa fa-star checked"></span>
+                        }
+
+                    }
+
+                    @Model.ProductReviews.Where(x => x.Reviews.Length > 0).Count() Reviews
+
+                </div>
+                @*<div class="rating">
+
+            <span class="fa fa-star checked"></span>
+            <span class="fa fa-star checked"></span>
+            <span class="fa fa-star checked"></span>
+            (10 reviews)
+        </div>*@
+
+
+                <h6 class="mt-2">Product Code : @Html.DisplayFor(model => model.ProductCode)</h6>
+                <p class="my-2"> @Html.DisplayFor(model => model.Description)</p>
+
+                <a href="#"
+                   data-id="@Html.DisplayFor(model => model.ProductId)"
+                   data-name="@Html.DisplayFor(model => model.ProductName)"
+                   data-price="@Html.DisplayFor(model => model.SalesPrice)"
+                   data-size="@Html.DisplayFor(model => model.SizeName)"
+                   data-color="@Html.DisplayFor(model => model.ColorName)"
+                   data-brand="@Html.DisplayFor(model => model.BrandName)"
+                   class="btn btn-md btn-primary add-to-cart">
+                    Add to cart
+                </a>
+                <button onclick="window.location.href = '@Url.Action("EcomIndex", "Home", new { IsMobile = "0" })';" class="btn btn-md btn-info back-btn">Back To List</button>
+
+            </div>
+            </div>
+    </div>
+</div>
+
+
+
+
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>*@
+
+@*<script src="~/AdminEla/Assets/js/zoomsl.min.js"></script>*@
+<script>
+
+    //test
+
+
+    var MainImg = document.getElementById('main-img');
+    //var SmallImg = document.getElementsByClassName('small-img');
+
+    //SmallImg[0].onmouseover = function () {
+    //    MainImg.src = SmallImg[0].src;
+    //}
+
+    //SmallImg[1].onmouseover = function () {
+    //    MainImg.src = SmallImg[1].src;
+    //}
+
+    //SmallImg[2].onmouseover = function () {
+    //    MainImg.src = SmallImg[2].src;
+    //}
+
+    //SmallImg[3].onmouseover = function () {
+    //    MainImg.src = SmallImg[3].src;
+    //}
+
+
+
+    //$(".example").imagezoomsl({
+
+    //});
+
+
+</script>
+
+
+

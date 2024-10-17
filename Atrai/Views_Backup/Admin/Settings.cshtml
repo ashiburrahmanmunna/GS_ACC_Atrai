@@ -1,0 +1,699 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model Atrai.Core.Entity.StoreSettingModel
+@{
+    ViewData["Title"] = "Settings";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var VatViewActivate = HttpContextAccessor.HttpContext.Session.GetInt32("VatViewActivate").ToString();
+}
+
+
+
+<div class="page-wrapper">
+
+    <div class="container-fluid">
+
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card ">
+                    <div class="card-header">
+                        <h4>Store Settings</h4>
+
+                    </div>
+
+
+
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="admin" asp-action="Settings" method="post" enctype="multipart/form-data">
+                                <input type="hidden" asp-for="Id" />
+                                <input type="hidden" asp-for="SubscriptionTypeId" />
+                                <input type="hidden" asp-for="CreateDate" />
+                                <input type="hidden" asp-for="UpdateDate" />
+                                <input type="hidden" asp-for="LuserId" />
+                                <input type="hidden" asp-for="LuserIdUpdate" />
+                                <input type="hidden" asp-for="BaseComId" />
+
+
+
+
+                                <div class="row">
+                                    <div class="col">
+
+                                        <div class="form-group">
+                                            <div class="col-md-5 col-md-offset-2">
+                                                <img src="../@Model.Logo" alt="img" id="UploadFile" class="img-thumbnail" style="height:150px" /> <br />
+                                                <input type="file" name="logoPostedFileBase" accept="image/x-png, image/gif, image/jpeg" id="FileUpload" onchange="PreviewImage()" />
+                                            </div>
+                                        </div>
+
+
+                                        <nav>
+                                            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                                <a class="nav-item nav-link active" id="nav-basic-tab" data-toggle="tab" href="#nav-basic" role="tab" aria-controls="nav-basic" aria-selected="true">Basic</a>
+                                                @if (VatViewActivate == "0")
+                                                {
+                                                    @if (!Model.BusinessType.BusinessTypeName.Contains("NID Verification"))
+                                                    {
+                                                        <a class="nav-item nav-link " id="nav-home-tab" data-toggle="tab" href="#nav-advance" role="tab" aria-controls="nav-advance" aria-selected="false">Advance</a>
+                                                        <a class="nav-item nav-link " id="nav-product-tab" data-toggle="tab" href="#nav-product" role="tab" aria-controls="nav-product" aria-selected="false">Sales / Product</a>
+                                                    }
+                                                }
+
+                                            </div>
+
+                                            @*btn btn-sm btn-outline-info rounded-0*@
+                                        </nav>
+                                        <div class="tab-content" id="nav-tabContent">
+                                            <div class="tab-pane fade show active" id="nav-basic" role="tabpanel" aria-labelledby="nav-basic-tab">
+
+                                                <br />
+                                                <br />
+
+
+                                                <div class="form-group">
+                                                    <div class="row">
+                                                        <div class="col-md-2 col-6 ">
+
+
+                                                            <label asp-for="StoreName"></label>
+                                                            <input type="text" asp-for="StoreName" class="form-control form-control-sm" placeholder="eg Dominatebd">
+                                                            <span asp-validation-for="StoreName" class="text-danger"></span>
+                                                        </div>
+
+                                                        <div class="col-md-2 col-6 ">
+
+
+                                                            @Html.LabelFor(x => x.CountryId)
+                                                            @Html.DropDownListFor(x => x.CountryId,
+                                                            new SelectList((IEnumerable<SelectListItem>)ViewBag.Country, "Value", "Text"), "Select Country",
+                                                            htmlAttributes: new { @class = "form-control form-control-sm", id = "CountryId" })
+
+                                                            @*<label asp-for="Currency"></label>
+                                                            <input type="text" asp-for="Currency" class="form-control form-control-sm" placeholder="eg $">
+                                                            <span asp-validation-for="Currency" class="text-danger"></span>*@
+                                                        </div>
+
+                                                                       <div class="col-md-2 col-6 ">
+                                                            <label asp-for="DecimalField"></label>
+                                                            <input type="text" asp-for="DecimalField" class="form-control form-control-sm" placeholder="eg 2">
+                                                            <span asp-validation-for="DecimalField" class="text-danger"></span>
+                                                        </div>
+
+
+                                                        <div class="col-md-3 col-6 ">
+                                                            @Html.LabelFor(x => x.TimeZoneSettingsId)
+                                                            @Html.DropDownListFor(x => x.TimeZoneSettingsId,
+                                                            new SelectList((IEnumerable<SelectListItem>)ViewBag.TimeZoneSettings, "Value", "Text"), "Select TimeZone",
+                                                            htmlAttributes: new { @class = "form-control form-control-sm", id = "TimeZoneSettingsId" })
+                                                        </div>
+
+
+                                         
+
+
+
+                                                        <div class="col-md-3 col-12 ">
+                                                            <label asp-for="RedirectToEcommercePage"></label>
+                                                            <input asp-for="RedirectToEcommercePage" class="form-control form-control-sm" type="checkbox">
+                                                            <span asp-validation-for="RedirectToEcommercePage" class="text-danger"></span>
+                                                        </div>
+
+
+
+
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+
+                                                    <div class="row">
+                                                        <div class="col-md-3 col-12 ">
+
+                                                            <label asp-for="Email"></label>
+                                                            <input asp-for="Email" class="form-control form-control-sm" type="email" placeholder="Enter Email" readonly>
+                                                            <span asp-validation-for="Email" class="text-danger"></span>
+                                                        </div>
+                                                        <div class="col-md-3 col-12 ">
+                                                            <label asp-for="Web"></label>
+                                                            <input asp-for="Web" class="form-control form-control-sm" type="text" placeholder="Enter Web">
+                                                            <span asp-validation-for="Web" class="text-danger"></span>
+                                                        </div>
+                                                        <div class="col-md-3 col-12 ">
+                                                            <label asp-for="Facebook"></label>
+                                                            <input asp-for="Facebook" class="form-control form-control-sm" type="text" placeholder="Enter Web">
+                                                            <span asp-validation-for="Facebook" class="text-danger"></span>
+                                                        </div>
+
+
+                                                    </div>
+
+
+
+                                                </div>
+                                                <div class="form-group row">
+                                                    <div class="col-md-3 col-12 ">
+                                                        <label asp-for="Phone"></label>
+                                                        <input asp-for="Phone" class="form-control form-control-sm" type="text" placeholder="Enter phone">
+                                                        <span asp-validation-for="Phone" class="text-danger"></span>
+
+                                                    </div>
+                                                    <div class="col-md-3 col-12 ">
+                                                        <label asp-for="PhoneTwo"></label>
+                                                        <input asp-for="PhoneTwo" class="form-control form-control-sm" type="text" placeholder="Enter phone">
+                                                        <span asp-validation-for="PhoneTwo" class="text-danger"></span>
+
+                                                    </div>
+
+
+
+                                                    <div class="col-md-3 col-12 ">
+
+                                                        <div class="form-group">
+                                                            @Html.LabelFor(x => x.BusinessTypeId)
+                                                            @Html.DropDownListFor(x => x.BusinessTypeId,
+                                                            new SelectList((IEnumerable<SelectListItem>)ViewBag.BusinessType, "Value", "Text"), "Select Business Type",
+                                                            htmlAttributes: new { @class = "form-control form-control-sm", id = "BusinessTypeId", @disabled = "disabled" })
+                                                            @Html.ValidationMessageFor(x => x.BusinessTypeId, "", new { @class = "text-danger" })
+                                                        </div>
+
+                                                    </div>
+
+                                                    @*                                                    <div class="col-md-3 col-12 ">
+
+                                                    <div class="form-group">
+                                                    @Html.LabelFor(x => x.FiscalYearTypeId)
+                                                    @Html.DropDownListFor(x => x.FiscalYearTypeId,
+                                                    new SelectList((IEnumerable<SelectListItem>)ViewBag.FiscalYearType, "Value", "Text"), "Select Fiscal Year",
+                                                    htmlAttributes: new { @class = "form-control form-control-sm", id = "FiscalYearTypeId", @disabled = "disabled" })
+                                                    @Html.ValidationMessageFor(x => x.FiscalYearTypeId, "", new { @class = "text-danger" })
+                                                    </div>
+
+                                                    </div>*@
+
+                                                </div>
+
+
+                                                <div class="form-group row">
+                                                    <div class="col-md-5 col-12 ">
+
+                                                        <label asp-for="Address"></label>
+                                                        <textarea class="form-control form-control-sm" asp-for="Address" rows="6" placeholder="Enter address"></textarea>
+                                                        <span asp-validation-for="Address" class="text-danger"></span>
+                                                    </div>
+
+                                                    <div class="col-md-5 col-12 ">
+
+                                                        <label asp-for="HeaderCaption"></label>
+                                                        <textarea class="form-control form-control-sm" asp-for="HeaderCaption" rows="6" placeholder="Enter Tax / Vat / Header Caption"></textarea>
+                                                        <span asp-validation-for="HeaderCaption" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+
+                                                @if (!Model.BusinessType.BusinessTypeName.Contains("NID Verification"))
+                                                {
+
+                                                    <div class="form-group row">
+                                                        <div class="col-md-4 col-12 ">
+
+                                                            @Html.LabelFor(x => x.SalesReportStyleId)
+                                                            @Html.DropDownListFor(x => x.SalesReportStyleId,
+                                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.InvoiceReportStyle, "Value", "Text"), "Select Sales Report Style",
+                                                        htmlAttributes: new { @class = "form-control form-control-sm", id = "SalesReportStyleId" })
+                                                            @Html.ValidationMessageFor(x => x.SalesReportStyleId, "", new { @class = "text-danger" })
+
+                                                        </div>
+                                                        <div class="col-md-4 col-12 ">
+
+                                                            @Html.LabelFor(x => x.PurchaseReportStyleId)
+                                                            @Html.DropDownListFor(x => x.PurchaseReportStyleId,
+                                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.PurchaseReportStyle, "Value", "Text"), "Select Purchase Report Style",
+                                                        htmlAttributes: new { @class = "form-control form-control-sm", id = "PurchaseReportStyleId" })
+                                                            @Html.ValidationMessageFor(x => x.PurchaseReportStyleId, "", new { @class = "text-danger" })
+
+                                                        </div>
+                                                        <div class="col-md-4 col-12 ">
+
+
+                                                            @Html.LabelFor(x => x.BarcodeReportStyleId)
+                                                            @Html.DropDownListFor(x => x.BarcodeReportStyleId,
+                                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.BarcodeReportStyle, "Value", "Text"), "Select Barcode Report Style",
+                                                        htmlAttributes: new { @class = "form-control form-control-sm", id = "BarcodeReportStyleId" })
+                                                            @Html.ValidationMessageFor(x => x.BarcodeReportStyleId, "", new { @class = "text-danger" })
+
+                                                        </div>
+
+                                                    </div>
+                                                }
+                                            </div>
+                                            @if (!Model.BusinessType.BusinessTypeName.Contains("NID Verification"))
+                                            {
+                                                <div class="tab-pane fade" id="nav-advance" role="tabpanel" aria-labelledby="nav-advance-tab">
+
+                                                    <br />
+                                                    <br />
+
+                                                    <div class="form-group row">
+
+                                                        <div class="col-md-6 col-12 ">
+                                                            <label asp-for="CustomizedReportFormatName"></label>
+                                                            <input asp-for="CustomizedReportFormatName" class="form-control form-control-sm" type="text" placeholder="Report Caption Small">
+                                                            <span asp-validation-for="CustomizedReportFormatName" class="text-danger"></span>
+                                                        </div>
+
+
+                                                        <div class="col-md-6 col-12 ">
+                                                            <label asp-for="ReportCaptionSmall"></label>
+                                                            <input asp-for="ReportCaptionSmall" class="form-control form-control-sm" type="text" placeholder="Report Caption Small">
+                                                            <span asp-validation-for="ReportCaptionSmall" class="text-danger"></span>
+                                                        </div>
+                                                        
+                                                        
+                                                        <br />
+
+                                                        <div class="col-md-3 col-12 text-center">
+                                                            <label asp-for="isMultiCurrency"></label>
+                                                            <input asp-for="isMultiCurrency" class="form-control form-control-sm" type="checkbox">
+                                                            <span asp-validation-for="isMultiCurrency" class="text-danger"></span>
+                                                        </div>
+
+
+
+
+                                                        <div class="col-md-3 col-12 text-center">
+                                                            <label asp-for="isMultiDebitCredit"></label>
+                                                            <input asp-for="isMultiDebitCredit" class="form-control form-control-sm" type="checkbox">
+                                                            <span asp-validation-for="isMultiDebitCredit" class="text-danger"></span>
+                                                        </div>
+
+
+
+                                                        <div class="col-md-3 col-12 text-center">
+                                                            <label asp-for="isVoucherDistributionEntry"></label>
+                                                            <input asp-for="isVoucherDistributionEntry" class="form-control form-control-sm" type="checkbox">
+                                                            <span asp-validation-for="isVoucherDistributionEntry" class="text-danger"></span>
+                                                        </div>
+
+
+                                                        <div class="col-md-3 col-12 text-center">
+                                                            <label asp-for="isEmailSerivce"></label>
+                                                            <input asp-for="isEmailSerivce" class="form-control form-control-sm" type="checkbox">
+                                                            <span asp-validation-for="isEmailSerivce" class="text-danger"></span>
+                                                        </div>
+
+
+
+                                                        <div class="col-md-3 col-12 text-center">
+                                                            <label asp-for="isSMSService"></label>
+                                                            <input asp-for="isSMSService" class="form-control form-control-sm" type="checkbox">
+                                                            <span asp-validation-for="isSMSService" class="text-danger"></span>
+                                                        </div>
+
+
+
+                                                        <div class="col-md-3 col-12 text-center">
+                                                            <label asp-for="IsSignature"></label>
+                                                            <input asp-for="IsSignature" class="form-control form-control-sm" type="checkbox">
+                                                            <span asp-validation-for="IsSignature" class="text-danger"></span>
+                                                        </div>
+
+
+                                                        <div class="col-md-3 col-12 text-center">
+                                                            <label asp-for="IsTermsCondition"></label>
+                                                            <input asp-for="IsTermsCondition" class="form-control form-control-sm" type="checkbox">
+                                                            <span asp-validation-for="IsTermsCondition" class="text-danger"></span>
+                                                        </div>
+
+
+
+                                                        <div class="col-md-3 col-12 text-center">
+                                                            <label asp-for="isChequeDetails"></label>
+                                                            <input asp-for="isChequeDetails" class="form-control form-control-sm" type="checkbox">
+                                                            <span asp-validation-for="isChequeDetails" class="text-danger"></span>
+                                                        </div>
+
+
+
+                                                    </div>
+
+
+
+                                                    <div class="row mb-2">
+
+                                                                     <div class="col-md-3 col-12 text-center">
+                                                            <label asp-for="isScanner"></label>
+                                                            <input asp-for="isScanner" class="form-control form-control-sm" type="checkbox">
+                                                            <span asp-validation-for="isScanner" class="text-danger"></span>
+                                                        </div>
+
+
+                                                        <div class="col-md-3 col-12 ">
+                                                            <label asp-for="BarcodePrefixForWeightScale"></label>
+                                                            <input type="text" asp-for="BarcodePrefixForWeightScale" class="form-control form-control-sm">
+                                                            <span asp-validation-for="BarcodePrefixForWeightScale" class="text-danger"></span>
+                                                        </div>
+
+
+                                           
+                                                    </div>
+
+
+                                                    <div class="row mb-2">
+
+                                                        <div class="col-md-3 col-12 text-center">
+                                                            <label asp-for="isBackDatePermission"></label>
+                                                            <input asp-for="isBackDatePermission" class="form-control form-control-sm" type="checkbox">
+                                                            <span asp-validation-for="isBackDatePermission" class="text-danger"></span>
+                                                        </div>
+
+                                                        <div class="col-md-3 col-12 ">
+                                                            <label asp-for="Days"></label>
+                                                            <input type="text" asp-for="Days" class="form-control form-control-sm">
+                                                            <span asp-validation-for="Days" class="text-danger"></span>
+                                                        </div>
+
+                                                    </div>
+
+
+
+                                                    <div class="row mb-2">
+                                                        <div class="col-md-3 col-12 text-center">
+                                                            <label asp-for="IsFirstLetterUpperCase"></label>
+                                                            <input asp-for="IsFirstLetterUpperCase" class="form-control form-control-sm" type="checkbox">
+                                                            <span asp-validation-for="IsFirstLetterUpperCase" class="text-danger"></span>
+                                                        </div>
+
+
+
+                                                        <div class="col-md-3 col-12 divHiddenItems">
+                                                            <label asp-for="ShortCutKey"></label>
+                                                            <input type="text" asp-for="ShortCutKey" class="form-control form-control-sm">
+                                                            <span asp-validation-for="ShortCutKey" class="text-danger"></span>
+                                                        </div>
+
+                                                    </div>
+
+
+                                                    <div class="row mb-2">
+
+                                                        <div class="col-md-4 col-12 ">
+
+
+                                                            @Html.LabelFor(x => x.VoucherNoCreatedTypeId)
+                                                            @Html.DropDownListFor(x => x.VoucherNoCreatedTypeId,
+                                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.VoucherNoCreatedType, "Value", "Text"), "Voucher No Created Style",
+                                                        htmlAttributes: new { @class = "form-control form-control-sm", id = "ReportStyleId" })
+                                                            @Html.ValidationMessageFor(x => x.VoucherNoCreatedTypeId, "", new { @class = "text-danger" })
+
+
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                            <div class="tab-pane fade" id="nav-product" role="tabpanel" aria-labelledby="nav-product-tab">
+
+                                                <br />
+                                                <br />
+
+                                                <div class="row">
+
+                                                    <div class="col-md-3 col-12 text-left">
+                                                        <input asp-for="IsIndDiscount" type="checkbox">
+                                                        <label asp-for="IsIndDiscount"></label>
+
+                                                        <span asp-validation-for="IsIndDiscount" class="text-danger"></span>
+                                                    </div>
+
+                                                    <div class="col-md-3 col-12 text-left">
+                                                        <input asp-for="IsSalesDescription" type="checkbox">
+                                                        <label asp-for="IsSalesDescription"></label>
+                                                        <span asp-validation-for="IsSalesDescription" class="text-danger"></span>
+                                                    </div>
+
+
+                                                    <div class="col-md-3 col-12 text-left">
+                                                        <input asp-for="IsSerialSales" type="checkbox">
+                                                        <label asp-for="IsSerialSales"></label>
+
+                                                        <span asp-validation-for="IsSerialSales" class="text-danger"></span>
+                                                    </div>
+
+
+                                                    <div class="col-md-3 col-12 text-left">
+                                                        <input type="checkbox" asp-for="PrintBrandName">
+                                                        <label asp-for="PrintBrandName"></label>
+
+                                                        <span asp-validation-for="PrintBrandName" class="text-danger"></span>
+                                                    </div>
+
+
+
+
+                                                    <div class="col-md-3 col-12 text-left">
+                                                        <input type="checkbox" asp-for="PrintModelName">
+                                                        <label asp-for="PrintModelName"></label>
+
+                                                        <span asp-validation-for="PrintModelName" class="text-danger"></span>
+                                                    </div>
+
+
+
+                                                    <div class="col-md-3 col-12 text-left">
+                                                        <input type="checkbox" asp-for="PrintSizeName">
+                                                        <label asp-for="PrintSizeName"></label>
+
+                                                        <span asp-validation-for="PrintSizeName" class="text-danger"></span>
+                                                    </div>
+
+
+
+
+                                                    <div class="col-md-3 col-12 text-left">
+                                                        <input type="checkbox" asp-for="PrintProductCode">
+                                                        <label asp-for="PrintProductCode"></label>
+
+                                                        <span asp-validation-for="PrintProductCode" class="text-danger"></span>
+                                                    </div>
+
+
+                                                    <div class="col-md-3 col-12 text-left">
+                                                        <input type="checkbox" asp-for="PrintProductName">
+                                                        <label asp-for="PrintProductName"></label>
+
+                                                        <span asp-validation-for="PrintProductName" class="text-danger"></span>
+                                                    </div>
+
+                                                    <div class="col-md-3 col-12 text-left">
+                                                        <input type="checkbox" asp-for="PrintProductDescription">
+                                                        <label asp-for="PrintProductDescription"></label>
+
+                                                        <span asp-validation-for="PrintProductDescription" class="text-danger"></span>
+                                                    </div>
+
+
+
+                                                    <div class="col-md-3 col-12 text-left">
+                                                        <input type="checkbox" asp-for="IsVatLogin">
+                                                        <label asp-for="IsVatLogin"></label>
+
+                                                        <span asp-validation-for="IsVatLogin" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+                                                <br>
+
+
+                                                <div class="row mb-2">
+
+                                                    <div class="col-md-3 col-12 text-center">
+                                                        <label asp-for="IsFixedSalesValue"></label>
+                                                        <input asp-for="IsFixedSalesValue" class="form-control form-control-sm" type="checkbox">
+                                                        <span asp-validation-for="IsFixedSalesValue" class="text-danger"></span>
+                                                    </div>
+                                                    <div class="col-md-3 col-12 text-center">
+                                                        <label asp-for="isMultiSelect"></label>
+                                                        <input asp-for="isMultiSelect" class="form-control form-control-sm" type="checkbox">
+                                                        <span asp-validation-for="isMultiSelect" class="text-danger"></span>
+                                                    </div>
+                                                    <div class="col-md-3 col-12 text-center">
+                                                        <label asp-for="IsDefaultDisAmount"></label>
+                                                        <input asp-for="IsDefaultDisAmount" class="form-control form-control-sm" type="checkbox">
+                                                        <span asp-validation-for="IsDefaultDisAmount" class="text-danger"></span>
+                                                    </div>
+
+                                                    <div class="col-md-3 col-12 text-center">
+                                                        <label asp-for="VisibleSalesCommission"></label>
+                                                        <input asp-for="VisibleSalesCommission" class="form-control form-control-sm" type="checkbox">
+                                                        <span asp-validation-for="VisibleSalesCommission" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+
+
+
+
+                                                <br>
+
+
+                                                <div class="row mb-4">
+                                                    <div class="col-md-3 col-12 text-center">
+                                                        <label asp-for="isDiscountOffer"></label>
+                                                        <input asp-for="isDiscountOffer" class="form-control form-control-sm" type="checkbox">
+                                                        <span asp-validation-for="isDiscountOffer" class="text-danger"></span>
+                                                    </div>
+
+                                                    <div class="col-md-3 col-12 ">
+                                                        <label asp-for="OfferDiscountPer"></label>
+                                                        <input type="text" asp-for="OfferDiscountPer" class="form-control form-control-sm">
+                                                        <span asp-validation-for="OfferDiscountPer" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+                          
+
+
+
+                                                <div class="row mb-4">
+
+                                                    <div class="col-md-3 col-12 text-center">
+                                                        <label asp-for="isTaxExcluded"></label>
+                                                        <input asp-for="isTaxExcluded" class="form-control form-control-sm" type="checkbox">
+                                                        <span asp-validation-for="isTaxExcluded" class="text-danger"></span>
+                                                    </div>
+
+                                                    <div class="col-md-3 col-12 ">
+                                                        <label asp-for="TaxPer"></label>
+                                                        <input type="text" asp-for="TaxPer" class="form-control form-control-sm">
+                                                        <span asp-validation-for="TaxPer" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="row mb-4">
+
+
+                                                    <div class="col-md-3 col-12 text-center">
+                                                        <label asp-for="IsFixedDiscountMainValue"></label>
+                                                        <input asp-for="IsFixedDiscountMainValue" class="form-control form-control-sm" type="checkbox">
+                                                        <span asp-validation-for="IsFixedDiscountMainValue" class="text-danger"></span>
+                                                    </div>
+
+                                                    <div class="col-md-3 col-12 ">
+                                                        <label asp-for="MaxDiscountMainValue"></label>
+                                                        <input type="text" asp-for="MaxDiscountMainValue" class="form-control form-control-sm">
+                                                        <span asp-validation-for="MaxDiscountMainValue" class="text-danger"></span>
+                                                    </div>
+
+                                                    
+                                                    <div class="col-md-3 col-12 ">
+                                                        <label asp-for="MaxDiscountPercentageMainValue"></label>
+                                                        <input type="text" asp-for="MaxDiscountPercentageMainValue" class="form-control form-control-sm">
+                                                        <span asp-validation-for="MaxDiscountPercentageMainValue" class="text-danger"></span>
+                                                    </div>
+
+
+                                                </div>
+
+                                                <div class="row mb-4">
+
+
+                                                    <div class="col-md-3 col-12 text-center">
+                                                        <label asp-for="IsFixedDiscountRowValue"></label>
+                                                        <input asp-for="IsFixedDiscountRowValue" class="form-control form-control-sm" type="checkbox">
+                                                        <span asp-validation-for="IsFixedDiscountRowValue" class="text-danger"></span>
+                                                    </div>
+
+                                                    <div class="col-md-3 col-12 ">
+                                                        <label asp-for="MaxDiscountRowValue"></label>
+                                                        <input type="text" asp-for="MaxDiscountRowValue" class="form-control form-control-sm">
+                                                        <span asp-validation-for="MaxDiscountRowValue" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+
+
+                                            </div>
+                                            }
+
+                                    </div>
+
+
+                                    <div class="form-group mt-3">
+                                            @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+
+
+                                        <button type="submit" class="btn btn-primary  rounded-0"> Save Changes </button>
+
+
+                                            @*@Html.ActionLink("Back", "Index", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })*@
+
+                                    </div>
+
+
+
+                                        @*<div class="form-group">
+                                    <button type="submit" class="btn btn-primary"> Save Changes </button>
+                                    </div>*@
+
+
+                                </div>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+    <!-- Start Page Content -->
+    <!-- End PAge Content -->
+</div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $("form").submit(function () {
+                $("#BusinessTypeId").prop("disabled", false);
+            });
+
+
+            var VatViewActivate = '@HttpContextAccessor.HttpContext.Session.GetInt32("VatViewActivate").ToString()';
+            if (VatViewActivate == 1) { $('.divHiddenItems').hide(); }
+
+
+        });
+
+        function PreviewImage() {
+            var oFReader = new FileReader();
+            oFReader.readAsDataURL(document.getElementById("FileUpload").files[0]);
+
+            oFReader.onload = function (oFREvent) {
+                document.getElementById("UploadFile").src = oFREvent.target.result;
+            };
+        };
+
+
+
+        $("#TimeZoneSettingsId").select2();
+        $("#SalesReportStyleId").select2();
+        $("#PurchaseReportStyleId").select2();
+        $("#BarcodeReportStyleId").select2();
+        $("#CountryId").select2();
+
+
+    </script>
+}

@@ -1,0 +1,416 @@
+﻿@using Microsoft.AspNetCore.Http
+@using Atrai.Core.Common
+@inject IHttpContextAccessor HttpContextAccessor
+@inject clsProcedure clsproc
+
+@model IEnumerable<Atrai.Controllers.AdminController.SubsidiaryLedgerModel>
+@{
+    ViewData["Title"] = "Ledger";
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+    var comimagepath = @HttpContextAccessor.HttpContext.Session.GetString("comImagePath");
+    var IsLogo = 1;
+    var ttldebit = Convert.ToDecimal(@Model.Where(x => Convert.ToDecimal(x.Amount) > 0).Sum(x => Convert.ToDecimal(x.Amount)));
+    var ttlcredit = Convert.ToDecimal(@Model.Where(x => Convert.ToDecimal(x.Amount) <= 0).Sum(x => Convert.ToDecimal(x.Amount)));
+    var closingbalance = ttldebit + ttlcredit;
+
+
+}
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>
+    </title>
+
+    @*<link rel="shortcut icon" href="http://www.unibuildltd.com/Images/favicon.ico">
+        <script src="./ReportLedgerBook_files/jquery-2.1.3.js.download" type="text/javascript"></script>
+        <script src="./ReportLedgerBook_files/jquery-ui.js.download" type="text/javascript"></script>*@
+
+    <script type="text/javascript">
+        function ClosePrint() {
+            var print = document.getElementById("print");
+            print.style.visibility = "hidden";
+            //            print.display = false;
+
+            window.print();
+        }
+    </script>
+
+    <style media="print">
+        .showHeader thead {
+            display: table-header-group;
+            border: 1px solid #000;
+        }
+
+    </style>
+
+        <style media="print">
+        
+     @@media print {
+      .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,
+      .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+           float: left;               
+      }
+
+      .col-md-12 {
+           width: 100%;
+      }
+
+      .col-md-11 {
+           width: 91.66666666666666%;
+      }
+
+      .col-md-10 {
+           width: 83.33333333333334%;
+      }
+
+      .col-md-9 {
+            width: 75%;
+      }
+
+      .col-md-8 {
+            width: 66.66666666666666%;
+      }
+
+       .col-md-7 {
+            width: 58.333333333333336%;
+       }
+
+       .col-md-6 {
+            width: 50%;
+       }
+
+       .col-md-5 {
+            width: 41.66666666666667%;
+       }
+
+       .col-md-4 {
+            width: 33.33333333333333%;
+       }
+
+
+       .col-md-3 {
+            width: 25%;
+       }
+       .col-md-2 {
+            width: 16.666666666666666%;
+       }
+       .col-md-1 {
+            width: 8.33333333333333%;
+       }
+
+           
+        .showHeader thead {
+            display: table-header-group;
+            border: 1px solid #000;
+        }
+        }
+
+
+    </style>
+
+
+    <style type="text/css">
+      
+
+        .table th, .table td {
+          padding-top: 0.25rem;
+          padding-bottom: 0.25rem;
+          padding-left: 0.40rem;
+          padding-right: 0.40rem;
+        }
+
+        a {
+          color: #000;
+          text-decoration: none;
+          background-color: transparent;
+        }
+
+
+
+        .whitespaceprewrap{
+        white-space:pre-wrap;
+        }
+
+
+        .table-hover tbody tr:hover {
+          color: #1c5b99;
+          font-size:14px!important;
+          font-weight:bold;
+        }
+
+    </style>
+</head>
+<body>
+
+        <h3>
+        @{
+            System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+        }
+
+    </h3>
+
+
+
+
+    <div id="main">
+        <div class="container">
+            <form> 
+
+                @if (Model.Count() > 0)
+                {
+                    if (IsLogo == 1)
+                    {
+                        <div class="row">
+
+                            <div class="col-md-2 col-2">
+                                @if (@comimagepath != null)
+                                {
+                                    <img  class="center img-fluid" style="max-height:120px;" src="..@comimagepath" onerror="this.onerror=null; this.src='.@comimagepath'" alt="" id="main-img">
+                                }
+                                else
+                                {
+                                    <h2 class="text-left m-0">@Model.FirstOrDefault().ComName</h2>
+                                }
+                            </div>
+                            <div class="col-md-10 col-10">
+                                <div class="row">     
+                                    <div class="col-md-12 col-10">
+                                        <h3 class="text-left">@Model.FirstOrDefault().ComName</h3>
+                                    </div>
+                                    @*<div class="col-md-2 col-2 text-right">
+                                    <input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()">
+                                    </div>*@
+                                    <div class="col-md-12 text-left">
+                                        <span>
+                                            @Model.FirstOrDefault().ComAddress
+                                        </span>
+                                        <span class="float-right">
+                                            <input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />
+                                        </span>
+                                    </div>
+                                    <div class="col-md-12 text-left">
+                                        <h5>Ledger Details Report || @Model.FirstOrDefault().ReportCaption</h5>
+                                    </div>
+                                    <div class="col-md-12">
+                                        @Model.FirstOrDefault().ReportCaptionSmall
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            <div class="col-md-12 col-12 text-center">
+                                @if (@comimagepath != null)
+                                {
+                                    <img  class="center img-fluid" style="max-height:120px;" src="..@comimagepath" onerror="this.onerror=null; this.src='.@comimagepath'" alt="" id="main-img">
+
+                                }
+                                else
+                                {
+                                    <h2 class="text-center m-0">@Model.FirstOrDefault().ComName</h2>
+
+                                }
+                            </div>
+
+                            <div class="col-md-12 text-center">
+                                <span>
+                                    @Model.FirstOrDefault().ComAddress
+                                </span>
+                                <span class="float-right">
+                                    <input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />
+                                </span>
+                            </div>
+                            <div class="col-md-12 text-center">
+                                <h5>Ledger Details Report || @Model.FirstOrDefault().ReportCaption</h5>
+                            </div>
+                            <div class="col-md-12">
+                                @Model.FirstOrDefault().ReportCaptionSmall
+                            </div>
+                        </div>
+                    }
+
+
+
+
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-4 border border-dark">
+                                GL SUB NAME
+                            </div>
+                            <div class="col-md-4 border border-dark">
+                                GL NAME
+                            </div>
+                            <div class="col-md-4 border border-dark">
+                                GL TYPE
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 border border-dark">
+                                @Model.FirstOrDefault().ReferanceName
+                            </div>
+                            <div class="col-md-4 border border-dark">
+                                @Model.FirstOrDefault().ReportCaption
+                            </div>
+                            <div class="col-md-4 border border-dark">
+                                Subsidiary Ledger
+                            </div>
+                        </div>
+                        <div class="row my-2 text-center">
+                            <div class="col-md-3 border border-dark">
+                                <h6>OP. Balance :  @(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.FirstOrDefault().Amount)))</h6>
+                            </div>
+                            <div class="col-md-3 border border-dark">
+                                <h6>Total Dr :  @(String.Format(BDFormat, "{0:N}", ttldebit))</h6>
+                            </div>
+                            <div class="col-md-3 border border-dark">
+                                <h6>Total Cr :  @(String.Format(BDFormat, "{0:N}", -ttlcredit))</h6>
+                            </div>
+                            <div class="col-md-3 border border-dark">
+                                <h6>CL. Balance : @(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(closingbalance))) </h6>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                            <tr class="text-nowrap">
+                                <th>Date</th>
+                                <th>Voucher No</th>
+                                <th>Particulars</th>
+                                <th>Ref.1</th>
+                                <th>Ref.2</th>
+                                <th>Debit</th>
+                                <th>Credit</th>
+                                <th>Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                decimal cumulativefigure = 0;
+                                foreach (var item in Model)
+                                {
+
+                                    cumulativefigure = cumulativefigure + Convert.ToDecimal(item.Amount);
+
+                                    <tr style="font-family:Arial Narrow;font-size:14.5px;">
+                                        <td class="text-nowrap">@Html.DisplayFor(modelItem => item.InputDate)</td>
+                                        <td class="text-nowrap">
+
+                                            @if (item.SalesId != null)
+                                            {
+
+                                                @Html.ActionLink(item.DisplayCode + "", "InvoiceViewReport","Sales" , new { saleId = item.SalesId, type = "pdf" }, new { @target = "_blank" , title="Go To Sales Invoice"})
+
+                                                if (item.isSystem == 0)
+                                                {
+                                                    <br>
+                                                    @Html.ActionLink(item.ReferanceDocNo + "", "TransactionVoucherViewReport","Admin" , new { TransactionId = item.TransactionId, type = "pdf" }, new { @target = "_blank" , title="Go To The Link" })
+
+                                                }
+
+                                            }
+                                            else if (item.PurchaseId != null)
+                                            {
+
+                                                @Html.ActionLink(item.DisplayCode + "", "PurchaseInvoiceViewReport","Purchase" , new { PurchaseId = item.PurchaseId, type = "pdf" }, new { @target = "_blank" , title="Go To Purchase Invoice"})
+
+                                                if (item.isSystem == 0)
+                                                {
+                                                    <br>
+                                                    @Html.ActionLink(item.ReferanceDocNo + "", "TransactionVoucherViewReport","Admin" , new { TransactionId = item.TransactionId, type = "pdf" }, new { @target = "_blank" , title="Go To The Link" })
+
+                                                }
+
+                                            }
+                                            //else if (item.PurchaseReturnId != null)
+                                            //{
+
+                                            //    @Html.ActionLink(item.DisplayCode + "", "PurchaseInvoiceViewReport","PurchaseReturn" , new { PurchaseReturnId = item.PurchaseId, type = "pdf" }, new { @target = "_blank" , title="Go To Purchase Return"})
+
+                                            //    if (item.isSystem == 0)
+                                            //    {
+                                            //        <br>
+                                            //        @Html.ActionLink(item.ReferanceDocNo + "", "TransactionVoucherViewReport","Admin" , new { TransactionId = item.TransactionId, type = "pdf" }, new { @target = "_blank" , title="Go To The Link" })
+
+                                            //    }
+
+                                            //}
+                                            else if (item.SalesReturnId != null)
+                                            {
+                                                @Html.ActionLink(item.DisplayCode + "", "TransactionVoucherViewReport","SalesReturn" , new { SalesId = item.SalesReturnId, type = "pdf" }, new { @target = "_blank", title="Go To The Link" })
+
+                                            }
+                                            else
+                                            {
+
+                                                @Html.ActionLink(item.ReferanceDocNo + "", "TransactionVoucherViewReport" ,"Admin" , new { TransactionId = item.TransactionId, type = "pdf" }, new { @target = "_blank" , title="Go To The Link"})
+
+                                            }
+
+
+                                        </td>
+                                        <td class="whitespaceprewrap">@Html.DisplayFor(modelItem => item.Particulars)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.ReceivePayName) </td>
+                                        @if (Convert.ToDecimal(item.Amount) > 0)
+                                        {
+                                            <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.Amount))) </td>
+                                            <td class="text-center">-</td>
+                                        }
+                                        else
+                                        {
+                                            <td class="text-center">-</td>
+                                            <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", -Convert.ToDecimal(item.Amount))) </td>
+                                        }
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(cumulativefigure)) )</td>
+                                    </tr>
+
+                                }
+                            }
+                            <tr class="text-right font-weight-bold">
+                                <td colspan="3"><h6>Total (Transaction) :</h6></td>
+                                <td></td>
+                                <td></td>
+                                <td>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttldebit))) </td>
+                                <td>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(-ttlcredit))) </td>
+                                <td></td>
+                            </tr>
+                            <tr class="text-right font-weight-bold">
+                                <td colspan="3"><h6>Closing Balance :</h6></td>
+                                <td></td>
+                                <td></td>
+                                @if (Convert.ToDecimal(closingbalance) > 0)
+                                {
+                                    <td>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(closingbalance))) </td>
+                                    <td></td>                     
+                                   
+                                }
+                                else
+                                {
+                                    <td></td>
+                                    <td>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(-closingbalance))) </td>
+                                }
+
+                                <td></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            @{
+
+
+                            }
+                        </tfoot>
+                    </table>
+                }
+            </form>
+
+            </div>
+        </div>
+
+
+</body>
+</html>

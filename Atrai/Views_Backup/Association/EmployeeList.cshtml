@@ -1,0 +1,175 @@
+﻿@*@model IEnumerable<Atrai.Core.Entity.EmployeeModel>*@
+@{
+    ViewData["Title"] = "Employee List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="row mb-2">
+                            <div class="col-md-2 col-12">
+                                @Html.ActionLink("Create Employee", "AddEmployee", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md-2 col-12 mt-1">
+                                <h4 style="color: #1976d2;">Employee List</h4>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive m-t-10">
+                            <table id="tbllist" class="display nowrap table table-hover  table-bordered" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr></tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr></tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+            </div>
+                </div>
+                <!-- End PAge Content -->
+            </div>
+        </div>
+
+
+
+
+
+        @section Scripts{
+
+            <script type="text/javascript">
+                $(function () {
+
+                    //function getDateString(dateObj) {
+
+
+                    //    if (dateObj == null) { return ''; };
+
+                    //    var date = new Date(parseInt(dateObj.substr(6)));
+                    //    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                    //        "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    //    //var month = dateObj.getMonth() + 1;
+                    //    //var day = dateObj.getDate();
+                    //    //var year = dateObj.getFullYear();
+                    //    //var date = day + "/" + month + "/" + year;
+
+                    //    var formatdate = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear();
+
+                    //    //alert(val);
+
+
+                    //    return formatdate;
+
+                    //    //return dateObj.toDateString();
+                    //}
+
+                    var peopleList = $('#tbllist').DataTable({
+
+                        serverSide: true,  "scrollX": true,
+                        processing: true,
+
+                        ajax: {
+                            url: '@Url.Action("GetEmployeeList", "Association")',
+                            data: {filter: 'All'},
+                            type: "POST",
+                            dataType: 'json',
+                        },
+                        dom: 'Blfrtip',
+                         //'dom': 'Rlfrtip'
+                        buttons: [
+                          //  'copy', 'csv', 'excel'
+                        ],
+                        rowId: 'Id',
+                        "iDisplayLength": 5,
+                        "lengthMenu": [[5, 10, 25, 50, 500], [5, 10, 25, 50, "All"]],
+                        columns: [
+                            { "title": "Employee Id", "data": "Id", "searchable": false, "visible": false },
+                            { "title": "Employee Code", "data": "EmployeeCode", "searchable": true },
+                            { "title": "Employees Name", "data": "EmployeeName", "searchable": true },
+                            { "title": "Fathers Name", "data": "FathersName", "searchable": true },
+
+                            { "title": "Present Address", "data": "PresentAddress", "searchable": true },
+                            { "title": "Permanent Address", "data": "PermanentAddress", "searchable": true },
+
+
+                            { "title": "Position Title", "data": "PositionTitle", "searchable": true },
+                            { "title": "Department", "data": "Department", "searchable": true },
+                            { "title": "NID", "data": "NID", "searchable": true },
+
+
+                            { "title": "Introducer Name", "data": "IntroducerName", "searchable": true },
+                            { "title": "Introducer ContctNo", "data": "IntroducerContctNo", "searchable": true },
+                            { "title": "Introducer Address", "data": "IntroducerAddress", "searchable": true },
+
+
+                            { "title": "Emergency Contact Name", "data": "EmergencyContactName", "searchable": true },
+                            { "title": "Emergency Contact Relationship", "data": "EmergencyContactRelationship", "searchable": true },
+                            { "title": "Emergency Mobile No", "data": "EmergencyMobileNo", "searchable": true },
+
+
+                            //{
+                            //    "title": "DOB", "data": "DOB",
+                            //    "render": function (data) { return getDateString(data); }
+                            //},
+
+                            //{
+                            //    "type": 'datetime',
+                            //    "def": function () { return new Date(); },
+                            //    "format": 'M/D/YYYY',
+                            //    "fieldInfo": 'US style m/d/y format', "data": "DOB", "title": "DOB", "searchable": false
+                            //},
+
+                            { "title": "DOB", "data": "DOBString", "searchable": false },
+                            { "title": "Joining Date", "data": "JoiningDateString", "searchable": false },
+                            { "title": "IsActive", "data": "IsActiveString", "searchable": false },
+                            { "title": "Blood Group", "data": "BloodGroup", "searchable": true },
+                            { "title": "Mobile No", "data": "MobileNo", "searchable": true },
+
+                            {
+                                "title": "Image", "data": "EmployeeImagePath", "searchable": false, "render": function (data) {
+                                    console.log(data);
+                                    //return '<img src="..' + data + '" class="img-thumbnail" width="80px">';
+                                    //console.log(data);
+                                    return '<img src="..' + data + '" class="img-thumbnail" width="80px" onerror=this.onerror=null;this.src="../Content/EmployeeImages/0.png">';
+
+                                }
+                            },
+
+                            {
+                                "title": "Action",
+                                "data": "Id",
+                                "render": function (data, type, row) {
+                                    var myUrledit = '@Url.Action("EditEmployee", "Association")?EmployeeId=' + data;
+                                    var myUrldelete = '@Url.Action("DeleteEmployee", "Association")?EmployeeId=' + data;
+                                    var myUrlViewCard = '@Url.Action("ViewCardEmployee", "Association")?EmployeeId=' + data;
+
+                                    var message = `return confirm('Are you sure you want to Remove this Employee ?')`;
+
+
+                                    return '<span data-toggle="tooltip" title="View Card"> <a href=\"' + myUrlViewCard + '\" class=\"btn btn-icon btn-info btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-print"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\"  onclick = \"' + message + '\"   class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-remove"></i></a></span>';
+
+                                }
+
+                            }
+                        ]
+                    });
+
+
+                });
+            </script>
+        }

@@ -1,0 +1,96 @@
+﻿@*@model IEnumerable<Atrai.Core.Entity.Loging InfoModel>*@
+@{ ViewData["Title"] = "Loging Information";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="color: #1976d2;">Loging Info List</h4>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="table-responsive mt-2">
+
+                           
+                            <table id="tbllist" class="nowrap table table-sm table-hover  table-bordered" cellspacing="0" width="100%">
+                            
+                            </table>
+                        
+                        
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+                $(function () {
+                    var peopleList = $('#tbllist').DataTable({
+
+                        serverSide: true,  "scrollX": true,
+                        processing: true,
+
+                        ajax: {
+                            url: '@Url.Action("GetUserLogingInfoList", "Admin")',
+                            type: "POST"
+                        },
+                        rowId: 'Id',
+                        columns: [
+
+                            { "title": "Id", "data": "Id", "visible": false },
+                            { "title": "WebLink", "data": "WebLink", "searchable": true },
+
+                            { "title": "Status", "data": "Status", "searchable": true },
+                            { "title": "LongString", "data": "LongString", "searchable": true },
+                            { "title": "LoginTime", "data": "LoginTime", "searchable": false },
+                            { "title": "IPAddress", "data": "IPAddress", "searchable": true },
+
+                            { "title": "DeviceType", "data": "DeviceType", "searchable": true },
+                            { "title": "Platform", "data": "Platform", "searchable": true },
+                            { "title": "WebBrowserName", "data": "WebBrowserName", "searchable": true },
+                            { "title": "UserName", "data": "UserName", "searchable": true },
+                            { "title": "CompanyName", "data": "CompanyName", "searchable": true }
+
+
+                        ],
+                        "order": [
+                            [0, 'dsc']
+                        ],
+                        "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+                        "dom": '<"toolbar">frtipl'
+                    });
+
+                   // $("div.toolbar").html('<input type="range" id="size" min="0.7" value="1" max="1.2" step="0.1">');
+
+
+                });
+
+        $(document).ready(function () {
+            var table = $('#tbllist').DataTable();
+
+            $('#size').on('change', function () {
+                $('#tbllist').css({
+                    'font-size': this.value + 'em',
+                    'line-height': this.value + 'em'
+                });
+            });
+        });
+
+    </script>
+}

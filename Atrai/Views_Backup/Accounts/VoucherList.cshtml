@@ -1,0 +1,586 @@
+﻿
+@model IEnumerable<Atrai.Core.Entity.Acc_VoucherMainModel>
+@{
+    List<Atrai.Core.Entity.Acc_VoucherNoPrefixModel> VoucherTypes = ViewBag.Acc_VoucherNoPrefix;
+}
+@{ ViewData["Title"] = "Voucher Created Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+<style>
+    /*    .far, .fas, .mdi {
+        font-size: 1.5em;
+    }*/
+    .border {
+      border: 1px solid #c9c9c9 !important;
+    }
+ 
+</style>
+<body>
+    <div class="page-wrapper">
+
+        @using (Html.BeginForm())
+        {
+            <div class="container-fluid">
+                <div class="card p-1 mb-1">
+                    <div class="row">
+                        <div class="col-md col-12">
+                            <div class="input-group input-group-sm mb-1">
+                                @Html.DropDownList("UserList", ViewBag.UserList as List<SelectListItem>, null, new { id = "UserList", @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+
+
+                        <div class="col-md col-12">
+                            <div class="input-group mb-2">
+                                @Html.DropDownList("Warehouse", ViewBag.Warehouse as List<SelectListItem>,  new { id = "WarehouseId", @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+
+                        <div class="col-md col-12">
+                            <div class="input-group input-group-sm mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text py-0">
+                                        <label for="FDate">From Date</label>
+                                    </span>
+                                </div>
+                                @Html.TextBox("FromDate", null, new { @class = "form-control form-control-sm text-center FromDate", @placeholder = "Select From Date ", @autocomplete = "off", name = "FromDate" })
+                            </div>
+                        </div>
+                        <div class="col-md col-12">
+                            <div class="input-group input-group-sm mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text py-0">
+                                        <label for="TDate">To Date</label>
+                                    </span>
+                                </div>
+                                @Html.TextBox("ToDate", null, new { @class = "form-control form-control-sm text-center ToDate", @placeholder = "Select To Date ", @autocomplete = "off", name = "ToDate" })
+                            </div>
+                        </div>
+                        
+                        @*<div class="col-md-1 col-12">
+                            <div class="input-group input-group-sm mb-2">
+                                @Html.TextBox("OtherSearch", null, new { @class = "form-control form-control-sm text-center rounded-0", @placeholder = "Note Search ", @autocomplete = "off"})
+                            </div>
+                        </div>*@
+
+
+                        <div class="col-md col-12">
+                            <h6 id="styletext" class="center">Voucher List</h6>
+                        </div>
+                        <div class="col-md col-12">
+                            <label class="pr-1"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                            <label class="pr-1"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                            <label class="pr-1"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+
+                        </div>
+                        </div>
+
+                        @*<div class="col-md-1 col-12">
+                                <input type="submit" value="Load" class="btn btn-success btn-block rounded-0" />
+                            </div>*@
+                       <div class="row">
+
+                        @foreach (var item in VoucherTypes)
+                        {
+
+                            <div class="col-md-2 col-6 mb-2">
+                                @Html.ActionLink(item.vVoucherTypes.VoucherTypeName, "AddVoucher", new { Type = item.vVoucherTypes.VoucherTypeNameShort }, new { @class ="btn btn-sm " + @item.vVoucherTypes.VoucherTypeButtonClass })
+                            </div>
+                            @*<div class="col-md-2 col-12">
+                                    @Html.ActionLink(item.VoucherTypeName, "Create", new { Type = item.VoucherTypeNameShort }, new { @class = "btn btn-success btn-block" "btn btn-success btn-block" })
+
+                                </div>
+                                <div class="col-md-2 col-12">
+                                    @Html.ActionLink(item.VoucherTypeName, "Create", new { Type = item.VoucherTypeNameShort }, new { @class = "btn btn-warning btn-block" })
+                                </div>
+                                <div class="col-md-2 col-12">
+                                    @Html.ActionLink(item.VoucherTypeName, "Create", new { Type = item.VoucherTypeNameShort }, new { @class = "btn btn-info btn-block" })
+                                </div>*@
+                        }
+
+
+
+                    </div>
+                </div>
+
+                    <div class="card p-1">
+                    
+                        <div class="table-responsive">
+                        <table id="tbllist" class="table table-sm table-striped table-bordered" width="100%">
+                           
+                        </table>
+                    </div>
+
+
+
+                </div>
+
+
+                <div class="card p-2 my-3">
+                    <div class="row">
+                       @* <div class="col-md-3 col-12 col-12">
+                            <div class="input-group mb-2">
+                                @Html.DropDownList("FiscalYearId", ViewBag.FiscalYearId as List<SelectListItem>, null, new { id = "FiscalYearId", @class = "form-control form-control-sm" })
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 col-12 col-12">
+                            <div class="input-group mb-2">
+                                @Html.DropDownList("FiscalMonthId", ViewBag.FiscalMonthId as List<SelectListItem>, null, new { id = "FiscalMonthId", @class = "form-control form-control-sm" })
+                            </div>
+                        </div>*@
+                        @*<div class="col-md-4 col-12 col-12">
+                                <div class="input-group mb-2">
+                                    @Html.DropDownList("IntegrationSettingMainId", ViewBag.IntegrationSettingMainId as List<SelectListItem>, null, new { id = "IntegrationSettingMainId", @class = "form-control form-control-sm" })
+                                </div>
+                            </div>*@
+
+             @*           <div class="col-md-2 col-12 col-12">
+                            <input type="button" value="Load" id="btnLoad" class="btn btn-primary btn-block rounded-0" />
+                        </div>*@
+
+                    </div>
+                </div>
+
+            </div>
+        }
+    </div>
+
+</body>
+
+
+@section Scripts{
+    <script type="text/javascript">
+
+                $('input[name=RptType]').click(function () {
+                var reporttypeind = $("input[name=RptType]:checked").val();
+                //alert(reporttype);
+
+                    $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("SetSessionReportType", "Accounts")',
+                    dataType: 'json',
+                    async: true,
+                        data: { reporttype: reporttypeind},
+                        success: function (response) {
+                            //  window.location.href = response.Url;
+
+                            //window.open(response.Url, '_blank')
+                        },
+                        error: function (ex) {
+                            alert('Failed.' + ex);
+                        }
+
+                    });
+
+                });
+
+
+        var type = "VPB";
+        //var abcd = $("#IntegrationSettingMainId option:selected").text();
+        $("#IntegrationSettingMainId").change(function () {
+            //$("#FiscalMonthId").empty();
+            $.ajax({
+                url: '@Url.Action("VoucherTypeByIntegrationId", "Accounts")',
+                data: { id: $("#IntegrationSettingMainId option:selected").val() }, //use id here
+                type: 'GET',
+                dataType: 'json',
+                success: function (result) {
+                    //alert(result.VoucherTypeName);
+                    console.log(result.VoucherTypeName);
+                    type = result.VoucherTypeName;
+                    console.log(type);
+
+                }
+            });
+        });
+
+
+        @*$("#IntegrationSettingMainId").select2(
+
+             $.ajax({
+                url: '@Url.Action("VoucherTypeByIntegrationId", "Accounts")',
+                data: { id: $("#IntegrationSettingMainId").val() }, //use id here
+                type: 'GET',
+                dataType: 'json',
+                success: function (result) {
+                    console.log(result);
+                }
+            });
+
+        );*@
+
+
+
+        $("#UserList").select2();
+        $("#FiscalYearId").select2();
+        $("#FiscalMonthId").select2();
+        //$("select").select2({
+        //    theme: "bootstrap4",
+        //});
+
+        var table;
+        $("#btnLoad").click(function () {
+
+            var abcd = $("#IntegrationSettingMainId option:selected").text();
+            //alert(abcd);
+
+            //var type = "VPB";
+
+            //if (abcd == "Issue Voucher") {
+            //    type = "VJR";
+            //}
+            //else if (abcd.includes('MRR Voucher') || abcd.includes('Depreciation')) // == "MRR Voucher")
+            //{
+            //    //alert('mrr hit');
+            //    type = "VJR";
+            //}
+            //else {
+            //    type = "VPB";
+
+            //}
+
+            var voucherid = "0";
+            var fiscalMonthId = $("#FiscalMonthId").val();
+            var IntegrationSettingMainId = $("#IntegrationSettingMainId").val();
+
+            window.location.href = `@Url.Action("Create", "Accounts")?type=${type}&voucherid=${voucherid}&fiscalMonthId=${fiscalMonthId}&IntegrationSettingMainId=${IntegrationSettingMainId}`
+
+        });
+         $("#FiscalYearId").change(function () {
+            $("#FiscalMonthId").empty();
+            $.ajax({
+                url: '@Url.Action("GetFiscalMonth", "Accounts")',
+                data: { id: $("#FiscalYearId").val() }, //use id here
+                type: 'GET',
+                dataType: 'json',
+                success: function (result) {
+                    console.log(result);
+                    for (var i = 0; i < result.length; i++) {
+                        $("#FiscalMonthId").append(`<option value="${result[i].FiscalMonthId}">${result[i].MonthName}</option>`);
+                    }
+
+                }
+            });
+        });
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            CurrentDate();
+
+            $(".FromDate").datepicker({
+
+                dateFormat: "dd-M-y",
+                changeMonth: true,
+                changeYear: true
+
+            });
+            $(".ToDate").datepicker({
+
+                dateFormat: "dd-M-y",
+                changeMonth: true,
+                changeYear: true
+
+            });
+
+            function CurrentDate() {
+                var date = new Date();
+                var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul","Aug", "Sep", "Oct", "Nov", "Dec"];
+                var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+                if ($(".FromDate").val() == '') {
+                    $(".FromDate").val(val);
+                }
+                if ($(".ToDate").val() == '') {
+                    $(".ToDate").val(val);
+                }
+            }
+
+            var userlist = $("#UserList").val();
+            var fromdate = $("#FromDate").val();
+            var todate = $("#ToDate").val();
+
+            loaddata(fromdate, todate, userlist ,1);
+
+
+               function format(d) {
+                //console.log(d.Items);
+                var trs = '';
+                var trf = '';
+                var sumtkdebit = 0.00;
+                var sumtkcredit = 0.00;
+
+
+                //console.log(d);
+
+                var i = 0;
+
+
+                $.each($(d.VoucherSubs), function (key, value) {
+                    
+                    //alert('hit');
+                    //console.log(d.VoucherSubs[0].TkDebit);
+                    console.log(value);
+                    i++;
+                    var indTkDebit = (parseFloat(d.VoucherSubs[key].TKDebit));
+                    var indTkCredit = (parseFloat(d.VoucherSubs[key].TKCredit));
+                    var indNote1 = d.VoucherSubs[key].Note1 || "";
+                    var indNote2 = d.VoucherSubs[key].Note2 || "";
+
+                    //console.log(profit);
+
+                    sumtkdebit += parseFloat(indTkDebit);
+                    sumtkcredit += parseFloat(indTkCredit);
+
+
+                    trs += '<tr><td>' + d.VoucherSubs[key].Acc_ChartOfAccount.AccName + '</td><td>' + indNote1 + '</td><td>' + indNote2 + '</td><td>' + d.VoucherSubs[key].TKDebit.toLocaleString() + '</td><td>' + d.VoucherSubs[key].TKCredit.toLocaleString() + '</td><td>' + d.VoucherSubs[key].Note5 + '</td></tr>';
+
+                })
+
+                if (i > 1) {
+                    trf += '<tr><td>Count : ' + i + '</td><td>Total :</td><td></td><td>' + sumtkdebit.toLocaleString() + '</td><td>' + sumtkcredit.toLocaleString() + '</td><td></td></tr>';
+
+                }
+
+                // `d` is the original data object for the row
+                return '<div class="offset-md-1 col-md-10"><table class="table table-sm  table-bordered text-nowrap">' +
+                    '<thead class="border">' +
+                    '<th>Account Head</th>' +
+                    '<th>Note 1</th>' +
+                    '<th>Note 2</th>' +
+                    '<th>TkDebit</th>' +
+                    '<th>TkCredit</th>' +
+                    '<th>Type</th>' +
+                    '</thead><tbody>' +
+
+                    trs +
+                    '</tbody><tfoot class="text-center font-weight-bold">' + trf + '</tfoot></table></div>';
+            }
+
+
+
+            $('#tbllist tbody').on('click', 'td.details-control', function () {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+
+                if (row.child.isShown()) {
+                    // This row is already open - close it
+                    row.child.hide();
+                    tr.removeClass('shown');
+                }
+                else {
+                    // Open this row
+                    row.child(format(row.data())).show();
+                    tr.addClass('shown');
+                }
+            });
+
+
+
+
+            function loaddata( FromDate = "", ToDate = "", userlist = "", isAll = 1) {
+
+                 var othersearchvalue = $("#OtherSearch").val() || "";
+                 var searchvalue = $(".dataTables_filter input").val() || "";
+
+
+                //alert(UserId, FromDate, ToDate);
+
+                table = $('#tbllist').DataTable({
+                    initComplete: function () {
+
+                        var input = $('.dataTables_filter input').val(searchvalue),//.unbind(),
+                            self = this.api(),
+
+                            //$searchButton = $('<button class="btn rounded-0 btn-success btn-sm" tabindex="0" aria-controls="tbltbllist" type="button" title="Export to excel"><span><i class="mdi mdi-file-excel"></i></span></button>')
+                            //    .text('Search')
+                            //    .click(function () {
+                            //        if (input.val().length > 0) {
+                            //            self.search(input.val()).draw();
+
+                            //        }
+                            //        else {
+                            //            loaddata(fromdate, todate, userlist, 1);
+
+                            //        }
+                            //    }),
+                            //$clearButton = $('<button class="btn rounded-0 btn-warning btn-sm" tabindex="0" aria-controls="tbltbllist" type="button" title="Export to PDF"><span><i class="mdi mdi-file-pdf"></i></span></button>')
+                            //    .text('Clear')
+                            //    .click(function () {
+                            //        input.val('');
+                            //        $searchButton.click();
+                            //    }),
+                            $allButton = $('<button class="ml-1 mb-1 btn rounded-0 btn-primary btn-sm" tabindex="0" aria-controls="tbltbllist" type="button" title="Export to excel"><span><i class="mdi mdi-file-excel"></i></span></button>')
+                                .text('Load')
+                                .click(function () {
+                                    input.val('');
+                                    //alert(FromDate);
+                                    loaddata( fromdate, todate, userlist, 1);
+                                    //table.ajax.reload();
+
+
+                                }),
+                                //$reporttypeselector = $('<span class=""> <label class="pr-1"><input type="radio" name="RptType" value="PDF" checked="checked"> PDF  </label>                             <label class="pr-1"><input type="radio" name="RptType" value="EXCEL"> EXCEL  </label>                             <label class="pr-1"><input type="radio" name="RptType" value="WORD"> WORD  </label>                  </span>'),
+                                $OtherSearch = $('<input  class="form-control form-control-sm text-center rounded-0 ml-2" id="OtherSearch" name="OtherSearch" placeholder="Note Search " type="text" value="'+othersearchvalue+'">')
+                        
+                                $('.dataTables_filter').append( $OtherSearch , $allButton ); // $searchButton, $clearButton,$reporttypeselector
+                    },
+
+                    "serverSide": true,
+                    "orderCellsTop": true,
+                    "scrollX": true,
+                    "scrollY": "60vh",
+                    "scrollCollapse": true,
+                    "info": true,
+                     "language": {
+                        "lengthMenu": "_MENU_",
+                        "zeroRecords": "Nothing found - sorry",
+                        "info": "Showing page _PAGE_ of _PAGES_",
+                        "infoEmpty": "No records available",
+                        "infoFiltered": "(filtered from _MAX_ total records)",
+                        "searchPlaceholder": "Search",
+                        "sSearch" : '<em class="fa fa-search"></em>'
+                    },
+                    "iDisplayLength": 10,
+                    "lengthMenu": [[5, 10, 20, 50, -1], [5, 10, 20, 50, "All"]],
+                    "columnDefs": [
+                        // Hide second, third and fourth columns
+                        { "visible": false, "targets": [] }
+                        //{ targets: [7], className: "noWrapTd" } // white-space: nowrap;
+                    ],
+                    dom: '<"dom_wrapper fh-fixedHeader"lBf>tip',
+                    //buttons: [
+                    //    'copy', 'csv', 'excel', 'pdf'
+                    //],
+                    buttons: {
+                        dom: {
+                            button: {
+                                className: 'btn rounded-0'
+                            }
+                        },
+                        buttons: [
+                            //'copy', 'csv', 'excel', 'pdf'
+                            //$(this).addClass("btn-group dt-buttons justify-content-center mb-3")
+                            //{
+                            //    extend: 'colvis',
+                            //    "columns": ':not(:last-child)',
+                            //    text: '<i class="mdi mdi-view-column"></i>',
+                            //    className: 'btn-info',
+                            //    titleAttr: 'Show / hide columns',
+                            //    //collectionLayout: 'fixed two-column'
+
+                            //},
+                            {
+                                extend: 'excel',
+                                text: '<i class="mdi mdi-file-excel"></i>',
+                                className: 'btn-success',
+                                titleAttr: 'Export to excel'
+                            }
+
+                        ]
+                    },
+                    //"datatest": function (d) {
+                    //    d.FromDate = $('#FromDate').val();
+                    //    d.ToDate = $('#ToDate').val();
+                    //    alert(d);
+                    //},
+                    //"fixedHeader": true,
+                    //"responsive": true,
+                    "ajax": {
+                        "url": "@Url.Action("GetVoucherList", "Accounts")",
+                        "data": { FromDate: $("#FromDate").val(), ToDate: $("#ToDate").val(), UserList: $("#UserList").val(), isAll: isAll , OtherSearch: $("#OtherSearch").val() },
+                        "type": "POST",
+                        "datatype": "json"
+                    },
+                    "columns": [
+                        { "title": "Voucher Id", "data": "VoucherId", "visible": false },
+                        { "title": "Voucher No", "data": "VoucherNo", "searchable": true },
+                        {
+                        "class": 'details-control pl-5',
+                        "orderable": false,
+                        "data": "CountSubData",
+                        "defaultContent": ''
+                        },
+                        { "title": "Voucher Type", "data": "VoucherTypeName" },
+
+                        {
+                            "type": 'datetime',
+                            "def": function () { return new Date(); },
+                            "format": 'M/D/YYYY',
+                            "fieldInfo": 'US style m/d/y format', "data": "VoucherDate", "title": "Voucher Date", "searchable": false
+                        },
+                        { "title": "VoucherDesc", "data": "VoucherDesc" },
+
+                        { "title": "VAmount", "data": "VAmount" },
+                        { "title": "Status", "data": "Status", "searchable": false },
+
+                        {
+                            "className": "text-nowrap",
+                            "data": {
+                               VoucherId: "VoucherId" //,
+                               //VoucherTypeName:"VoucherTypeName",
+                               //isPosted:"isPosted"
+                           },
+
+                           "render": function (data, type, row) {
+                                var myUrlprint = '@Url.Action("Print", "Accounts")/' + data.VoucherId;
+                               var myUrlprintCheck = '@Url.Action("PrintCheck", "Accounts")/' + data.VoucherId;
+                               var myUrlCreateCopy = '@Url.Action("CreateCopy", "Accounts")?Type=' + data.VoucherTypeNameShort + '&VoucherId=' + data.VoucherId;
+                               var myUrledit = '@Url.Action("AddVoucher", "Accounts")?Type=' + data.VoucherTypeNameShort + '&VoucherId=' + data.VoucherId;
+                               var myUrldelete = '@Url.Action("DeleteVoucher", "Accounts")?Type=' + data.VoucherTypeNameShort + '&VoucherId=' + data.VoucherId;
+                               var myUrlView = '@Url.Action("AddVoucher", "Accounts")?Type=' + data.VoucherTypeNameShort + '&VoucherId=' + data.VoucherId+ '&IsView=1';
+                                var message = `return confirm('Are you sure you want to Remove the Sales Information ?')`;
+
+                               var buttons = '<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"fa fa-file-pdf-o text-success px-1 h4\" target=\"_blank\"></a></span>';
+                               if (data.VoucherTypeName == "Bank Payment")
+                               {
+                                   buttons += '<span data-toggle="tooltip" title="Check Print"> <a href=\"' + myUrlprintCheck + '\" class=\"fa fa-credit-card text-primary px-1 h4\" target=\"_blank\"></a></span>'
+                               }
+                               if (data.VoucherTypeName != "System Voucher")
+                                {
+                                    buttons += '<span data-toggle="tooltip" title="Copy"> <a href=\"' + myUrlCreateCopy + '\" class=\"fa fa-copy text-info px-1 h4\" target=\"_blank\"></a></span>'
+                                }
+                               if (!data.isPosted) {
+                                   buttons += '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"fa fa-edit text-warning px-1 h4\" target=\"_blank\"></a></span>' +
+                                       '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick = \"' + message + '\"  class=\"fa fa-trash text-danger px-1 h4\" target=\"_self\"></a></span>';
+                               
+                               } else 
+                               {
+                                    if (data.VoucherTypeName != "System Voucher")
+                                    {
+                                        buttons += '<span data-toggle="tooltip" title="View"> <a href=\"' + myUrlView + '\" class=\"fa fa-eye text-info px-1 h4\" target=\"_blank\"></a></span>';
+
+                                    }
+                               }
+
+                               return buttons;
+
+                           }
+
+                           
+                        }
+                    ],
+                    "order": [0, "desc"],
+                    "processing": true,
+                    //"language": {
+
+                    //    sLengthMenu: " _MENU_",
+                    //    search: "",
+                    //    searchPlaceholder: "Search..."
+                    //},
+                    "destroy": true
+                });
+
+                $('.dataTables_filter input').bind('keyup', function (e) {
+
+                    if (e.keyCode == 13) {
+                        //alert('enter');
+                        table.search(this.value).draw();
+                    }
+
+                });
+            }
+
+
+        });
+    </script>
+}
+
+

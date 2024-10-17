@@ -1,0 +1,3093 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@using Atrai.Model.Core.Entity;
+@using Atrai.Model.Core.Common;
+@{
+    ViewData["Title"] = "Order management";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var ListType = ViewBag.ListType as string;
+}
+
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<style>
+    /*li {
+                cursor: pointer;
+                padding: 10px;
+                margin: 5px;
+                border: 1px solid #ccc;
+            }*/
+
+    /* Set the anchor tag to have full width */
+    li a {
+        display: block;
+        width: 100%;
+    }
+
+    .full-width {
+        display: block;
+        width: 100%;
+    }
+
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+                             border-bottom-width: 0px;
+
+                        }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    /*   .tabulator-table .tabulator-row {
+                background-color: white;
+            } */
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customize-btn-another {
+        background: #2CA01C;
+        border: 1px solid black;
+        border-radius: 20px;
+        color: #FFFFFF;
+        border: 1px solid #2CA01C;
+    }
+
+        .customize-btn-another:hover {
+            background: #2CA01C;
+            border: 1px solid black;
+            border-radius: 20px;
+            color: #FFFFFF;
+            border: 1px solid #2CA01C;
+        }
+
+    .customize-btn:hover {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .gear-dropdown.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+        margin-top: 7px;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-bottom: 1px solid #aaaaaa38;
+        border-right: 1px solid #aaaaaa38;
+        /*border-left: 1px solid #aaaaaa38;*/
+        /* padding-left: 2px;*/
+    }
+    /*    .tabulator-row .tabulator-cell, .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+                        border-right: none;
+                        border-left: none;
+                    }*/
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: none;
+        border-left: none;
+        padding-left: 10px;
+        border: 1px solid #aaaaaa29;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        /*margin-top: 27px;*/
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+        /* Add any other styles you need for the active cell */
+    }
+
+    .tabulator-row {
+        /*   border: 1px solid #aaaaaa38;*/
+        border-left: none;
+        border-right: none;
+    }
+
+    input[type="checkbox"] {
+        width: 20px; /* Set the width */
+        height: 20px; /* Set the height */
+    }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom: 4px solid green;
+    }
+
+        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active:hover {
+            background-color: #F8F8F8;
+            border-top-color: transparent !important;
+            border-left-color: transparent !important;
+            border-right-color: transparent !important;
+        }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link:hover {
+        background-color: #F8F8F8;
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+    }
+
+    .customize-btnew {
+        background: transparent;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btnew:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .tabulator-row .tabulator-cell.tabulator-editing {
+        border: 1px solid #404c5d;
+        outline: none;
+        padding: 0;
+    }
+
+    .tabulator-cell.tabulator-editable[tabulator-field="AccName"] {
+        border: 1px solid #0003;
+        margin-bottom: 10px;
+    }
+
+    .filter-dropdown > .filter-dropdown-class.show {
+        width: 580px;
+    }
+
+    p {
+        margin: 1em 0;
+    }
+
+    .button {
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        position: relative;
+        background: #aa0000;
+        padding: 10px 15px;
+        color: white;
+        box-shadow: 0 2px black;
+        text-decoration: none;
+        border-radius: 5px;
+        /*text-shadow: 0 1px 1px black;*/
+    }
+
+        .button:hover {
+            top: -2px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+        .button:active {
+            top: 1px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+    .unbilledbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .overduebtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .openbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .paidbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .scrollable-offcanvas {
+        /* max-height: 80vh;*/ /* Adjust the maximum height as needed */
+        overflow-y: auto;
+    }
+
+    .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:hover {
+        background-color: deepskyblue;
+    }
+
+    .tabulator .tabulator-footer {
+        background-color: #fff;
+        color: black;
+    }
+
+        .tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row {
+            background: white !important;
+        }
+
+
+    .offcanvas {
+        /* Add position relative to its parent */
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* Ensure offcanvas takes full viewport height */
+    }
+
+    .offcanvas-footer {
+        margin-top: auto; /* Push footer to the bottom */
+        width: 100%; /* Occupy full width */
+    }
+
+    .modal-footer {
+        width: 100%; /* Ensure buttons occupy full width */
+        padding: 10px; /* Add padding for better appearance */
+    }
+
+    .w-15 {
+        width: fit-content !important;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+    }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #999;
+        }
+
+        .separator:not(:empty)::before {
+            margin-right: .25em;
+        }
+
+        .separator:not(:empty)::after {
+            margin-left: .25em;
+        }
+
+    .tabulator-row.tabulator-selected {
+        background-color: #9abcea !important;
+    }
+
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 24px;
+        }
+
+            .rating label:before {
+                content: '\2605'; /* Unicode star character */
+            }
+
+        .rating input:checked ~ label:before {
+            color: gold; /* Change color of selected stars */
+        }
+
+    .child-table-hidden {
+        display: none;
+    }
+
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-calcs {
+        background: #fff !important;
+    }
+
+    .tabulator .tabulator-footer {
+        border-top: 1px solid #fff;
+    }
+
+    #file-drop-area {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    #image-uploadify {
+        display: none;
+    }
+
+    .footerButton {
+        margin-top: 40px;
+    }
+
+    input[type="checkbox"] {
+        width: 15px; /* Set the width */
+        height: 20px; /* Set the height */
+    }
+
+</style>
+@*expenses tag and navs starts*@
+<div class="col-lg-4">
+    <p class="fs-4 fw-bold">ORDER MANAGEMENT</p>
+</div>
+<ul class="nav nav-tabs ">
+    @{
+        var AllChildMenu = HttpContextAccessor.HttpContext.Session.GetObject<List<UserMenuPermissionViewModel>>("UserChildMenu");
+
+        var filterparentmenu = AllChildMenu.Where(x => x.ControllerName == "Accounts" && x.ActionName == "OrderManagement" && x.IsView == true).ToList();
+        var i = 0;
+        foreach (var childitem in filterparentmenu)
+        {
+
+            if (childitem.FirstParameter != null)
+            {
+
+                if (i == 0)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link  fw-semibold active" href="#" id=@childitem.FirstValue>@childitem.MenuName</a>
+                    </li>
+
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link  fw-semibold" href="#" id=@childitem.FirstValue>@childitem.MenuName</a>
+                    </li>
+
+                }
+
+
+            }
+
+            i++;
+        }
+    }
+
+    @*  <li class="nav-item">
+    <a class="nav-link  fw-semibold active" href="#" id="suppliers-id">STYLES</a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link fw-semibold" href="#" id="expenses-id">COLORS</a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link fw-semibold" href="#" id="payments-id">SIZES</a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link fw-semibold" href="#" id="cat-id">CATEGORIES</a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link fw-semibold" href="#" id="mpo-id">MASTER PO</a>
+    </li> *@
+</ul>
+@*expenses tag and navs ends*@
+
+
+@*-------------style all html tags starts--------------*@
+<div id="suppliers-view-id" @*class="d-none"*@>
+    @*suppliers tag and buttons starts*@
+    <div id="supplier-div" class="row py-3" style="background: #e9ecef6b;">
+        <div class="col-lg-2">
+            <p class="fs-4 fw-bold">Styles</p>
+        </div>
+        <div class="col-lg-10">
+            <div class="float-end d-flex">
+                <div class="dropdown">
+                    <a asp-controller="Accounts" asp-action="CreateStyle" class="btn btn-success fw-bold ms-3 h-100 radius-30">
+                        New Style
+                    </a>
+                    @*<button class="btn btn-success fw-bold ms-3 h-100 radius-30" type="button" data-bs-toggle="offcanvas" data-bs-target="#supplierOffcanvas">
+                    New Style
+                    </button>*@
+                    @*offcanvas for add stylee starts*@
+                    <div class="offcanvas offcanvas-end scrollable-offcanvas" tabindex="-1" id="supplierOffcanvas" data-bs-backdrop="false" style="width: 50%;">
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title">Add New Style</h5>
+                            <button onclick="clearOffCanvasData()" id="offcanvasCloseBtn" type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body">
+
+                            <input type="hidden" id="StylesId" name="Id" value="" />
+                            <div class="mt-4">
+                                <label class="fw-bold">Style No.</label>
+                                <input id="styleNo" class="form-control" />
+                            </div>
+                            <div class="mt-5" id="tabulatorItemsGrid"></div>
+                            <button id="add-row-second-table" class="btn mt-5" style="border: 1px solid;margin-right: 30px;">Add Row</button>
+                            <button id="clear-second-table" class="btn mt-5" style="border: 1px solid;margin-right: 30px;">Clear All Rows</button>
+                        </div>
+
+                        <div class="offcanvas-footer">
+                            <div class="modal-footer my-2">
+                                <button id="StyleCancelBtn" type="submit" class="btn float-lg-end px-5 py-2 text-white fw-bolder" style="background: #949494; margin-right: 15px;">Cancel</button>
+                                <button id="StyleSaveBtn" type="submit" class="btn float-lg-end px-5 py-2 text-white fw-bolder" style="background: #2ca01c;margin-right: 15px;">Save</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*offcanvas for add style ends*@
+                </div>
+            </div>
+        </div>
+
+    </div>
+    @*suppliers tag and buttons ends*@
+
+    @*gear icon and other two buttons starts*@
+    <div class="d-flex justify-content-between">
+        <div>
+            <div class="d-flex mt-3">
+            </div>
+        </div>
+
+        <div>
+        </div>
+
+        <div>
+            <a href="#" id="print-table-style" class="text-decoration-none text-black me-1">
+                <i class="bi bi-printer fs-5"></i>
+            </a>
+            <a href="#" id="download-xlsx-style" class="text-decoration-none text-black me-1">
+                <i class="bi bi-file-earmark-excel fs-5"></i>
+            </a>
+            <div title="Settings" class="dropdown1 mt-3 custom-grid" style="display:inline-block;">
+                <a href="#" class="text-decoration-none text-black me-1" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                   aria-expanded="false">
+                    <i class="bi bi-gear fs-5"></i>
+                </a>
+                <div class="dropdown-menu gear-dropdown" aria-labelledby="dropdownMenuButton-expense">
+                    <div class="row p-4 main-dropdown-size" style="overflow:hidden;">
+                        <div class="col">
+                            <span class="fw-bold ms-3">Columns</span>
+                            <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                            <ul class="list-unstyled">
+                                <li>
+                                    <div id="styleColumnList" class="custom-grid">
+                                    </div>
+                                </li>
+                            </ul>
+
+                        </div>
+
+                        <div class="ms-3">
+                            <label>Rows</label> <br />
+                            <select name="rows" id="style-rows" class="cursor-pointer" style="padding: 10px 0 10px 5px; width: 70px;">
+                                <option value="0" disabled selected>Rows</option>
+                                <option value="5" selected>5</option>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="1000">1000</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+    @*gear icon and other two buttons ends*@
+    @*suppliers tabulators starts*@
+    <div id="supplierTaableContainer" class="mt-4">
+        <div id="styles-table" style="min-height:100%"></div>
+    </div>
+    @*suppliers tabulators ends*@
+</div>
+
+
+
+@*colors all html tags starts*@
+<div id="expenses-view-id" class="d-none">
+    @*expenses tag and buttons starts*@
+    <div class="row py-3" style="background: #e9ecef6b;">
+        <div class="col-lg">
+            <p class="fs-4 fw-bold">Colors</p>
+        </div>
+        <div class="col-lg">
+            <div class="float-end">
+                <button class="btn btn-success fw-bold ms-3 h-100 radius-30" type="button" data-bs-toggle="offcanvas" data-bs-target="#colorOffcanvas">
+                    New Color
+                </button>
+            </div>
+            @*offcanvas for add colors starts*@
+            <div class="offcanvas offcanvas-end scrollable-offcanvas" tabindex="-1" id="colorOffcanvas" data-bs-backdrop="false" style="width: 50%;">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title">Add New Color</h5>
+                    <button onclick="clearOffCanvasData()" id="offcanvasCloseBtn" type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <input type="hidden" id="ColorsId" name="Id" value="" />
+                    <input type="hidden" id="ColorsFilePath" name="ColorsFilePath" value="" />
+
+                    <div id="nameParent" class="mt-4">
+                        <label class="fw-bold">Name</label>
+                        <input id="name" class="form-control" />
+                        <span class="text-danger" id="colorNameValidation"></span>
+                    </div>
+                    <div id="nameParent" class="mt-4">
+                        <label class="fw-bold">Code</label>
+                        <input id="code" class="form-control" />
+                    </div>
+                    <div id="nameParent" class="mt-4">
+                        <label class="fw-bold">Desc</label>
+                        <textarea class="form-control text-box multi-line" id="desc" name="PurchaseDesc" rows="4"></textarea>
+                    </div>
+                    <div class="mt-4">
+                        <label for="attachments" class="form-label fw-bold">Attachments</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="attachments" accept=".pdf, .doc, .docx" />
+                            <span class="input-group-text" id="attachmentText">Add Attachment max size 20mb</span>
+                        </div>
+                        <div class="footerButton" id="footerButtonParent">
+                            <button class="btn btn-outline-dark fw-bolder btn-sm mt-4 d-none" id="view-image-or-pdf">Full view <i class="bi bi-eye-fill"></i></button>
+                            <button class="btn btn-outline-dark fw-bolder btn-sm mt-4 bg-danger text-white d-none" id="remove-image-or-pdf">X</button>
+                        </div>
+                        <iframe id="pdf-iframe" class="d-none" style="width: 66%; height: 500px;"></iframe>
+                    </div>
+                    <!--<div class="mb-3 mt-4">
+                    <label class="form-label">
+                        <i class="fas fa-link"></i> <span>Attachments Maximum size: 20MB</span>
+                    </label>
+                    <div id="file-drop-area">
+                        <p>Drag and drop files here or click to select files.</p>
+                        <ul id="selected-files-list"></ul>-->
+                    <!-- List to display selected file names -->
+                    <!--</div>
+                        <input id="image-uploadify" type="file" accept=".xlsx,.xls,image/*,.doc,audio/*,.docx,video/*,.ppt,.pptx,.txt,.pdf" multiple>
+                    </div>-->
+                </div>
+
+                <div class="offcanvas-footer">
+                    <div class="modal-footer my-2">
+                        <button id="closeColorOffCanvasBtn" type="submit" class="btn float-lg-end px-5 py-2 text-white fw-bolder" style="background: #949494; margin-right: 15px;">Cancel</button>
+                        <button id="colorSaveBtn" type="submit" class="btn float-lg-end px-5 py-2 text-white fw-bolder" style="background: #2ca01c;margin-right: 15px;">Save</button>
+                    </div>
+                </div>
+            </div>
+
+            @*offcanvas for add colors ends*@
+        </div>
+    </div>
+    @*expenses tag and buttons ends*@
+
+    @*gear icon and other two buttons starts*@
+    <div class="d-flex justify-content-between">
+        <div style="display: flex;">
+        </div>
+
+        <div>
+            <a href="#" id="print-table-color" class="text-decoration-none text-black me-1">
+                <i class="bi bi-printer fs-5"></i>
+            </a>
+            <a href="#" id="download-xlsx-color" class="text-decoration-none text-black me-1">
+                <i class="bi bi-file-earmark-excel fs-5"></i>
+            </a>
+            <div title="Settings" class="dropdown1 mt-3 custom-grid" style="display:inline-block;">
+                <a href="#" class="text-decoration-none text-black me-1" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                   aria-expanded="false">
+                    <i class="bi bi-gear fs-5"></i>
+                </a>
+                <div class="dropdown-menu gear-dropdown" aria-labelledby="dropdownMenuButton-expense">
+                    <div class="row p-4 main-dropdown-size" style="overflow:hidden;">
+                        <div class="col">
+                            <span class="fw-bold ms-3">Columns</span>
+                            <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                            <ul class="list-unstyled">
+                                <li>
+                                    <div id="colorColumnList" class="custom-grid">
+                                    </div>
+                                </li>
+                            </ul>
+
+                        </div>
+
+                        <div class="ms-3">
+                            <label>Rows</label> <br />
+                            <select name="rows" id="colore-rows" class="cursor-pointer" style="padding: 10px 0 10px 5px; width: 70px;">
+                                <option value="0" disabled selected>Rows</option>
+                                <option value="5" selected>5</option>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="1000">1000</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+
+    @*gear icon and other two buttons ends*@
+
+    @*expenses tabulators starts*@
+    <div id="tableContainer" class="mt-4">
+        <div id="colors-table" style="min-height:100%"></div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+@*-------------sizes all html tags starts--------------*@
+<div id="payments-view-id" class="d-none">
+    @*expenses tag and buttons starts*@
+    <div class="row py-3" style="background: #e9ecef6b;">
+        <div class="col-lg-2">
+            <p class="fs-4 fw-bold">Sizes</p>
+        </div>
+        <div class="col-lg">
+            <div class="float-end">
+                <button class="btn btn-success fw-bold ms-3 h-100 radius-30" type="button" data-bs-toggle="offcanvas" data-bs-target="#sizeOffcanvas">
+                    New Size
+                </button>
+            </div>
+            @*offcanvas for add sizes starts*@
+            <div class="offcanvas offcanvas-end scrollable-offcanvas" tabindex="-1" id="sizeOffcanvas" data-bs-backdrop="false" style="width: 50%;">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title">Add New Size</h5>
+                    <button onclick="clearOffCanvasDataOfSize()" id="offcanvasCloseBtn" type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <input type="hidden" id="SizesId" name="Id" value="" />
+
+                    <div class="mt-4">
+                        <label class="fw-bold">Name</label>
+                        <input id="SizeName" class="form-control" />
+                        <span class="text-danger" id="sizeNameValidation"></span>
+                    </div>
+                    <div class="mt-4">
+                        <label class="fw-bold">Code</label>
+                        <input id="SizeCode" class="form-control" />
+                    </div>
+                    <div class="mt-4">
+                        <label class="fw-bold">Desc</label>
+                        <textarea class="form-control text-box multi-line" id="SizeDesc" name="PurchaseDesc" rows="4"></textarea>
+                    </div>
+                </div>
+
+                <div class="offcanvas-footer">
+                    <div class="modal-footer my-2">
+                        <button id="closeSizeOffCanvasBtn" type="submit" class="btn float-lg-end px-5 py-2 text-white fw-bolder" style="background: #949494; margin-right: 15px;">Cancel</button>
+                        <button id="sizeSaveBtn" type="submit" class="btn float-lg-end px-5 py-2 text-white fw-bolder" style="background: #2ca01c;margin-right: 15px;">Save</button>
+                    </div>
+                </div>
+            </div>
+
+            @*offcanvas for add sizes ends*@
+        </div>
+    </div>
+
+    @*gear icon and other two buttons starts*@
+    <div class="d-flex justify-content-between">
+        <div class="dropdown batch-dropdown mt-3">
+        </div>
+
+        <div>
+        </div>
+        <div>
+            <a href="#" id="print-table-size" class="text-decoration-none text-black me-1">
+                <i class="bi bi-printer fs-5"></i>
+            </a>
+            <a href="#" id="download-xlsx-size" class="text-decoration-none text-black me-1">
+                <i class="bi bi-file-earmark-excel fs-5"></i>
+            </a>
+            <div title="Settings" class="dropdown1 mt-3 custom-grid" style="display:inline-block;">
+                <a href="#" class="text-decoration-none text-black me-1" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                   aria-expanded="false">
+                    <i class="bi bi-gear fs-5"></i>
+                </a>
+                <div class="dropdown-menu gear-dropdown" aria-labelledby="dropdownMenuButton-expense">
+                    <div class="row p-4 main-dropdown-size" style="overflow:hidden;">
+                        <div class="col">
+                            <span class="fw-bold ms-3">Columns</span>
+                            <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                            <ul class="list-unstyled">
+                                <li>
+                                    <div id="sizeColumnList" class="custom-grid">
+                                    </div>
+                                </li>
+                            </ul>
+
+                        </div>
+
+                        <div class="ms-3">
+                            <label>Rows</label> <br />
+                            <select name="rows" id="size-rows" class="cursor-pointer" style="padding: 10px 0 10px 5px; width: 70px;">
+                                <option value="0" disabled selected>Rows</option>
+                                <option value="5" selected>5</option>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="1000">1000</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+    @*gear icon and other two buttons ends*@
+
+    @*suppliers tabulators starts*@
+    <div id="PaymentTableContainer" class="mt-4">
+        <div id="sizes-table" style="min-height:100%"></div>
+    </div>
+    @*suppliers tabulators ends*@
+</div>
+
+
+@*-------------sizes all html tags starts--------------*@
+<div id="cat-view-id" class="d-none">
+    @*expenses tag and buttons starts*@
+    <div class="row py-3" style="background: #e9ecef6b;">
+        <div class="col-lg-2">
+            <p class="fs-4 fw-bold">Categories</p>
+        </div>
+        <div class="col-lg">
+            <div class="float-end">
+                <button class="btn btn-success fw-bold ms-3 h-100 radius-30" type="button" data-bs-toggle="offcanvas" data-bs-target="#catOffcanvas">
+                    New Category
+                </button>
+            </div>
+            @*offcanvas for add sizes starts*@
+            <div class="offcanvas offcanvas-end scrollable-offcanvas" tabindex="-1" id="catOffcanvas" data-bs-backdrop="false" style="width: 50%;">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title">Add New Category</h5>
+                    <button onclick="clearOffCanvasDataOfcat()" id="offcanvasCloseBtn" type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <input type="hidden" id="CatId" name="Id" value="" />
+
+                    <div class="mt-4">
+                        <label class="fw-bold">Name</label>
+                        <input id="catName" class="form-control" />
+                        <span class="text-danger" id="catNameValidation"></span>
+                    </div>
+                    <div class="mt-4">
+                        <label class="fw-bold">Short Name</label>
+                        <input id="catShortName" class="form-control" />
+                    </div>
+                    <div class="mt-4">
+                        <label class="fw-bold">Code</label>
+                        <input id="catCode" class="form-control" />
+                    </div>
+                    <div class="mt-4">
+                        <label class="form-label fw-bold">Category Type</label>
+                        <select id="CategoryTypeId" class="form-control">
+                            <option value="">Select type</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="offcanvas-footer">
+                    <div class="modal-footer my-2">
+                        <button id="closecatOffCanvasBtn" type="submit" class="btn float-lg-end px-5 py-2 text-white fw-bolder" style="background: #949494; margin-right: 15px;">Cancel</button>
+                        <button id="catSaveBtn" type="submit" class="btn float-lg-end px-5 py-2 text-white fw-bolder" style="background: #2ca01c;margin-right: 15px;">Save</button>
+                    </div>
+                </div>
+            </div>
+
+            @*offcanvas for add sizes ends*@
+        </div>
+    </div>
+
+    @*gear icon and other two buttons starts*@
+    <div class="d-flex justify-content-between">
+        <div class="dropdown batch-dropdown mt-3">
+        </div>
+
+        <div>
+        </div>
+        <div>
+            <a href="#" id="print-table-cat" class="text-decoration-none text-black me-1">
+                <i class="bi bi-printer fs-5"></i>
+            </a>
+            <a href="#" id="download-xlsx-cat" class="text-decoration-none text-black me-1">
+                <i class="bi bi-file-earmark-excel fs-5"></i>
+            </a>
+            <div title="Settings" class="dropdown1 mt-3 custom-grid" style="display:inline-block;">
+                <a href="#" class="text-decoration-none text-black me-1" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                   aria-expanded="false">
+                    <i class="bi bi-gear fs-5"></i>
+                </a>
+                <div class="dropdown-menu gear-dropdown" aria-labelledby="dropdownMenuButton-expense">
+                    <div class="row p-4 main-dropdown-size" style="overflow:hidden;">
+                        <div class="col">
+                            <span class="fw-bold ms-3">Columns</span>
+                            <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                            <ul class="list-unstyled">
+                                <li>
+                                    <div id="bomallocationcatColumnList" class="custom-grid">
+                                    </div>
+                                </li>
+                            </ul>
+
+                        </div>
+
+                        <div class="ms-3">
+                            <label>Rows</label> <br />
+                            <select name="rows" id="bomallocationcat-rows" class="cursor-pointer" style="padding: 10px 0 10px 5px; width: 70px;">
+                                <option value="0" disabled selected>Rows</option>
+                                <option value="5" selected>5</option>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="1000">1000</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+    @*gear icon and other two buttons ends*@
+
+    @*suppliers tabulators starts*@
+    <div id="PaymentTableContainer" class="mt-4">
+        <div id="bomallocationcat-table" style="min-height:100%"></div>
+    </div>
+    @*suppliers tabulators ends*@
+</div>
+
+@*-------------mpos all html tags starts--------------*@
+<div id="mpo-view-id" class="d-none">
+    @*expenses tag and buttons starts*@
+    <div class="row py-3" style="background: #e9ecef6b;">
+        <div class="col-lg-2">
+            <p class="fs-4 fw-bold">Master PO</p>
+        </div>
+        <div class="col-lg">
+            <div class="float-end">
+                <a asp-asp-controller="Accounts" asp-action="createmasterpo" class="btn btn-success fw-bold ms-3 h-100 radius-30" type="button">
+                    New MPO
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @*gear icon and other two buttons starts*@
+    <div class="d-flex justify-content-between">
+        <div class="dropdown batch-dropdown mt-3">
+        </div>
+
+        <div>
+        </div>
+        <div>
+            <a href="#" id="print-table-mpo" class="text-decoration-none text-black me-1">
+                <i class="bi bi-printer fs-5"></i>
+            </a>
+            <a href="#" id="download-xlsx-mpo" class="text-decoration-none text-black me-1">
+                <i class="bi bi-file-earmark-excel fs-5"></i>
+            </a>
+            <div title="Settings" class="dropdown1 mt-3 custom-grid" style="display:inline-block;">
+                <a href="#" class="text-decoration-none text-black me-1" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                   aria-expanded="false">
+                    <i class="bi bi-gear fs-5"></i>
+                </a>
+                <div class="dropdown-menu gear-dropdown" aria-labelledby="dropdownMenuButton-expense">
+                    <div class="row p-4 main-dropdown-size" style="overflow:hidden;">
+                        <div class="col">
+                            <span class="fw-bold ms-3">Columns</span>
+                            <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                            <ul class="list-unstyled">
+                                <li>
+                                    <div id="mpoColumnList" class="custom-grid">
+                                    </div>
+                                </li>
+                            </ul>
+
+                        </div>
+
+                        <div class="ms-3">
+                            <label>Rows</label> <br />
+                            <select name="rows" id="mpo-rows" class="cursor-pointer" style="padding: 10px 0 10px 5px; width: 70px;">
+                                <option value="0" disabled selected>Rows</option>
+                                <option value="5" selected>5</option>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="1000">1000</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+    @*gear icon and other two buttons ends*@
+
+    @*suppliers tabulators starts*@
+    <div id="PaymentTableContainer" class="mt-4">
+        <div id="mpo-table"></div>
+    </div>
+    @*suppliers tabulators ends*@
+</div>
+
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.20/jspdf.plugin.autotable.min.js"></script>
+    <script type="text/javascript">
+
+        var globalFieldsStyle1 =
+            [
+                //{
+                //    title: "",
+                //    field: "selected",
+                //    headerSort: false,
+                //    formatter: "rowSelection",
+                //    hozAlign: "left",
+                //    width: 70,
+                //    vertAlign:"middle",
+                //},
+                { title: "STYLE NO", field: "StyleNo", headerHozAlign: "center", vertAlign: "middle", hozAlign: "left", headerFilter: "input", headerFilterLiveFilter: false },
+                { title: "STYLE NAME", field: "GoodsDescription", headerHozAlign: "center", vertAlign: "middle", hozAlign: "left", headerFilter: "input", headerFilterLiveFilter: false },
+                { title: "BUYER NAME", field: "Name", headerHozAlign: "center", vertAlign: "middle", hozAlign: "left", headerFilter: "input", headerFilterLiveFilter: false },
+                { title: "Unit Price", field: "UnitPrice", headerHozAlign: "center", vertAlign: "middle", hozAlign: "left", headerFilter: "input", headerFilterLiveFilter: false },
+                { title: "HS Code", field: "HSCode", headerHozAlign: "center", vertAlign: "middle", hozAlign: "left", headerFilter: "input", headerFilterLiveFilter: false },
+                { title: "Style Date", field: "StyleDate", hozAlign: "left", vertAlign: "middle", headerFilter: "input" },
+                {
+                    title: "ACTIONS", field: "button", headerHozAlign: "center", headerSort: false, hozAlign: "left", resizable: false, formatter: function (cell, formatterParams, onRendered) {
+                        var data = cell.getData();
+                        //console.log("seeeee data::", data);
+                        var myUrlGet = `@Url.Action("UpdateStyle", "Accounts")?StyleId=${data.Id}`;
+
+                        var inActive = `setStyleInactive(${data.Id}) `
+
+                        var deleteHtml = `
+                                                                    <a onclick='${inActive}' class='text-decoration-none text-black ms-3 mt-1 full-width' href='#' id='InActive'>
+                                                                    <i class="bi bi-trash3"></i><span class='ms-1 mt-2'>Delete</span><br />
+                                                                    </a>
+                                                                    `;
+
+
+                        //var statusDependentHtml = data.isPosted ? viewHtml + deleteHtml : editHtml + deleteHtml;
+                        var statusDependentHtml = deleteHtml;
+
+                        var html = `
+                                                                    <div class='dropdown ms-1'>
+                                                                    <a href='${myUrlGet}' target="_blank" class='fw-bolder mt-2'>View/Edit</a>
+                                                                    <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                                    <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton1' style="width: 57%;">
+                                                                        ${statusDependentHtml}
+
+                                                                    </ul>
+                                                                    </div>
+                                                                    `;
+
+                        return html;
+                    },
+                    visible: true, cellClick: function (e, cell) {
+                        // Add a custom class to the cell when it's clicked
+                        cell.getElement().classList.add('active-cell');
+                    },
+                },
+            ];
+
+
+        var globalFieldsColor =
+            [
+                { title: "NAME", field: "ColorName", hozAlign: "left", headerHozAlign: "center", headerFilter: "input", headerFilterLiveFilter: false },
+                { title: "CODE", field: "ColorCode", hozAlign: "left", headerHozAlign: "center", headerFilter: "input", headerFilterLiveFilter: false },
+                { title: "DESCRIPTION", field: "ColorDesc", hozAlign: "left", headerHozAlign: "center", headerFilter: "input", headerFilterLiveFilter: false },
+                {
+                    title: "ACTIONS", field: "action", headerHozAlign: "center", headerSort: false, hozAlign: "left", resizable: false, width: 170, formatter: function (cell, formatterParams, onRendered) {
+                        var data = cell.getData();
+                        //console.log("seeeee data::", data);
+                        var Edit = `editSupplier(${data.Id})`;
+                        var inActive = `setInactiveUrl(${data.Id}) `
+                        var deleteHtml = `
+                                                            <a onclick='${inActive}' class='text-decoration-none text-black ms-3 mt-1 full-width' href='#' id='InActive'>
+                                                            <i class="bi bi-trash3"></i><span class='ms-1 mt-2'>Delete</span><br />
+                                                            </a>
+                                                            `;
+
+
+                        //var statusDependentHtml = data.isPosted ? viewHtml + deleteHtml : editHtml + deleteHtml;
+                        var statusDependentHtml = deleteHtml;
+
+                        var html = `
+                                                            <div class='dropdown ms-1'>
+                                                            <a onclick='${Edit}' class='fw-bolder mt-2'>View/Edit</a>
+                                                            <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                            <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton1' style="width: 57%;">
+                                                                ${statusDependentHtml}
+
+                                                            </ul>
+                                                            </div>
+                                                            `;
+
+                        return html;
+                    },
+                    visible: true, cellClick: function (e, cell) {
+                        // Add a custom class to the cell when it's clicked
+                        cell.getElement().classList.add('active-cell');
+                    },
+                },
+
+            ];
+
+        var globalFieldsSize = [
+            { title: "NAME", field: "SizeName", hozAlign: "left", headerHozAlign: "center", visible: true, headerFilter: "input", headerFilterLiveFilter: false },
+            { title: "CODE", field: "SizeCode", hozAlign: "left", headerHozAlign: "center", visible: true, headerFilter: "input", headerFilterLiveFilter: false },
+            { title: "DESCRIPTION", field: "SizeDesc", hozAlign: "left", headerHozAlign: "center", visible: true, headerFilter: "input", headerFilterLiveFilter: false },
+            {
+                title: "ACTIONS", field: "sizeAction", headerHozAlign: "center", headerSort: false, hozAlign: "left", resizable: false, width: 170, visible: true, formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    //console.log("seeeee data::", data);
+                    var Edit = `editSizes(${data.Id})`;
+                    var inActive = `setInactiveUrlOfSizes(${data.Id}) `
+
+                    var deleteHtml = `
+                                      <a onclick='${inActive}' class='text-decoration-none text-black ms-3 mt-1 full-width' href='#' id='InActive'>
+                                      <i class="bi bi-trash3"></i><span class='ms-1 mt-2'>Delete</span><br />
+                                      </a>
+                                      `;
+
+
+                    //var statusDependentHtml = data.isPosted ? viewHtml + deleteHtml : editHtml + deleteHtml;
+                    var statusDependentHtml = deleteHtml;
+
+                    var html = `
+                                      <div class='dropdown ms-1'>
+                                      <a onclick='${Edit}' class='fw-bolder mt-2'>View/Edit</a>
+                                      <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                      <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton1' style="width: 57%;">
+                                          ${statusDependentHtml}
+
+                                      </ul>
+                                      </div>
+                                      `;
+
+                    return html;
+                },
+                visible: true, cellClick: function (e, cell) {
+                    // Add a custom class to the cell when it's clicked
+                    cell.getElement().classList.add('active-cell');
+                },
+            },
+
+        ];
+
+        var globalFieldsCategory = [
+            { title: "NAME", field: "catname", hozAlign: "left", headerHozAlign: "center", visible: true, headerFilter: "input", headerFilterLiveFilter: false },
+            { title: "SHORT NAME", field: "shortname", hozAlign: "left", headerHozAlign: "center", visible: true, headerFilter: "input", headerFilterLiveFilter: false },
+            { title: "CODE", field: "catcode", hozAlign: "left", headerHozAlign: "center", visible: true, headerFilter: "input", headerFilterLiveFilter: false },
+            {
+                title: "ACTIONS", field: "CATAction", headerHozAlign: "center", headerSort: false, hozAlign: "left", resizable: false, width: 170, visible: true, formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    //console.log("seeeee data::", data);
+                    var Edit = `editCat(${data.Id})`;
+                    var inActive = `setInactiveCat(${data.Id}) `
+
+                    var deleteHtml = `
+                                      <a onclick='${inActive}' class='text-decoration-none text-black ms-3 mt-1 full-width' href='#' id='InActive'>
+                                      <i class="bi bi-trash3"></i><span class='ms-1 mt-2'>Delete</span><br />
+                                      </a>
+                                      `;
+
+
+                    //var statusDependentHtml = data.isPosted ? viewHtml + deleteHtml : editHtml + deleteHtml;
+                    var statusDependentHtml = deleteHtml;
+
+                    var html = `
+                                      <div class='dropdown ms-1'>
+                                      <a onclick='${Edit}' class='fw-bolder mt-2'>View/Edit</a>
+                                      <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                      <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton1' style="width: 57%;">
+                                          ${statusDependentHtml}
+
+                                      </ul>
+                                      </div>
+                                      `;
+
+                    return html;
+                },
+                visible: true, cellClick: function (e, cell) {
+                    // Add a custom class to the cell when it's clicked
+                    cell.getElement().classList.add('active-cell');
+                },
+            },
+
+        ];
+
+        var globalFieldsMasterPO =
+            [
+                //{
+                //    title: "",
+                //    field: "selected",
+                //    headerSort: false,
+                //    formatter: "rowSelection",
+                //    hozAlign: "left",
+                //    width: 70,
+                //    vertAlign:"middle",
+                //},
+                { title: "MASTER PO NO", field: "MasterPONo", headerHozAlign: "center", vertAlign: "middle", hozAlign: "left", headerFilter: "input", headerFilterLiveFilter: false },
+                { title: "MasterPO Date", field: "MasterPODate", hozAlign: "left", vertAlign: "middle", headerFilter: "input" },
+                {
+                    title: "ACTIONS", field: "MPObutton", headerHozAlign: "center", headerSort: false, hozAlign: "left", resizable: false, formatter: function (cell, formatterParams, onRendered) {
+                        var data = cell.getData();
+                        //console.log("seeeee data::", data);
+                        var myUrlGet = `@Url.Action("UpdateMasterpo", "Accounts")?MPoId=${data.Id}`;
+
+                        var inActive = `setMPOInactive(${data.Id}) `
+
+                        var deleteHtml = `
+                                                                    <a onclick='${inActive}' class='text-decoration-none text-black ms-3 mt-1' href='#' id='InActive'>
+                                                                    <i class="bi bi-trash3"></i><span class='ms-1 mt-2'>Delete</span><br />
+                                                                    </a>
+                                                                    `;
+
+
+                        //var statusDependentHtml = data.isPosted ? viewHtml + deleteHtml : editHtml + deleteHtml;
+                        var statusDependentHtml = deleteHtml;
+
+                        var html = `
+                                                                    <div class='dropdown ms-1'>
+                                                                    <a href='${myUrlGet}' target="_blank" class='fw-bolder mt-2'>View/Edit</a>
+                                                                    <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                                    <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton1' style="width: 57%;">
+                                                                        ${statusDependentHtml}
+
+                                                                    </ul>
+                                                                    </div>
+                                                                    `;
+
+                        return html;
+                    },
+                    visible: true, cellClick: function (e, cell) {
+                        // Add a custom class to the cell when it's clicked
+                        cell.getElement().classList.add('active-cell');
+                    },
+                },
+            ];
+
+        //setTimeout(function () {
+        //    getColors();
+        //}, 4000);
+
+        //setTimeout(function () {
+        //    getSizes();
+        //}, 1000);
+
+        //setTimeout(function () {
+        //    getStyle();
+        //}, 2000);
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("categoryTypeDropdown", "Accounts")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#CategoryTypeId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+
+        //======nav functionalities starts========
+        $(".nav-link").click(function () {
+            // Remove the "active" class from all nav links
+            $(".nav-link").removeClass("active");
+
+            // Add the "active" class to the clicked nav link
+            $(this).addClass("active");
+        });
+
+        if ('@ListType' === "Styles") {
+            $("#Styles").addClass("active");
+            $("#Colors").removeClass("active");
+            $("#Sizes").removeClass("active");
+            $("#Categories").removeClass("active");
+            $("#MasterPO").removeClass("active");
+
+            $("#expenses-view-id").addClass("d-none");
+            $("#bills-view-id").addClass("d-none");
+            $("#suppliers-view-id").removeClass("d-none");
+            $("#payments-view-id").addClass("d-none");
+            $("#Supplier-Details-view").addClass("d-none");
+            $("#mpo-view-id").addClass("d-none");
+            $("#cat-view-id").addClass("d-none");
+
+            getStyle();
+        }
+
+        if ('@ListType' === "Colors") {
+            $("#Styles").removeClass("active");
+            $("#Colors").addClass("active");
+            $("#Sizes").removeClass("active");
+            $("#Categories").removeClass("active");
+            $("#MasterPO").removeClass("active");
+
+            $("#bills-view-id").addClass("d-none");
+            $("#suppliers-view-id").addClass("d-none");
+            $("#expenses-view-id").removeClass("d-none");
+            $("#payments-view-id").addClass("d-none");
+            $("#Supplier-Details-view").addClass("d-none");
+            $("#mpo-view-id").addClass("d-none");
+            $("#cat-view-id").addClass("d-none");
+
+            getColors();
+        }
+
+        if ('@ListType' === "Sizes") {
+            $("#Styles").removeClass("active");
+            $("#Colors").removeClass("active");
+            $("#Sizes").addClass("active");
+            $("#Categories").removeClass("active");
+            $("#MasterPO").removeClass("active");
+
+            $("#expenses-view-id").addClass("d-none");
+            $("#bills-view-id").addClass("d-none");
+            $("#suppliers-view-id").addClass("d-none");
+            $("#payments-view-id").removeClass("d-none");
+            $("#Supplier-Details-view").addClass("d-none");
+            $("#mpo-view-id").addClass("d-none");
+            $("#cat-view-id").addClass("d-none");
+
+            getSizes();
+        }
+
+        if ('@ListType' === "Categories") {
+            $("#Styles").removeClass("active");
+            $("#Colors").removeClass("active");
+            $("#Sizes").removeClass("active");
+            $("#Categories").addClass("active");
+            $("#MasterPO").removeClass("active");
+
+            $("#expenses-view-id").addClass("d-none");
+            $("#bills-view-id").addClass("d-none");
+            $("#suppliers-view-id").addClass("d-none");
+            $("#payments-view-id").addClass("d-none");
+            $("#Supplier-Details-view").addClass("d-none");
+            $("#mpo-view-id").addClass("d-none");
+            $("#cat-view-id").removeClass("d-none");
+
+            getCatTable();
+        }
+
+        if ('@ListType' === "MasterPO") {
+            $("#Styles").removeClass("active");
+            $("#Colors").removeClass("active");
+            $("#Sizes").removeClass("active");
+            $("#Categories").removeClass("active");
+            $("#MasterPO").addClass("active");
+
+            $("#expenses-view-id").addClass("d-none");
+            $("#bills-view-id").addClass("d-none");
+            $("#suppliers-view-id").addClass("d-none");
+            $("#payments-view-id").addClass("d-none");
+            $("#Supplier-Details-view").addClass("d-none");
+            $("#mpo-view-id").removeClass("d-none");
+            $("#cat-view-id").addClass("d-none");
+
+            getMPO();
+        }
+
+        $("#bill-id").on("click", function () {
+            $("#bills-view-id").removeClass("d-none");
+            $("#expenses-view-id").addClass("d-none");
+            $("#suppliers-view-id").addClass("d-none");
+            $("#payments-view-id").addClass("d-none");
+            $("#Supplier-Details-view").addClass("d-none");
+            $("#mpo-view-id").addClass("d-none");
+            $("#cat-view-id").addClass("d-none");
+
+        })
+        $("#Colors").on("click", function () {
+            $("#bills-view-id").addClass("d-none");
+            $("#suppliers-view-id").addClass("d-none");
+            $("#expenses-view-id").removeClass("d-none");
+            $("#payments-view-id").addClass("d-none");
+            $("#Supplier-Details-view").addClass("d-none");
+            $("#mpo-view-id").addClass("d-none");
+            $("#cat-view-id").addClass("d-none");
+
+
+            // Check if POLTable is initialized and has rows
+            if (ColorsTable && ColorsTable.getRows().length > 0) {
+                // POLTable exists and has rows, do not call POLGetData
+                return;
+            } else {
+                // POLTable does not exist or has no rows, call POLGetData
+                getColors();
+            }
+        })
+        $("#Styles").on("click", function () {
+            $("#expenses-view-id").addClass("d-none");
+            $("#bills-view-id").addClass("d-none");
+            $("#suppliers-view-id").removeClass("d-none");
+            $("#payments-view-id").addClass("d-none");
+            $("#Supplier-Details-view").addClass("d-none");
+            $("#mpo-view-id").addClass("d-none");
+            $("#cat-view-id").addClass("d-none");
+
+
+            // Check if POLTable is initialized and has rows
+            if (suppliersTable && suppliersTable.getRows().length > 0) {
+                // POLTable exists and has rows, do not call POLGetData
+                return;
+            } else {
+                // POLTable does not exist or has no rows, call POLGetData
+                getStyle();
+            }
+        })
+        $("#divsupplier").on("click", function () {
+            $("#expenses-view-id").addClass("d-none");
+            $("#bills-view-id").addClass("d-none");
+            $("#suppliers-view-id").removeClass("d-none");
+            $("#payments-view-id").addClass("d-none");
+            $("#Supplier-Details-view").addClass("d-none");
+            $("#mpo-view-id").addClass("d-none");
+            $("#cat-view-id").addClass("d-none");
+
+        })
+
+        $("#Sizes").on("click", function () {
+            $("#expenses-view-id").addClass("d-none");
+            $("#bills-view-id").addClass("d-none");
+            $("#suppliers-view-id").addClass("d-none");
+            $("#payments-view-id").removeClass("d-none");
+            $("#Supplier-Details-view").addClass("d-none");
+            $("#mpo-view-id").addClass("d-none");
+            $("#cat-view-id").addClass("d-none");
+
+
+            // Check if POLTable is initialized and has rows
+            if (SizeTable && SizeTable.getRows().length > 0) {
+                // POLTable exists and has rows, do not call POLGetData
+                return;
+            } else {
+                // POLTable does not exist or has no rows, call POLGetData
+                getSizes();
+            }
+        })
+
+        $("#Categories").on("click", function () {
+            $("#expenses-view-id").addClass("d-none");
+            $("#bills-view-id").addClass("d-none");
+            $("#suppliers-view-id").addClass("d-none");
+            $("#payments-view-id").addClass("d-none");
+            $("#Supplier-Details-view").addClass("d-none");
+            $("#mpo-view-id").addClass("d-none");
+            $("#cat-view-id").removeClass("d-none");
+
+
+            // Check if POLTable is initialized and has rows
+            if (CatTable && CatTable.getRows().length > 0) {
+                // POLTable exists and has rows, do not call POLGetData
+                return;
+            } else {
+                // POLTable does not exist or has no rows, call POLGetData
+                getCatTable();
+            }
+        })
+
+        $("#MasterPO").on("click", function () {
+            $("#expenses-view-id").addClass("d-none");
+            $("#bills-view-id").addClass("d-none");
+            $("#suppliers-view-id").addClass("d-none");
+            $("#payments-view-id").addClass("d-none");
+            $("#Supplier-Details-view").addClass("d-none");
+            $("#mpo-view-id").removeClass("d-none");
+            $("#cat-view-id").addClass("d-none");
+
+
+            // Check if POLTable is initialized and has rows
+            if (MPOTable && MPOTable.getRows().length > 0) {
+                // POLTable exists and has rows, do not call POLGetData
+                return;
+            } else {
+                // POLTable does not exist or has no rows, call POLGetData
+                getMPO();
+            }
+        })
+        //======nav functionalities ends========
+        function formatDateToCustomDate(originalDate) {
+            const months = [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+
+            const dateObj = new Date(originalDate);
+            const day = dateObj.getDate();
+            const month = months[dateObj.getMonth()];
+            const year = dateObj.getFullYear();
+
+            return `${day}-${month}-${year}`;
+        }
+        //===========================style functionalities starts=====================
+
+
+
+        var suppliersTable;
+        //getStyle();
+        function getStyle() {
+            var supplierApiUrl = '@Url.Action("GetStyleList", "Accounts")';
+            suppliersTable = new Tabulator("#styles-table", {
+                // data: dataTableFilter,
+                dataTree: true,
+                //height:300,
+                dataTreeStartExpanded: true,
+                dataTreeChildField: "children",
+                layout: "fitColumns",
+                selectable: 1,
+                pagination: true,
+                paginationMode: "remote",
+                filterMode: "remote",
+                paginationSize: 5,
+                paginationInitialPage: 1,
+                paginationSizeSelector: [5, 10, 25, 50, 100, 500, 1000],
+                paginationCounter: "rows",
+                ajaxURL: supplierApiUrl,
+                ajaxConfig: "get",
+                ajaxContentType: "json",
+
+                ajaxResponse: function (url, params, response) {
+                    suppliersTable.setMaxPage(response.last_page);
+                    // //console.log("response.last_page", response.last_page);
+
+                    dataLoadExpense = response.data;
+                    ////console.log("dataLoadExpense abc:", dataLoadExpense);
+                    dataLoadExpense.forEach(function (item) {
+                        if (item.StyleDate) {
+                            const dateObject = new Date(item.StyleDate);
+                            item.StyleDate = formatDateToCustomStringForDate(dateObject);
+                        }
+
+                    });
+
+                    return {
+
+                        data: dataLoadExpense,
+                        last_page: response.last_page,
+
+                    };
+                },
+
+                columns: globalFieldsStyle1,
+                ajaxURLGenerator: function (url, config, params) {
+                    //return request url
+                    return url + "?searchquery=" + encodeURIComponent(JSON.stringify(params)); //encode parameters as a json object
+                },
+                dataBound: function () {
+                    // Freeze the top 1 row (index 0) after the table is created
+                    var rows = table.getRows();
+                    if (rows.length > 0) {
+                        var cells = rows[0].getCells();
+                        cells.forEach(cell => {
+                            cell.freeze();
+                        });
+                    }
+                },
+            });
+
+
+
+            //style gear functionalities starts=============
+
+            var columnListStyle = $("#styleColumnList");
+            $.each(globalFieldsStyle1, function (index, field) {
+                ////console.log("GLOBAL 2::",field);
+                var title = field.title;
+                var name = field.field;
+                var visible = true;
+                if (field.visible == false) {
+                    visible = false;
+                }
+                var Styletitles = `<li>
+                               <a class="dropdown-item" href="#">
+                               <div class="custom-control custom-checkbox" >
+                               <input type="checkbox" class="custom-control-input title-input" id="${name}" value="${name}">
+                                       <label class="custom-control-label w-100 cursor-pointer" id="${name}" for="${name}">${title}</label>
+                               </div>
+                               </a>
+                               </li>`;
+                columnListStyle.append(Styletitles);
+
+                document.querySelector(`#${name}`).addEventListener('click', function (event) {
+                    var checkbox = event.target;
+                    var isChecked = checkbox.checked;
+
+                    if (isChecked) {
+                        suppliersTable.showColumn(name);
+                    } else {
+                        suppliersTable.hideColumn(name);
+                    }
+                });
+
+
+                $(`${'#' + name}`).prop('checked', visible);
+
+
+                $('.custom-control-label').on('click', function (e) {
+                    e.stopPropagation();
+                });
+                $('#dropdown-titles').on('click', function (e) {
+                    e.stopPropagation();
+                });
+
+                //Add event listener to the rows select input
+                $("#style-rows").on("change", function () {
+                    var selectedRows = $(this).val();
+                    if (selectedRows !== null) {
+                        var pageSize = parseInt(selectedRows);
+                        if (!isNaN(pageSize)) {
+                            suppliersTable.setPageSize(pageSize);
+                        }
+                    }
+                });
+
+            });
+            //gear functionalities ends===============
+
+        };
+
+
+
+
+
+
+
+        function setStyleInactive(data) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteStyle", "Accounts")',
+                        type: "get",
+                        data: { id: data },
+                        traditional: true,
+                        success: function (response) {
+                            if (response.success == "1") {
+                                toastr.success(response.msg, "", {
+                                    "toastClass": "toast-green",
+                                });
+                                getStyle();
+                            }
+                            else if (response.success == "0") {
+                                //alert()
+                                toastr.success(response.msg, "", {
+                                    "toastClass": "toast-red",
+                                });
+                                getStyle();
+                            }
+                            else {
+
+                                toastr.success(response.message, "Access Denied", {
+                                    "toastClass": "toast-red",
+                                });
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+                            toastr.error("Error during delete.", "", { "toastClass": "toast-red" });
+                        }
+                    });
+                }
+            });
+        };
+
+        document.getElementById("print-table-style").addEventListener("click", function () {
+            suppliersTable.print(false, true);
+        });
+        document.getElementById("download-xlsx-style").addEventListener("click", function () {
+            suppliersTable.download("xlsx", "Styles.xlsx", { sheetName: "Style" });
+        });
+
+        //===========================style functionalities ends=======================
+
+
+        //===========================color functionalities starts=====================
+        //getColors();
+        var currentColorId;
+        var ColorsTable;
+        function getColors() {
+            var supplierApiUrl = '@Url.Action("GetColorList", "Accounts")';
+            ColorsTable = new Tabulator("#colors-table", {
+                // data: dataTableFilter,
+                dataTree: true,
+                //height:300,
+                dataTreeStartExpanded: true,
+                dataTreeChildField: "children",
+                layout: "fitColumns",
+                selectable: 1,
+                pagination: true,
+                paginationMode: "remote",
+                filterMode: "remote",
+                paginationSize: 5,
+                paginationInitialPage: 1,
+                paginationSizeSelector: [5, 10, 25, 50, 100, 500, 1000],
+                paginationCounter: "rows",
+                ajaxURL: supplierApiUrl,
+                ajaxConfig: "get",
+                ajaxContentType: "json",
+
+                ajaxResponse: function (url, params, response) {
+                    ColorsTable.setMaxPage(response.last_page);
+                    // //console.log("response.last_page", response.last_page);
+
+                    dataLoadExpense = response.data;
+                    ////console.log("dataLoadExpense abc:", dataLoadExpense);
+
+                    return {
+
+                        data: dataLoadExpense,
+                        last_page: response.last_page,
+
+                    };
+                },
+
+                columns: globalFieldsColor,
+                ajaxURLGenerator: function (url, config, params) {
+                    //return request url
+                    return url + "?searchquery=" + encodeURIComponent(JSON.stringify(params)); //encode parameters as a json object
+                },
+                dataBound: function () {
+                    // Freeze the top 1 row (index 0) after the table is created
+                    var rows = table.getRows();
+                    if (rows.length > 0) {
+                        var cells = rows[0].getCells();
+                        cells.forEach(cell => {
+                            cell.freeze();
+                        });
+                    }
+                },
+            });
+
+
+
+
+
+            //color gear functionalities starts=============          
+
+            var columnListColor = $("#colorColumnList");
+            $.each(globalFieldsColor, function (index, field) {
+                ////console.log("GLOBAL 2::",field);
+                var title = field.title;
+                var name = field.field;
+                var visible = true;
+                if (field.visible == false) {
+                    visible = false;
+                }
+                var Colortitles = `<li>
+                                 <a class="dropdown-item" href="#">
+                                 <div class="custom-control custom-checkbox" >
+                                 <input type="checkbox" class="custom-control-input title-input" id="${name}" value="${name}">
+                                         <label class="custom-control-label w-100 cursor-pointer" id="${name}" for="${name}">${title}</label>
+                                 </div>
+                                 </a>
+                                 </li>`;
+                columnListColor.append(Colortitles);
+
+                document.querySelector(`#${name}`).addEventListener('click', function (event) {
+                    var checkbox = event.target;
+                    var isChecked = checkbox.checked;
+
+                    if (isChecked) {
+                        ColorsTable.showColumn(name);
+                    } else {
+                        ColorsTable.hideColumn(name);
+                    }
+                });
+
+
+                $(`${'#' + name}`).prop('checked', visible);
+
+
+                $('.custom-control-label').on('click', function (e) {
+                    e.stopPropagation();
+                });
+                $('#dropdown-titles').on('click', function (e) {
+                    e.stopPropagation();
+                });
+
+                //Add event listener to the rows select input
+                $("#colore-rows").on("change", function () {
+                    var selectedRows = $(this).val();
+                    if (selectedRows !== null) {
+                        var pageSize = parseInt(selectedRows);
+                        if (!isNaN(pageSize)) {
+                            ColorsTable.setPageSize(pageSize);
+                        }
+                    }
+                });
+
+            });
+            //gear functionalities ends===============
+
+
+
+
+
+        };
+
+        $("#colorSaveBtn").click(function () {
+            SaveColor();
+        });
+        function SaveColor() {
+
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+
+            var model = {
+                ComId: ComId,
+                LuserId: UserId,
+
+                Id: $("#ColorsId").val() || 0,
+                ColorName: $("#name").val(),
+                ColorCode: $("#code").val(),
+                ColorDesc: $("#desc").val(),
+                ColorsFilePath: '',
+            };
+            console.log("Color model", model);
+            var fileInput = $('input[type=file]')[0];
+            $.ajax({
+                async: false,
+                type: "POST",
+                url: '@Url.Action("AddUpdateColor", "Accounts")',
+                data: JSON.stringify(model),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    console.log("after save result", result);
+                    var ColorsId = result.Id;
+
+                    if (result.success == "1") {
+                        toastr.success(result.message, "", {
+                            "toastClass": "toast-green",
+                        });
+                        $("#colorOffcanvas").offcanvas('hide');
+                        //setTimeout(function () {  }, 1000);
+                        clearOffCanvasData();
+                        getColors();
+                        if (fileInput.files.length > 0 && fileInput.files[0].size > 0) {
+                            var formData = new FormData();
+                            formData.append("file", fileInput.files[0]);
+                            formData.append("ColorsId", ColorsId);
+                            $.ajax({
+                                type: "POST",
+                                url: "@Url.Action("UploadColorsImage", "Accounts")",
+                                data: formData,
+                                contentType: false,
+                                processData: false,
+                                success: function (response) {
+                                }
+                            });
+                        }
+                    } else {
+                        toastr.success(result.message, "", {
+                            "toastClass": "toast-red",
+                        });
+                        getColors()
+                    }
+                },
+                error: function () {
+                    toastr.success(result.message, "", {
+                        "toastClass": "toast-red",
+                    });
+                    getColors()
+                }
+            });
+        }
+        function clearOffCanvasData() {
+            $("#colorOffcanvas .offcanvas-title").html("Add New Color");
+            $("#ColorsId").val("");
+            $("#name").val("");
+            $("#code").val("");
+            $("#desc").val("");
+            $('#attachments').text("");
+            //$('#attachmentText').text("Add Attachment max size 20mb");
+            $('#view-image-or-pdf').addClass("d-none");
+            $('#remove-image-or-pdf').addClass("d-none");
+            $('#pdf-iframe').addClass("d-none");
+            $('#colorSaveBtn').text("Save");
+            $('#colorNameValidation').html("");
+        }
+
+
+
+        function editSupplier(data) {
+            //console.log("data", data)
+            currentColorId = data;
+            var myUrlGet = '@Url.Action("GetColorEdit", "Accounts")?ColorsId=' + data;
+            $.ajax({
+                type: "GET",
+                url: myUrlGet,
+                success: function (result) {
+                    console.log("edit data", result);
+
+                    if (result.Success == "1") {
+                        $("#colorOffcanvas .offcanvas-title").html("Edit Color");
+                        $("#colorOffcanvas").offcanvas("show");
+                        $("#colorSaveBtn").text('Update');
+                        $("#ColorsId").val(result.data[0].Id);
+                        $("#name").val(result.data[0].ColorName);
+                        $("#code").val(result.data[0].ColorCode);
+                        $("#desc").val(result.data[0].ColorDesc);
+                        var fullPath = result.data[0].FilePath;
+                        if (fullPath != null) {
+                            var filename = fullPath.split('/').pop();
+                            //$("#attachmentText").text(filename);
+
+                            $("#ColorsFilePath").val(result.data[0].ColorsFilePath);
+                            $('#pdf-iframe').attr('src', "../" + result.data[0].FilePath);
+                        }
+                        if (result.data[0].FilePath != null) {
+                            $("#view-image-or-pdf").toggleClass("d-none");
+                            $("#remove-image-or-pdf").toggleClass("d-none");
+                            $("#pdf-iframe").toggleClass("d-none");
+
+                        }
+                    }
+                    else {
+
+                        toastr.success(result.message, "", {
+                            "toastClass": "toast-red",
+                        });
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert("Error: " + xhr.status);
+                }
+            });
+        }
+
+
+        function setInactiveUrl(data) {
+
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteColors", "Accounts")',
+                        type: "get",
+                        data: { ColorsId: data },
+                        traditional: true,
+                        success: function (response) {
+                            if (response.success == "1") {
+                                toastr.success(response.msg, "", {
+                                    "toastClass": "toast-green",
+                                });
+                                getColors();
+                            }
+                            else if (response.success == "0") {
+                                //alert()
+                                toastr.success(response.msg, "", {
+                                    "toastClass": "toast-red",
+                                });
+                                getColors();
+                            }
+                            else {
+
+                                toastr.success(response.message, "", {
+                                    "toastClass": "toast-red",
+                                });
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+                            toastr.error("Error during delete.", "", { "toastClass": "toast-red" });
+                        }
+                    });
+                }
+            });
+        };
+
+        document.getElementById("remove-image-or-pdf").addEventListener("click", function () {
+            document.getElementById("pdf-iframe").classList.add("d-none");
+            document.getElementById("view-image-or-pdf").classList.add("d-none");
+            document.getElementById("remove-image-or-pdf").classList.add("d-none");
+            document.getElementById("ColorsFilePath").value = "";
+        });
+        if (document.getElementById("ColorsFilePath").value !== "") {
+            $('#pdf-iframe').toggleClass("d-none");
+            $('#view-image-or-pdf').toggleClass("d-none");
+            $('#remove-image-or-pdf').toggleClass("d-none");
+        }
+        document.getElementById("view-image-or-pdf").addEventListener("click", function () {
+            var url = res.FilePath;
+            window.open(url, '_blank');
+        });
+        document.getElementById("print-table-color").addEventListener("click", function () {
+            ColorsTable.print(false, true);
+        });
+        document.getElementById("download-xlsx-color").addEventListener("click", function () {
+            ColorsTable.download("xlsx", "Colors.xlsx", { sheetName: "Color" });
+        });
+
+
+        //duplicate color name error  handling
+        var sizeSave = document.querySelector('#colorSaveBtn');
+
+        function getAllcolour(callback) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetColorList", "Accounts")',
+                dataType: "json",
+                success: function (data) {
+                    console.log("data::", data.data);
+                    var ColorCodeGetArray = [];
+
+                    data.data.forEach(function (item) {
+                        var ColorName = item.ColorName;
+                        var ColorIdGet = item.Id;
+                        var ColorData = {
+                            ColorName: ColorName,
+                            Id: ColorIdGet
+                        };
+                        ColorCodeGetArray.push(ColorData);
+                    });
+
+                    if (typeof callback === "function") {
+                        callback(ColorCodeGetArray);
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                }
+            });
+        }
+        //console.log("currentColorId", currentColorId);
+        function checkColorExists(colorName) {
+            getAllcolour(function (data) {
+                var lowercasedColorName = colorName.toLowerCase();
+
+                var colorExists = data.some(function (item) {
+
+                    if (currentColorId && currentColorId === item.Id) {
+                        return false;
+                    }
+
+                    return item.ColorName.trim().toLowerCase() === lowercasedColorName;
+                });
+
+                if (colorExists) {
+                    $("#colorNameValidation").html("Already has the same color!");
+                    sizeSave.disabled = true;
+                } else {
+                    $("#colorNameValidation").html("");
+                    sizeSave.disabled = false;
+                }
+            });
+        }
+
+        var ColorNameHanlde = document.getElementById("name");
+        ColorNameHanlde.addEventListener("input", function () {
+            console.log("currentColorId", currentColorId);
+
+            var enteredColorName = ColorNameHanlde.value;
+            checkColorExists(enteredColorName);
+        });
+
+        $("#closeColorOffCanvasBtn").on("click", function () {
+            $("#colorOffcanvas").offcanvas('hide');
+            clearOffCanvasData()
+        });
+
+        //===========================color functionalities ends=====================
+
+
+
+
+
+
+
+        //===========================size functionalities starts=====================
+        var SizeTable;
+        var currentSizeId;
+        //getSizes();
+        function getSizes() {
+            var supplierApiUrl = '@Url.Action("GetSizeList", "Accounts")';
+            SizeTable = new Tabulator("#sizes-table", {
+                // data: dataTableFilter,
+                dataTree: true,
+                //height:300,
+                dataTreeStartExpanded: true,
+                dataTreeChildField: "children",
+                layout: "fitColumns",
+                selectable: 1,
+                pagination: true,
+                paginationMode: "remote",
+                filterMode: "remote",
+                paginationSize: 5,
+                paginationInitialPage: 1,
+                paginationSizeSelector: [5, 10, 25, 50, 100, 500, 1000],
+                paginationCounter: "rows",
+                ajaxURL: supplierApiUrl,
+                ajaxConfig: "get",
+                ajaxContentType: "json",
+
+                ajaxResponse: function (url, params, response) {
+                    SizeTable.setMaxPage(response.last_page);
+                    // //console.log("response.last_page", response.last_page);
+
+                    dataLoadExpense = response.data;
+                    ////console.log("dataLoadExpense abc:", dataLoadExpense);
+
+                    return {
+
+                        data: dataLoadExpense,
+                        last_page: response.last_page,
+
+                    };
+                },
+
+                columns: globalFieldsSize,
+                ajaxURLGenerator: function (url, config, params) {
+                    //return request url
+                    return url + "?searchquery=" + encodeURIComponent(JSON.stringify(params)); //encode parameters as a json object
+                },
+                dataBound: function () {
+                    // Freeze the top 1 row (index 0) after the table is created
+                    var rows = table.getRows();
+                    if (rows.length > 0) {
+                        var cells = rows[0].getCells();
+                        cells.forEach(cell => {
+                            cell.freeze();
+                        });
+                    }
+                },
+            });
+
+
+
+
+
+            //size gear functionalities starts=============
+           
+            var columnListSize = $("#sizeColumnList");
+
+            $.each(globalFieldsSize, function (index, field) {
+                //console.log("GLOBAL 2::",field);
+                var title = field.title;
+                var name = field.field;
+                var visible = true;
+                if (field.visible == false) {
+                    visible = false;
+                }
+                var Sizetitles = `<li>
+                                 <a class="dropdown-item" href="#">
+                                 <div class="custom-control custom-checkbox" >
+                                 <input type="checkbox" class="custom-control-input title-input" id="sz_${name}" value="${name}">
+                                 <label class="custom-control-label w-100 cursor-pointer" id="sz_${name}" for="sz_${name}">${title}</label>
+                                 </div>
+                                 </a>
+                                 </li>`;
+                columnListSize.append(Sizetitles);
+
+                document.querySelector(`#sz_${name}`).addEventListener('click', function (event) {
+                    var checkbox = event.target;
+                    var isChecked = checkbox.checked;
+
+                    if (isChecked) {
+                        SizeTable.showColumn(name);
+                    } else {
+                        SizeTable.hideColumn(name);
+                    }
+                });
+
+
+                $(`#sz_${name}`).prop('checked', visible);
+
+
+                $('.custom-control-label').on('click', function (e) {
+                    e.stopPropagation();
+                });
+                $('#dropdown-titles').on('click', function (e) {
+                    e.stopPropagation();
+                });
+
+                //Add event listener to the rows select input
+                $("#size-rows").on("change", function () {
+                    var selectedRows = $(this).val();
+                    if (selectedRows !== null) {
+                        var pageSize = parseInt(selectedRows);
+                        if (!isNaN(pageSize)) {
+                            SizeTable.setPageSize(pageSize);
+                        }
+                    }
+                });
+
+            });
+            //gear functionalities ends===============
+
+        };
+
+        $("#sizeSaveBtn").click(function () {
+            SaveSizes();
+        });
+        function SaveSizes() {
+            var model = {
+                Id: $("#SizesId").val() || 0,
+                SizeName: $("#SizeName").val(),
+                SizeCode: $("#SizeCode").val(),
+                SizeDesc: $("#SizeDesc").val(),
+            };
+            console.log("Size model", model);
+            $.ajax({
+                async: false,
+                type: "POST",
+                url: '@Url.Action("AddUpdateSize", "Accounts")',
+                data: JSON.stringify(model),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    console.log("after save result", result);
+                    var ColorsId = result.Id;
+
+                    if (result.success == "1") {
+                        toastr.success(result.message, "", {
+                            "toastClass": "toast-green",
+                        });
+                        $("#sizeOffcanvas").offcanvas('hide');
+                        clearOffCanvasDataOfSize();
+                        getSizes();
+                    } else {
+                        toastr.success(result.message, "", {
+                            "toastClass": "toast-red",
+                        });
+                        getSizes();
+                    }
+                },
+                error: function () {
+                    toastr.success(result.message, "", {
+                        "toastClass": "toast-red",
+                    });
+                    getSizes();
+                }
+            });
+        }
+        function clearOffCanvasDataOfSize() {
+            $("#sizeOffcanvas .offcanvas-title").html("Add New Size");
+            $("#SizesId").val("");
+            $("#SizeName").val("");
+            $("#SizeCode").val("");
+            $("#SizeDesc").val("");
+            $('#sizeSaveBtn').text("Save");
+            $('#sizeNameValidation').html("");
+        }
+
+
+        $("#closeSizeOffCanvasBtn").on("click", function () {
+            $("#sizeOffcanvas").offcanvas('hide');
+            clearOffCanvasDataOfSize()
+        });
+
+
+        function editSizes(data) {
+            currentSizeId = data;
+
+            var myUrlGet = '@Url.Action("GetSizeEdit", "Accounts")?id=' + data;
+            $.ajax({
+                type: "GET",
+                url: myUrlGet,
+                success: function (result) {
+                    console.log("edit data", result);
+
+                    if (result.Success == "1") {
+                        $("#sizeOffcanvas .offcanvas-title").html("Edit Size");
+                        $("#sizeOffcanvas").offcanvas("show");
+                        $("#sizeSaveBtn").text('Update');
+                        $("#SizesId").val(result.data[0].Id);
+                        $("#SizeName").val(result.data[0].SizeName);
+                        $("#SizeCode").val(result.data[0].SizeCode);
+                        $("#SizeDesc").val(result.data[0].SizeDesc);
+                    }
+                    else {
+
+                        toastr.success(result.message, "", {
+                            "toastClass": "toast-red",
+                        });
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert("Error: " + xhr.status);
+                }
+            });
+        }
+
+
+        function setInactiveUrlOfSizes(data) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteSizes", "Accounts")',
+                        type: "get",
+                        data: { id: data },
+                        traditional: true,
+                        success: function (response) {
+                            if (response.success == "1") {
+                                toastr.success(response.msg, "", {
+                                    "toastClass": "toast-green",
+                                });
+                                getSizes();
+                            }
+                            else if (response.success == "0") {
+                                //alert()
+                                toastr.success(response.msg, "", {
+                                    "toastClass": "toast-red",
+                                });
+                                getSizes();
+                            }
+                            else {
+
+                                toastr.success(response.message, "", {
+                                    "toastClass": "toast-red",
+                                });
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+                            toastr.error("Error during delete.", "", { "toastClass": "toast-red" });
+                        }
+                    });
+                }
+            });
+        };
+        document.getElementById("print-table-size").addEventListener("click", function () {
+            SizeTable.print(false, true);
+        });
+        document.getElementById("download-xlsx-size").addEventListener("click", function () {
+            SizeTable.download("xlsx", "Sizes.xlsx", { sheetName: "Size" });
+        });
+
+
+
+        var colorSave = document.querySelector('#sizeSaveBtn');
+        function getAllSize(callback) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetSizeList", "Accounts")',
+                dataType: "json",
+                success: function (data) {
+                    console.log("data::", data.data);
+                    var SizeCodeGetArray = [];
+
+                    data.data.forEach(function (item) {
+                        var SizeName = item.sname;
+                        var SizeIdGet = item.Id;
+                        var SizeData = {
+                            SizeName: SizeName,
+                            Id: SizeIdGet
+                        };
+                        SizeCodeGetArray.push(SizeData);
+                    });
+
+                    if (typeof callback === "function") {
+                        callback(SizeCodeGetArray);
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                }
+            });
+        }
+
+        function checkSizeExists(sizeName) {
+            getAllSize(function (data) {
+                var lowercasedSizeName = sizeName.toLowerCase();
+
+                var sizeExists = data.some(function (item) {
+                    console.log("item.Id", item.Id);
+                    //console.log("currentSizeIdd", currentSizeIdd);
+
+                    if (currentSizeId && currentSizeId === item.Id) {
+                        return false;
+                    }
+
+                    return item.SizeName.trim().toLowerCase() === lowercasedSizeName;
+                });
+
+                console.log("sizeExists", sizeExists);
+
+                if (sizeExists) {
+                    $("#sizeNameValidation").html("Already has the same size!");
+                    colorSave.disabled = true;
+                } else {
+                    $("#sizeNameValidation").html("");
+                    colorSave.disabled = false;
+
+                }
+            });
+        }
+
+        var sizeNameHandle = document.getElementById("SizeName");
+        sizeNameHandle.addEventListener("input", function () {
+            //console.log("currentSizeId", currentSizeIdd);
+
+            var enteredSizeName = sizeNameHandle.value;
+            checkSizeExists(enteredSizeName);
+        });
+
+        //===========================size functionalities ends=====================
+
+
+
+
+        //===========================category functionalities starts=====================
+        var CatTable;
+        var currentCatId;
+        //getCatTable();
+        function getCatTable() {
+            var supplierApiUrl = '@Url.Action("GetCategoryList", "Accounts")';
+            CatTable = new Tabulator("#bomallocationcat-table", {
+                // data: dataTableFilter,
+                dataTree: true,
+                //height:300,
+                dataTreeStartExpanded: true,
+                dataTreeChildField: "children",
+                layout: "fitColumns",
+                selectable: 1,
+                pagination: true,
+                paginationMode: "remote",
+                filterMode: "remote",
+                paginationSize: 5,
+                paginationInitialPage: 1,
+                paginationSizeSelector: [5, 10, 25, 50, 100, 500, 1000],
+                paginationCounter: "rows",
+                ajaxURL: supplierApiUrl,
+                ajaxConfig: "get",
+                ajaxContentType: "json",
+
+                ajaxResponse: function (url, params, response) {
+                    CatTable.setMaxPage(response.last_page);
+                    // //console.log("response.last_page", response.last_page);
+
+                    dataLoadExpense = response.data;
+                    ////console.log("dataLoadExpense abc:", dataLoadExpense);
+
+                    return {
+
+                        data: dataLoadExpense,
+                        last_page: response.last_page,
+
+                    };
+                },
+
+                columns: globalFieldsCategory,
+                ajaxURLGenerator: function (url, config, params) {
+                    //return request url
+                    return url + "?searchquery=" + encodeURIComponent(JSON.stringify(params)); //encode parameters as a json object
+                },
+                dataBound: function () {
+                    // Freeze the top 1 row (index 0) after the table is created
+                    var rows = table.getRows();
+                    if (rows.length > 0) {
+                        var cells = rows[0].getCells();
+                        cells.forEach(cell => {
+                            cell.freeze();
+                        });
+                    }
+                },
+            });
+
+
+
+
+
+            //size gear functionalities starts=============
+           
+            var columnListSize = $("#bomallocationcatColumnList");
+
+            $.each(globalFieldsCategory, function (index, field) {
+                //console.log("GLOBAL 2::",field);
+                var title = field.title;
+                var name = field.field;
+                var visible = true;
+                if (field.visible == false) {
+                    visible = false;
+                }
+                var Sizetitles = `<li>
+                                 <a class="dropdown-item" href="#">
+                                 <div class="custom-control custom-checkbox" >
+                                 <input type="checkbox" class="custom-control-input title-input" id="${name}" value="${name}">
+                                         <label class="custom-control-label w-100 cursor-pointer" id="${name}" for="${name}">${title}</label>
+                                 </div>
+                                 </a>
+                                 </li>`;
+                columnListSize.append(Sizetitles);
+
+                document.querySelector(`#${name}`).addEventListener('click', function (event) {
+                    var checkbox = event.target;
+                    var isChecked = checkbox.checked;
+
+                    if (isChecked) {
+                        CatTable.showColumn(name);
+                    } else {
+                        CatTable.hideColumn(name);
+                    }
+                });
+
+
+                $(`${'#' + name}`).prop('checked', visible);
+
+
+                $('.custom-control-label').on('click', function (e) {
+                    e.stopPropagation();
+                });
+                $('#dropdown-titles').on('click', function (e) {
+                    e.stopPropagation();
+                });
+
+                //Add event listener to the rows select input
+                $("#bomallocationcat-rows").on("change", function () {
+                    var selectedRows = $(this).val();
+                    if (selectedRows !== null) {
+                        var pageSize = parseInt(selectedRows);
+                        if (!isNaN(pageSize)) {
+                            CatTable.setPageSize(pageSize);
+                        }
+                    }
+                });
+
+            });
+            //gear functionalities ends===============
+
+        };
+
+        $("#catSaveBtn").click(function () {
+            SaveCategories();
+        });
+        function SaveCategories() {
+            var model = {
+                Id: $("#CatId").val() || 0,
+                Name: $("#catName").val(),
+                ShortName: $("#catShortName").val(),
+                Code: $("#catCode").val(),
+                CategoryTypeId: $("#CategoryTypeId").val(),
+            };
+            console.log("Size model", model);
+            $.ajax({
+                async: false,
+                type: "POST",
+                url: '@Url.Action("AddUpdateCategory", "Accounts")',
+                data: JSON.stringify(model),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    console.log("after save result", result);
+                    var ColorsId = result.Id;
+
+                    if (result.success == "1") {
+                        toastr.success(result.message, "", {
+                            "toastClass": "toast-green",
+                        });
+                        $("#catOffcanvas").offcanvas('hide');
+                        clearOffCanvasDataOfcat();
+                        getCatTable();
+                    } else {
+                        toastr.success(result.message, "", {
+                            "toastClass": "toast-red",
+                        });
+                        getCatTable();
+                    }
+                },
+                error: function () {
+                    toastr.success(result.message, "", {
+                        "toastClass": "toast-red",
+                    });
+                    getCatTable();
+                }
+            });
+        }
+        function clearOffCanvasDataOfcat() {
+            $("#catOffcanvas .offcanvas-title").html("Add New Category");
+            $("#CatId").val("");
+            $("#catName").val("");
+            $("#catShortName").val("");
+            $("#catCode").val("");
+            $("#CategoryTypeId").val("");
+            $('#catSaveBtn').text("Save");
+            $('#catNameValidation').html("");
+        }
+
+
+        $("#closecatOffCanvasBtn").on("click", function () {
+            $("#catOffcanvas").offcanvas('hide');
+            clearOffCanvasDataOfcat()
+        });
+
+
+        function editCat(data) {
+            currentCatId = data;
+
+            var myUrlGet = '@Url.Action("GetCategoryEdit", "Accounts")?id=' + data;
+            $.ajax({
+                type: "GET",
+                url: myUrlGet,
+                success: function (result) {
+                    console.log("edit data", result);
+
+                    if (result.Success == "1") {
+                        $("#catOffcanvas .offcanvas-title").html("Edit Category");
+                        $("#catOffcanvas").offcanvas("show");
+                        $("#catSaveBtn").text('Update');
+                        $("#CatId").val(result.data[0].Id);
+                        $("#catName").val(result.data[0].Name);
+                        $("#catShortName").val(result.data[0].ShortName);
+                        $("#catCode").val(result.data[0].Code);
+                        $("#CategoryTypeId").val(result.data[0].CategoryTypeId).change();
+                    }
+                    else {
+
+                        toastr.success(result.message, "", {
+                            "toastClass": "toast-red",
+                        });
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert("Error: " + xhr.status);
+                }
+            });
+        }
+
+
+        function setInactiveCat(data) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteCategories", "Accounts")',
+                        type: "get",
+                        data: { id: data },
+                        traditional: true,
+                        success: function (response) {
+                            if (response.success == "1") {
+                                toastr.success(response.msg, "", {
+                                    "toastClass": "toast-green",
+                                });
+                                getCatTable();
+                            }
+                            else if (response.success == "0") {
+                                //alert()
+                                toastr.success(response.msg, "", {
+                                    "toastClass": "toast-red",
+                                });
+                                getCatTable();
+                            }
+                            else {
+
+                                toastr.success(response.message, "", {
+                                    "toastClass": "toast-red",
+                                });
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+                            toastr.error("Error during delete.", "", { "toastClass": "toast-red" });
+                        }
+                    });
+                }
+            });
+        };
+        document.getElementById("print-table-cat").addEventListener("click", function () {
+            CatTable.print(false, true);
+        });
+        document.getElementById("download-xlsx-cat").addEventListener("click", function () {
+            CatTable.download("xlsx", "Categories.xlsx", { sheetName: "Categories" });
+        });
+
+
+
+        var CatSave = document.querySelector('#catSaveBtn');
+        function getAllCats(callback) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetCategoryList", "Accounts")',
+                dataType: "json",
+                success: function (data) {
+                    console.log("data::", data.data);
+                    var SizeCodeGetArray = [];
+
+                    data.data.forEach(function (item) {
+                        var SizeName = item.catname;
+                        var SizeIdGet = item.Id;
+                        var SizeData = {
+                            SizeName: SizeName,
+                            Id: SizeIdGet
+                        };
+                        SizeCodeGetArray.push(SizeData);
+                    });
+
+                    if (typeof callback === "function") {
+                        callback(SizeCodeGetArray);
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                }
+            });
+        }
+
+        function checkCatsExists(sizeName) {
+            getAllCats(function (data) {
+                var lowercasedSizeName = sizeName.toLowerCase();
+
+                var sizeExists = data.some(function (item) {
+                    console.log("item.Id", item.Id);
+                    //console.log("currentSizeIdd", currentSizeIdd);
+
+                    if (currentCatId && currentCatId === item.Id) {
+                        return false;
+                    }
+
+                    return item.SizeName.trim().toLowerCase() === lowercasedSizeName;
+                });
+
+                console.log("sizeExists", sizeExists);
+
+                if (sizeExists) {
+                    $("#catNameValidation").html("Already has the same category!");
+                    CatSave.disabled = true;
+                } else {
+                    $("#catNameValidation").html("");
+                    CatSave.disabled = false;
+
+                }
+            });
+        }
+
+        var catNameHandle = document.getElementById("catName");
+        catNameHandle.addEventListener("input", function () {
+            //console.log("currentSizeId", currentSizeIdd);
+
+            var enteredSizeName = catNameHandle.value;
+            checkCatsExists(enteredSizeName);
+        });
+
+        //===========================category functionalities ends=====================
+
+
+        function formatDateToCustomStringForDate(inputDate) {
+            const months = [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+
+            if (inputDate instanceof Date && !isNaN(inputDate)) {
+                const day = inputDate.getDate();
+                const monthIndex = inputDate.getMonth();
+                const year = inputDate.getFullYear();
+                const formattedDay = day < 10 ? `0${day}` : day;
+
+                const formattedDate = `${formattedDay}-${months[monthIndex]}-${year}`;
+                return formattedDate;
+            } else {
+                return inputDate;
+            }
+        }
+
+        //===========================mpo functionalities starts=====================
+        var MPOTable;
+        //getMPO();
+        function getMPO() {
+            var MPOApiUrl = '@Url.Action("GetMPOList", "Accounts")';
+            MPOTable = new Tabulator("#mpo-table", {
+                // data: dataTableFilter,
+                dataTree: true,
+                height: 300,
+                dataTreeStartExpanded: true,
+                dataTreeChildField: "children",
+                layout: "fitColumns",
+                selectable: 1,
+                pagination: true,
+                paginationMode: "remote",
+                filterMode: "remote",
+                paginationSize: 5,
+                paginationInitialPage: 1,
+                paginationSizeSelector: [5, 10, 25, 50, 100, 500, 1000],
+                paginationCounter: "rows",
+                ajaxURL: MPOApiUrl,
+                ajaxConfig: "get",
+                ajaxContentType: "json",
+
+                ajaxResponse: function (url, params, response) {
+                    MPOTable.setMaxPage(response.last_page);
+                    // //console.log("response.last_page", response.last_page);
+
+                    dataLoadExpense = response.data;
+                    ////console.log("dataLoadExpense abc:", dataLoadExpense);
+                    dataLoadExpense.forEach(function (item) {
+                        if (item.MasterPODate) {
+                            const dateObject = new Date(item.MasterPODate);
+                            item.MasterPODate = formatDateToCustomStringForDate(dateObject);
+                        }
+
+                    });
+                    return {
+
+                        data: dataLoadExpense,
+                        last_page: response.last_page,
+
+                    };
+                },
+
+                columns: globalFieldsMasterPO,
+                ajaxURLGenerator: function (url, config, params) {
+                    //return request url
+                    return url + "?searchquery=" + encodeURIComponent(JSON.stringify(params)); //encode parameters as a json object
+                },
+                dataBound: function () {
+                    // Freeze the top 1 row (index 0) after the table is created
+                    var rows = table.getRows();
+                    if (rows.length > 0) {
+                        var cells = rows[0].getCells();
+                        cells.forEach(cell => {
+                            cell.freeze();
+                        });
+                    }
+                },
+            });
+
+
+
+
+
+            //mpo gear functionalities starts=============          
+
+            var columnListStyle = $("#mpoColumnList");
+            $.each(globalFieldsMasterPO, function (index, field) {
+                ////console.log("GLOBAL 2::",field);
+                var title = field.title;
+                var name = field.field;
+                var visible = true;
+                if (field.visible == false) {
+                    visible = false;
+                }
+                var Styletitles = `<li>
+                                       <a class="dropdown-item" href="#">
+                                       <div class="custom-control custom-checkbox" >
+                                       <input type="checkbox" class="custom-control-input title-input" id="${name}" value="${name}">
+                                               <label class="custom-control-label w-100 cursor-pointer" id="${name}" for="${name}">${title}</label>
+                                       </div>
+                                       </a>
+                                       </li>`;
+                columnListStyle.append(Styletitles);
+
+                document.querySelector(`#${name}`).addEventListener('click', function (event) {
+                    var checkbox = event.target;
+                    var isChecked = checkbox.checked;
+
+                    if (isChecked) {
+                        MPOTable.showColumn(name);
+                    } else {
+                        MPOTable.hideColumn(name);
+                    }
+                });
+
+
+                $(`${'#' + name}`).prop('checked', visible);
+
+
+                $('.custom-control-label').on('click', function (e) {
+                    e.stopPropagation();
+                });
+                $('#dropdown-titles').on('click', function (e) {
+                    e.stopPropagation();
+                });
+
+                //Add event listener to the rows select input
+                $("#mpo-rows").on("change", function () {
+                    var selectedRows = $(this).val();
+                    if (selectedRows !== null) {
+                        var pageSize = parseInt(selectedRows);
+                        if (!isNaN(pageSize)) {
+                            MPOTable.setPageSize(pageSize);
+                        }
+                    }
+                });
+
+            });
+            //gear functionalities ends===============
+
+        };
+
+
+
+
+
+
+
+        function setMPOInactive(data) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteMPO", "Accounts")',
+                        type: "get",
+                        data: { id: data },
+                        traditional: true,
+                        success: function (response) {
+                            if (response.success == "1") {
+                                toastr.success(response.msg, "", {
+                                    "toastClass": "toast-green",
+                                });
+                                getMPO();
+                            }
+                            else if (response.success == "0") {
+                                //alert()
+                                toastr.success(response.msg, "", {
+                                    "toastClass": "toast-red",
+                                });
+                                getMPO();
+                            }
+                            else {
+
+                                toastr.success(response.message, "Access Denied", {
+                                    "toastClass": "toast-red",
+                                });
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+                            toastr.error("Error during delete.", "", { "toastClass": "toast-red" });
+                        }
+                    });
+                }
+            });
+        };
+
+        document.getElementById("print-table-mpo").addEventListener("click", function () {
+            MPOTable.print(false, true);
+        });
+        document.getElementById("download-xlsx-mpo").addEventListener("click", function () {
+            MPOTable.download("xlsx", "MASTER PO.xlsx", { sheetName: "MASTER PO" });
+        });
+
+        //===========================mpo functionalities ends=======================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+}

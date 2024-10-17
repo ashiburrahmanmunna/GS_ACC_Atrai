@@ -1,0 +1,194 @@
+﻿@model IEnumerable<Atrai.Model.Core.Entity.UnitModel>
+@{
+    ViewData["Title"] = "Unit List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" ></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+<style>
+    .modal {
+    z-index: 1050; /* Adjust as needed */
+    position: fixed;
+}
+.modal-backdrop {
+    z-index: 1040; /* Adjust as needed */
+    position: fixed;
+}
+
+</style>
+<div class="page-wrapper">
+    <div class="container-fluid">
+
+        @*
+
+            </div>*@
+
+        <!-- Start Page Content -->
+
+
+        <div class="card p-1">
+
+            <div class="card-header">
+                <div class="row">
+                    @*<div class="col-md-2 col-12">
+                        @Html.ActionLink("Create Unit", "AddUnit", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                    </div>*@
+                    <div class="col-md-2 col-12">
+                        <a href="#" id="modalunit" class="btn btn-sm btn-outline-info btn-block rounded-0" data-toggle="modal" data-target="#unitModal">Create Unit</a>
+                    </div>
+
+                    <div class="col-md-2 col-12">
+                        <h4 style="color: #1976d2;">Unit List</h4>
+                    </div>
+                    <div class="modal fade" id="unitModal" tabindex="-1" role="dialog" aria-labelledby="unitModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="unitModalLabel">Create Unit</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="unitModalContent">
+                                        <!-- Content loaded from AddUnit action will appear here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="example23" class="display nowrap table table-sm table-hover  table-bordered table-striped" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.UnitName)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.UnitShortName)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.UnitNameBangla)
+                                </th>
+                                <th>
+                                Product Count
+                                </th>
+
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.UnitName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.UnitShortName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.UnitNameBangla)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.ProductCount)
+                                </td>
+                                <td>
+                                  @*  <a href="@Url.Action("EditUnit", "Admin", new { Unitid = item.Id })" class="btn btn-icon btn-warning rounded-0 btn-sm rounded-0 mb-1">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>*@
+                                        <a href="#" class="btn btn-icon btn-warning rounded-0 btn-sm rounded-0 mb-1 edit-unit-link" data-unit-id="@item.Id">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+
+
+
+                                    @if (@item.ProductCount == 0)
+                                    {
+                                        <a href="@Url.Action("DeleteUnit", "Admin", new { Unitid = item.Id })" onclick="return confirm('Are you sure you want to Remove this Unit?')" class="btn btn-icon btn-danger rounded-0 btn-sm rounded-0 mb-1">
+                                            <i class="bi bi-x"></i>
+                                        </a>
+                                    }
+                                </td>
+
+                            </tr>
+}
+                        </tbody>
+                    </table>
+
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+
+
+@section Scripts{
+    <script type="text/javascript">
+
+
+
+   $(document).ready(function () {
+
+            $('#modalunit').on('click', function (e) {
+                console.log('adda');
+                var url = '@Url.Action("AddUnit", "Admin")';
+                var unitModalContent = $('#unitModalContent');
+                var loadingIndicator = $('<div class="loading-indicator"></div>');
+
+                // Add the loading indicator to the modal content
+                unitModalContent.html(loadingIndicator);
+
+                // Load the content and replace the loading indicator
+                unitModalContent.load(url, function () {
+                    loadingIndicator.remove();
+                });
+            });
+
+            $('.edit-unit-link').on('click', function (e) {
+                e.preventDefault();
+
+                var unitId = $(this).data('unit-id');
+                var url = '@Url.Action("EditUnit", "Admin")?UnitId=' + unitId;
+
+                var unitModalContent = $('#unitModalContent');
+                var loadingIndicator = $('<div class="loading-indicator"></div>');
+
+                // Add the loading indicator to the modal content
+                unitModalContent.html(loadingIndicator);
+
+                // Load the content and replace the loading indicator
+                $.get(url, function (data) {
+                    unitModalContent.html(data);
+                    $('#unitModal').modal('show'); // Show the modal
+                });
+            });
+
+
+
+
+
+
+
+
+    });
+</script>
+}

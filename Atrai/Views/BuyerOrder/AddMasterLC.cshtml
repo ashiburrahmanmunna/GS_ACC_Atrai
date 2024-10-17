@@ -1,0 +1,1600 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Master LC";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+
+    .form-control {
+        font-size: 14px;
+        font-family: 'Arial Narrow', Arial, sans-serif;
+    }
+
+    .select2-container {
+        font-size: 13px;
+        font-family: 'Arial Narrow', Arial, sans-serif;
+    }
+
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+    .form-control{
+        border: 1px solid #adb5bd !important;
+    }
+
+    #example-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #393a3d;
+        color: #fff;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+</style>
+
+
+<div >
+    <div style="background: #F4F4F4; padding: 20px;">
+        <h3 style="border-bottom: 1px solid gray">Master LC</h3>
+        <input type="hidden" id="Id" value="0" />
+        <div class="row">
+            <div class="col-md col-2 px-1">
+                <label>Company</label>
+                <select id="Company" class="form-control">
+                    <option value="">Select Company</option>
+                </select>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Buyer Group</label>
+                <select id="BuyerGroup" class="form-control">
+                    <option value="">Select Buyer Group</option>
+                </select>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Buyer</label>
+                <select id="Buyer" class="form-control">
+                    <option value="">Select Buyer</option>
+                </select>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>LC Margin</label>
+                <input type="text" id="LCMargin" class="form-control" style="padding:1px;">
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-md col-2 px-1">
+                <label>Bank AccountNo</label>
+                <select id="BankAccountNo" class="form-control">
+                    <option value="">Select Account</option>
+                </select>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Concern Bank</label>
+                <select id="ConcernBank" class="form-control" disabled>
+                    <option value="">Select Concern Bank</option>
+                </select>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Buyer Bank</label>
+                <select id="BuyerBank" class="form-control">
+                    <option value="">Select Buyer Bank</option>
+                </select>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Type</label>
+                <select id="LCType" class="form-control">
+                    <option value="">Select Type</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-md col-2 px-1">
+                <label>Sales Contract No</label>
+                <input type="text" id="SalesContractNo" class="form-control" style="padding:1px;">
+                <span class="text-danger" id="SalesContractNoValidation"></span>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Manual Sales Contract Value</label>
+                <input type="text" id="ManualSalesContractVal" class="form-control" style="padding:1px;">
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Manual Export LC Value</label>
+                <input type="text" id="ManualExportLCVal" class="form-control" style="padding:1px;">
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Sales Contract Date</label>
+                <input id="ContractIssueDate" class="form-control" style="padding:1px;" autocomplete="off">
+            </div>
+           
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-md col-2 px-1">
+                <label>Sales Contract Last Shipment Date</label>
+                <input id="ContractLastShipmentDate" class="form-control" style="padding:1px;" autocomplete="off">
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Unit Name</label>
+                <select id="UnitId" class="form-control">
+                    <option value="">Select Unit</option>
+                </select>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Currency</label>
+                <select id="CurrencyId" class="form-control">
+                    <option value="">Select Currency</option>
+                </select>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Export LC No.</label>
+                <input id="ExportLCNo" class="form-control" style="padding:1px;">
+            </div>
+            
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-md col-2 px-1">
+                <label>Export LC Issue Date</label>
+                <input id="ExportLCIssueDate" class="form-control" style="padding:1px;" autocomplete="off">
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Export LC/Contract Qty</label>
+                <input id="ExportLCContractQty" class="form-control" style="padding:1px;">
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Export LC/Contract Value</label>
+                <input id="ExportLCContractVal" class="form-control" style="padding:1px;">
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Trade Term</label>
+                <select id="TradeTermId" class="form-control">
+                    <option value="">Select from list</option>
+                </select>
+            </div>
+          
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-md col-2 px-1">
+                <label>Port of Loading</label>
+                <select id="LoadingPort" class="form-control">
+                    <option value="">Select from list</option>
+                </select>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Port of Discharge</label>
+                <select id="DischargePort" class="form-control">
+                    <option value="">Select from list</option>
+                </select>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Destination</label>
+                <select id="DestinationId" class="form-control">
+                    <option value="">Select from list</option>
+                </select>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Ship Mode</label>
+                <select id="ShipModeId" class="form-control">
+                    <option value="">=N/A=</option>
+                </select>
+            </div>
+            
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-md col-2 px-1">
+                <label>Payment Terms</label>
+                <select id="PaymentTermsId" class="form-control">
+                    <option value="">Select from list</option>
+                </select>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Days</label>
+                <select id="DayId" class="form-control">
+                    <option value="">Select from list</option>
+                </select>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>LC Status</label>
+                <select id="LCStatusId" class="form-control">
+                    <option value="">=N/A=</option>
+                </select>
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Destination</label>
+                <input id="Destination" class="form-control" style="padding:1px;">
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md col-2 px-1">
+                <label>Remarks</label>
+                <input id="Remarks" class="form-control" style="padding:1px;">
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>File NO</label>
+                <input id="FileNo" class="form-control" style="padding:1px;">
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Remaining Contract Value</label>
+                <input id="RemainingContractVal" class="form-control" style="padding:1px;" value="0">
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Exp LC No[Imp Dept.] Rev. Amd No</label>
+                <input id="LCNOforImport" class="form-control" style="padding:1px;">
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md col-2 px-1">
+                <label>CMT Permission</label>
+                <input id="CMTPermission" class="form-control" style="padding:1px;">
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>PI NO</label>
+                <input id="PINo" class="form-control" style="padding:1px;">
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>PI Date</label>
+                <input id="PIDate" class="form-control" style="padding:1px;" autocomplete="off">
+            </div>
+            <div class="col-md col-2 px-1">
+                <label>Commercial Type</label>
+                <select id="CommercialTypeId" class="form-control">
+                    <option value="">Select from list</option>
+                </select>
+            </div>
+        </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4" style="background: #F4F4F4; padding: 20px; margin-left: 0px; margin-right: 0px;">
+        <div class="col-md-5 col-5">
+            <div class="input-group">
+                <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
+                <button class="btn btn-outline-secondary d-none" type="button" id="inputGroupFileAddon04" style="background-color: #007bff; color: white;">Upload Files</button>
+            </div>
+        </div>
+        
+        <div class="col-md-7 col-7">
+            <h6 class="mt-1" style="color: black">Upload the List of Buyer PO Under the Referred Sales Contact</h6>
+        </div>
+    </div>
+    
+    <input type="text" id="search-buyerpoid" placeholder="Search" class="mt-2">
+    <div id="example-table" style="margin-top: 30px;"></div>
+    <div class="row" style="margin-bottom: 50px;">
+        <div class="col-md-3 col-12">
+            <div class="btn-group">
+                <button type="button" class="btn btn-success btn-sm" id="add-row">Add Row</button>
+                <button type="button" class="btn btn-danger btn-sm" id="del-row">Clear Table</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="container-fluid">
+            <div class="row px-4">
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-outline-secondary text-white btn-sm rounded-pill " id="BtnBack" onclick="window.location.href = '@Url.Action("Export", "BuyerOrder", new { Type = "MasterLC" })';">Cancel</button>
+                </div>
+                <div class="col-md-6 d-flex justify-content-center">
+                    
+                </div>
+
+                <div class="col-md-3 d-flex justify-content-end">
+                    <button class="btn btn-outline-secondary text-white btn-sm rounded-pill me-1" id="BtnSave">
+                        @if (ViewBag.ActionType == "Edit")
+                        {
+                            <span>Update</span>
+                        }
+                        else if (ViewBag.ActionType == "Create")
+                        {
+                            <span>Save </span>
+                        }
+
+                    </button>
+                    <div class="btn-group">
+                        <button class="btn btn-success btn-sm" id="BtnSaveClose">
+                            @if (ViewBag.ActionType == "Edit")
+                            {
+                                <span>Update and close</span>
+                            }
+                            else if (ViewBag.ActionType == "Create" || ViewBag.ActionType == "Copy")
+                            {
+                                <span>Save and close</span>
+                            }
+
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu" id="ul-id-for-expenses">
+                            <li><a class="dropdown-item" href="/Accounts/ImportTransaction">Time activity</a></li>
+                        </ul>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+        <input type="button" id="unknown" class="btn  btn-md" value="" />
+        <div class="dropdown" id="unknown1" style="display: inline-block;">
+        </div>
+    </div>
+</div>
+
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+
+
+    <script>
+        $('#Buyer').select2();
+        $('#BuyerGroup').select2();
+        $('#Company').select2();
+        $('#BankAccountNo').select2();
+        $('#ConcernBank').select2();
+        $('#BuyerBank').select2();
+        $('#LCType').select2();
+        $('#UnitId').select2();
+        $('#CurrencyId').select2();
+        $('#LoadingPort').select2();
+        $('#DischargePort').select2();
+        $('#DestinationId').select2();
+        $('#ShipModeId').select2();
+        $('#PaymentTermsId').select2();
+        $('#CommercialTypeId').select2();
+        $('#DayId').select2();
+        $('#LCStatusId').select2();
+        $('#TradeTermId').select2();
+
+
+        $("#BankAccountNo").on("change", function () {
+            var val = $(this).val();
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetBankAccountNameByBankAccNo", "BuyerOrder")?BankAccountNoId=' + val,
+                datatype: "Json",
+                success: function (data) {
+                    // console.log("data for bank acc no chose", data);
+                    if (data != null) {
+                        $("#ConcernBank").val(data.Id).change();
+                    };
+                }
+            });
+
+        });
+
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetBuyers", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#Buyer').append('<option value="' + value.Id + '" data-currency-id="' + value.CustomerCurrencyId + '" >' + value.Name + '-' + value.CurrencyShortName + '</option>');
+                });
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetComercialCompany", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#Company').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetBuyerGroup", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#BuyerGroup').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetBankAccountNo", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#BankAccountNo').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetConcernBank", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#ConcernBank').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetBuyerBank", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#BuyerBank').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetLCType", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#LCType').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetUnit", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#UnitId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetCurrencies", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#CurrencyId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetTradeTerm", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#TradeTermId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetLoadingPort", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#LoadingPort').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetDischargePort", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#DischargePort').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetDestination", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#DestinationId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetShipMode", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#ShipModeId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetPaymentTerms", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#PaymentTermsId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetCommercialType", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#CommercialTypeId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetDaylist", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#DayId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetLCStatus", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#LCStatusId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+    </script>
+
+
+    <script>
+        $(document).ready(function () {
+            $(function () {
+                $("#ContractIssueDate").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                });
+                $("#ContractLastShipmentDate").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                });
+                $("#ExportLCIssueDate").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                });
+                $("#PIDate").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                });
+            });
+        });
+        function buyerPOEditor(cell, onRendered, success, cancel, editorParams) {
+            var editor = document.createElement("select");
+            editor.setAttribute("class", "select2");
+            editor.style.width = "100%";
+
+            onRendered(function () {
+                $(editor).select2({
+                    closeOnSelect: false,
+                    ajax: {
+                        url: '@Url.Action("GetBuyerPOSearchList", "BuyerOrder")',
+                        dataType: 'json',
+                        data: function (params) {
+                            return {
+                                dropdownSearch: params.term,
+                                pageNo: params.page || 1
+                            };
+                        },
+                        processResults: function (data) {
+                            var options = data.BuyerPOList.map(function (item) {
+                                return {
+                                    id: item.Id,
+                                    text: item.BuyerPO,
+                                    StyleName: item.StyleName,
+                                    UnitPrice: item.UnitPrice,
+                                    TotalValue: item.TotalValue,
+                                    OrderQty: item.OrderQty
+                                };
+                            });
+                            return { results: options };
+                        },
+                        cache: false
+                    }
+                });
+                editor.style.css = "100%";
+                $(editor).select2('open');
+            });
+
+            function successFunc(e) {
+                var data = e.params.data;
+                cell.getRow().update({
+                    "BuyerPOId": data.id,
+                    "BuyerPO": data.text,
+                    "ExportPONo": data.text,
+                    "UnitPrice": data.UnitPrice,
+                    "TotalValue": data.TotalValue,
+                    "StyleName": data.StyleName,
+                    "OrderQty": data.OrderQty,
+                });
+                success(data.text);
+                $(editor).select2('close');
+            }
+
+            function DestroyFunc() {
+                cancel();
+                cell.navigateRight();
+            }
+
+            $(editor).on("select2:select", successFunc);
+            $(editor).on("select2:close", DestroyFunc);
+
+            return editor;
+        }
+
+
+
+        var selectOptions = @Html.Raw(Json.Serialize(ViewBag.BuyerPOList));
+        var unitOptions = @Html.Raw(Json.Serialize(ViewBag.UnitList));
+
+
+        var columns = [
+            {
+                headerSort: false,
+                field: "drag",
+                frozen: true,
+                formatter: function (cell, formatterParams) {
+                    return "<i class='fas fa-bars drag-icon'></i>";
+                },
+                width: 30,
+                headerSort: false,
+                rowHandle: true,
+            },
+            { title: "Id", field: "Id", movable: false, headerSort: false, visible: false },
+            { title: "BuyerPOId", field: "BuyerPOId", movable: false, headerSort: false, visible: false },
+            { title: "UnitMasterId", field: "UnitMasterId", movable: false, headerSort: false, visible: false },
+            { title: "SL.", field: "SLNo", headerSort: false, frozen: true, width: 5, bottomCalc: "count", hozAlign: "right",
+                cellClick: function (e, cell) {
+
+                    let columnCells = table.getColumn("SLNo").getCells();
+                    var row = cell.getRow().getElement();
+
+                    var currentColor = window.getComputedStyle(row).backgroundColor;
+
+                    var highlightColor = "#9abcea";
+
+                    if (currentColor === "rgb(154, 188, 234)") {
+                        var rowData = cell.getRow().getData();
+                        if (rowData.IsVisible) {
+                            row.style.backgroundColor = "";
+                        } else {
+                            row.style.backgroundColor = "#f8dada";
+                        }
+                        //row.style.backgroundColor = "";
+                    } else {
+                        row.style.backgroundColor = highlightColor;
+                    }
+                }
+            },
+            {
+                title: "Buyer PO",
+                field: "BuyerPO",
+                width: 200,
+                hozAlign: "center",
+                sorter: "number",
+                editor: buyerPOEditor,
+                cellEdited: function (cell) {
+                    var rowData = cell.getRow().getData();
+                    if (rowData.ShipmentDate === undefined) {
+                        rowData.ShipmentDate = moment().format('DD-MMM-YYYY');
+                        cell.getRow().update({ ShipmentDate: rowData.ShipmentDate });
+                    }
+                    if (rowData.ContractDate === undefined) {
+                        rowData.ContractDate = moment().format('DD-MMM-YYYY');
+                        cell.getRow().update({ ContractDate: rowData.ContractDate });
+                    }
+                    var selectedText = cell.getValue();
+                    var selectedValue = selectOptions.find(option => option.Text === selectedText);
+                    if (selectedValue) {
+                        var BuyerPOId = selectedValue.Value;
+                        getBuyerPODetails(BuyerPOId, function (exportpono, buyerpoId, unitPrice, orderQty, totalValue, stylename) {
+                            cell.getRow().update({
+                                "ExportPONo": exportpono,
+                                "StyleName": stylename,
+                                "BuyerPOId": buyerpoId,
+                                "UnitPrice": unitPrice,
+                                "OrderQty": orderQty,
+                                "TotalValue": totalValue
+                            });
+                        });
+                    }
+                    markAsTransaction(cell);
+                },
+            },
+            {
+                title: "Unit",
+                field: "UnitName",               
+                hozAlign: "center",
+                sorter: "number",
+                editor: "select",
+                editorParams: {
+                    values: unitOptions.map(option => option.Text),
+                },
+                cellEdited: function (cell) {
+                    var selectedText = cell.getValue();
+                    var selectedValue = unitOptions.find(option => option.Text === selectedText);
+                    if (selectedValue) {
+                        var UnitId = selectedValue.Value;
+                        cell.getRow().update({ UnitMasterId: UnitId, UnitName: selectedText });
+                    }
+                    markAsTransaction(cell);
+                },
+            },
+            { title: "Buyer/Export PO No.", field: "ExportPONo", editor: "input", cellEdited: markAsTransaction },
+            { title: "Style Name", field: "StyleName", editor: "input", cellEdited: markAsTransaction },
+            { title: "Item Name", field: "ItemName", editor: "input", cellEdited: markAsTransaction },
+            { title: "HSCode", field: "HSCode", editor: "input", cellEdited: markAsTransaction },
+            { title: "Fabrication", field: "Fabrication", editor: "input", cellEdited: markAsTransaction },
+            {
+                title: "Order Qty", field: "OrderQty", editor: "input", hozAlign: "right", bottomCalc: "sum",
+                bottomCalcFormatter: "money",
+                formatter: "money",
+                formatterParams: {
+                    decimal: ".",
+                    thousand: ",",
+                    precision: 2,
+                },
+                cellEdited: function (cell) {
+                    markAsTransaction(cell);
+                    calculateTotalQtyInPcs(cell.getRow());                    
+                }
+            },
+            {
+                title: "Factor<span style=\"color: red; \">*</span>", field: "Factor", editor: "input",hozAlign: "right", bottomCalc: "sum",
+                bottomCalcFormatter: "money",
+                formatter: "money",
+                formatterParams: {
+                    decimal: ".",
+                    thousand: ",",
+                    precision: 2,
+                },
+                cellEdited: function (cell) {
+                    markAsTransaction(cell);
+                    calculateTotalQtyInPcs(cell.getRow());
+                }
+            },
+            {
+                title: "Qty In Pcs<span style=\"color: red; \">*</span>", field: "QtyInPcs", hozAlign: "right", bottomCalc: "sum",
+                bottomCalcFormatter: "money",
+                formatter: "money",
+                formatterParams: {
+                    decimal: ".",
+                    thousand: ",",
+                    precision: 2,
+                },
+                cellEdited: function (cell) {
+                    markAsTransaction(cell);
+                    calculateTotalValue(cell.getRow());
+                    calculateCMTTotalAmount(cell.getRow());
+                }
+            },
+            {
+                title: "FOB", field: "UnitPrice", editor: "input",hozAlign: "right", bottomCalc: "sum",
+                bottomCalcFormatter: "money",
+                bottomCalcFormatterParams: {
+                    decimal: ".",
+                    thousand: ",",
+                    precision: 3, 
+                },
+                formatter: "money",
+                formatterParams: {
+                    decimal: ".",
+                    thousand: ",",
+                    precision: 3,
+                },
+                cellEdited: function (cell) {
+                    markAsTransaction(cell);
+                    calculateTotalValue(cell.getRow());
+                    calculateCMTUnitPrice(cell.getRow());
+                    calculateCMTTotalAmount(cell.getRow());
+                }
+            },
+            {
+                title: "Total Value", field: "TotalValue", editor: "input",hozAlign: "right", bottomCalc: "sum",
+                bottomCalcFormatter: "money",
+                bottomCalcFormatterParams: {
+                    decimal: ".",
+                    thousand: ",",
+                    precision: 3, 
+                },
+                formatter: "money",
+                formatterParams: {
+                    decimal: ".",
+                    thousand: ",",
+                    precision: 3,
+                },
+                cellEdited: markAsTransaction
+            },
+            {
+                title: "CMT Percentage<span style=\"color: red; \">*</span>", field: "CMTPercentage",hozAlign: "right", visible: false, editor: "input",                 
+                cellEdited: function (cell) {
+                    calculateCMTUnitPrice(cell.getRow());
+                    calculateCMTTotalAmount(cell.getRow());
+                }
+            },
+            {
+                title: "CMT UnitPrice", field: "CMTUnitPrice",hozAlign: "right",visible: false, bottomCalc: "sum",
+                bottomCalcFormatter: "money",
+                formatter: "money",
+                formatterParams: {
+                    decimal: ".",
+                    thousand: ",",
+                    precision: 2,
+                },
+                cellEdited: markAsTransaction
+            },
+            {
+                title: "CMT TotalAmount", field: "CMTTotalAmount",hozAlign: "right",visible: false, bottomCalc: "sum",
+                bottomCalcFormatter: "money",
+                formatter: "money",
+                formatterParams: {
+                    decimal: ".",
+                    thousand: ",",
+                    precision: 2,
+                },
+                cellEdited: markAsTransaction
+            },
+            {
+                title: "Shipment Date", field: "ShipmentDate", editor: "input",
+                editorParams: {
+                    dateFormat: "d-M-Y",
+                },
+                cellEdited: function (cell) {
+                    cell.getRow().update({ "ShipmentDate": cell.getValue() });
+                    markAsTransaction(cell);
+                },
+                editor: function (cell, onRendered, success, cancel, editorParams) {
+                    var input = document.createElement("input");
+                    input.type = "text";
+                    input.style.width = "100%";
+                    input.value = cell.getValue() || "";
+
+                    var flatpickrInstance = flatpickr(input, editorParams);
+
+                    flatpickrInstance.config.onClose.push(function (selectedDates, dateStr) {
+                        cell.setValue(dateStr);
+                        success(dateStr);
+                    });
+
+                    onRendered(function () {
+                        input.focus();
+                    });
+
+                    return input;
+                },
+            },
+            { title: "Destination", field: "Destination", editor: "input", cellEdited: markAsTransaction },
+            { title: "Contract No", field: "ContractNo", editor: "input", cellEdited: markAsTransaction },
+            { title: "Order Type", field: "OrderType", editor: "input", cellEdited: markAsTransaction },
+            { title: "Cat No", field: "CatNo", editor: "input", cellEdited: markAsTransaction },
+            { title: "Delivery No", field: "DeliveryNo", editor: "input", cellEdited: markAsTransaction },
+            { title: "Destination PO", field: "DestinationPO", editor: "input", cellEdited: markAsTransaction },
+            { title: "Kimball", field: "Kimball", editor: "input", cellEdited: markAsTransaction },
+            { title: "Color Code", field: "ColorCode", editor: "input", cellEdited: markAsTransaction },
+            {
+                title: "Contract Date", field: "ContractDate", editor: "input",
+                editorParams: {
+                    dateFormat: "d-M-Y",
+                },
+                cellEdited: function (cell) {
+                    cell.getRow().update({ "ContractDate": cell.getValue() });
+                    markAsTransaction(cell);
+                },
+                editor: function (cell, onRendered, success, cancel, editorParams) {
+                    var input = document.createElement("input");
+                    input.type = "text";
+                    input.style.width = "100%";
+                    input.value = cell.getValue() || "";
+
+                    var flatpickrInstance = flatpickr(input, editorParams);
+
+                    flatpickrInstance.config.onClose.push(function (selectedDates, dateStr) {
+                        cell.setValue(dateStr);
+                        success(dateStr);
+                    });
+
+                    onRendered(function () {
+                        input.focus();
+                    });
+
+                    return input;
+                },
+            },
+            {
+                title: "Is Transaction", field: "IsTransaction", hozAlign: "center", visible: false, formatter: function (cell) {
+                    return cell.getValue() === 1 ? "1" : "0";
+                }
+            },
+            {
+                title: "Is Delete", field: "IsDelete", hozAlign: "center", visible: false, formatter: function (cell) {
+                    return cell.getValue() === 1 ? "1" : "0";
+                }
+            },
+            {
+                title: "Is Visible", field: "IsVisible", hozAlign: "center", visible: false
+            }
+        ];
+
+        var deleteColumn = {
+            title: "",
+            field: "Delete",
+            movable: false,
+            formatter: function (cell, formatterParams) {
+                // return "<i class='fas fa-trash-alt delete-icon'></i>";
+                var row = cell.getRow().getElement();
+                var rowData = cell.getRow().getData();
+                if (rowData.IsVisible) {
+                    row.style.backgroundColor = "";
+                    return "<i class='fas fa-trash-alt delete-icon'></i>";
+                } else {
+                    row.style.backgroundColor = "#f8dada";
+                    return "";
+                }
+            },
+            width: 30,
+            headerSort: false,
+            cellClick: function (e, cell) {
+                var rowData = cell.getRow().getData();
+                var row = cell.getRow();
+                if (rowData.IsVisible)
+                {
+                    deleteRow(row);
+                }
+                
+            }
+        };
+
+        columns.push(deleteColumn);
+
+
+
+        function calculateTotalQtyInPcs(row) {
+            var orderQty = parseFloat(row.getCell("OrderQty").getValue()) || 0;
+            var factor = parseFloat(row.getCell("Factor").getValue()) || 0;
+            var totalQtyInPcs = orderQty * factor;
+
+            // Set the TotalValue cell
+            row.getCell("QtyInPcs").setValue(totalQtyInPcs);
+        }
+
+        function calculateTotalValue(row) {
+            var qty = parseFloat(row.getCell("QtyInPcs").getValue()) || 0;
+            var unitPrice = parseFloat(row.getCell("UnitPrice").getValue()) || 0;
+            var totalValue = qty * unitPrice;
+
+            // Set the TotalValue cell
+            row.getCell("TotalValue").setValue(totalValue);
+        }
+
+        function calculateCMTUnitPrice(row) {
+            var unitPrice = parseFloat(row.getCell("UnitPrice").getValue()) || 0;
+            var cmtPercentage = parseFloat(row.getCell("CMTPercentage").getValue()) || 0;
+            var cmtUnitPrice = unitPrice * cmtPercentage;
+
+            // Set the CMTUnitPrice cell
+            row.getCell("CMTUnitPrice").setValue(cmtUnitPrice);
+        }
+
+        // Function to calculate the CMT Total Amount
+        function calculateCMTTotalAmount(row) {
+            var qty = parseFloat(row.getCell("QtyInPcs").getValue()) || 0;
+            var cmtUnitPrice = parseFloat(row.getCell("CMTUnitPrice").getValue()) || 0;
+            var cmtTotalAmount = qty * cmtUnitPrice;
+
+            // Set the CMTTotalAmount cell
+            row.getCell("CMTTotalAmount").setValue(cmtTotalAmount);
+        }
+
+
+        function markAsTransaction(cell) {
+            if ('@actiontype' === "Edit") {
+                cell.getRow().update({ IsTransaction: 1 });
+            }
+        }
+
+        var table = new Tabulator("#example-table", {
+            height: "311px",
+            //layout: "fitColumns",
+            movableRows: true,
+            addRowPos: "bottom",
+            columns: columns,
+            pagination: true, 
+            paginationMode: "local", 
+            paginationSize: 5,  
+            paginationInitialPage: 1,  
+            paginationSizeSelector: [5, 10, 25, 50, 100, 500, 1000],
+        });
+
+        // document.getElementById("search-buyerpoid").addEventListener("keyup", function () {
+        //     var searchTerm = this.value; // Get the value from the search input field
+        //     table.setFilter("BuyerPO", "like", searchTerm); // Apply the filter to the table
+        // });
+
+        document.getElementById("search-buyerpoid").addEventListener("keyup", function () {
+            var searchTerm = this.value.toLowerCase(); // Get the value from the search input field and convert to lowercase
+            table.setFilter(function (data) {
+                return Object.values(data).some(value =>
+                    String(value).toLowerCase().includes(searchTerm)
+                );
+            });
+        });
+
+
+        function deleteRow(row) {
+            
+            if (confirm("Are you sure you want to delete this row?")) {
+                //table.deleteRow(row);
+                row.getElement().style.display = 'none'; 
+                row.update({ hidden: true, IsDelete: 1 });
+                renumberRows();
+            }
+
+        }
+        function renumberRows() {
+            var rows = table.getRows();
+            rows.forEach(function (row, index) {
+                row.update({ SLNo: index + 1 });
+            });
+        }
+        document.getElementById("add-row").addEventListener("click", function () {
+            var newRowData = {
+                Factor: 1,
+                IsVisible: true,
+                IsDelete: false
+            };
+             
+            if (!newRowData.IsVisible) {
+                newRowData.Delete = "<i class='fas fa-trash-alt delete-icon'></i>";
+            } else { 
+                newRowData.Delete = "";
+            }
+             
+            table.addRow(newRowData);
+
+            renumberRows();
+        });
+
+        document.getElementById("del-row").addEventListener("click", function () {
+            table.clearData();
+            renumberRows();
+        });
+
+        function getBuyerPODetails(BuyerPOId, callback) {
+            $.ajax({
+                type: "get",
+                url: '@Url.Action("GetBuyerPODetails", "BuyerOrder")',
+                data: { BuyerPOId: BuyerPOId },
+
+                success: function (response) {
+                    
+                    var result = response.data;
+                    var exportpono = result.BuyerPO;
+                    var buyerpoId = result.Id;
+                    var unitPrice = result.UnitPrice;
+                    var orderQty = result.TotalQuantity;
+                    var totalValue = result.TotalAmount;
+                    var stylename = result.Style.StyleNo;
+
+                    callback(exportpono, buyerpoId, unitPrice, orderQty, totalValue, stylename);
+                },
+                error: function (error) {
+                    console.error("Error fetching price:", error);
+                }
+            });
+        }
+
+
+        function gatherData() {
+
+            var dataList = [];
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var rows = table.getData();
+            var id = @ViewBag.Id;
+            rows.forEach(function (row) {
+                var rowData = {
+                    "Id": row["Id"] == null ? 0 : parseInt(row["Id"]),
+                    "ExportPONo": row.ExportPONo,
+                    "BuyerPOId": row.BuyerPOId,
+                    "StyleName": row.StyleName,
+                    "ItemName": row.ItemName,
+                    "HSCode": row.HSCode,
+                    "Fabrication": row.Fabrication,
+                    "UnitMasterId": row.UnitMasterId,
+                    "OrderQty": parseFloat(row.OrderQty),
+                    "Factor": parseFloat(row.Factor),
+                    "QtyInPcs": parseFloat(row.QtyInPcs),
+                    "UnitPrice": parseFloat(row.UnitPrice),
+                    "TotalValue": parseFloat(row.TotalValue),
+                    "CMTPercentage": parseFloat(row.CMTPercentage),
+                    "CMTUnitPrice": parseFloat(row.CMTUnitPrice),
+                    "CMTTotalAmount": parseFloat(row.CMTTotalAmount),
+                    "ShipmentDate": row.ShipmentDate,
+                    "Destination": row.Destination,
+                    "ContractNo": row.ContractNo,
+                    "OrderType": row.OrderType,
+                    "CatNo": row.CatNo,
+                    "DeliveryNo": row.DeliveryNo,
+                    "DestinationPO": row.DestinationPO,
+                    "Kimball": row.Kimball,
+                    "ColorCode": row.ColorCode,
+                    "ContractDate": row.ContractDate,
+                    "MasterLCId": id,
+                    "ComId": ComId,
+                    "LuserId": UserId,
+                    "isTransaction": row.IsTransaction == 1 ? true : false,
+                    "IsDelete": row.IsDelete == 0 ? false : true
+                };
+                dataList.push(rowData);
+            });
+
+
+            var masterLCData = {
+                Id: id,
+                CommercialCompanyId: $("#Company").val(),
+                BuyerGroupID: $("#BuyerGroup").val(),
+                BuyerID: $("#Buyer").val(),
+                LCMargin: parseFloat($("#LCMargin").val()),
+                BankAccountId: $("#BankAccountNo").val(),
+                OpeningBankId: $("#ConcernBank").val(),
+                LienBankId: $("#BuyerBank").val(),
+                LCTypeId: $("#LCType").val(),
+                LCRefNo: $("#SalesContractNo").val(),
+                MasterLCValueManual: $("#ManualSalesContractVal").val(),
+                ExportLCValueManual: $("#ManualExportLCVal").val(),
+                SalesContractIssueDate: $("#ContractIssueDate").val(),
+                LCExpirydate: $("#ContractLastShipmentDate").val(),
+                UnitMasterId: $("#UnitId").val(),
+                CurrencyId: $("#CurrencyId").val(),
+                BuyerLCRef: $("#ExportLCNo").val(),
+                PINo: $("#PINo").val(),
+                PIDate: $("#PIDate").val(),
+                LCOpenDate: $("#ExportLCIssueDate").val(),
+                TotalLCQty: parseFloat($("#ExportLCContractQty").val()),
+                LCValue: parseFloat($("#ExportLCContractVal").val()),
+                TradeTermId: $("#TradeTermId").val(),
+                PortOfLoadingId: $("#LoadingPort").val(),
+                PortOfDischargeId: $("#DischargePort").val(),
+                DestinationId: $("#DestinationId").val(),
+                ShipModeId: $("#ShipModeId").val(),
+                PaymentTermsId: $("#PaymentTermsId").val(),
+                CommercialTypeId: $("#CommercialTypeId").val(),
+                DayListId: $("#DayId").val(),
+                LCStatusId: $("#LCStatusId").val(),
+                DestinationContract: $("#Destination").val(),
+                Remarks: $("#Remarks").val(),
+                FileNo: $("#FileNo").val(),
+                RemainingContractValue: parseFloat($("#RemainingContractVal").val()),
+                LCNOforImport: $("#LCNOforImport").val(),
+                CMTPermission: $("#CMTPermission").val(),
+                "LuserId": UserId,
+                COM_MasterLC_Details: dataList
+
+            }
+
+            return masterLCData;
+            
+        }
+
+        function sendDataToServer(button) {
+            var lcData = gatherData();
+
+            var data = JSON.stringify(lcData);
+
+
+            $.ajax({
+
+                url: '@Url.Action("MasterLCCreation", "BuyerOrder")',
+                type: 'POST',
+                data: data,
+                async: false,
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (response) {
+                    toastr.success(response.message, "", {
+                        "toastClass": "toast-green",
+                    });
+                    setTimeout(function () {
+                        if (button == 'BtnSave') {
+                            if ('@actiontype' === "Create") {
+                                window.location.href = '@Url.Action("AddMasterLC", "BuyerOrder")';
+                            }
+                            else 
+                            {
+                                var id = @ViewBag.Id;
+                                window.location.href = '@Url.Action("EditMasterLC", "BuyerOrder")?id=' + id;
+                            }
+                        }
+                        else 
+                        {
+                            window.location.href = '@Url.Action("Export", "BuyerOrder")';
+                        }
+                        
+                    }, 1000);
+                },
+                error: function (error) {
+                    console.log("Error");
+                }
+            });
+                        
+        }
+
+        var saveButton = document.getElementById('BtnSave');
+        saveButton.addEventListener('click', function () {
+            sendDataToServer('BtnSave');
+        });
+
+        var saveButton = document.getElementById('BtnSaveClose');
+        saveButton.addEventListener('click', function () {
+            sendDataToServer('BtnSaveClose');
+        });
+
+        function formatDateToCustomString(inputDate) {
+            const months = [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+
+            if (inputDate instanceof Date && !isNaN(inputDate)) {
+                const day = inputDate.getDate();
+                const monthIndex = inputDate.getMonth();
+                const year = inputDate.getFullYear();
+                const formattedDay = day < 10 ? `0${day}` : day;
+
+                const formattedDate = `${formattedDay}-${months[monthIndex]}-${year}`;
+                return formattedDate;
+            } else {
+                return inputDate;
+            }
+        }
+
+        if ('@actiontype' === "Edit") {
+            $("#invoice-no").prop("disabled", false)
+            var id = @ViewBag.Id;
+            console.log(id);
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetMasterLCDetails", "BuyerOrder")',
+                data: { id: id },
+                dataType: "json",
+                success: function (response) {
+                    if (response.Success == 1) {
+                        console.log(response.data);
+                        var model = response.data;
+
+                        $("#Id").val(model.Id);
+                        $("#LCMargin").val(model.LCMargin);
+                        $("#SalesContractNo").val(model.LCRefNo);
+                        $("#ManualSalesContractVal").val(model.MasterLCValueManual);
+                        $("#ManualExportLCVal").val(model.ExportLCValueManual);
+                        $("#ContractIssueDate").val(formatDateToCustomString(new Date(model.SalesContractIssueDate)));
+                        $("#ContractLastShipmentDate").val(formatDateToCustomString(new Date(model.LCExpirydate)));
+                        $("#PIDate").val(formatDateToCustomString(new Date(model.PIDate)));
+                        $("#ExportLCNo").val(model.BuyerLCRef);
+                        $("#PINo").val(model.PINo);
+                        $("#ExportLCIssueDate").val(formatDateToCustomString(new Date(model.LCOpenDate)));
+                        $("#ExportLCContractQty").val(model.TotalLCQty);
+                        $("#ExportLCContractVal").val(model.LCValue);
+                        $("#Destination").val(model.DestinationContract);
+                        $("#Remarks").val(model.Remarks);
+                        $("#FileNo").val(model.FileNo);
+                        $("#RemainingContractVal").val(model.RemainingContractValue);
+                        $("#LCNOforImport").val(model.LCNOforImport);
+                        $("#CMTPermission").val(model.CMTPermission);
+
+                        setTimeout(function () {
+                            $("#Company").val(model.CommercialCompanyId).trigger('change');
+                            $("#BuyerGroup").val(model.BuyerGroupID).trigger('change');
+                            $("#Buyer").val(model.BuyerID).trigger('change');
+                            $("#BankAccountNo").val(model.BankAccountId).trigger('change');
+                            $("#ConcernBank").val(model.OpeningBankId).trigger('change');
+                            $("#BuyerBank").val(model.LienBankId).trigger('change');
+                            $("#LCType").val(model.LCTypeId).trigger('change');
+                            $("#UnitId").val(model.UnitMasterId).trigger('change');
+                            $("#CurrencyId").val(model.CurrencyId).trigger('change');
+                            $("#TradeTermId").val(model.TradeTermId).trigger('change');
+                            $("#LoadingPort").val(model.PortOfLoadingId).trigger('change');
+                            $("#DischargePort").val(model.PortOfDischargeId).trigger('change');
+                            $("#DestinationId").val(model.DestinationId).trigger('change');
+                            $("#ShipModeId").val(model.ShipModeId).trigger('change');
+                            $("#PaymentTermsId").val(model.PaymentTermsId).trigger('change');
+                            $("#CommercialTypeId").val(model.CommercialTypeId).trigger('change');
+                            $("#DayId").val(model.DayListId).trigger('change');
+                            $("#LCStatusId").val(model.LCStatusId).trigger('change');
+                        }, 400);
+
+
+                        setTimeout(function () {
+                            initializeTabulator(model.COM_MasterLC_Details);
+                        }, 600);
+
+
+                    
+                    }
+                    else 
+                    {
+                        toastr.success(response.message, "", {
+                            "toastClass": "toast-red",
+                        });
+                    }
+                   
+                },
+                error: function (error) {
+                    console.error("Error fetching data: " + error);
+                }
+            });
+        }
+
+        function initializeTabulator(data) {
+            if (table) {
+                data.forEach(function (row, index) {
+                    var dateObj = new Date(row.ContractDate);
+                    var dateObj1 = new Date(row.ShipmentDate);
+
+                    row.ContractDate = dateObj.getDate() + '-' +
+                        new Intl.DateTimeFormat('en-us', { month: 'short' }).format(dateObj) + '-' +
+                        dateObj.getFullYear();
+
+                    row.ShipmentDate = dateObj1.getDate() + '-' +
+                        new Intl.DateTimeFormat('en-us', { month: 'short' }).format(dateObj1) + '-' +
+                        dateObj1.getFullYear();
+
+                    row.SLNo = index + 1;
+                    rowIsTransaction = 0;
+                    if (row.IsExist > 0) {
+                        row.IsVisible = false; 
+                    } else {
+                        row.IsVisible = true;
+                    }
+                });
+
+                //console.log(data);
+                //alert('Load Successfully');
+                table.setData(data);
+                
+            } else {
+                table = new Tabulator("#example-table", {
+                    height: "311px",
+                    layout: "fitColumns",
+                    addRowPos: "bottom",
+                    columns: columns,
+                    data: data,
+                    pagination: true, 
+                    paginationMode: "local",  
+                    paginationSize: 5,  
+                    paginationInitialPage: 1, 
+                    paginationSizeSelector: [5, 10, 25, 50, 100, 500, 1000],
+                });
+            }
+        }
+
+        document.getElementById('inputGroupFile04').addEventListener('change', function (evt) {
+            var files = evt.target.files; // FileList object
+            var file = files[0];
+
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var data = new Uint8Array(e.target.result);
+                var workbook = XLSX.read(data, { type: 'array' });
+
+                // Get data from "BuyerPO" sheet
+                var buyerPOData = XLSX.utils.sheet_to_json(workbook.Sheets['BuyerPO']);
+
+                // Log data to verify it is correctly parsed
+                console.log(buyerPOData);
+
+
+                buyerPOData.forEach(function (item) {
+                    if (item.ShipmentDate) {
+                        item.ShipmentDate = new Date((item.ShipmentDate - (25567 + 1)) * 86400 * 1000).toISOString();
+                    }
+                    if (item.ContractDate) {
+                        item.ContractDate = new Date((item.ContractDate - (25567 + 1)) * 86400 * 1000).toISOString();
+                    }
+                });
+
+
+                var jsonData = JSON.stringify(buyerPOData);
+
+                // Log JSON data before sending
+                console.log(jsonData);
+
+                $.ajax({
+                    url: '/BuyerOrder/DetailsLCTempCreation',
+                    type: 'POST',
+                    data: jsonData,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (response) {
+                        console.log("Success", response);
+                        if(response.Success == 0)
+                        {
+                            initializeTabulator(response.data);
+                        }
+                        else
+                        {
+                            toastr.success(response.message, "", {
+                                "toastClass": "toast-red",
+                            });
+                            initializeTabulator(response.data);
+                        }
+                         // Assuming initializeTabulator is defined elsewhere
+                    },
+                    error: function (error) {
+                        console.log("Error", error);
+                    }
+                });
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+        var currentPOLId = '@ViewBag.Id';
+        var BtnSave = document.querySelector('#BtnSave');
+        var BtnSaveClose = document.querySelector('#BtnSaveClose');
+        function getAllPOLs(callback) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetMasterLC", "BuyerOrder")',
+                dataType: "json",
+                success: function (data) {
+                    // console.log("data::", data.data);
+                    var SizeCodeGetArray = [];
+
+                    data.forEach(function (item) {
+                        var SizeName = item.Text;
+                        var SizeIdGet = item.Value;
+                        var SizeData = {
+                            SizeName: SizeName,
+                            Id: SizeIdGet
+                        };
+                        SizeCodeGetArray.push(SizeData);
+                    });
+
+                    if (typeof callback === "function") {
+                        callback(SizeCodeGetArray);
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                }
+            });
+        }
+
+        function checkPOLExists(sizeName) {
+            getAllPOLs(function (data) {
+                var lowercasedSizeName = sizeName.toLowerCase();
+
+                var sizeExists = data.some(function (item) {
+
+                    if (currentPOLId && currentPOLId === item.Id) {
+                        return false;
+                    }
+
+                    return item.SizeName.trim().toLowerCase() === lowercasedSizeName;
+                });
+
+                console.log("sizeExists", sizeExists);
+
+                if (sizeExists) {
+                    $("#SalesContractNoValidation").html("Already Exist.!");
+                    BtnSave.disabled = true;
+                    BtnSaveClose.disabled = true;
+                } else {
+                    $("#SalesContractNoValidation").html("");
+                    BtnSave.disabled = false;
+                    BtnSaveClose.disabled = false;
+
+                }
+            });
+        }
+
+        var POLNameHandle = document.getElementById("SalesContractNo");
+        POLNameHandle.addEventListener("input", function () {
+            //console.log("currentSizeId", currentSizeIdd);
+
+            var enteredSizeName = POLNameHandle.value;
+            checkPOLExists(enteredSizeName);
+        });
+    </script>
+    
+    
+}

@@ -1,0 +1,574 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model Atrai.Controllers.AdminController.HeadWiseReport
+@{
+    ViewData["Title"] = "Date Wise Details";
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+    //var FromDate = Model.FromDate;
+}
+<style>
+/*    .tabulator-menu{
+    top: 50px!important;
+    }*/
+
+    .green-cell {
+    background-color: green;
+    color: white;
+}
+
+.red-cell {
+    background-color: red;
+    color: white;
+}
+
+.orange-cell {
+    background-color: orange;
+    color: black;
+}
+
+#loader {
+    display: none;
+    position: fixed;
+/*    top: 50%;*/
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999999; /* Adjust the z-index value as needed */
+}
+
+    .tabulator-menu {
+        display: grid!important;
+        grid-template-columns: repeat(3, 180px);
+        grid-auto-flow: row;
+    }
+
+
+</style>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>
+    </title>
+        <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+
+    @section scripts {
+        @*            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>*@
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.20/jspdf.plugin.autotable.min.js"></script>
+        <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+
+
+
+
+        <script type="text/javascript">
+
+
+            $(document).ajaxStart(function() {
+            //alert("start");
+            loadingTimeout = setTimeout(function() {
+                //$('#loading').show();
+               $("#loader").show();
+
+            }, 3000);
+            })
+            .ajaxStop(function() {
+            //alert("done");
+            clearTimeout(loadingTimeout);
+            //$('#loading').hide();
+             $("#loader").hide();
+            });
+
+
+            $(document).ready(function() {
+
+
+
+                            
+
+
+
+
+                 var table;     
+	            var tableConfig = [];
+                function createTableConfig(dataArray) {
+                      if (!dataArray || dataArray.length === 0) {
+                        return []; // Return an empty array if there's no data
+                      }
+
+                      const dataSample = dataArray[0]; // Get the first data object to extract keys
+       
+                      // Iterate through the keys in the dataSample object
+                      for (const key in dataSample) {
+            
+                        const configObject = {
+                          title: key, // Use the key as the column title
+                          field: key, // Use the key as the field name
+              
+              
+                        };
+          
+
+                        // Add the configuration object to the tableConfig array
+                        tableConfig.push(configObject);
+                      }
+
+		             const dateFieldIndex = tableConfig.findIndex(config => config.field === 'Date');
+		              if (dateFieldIndex !== -1) {
+			            tableConfig[dateFieldIndex].headerFilter = "date";
+		              }
+
+
+          
+		              const timeFieldIndex = tableConfig.findIndex(config => config.field === 'Time');
+		              if (timeFieldIndex !== -1) {
+			            tableConfig[timeFieldIndex].headerFilter = "time";
+		              }
+
+
+		              const customerFieldIndex = tableConfig.findIndex(config => config.field === 'Customer');
+		              if (customerFieldIndex !== -1) {
+			            tableConfig[customerFieldIndex].editor = "input";
+			            tableConfig[customerFieldIndex].headerFilter = "list";
+			            tableConfig[customerFieldIndex].headerFilterParams = { valuesLookup: true, clearable: true };
+		              }
+
+
+               
+                        //for (let i = 0; i < tableConfig.length; i++) {
+			                
+                        //    if (tableConfig[i].field === 'Code') {
+		                      //  tableConfig[i].headerFilter = "input";
+	                       // }
+
+                        //}
+
+
+
+                      let IntialValueFromCalculateAlign = 0;
+                      //let IntialValueFromCalculateAlign = 6;
+		              for (let i = IntialValueFromCalculateAlign; i < tableConfig.length; i++) {
+			                
+                            if (tableConfig[i].field !== 'Date' && tableConfig[i].field !== 'Customer' && tableConfig[i].field !== 'Time') {
+			                    tableConfig[i].headerFilter = "input";
+			                }
+
+
+                             if (i > 4 && i < 10) {
+                                if (tableConfig[i].field !== 'Status')
+                                {
+                                    tableConfig[i].hozAlign = "right";
+                                    tableConfig[i].formatter = function(cell, formatterParams, onRendered) {
+                                        var value = cell.getValue();
+                                        if (value === 0 || value === 0.00) {
+                                            return "-";
+                                        }
+                                        return new Intl.NumberFormat('en-US', {
+                                            //style: 'currency',
+                                            //currency: 'USD', // You can adjust the currency code as needed
+                                            //minimumFractionDigits: value % 1 === 0 ? 0 : 2,
+                                        }).format(value);
+                                    };
+                                    tableConfig[i].formatterParams = {
+                                        symbol: "", // You can adjust the currency symbol as needed
+                                        thousand: ',',
+                                    };
+                                }
+
+                            }
+
+
+			                ////if (tableConfig[i].field === 'NetAmount' || tableConfig[i].field === 'ShopCash') {
+			                //if (i > 4 && i < 10) {
+			                //  tableConfig[i].hozAlign = "right";
+			                //  tableConfig[i].formatter = "money"; 
+			                //  tableConfig[i].formatterParams = {      
+				               // thousand: ',', // Thousand separator      
+			                //  };
+			                //}
+
+
+            //                 formatter: function(cell, formatterParams, onRendered) {
+            //    var value = cell.getValue();
+            //    if (value === 0) {
+            //        return "-";
+            //    }
+            //    return value;
+            //}
+
+
+		              }
+
+                      return tableConfig;
+            }
+
+
+            
+                            $("#loadData").click(function() {
+                                
+
+                                ajaxloaddata();
+                                // Show the loader
+                            });
+
+                             function ajaxloaddata() {
+
+                                
+                                //////////////////////////fahad need to check 
+
+                                        var companyinfo = [];
+                                        var data = [];
+
+
+                                        var FromDate = $('#FromDate').val();
+                                        var ToDate = $('#ToDate').val();
+                                        var WarehouseId = $('#WarehouseId').val();
+                                        //console.log(FromDate);
+                                        //console.log(ToDate);
+
+                
+                                            $("#loader").show();
+                                            //alert('abc');
+
+                                            $.ajax({
+                                                method: "get",
+                                                async: false,
+                                                url: '@Url.Action("GetProductStockViewReport", "Admin")',
+                                                data: { dtFrom: FromDate, dtTo: ToDate,Type:"ProductWiseStockCalculationTabulator", WarehouseId: WarehouseId },   //SaleId:$("#BtnSave").attr("data-sale-Id")   data: { ProductId: args.ProductId, SaleId:0, WarehouseId:warehouseVal }
+
+                                                success: function(result) {
+                                                    
+                                                    dataabc = JSON.parse(result.data);
+                                                    GlobalData = dataabc;
+                                                    console.log(GlobalData);
+                                                    companyinfo = [...GlobalData.Table];
+                                                    //groupinfo = [...GlobalData.Table1];
+                                                    //tabledata = [...GlobalData.Table2];
+                                                    tabledata = [...GlobalData.Table1];
+                                                    //alert('found');
+                                                },
+                                                error: function() {
+                                                    // Hide the loader
+                                                    $("#loader").hide();
+                    
+                                                    // Handle error if needed
+                                                    $("#result").html("An error occurred.");
+                                                }
+
+                                            });
+
+
+                                            console.log(companyinfo);
+
+                                            $('#CompanyName').text(companyinfo[0].CompanyName);
+                                            $('#CompanyAddress').text(companyinfo[0].CompanyAddress);
+                                            $('#PhoneNo').text(companyinfo[0].PhoneNo);
+
+                                            $('#CaptionSmall').text(companyinfo[0].CaptionSmall);
+
+                                            var headerMenu = function(){
+                                            var menu = [];
+                                            var columns = this.getColumns();
+
+                                            for(let column of columns){
+                                                let icon = document.createElement("i");
+                                                icon.classList.add("fa");
+                                                icon.classList.add(column.isVisible() ? "fa-check-square" : "fa-square");
+
+                                                let label = document.createElement("span");
+                                                let title = document.createElement("span");
+
+                                                title.textContent = " " + column.getDefinition().title;
+
+                                                label.appendChild(icon);
+                                                label.appendChild(title);
+
+                                                menu.push({
+                                                    label:label,
+                                                    action:function(e){
+                                                        e.stopPropagation();
+                                                        column.toggle();
+                                                        if(column.isVisible()){
+                                                            icon.classList.remove("fa-square");
+                                                            icon.classList.add("fa-check-square");
+                                                        }else{
+                                                            icon.classList.remove("fa-check-square");
+                                                            icon.classList.add("fa-square");
+                                                        }
+                                                    }
+                                                });
+                                            }
+
+                                            return menu;
+                    
+                                            };
+                
+            
+                                    tableConfig = createTableConfig(tabledata);
+
+                                    console.log("table:",tableConfig);
+
+
+                                    let IntialValueFromCalculateSum = 5;
+
+                                        for (let i = IntialValueFromCalculateSum; i < tableConfig.length; i++) {
+                                             if (tableConfig[i].field !== 'Status')
+                                                {
+                                                    if (typeof tabledata[0][tableConfig[i].field] === 'number') {
+                                                        tableConfig[i].bottomCalc = "sum";
+                                                        tableConfig[i].bottomCalcFormatter = "money";
+                                                        tableConfig[i].bottomCalcFormatterParams = {
+                                                        thousand: ',',
+                                                        };
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    tableConfig[i].formatter = stockCountFormatter;
+                                                   tableConfig[i].bottomCalc = "count";
+                                                    //formatter: stockCountFormatter
+                                
+                                                }
+                                      }
+
+                              //for (let i = IntialValueFromCalculateSum; i < tableConfig.length; i++) {
+                              //    tableConfig[i].bottomCalc = "sum";
+                              //    tableConfig[i].bottomCalcFormatter = "money";
+                              //}
+
+                                for (let i = 0; i < 3; i++) {
+                                    tableConfig[i].frozen = true;
+                                }
+
+
+                                for (let i = 0; i < tableConfig.length; i++) {
+                                    tableConfig[i].headerMenu = headerMenu;
+                                }
+
+                    
+                                for (let i = 10; i < tableConfig.length; i++) {
+                                    tableConfig[i].visible = false;
+                                }
+
+
+                                console.log("sum:",tableConfig);
+
+                                table = new Tabulator("#example-table", {
+                                data: tabledata,
+                                columns: tableConfig,
+                                height:"611px",
+                                //groupBy: "TYPE",
+                        });
+      
+                        //alert('found');
+                          //$("#loader").hide();
+
+                     };
+
+
+                function stockCountFormatter(cell, formatterParams, onRendered) {
+                    var value = cell.getValue();
+                    var cellElement = cell.getElement();
+
+                    if (value === "N/A") {
+                        cellElement.classList.add("orange-cell");
+                        cellElement.classList.remove("green-cell", "red-cell");
+                    } else if (value === "Difference") {
+                        cellElement.classList.add("red-cell");
+                        cellElement.classList.remove("green-cell", "orange-cell");
+                    } else {
+                        cellElement.classList.add("green-cell");
+                        cellElement.classList.remove("red-cell", "orange-cell");
+                    }
+
+                    return value;
+                }
+
+            
+
+
+                document.getElementById("download-excel").addEventListener("click", function(){
+                    table.download("xlsx", "data.xlsx", {sheetName:"My Data"});
+                });
+
+
+                        document.getElementById("download-pdf").addEventListener("click", function(){
+                    table.download("pdf", "data.pdf", {      
+                        title:"PDF Report", 
+                    });
+                });
+
+
+            });
+
+
+
+
+            function ClosePrint() {
+                var print = document.getElementById("print");
+                print.style.visibility = "hidden";
+                //            print.display = false;
+
+                window.print();
+            }
+
+
+
+
+
+
+
+
+
+
+        </script>
+    }
+        <style media="print">
+
+            @@media print {
+                .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,
+                .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+                    float: left;
+                }
+
+                .col-md-12 {
+                    width: 100%;
+                }
+
+                .col-md-11 {
+                    width: 91.66666666666666%;
+                }
+
+                .col-md-10 {
+                    width: 83.33333333333334%;
+                }
+
+                .col-md-9 {
+                    width: 75%;
+                }
+
+                .col-md-8 {
+                    width: 66.66666666666666%;
+                }
+
+                .col-md-7 {
+                    width: 58.333333333333336%;
+                }
+
+                .col-md-6 {
+                    width: 50%;
+                }
+
+                .col-md-5 {
+                    width: 41.66666666666667%;
+                }
+
+                .col-md-4 {
+                    width: 33.33333333333333%;
+                }
+
+
+                .col-md-3 {
+                    width: 25%;
+                }
+
+                .col-md-2 {
+                    width: 16.666666666666666%;
+                }
+
+                .col-md-1 {
+                    width: 8.33333333333333%;
+                }
+
+
+                .showHeader thead {
+                    display: table-header-group;
+                    border: 1px solid #000;
+                }
+            }
+        </style>
+
+
+
+
+    </head>
+    <body>
+
+        <h3>
+            @{
+            System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+            BDFormat.NumberFormat.CurrencyDecimalDigits = 1;
+            BDFormat.NumberFormat.NumberDecimalDigits = 1;
+
+            var UserRole = HttpContextAccessor.HttpContext.Session.GetString("UserRole");
+        }
+
+    </h3>
+    <div id="main">
+            <div id="loader">
+                <img src="loader.gif" alt="Loading...">
+            </div>
+        <div class="container-fluid p-5">
+            <span class="float-right">
+                <button id="download-excel" class="btn btn-success">Excel</button> 
+                <button id="download-pdf" class="btn btn-danger">PDF</button>
+                <input id="print" tabindex="1" type="button" value="Print" class="btn btn-primary" onclick="ClosePrint()" />
+
+            </span>
+
+
+            <button id="loadData" class="btn btn-warning">Load & Refresh Data</button>
+            <div id="result"></div>
+            <hr />
+
+            <div class="row mb-2">
+
+                <img src="" id="CompanyImagePath" />
+                <div class="col-md-12">
+                    <h2 class="text-center" id="CompanyName"></h2>
+                </div>
+                <div class="col-md-12 text-center">
+                    <span>
+                        <h5 class="text-center" id="CompanyAddress"></h5>
+                        <h5 class="text-center" id="PhoneNo"></h5>
+                    </span>
+                    <span>
+                        <h5 class="text-center" id="CaptionSmall"></h5>
+
+                    </span>
+                </div>
+@*
+                <div class="col-md-12 text-center">
+                    <hr />
+                    <h3><span class="border-bottom border-dark">Head Wise Collection Report</span></h3>
+                </div>*@
+            </div>
+            @Html.HiddenFor(model => model.FromDate, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.HiddenFor(model => model.ToDate, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.HiddenFor(model => model.WarehouseId, new { htmlAttributes = new { @class = "form-control" } })
+
+
+
+            <br>
+
+            <div id="example-table"></div>
+            <div id="sum-row" style="text-align: right; padding-right: 10px;"></div>
+
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h6>Software Generated Report || Developed By : Dominate Software Solution || Contact No : 01671-303 302</h6>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+</body>
+</html>
+
+
+

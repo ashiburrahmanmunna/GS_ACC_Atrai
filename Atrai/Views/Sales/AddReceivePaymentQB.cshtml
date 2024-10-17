@@ -1,0 +1,2825 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@* @model IEnumerable<Atrai.Model.Core.Entity.SalesModel> *@
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
+
+@{
+    ViewData["Title"] = "Receive Payment";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var id = ViewBag.Id as string;
+    var SalesId = ViewBag.SalesId as string;
+    var actionType = ViewBag.ActionType as string;
+    var customerId = ViewBag.CustomerId as string;
+}
+@model int
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+
+<style>
+    #customer-email::placeholder {
+        font-size: 12px;
+    }
+
+    #dropdownMenuButton
+    {
+        height: 30px;
+        padding-top: 4px;
+    }
+    #find_invoice
+    {
+        height: 30px;
+        padding-top: 5px;
+    }
+    .wide-dropdown {
+        width: 200px; /* Set the desired width here */
+        height: 30px;
+    }
+    
+    .wide-dropdown1 {
+        width: 180px;
+        height: 80px;
+    }
+
+    .wide-dropdown2 {
+        width: 350px;
+        height: 60px;
+    }
+
+    .custom-height {
+        height: 30px;
+    }
+
+    .form-label {
+        margin-bottom: 0 !important;
+    }
+
+    .mb-2 {
+        margin-bottom: 0 !important;
+    }
+
+    .mb-3 {
+        margin-bottom: 0 !important;
+    }
+
+    .page-content {
+        /*background: #EEEEEE;*/
+        padding: inherit;
+    }
+
+    .custom-background {
+        /* background: #EEEEEE; */
+        background: #F9F9F9;
+    }
+
+    #alert-transanction
+    {
+        background: white;
+        border: 1px solid red;
+    }
+
+    #shipping-amount {
+        padding: 0 !important;
+    }
+
+    #shipping-tax {
+        padding: 0 !important;
+    }
+
+    .left-button {
+        margin-right: auto; /* Push the button to the left by using auto margin */
+    }
+
+    .tabulator {
+        position: relative;
+        border: 1px #999;
+        background-color: #ffffff;
+        font-size: 14px;
+        text-align: left;
+        overflow: hidden;
+        -webkit-transform: translateZ(0);
+        -moz-transform: translateZ(0);
+        -ms-transform: translateZ(0);
+        -o-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+
+        .tabulator .tabulator-header .tabulator-col {
+            display: inline-flex;
+            position: relative;
+            box-sizing: border-box;
+            flex-direction: column;
+            justify-content: flex-start;
+            border-right: 1px solid #aaa;
+            background: #ffffff !important;
+            text-align: left;
+            vertical-align: bottom;
+            overflow: hidden;
+        }
+
+    .tabulator-table .tabulator-row {
+        background-color: white;
+    }
+
+    #example-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+    #credit-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+    #file-drop-area {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    #image-uploadify {
+        display: none;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .grid-row {
+        display: flex;
+        align-items: center;
+    }
+
+    .grid-cell {
+        margin-right: 5px;
+    }
+
+    .grid-container {
+        position: absolute;
+        display: flex;
+        flex-wrap: wrap;
+        background: #E0F0E3;
+        border: 1px solid #ccc;
+        /* padding: 10px; */
+        
+    }
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #393a3d;
+        color: #fff;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+
+    .file-wrapper {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .remove-button {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        z-index: 10;
+    }
+
+    .file-iframe {
+        width: 50%;
+        height: auto;
+        border: 1px solid #ccc;
+        overflow: hidden;
+    }
+</style>
+
+
+<section class="mb-5 custom-background" style="padding-bottom:20px">
+
+    <div class="container-fluid ">
+        <h4><p>Receive Payment</p> </h4>
+        <input id="payment-id" type="text" value="0" hidden />
+        <div class="first-row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-lg-2 col-12">
+                        <div class="col-lg-12">
+                            <div class="mb-3">
+                                <label class="form-label " style="font-size: 12px;">
+                                    Customer<span style="color: red;">*</span>
+                                </label>
+                                @Html.DropDownList("Customers", ViewBag.Customers as List<SelectListItem>,"Select a customer", new { id = "Customer", @class = "form-select form-select-sm" })
+                                <span class="text-danger" id="Customer-validation"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <input id="ParentTransactionId" class="d-none" value="0" />
+                    <div class="col-lg-2 col-12">
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size: 12px;">Customer Email</label>
+                            <input id="customer-email" class="wide-dropdown" placeholder="Customer's email'" />
+
+                        </div>
+                        <div class="mb-2">
+                            <input id="send-later" type="checkbox" />
+                            <label class="form-label" style="font-size: 12px;">Send later</label>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-2">
+                        <div class="d-flex mt-3" id="yourRateParent" style="width: 300px; display: none !important">
+                            <label style="margin-top: 0.5rem">1 <span class="rate"></span><span class="flag"></span> = </label>
+                            <input type="text" class="form-control h-100 ms-2 me-2 text-end" id="CurrencyRate" style="border-radius:0px; width: 40%;">
+                            <input type="text" class="form-control w-50 h-100 ms-2 me-2" id="MultiiCurrencyId" style="border-radius:0px;" hidden>
+                            <label style="margin-top: 0.5rem">BDT</label>  <i class="flag-icon flag-icon-bd"></i>
+                        </div>
+                        
+                    </div>
+                    <div class="col-lg-4 col-2">
+                    </div>
+                    <div class="col-lg-2 col-2">
+                        <div class="mt-3 ">
+                            <p style="font-size: 12px;">AMOUNT RECEIVED</p>
+                            <h4><span class="rate"></span>&nbsp;<span id="tk-amount-received">0.00</span></h4>
+                        </div>
+
+                    </div>
+                </div>
+
+                @*//////////////////////////////////////////////////////////////////*@
+
+
+                <div class="row">
+                    <div class="col-lg-2 col-12">
+                        <div class="col-lg-12">
+                            <div class="mb-3">
+                                <label class="form-label" style="font-size: 12px;">Payment Date<span style="color: red;">*</span></label>
+
+                                <input class="form-control custom-height" id="start-date" />
+                                <span class="text-danger" id="start-date-validation"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 col-2">
+                        <div class="mb-3">
+                            <label class="form-label ">
+                                Location<span style="color: red;">*</span>
+                            </label>
+                            @Html.DropDownList("WarehouseIdMain", ViewBag.WarehouseIdMain as List<SelectListItem>, null, new { id = "WarehouseIdMain", @class = "form-select form-select-sm" })
+                            <span class="text-danger" id="location-validation" style="font-size: 12px;"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-12">
+                        <div class="d-none" id="FiscalMonthDiv">
+                            <label class="form-label fw-semibold">Fiscal month</label>
+                            <select class="wide-dropdown form-select form-select-sm" id="FiscalMonthId"
+                                    aria-label="Floating label select example">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mx-3 my-2" >
+                    <div id="alert-transanction">
+                        <p style="color: red; font-size: 12px;margin-bottom:0px;"><i class="bi bi-exclamation-triangle"></i> Something's not quite right </p>
+                        <p style="font-size: 10px; color: black;"><span id="alert_details"></span></p>
+
+                    </div>
+                </div>
+
+                
+
+                <div class="row" style="margin-top: 25px">
+                    <div class="col-lg-2 col-12">
+                        <div class="col-lg-12">
+                            <div class="mb-3">
+                                <label class="form-label" style="font-size: 12px;">
+                                    Payment method<span style="color: red;">*</span>
+                                </label>
+                                @Html.DropDownList("PaymentMethod", ViewBag.PaymentMethod as List<SelectListItem>,"Select a method", new { id = "PaymentMethod", @class = "wide-dropdown form-select form-select-sm" })
+                                <span class="text-danger" id="PaymentMethod-validation" style="font-size: 12px;"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-12">
+                        <div class="col-lg-11">
+                            <div class="mb-3">
+                                <label class="form-label" style="font-size: 12px;">
+                                    Reference No.
+                                </label>
+                                <input id="reference-no" type="text" class="wide-dropdown" value="@ViewBag.DefaultInvoice" placeholder="Auto generated.."/>
+                                <span class="text-danger" id="reference-no-validation"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-12">
+                        <div class="col-lg-10">
+                            <div class="mb-3">
+                                <label class="form-label" style="font-size: 12px;">
+                                    Deposit To<span style="color: red;">*</span>
+                                </label>
+                                @Html.DropDownList("CategoryList", ViewBag.CategoryList as List<SelectListItem>,"Choose an account", new { id = "CategoryList", @class = "wide-dropdown form-select form-select-sm" })
+                                <span class="text-danger" id="CategoryList-validation" style="font-size: 12px;"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-12">
+                        <div class="col-lg-10 d-none">
+                            <div class="mb-3">
+                                <label class="form-label" style="font-size: 12px;">
+                                    Credit Account<span style="color: red;">*</span>
+                                </label>
+                                @Html.DropDownList("CreditAccount", ViewBag.CreditAccount as List<SelectListItem>, new { id = "CreditAccount", @class = "wide-dropdown form-select form-select-sm" })
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-12">
+                        <div class="col-lg-12">
+                            <div class="mb-3">
+                                <label class="form-label" style="font-size: 12px;">
+                                    Amount received
+                                </label>
+                                <input id="amount-received" type="text" dir="rtl" class="wide-dropdown"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+</section>
+<section>
+    <div style="padding: 20px">
+        <h6>Outstanding Transactions</h6>  
+        <div class="row" style="margin-bottom: 5px;">
+            <div class="col-lg-2 col-12">
+                <div class="col-lg-10" style="padding-left: 0;">
+                    <div class="mb-3">
+                        <input id="find-invoice" type="text"  placeholder="find invoice"/>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-1 col-12">
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Filter
+                    </button>
+                    <div class="dropdown-menu filter-drop" aria-labelledby="dropdownMenuButton" style="width:500px; padding:20px;" >
+                        <div class="row">
+                            <div class="col-lg-5 col-12">
+                                 <div class="mb-3">
+                                     <label class="form-label">Invoices From</label>
+                                    <input class="form-control custom-height" id="invoice-from" onclick="keepDropdownOpened(event)" />
+                                 </div>
+                            </div>
+                            <div class="col-lg-5 col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">To</label>
+                                    <input class="form-control custom-height" id="invoice-to" onclick="keepDropdownOpened(event)" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="row">
+                                <div class="col-lg-2 col-12">
+                                    <button type="button" class="btn btn-light" id="reset-filter">Reset</button>
+                                </div>
+                                <div class="col-lg-6 col-12">
+
+                                </div>
+                                <div class="col-lg-3 col-12 d-flex">
+                                    <button type="button" class="btn btn-danger" style="margin-right: 5px;" id="filtered-close">Close</button>
+                                    <button type="button" class="btn btn-success" id="filtered-button" >Apply</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="col-lg-3 col-12">
+                <div style="display: none" id="divfilterlabel">
+                    <span id="filter-label" style="font-size:12px"></span>
+                    <a href="#" id="clear-filter-label"><i class="bi bi-x-circle"></i></a>
+                </div>
+            </div>
+        </div>
+        <div id="example-table"></div>
+
+
+        <h6 style="margin-top: 50px;">Credits</h6>
+        <div class="row">
+            <div class="col-lg-2 col-12">
+                <div class="col-lg-10" style="padding-left: 0;">
+                    <div class="mb-3">
+                        <input id="find-credit" type="text" placeholder="find credit" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-1 col-12">
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButtonCredit" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Filter
+                    </button>
+                    <div class="dropdown-menu filter-drop1" aria-labelledby="dropdownMenuButtonCredit" style="width:500px; padding:20px;">
+                        <div class="row">
+                            <div class="col-lg-5 col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Credit From</label>
+                                    <input class="form-control custom-height" id="invoice-from-credit" onclick="keepDropdownOpened(event)" />
+                                </div>
+                            </div>
+                            <div class="col-lg-5 col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">To</label>
+                                    <input class="form-control custom-height" id="invoice-to-credit" onclick="keepDropdownOpened(event)" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="row">
+                                <div class="col-lg-2 col-12">
+                                    <button type="button" class="btn btn-light" id="reset-filter-credit">Reset</button>
+                                </div>
+                                <div class="col-lg-5 col-12">
+                                </div>
+                                <div class="col-lg-5 col-12">
+                                    <button type="button" class="btn btn-danger" style="margin-right: 5px;" id="filtered-close-credit">Close</button>
+                                    <button type="button" class="btn btn-success" id="filtered-button-credit">Apply</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-3 col-12">
+                <div style="display: none" id="divfilterlabelcredit">
+                    <span id="filter-label-credit" style="font-size:12px"></span>
+                    <a href="#" id="clear-filter-label-credit"><i class="bi bi-x-circle"></i></a>
+                </div>
+            </div>
+        </div>
+        <div id="credit-table"></div>
+        <div class="grid-container" id="grid-container"></div>
+        <div>
+            <div class="row">
+                <div class="col-md-9 col-9">
+
+                </div>
+                <div class="col-md-2 col-2">
+                    <div class="mb-3">
+                        <p style="font-weight: bold; font-size: 12px; text-align: right;">Total received(<span class="rate"></span>)</p>
+                    </div>
+                </div>
+                <div class="col-lg-1 col-12">
+                    <div class="mb-3">
+                        @* <p style="font-weight: bold; font-size: 12px;"><span id="amount-to-apply">0.00</span></p> *@
+                        <p style="font-weight:bold; font-size: 12px;"><span id="total-received">0.00</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-9 col-9"></div>
+                <div class="col-md-2 col-2 inBDT">
+                    <div class="mb-3">
+                        <p style="font-weight: bold; font-size: 12px; text-align: right;">Total received(BDT)</p>
+                    </div>
+                </div>
+                <div class="col-lg-1 col-12 inBDT">
+                    <div class="mb-3">
+                        @* <p style="font-weight: bold; font-size: 12px;"><span id="amount-to-apply">0.00</span></p> *@
+                        <p style="font-weight:bold; font-size: 12px;"><span id="total-received-BDT">0.00</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                
+                <div class="col-lg-9 col-12">
+                    <div class="mb-3">
+                    </div>
+                </div>
+                <div class="col-lg-2 col-12">
+                    <div class="mb-3">
+                        <p style="font-weight: bold; font-size: 12px; text-align: right;">Amount to apply(<span class="rate"></span>)</p>
+                    </div>
+                </div>
+                <div class="col-lg-1 col-12">
+                    <div class="mb-3">
+                        <p style="font-weight: bold; font-size: 12px;"><span id="amount-to-apply">0.00</span></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+
+            <div class="col-6 col-md-6">
+                <div class="col-lg-7 col-12">
+                    <div class="col-lg-12">
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size: 12px;">
+                                Memo
+                            </label><br>
+                            <input id="message-invoice" type="text" class="wide-dropdown2" placeholder="Note" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7 col-12" style="margin-top:20px;">
+                    <div class="col-lg-12">
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-link"></i> <span>Attachments Maximum size: 20MB</span>
+                            </label>
+                            <div id="file-drop-area">
+                                <p>Drag and drop files here or click to select files.</p>
+                                <ul id="selected-files-list"></ul> <!-- List to display selected file names -->
+                            </div>
+                            <input id="image-uploadify" type="file" accept=".xlsx,.xls,image/*,.doc,audio/*,.docx,video/*,.ppt,.pptx,.txt,.pdf" multiple>
+                        </div>
+                    </div>
+                </div>
+               
+            </div>
+            <div class="col-6 col-md-6">
+                <div class="row">
+                    <div class="col-lg-6 col-12"></div>
+                    <div class="col-lg-4 col-12">
+                        <div class="mb-3">
+                            <p style="font-weight: bold; font-size: 12px; text-align: right;">Amount to credit(<span class="rate"></span>)</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-12">
+                        <div class="mb-3">
+                            <p style="font-weight: bold; font-size: 12px;"><span id="amount-to-credit">0.00</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 col-12"></div>
+                    <div class="col-lg-4 col-12">
+                        <div class="mb-3">
+                            <p style="font-weight: bold; font-size: 12px; text-align: right;">Total Exchange G/L(<span class="rate"></span>)</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-12">
+                        <div class="mb-3">
+                            <p style="font-weight: bold; font-size: 12px;"><span id="total_exchange">0.00</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-9 col-12"></div>
+                    <div class="col-lg-3 col-12">
+                        <button type="button" class="btn btn-outline-secondary" id="clear-payment">Clear Payment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="mb-3">
+                    <div class="col-lg-12 row" id="file-container">
+                        <!-- Placeholder for dynamically added iframes and buttons -->
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+@* <div class="footerButton d-flex justify-content-end" style="padding: 18px;">
+    
+
+    <button class="btn btn-info btn-md mx-2" id="BtnBack" onclick="gotoInvoiceList()">Back</button>
+    @if (ViewBag.ActionType == "Edit")
+    {
+        <button class="btn btn-warning btn-md" id="BtnSave">Update</button>
+    }
+    else if (ViewBag.ActionType == "Create")
+    {
+        <button class="btn btn-success btn-md" id="BtnSave">Save</button>
+    }
+
+
+</div> *@
+ <div class="bottom-bar" >
+        <div class="container-fluid">
+            <div class="row px-4">
+                <div class="col-md-3">
+                    <button class="btn btn-outline-secondary text-white btn-sm rounded-pill " id="BtnBack" onclick="gotoInvoiceList()">Back</button>
+                </div>
+                <div class="col-md-6 d-flex justify-content-center"></div>
+                <div class="col-md-3 d-flex justify-content-end">
+                    <button class="btn btn-success text-white btn-sm rounded-pill me-1" id="BtnSave" style="margin-right: 40px!important;">
+                            @if (ViewBag.ActionType == "Edit")
+                            {
+                                <span>Update</span>
+                            }
+                            else if (ViewBag.ActionType == "Create" || ViewBag.ActionType == "Copy")
+                            {
+                                <span>Save </span>
+                            }
+                    </button>
+                </div>
+            </div>
+        </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this file?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+
+    <script>
+        $("#dropdownMenuButton").on("click", function (event) {
+            if (!$(event.target).closest(".filter-drop").length && !$(event.target).is("#invoice-from, #invoice-to")) {
+                $(".filter-drop").addClass("show");
+            }
+        });
+        
+        $("#filtered-close").on("click", function (event) {
+            $(".filter-drop").removeClass("show");
+        });
+
+        $("#dropdownMenuButtonCredit").on("click", function (event) {
+            if (!$(event.target).closest(".filter-drop1").length && !$(event.target).is("#invoice-from-credit, #invoice-to-credit")) {
+                $(".filter-drop1").addClass("show");
+            }
+        });
+        
+        $("#filtered-close-credit").on("click", function (event) {
+            $(".filter-drop1").removeClass("show");
+        });
+    </script>
+    
+    <script>
+
+         var IsCopy = '@ViewBag.ActionType';
+             if (IsCopy == "View")
+             {                
+                document.getElementById("BtnSave").style.display = "none";              
+             }
+
+        function gotoInvoiceList() {
+            var editUrl = '@Url.Action("InvoiceList", "Sales")?Type=Payments';
+            window.location.href = editUrl;
+        }
+        function customCheckBoxFormatter(cell, formatterParams, onRendered) {
+            return '<input type="checkbox" class="custom-checkbox">';
+        }
+        var columns = [
+            { title: "Id", field: "TransactionDetailsId", movable: false, headerSort: false, visible: false },
+            { title: "Id", field: "Id", movable: false, headerSort: false, visible: false },
+            { title: "SalesCode", field: "SalesCode", movable: false, headerSort: false, visible: false },
+            { title: "SalesDate", field: "SalesDate", movable: false, headerSort: false, visible: false },
+            // { title: "", field: "CheckBox", headerHozAlign: "left", width: "9px", headerSort: false, hozAlign: "left", formatter: customCheckBoxFormatter, visible: true, width: 50 },
+            {
+                title: "",
+                field: "CheckBox",
+                headerHozAlign: "left",
+                width: "9px",
+                headerSort: false,
+                hozAlign: "left",
+                formatter: function (cell, formatterParams, onRendered) {
+                    var isChecked = cell.getValue() === true;
+
+                    var checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.checked = isChecked;
+
+                    checkbox.addEventListener("click", function (event) {
+                        var newValue = event.target.checked;
+                        // Update the cell value
+                        cell.setValue(newValue);
+                    });
+
+                    return checkbox;
+                },
+                visible: true,
+                width: 50
+            },
+
+            //{ title: "Description", field: "Description", headerSort: false },   
+            {
+                title: "Description",
+                field: "Description",
+                width: '25px',
+                headerSort: false,
+                formatter: function (cell, formatterParams, onRendered) {
+                    var date = new Date(cell.getData().SalesDate);
+                    var day = date.getDate();
+                    var monthNames = [
+                        "Jan", "Feb", "Mar",
+                        "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep",
+                        "Oct", "Nov", "Dec"
+                    ];
+                    var monthIndex = date.getMonth();
+                    var year = date.getFullYear().toString().substr(-2); // Extract last 2 digits of year
+
+                    var formattedDate = day + '-' + monthNames[monthIndex] + '-' + year;
+
+                    // Update the Description column value with the merged text
+                    cell.getData().Description = cell.getData().Description + '(' + formattedDate + ')';
+
+                    return cell.getData().Description;
+                }
+            },
+            {
+                title: "Due Date",
+                field: "DueDate",
+                width: "10%", cssClass: "text-center",
+                formatter: function (cell, formatterParams, onRendered) {
+                    var date = new Date(cell.getValue());
+                    var day = date.getDate();
+                    var monthNames = [
+                        "Jan", "Feb", "Mar",
+                        "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep",
+                        "Oct", "Nov", "Dec"
+                    ];
+                    var monthIndex = date.getMonth();
+                    var year = date.getFullYear().toString().substr(-2); // Extract last 2 digits of year
+
+                    return day + '-' + monthNames[monthIndex] + '-' + year;
+                }
+            },
+            {
+                title: "Original Amount", field: "Original_Amount", cssClass: "text-center", width: "13%",
+                    formatter: function (cell, formatterParams, onRendered) {
+                        var formattedNumber = cell.getValue().toLocaleString();
+
+                        return "<div>" + formattedNumber + "</div>";
+                    },
+            },
+             {
+                title: "Currency Rate", field: "CurrencyRate", cssClass: "text-center", width: "13%",
+                    formatter: function (cell, formatterParams, onRendered) {
+                        var formattedNumber = cell.getValue().toLocaleString();
+
+                        return "<div>" + formattedNumber + "</div>";
+                    },
+            },
+            { title: "Open Balance", field: "Open_Balance", cssClass: "text-center", width: "13%",
+                formatter: function (cell, formatterParams, onRendered) {
+                    var formattedNumber = cell.getValue().toLocaleString();
+
+                    return "<div>" + formattedNumber + "</div>";
+                },
+            },
+            //{ title: "Payment", field: "Payment", cssClass: "text-center",  editor: "input" }
+            { 
+                title: "Payment", 
+                field: "Payment", 
+                width: '11px',
+                cssClass: "text-center",  
+                editor: "input",
+                cellEdited: function(cell) {
+                    var newValue = parseFloat(cell.getValue());
+                    var openBalance = parseFloat(cell.getRow().getData().Open_Balance);
+
+                    if (newValue > openBalance) {
+                        // If the new value is greater than Open Balance, revert to the previous value
+                        var previousValue = cell.getOldValue();
+                        cell.setValue(previousValue);
+                    }
+
+                    var payment = parseFloat(cell.getValue()) || 0;
+                    var currencyRate = cell.getRow().getData().CurrencyRate || 0;
+                    var amount = cell.getRow().getData().Amount || 0;
+                    var MasterCurrencyRate = parseFloat($("#CurrencyRate").val()) || 1;
+
+                    var exchangeGLValue = (currencyRate - MasterCurrencyRate) * payment;
+
+                    // Update the ExchangeGL column
+                    cell.getRow().getCell("ExchangeLossGain").setValue(exchangeGLValue.toFixed(4));
+
+                },
+                formatter: function (cell, formatterParams, onRendered) {
+                    var formattedNumber = cell.getValue().toLocaleString();
+
+                    return "<div>" + formattedNumber + "</div>";
+                },
+            },
+              {
+                    title: "Exchange G/L", field: "ExchangeLossGain", editable: true, hozAlign: "right", width: '12px',cssClass: "text-center", headerSort: false, movable: false,
+                    
+                    formatter: "money",
+                    formatterParams: {
+                        precision: 2,
+                        symbol: "",
+                        thousand: ",",
+                        decimal: ".",
+                    },
+
+                     formatter: function (cell, formatterParams, onRendered) {
+                        
+                         var exchangeGLValue = parseFloat(cell.getValue()) || 0;                    
+                                          
+                        return exchangeGLValue.toFixed(4).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                        
+                     },                   
+                   
+                },
+
+        ];
+
+        var table = new Tabulator("#example-table", {
+            layout: "fitColumns",
+            addRowPos: "bottom",
+            columns: columns,
+        });
+
+
+         $("#CurrencyRate").on("input", function () {
+        // Get the new value from the input field
+        var MasterCurrencyRate = parseFloat($(this).val()) || 1; // Default to 1 if undefined or NaN
+
+        var totalexchange = 0;
+
+            table.getRows(true).forEach(function (row) {
+
+                var payment = parseFloat(row.getCell("Payment").getValue()) || 0;
+                var currencyRate = parseFloat(row.getData().CurrencyRate) || 0;
+                var amount = parseFloat(row.getData().Amount) || 0;        
+
+                var exchangeGLValue = (currencyRate - MasterCurrencyRate) * payment;
+                totalexchange += exchangeGLValue;
+                // Update the ExchangeGL column
+                row.getCell("ExchangeLossGain").setValue(exchangeGLValue.toFixed(4));
+            });
+
+            var amountToExchange = document.getElementById("total_exchange");
+              amountToExchange.textContent = totalexchange.toFixed(4);
+   
+      });
+
+        document.getElementById("example-table").addEventListener("click", function (event) {
+            var clickedRow = event.target.closest(".tabulator-row");
+
+           
+            // if (clickedRow) {
+            //     // Get the position of the clicked row
+            //     var rowPosition = clickedRow.getBoundingClientRect();
+            //     //var rowTop = rowPosition.top;
+            //     var rowTop = rowPosition.top + window.scrollY;
+            //     var rowLeft = rowPosition.left;
+            //     var rowheight = rowPosition.height;
+            //     var rowwidth = rowPosition.width;
+
+            //     var row = table.getRow(clickedRow);
+            //     var data = row.getData();
+
+            //     var cellWidths = getCellWidths(clickedRow);
+            //     // Create a new grid for the clicked row
+            //     var gridElement = createGridElement(data, cellWidths);
+
+            //     // Position the grid container over the clicked row
+            //     var gridContainer = document.getElementById("grid-container");
+            //     gridContainer.innerHTML = '';
+            //     gridContainer.appendChild(gridElement);
+            //     layout:"fitData",
+            //     // Set the position of the grid container relative to the clicked row
+            //     gridContainer.style.width = rowwidth + 'px';
+            //     gridContainer.style.height = rowheight + 'px';
+            //     gridContainer.style.left = rowLeft + 'px';
+            //     gridContainer.style.top = (rowTop - rowheight * 2) + 'px';
+            //     gridContainer.classList.remove('hidden');
+            // }
+        });
+
+        var columns1 = [
+            { title: "Id", field: "TransactionDetailsId", movable: false, headerSort: false, visible: false },
+            { title: "Id", field: "Id", movable: false, headerSort: false, visible: false },
+            { title: "SalesCode", field: "SalesCode", movable: false, headerSort: false, visible: false },
+            { title: "SalesDate", field: "SalesDate", movable: false, headerSort: false, visible: false },
+            // { title: "", field: "CheckBox", headerHozAlign: "left", width: "9px", headerSort: false, hozAlign: "left", formatter: customCheckBoxFormatter, visible: true, width: 50 },
+            {
+                title: "",
+                field: "CheckBox",
+                headerHozAlign: "left",
+                width: "9px",
+                headerSort: false,
+                hozAlign: "left",
+                formatter: function (cell, formatterParams, onRendered) {
+                    var isChecked = cell.getValue() === true;
+
+                    var checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.checked = isChecked;
+
+                    checkbox.addEventListener("click", function (event) {
+                        var newValue = event.target.checked;
+                        // Update the cell value
+                        cell.setValue(newValue);
+                    });
+
+                    return checkbox;
+                },
+                visible: true,
+                width: 50
+            },
+
+            //{ title: "Description", field: "Description", headerSort: false },
+            {
+                title: "Description",
+                field: "Description",
+                headerSort: false,
+                formatter: function (cell, formatterParams, onRendered) {
+                    var date = new Date(cell.getData().SalesDate);
+                    var day = date.getDate();
+                    var monthNames = [
+                        "Jan", "Feb", "Mar",
+                        "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep",
+                        "Oct", "Nov", "Dec"
+                    ];
+                    var monthIndex = date.getMonth();
+                    var year = date.getFullYear().toString().substr(-2); // Extract last 2 digits of year
+
+                    var formattedDate = day + '-' + monthNames[monthIndex] + '-' + year;
+
+                    // Update the Description column value with the merged text
+                    cell.getData().Description = cell.getData().Description + '(' + formattedDate + ')';
+
+                    return cell.getData().Description;
+                }
+            },
+            { title: "Original Amount", field: "Original_Amount", cssClass: "text-center", width: "15%",
+                formatter: function (cell, formatterParams, onRendered) {
+                    var formattedNumber = cell.getValue().toLocaleString();
+
+                    return "<div>" + formattedNumber + "</div>";
+                },
+            },
+            { title: "Open Balance", field: "Open_Balance", cssClass: "text-center", width: "15%",
+                formatter: function (cell, formatterParams, onRendered) {
+                    var formattedNumber = cell.getValue().toLocaleString();
+
+                    return "<div>" + formattedNumber + "</div>";
+                },
+            },
+            //{ title: "Payment", field: "Payment", cssClass: "text-center", editor: "input" }
+            { 
+                title: "Payment", 
+                field: "Payment", 
+                cssClass: "text-center",  
+                editor: "input",
+                cellEdited: function(cell) {
+                    var newValue = parseFloat(cell.getValue());
+                    var openBalance = parseFloat(cell.getRow().getData().Open_Balance);
+
+                    if (newValue > openBalance) {
+                        var previousValue = cell.getOldValue();
+                        cell.setValue(previousValue);
+                    }
+                }
+            }
+        ];
+
+        var table1 = new Tabulator("#credit-table", {
+            layout: "fitColumns",
+            addRowPos: "bottom",
+            columns: columns1,
+        });
+
+        
+
+        function formatDateToCustomDate2(originalDate) {
+            const months = [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+
+            const dateObj = new Date(originalDate);
+            const day = dateObj.getDate();
+            const month = months[dateObj.getMonth()];
+            const year = dateObj.getFullYear();
+
+            return `${day}-${month}-${year}`;
+        }
+
+        // Function to create a grid element for the clicked row
+        function createGridElement(data, cellWidths) {
+            var gridElement = document.createElement("div");
+            gridElement.classList.add("grid-view");
+            var gridRow = document.createElement("div");
+            gridRow.classList.add("grid-row");
+
+            for(var key in data)
+            {
+                if (key == "CheckBox") {
+                    var cell = document.createElement("div");
+                    var isChecked = data[key] === true;
+
+                    var checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.checked = isChecked;
+                    checkbox.style.marginLeft = "5px";
+
+                    checkbox.addEventListener("click", function (event) {
+                        var newValue = event.target.checked;
+                        // Update the cell value
+                        data[key] = newValue;
+                    });
+
+                    cell.appendChild(checkbox);
+                    var matchingWidth = cellWidths[key];
+                    if (matchingWidth) {
+                        cell.style.width = matchingWidth + "px";
+                        cell.style.borderRight = "1px solid #ccc";
+                    }
+                    gridRow.appendChild(cell);
+
+                    break;
+                }
+            }
+            for (var key in data) {
+                if (key != "Id" && key != "SalesCode" && key != "SalesDate" && key != "TransactionDetailsId" && key != "CheckBox") {
+                    var cell = document.createElement("div");
+                    cell.classList.add("grid-cell");
+                    if(key =="DueDate")
+                    {
+                        data[key] = formatDateToCustomDate2(data[key]);
+                    }
+                    if (key == "Payment") {
+                        var input = document.createElement("input");
+                        input.type = "text";
+                        input.value = data[key]; // Set the value from the clicked row's Payment cell
+                        input.style.width = "100%";
+                        input.style.height = "23px";
+                        cell.appendChild(input);
+
+                        //cell.style.width = "100px"; // Set the desired width for the Payment cell
+                        cell.style.borderRight = "1px solid #ccc";
+                        cell.style.padding = "2px"; // Add padding for better appearance
+                    }
+                    else
+                    {
+                        cell.textContent = data[key];
+                        if (key != "Description") {
+                            cell.style.textAlign = "center";
+                            cell.style.borderRight = "1px solid #ccc";
+                        }
+                        else {
+                            cell.style.marginLeft = "10px";
+                            cell.style.borderRight = "1px solid #ccc";
+                        }
+                    }
+                    
+                    
+                    // Set the width of the grid cell using the cellWidths object
+                    var matchingWidth = cellWidths[key];
+                    if (matchingWidth) {
+                        cell.style.width = matchingWidth + "px";
+                    }
+
+                    gridRow.appendChild(cell);
+                }
+                
+            }
+
+            gridElement.appendChild(gridRow);
+            return gridElement;
+        }
+
+
+        function getCellWidths(clickedRow) {
+            var cellWidths = {};
+            var cells = clickedRow.querySelectorAll(".tabulator-cell");
+
+            cells.forEach(function (cell) {
+                var width = cell.getBoundingClientRect().width;
+                //var name = cell.getAttribute("data-field"); // Replace with the correct attribute
+                var name = cell.attributes["tabulator-field"].nodeValue;
+                if (name) {
+                    cellWidths[name] = width;
+                }
+            });
+
+            return cellWidths;
+        }
+
+
+
+
+
+
+        
+
+        // function calculateAmmountToApply() {
+        //     var data = table.getData();
+        //     var subtotal = data.reduce(function (sum, row) {
+        //         var amount = parseFloat(row.Payment) || 0; // Parse the amount as a float
+        //         return sum + amount;
+        //     }, 0);
+
+        //     var amountToApply = document.getElementById("amount-to-apply");
+        //     amountToApply.textContent = subtotal.toFixed(4);
+        // }
+        function calculateAmmountToApply() {
+
+            var allRows = table1.getRows();
+            var selectedRows = allRows.filter(function (row) {
+                return row.getCell("Payment").getValue() !== null;
+            });
+
+            selectedRows.forEach(function (row) {
+                row.getCell("CheckBox").setValue(true);
+            });
+
+
+            var data1 = table1.getData();
+            var totalAmount = data1.reduce(function (sum, row) {
+                // Check if the "Checkbox" is true for the current row
+                if (row.CheckBox === true) {
+                    var amount = parseFloat(row.Payment) || 0;
+                    return sum + amount;
+                }
+                return sum;
+            }, 0);
+
+            var data = table.getData();
+            var subtotal = data.reduce(function (sum, row) {
+                // Check if the "Checkbox" is true for the current row
+                if (row.CheckBox === true) {
+                    var amount = parseFloat(row.Payment) || 0;
+                    return sum + amount;
+                }
+                return sum;
+            }, 0);
+            var amountReceived = $("#amount-received").val();
+            var receivedAmountFloat = parseFloat(amountReceived);
+            if (isNaN(receivedAmountFloat)) {
+                receivedAmountFloat = 0;
+            }
+            var total = totalAmount + receivedAmountFloat;
+
+            var amountCredit = total - subtotal;
+
+            var amountToCredit = document.getElementById("amount-to-credit");
+            amountToCredit.textContent = amountCredit.toFixed(4);
+
+            var amountToApply = document.getElementById("amount-to-apply");
+            amountToApply.textContent = total.toFixed(4);
+
+               // Listen for input changes in the "Payment" field
+            var paymentField = document.querySelector('input[name="Payment"]');
+            if (paymentField) {
+                paymentField.addEventListener('input', function() {
+                    var typedValue = parseFloat(paymentField.value) || 0;
+                    var updatedTotal = total + typedValue;
+                    amountToApply.textContent = updatedTotal.toFixed(4);
+                });
+            }
+
+        }
+        
+
+        function populateTableWithData(data) {
+
+            var tableData = data.map(function (item) {
+                item.CheckBox = item.CheckBox === true || item.Id === @SalesId;
+                item.CheckBox = item.CheckBox === true;
+                if(item.Id === @SalesId)
+                {
+                    item.Payment = item.Open_Balance;
+                    // var amountToApply = document.getElementById("amount-to-apply");
+                    // amountToApply.textContent = item.Open_Balance;
+                    document.getElementById('tk-amount-received').textContent = item.Open_Balance.toLocaleString();
+                    document.getElementById('total-received').textContent = item.Open_Balance.toLocaleString();
+                    $("#amount-received").val(item.Open_Balance.toFixed(4));
+                    document.getElementById('amount-to-apply').textContent = item.Open_Balance.toLocaleString();
+                }
+                return item;
+            });
+
+
+            table = new Tabulator("#example-table", {
+                layout: "fitColumns",
+                addRowPos: "bottom",
+                columns: columns, // Your columns configuration
+                data: data,
+            });
+            console.log(data);
+            //table.redraw(true);
+
+        }
+        function populateTableWithDataForCredit(data) {
+            var sum = 0;
+            var tableData = data.map(function (item) {
+                sum += item.Payment;
+                item.CheckBox = item.CheckBox === true || item.Id === @SalesId;
+                item.CheckBox = item.CheckBox === true;
+                if (item.Id === @SalesId) {
+                    //item.Payment = 0;
+                    // var amountToApply = document.getElementById("amount-to-apply");
+                    // amountToApply.textContent = item.Open_Balance;
+                    
+                }
+                return item;
+            });
+
+            var paymentSum = tableData.reduce(function (accumulator, currentItem) {
+                return accumulator + currentItem.Payment;
+            }, 0);
+
+            document.getElementById('amount-to-credit').textContent = paymentSum;
+            table1 = new Tabulator("#credit-table", {
+                layout: "fitColumns",
+                addRowPos: "bottom",
+                columns: columns1, // Your columns configuration
+                data: data,
+            });
+
+            console.log(data);
+            //table1.redraw(true);
+            
+            //calculateAmmountToApply();
+        }
+        
+
+        var tableInput = document.getElementById('example-table');
+
+        if (tableInput) {
+            tableInput.addEventListener("change", function () {
+                calculateAmmountToApply();
+            });
+        }
+
+       
+
+        var table1Input = document.getElementById('credit-table');
+
+        if (table1Input) {
+            table1Input.addEventListener("change", function () {
+                calculateAmmountToApply();
+            });
+        }
+
+       function gatherAdvData()
+       {
+           var dataList = [];
+            var rows1 = table1.getData();
+
+            rows1.forEach(function (row) {
+                if (row.CheckBox === true && row.Id === 0) {
+                    var rowData = {
+                        "Id": row["TransactionDetailsId"],
+                        "SalesId": row["Id"],
+                        "TransactionId": $("#payment-id").val(),
+                        "NetAmount": row.Payment,
+                        "ExchangeLossGain": row.ExchangeLossGain,
+                    };
+
+                    dataList.push(rowData);
+                }
+
+            });
+
+            return dataList;
+       }
+
+        function gatherData() {
+
+            var dataList = [];
+
+            var taxList = [];
+
+            var rows = table.getData();
+
+            rows.forEach(function (row) {
+                if(row.CheckBox === true)
+                {
+                    var rowData = {
+                        "Id": row["TransactionDetailsId"] == null ? 0 : row["TransactionDetailsId"],
+                        "SalesId": row["Id"],
+                        "TransactionId": $("#payment-id").val(),
+                        //"SalesCode": row["SalesCode"],
+                        //"SalesDate": row["SalesDate"],
+                        //"Description": row.Description,
+                        //"DueDate": row.DueDate,
+                        //"NetAmount": row.Original_Amount,
+                        //"Open_Balance": row.Open_Balance,
+                        "NetAmount": row.Payment,
+                        "ExchangeLossGain": row.ExchangeLossGain,
+                        //"DebitAccountId": $("#CategoryList").val(),
+                    };
+
+                    dataList.push(rowData);
+                }
+                
+            });
+
+            var adjustedAmount = 0;
+            var rows1 = table1.getData();
+
+            rows1.forEach(function (row) {
+                if (row.CheckBox === true && row.Id !== 0) {
+                    var rowData = {
+                        "Id": row["TransactionDetailsId"] == null ? 0 : row["TransactionDetailsId"],
+                        "SalesId": row["Id"],
+                        "TransactionId": $("#payment-id").val(),
+                        "NetAmount": row.Payment,
+                        "ExchangeLossGain": row.ExchangeLossGain,
+                    };
+
+                    dataList.push(rowData);
+                }
+
+            });
+
+            rows1.forEach(function (row) {
+                if (row.CheckBox === true && row.Id === 0) {
+                    adjustedAmount += row.Payment;
+                }
+
+            });
+
+            var dataListCount = dataList.length;
+
+            var fiscalMonthId = $('#FiscalMonthId').val();
+            var creditAccount = $('#CreditAccount').val();
+            console.log(dataList);
+
+            var MakePaymentVM = {
+                Id: $("#payment-id").val(),
+                CustomerId: $("#Customer").val(),
+                //EmailId: $("#customer-email").val(),
+                InputDate: $("#start-date").val(),
+                PaymentTypeId: $("#PaymentMethod").val(),
+                TransactionCode: $("#reference-no").val(),
+                CurrencyId: $("#MultiiCurrencyId").val(),
+                CurrencyRate: $("#CurrencyRate").val(),
+                DebitAccountId: $("#CategoryList").val(),
+                //CreditAccountId: $("#CreditAccount").val(),
+                TransactionCategory: "Receive payment",
+                TransactionAmount: $("#amount-to-apply").text(),
+                Description: $("#message-invoice").val(),
+                WarehouseId: $("#WarehouseIdMain").val(),
+                //AmountToCredit: $("#amount-to-credit").val(),
+                FiscalMonthId: fiscalMonthId,
+                TransactionDetails: dataList,
+                isReceipt: true ,
+                CreditAccountId: dataListCount == 0 ? 1 : creditAccount,
+                ParentTransactionId: $("#ParentTransactionId").val() == 0 ? null : $("#ParentTransactionId").val(),
+                adjustedAmount: adjustedAmount
+            };
+
+            return MakePaymentVM;
+        }
+         
+        var PaymentId = 0;
+        function sendDataToServer() {
+            var paymentData = gatherData();
+
+            var data = JSON.stringify(paymentData);
+            console.log(data);
+            var fileInput = $('input[type=file]')[0];
+
+
+            $.ajax({
+
+                url: '@Url.Action("AddTransactionQB", "Admin")',
+                type: 'POST',
+                data: data,
+                async: false,
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (response) {
+                    PaymentId = response.TransactionId;
+                    console.log("Done");
+                    toastr.success(response.message, "", {
+                        "toastClass": "toast-green",
+                    });
+                    setTimeout(function () {
+                        window.location.href = '@Url.Action("InvoiceList", "Sales")?Type=Payments';
+                    }, 1000);
+                },
+                error: function (error) {
+                    console.log("Error");
+                }
+            });
+
+            var advData = gatherAdvData();
+
+            var advdatas = JSON.stringify(advData);
+
+            $.ajax({
+
+                url: '@Url.Action("AdjustAdvanceAmount", "Sales")',
+                type: 'POST',
+                data: advdatas,
+                async: false,
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (response) {
+                    console.log("Done");
+                },
+                error: function (error) {
+                    console.log("Error");
+                }
+            });
+
+            if (fileInput.files.length > 0 && fileInput.files[0].size > 0) {
+                var formData = new FormData();
+                //formData.append("file", fileInput.files[0]);
+                for (var i = 0; i < fileInput.files.length; i++) {
+                    formData.append("files", fileInput.files[i]);
+                }
+                formData.append("InvoiceId", PaymentId);
+
+                $.ajax({
+                    async: false,
+                    type: "POST",
+                    url: "@Url.Action("UploadImageForPayment", "Sales")",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        // Handle the response
+                    }
+                });
+            } else {
+                // Handle the case where no file was selected
+            }
+        }
+
+        if('@actionType' !== "View")
+        {
+            var saveButton = document.getElementById('BtnSave');
+            saveButton.addEventListener('click', function () {
+                var flag = 0;
+
+                var allRows = table.getRows();
+
+                var selectedRows = allRows.filter(function (row) {
+                    return row.getCell("CheckBox").getValue() === true;
+                });
+
+                var numberOfSelectedRows = selectedRows.length;
+                console.log(numberOfSelectedRows);
+
+                if (numberOfSelectedRows === -1) {
+                    var alertDiv = document.getElementById("alert-transanction");
+                    if (alertDiv) {
+                        $("#alert_details").text("Enter a valid transaction amount.");
+                        alertDiv.style.display = "block";
+                    }
+                }
+                else
+                {
+                    var alertDiv = document.getElementById("alert-transanction");
+                    $("#alert_details").text("");
+
+                    var allValidation ="";
+                    if ($("#Customer").val() == "") {
+                        $("#Customer-validation").html("Choose a Customer");
+                        allValidation += "Choose a Customer</br>"
+                    }
+                    if ($("#PaymentMethod").val() == "") {
+                        $("#PaymentMethod-validation").html("Please select payment method");
+                        allValidation += "Please select payment method</br>"
+                    }
+                    // if ($("#reference-no").val() == "") {
+                    //     $("#reference-no-validation").html("Please enter reference no");
+                    //     allValidation += "Please enter reference no</br>"
+                    // }
+                    if ($("#CategoryList").val() == "") {
+                        $("#CategoryList-validation").html("Please select Deposit type");
+                        allValidation += "Please select Deposit type</br>"
+                    }
+                    if ($("#WarehouseIdMain").val() == "") {
+                        $("#location-validation").html("Please select a location");
+                        allValidation += "Please select a location"
+                    }
+                    
+                    if (allValidation === "") {
+                        sendDataToServer(); 
+                    }
+                    // else
+                    // {
+                    //     $("#alert_details").html(allValidation);
+                    //     alertDiv.style.display = "block";
+                    // }
+                }
+            
+            });
+        }
+        
+        $("#WarehouseIdMain").on("change", function () {
+            if ($("#WarehouseIdMain").val() != "") {
+               $("#location-validation").html("");
+            }
+        });
+
+        $("#CategoryList").on("change", function () {
+            if ($("#CategoryList").val() != "") {
+               $("#CategoryList-validation").html("");
+            }
+        });
+        
+        $("#PaymentMethod").on("change", function () {
+            if ($("#PaymentMethod").val() != "") {
+               $("#PaymentMethod-validation").html("");
+            }
+        });
+
+
+        var clearpaymentButton = document.getElementById('clear-payment');
+        clearpaymentButton.addEventListener('click', function () {
+            var allRows = table.getRows();
+
+            var selectedRows = allRows.filter(function (row) {
+                return row.getCell("CheckBox").getValue() === true;
+            });
+
+            selectedRows.forEach(function (row) {
+                row.getCell("Payment").setValue("");
+                row.getCell("CheckBox").setValue(false);
+
+                
+            });
+            document.getElementById('amount-received').value = '';
+            var amountToApply = document.getElementById("amount-to-apply");
+            amountToApply.textContent = '0.00';
+
+        });
+
+        function initializeFiscalMonthForEdit(date, FiscalMonthId) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetFiscalMonthDateWise", "Accounts")',
+                data: { fiscalDate: date },
+                datatype: "Json",
+                success: function (data) {
+
+                    if (data.length > 1) {
+                        $("#FiscalMonthDiv").removeClass('d-none');
+                    }
+                    else {
+                        $("#FiscalMonthDiv").addClass('d-none');
+                    }
+                    $('#FiscalMonthId').empty();
+                    $.each(data, function (index, value) {
+                        $('#FiscalMonthId').append('<option value="' + value.Id + '" >' + value.MonthName + '</option>');
+                    });
+                    console.log($('#FiscalMonthId').val());
+                    $("#FiscalMonthId").val(FiscalMonthId).trigger('change');
+                }
+            });
+        }
+
+        $(document).ready(function () {
+
+            var alertDiv = document.getElementById("alert-transanction");
+            if (alertDiv) {
+                alertDiv.style.display = "none";
+            }
+            $("#Customer").select2();
+            $("#FiscalMonthId").select2();
+
+            $(".inBDT").addClass("d-none");
+            
+
+            if ('@actionType' === "Create")
+            {
+                LoadData();
+            }
+            if('@actionType' === "Edit")
+            {
+                EditLoadData();
+                function EditLoadData() {
+                    var id = @id;
+                    //console.log(Salesid);
+                    $.ajax({
+                        url: '@Url.Action("LoadReceivePaymentDetails", "Sales")',
+                        data: { id: id },
+                        type: 'GET',
+                        async: true,
+                        dataType: 'json',
+                        success: function (result) {
+                            if (result.Success == "1") {
+                                //toastr.success(result.ex, "", {
+                                //    "toastClass": "toast-green",
+                                //});
+                                // console.log(CustomerId);
+                                console.log(result.Data);
+                                initparentData(result.Data);
+                            }
+                        },
+                        error: function () {
+                            toastr.error('Unable to Save');
+                            //alert('Unable to Save');
+                        }
+                    });
+                }
+            }
+
+            if('@actionType' === "View")
+            {
+                EditLoadData();
+                function EditLoadData() {
+                    var id = @id;
+                    //console.log(Salesid);
+                    $.ajax({
+                        url: '@Url.Action("LoadReceivePaymentDetails", "Sales")',
+                        data: { id: id },
+                        type: 'GET',
+                        async: true,
+                        dataType: 'json',
+                        success: function (result) {
+                            if (result.Success == "1") {
+                                //toastr.success(result.ex, "", {
+                                //    "toastClass": "toast-green",
+                                //});
+                                // console.log(CustomerId);
+                                console.log(result.Data);
+                                initparentData(result.Data);
+                            }
+                        },
+                        error: function () {
+                            toastr.error('Unable to Save');
+                            //alert('Unable to Save');
+                        }
+                    });
+                }
+            }
+            
+
+            var customerId = @customerId;
+            function LoadData() {
+
+                var Salesid = @SalesId;
+                var CustomerId = @customerId;
+                console.log(CustomerId);
+                $.ajax({
+                    url: '@Url.Action("LoadReceivePayment", "Sales")',
+                    data: { invoiceid: Salesid },
+                    type: 'GET',
+                    async: true,
+                    dataType: 'json',
+                    success: function (result) {
+                        console.log(result.Data);
+                        if (result.Success == "1") {
+
+                            if(CustomerId !== 0)
+                            {
+                                  $("#Customer").val(CustomerId).trigger('change');
+                            }
+                            
+                            LoadDataforCredit();
+                            populateTableWithData(result.Data);
+                            toastr.success(result.ex, "", {
+                                "toastClass": "toast-green",
+                            });
+                            
+                            
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Unable to Save');
+                        //alert('Unable to Save');
+                    }
+                });
+            }
+            function LoadDataforCredit() {
+
+                var Salesid = @SalesId;
+                var CustomerId = @customerId;
+                console.log(CustomerId);
+                $.ajax({
+                    url: '@Url.Action("LoadReceivePaymentCredit", "Sales")',
+                    data: { invoiceid: Salesid },
+                    type: 'GET',
+                    async: true,
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result.Success == "1") {
+                            
+                            $("#Customer").val(CustomerId);
+                            populateTableWithDataForCredit(result.Data);
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Unable to Save');
+                        //alert('Unable to Save');
+                    }
+                });
+            }
+            //function EditLoadData()
+            //{
+            //    var id = @id;
+            //    //console.log(Salesid);
+            //    $.ajax({
+            //        url: '@Url.Action("LoadReceivePaymentDetails", "Sales")',
+            //        data: { id: id },
+            //        type: 'GET',
+            //        async: true,
+            //        dataType: 'json',
+            //        success: function (result) {
+            //            if (result.Success == "1") {
+            //                toastr.success(result.ex, "", {
+            //                    "toastClass": "toast-green",
+            //                });
+            //                // console.log(CustomerId);
+            //                console.log(result.Data);
+            //                initparentData(result.Data);
+            //            }
+            //        },
+            //        error: function () {
+            //            toastr.error('Unable to Save');
+            //            //alert('Unable to Save');
+            //        }
+            //    });
+            //}
+
+            function getFileType(fileName) {
+                var extension = fileName.split('.').pop().toLowerCase();
+                if (extension === 'pdf') {
+                    return 'pdf';
+                } else if (extension === 'xls' || extension === 'xlsx') {
+                    return 'excel';
+                } else if (extension === 'jpg' || extension === 'jpeg' || extension === 'png' || extension === 'gif') {
+                    return 'image';
+                } else {
+                    return 'unknown';
+                }
+            }
+
+            function deleteFile(filename) {
+                $.ajax({
+                    url: '@Url.Action("DeleteFileName", "Admin")',
+                    type: 'Post',
+                    data: { fileName: filename },
+                    success: function (result) {
+
+                    },
+                    error: function (error) {
+                        console.log('Error fetching group list:', error);
+                    }
+                });
+            }
+
+            function initparentData(data) {
+                var inputdate = formatDateToCustomDate(data.InputDate);
+                console.log(inputdate);
+                $("#payment-id").val(data.Id);
+                $("#Customer").val(data.CustomerId).trigger("change");
+                $("#start-date").val(inputdate);
+                $("#reference-no").val(data.TransactionCode);
+                $("#CurrencyRate").val(data.CurrencyRate);
+                $("#PaymentMethod").val(data.PaymentTypeId);
+                $("#CategoryList").val(data.DebitAccountId);
+                $("#CreditAccount").val(data.CreditAccountId);
+                $("#WarehouseIdMain").val(data.WarehouseId);
+                $("#ParentTransactionId").val(data.ParentTransactionId);
+                $("#message-invoice").val(data.Description);
+                initializeFiscalMonthForEdit(inputdate, data.FiscalMonthId);
+                //$("#amount-received").val(data.TransactionAmount);
+                var amountToApply = document.getElementById("amount-to-apply");
+                amountToApply.textContent = data.TransactionAmount.toFixed(4);
+
+                document.getElementById('tk-amount-received').textContent = data.TransactionAmount.toFixed(4);
+
+                loadtabulatorData(data.Id);
+
+                loadtabulatorDataForCredit(data.Id, data.TransactionAmount, data.CustomerId);
+                getCurrencyRate(data.CustomerId);
+
+                var fileNames = data.FilePath ? data.FilePath.split(';') : [];
+
+                var fileContainer = $('#file-container');
+
+                // Clear any existing elements
+                fileContainer.empty();
+
+                fileNames.forEach(function (fileName, index) {
+                    if (fileName) {
+                        // Determine file type based on extension
+                        var fileType = getFileType(fileName);
+                        var fileName2 = fileName.split('/').pop();
+
+                        var actualFileName = fileName2.match(/[^_]+$/)[0];
+
+                        // Wrapper div
+                        var fileWrapper = $('<div>', {
+                            class: 'file-wrapper col-md-1',
+                            css: {
+                                position: 'relative',
+                                marginBottom: '20px' // space between files
+                            }
+                        });
+
+                        // Create iframe for PDF and Excel files
+                        var iframe;
+                        if (fileType === 'pdf' || fileType === 'excel') {
+                            iframe = $('<iframe>', {
+                                id: 'pdf-iframe-' + index,
+                                class: 'file-iframe',
+                                css: {
+                                    width: '100%',
+                                    height: '0',
+                                    border: '1px solid #ccc',
+                                    overflow: 'hidden'
+                                },
+
+                            });
+
+                            // Display filename as text overlay
+                            var filenameOverlay = $('<div>', {
+                                class: 'filename-overlay',
+                                css: {
+                                    position: 'absolute',
+                                    top: '0',
+                                    left: '0',
+                                    width: '100%',
+                                    background: 'rgba(0, 0, 0, 0.5)',
+                                    color: '#fff',
+                                    padding: '5px',
+                                    boxSizing: 'border-box',
+                                    zIndex: '5'
+                                },
+                                text: fileName.split('/').pop() // Extract filename from path
+                            });
+
+                            // Append filename overlay to iframe container
+                            iframe.append(filenameOverlay);
+                        } else if (fileType === 'image') {
+                            // Create img element for image files
+                            iframe = $('<img>', {
+                                class: 'file-img',
+                                css: {
+                                    width: '100%',
+                                    height: 'auto',
+                                    border: '1px solid #ccc',
+                                    objectFit: 'contain' // Adjust as needed for image display
+                                },
+                                src: "../" + fileName
+                            });
+                        } else {
+                            // Handle unknown file types (optional)
+                            console.log("Unknown file type for fileName: " + fileName);
+                            return; // Skip processing this file
+                        }
+
+                        // Create download button for PDF and Excel files
+                        var downloadButton;
+                        if (fileType === 'pdf' || fileType === 'excel') {
+                            downloadButton = $('<a>', {
+                                class: 'btn btn-primary btn-sm download-button',
+                                text: actualFileName,
+                                href: "../" + fileName,
+                                //download: fileName.split('/').pop()
+                            });
+                        }
+
+                        // Create remove button
+                        var removeButton = $('<button>', {
+                            class: 'btn btn-danger btn-sm remove-button',
+                            text: 'X',
+                            css: {
+                                position: 'absolute',
+                                top: '5px',
+                                right: '5px',
+                                zIndex: 10
+                            },
+                            click: function () {
+                                $('#confirmDeleteModal').modal('show');
+
+                                // Handle click on confirmation button
+                                $('#confirmDeleteBtn').on('click', function () {
+                                    // Close modal
+                                    $('#confirmDeleteModal').modal('hide');
+                                    fileWrapper.remove();
+                                    deleteFile(fileName);
+                                });
+                            }
+                        });
+
+                        // Append iframe (or img) and buttons to the wrapper
+                        fileWrapper.append(iframe);
+                        fileWrapper.append(removeButton);
+                        if (downloadButton) {
+                            fileWrapper.append(downloadButton);
+                        }
+
+                        // Append the wrapper to the container
+                        fileContainer.append(fileWrapper);
+
+                        // Show initial elements if necessary
+                        if (fileType === 'pdf' || fileType === 'excel' || fileType === 'image') {
+                            iframe.removeClass('d-none');
+                            removeButton.removeClass('d-none');
+                            if (downloadButton) {
+                                downloadButton.removeClass('d-none');
+                            }
+                        }
+                    }
+                });
+            }
+
+            var totalTransactionAmount = 0;
+            function loadtabulatorData(transactionId)
+            {
+                $.ajax({
+                    url: '@Url.Action("LoadTransactionDetails", "Sales")',
+                    data: { id: transactionId },
+                    type: 'GET',
+                    async: true,
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result.Success == "1") {
+                            totalTransactionAmount = result.Data.reduce(function (sum, item) {
+                                var paymentValue = parseFloat(item.Payment) || 0;
+                                return sum + paymentValue;
+                            }, 0);
+                            console.log(result.Data);
+                            populateTableWithData(result.Data);
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Unable to Save');
+                        //alert('Unable to Save');
+                    }
+                });
+            }
+
+            function loadtabulatorDataForCredit(transactionId, amount, customerId) {
+                $.ajax({
+                    url: '@Url.Action("LoadTransactionDetailsForCredit", "Sales")',
+                    data: { id: transactionId, customerId: customerId },
+                    type: 'GET',
+                    async: true,
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result.Success == "1") {
+                            toastr.success(result.ex, "", {
+                                "toastClass": "toast-green",
+                            });
+                            var totalPayment = result.Data.reduce(function (sum, item) {
+                                var paymentValue = parseFloat(item.Payment) || 0;
+                                return sum + paymentValue;
+                            }, 0);
+                            totalPayment = amount - totalPayment;
+                            $("#amount-received").val(totalPayment.toFixed(4));
+
+                            document.getElementById('tk-amount-received').textContent = totalPayment.toFixed(4);
+                            document.getElementById('total-received').textContent = totalPayment.toFixed(4);
+
+                            console.log(result.Data);
+                            populateTableWithDataForCredit(result.Data);
+
+                            $("#ParentTransactionId").val(result.ParentTransactionId);
+
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Unable to Save');
+                        //alert('Unable to Save');
+                    }
+                });
+
+
+            }
+
+            function formatDateToCustomDate(originalDate) {
+                const months = [
+                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                ];
+
+                const dateObj = new Date(originalDate);
+                const day = dateObj.getDate();
+                const month = months[dateObj.getMonth()];
+                const year = dateObj.getFullYear();
+
+                return `${day}-${month}-${year}`;
+            }
+
+            // Example usage
+            const originalDate = "2023-09-30T00:00:00";
+            const customFormattedDate = formatDateToCustomString(originalDate);
+            console.log(customFormattedDate);  // Output: 30-Sep-2023
+
+            var customerDropdown = $("#Customer");
+
+            customerDropdown.on("select2:select", function () {
+                // Get the selected value
+                var selectedValue = $(this).val();
+                document.getElementById('tk-amount-received').textContent = 0.00;
+                document.getElementById('total-received').textContent = 0.00;
+                $("#amount-received").val(0.00.toLocaleString());
+                document.getElementById('amount-to-apply').textContent = 0.00;
+                LoadCustomerWiseData(selectedValue);
+            });
+
+            function LoadCustomerWiseData(selectedValue) {
+                //var CustomerId = @customerId;
+                $.ajax({
+                    url: '@Url.Action("LoadCustomerWiseData", "Sales")',
+                    data: { customerid: selectedValue },
+                    type: 'GET',
+                    async: true,
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result.Success == "1") {
+                            toastr.success(result.ex, "", {
+                                "toastClass": "toast-green",
+                            });
+                            // console.log(CustomerId);
+                            customerId = selectedValue;
+                            LoadCustomerWiseDataForCredit(selectedValue);
+                            populateTableWithData(result.Data);
+                            
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Unable to Save');
+                        //alert('Unable to Save');
+                    }
+                });
+            }
+                function LoadCustomerWiseDataForCredit(selectedValue) {
+                    //var CustomerId = @customerId;
+                    $.ajax({
+                        url: '@Url.Action("LoadCustomerWiseDataForCredit", "Sales")',
+                        data: { customerid: selectedValue },
+                        type: 'GET',
+                        async: true,
+                        dataType: 'json',
+                        success: function (result) {
+                            if (result.Success == "1") {
+                                
+                                // console.log(CustomerId);
+                                customerId = selectedValue;
+                                populateTableWithDataForCredit(result.Data);
+                                $("#ParentTransactionId").val(result.ParentTransactionId);
+                            }
+                        },
+                        error: function () {
+                            toastr.error('Unable to Save');
+                            //alert('Unable to Save');
+                        }
+                    });
+                }
+
+            var resetfilterButton = document.getElementById('reset-filter');
+            resetfilterButton.addEventListener('click', function () {
+                LoadCustomerWiseData(customerId);
+                $("#invoice-from").val('');
+                $("#invoice-to").val('');
+            });
+
+            var resetfilterButton = document.getElementById('reset-filter-credit');
+            resetfilterButton.addEventListener('click', function () {
+                LoadCustomerWiseDataForCredit(customerId);
+                $("#invoice-from-credit").val('');
+                $("#invoice-to-credit").val('');
+            });
+            const myLink = document.getElementById("clear-filter-label");
+
+            myLink.addEventListener("click", function (event) {
+                const filterLabel = document.getElementById("filter-label");
+                filterLabel.textContent = '';
+                var alertDiv = document.getElementById("divfilterlabel");
+                if (alertDiv) {
+                    alertDiv.style.display = "none";
+                }
+            });
+
+            const myLinkcredit = document.getElementById("clear-filter-label-credit");
+
+            myLinkcredit.addEventListener("click", function (event) {
+                const filterLabel = document.getElementById("filter-label-credit");
+                filterLabel.textContent = '';
+                var alertDiv = document.getElementById("divfilterlabelcredit");
+                if (alertDiv) {
+                    alertDiv.style.display = "none";
+                }
+            });
+
+            function LoadFilteredData() {
+                var dtFrom = $("#invoice-from").val();
+                console.log(dtFrom);
+                var dtTo = $("#invoice-to").val();
+                $.ajax({
+                    url: '@Url.Action("LoadFilteredData", "Sales")',
+                    data: { dtFrom: dtFrom, dtTo: dtTo, CustomerId: customerId },
+                    type: 'GET',
+                    async: true,
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result.Success == "1") {
+                            toastr.success(result.ex, "", {
+                                "toastClass": "toast-green",
+                            });
+                            // console.log(CustomerId);
+                            //$("#Customer").val(CustomerId);
+                            populateTableWithData(result.Data);
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Unable to Save');
+                        //alert('Unable to Save');
+                    }
+                });
+            }
+
+            var filterButton = document.getElementById('filtered-button');
+            filterButton.addEventListener('click', function () {
+                LoadFilteredData();
+                var dtFrom = $("#invoice-from").val();
+                var dtTo = $("#invoice-to").val();
+
+                const filterLabel = document.getElementById("filter-label");
+                var message = dtFrom + ' To ' + dtTo;
+                filterLabel.textContent = message;
+                var alertDiv = document.getElementById("divfilterlabel");
+                if (alertDiv) {
+                    alertDiv.style.display = "block";
+                }
+            });
+
+            
+
+            function LoadFilteredDataForCredit() {
+                var dtFrom = $("#invoice-from-credit").val();
+                console.log(dtFrom);
+                var dtTo = $("#invoice-to-credit").val();
+                $.ajax({
+                    url: '@Url.Action("LoadFilteredDataForCredit", "Sales")',
+                    data: { dtFrom: dtFrom, dtTo: dtTo, CustomerId: customerId },
+                    type: 'GET',
+                    async: true,
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result.Success == "1") {
+                            toastr.success(result.ex, "", {
+                                "toastClass": "toast-green",
+                            });
+                            // console.log(CustomerId);
+                            //$("#Customer").val(CustomerId);
+                            populateTableWithDataForCredit(result.Data);
+                            $("#ParentTransactionId").val(result.ParentTransactionId);
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Unable to Save');
+                        //alert('Unable to Save');
+                    }
+                });
+            }
+
+            var filterButton = document.getElementById('filtered-button-credit');
+            filterButton.addEventListener('click', function () {
+                LoadFilteredDataForCredit();
+                var dtFrom = $("#invoice-from-credit").val();
+                var dtTo = $("#invoice-to-credit").val();
+
+                const filterLabel = document.getElementById("filter-label-credit");
+                var message = dtFrom + ' To ' + dtTo;
+                filterLabel.textContent = message;
+                var alertDiv = document.getElementById("divfilterlabelcredit");
+                if (alertDiv) {
+                    alertDiv.style.display = "block";
+                }
+            });
+
+
+            var amountReceivedInput = document.getElementById("amount-received");
+            amountReceivedInput.addEventListener("keyup", function (event) {
+                var inputValue = event.target.value;
+
+                // Log the input value to the console
+                console.log(inputValue);
+
+                    var alertDiv = document.getElementById("alert-transanction");
+                if (alertDiv) {
+                    alertDiv.style.display = "none";
+                }
+
+                var totalAmountReceived = parseFloat(document.getElementById("amount-received").value);
+                var forTkAmount = totalAmountReceived;
+
+                var data1 = table1.getData();
+                var totalAmount = data1.reduce(function (sum, row) {
+                    // Check if the "Checkbox" is true for the current row
+                    if (row.CheckBox === true) {
+                        var amount = parseFloat(row.Payment) || 0;
+                        return sum + amount;
+                    }
+                    return sum;
+                }, 0);
+
+                totalAmountReceived = totalAmountReceived + totalAmount;
+
+                var tkAmountReceived = document.getElementById("tk-amount-received");
+                var totalReceived = document.getElementById("total-received");
+                var totalReceivedBDT = document.getElementById("total-received-BDT");
+                var amountToApply = document.getElementById("amount-to-apply");
+
+                var currencyRate = parseFloat($("#CurrencyRate").val());
+
+                if (!amountReceivedInput.value) {
+                    tkAmountReceived.textContent = '0.00';
+                    totalReceivedBDT.textContent = '0.00';
+                    totalReceived.textContent = '0.00';
+                    amountToApply.textContent = '0.00';
+                } else {
+                    tkAmountReceived.textContent = forTkAmount.toFixed(4);
+                    totalReceived.textContent = forTkAmount.toFixed(4);
+                    totalReceivedBDT.textContent = (forTkAmount*currencyRate).toFixed(4);
+                    amountToApply.textContent = totalAmountReceived.toFixed(4);
+                }
+
+                var payment = 0;
+                var allRows = table.getRows();
+
+                var selectedRows = allRows.filter(function (row) {
+                    return row.getCell("CheckBox").getValue() === true;
+                });
+
+                // Calculate the total "Open_Balance" of selected rows
+                var totalOpenBalance = selectedRows.reduce(function (acc, row) {
+                    return acc + parseFloat(row.getCell("Open_Balance").getValue());
+                }, 0);
+
+                // Distribute the amount to selected rows until their "Open_Balance" is satisfied
+                selectedRows.forEach(function (row) {
+                    var openBalance = parseFloat(row.getCell("Open_Balance").getValue());
+                    var salesid = parseFloat(row.getCell("Id").getValue());
+
+                    if (totalAmountReceived > 0 && openBalance > 0 && salesid === @SalesId) {
+                        // Calculate the amount to distribute to this row
+                        var amountToDistribute = Math.min(openBalance, totalAmountReceived);
+                        payment += amountToDistribute;
+                        // Update the payment for this row
+                        row.getCell("Payment").setValue(amountToDistribute.toFixed(4));
+
+                        // Deduct the distributed amount from the total
+                        totalAmountReceived -= amountToDistribute;
+                    } else {
+                        if(openBalance === 0)
+                        {
+                            row.getCell("CheckBox").setValue(false);
+                        }
+                        else
+                        {
+                            // If there's no more amount to distribute or open balance is zero, set payment to 0
+                            row.getCell("Payment").setValue(0);
+                        }
+                        
+                    }
+                });
+
+                // Distribute any remaining amount to unchecked rows
+                if (totalAmountReceived > 0) {
+                    allRows.forEach(function (row) {
+                        var salesid = parseFloat(row.getCell("Id").getValue());
+                        //if (row.getCell("CheckBox").getValue() === false)
+                        if (salesid != @SalesId) {
+                            var openBalance = parseFloat(row.getCell("Open_Balance").getValue());
+
+                            if (openBalance > 0 && totalAmountReceived > 0) {
+                                // Calculate the amount to distribute to this row
+                                var amountToDistribute = Math.min(openBalance, totalAmountReceived);
+                                payment += amountToDistribute;
+                                // Update the payment for this row
+                                row.getCell("Payment").setValue(amountToDistribute.toFixed(4));
+
+                                // Deduct the distributed amount from the total
+                                totalAmountReceived -= amountToDistribute;
+
+                                // Check the row since it has received a payment
+                                row.getCell("CheckBox").setValue(true);
+                            }
+                            else
+                            {
+                                row.getCell("CheckBox").setValue(false);
+                            }
+                        }
+
+                    });
+                }
+                else {
+                    allRows.forEach(function (row) {
+                        var salesid = parseFloat(row.getCell("Id").getValue());
+                        var payment = parseFloat(row.getCell("Payment").getValue());
+                        if (salesid === @SalesId) {
+                            row.getCell("CheckBox").setValue(true);
+                        }
+                        else {
+                            row.getCell("CheckBox").setValue(false);
+                        }
+
+                    });
+                    
+                }
+                if (isNaN(totalAmountReceived)) {
+                totalAmountReceived = 0;
+            }
+                document.getElementById('amount-to-credit').textContent = totalAmountReceived;
+
+                  var totalLossGain = allRows.reduce(function (acc, row) {
+                        return acc + parseFloat(row.getCell("ExchangeLossGain").getValue());
+                    }, 0);
+                    if (isNaN(totalLossGain)) {
+                        totalLossGain = 0;
+                    }
+
+                    var amountToExchange = document.getElementById("total_exchange");
+                    amountToExchange.textContent = totalLossGain.toFixed(4);
+            });
+
+            var findinvoice = document.getElementById("find-invoice");
+            findinvoice.addEventListener("keyup", function (event) {
+                var inputValue = event.target.value;
+                
+                $.ajax({
+                    url: '@Url.Action("LoadFindInvoice", "Sales")',
+                    data: { InvoiceNo: inputValue, CustomerId: customerId },
+                    type: 'GET',
+                    async: true,
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result.Success == "1") {
+                            
+                            // console.log(CustomerId);
+                            //$("#Customer").val(CustomerId);
+                            populateTableWithData(result.Data);
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Unable to Save');
+                        //alert('Unable to Save');
+                    }
+                });
+            });
+
+            var findcredit = document.getElementById("find-credit");
+            findcredit.addEventListener("keyup", function (event) {
+                var inputValue = event.target.value;
+
+                $.ajax({
+                    url: '@Url.Action("LoadFindCredit", "Sales")',
+                    data: { InvoiceNo: inputValue, CustomerId: customerId },
+                    type: 'GET',
+                    async: true,
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result.Success == "1") {
+
+                            // console.log(CustomerId);
+                            //$("#Customer").val(CustomerId);
+                            populateTableWithDataForCredit(result.Data);
+                            $("#ParentTransactionId").val(result.ParentTransactionId);
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Unable to Save');
+                        //alert('Unable to Save');
+                    }
+                });
+            });
+
+            function keepDropdownOpened(event) {
+                event.preventDefault;
+                event.stopPropagation;
+            }
+            
+            $('.dropdown-menu').on('click', function (e) {
+                e.stopPropagation();
+            })
+
+            
+            function formatDateToCustomString(inputDate) {
+                const months = [
+                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                ];
+
+                if (inputDate instanceof Date && !isNaN(inputDate)) {
+                    const day = inputDate.getDate();
+                    const monthIndex = inputDate.getMonth();
+                    const year = inputDate.getFullYear();
+
+                    const formattedDate = `${day}-${months[monthIndex]}-${year}`;
+                    return formattedDate;
+                } else {
+                    return inputDate;
+                }
+            }
+            var today = new Date();
+            var day = today.getDate();
+            var month = today.toLocaleString('default', { month: 'short' });
+            var year = today.getFullYear();
+
+            var formattedDay = (day < 10 ? '0' : '') + day;
+
+            var formattedDate = formattedDay + '-' + month + '-' + year;
+
+            //document.getElementById('start-date').value = formattedDate;
+
+            $(function () {
+                $("#start-date").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy",
+                    todayHighlight: true,
+                    autoclose: true,
+                    onSelect: function (dateText, inst) {
+                        getverifyFiscalMonth(dateText);
+                    }
+                }).attr('readonly', 'readonly');
+
+                $("#invoice-from").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                });
+
+                $("#invoice-to").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                });
+                $("#invoice-from-credit").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                });
+
+                $("#invoice-to-credit").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                });
+            });
+
+            $('#file-drop-area').on('click', function (e) {
+                e.preventDefault();
+                $('#image-uploadify').click(); 
+            });
+
+            function initializeFiscalMonth(date) {
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetFiscalMonthDateWise", "Accounts")',
+                    data: { fiscalDate: date },
+                    datatype: "Json",
+                    success: function (data) {
+
+                        if (data.length > 1) {
+                            $("#FiscalMonthDiv").removeClass('d-none');
+                        }
+                        else {
+                            $("#FiscalMonthDiv").addClass('d-none');
+                        }
+                        $('#FiscalMonthId').empty();
+                        $.each(data, function (index, value) {
+                            $('#FiscalMonthId').append('<option value="' + value.Id + '" >' + value.MonthName + '</option>');
+                        });
+                        console.log($('#FiscalMonthId').val());
+                    }
+                });
+            }
+
+            function getverifyFiscalMonth(selectedDate) {
+
+                $.ajax({
+                    url: '@Url.Action("VerifyFiscalMonth", "Accounts")',
+                    data: { fiscalDate: selectedDate },
+                    type: 'GET',
+                    success: function (result) {
+
+                        if (result.IsLocked == true) {
+                            // var formattedDate = moment(result.data).format('DD-MMM-YYYY');
+                            // $('#start-date').val(formattedDate);
+                            // $('#start-date-validation').text('The fiscal month you choosed is closed');
+                            if (result.data == null) {
+                                $('#start-date-validation').text('Open a fiscal month.');
+                                $('#start-date').val('');
+                            }
+                            else {
+                                //$('#VoucherDate').val(result.data);
+                                var formattedDate = moment(result.data).format('DD-MMM-YY');
+                                $('#start-date').val(formattedDate);
+                                $('#start-date-validation').text('The fiscal month you choosed is closed');
+                                initializeFiscalMonth(result.data);
+                            }
+                        }
+                        else {
+                            $('#start-date-validation').text('');
+                            initializeFiscalMonth($('#start-date').val());
+                        }
+                    },
+                    error: function (error) {
+                        console.log('Error fetching group list:', error);
+                    }
+                });
+            }
+
+            function updateSelectedFilesList(files) {
+                var selectedFilesList = $('#selected-files-list');
+                selectedFilesList.empty(); 
+
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    var listItem = $('<li>' + file.name + '</li>');
+                    selectedFilesList.append(listItem);
+                }
+            }
+
+            $('#image-uploadify').on('change', function () {
+                var files = $(this)[0].files;
+
+                updateSelectedFilesList(files);
+
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+
+                    if (file.size > 20 * 1024 * 1024) {
+                        alert('File "' + file.name + '" exceeds the maximum allowed size of 20MB.');
+                        $(this).val('');
+                        updateSelectedFilesList([]);
+                        return;
+                    }
+
+                }
+            });
+
+            $('#file-drop-area').on('dragover', function (e) {
+                e.preventDefault();
+                $(this).addClass('dragover');
+            });
+
+            $('#file-drop-area').on('dragleave drop', function (e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+            });
+
+            $('#file-drop-area').on('drop', function (e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+                var files = e.originalEvent.dataTransfer.files;
+                $('#image-uploadify')[0].files = files;
+                updateSelectedFilesList(files);
+            });
+
+            
+        });
+
+        function CommonInitToZero() {
+            // table.clearData();
+            // table1.clearData();
+            // var initvalue = 0
+            // document.getElementById("total-tax").textContent = initvalue.toFixed(4);
+            // document.getElementById("total").textContent = initvalue.toFixed(4);
+            // document.getElementById("subtotal").textContent = initvalue.toFixed(4);
+            // document.getElementById("taxable-subtotal").textContent = initvalue.toFixed(4);
+            // document.getElementById("totalInBDT").textContent = initvalue.toFixed(4);
+        }
+
+        $("#Customer").on("select2:select", function () {
+            var selectedOption = $(this).find("option:selected");
+            var CustomerId = selectedOption.val();
+            console.log('Selected Currency ID:', CustomerId);
+
+            $.ajax({
+                url: '@Url.Action("GetCurrencyRateForSales", "Admin")' + '?CustomerId=' + CustomerId,
+                success: function (data) {
+                    console.log("see currency", data);
+                    if (data.success == "0") {
+                        toastr.success(data.msg, "", {
+                            "toastClass": "toast-red",
+                        });
+                    }
+                    else {
+                        if (data.CurrencyShortName == "BDT") {
+                            $("#yourRateParent").css("display", "none !important");
+                            $(".totalspan").css("display", "none !important");
+                            var flag = '<i class="flag-icon ' + data.FlagClass + '"></i>';
+                            $(".flag").html(flag);
+                            $(".rate").text(data.CurrencyShortName);
+                            var previousRate = $("#CurrencyRate").val();
+                            $("#MultiiCurrencyId").val(data.CurrencyId);
+
+                            $("#CurrencyRate").val(data.CurrencyRate);
+                            $(".inBDT").addClass("d-none");
+                            // if (previousRate !== "" && data[0].CurrencyRate !== 1) {
+                            //     CommonInitToZero();
+                            // } else if (data[0].CurrencyRate === 1 && previousRate !== "" && previousRate !== 1) {
+                            //     CommonInitToZero();
+                            // }
+                        }
+                        else {
+                            $("#yourRateParent").css("display", "");
+                            $(".totalspan").css("display", "");
+                            var flag = '<i class="flag-icon ' + data.FlagClass + '"></i>';
+                            $(".flag").html(flag);
+                            $(".rate").text(data.CurrencyShortName);
+                            var previousRate = $("#CurrencyRate").val();
+                            $("#CurrencyRate").val(data.CurrencyRate);
+                            $("#MultiiCurrencyId").val(data.CurrencyId);
+
+                            var inBDT = data.CurrencyRate;
+                            if (inBDT == "" || inBDT == "1") {
+                                $(".inBDT").addClass("d-none");
+                            }
+                            else {
+                                $(".inBDT").removeClass("d-none");
+                                var totalReceivedBDT = document.getElementById("total-received-BDT");
+                                var amountreceived = parseFloat($("#total-received").text());
+                                totalReceivedBDT.textContent = (amountreceived * data.CurrencyRate).toFixed(4);
+
+                            }
+                            // if ('@actionType' === "Create") {
+                            //     if (previousRate != data[0].CurrencyRate) {
+                            //         CommonInitToZero();
+                            //     }
+                            // }
+                            // else {
+                            //     CommonInitToZero();
+                            // }
+
+                        }
+                    }
+
+
+                }
+            });
+
+        });
+
+        $("#Customer").on("change", function () {
+            var selectedOption = $(this).find("option:selected");
+            var CustomerId = selectedOption.val();
+            console.log('Selected Currency ID:', CustomerId);
+
+            getCurrencyRate(CustomerId);
+            
+        });
+
+        
+
+        function getCurrencyRate(CustomerId) {
+            $.ajax({
+                url: '@Url.Action("GetCurrencyRateForSales", "Admin")' + '?CustomerId=' + CustomerId,
+                success: function (data) {
+                    console.log("see currency", data);
+                    if (data.success == "0") {
+                        toastr.success(data.msg, "", {
+                            "toastClass": "toast-red",
+                        });
+                    }
+                    else {
+                        if (data.CurrencyShortName == "BDT") {
+                            $("#yourRateParent").css("display", "none !important");
+                            $(".totalspan").css("display", "none !important");
+                            var flag = '<i class="flag-icon ' + data.FlagClass + '"></i>';
+                            $(".flag").html(flag);
+                            $(".rate").text(data.CurrencyShortName);
+                            var previousRate = $("#CurrencyRate").val();
+                            $("#MultiiCurrencyId").val(data.CurrencyId);
+
+                            $("#CurrencyRate").val(data.CurrencyRate);
+                            $(".inBDT").addClass("d-none");
+                            // if (previousRate !== "" && data[0].CurrencyRate !== 1) {
+                            //     CommonInitToZero();
+                            // } else if (data[0].CurrencyRate === 1 && previousRate !== "" && previousRate !== 1) {
+                            //     CommonInitToZero();
+                            // }
+                        }
+                        else {
+                            $("#yourRateParent").css("display", "");
+                            $(".totalspan").css("display", "");
+                            var flag = '<i class="flag-icon ' + data.FlagClass + '"></i>';
+                            $(".flag").html(flag);
+                            $(".rate").text(data.CurrencyShortName);
+                            var previousRate = $("#CurrencyRate").val();
+                            if ('@actionType' === "Create")
+                            {
+                                $("#CurrencyRate").val(data.CurrencyRate);
+                            }
+                            
+                            $("#MultiiCurrencyId").val(data.CurrencyId);
+
+                            var inBDT = data.CurrencyRate;
+                            if (inBDT == "" || inBDT == "1") {
+                                $(".inBDT").addClass("d-none");
+                            }
+                            else {
+                                $(".inBDT").removeClass("d-none");
+                                var totalReceivedBDT = document.getElementById("total-received-BDT");
+                                var amountreceived = parseFloat($("#total-received").text());
+                                totalReceivedBDT.textContent = (amountreceived * data.CurrencyRate).toFixed(4);
+
+                            }
+                            // if ('@actionType' === "Create") {
+                            //     if (previousRate != data[0].CurrencyRate) {
+                            //         CommonInitToZero();
+                            //     }
+                            // }
+                            // else {
+                            //     CommonInitToZero();
+                            // }
+
+                        }
+                    }
+
+
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var POLNameHandle = document.getElementById("reference-no");
+            var BtnSave = document.querySelector('#BtnSave');
+            var paymentid = $("#payment-id").val();
+
+            function getAllCodes(callback) {
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetTransactionCodes", "Admin")',
+                    dataType: "json",
+                    success: function (data) {
+                        var CustCodeGetArray = [];
+                        data.forEach(function (item) {
+                            var CustomerCode = item.Text;
+                            var CustomerId = item.Value;
+                            var SizeData = {
+                                CustomerCode: CustomerCode,
+                                Id: CustomerId
+                            };
+                            CustCodeGetArray.push(SizeData);
+                        });
+                        if (typeof callback === "function") {
+                            callback(CustCodeGetArray);
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Error:", error);
+                    }
+                });
+            }
+
+            function checkCustomerCodeExists(code) {
+                getAllCodes(function (data) {
+                    var lowercasedSizeName = code.toLowerCase();
+                    var sizeExists = data.some(function (item) {
+                        if (paymentid && paymentid === item.Id) {
+                            return false;
+                        }
+                        return item.CustomerCode.trim().toLowerCase() === lowercasedSizeName;
+                    });
+
+                    console.log("Size exists:", sizeExists);
+                    if (sizeExists) {
+                        $("#reference-no-validation").html("Already Exist.!");
+                        BtnSave.disabled = true;
+                        console.log("Button disabled");
+                    } else {
+                        $("#reference-no-validation").html("");
+                        BtnSave.disabled = false;
+                        console.log("Button enabled");
+                    }
+                });
+            }
+
+            POLNameHandle.addEventListener("input", function () {
+                console.log("Input value:", POLNameHandle.value);
+                var enteredSizeName = POLNameHandle.value;
+                checkCustomerCodeExists(enteredSizeName);
+            });
+        });
+    </script>
+
+}
+
+

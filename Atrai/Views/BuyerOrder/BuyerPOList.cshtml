@@ -1,0 +1,1542 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@using Atrai.Model.Core.Entity;
+@using Atrai.Model.Core.Common;
+@{
+    ViewData["Title"] = "Order Allocation List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var ListType = ViewBag.ListType as string;
+    
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+  
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    #modal-content2 {
+        background-color: #fefefe;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 30%;
+    }
+
+    input[type="checkbox"] {
+        width: 15px; /* Set the width */
+        height: 20px; /* Set the height */
+    }
+
+</style>
+
+
+<div class="col-lg-4">
+    <p class="fs-4 fw-bold">Buyer PO List</p>
+</div>
+<ul class="nav nav-tabs mt-5">
+
+    @{
+        var AllChildMenu = HttpContextAccessor.HttpContext.Session.GetObject<List<UserMenuPermissionViewModel>>("UserChildMenu");
+
+        var filterparentmenu = AllChildMenu.Where(x => x.ControllerName == "BuyerOrder" && x.ActionName == "BuyerPOList" && x.IsView == true).ToList();
+        var i = 0;
+        foreach (var childitem in filterparentmenu)
+        {
+
+            if (childitem.FirstParameter != null)
+            {
+
+                if (i == 0)
+                {
+                        <li class="nav-item">
+                            <a class="nav-link  fw-semibold active" href="#" id=@childitem.FirstValue>@childitem.MenuName</a>
+                        </li>
+
+                }
+                else
+                {
+                        <li class="nav-item">
+                            <a class="nav-link  fw-semibold" href="#" id=@childitem.FirstValue>@childitem.MenuName</a>
+                        </li>
+
+                }
+
+
+            }
+
+            i++;
+        }
+    }
+
+    @* <li class="nav-item">
+        <a class="nav-link active fw-semibold" aria-current="page" href="#" id="all_order">Buyer PO</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link fw-semibold" href="#" id="bom">BOM</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link fw-semibold" href="#" id="daily_production">Daily Production</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link fw-semibold" href="#" id="deptWise_daily_production">Dept Wise Daily Production</a>
+    </li> *@
+    
+</ul>
+
+<div id="order_view_id" class="d-none">
+    <div class="d-flex justify-content-end">
+        <button class="btn btn-success fw-bold ms-3 h-70 radius-30 my-2" type="button" data-bs-toggle="dropdown" onclick="gotoCreatePO()">
+            New Buyer PO
+        </button>
+    </div>
+    
+    <div class="d-flex justify-content-end">
+        <button title="Print" class="btn btn-white border-0" type="button" id="salesPrint-pdf" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-printer fs-5" style=" margin-right: 10px; "></i>
+        </button>
+        <button title="Export to excel" class="btn btn-white border-0" type="button" id="salesPrint-excel" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-file-earmark-excel fs-5" style=" margin-right: 10px; "></i>
+        </button>
+        <div title="Settings" class="dropdown1 custom-grid" style="display:inline-block;">
+            <a href="#" class="text-decoration-none text-black me-1" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+               aria-expanded="false">
+                <i class="bi bi-gear fs-5"></i>
+            </a>
+            <div class="dropdown-menu gear-dropdown" aria-labelledby="dropdownMenuButton-expense">
+                <div class="row p-4 main-dropdown-size" style="overflow:hidden;">
+                    <div class="col">
+                        <span class="fw-bold ms-3">Columns</span>
+                        <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                        <ul class="list-unstyled">
+                            <li>
+                                <div id="buyerpoColumnList" class="custom-grid">
+                                </div>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                    <div class="ms-3">
+                        <label>Rows</label> <br />
+                        <select name="rows" id="buyerpo-rows" class="cursor-pointer" style="padding: 10px 0 10px 5px; width: 70px;">
+                            <option value="0" disabled selected>Rows</option>
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+    <div id="example-table"></div>
+</div>
+
+<div id="bom_view_id" class="d-none">
+    <div class="d-flex justify-content-end">
+        <button class="btn btn-success fw-bold ms-3 h-70 radius-30 my-2" type="button" data-bs-toggle="dropdown" onclick="gotoCreateBOM()">
+            New BOM
+        </button>
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button title="Print" class="btn btn-white border-0" type="button" id="bomPrint-pdf" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-printer fs-5" style=" margin-right: 10px; "></i>
+        </button>
+        <button title="Export to excel" class="btn btn-white border-0" type="button" id="bomPrint-excel" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-file-earmark-excel fs-5" style=" margin-right: 10px; "></i>
+        </button>
+        <div title="Settings" class="dropdown1 custom-grid" style="display:inline-block;">
+            <a href="#" class="text-decoration-none text-black me-1" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+               aria-expanded="false">
+                <i class="bi bi-gear fs-5"></i>
+            </a>
+            <div class="dropdown-menu gear-dropdown" aria-labelledby="dropdownMenuButton-expense">
+                <div class="row p-4 main-dropdown-size" style="overflow:hidden;">
+                    <div class="col">
+                        <span class="fw-bold ms-3">Columns</span>
+                        <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                        <ul class="list-unstyled">
+                            <li>
+                                <div id="bomColumnList" class="custom-grid">
+                                </div>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                    <div class="ms-3">
+                        <label>Rows</label> <br />
+                        <select name="rows" id="bom-rows" class="cursor-pointer" style="padding: 10px 0 10px 5px; width: 70px;">
+                            <option value="0" disabled selected>Rows</option>
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+    <div id="bom-table"></div>
+</div>
+
+<div id="daily_production_view_id" class="d-none">
+    <div class="d-flex justify-content-end">
+        <button class="btn btn-success fw-bold ms-3 h-70 radius-30 my-2" type="button" data-bs-toggle="dropdown" onclick="gotoCreateDailyProduction()">
+            New Daily Production
+        </button>
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button title="Print" class="btn btn-white border-0" type="button" id="dailyProPrint-pdf" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-printer fs-5" style=" margin-right: 10px; "></i>
+        </button>
+        <button title="Export to excel" class="btn btn-white border-0" type="button" id="dailyProPrint-excel" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-file-earmark-excel fs-5" style=" margin-right: 10px; "></i>
+        </button>
+        <div title="Settings" class="dropdown1 custom-grid" style="display:inline-block;">
+            <a href="#" class="text-decoration-none text-black me-1" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+               aria-expanded="false">
+                <i class="bi bi-gear fs-5"></i>
+            </a>
+            <div class="dropdown-menu gear-dropdown" aria-labelledby="dropdownMenuButton-expense">
+                <div class="row p-4 main-dropdown-size" style="overflow:hidden;">
+                    <div class="col">
+                        <span class="fw-bold ms-3">Columns</span>
+                        <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                        <ul class="list-unstyled">
+                            <li>
+                                <div id="DailyProColumnList" class="custom-grid">
+                                </div>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                    <div class="ms-3">
+                        <label>Rows</label> <br />
+                        <select name="rows" id="DailyPro-rows" class="cursor-pointer" style="padding: 10px 0 10px 5px; width: 70px;">
+                            <option value="0" disabled selected>Rows</option>
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+    <div id="daily-production-table"></div>
+</div>
+
+<div id="deptWise_daily_production_view_id" class="d-none">
+    <div class="d-flex justify-content-end">
+        <button class="btn btn-info fw-bold ms-3 h-70 radius-30 my-2" type="button" data-bs-toggle="dropdown" onclick="gotoDailyProductionReport()">
+            Report
+        </button>
+        <button class="btn btn-success fw-bold ms-3 h-70 radius-30 my-2" type="button" data-bs-toggle="dropdown" onclick="gotoCreateDeptDailyProduction()">
+            New Daily Production
+        </button>
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button title="Print" class="btn btn-white border-0" type="button" id="deptWise_dailyProPrint-pdf" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-printer fs-5" style=" margin-right: 10px; "></i>
+        </button>
+        <button title="Export to excel" class="btn btn-white border-0" type="button" id="deptWise_dailyProPrint-excel" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-file-earmark-excel fs-5" style=" margin-right: 10px; "></i>
+        </button>
+        <div title="Settings" class="dropdown1 custom-grid" style="display:inline-block;">
+            <a href="#" class="text-decoration-none text-black me-1" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+               aria-expanded="false">
+                <i class="bi bi-gear fs-5"></i>
+            </a>
+            <div class="dropdown-menu gear-dropdown" aria-labelledby="dropdownMenuButton-expense">
+                <div class="row p-4 main-dropdown-size" style="overflow:hidden;">
+                    <div class="col">
+                        <span class="fw-bold ms-3">Columns</span>
+                        <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                        <ul class="list-unstyled">
+                            <li>
+                                <div id="DeptDailyProColumnList" class="custom-grid">
+                                </div>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                    <div class="ms-3">
+                        <label>Rows</label> <br />
+                        <select name="rows" id="DeptDailyPro-rows" class="cursor-pointer" style="padding: 10px 0 10px 5px; width: 70px;">
+                            <option value="0" disabled selected>Rows</option>
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+    <div id="deptWise_daily-production-table"></div>
+</div>
+
+<div class="col-md-2  col-2">
+    <div id="customModal" class="modal">
+        <div class="modal-content" id="modal-content2">
+            <p>Are you sure you want to delete?</p>
+            <div class="row">
+                <div class="col-md-6 col-6">
+                    <button id="confirmBtn" class="btn btn-success" style="width: 100px">OK</button>
+                </div>
+                <div class="col-md-6 col-6 d-flex justify-content-end">
+                    <button id="cancelBtn" class="btn btn-danger" style="width: 100px">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+
+    <script>
+
+        var buyerPOTable;
+
+        function setInactiveUrl(data) {
+            var myUrlInactive = '@Url.Action("DeleteOrder", "BuyerOrder")';
+
+            var modal = document.getElementById("customModal");
+            modal.style.display = "block";
+
+            document.getElementById("confirmBtn").onclick = function () {
+                $.ajax({
+                    type: "get",
+                    data: { Id: data },
+                    url: myUrlInactive,
+                    success: function (response) {
+                        if (response.success == "1") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-green",
+                            });
+                            initTabulator();
+                        }
+                        else if (response.success == "0") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-red",
+                            });
+                        }
+                        else {
+
+                            toastr.success(response.message, "Access Denied", {
+                                "toastClass": "toast-red",
+                            });
+                        }
+                    }
+                });
+                modal.style.display = "none";
+            };
+
+            document.getElementById("cancelBtn").onclick = function () {
+                modal.style.display = "none";
+            };
+        }
+
+        function customCheckBoxFormatter(cell, formatterParams, onRendered) {
+            return '<input type="checkbox" class="custom-checkbox mt-2">';
+        }
+
+        var buyerpocolumn = [
+            { title: "", field: "CheckBox", headerHozAlign: "left", headerSort: false, formatter: customCheckBoxFormatter, visible: true, width: 50 },
+            {
+                title: "Buyer PO", field: "BuyerPO", hozAlign: "left", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false,
+            },
+            {
+                title: "Buyers", field: "BuyerName", hozAlign: "left", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false,
+            },
+            {
+                title: "Company Name", field: "CompanyName", hozAlign: "left", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false,
+            },
+            {
+                title: "Style", field: "StyleName", hozAlign: "center", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false,
+            },
+            {
+                title: "Unit Price", field: "UnitPrice", hozAlign: "right", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false,
+                formatter: function (cell, formatterParams, onRendered) {
+                    var formattedNumber = cell.getValue().toLocaleString();
+
+                    return "<div style='text-align:right'>" + formattedNumber + "</div>";
+                },
+            },
+            { title: "Order Date", field: "OrderDate", hozAlign: "center", vertAlign: "middle", headerFilter: "input" },
+            {
+                title: "Quantity", field: "TotalQuantity", hozAlign: "right", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false,
+            },
+            {
+                title: "Actions", field: "button", headerHozAlign: "center", vertAlign: "middle", headerSort: false, hozAlign: "right", resizable: false, formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    console.log("see data::", data);
+                    var myUrlGetforInvoice = `@Url.Action("UpdateBuyerPO", "BuyerOrder")?id=${data.Id}`;
+
+                    var inActive = `setInactiveUrl(${data.Id}) `
+                    var active = `setActiveUrl(${data.Id}) `
+
+
+                    var editHtml;
+
+                    editHtml = `
+                                        <a href='${myUrlGetforInvoice}' class='text-decoration-none text-black ms-3 mt-1'>
+                                            <i class='bi bi-pencil-square pe-1'></i> <span>Edit</span>  <br />
+                                        </a>
+                                        <div class='dropdown-divider m-0'></div>`;
+
+
+
+                    var deleteHtml;
+                    deleteHtml = `
+                                             <a onclick='${inActive}' class='text-decoration-none text-black ms-3 mt-1' href='#' id='InActive'>
+                                                 <i class="bi bi-trash3"></i><span class='ms-1 mt-2'>Delete</span><br />
+                                             </a>
+                                         `;
+
+                    var statusDependentHtml = data.isPosted ? deleteHtml : editHtml + deleteHtml;
+                    var html = `
+                                                                              <div class='dropdown ms-1'>
+
+                                                                              <a href='${myUrlGetforInvoice}' class='text-decoration-none  ms-3 mt-1'>
+                                                                                           Edit
+                                                                                       </a>
+                                                                                  <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                                                 <ul class='dropdown-menu item-menu' aria-labelledby='dropdownMenuButton1'>
+                                                                                      ${statusDependentHtml}
+
+                                                                                  </ul>
+                                                                              </div>
+                                                                          `;
+
+                    return html;
+                },
+                visible: true, cellClick: function (e, cell) {
+                    cell.getElement().classList.add('active-cell');
+                },
+            },
+
+        ];
+
+        function formatDateToCustomStringForDate(inputDate) {
+            const months = [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+
+            if (inputDate instanceof Date && !isNaN(inputDate)) {
+                const day = inputDate.getDate();
+                const monthIndex = inputDate.getMonth();
+                const year = inputDate.getFullYear();
+                const formattedDay = day < 10 ? `0${day}` : day;
+
+                const formattedDate = `${formattedDay}-${months[monthIndex]}-${year}`;
+                return formattedDate;
+            } else {
+                return inputDate;
+            }
+        }
+
+        function initTabulator()
+        {
+            // function fetchDataFromServer() {
+            //     var MyAppUrlSettings = {
+            //         MyUsefulUrl: '@Url.Action("GetOrderList", "BuyerOrder")'
+            //     };
+            //     return $.ajax({
+            //         url: MyAppUrlSettings.MyUsefulUrl,
+                   
+            //         dataType: "json",
+            //     });
+            // }
+
+            // fetchDataFromServer().done(function (response) {
+
+            //     console.log("notrmal response:", response.data);
+            //     var dataTable = response.data;
+               
+
+                salesApiUrl = '@Url.Action("GetOrderList", "BuyerOrder")',
+                    buyerPOTable = new Tabulator("#example-table", {
+
+                        layout: "fitColumns",
+                        minHeight: 400,                        
+                        selectable: 1,
+                        pagination: true,
+                        paginationMode: "remote",
+                        filterMode: "remote",
+                        paginationSize: 5,
+                        paginationInitialPage: 1,
+                        paginationSizeSelector: [5, 10, 25, 50, 100, 500, 1000],
+                        paginationCounter: "rows",
+                        ajaxURL: salesApiUrl,
+                        ajaxConfig: "get",
+                        ajaxContentType: "json",
+                        
+                        ajaxResponse: function (url, params, response) {
+                            buyerPOTable.setMaxPage(response.last_page);
+                            // //console.log("response.last_page", response.last_page);
+
+                            dataLoadExpense = response.data;
+                            ////console.log("dataLoadExpense abc:", dataLoadExpense);
+                            dataLoadExpense.forEach(function (item) {
+                                if (item.OrderDate) {
+                                    const dateObject = new Date(item.OrderDate);
+                                    item.OrderDate = formatDateToCustomStringForDate(dateObject);
+                                }
+                                
+                            });
+
+                            return {
+
+                                data: dataLoadExpense,
+                                last_page: response.last_page,
+
+                            };
+                        },
+
+                        columns: buyerpocolumn,
+                        ajaxURLGenerator: function (url, config, params) {
+                            //return request url
+                            return url + "?searchquery=" + encodeURIComponent(JSON.stringify(params)); //encode parameters as a json object
+                        },
+
+                    });
+                document.getElementById("salesPrint-pdf").addEventListener("click", function () {
+                    buyerPOTable.print(false, true);
+                });
+                document.getElementById("salesPrint-excel").addEventListener("click", function () {
+                    buyerPOTable.download("xlsx", "data.xlsx", { sheetName: "Table Data" });
+                });
+            // });
+        }
+
+        if ('@ListType' === "Order") {
+            $("#Order").addClass("active");
+            $("#BOM").removeClass("active");
+            $("#Daily_Production").removeClass("active");
+            $("#DeptWise_Daily_Production").removeClass("active");
+
+            $("#order_view_id").removeClass("d-none");
+            $("#bom_view_id").addClass("d-none");
+            $("#daily_production_view_id").addClass("d-none");
+            $("#deptWise_daily_production_view_id").addClass("d-none");
+
+            initTabulator();
+        }
+
+        $("#Order").on("click", function () {
+            $("#Order").addClass("active");
+            $("#BOM").removeClass("active");
+            $("#Daily_Production").removeClass("active");
+            $("#DeptWise_Daily_Production").removeClass("active");
+
+            $("#order_view_id").removeClass("d-none");
+            $("#bom_view_id").addClass("d-none");
+            $("#deptWise_daily_production_view_id").addClass("d-none");
+
+            
+            // Check if POLTable is initialized and has rows
+            if (buyerPOTable && buyerPOTable.getRows().length > 0) {
+                // POLTable exists and has rows, do not call POLGetData
+                return;
+            } else {
+                // POLTable does not exist or has no rows, call POLGetData
+                initTabulator();
+            }
+        })
+
+        //Buyer PO gear functionalities starts=============
+
+        var columnListStyle = $("#buyerpoColumnList");
+        $.each(buyerpocolumn, function (index, field) {
+            ////console.log("GLOBAL 2::",field);
+            var title = field.title;
+            var name = field.field;
+            var visible = true;
+            if (field.visible == false) {
+                visible = false;
+            }
+            var Styletitles = `<li>
+                                       <a class="dropdown-item" href="#">
+                                       <div class="custom-control custom-checkbox" >
+                                       <input type="checkbox" class="custom-control-input title-input" id="${name}" value="${name}">
+                                       <label class="custom-control-label w-100 cursor-pointer" id="${name}" for="${name}">${title}</label>
+                                       </div>
+                                       </a>
+                                       </li>`;
+            columnListStyle.append(Styletitles);
+
+            document.querySelector(`#${name}`).addEventListener('click', function (event) {
+                var checkbox = event.target;
+                var isChecked = checkbox.checked;
+
+                if (isChecked) {
+                    buyerPOTable.showColumn(name);
+                } else {
+                    buyerPOTable.hideColumn(name);
+                }
+            });
+
+
+            $(`${'#' + name}`).prop('checked', visible);
+
+
+            $('.custom-control-label').on('click', function (e) {
+                e.stopPropagation();
+            });
+            $('#dropdown-titles').on('click', function (e) {
+                e.stopPropagation();
+            });
+
+            //Add event listener to the rows select input
+            $("#buyerpo-rows").on("change", function () {
+                var selectedRows = $(this).val();
+                if (selectedRows !== null) {
+                    var pageSize = parseInt(selectedRows);
+                    if (!isNaN(pageSize)) {
+                        buyerPOTable.setPageSize(pageSize);
+                    }
+                }
+            });
+
+        });
+        //gear functionalities ends===============
+
+
+        function gotoCreatePO() {
+            var editUrl = '@Url.Action("CreateBuyerPO", "BuyerOrder")';
+            window.location.href = editUrl;
+        }
+    </script>
+
+    <script>
+
+        var BOMTable;
+
+        function gotoCreateBOM() {
+            var editUrl = '@Url.Action("CreateBOM", "BuyerOrder")';
+            window.location.href = editUrl;
+        }
+              
+
+        function setInactiveUrlBOM(data) {
+            var myUrlInactive = '@Url.Action("DeleteBOM", "BuyerOrder")';
+
+            var modal = document.getElementById("customModal");
+            modal.style.display = "block";
+
+            document.getElementById("confirmBtn").onclick = function () {
+                $.ajax({
+                    type: "get",
+                    data: { Id: data },
+                    url: myUrlInactive,
+                    success: function (response) {
+                        if (response.success == "1") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-green",
+                            });
+                            initTabulatorBOM();
+                        }
+                        else if (response.success == "0") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-red",
+                            });
+                        }
+                        else {
+
+                            toastr.success(response.message, "Access Denied", {
+                                "toastClass": "toast-red",
+                            });
+                        }
+                    }
+                });
+                modal.style.display = "none";
+            };
+
+            document.getElementById("cancelBtn").onclick = function () {
+                modal.style.display = "none";
+            };
+        }
+
+        var bomcolumn = [
+            { title: "", field: "CheckBox1", headerHozAlign: "left", headerSort: false, formatter: customCheckBoxFormatter, visible: true, width: 50 },
+
+            {
+                title: "BOM", field: "BOMCode", hozAlign: "left", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false
+            },
+            {
+                title: "Style", field: "Style", hozAlign: "center", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false
+            },
+            {
+                title: "Color", field: "Color", hozAlign: "center", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false
+            },
+            {
+                title: "Size", field: "Size", hozAlign: "center", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false
+            },
+            {
+                title: "Actions", field: "bombutton", headerHozAlign: "center", vertAlign: "middle", headerSort: false, hozAlign: "right", resizable: false, formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    console.log("see data::", data);
+                    var myUrlGetforInvoice = `@Url.Action("UpdateBOM", "BuyerOrder")?id=${data.Id}`;
+                    var myUrlGetforCopy = `@Url.Action("BOM", "BuyerOrder")?id=${data.Id}&IsCopy=1`;
+                    var myUrlGetforRevision = `@Url.Action("BOM", "BuyerOrder")?id=${data.Id}&IsRevised=1`;
+
+                    var inActive = `setInactiveUrlBOM(${data.Id}) `
+                    var active = `setActiveUrl(${data.Id}) `
+
+
+                    var editHtml;
+
+                    editHtml = `
+                                        <a href='${myUrlGetforInvoice}' class='text-decoration-none text-black ms-3 mt-1'>
+                                            <i class='bi bi-pencil-square pe-1'></i> <span>Edit</span>  <br />
+                                        </a>
+                                        <div class='dropdown-divider m-0'></div>`;
+
+
+
+                    var deleteHtml;
+                    deleteHtml = `
+                                             <a onclick='${inActive}' class='text-decoration-none text-black ms-3 mt-1' href='#' id='InActive'>
+                                                 <i class="bi bi-trash3"></i><span class='ms-1 mt-2'>Delete</span><br />
+                                                     </a>
+                                                 <div class='dropdown-divider m-0'></div>`;
+
+                    var copyHtml;
+
+                    copyHtml = `
+                                             <a href='${myUrlGetforCopy}' class='text-decoration-none text-black ms-3 mt-1'>
+                                             <i class='bi bi-pencil-square pe-1'></i> <span>Copy</span>  <br />
+                                                 </a><div class='dropdown-divider m-0'></div>`;
+                    var revisionHtml;
+
+                    revisionHtml = `
+                                             <a href='${myUrlGetforRevision}' class='text-decoration-none text-black ms-3 mt-1'>
+                                                     <i class='bi bi-pencil-square pe-1'></i> <span>Revision</span>  <br />
+                                                 </a>`;
+
+                    var statusDependentHtml = data.isPosted ? deleteHtml : editHtml + deleteHtml + copyHtml + revisionHtml;
+
+                    var html = `
+                                                                              <div class='dropdown ms-1'>
+
+                                                                                                                      <a href='${myUrlGetforInvoice}' class='text-decoration-none  ms-3 mt-1'>
+                                                                                           Edit
+                                                                                       </a>
+                                                                                  <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                                                 <ul class='dropdown-menu item-menu' aria-labelledby='dropdownMenuButton1'>
+                                                                                      ${statusDependentHtml}
+
+                                                                                  </ul>
+                                                                              </div>
+                                                                          `;
+
+                    if (data.IsRevised == true) {
+                        html = '';
+                    }
+                    return html;
+                },
+                visible: true, cellClick: function (e, cell) {
+                    cell.getElement().classList.add('active-cell');
+                },
+            },
+
+        ]
+
+        function initTabulatorBOM() {
+            // function fetchDataFromServer() {
+            //     var MyAppUrlSettings = {
+            //         MyUsefulUrl: '@Url.Action("GetBOMList", "BuyerOrder")'
+            //     };
+            //     return $.ajax({
+            //         url: MyAppUrlSettings.MyUsefulUrl,
+
+            //         dataType: "json",
+            //     });
+            // }
+
+            // fetchDataFromServer().done(function (response) {
+
+            //     console.log("notrmal response:", response.data);
+            //     var dataTable = response.data;
+
+
+                salesApiUrl = '@Url.Action("GetBOMList", "BuyerOrder")',
+                    BOMTable = new Tabulator("#bom-table", {
+                        
+                        layout: "fitColumns",
+                        minHeight: 400,
+                        selectable: 1,
+                        pagination: true,
+                        paginationMode: "remote",
+                        filterMode: "remote",
+                        paginationSize: 5,
+                        paginationInitialPage: 1,
+                        paginationSizeSelector: [5, 10, 25, 50, 100, 500, 1000],
+                        paginationCounter: "rows",
+                        ajaxURL: salesApiUrl,
+                        ajaxConfig: "get",
+                        ajaxContentType: "json",
+
+                        ajaxResponse: function (url, params, response) {
+                            BOMTable.setMaxPage(response.last_page);
+                            // //console.log("response.last_page", response.last_page);
+
+                            dataLoadExpense = response.data;
+                            ////console.log("dataLoadExpense abc:", dataLoadExpense);
+
+                            return {
+
+                                data: dataLoadExpense,
+                                last_page: response.last_page,
+
+                            };
+                        },
+                        columns: bomcolumn,
+                        ajaxURLGenerator: function (url, config, params) {
+                            //return request url
+                            return url + "?searchquery=" + encodeURIComponent(JSON.stringify(params)); //encode parameters as a json object
+                        },
+
+                    });
+                document.getElementById("bomPrint-pdf").addEventListener("click", function () {
+                    BOMTable.print(false, true);
+                });
+                document.getElementById("bomPrint-excel").addEventListener("click", function () {
+                    BOMTable.download("xlsx", "data.xlsx", { sheetName: "Table Data" });
+                });
+            // });
+        }
+
+
+        //BOM gear functionalities starts=============
+
+        var columnListStyle = $("#bomColumnList");
+        $.each(bomcolumn, function (index, field) {
+            ////console.log("GLOBAL 2::",field);
+            var title = field.title;
+            var name = field.field;
+            var visible = true;
+            if (field.visible == false) {
+                visible = false;
+            }
+            var Styletitles = `<li>
+                                               <a class="dropdown-item" href="#">
+                                               <div class="custom-control custom-checkbox" >
+                                               <input type="checkbox" class="custom-control-input title-input" id="${name}" value="${name}">
+                                                       <label class="custom-control-label w-100 cursor-pointer" id="${name}" for="${name}">${title}</label>
+                                               </div>
+                                               </a>
+                                               </li>`;
+            columnListStyle.append(Styletitles);
+
+            document.querySelector(`#${name}`).addEventListener('click', function (event) {
+                var checkbox = event.target;
+                var isChecked = checkbox.checked;
+
+                if (isChecked) {
+                    BOMTable.showColumn(name);
+                } else {
+                    BOMTable.hideColumn(name);
+                }
+            });
+
+
+            $(`${'#' + name}`).prop('checked', visible);
+
+
+            $('.custom-control-label').on('click', function (e) {
+                e.stopPropagation();
+            });
+            $('#dropdown-titles').on('click', function (e) {
+                e.stopPropagation();
+            });
+
+            //Add event listener to the rows select input
+            $("#bom-rows").on("change", function () {
+                var selectedRows = $(this).val();
+                if (selectedRows !== null) {
+                    var pageSize = parseInt(selectedRows);
+                    if (!isNaN(pageSize)) {
+                        BOMTable.setPageSize(pageSize);
+                    }
+                }
+            });
+
+        });
+        //gear functionalities ends===============
+
+        if ('@ListType' === "BOM") {
+            $("#Order").removeClass("active");
+            $("#BOM").addClass("active");
+            $("#Daily_Production").removeClass("active");
+            $("#DeptWise_Daily_Production").removeClass("active");
+
+            $("#order_view_id").addClass("d-none");
+            $("#bom_view_id").removeClass("d-none");
+            $("#daily_production_view_id").addClass("d-none");
+            $("#deptWise_daily_production_view_id").addClass("d-none");
+
+            initTabulatorBOM();
+        }
+
+        $("#BOM").on("click", function () {
+            $("#Order").removeClass("active");
+            $("#BOM").addClass("active");
+            $("#Daily_Production").removeClass("active");
+            $("#DeptWise_Daily_Production").removeClass("active");
+
+            $("#order_view_id").addClass("d-none");
+            $("#bom_view_id").removeClass("d-none");
+            $("#daily_production_view_id").addClass("d-none");
+            $("#deptWise_daily_production_view_id").addClass("d-none");
+            
+            // Check if POLTable is initialized and has rows
+            if (BOMTable && BOMTable.getRows().length > 0) {
+                // POLTable exists and has rows, do not call POLGetData
+                return;
+            } else {
+                // POLTable does not exist or has no rows, call POLGetData
+                initTabulatorBOM();
+            }
+        })
+    </script>
+
+    <script>
+
+        var productionTable;
+
+        function gotoCreateDailyProduction() {
+            var editUrl = '@Url.Action("CreateDailyProduction", "BuyerOrder")';
+            window.location.href = editUrl;
+        }
+
+        function setInactiveUrlDailyProduction(data) {
+            var myUrlInactive = '@Url.Action("DeleteDailyProduction", "BuyerOrder")';
+
+            var modal = document.getElementById("customModal");
+            modal.style.display = "block";
+
+            document.getElementById("confirmBtn").onclick = function () {
+                $.ajax({
+                    type: "get",
+                    data: { Id: data },
+                    url: myUrlInactive,
+                    success: function (response) {
+                        if (response.success == "1") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-green",
+                            });
+                            initTabulatorDailyProduction();
+                        }
+                        else if (response.success == "0") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-red",
+                            });
+                        }
+                        else {
+
+                            toastr.success(response.message, "Access Denied", {
+                                "toastClass": "toast-red",
+                            });
+                        }
+                    }
+                });
+                modal.style.display = "none";
+            };
+
+            document.getElementById("cancelBtn").onclick = function () {
+                modal.style.display = "none";
+            };
+        }
+
+        var dailyProductioncolumn = [
+            { title: "", field: "CheckBox2", headerHozAlign: "left", headerSort: false, formatter: customCheckBoxFormatter, visible: true, width: 50 },
+
+            {
+                title: "Style", field: "StyleNo", hozAlign: "center", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false
+            },
+            {
+                title: "Buyer", field: "Buyer", hozAlign: "center", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false
+            },
+            {
+                title: "Buyer PO", field: "DailyBuyerPO", hozAlign: "center", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false
+            },
+            {
+                title: "Total Quantity", field: "DailyTotalQuantity", hozAlign: "center", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false
+            },
+            {
+                title: "Actions", field: "Dailybutton", headerHozAlign: "center", vertAlign: "middle", headerSort: false, hozAlign: "right", resizable: false, formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    console.log("see data::", data);
+                    var myUrlGetforInvoice = `@Url.Action("UpdateDailyProduction", "BuyerOrder")?id=${data.Id}`;
+
+                    var inActive = `setInactiveUrlDailyProduction(${data.Id}) `
+                    var active = `setActiveUrl(${data.Id}) `
+
+
+                    var editHtml;
+
+                    editHtml = `
+                                                <a href='${myUrlGetforInvoice}' class='text-decoration-none text-black ms-3 mt-1'>
+                                                    <i class='bi bi-pencil-square pe-1'></i> <span>Edit</span>  <br />
+                                                </a>
+                                                <div class='dropdown-divider m-0'></div>`;
+
+
+
+                    var deleteHtml;
+                    deleteHtml = `
+                                                     <a onclick='${inActive}' class='text-decoration-none text-black ms-3 mt-1' href='#' id='InActive'>
+                                                         <i class="bi bi-trash3"></i><span class='ms-1 mt-2'>Delete</span><br />
+                                                     </a>
+                                                 `;
+
+                    var statusDependentHtml = data.isPosted ? deleteHtml : editHtml + deleteHtml;
+                    var html = `
+                                                                                      <div class='dropdown ms-1'>
+
+                                                                                                                              <a href='${myUrlGetforInvoice}' class='text-decoration-none  ms-3 mt-1'>
+                                                                                                   Edit
+                                                                                               </a>
+                                                                                          <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                                                         <ul class='dropdown-menu item-menu' aria-labelledby='dropdownMenuButton1'>
+                                                                                              ${statusDependentHtml}
+
+                                                                                          </ul>
+                                                                                      </div>
+                                                                                  `;
+
+                    return html;
+                },
+                visible: true, cellClick: function (e, cell) {
+                    cell.getElement().classList.add('active-cell');
+                },
+            },
+
+        ]
+
+        function initTabulatorDailyProduction() {
+            // function fetchDataFromServer() {
+            //     var MyAppUrlSettings = {
+            //         MyUsefulUrl: '@Url.Action("GetDailyProductionList", "BuyerOrder")'
+            //     };
+            //     return $.ajax({
+            //         url: MyAppUrlSettings.MyUsefulUrl,
+
+            //         dataType: "json",
+            //     });
+            // }
+
+            // fetchDataFromServer().done(function (response) {
+
+            //     console.log("notrmal response:", response.data);
+            //     var dataTable = response.data;
+
+
+                productionApiUrl = '@Url.Action("GetDailyProductionList", "BuyerOrder")',
+                    productionTable = new Tabulator("#daily-production-table", {
+
+                        layout: "fitColumns",
+                        minHeight: 400,
+                        selectable: 1,
+                        pagination: true,
+                        paginationMode: "remote",
+                        filterMode: "remote",
+                        paginationSize: 5,
+                        paginationInitialPage: 1,
+                        paginationSizeSelector: [5, 10, 25, 50, 100, 500, 1000],
+                        paginationCounter: "rows",
+                        ajaxURL: productionApiUrl,
+                        ajaxConfig: "get",
+                        ajaxContentType: "json",
+
+                        ajaxResponse: function (url, params, response) {
+                            productionTable.setMaxPage(response.last_page);
+                            // //console.log("response.last_page", response.last_page);
+
+                            dataLoadExpense = response.data;
+                            ////console.log("dataLoadExpense abc:", dataLoadExpense);
+
+                            return {
+
+                                data: dataLoadExpense,
+                                last_page: response.last_page,
+
+                            };
+                        },
+                        columns: dailyProductioncolumn,
+                        ajaxURLGenerator: function (url, config, params) {
+                            //return request url
+                            return url + "?searchquery=" + encodeURIComponent(JSON.stringify(params)); //encode parameters as a json object
+                        },
+
+                    });
+                document.getElementById("dailyProPrint-pdf").addEventListener("click", function () {
+                    productionTable.print(false, true);
+                });
+                document.getElementById("dailyProPrint-excel").addEventListener("click", function () {
+                    productionTable.download("xlsx", "data.xlsx", { sheetName: "Table Data" });
+                });
+            // });
+        }
+
+
+        //Daily Production gear functionalities starts=============
+
+        var columnListStyle = $("#DailyProColumnList");
+        $.each(dailyProductioncolumn, function (index, field) {
+            ////console.log("GLOBAL 2::",field);
+            var title = field.title;
+            var name = field.field;
+            var visible = true;
+            if (field.visible == false) {
+                visible = false;
+            }
+            var Styletitles = `<li>
+                                         <a class="dropdown-item" href="#">
+                                         <div class="custom-control custom-checkbox" >
+                                         <input type="checkbox" class="custom-control-input title-input" id="${name}" value="${name}">
+                                                 <label class="custom-control-label w-100 cursor-pointer" id="${name}" for="${name}">${title}</label>
+                                         </div>
+                                         </a>
+                                         </li>`;
+            columnListStyle.append(Styletitles);
+
+            document.querySelector(`#${name}`).addEventListener('click', function (event) {
+                var checkbox = event.target;
+                var isChecked = checkbox.checked;
+
+                if (isChecked) {
+                    productionTable.showColumn(name);
+                } else {
+                    productionTable.hideColumn(name);
+                }
+            });
+
+
+            $(`${'#' + name}`).prop('checked', visible);
+
+
+            $('.custom-control-label').on('click', function (e) {
+                e.stopPropagation();
+            });
+            $('#dropdown-titles').on('click', function (e) {
+                e.stopPropagation();
+            });
+
+            //Add event listener to the rows select input
+            $("#DailyPro-rows").on("change", function () {
+                var selectedRows = $(this).val();
+                if (selectedRows !== null) {
+                    var pageSize = parseInt(selectedRows);
+                    if (!isNaN(pageSize)) {
+                        productionTable.setPageSize(pageSize);
+                    }
+                }
+            });
+
+        });
+        //gear functionalities ends===============
+
+
+        if ('@ListType' === "Daily_Production") {
+            $("#Order").removeClass("active");
+            $("#BOM").removeClass("active");
+            $("#Daily_Production").addClass("active");
+            $("#DeptWise_Daily_Production").removeClass("active");
+
+            $("#order_view_id").addClass("d-none");
+            $("#bom_view_id").addClass("d-none");
+            $("#daily_production_view_id").removeClass("d-none");
+            $("#deptWise_daily_production_view_id").addClass("d-none");
+
+            initTabulatorDailyProduction();
+        }
+
+        $("#Daily_Production").on("click", function () {
+            $("#Order").removeClass("active");
+            $("#BOM").removeClass("active");
+            $("#Daily_Production").addClass("active");
+            $("#DeptWise_Daily_Production").removeClass("active");
+
+            $("#order_view_id").addClass("d-none");
+            $("#bom_view_id").addClass("d-none");
+            $("#daily_production_view_id").removeClass("d-none");
+            $("#deptWise_daily_production_view_id").addClass("d-none");
+            
+            // Check if POLTable is initialized and has rows
+            if (productionTable && productionTable.getRows().length > 0) {
+                // POLTable exists and has rows, do not call POLGetData
+                return;
+            } else {
+                // POLTable does not exist or has no rows, call POLGetData
+                initTabulatorDailyProduction();
+            }
+        })
+    </script>
+
+    <script>
+
+        var deptWise_productionTable;
+
+        function gotoCreateDeptDailyProduction() {
+            var editUrl = '@Url.Action("CreateDeptWiseDailyProduction", "BuyerOrder")';
+            window.location.href = editUrl;
+        }
+        function gotoDailyProductionReport() {
+            var editUrl = '@Url.Action("DailyProductionReport", "BuyerOrder")';
+            window.location.href = editUrl;
+        }
+
+        function setInactiveUrlDeptWiseDailyProduction(data) {
+            var myUrlInactive = '@Url.Action("DeleteDeptWiseDailyProduction", "BuyerOrder")';
+
+            var modal = document.getElementById("customModal");
+            modal.style.display = "block";
+
+            document.getElementById("confirmBtn").onclick = function () {
+                $.ajax({
+                    type: "get",
+                    data: { Id: data },
+                    url: myUrlInactive,
+                    success: function (response) {
+                        if (response.success == "1") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-green",
+                            });
+                            initTabulatorDeptWiseDailyProduction();
+                        }
+                        else if (response.success == "0") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-red",
+                            });
+                        }
+                        else {
+
+                            toastr.success(response.message, "Access Denied", {
+                                "toastClass": "toast-red",
+                            });
+                        }
+                    }
+                });
+                modal.style.display = "none";
+            };
+
+            document.getElementById("cancelBtn").onclick = function () {
+                modal.style.display = "none";
+            };
+        }
+
+        var deptWise_dailyProductioncolumn = [
+            { title: "", field: "CheckBox3", headerHozAlign: "left", headerSort: false, formatter: customCheckBoxFormatter, visible: true, width: 50 },
+
+            {
+                title: "Style", field: "DeptStyle", hozAlign: "center", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false
+            },
+            {
+                title: "Buyer PO/Lot No.", field: "DeptBuyerPO", hozAlign: "center", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false
+            },
+            {
+                title: "Department", field: "Department", hozAlign: "center", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false
+            },
+            {
+                title: "Total Quantity", field: "DeptTotalQuantity", hozAlign: "center", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false
+            },
+            {
+                title: "Type", field: "Type", hozAlign: "center", vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false
+            },
+            {
+                title: "Actions", field: "DeptDailybutton", headerHozAlign: "center", vertAlign: "middle", headerSort: false, hozAlign: "right", resizable: false, formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    console.log("see data::", data);
+                    var myUrlGetforInvoice = `@Url.Action("UpdateDeptWiseDailyProduction", "BuyerOrder")?id=${data.Id}`;
+
+                    var inActive = `setInactiveUrlDeptWiseDailyProduction(${data.Id}) `
+                    var active = `setActiveUrl(${data.Id}) `
+
+
+                    var editHtml;
+
+                    editHtml = `
+                                                        <a href='${myUrlGetforInvoice}' class='text-decoration-none text-black ms-3 mt-1'>
+                                                            <i class='bi bi-pencil-square pe-1'></i> <span>Edit</span>  <br />
+                                                        </a>
+                                                        <div class='dropdown-divider m-0'></div>`;
+
+
+
+                    var deleteHtml;
+                    deleteHtml = `
+                                                             <a onclick='${inActive}' class='text-decoration-none text-black ms-3 mt-1' href='#' id='InActive'>
+                                                                 <i class="bi bi-trash3"></i><span class='ms-1 mt-2'>Delete</span><br />
+                                                             </a>
+                                                         `;
+
+                    var statusDependentHtml = data.isPosted ? deleteHtml : editHtml + deleteHtml;
+                    var html = `
+                                                                                              <div class='dropdown ms-1'>
+
+                                                                                                                                      <a href='${myUrlGetforInvoice}' class='text-decoration-none  ms-3 mt-1'>
+                                                                                                           Edit
+                                                                                                       </a>
+                                                                                                  <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                                                                 <ul class='dropdown-menu item-menu' aria-labelledby='dropdownMenuButton1'>
+                                                                                                      ${statusDependentHtml}
+
+                                                                                                  </ul>
+                                                                                              </div>
+                                                                                          `;
+
+                    return html;
+                },
+                visible: true, cellClick: function (e, cell) {
+                    cell.getElement().classList.add('active-cell');
+                },
+            },
+
+        ]
+
+        function initTabulatorDeptWiseDailyProduction() {
+            // function fetchDataFromServer() {
+            //     var MyAppUrlSettings = {
+            //         MyUsefulUrl: '@Url.Action("GetDeptWiseDailyProductionList", "BuyerOrder")'
+            //     };
+            //     return $.ajax({
+            //         url: MyAppUrlSettings.MyUsefulUrl,
+
+            //         dataType: "json",
+            //     });
+            // }
+
+            // fetchDataFromServer().done(function (response) {
+
+            //     console.log("notrmal response:", response.data);
+            //     var dataTable = response.data;
+
+
+                deptWiseApiUrl = '@Url.Action("GetDeptWiseDailyProductionList", "BuyerOrder")',
+                    deptWise_productionTable = new Tabulator("#deptWise_daily-production-table", {
+
+                        layout: "fitColumns",
+                        minHeight: 400,
+                        selectable: 1,
+                        pagination: true,
+                        paginationMode: "remote",
+                        filterMode: "remote",
+                        paginationSize: 5,
+                        paginationInitialPage: 1,
+                        paginationSizeSelector: [5, 10, 25, 50, 100, 500, 1000],
+                        paginationCounter: "rows",
+                        ajaxURL: deptWiseApiUrl,
+                        ajaxConfig: "get",
+                        ajaxContentType: "json",
+
+                        ajaxResponse: function (url, params, response) {
+                            deptWise_productionTable.setMaxPage(response.last_page);
+                            // //console.log("response.last_page", response.last_page);
+
+                            dataLoadExpense = response.data;
+                            ////console.log("dataLoadExpense abc:", dataLoadExpense);
+
+                            return {
+
+                                data: dataLoadExpense,
+                                last_page: response.last_page,
+
+                            };
+                        },
+                        columns: deptWise_dailyProductioncolumn,
+                        ajaxURLGenerator: function (url, config, params) {
+                            //return request url
+                            return url + "?searchquery=" + encodeURIComponent(JSON.stringify(params)); //encode parameters as a json object
+                        },
+
+                    });
+                document.getElementById("deptWise_dailyProPrint-pdf").addEventListener("click", function () {
+                    deptWise_productionTable.print(false, true);
+                });
+                document.getElementById("deptWise_dailyProPrint-excel").addEventListener("click", function () {
+                    deptWise_productionTable.download("xlsx", "data.xlsx", { sheetName: "Table Data" });
+                });
+            // });
+        }
+
+        //Dept wise Daily Pro gear functionalities starts=============
+
+        var columnListStyle = $("#DeptDailyProColumnList");
+        $.each(deptWise_dailyProductioncolumn, function (index, field) {
+            ////console.log("GLOBAL 2::",field);
+            var title = field.title;
+            var name = field.field;
+            var visible = true;
+            if (field.visible == false) {
+                visible = false;
+            }
+            var Styletitles = `<li>
+                                         <a class="dropdown-item" href="#">
+                                         <div class="custom-control custom-checkbox" >
+                                         <input type="checkbox" class="custom-control-input title-input" id="${name}" value="${name}">
+                                                 <label class="custom-control-label w-100 cursor-pointer" id="${name}" for="${name}">${title}</label>
+                                         </div>
+                                         </a>
+                                         </li>`;
+            columnListStyle.append(Styletitles);
+
+            document.querySelector(`#${name}`).addEventListener('click', function (event) {
+                var checkbox = event.target;
+                var isChecked = checkbox.checked;
+
+                if (isChecked) {
+                    deptWise_productionTable.showColumn(name);
+                } else {
+                    deptWise_productionTable.hideColumn(name);
+                }
+            });
+
+
+            $(`${'#' + name}`).prop('checked', visible);
+
+
+            $('.custom-control-label').on('click', function (e) {
+                e.stopPropagation();
+            });
+            $('#dropdown-titles').on('click', function (e) {
+                e.stopPropagation();
+            });
+
+            //Add event listener to the rows select input
+            $("#DeptDailyPro-rows").on("change", function () {
+                var selectedRows = $(this).val();
+                if (selectedRows !== null) {
+                    var pageSize = parseInt(selectedRows);
+                    if (!isNaN(pageSize)) {
+                        deptWise_productionTable.setPageSize(pageSize);
+                    }
+                }
+            });
+
+        });
+        //gear functionalities ends===============
+
+        if ('@ListType' === "DeptWise_Daily_Production") {
+            $("#Order").removeClass("active");
+            $("#BOM").removeClass("active");
+            $("#Daily_Production").removeClass("active");
+            $("#DeptWise_Daily_Production").addClass("active");
+
+            $("#order_view_id").addClass("d-none");
+            $("#bom_view_id").addClass("d-none");
+            $("#daily_production_view_id").addClass("d-none");
+            $("#deptWise_daily_production_view_id").removeClass("d-none");
+
+            initTabulatorDeptWiseDailyProduction();
+        }
+
+        $("#DeptWise_Daily_Production").on("click", function () {
+            $("#Order").removeClass("active");
+            $("#BOM").removeClass("active");
+            $("#Daily_Production").removeClass("active");
+            $("#DeptWise_Daily_Production").addClass("active");
+
+            $("#order_view_id").addClass("d-none");
+            $("#bom_view_id").addClass("d-none");
+            $("#daily_production_view_id").addClass("d-none");
+            $("#deptWise_daily_production_view_id").removeClass("d-none");
+            
+            // Check if POLTable is initialized and has rows
+            if (deptWise_productionTable && deptWise_productionTable.getRows().length > 0) {
+                // POLTable exists and has rows, do not call POLGetData
+                return;
+            } else {
+                // POLTable does not exist or has no rows, call POLGetData
+                initTabulatorDeptWiseDailyProduction();
+            }
+        })
+    </script>
+}

@@ -1,0 +1,564 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@using Atrai.Model.Core.Entity;
+@using Atrai.Model.Core.Common;
+
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var ListType = ViewBag.ListType as string;
+    var CompanyName = ViewBag.CompanyName as string;
+    //await Html.RenderPartialAsync("~/Views/Shared/_Dashboardtabed.cshtml");
+   
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="~/css/custom_QBstyle.css" rel="stylesheet" />
+<style>
+
+    .btn-outline-secondary:hover {
+        background-color: rgba(107, 108, 114, 0.1);
+        color: #393a3d;
+    }
+</style>
+
+<ul class="nav nav-tabs mt-5">
+@{
+    var AllChildMenu = HttpContextAccessor.HttpContext.Session.GetObject<List<UserMenuPermissionViewModel>>("UserChildMenu");
+            
+    var filterparentmenu = AllChildMenu.Where(x => x.ControllerName == "Accounts" && x.ActionName == "GetthingsDone" && x.IsView == true).ToList();
+    var i = 0;
+    foreach (var childitem in filterparentmenu)
+    {
+
+        if (childitem.FirstParameter != null)
+        {
+
+            if (i == 0)
+            {
+            <li class="nav-item">
+                <a class="nav-link  fw-semibold active" href="#" id=@childitem.FirstValue>@childitem.MenuName</a>
+            </li>
+
+            }
+            else
+            {
+            <li class="nav-item">
+                <a class="nav-link  fw-semibold" href="#" id=@childitem.FirstValue>@childitem.MenuName</a>
+            </li>
+
+            }
+
+
+        }
+
+        i++;
+    }
+}
+</ul>
+
+<h4 class="my-3">@ViewBag.CompanyName</h4>
+<div id="GetthingsDone-view-id" class="d-none">
+    <div class="row">
+        <div class="col-md-8 col-12">
+            <div class="divArea p-3">
+                <p class="tasks-heading">Tasks</p>
+                
+                <h6 class="mb-0"><span class="badge bg-orange">OVERDUE</span></h6>
+                
+                <div id="div-for-tasks">
+
+                </div>
+            </div>
+
+            <div class="divArea mt-2 p-3"> 
+                <p class="quick-actions-heading">Quick Actions</p>
+                <div id="div-for-quick-actions">
+                 
+                </div>
+                   
+                <div class="d-none" id="MoneyInOut">
+                    <p class="section-heading">Money In</p>
+                    <div id="div-for-quick-actions1">
+
+                    </div>
+
+                    <p class="section-heading">Money Out</p>
+                    <div id="div-for-quick-actions2">
+
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <p class="text-center section-visibility-btn"> <a href="#" onclick="ShowMore()" id="More/Less">See more</a></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-12 divArea table-responsive">
+            <table class="table p-3">
+                <p class="fw-bold pt-3">Bank Accounts</p>
+                <div id="div-for-bank-account"></div>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="BusinessOverview-view-id" class="d-none">
+
+</div>
+
+<div id="CashFlow-view-id" class="d-none">
+
+</div>
+
+
+@section Scripts
+{
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script>
+        $(document).ready(function () {
+            function GetDataForGetthingsDone()
+            {
+                $.ajax({
+                            type: "GET",
+                            url: '@Url.Action("GetDataForGetthingsDone", "Accounts")',
+                            success: function (response) {
+                                //console.log(response.data);
+                                populateGetttingsForTask(response.data);
+                                populateGetttingsForBankAccounts(response.data1);
+
+                                populateGetthingsForQuickActions(response.data2);
+
+                                //console.log(response.data1);
+                                //console.log(response.data2);
+                            },
+                            error: function (error) {
+                                console.log(error);
+                            }
+                        });
+            }
+
+             if ('@ListType' === "GetthingsDone") {
+                $("#GetthingsDone").addClass("active");
+                $("#Business").removeClass("active");
+                $("#cashflow").removeClass("active");
+
+                $("#GetthingsDone-view-id").removeClass("d-none");
+                $("#BusinessOverview-view-id").addClass("d-none");
+                $("#CashFlow-view-id").addClass("d-none");
+
+                GetDataForGetthingsDone();
+            }
+            if ('@ListType' === "BusinessOverview") {
+                $("#GetthingsDone").removeClass("active");
+                $("#Business").addClass("active");
+                $("#cashflow").removeClass("active");
+
+                $("#GetthingsDone-view-id").addClass("d-none");
+                $("#BusinessOverview-view-id").removeClass("d-none");
+                $("#CashFlow-view-id").addClass("d-none");
+            }
+            if ('@ListType' === "CashFlow") {
+                $("#GetthingsDone").removeClass("active");
+                $("#Business").removeClass("active");
+                $("#cashflow").addClass("active");
+
+                $("#GetthingsDone-view-id").addClass("d-none");
+                $("#BusinessOverview-view-id").addClass("d-none");
+                $("#CashFlow-view-id").removeClass("d-none");
+            }
+            
+        });
+        
+        $("#GetthingsDone").on("click", function () {
+            $("#GetthingsDone").addClass("active");
+            $("#Business").removeClass("active");
+            $("#cashflow").removeClass("active");
+
+            $("#GetthingsDone-view-id").removeClass("d-none");
+            $("#BusinessOverview-view-id").addClass("d-none");
+            $("#CashFlow-view-id").addClass("d-none");
+            GetDataForGetthingsDone();
+        })
+
+        $("#Business").on("click", function () {
+            $("#GetthingsDone").removeClass("active");
+            $("#Business").addClass("active");
+            $("#cashflow").removeClass("active");
+
+            $("#GetthingsDone-view-id").addClass("d-none");
+            $("#BusinessOverview-view-id").removeClass("d-none");
+            $("#CashFlow-view-id").addClass("d-none");
+        })
+
+        $("#cashflow").on("click", function () {
+            $("#GetthingsDone").removeClass("active");
+            $("#Business").removeClass("active");
+            $("#cashflow").addClass("active");
+
+            $("#GetthingsDone-view-id").addClass("d-none");
+            $("#BusinessOverview-view-id").addClass("d-none");
+            $("#CashFlow-view-id").removeClass("d-none");
+        })
+
+
+        function addCommasToNumber1(number) { 
+            let numString = number.toString();
+            let parts = numString.split('.');           
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");           
+            return parts.join('.');
+        }
+
+        function populateGetttingsForTask(data) {
+            const divElement = document.querySelector('#div-for-tasks');
+                     
+            for (var i = 0; i < data.length; i++) {
+                const mainRowDiv = document.createElement('div');
+                mainRowDiv.className = 'row task-item';
+
+                mainRowDiv.style.borderBottom = '1px solid #ccc';
+                mainRowDiv.style.paddingTop = '10px';
+                mainRowDiv.style.paddingBottom = '10px';
+                //mainRowDiv.style.margin = '10px';
+
+                const col1Div = document.createElement('div');
+                col1Div.className = 'col-md-6 col-6';
+
+                const contentSpan = document.createElement('span');
+                // contentSpan.innerHTML = "<strong style='font-size: 12px;'>" + data[i].Caption + "</strong><br><span style='font-size: 11px;'>" + data[i].SubCaption + "</span>";
+                const formattedBalance1 = addCommasToNumber1(data[i].SubCaption);
+                contentSpan.innerHTML = "<strong style='font-size: 14px;'>" + data[i].Caption + "</strong><br><span style='font-size: 11px;'>" + formattedBalance1 + "</span>";
+
+                col1Div.appendChild(contentSpan);
+
+                const col2Div = document.createElement('div');
+                col2Div.className = 'col-md-4 col-4';
+
+                const col3Div = document.createElement('div');
+                col3Div.className = 'col-md-2 col-2';
+
+                const button = document.createElement('a');
+                button.className = 'btn btn-outline-secondary';
+                button.innerText = 'Go';
+
+                //button.style.width = '80px';
+                //button.style.height = '30px';
+                button.style.display = 'flex';
+                button.style.alignItems = 'center';
+                button.style.fontSize = '16px';
+                button.style.fontWeight = '600';
+                button.style.justifyContent = 'center';
+                button.style.border = '2px solid #6b6c72';
+
+                //const linkUrl = data[i].Link;
+                const linkUrl = '@Url.Action("PlaceholderAction", "PlaceholderController")'
+                .replace('PlaceholderAction', data[i].VariableAction)
+                .replace('PlaceholderController', data[i].VariableController)
+                + '?Type=' + encodeURIComponent(data[i].PerameterValue);
+
+                button.setAttribute('href', `${linkUrl}`);             
+                button.setAttribute('target', '_blank');
+                col3Div.appendChild(button);
+              
+                mainRowDiv.appendChild(col1Div);
+                mainRowDiv.appendChild(col2Div);
+                mainRowDiv.appendChild(col3Div);
+
+                divElement.appendChild(mainRowDiv);
+            }
+        }
+      
+        function populateGetthingsForQuickActions(data) 
+        {
+            const divElement = document.querySelector('#div-for-quick-actions');
+            divElement.style.display = 'flex';
+
+            for (var i = 0; i < data.length; i++) {
+                if(data[i].IsTop === true)
+                {
+                    const quickActionDiv = document.createElement('div');
+                    quickActionDiv.style.width = '20%';
+                    quickActionDiv.style.borderRadius = '5px';
+                    
+                    const link = document.createElement('a');
+
+                    const linkUrl = '@Url.Action("PlaceholderAction", "PlaceholderController")'
+                    .replace('PlaceholderAction', data[i].VariableAction)
+                    .replace('PlaceholderController', data[i].VariableController)
+                    + '?Type=' + encodeURIComponent(data[i].PerameterValue) ;
+
+                    const roundDiv = document.createElement('div');
+                    roundDiv.style.width = '80px';
+                    roundDiv.style.height = '80px'; 
+                    roundDiv.style.borderRadius = '50%'; 
+                    roundDiv.style.boxShadow = '0px 1px 4px rgba(0,0,0,.2)';
+                    roundDiv.style.margin = 'auto';
+                    roundDiv.style.marginBottom  = '8px';
+                    roundDiv.style.cursor = 'pointer';
+
+                    const icon = document.createElement('i');
+                    icon.className = data[i].ClassName;
+
+                    icon.style.fontSize = '40px'; 
+                    icon.style.fontWeight = '600';
+                    icon.style.display = 'flex';
+                    icon.style.alignItems = 'center';
+                    icon.style.justifyContent = 'center';
+                    icon.style.width = '100%';
+                    icon.style.height = '100%';
+
+                    roundDiv.appendChild(icon);
+
+                    roundDiv.addEventListener('mouseenter', function () {
+                        this.style.backgroundColor = '#def3cc'; // Change background color on hover
+                    });
+
+                    roundDiv.addEventListener('mouseleave', function () {
+                        this.style.backgroundColor = ''; // Reset background color on mouse leave
+                    });
+
+                    link.appendChild(roundDiv);
+
+                    link.addEventListener('click', function (e) {
+                           // window.location.href = linkUrl;
+                            e.preventDefault();
+                            window.open(linkUrl, '_blank');
+                    });
+
+                    quickActionDiv.appendChild(link);
+
+                    const paragraph = document.createElement('p');
+                    paragraph.innerText = data[i].VariableName;
+                    paragraph.style.textAlign = 'center';
+                    paragraph.style.fontWeight = '600';
+                    paragraph.style.fontSize = '14px';
+                    paragraph.style.color = '#393a3d';
+                    quickActionDiv.appendChild(paragraph);
+
+                    divElement.appendChild(quickActionDiv);
+                }               
+            }
+
+            const divElement1 = document.querySelector('#div-for-quick-actions1');
+            divElement1.style.display = 'flex';
+            divElement1.style.flexWrap = 'wrap';
+
+            for (var i = 0; i < data.length; i++) {
+                if(data[i].VariableCategory === 'Revenue')
+                {
+                    const quickActionDiv = document.createElement('div');
+                    quickActionDiv.style.width = '20%';
+                    quickActionDiv.style.borderRadius = '5px';
+                    quickActionDiv.style.borderTop = '20px';
+                    
+                    const link = document.createElement('a');
+                    const linkUrl = '@Url.Action("PlaceholderAction", "PlaceholderController")'
+                    .replace('PlaceholderAction', data[i].VariableAction)
+                    .replace('PlaceholderController', data[i].VariableController)
+                    + '?Type=' + encodeURIComponent(data[i].PerameterValue) ;
+                
+                    const roundDiv = document.createElement('div');
+                    roundDiv.style.width = '80px';
+                    roundDiv.style.height = '80px'; 
+                    roundDiv.style.borderRadius = '50%'; 
+                    roundDiv.style.boxShadow = '0px 1px 4px rgba(0,0,0,.2)';
+                    roundDiv.style.margin = 'auto';
+                    roundDiv.style.marginBottom  = '8px';
+                    roundDiv.style.cursor = 'pointer';
+
+                    const icon = document.createElement('i');
+                    icon.className = data[i].ClassName;
+
+                    icon.style.fontSize = '40px'; 
+                    icon.style.fontWeight = '600';
+                    icon.style.display = 'flex';
+                    icon.style.alignItems = 'center';
+                    icon.style.justifyContent = 'center';
+                    icon.style.width = '100%';
+                    icon.style.height = '100%';
+
+                    roundDiv.appendChild(icon);
+
+                    roundDiv.addEventListener('mouseenter', function () {
+                        this.style.backgroundColor = '#def3cc'; // Change background color on hover
+                    });
+
+                    roundDiv.addEventListener('mouseleave', function () {
+                        this.style.backgroundColor = ''; // Reset background color on mouse leave
+                    });
+
+                    link.appendChild(roundDiv);
+                    link.addEventListener('click', function (e) {
+                           // window.location.href = linkUrl;
+                            e.preventDefault();
+                            window.open(linkUrl, '_blank');
+                    });
+
+                    quickActionDiv.appendChild(link);
+
+                    const paragraph = document.createElement('p');
+                    paragraph.innerText = data[i].VariableName;
+                   paragraph.style.textAlign = 'center';
+                    paragraph.style.fontWeight = '600';
+                    paragraph.style.fontSize = '14px';
+                    paragraph.style.color = '#393a3d';
+                    quickActionDiv.appendChild(paragraph);
+
+                    divElement1.appendChild(quickActionDiv);
+                }
+            }
+
+            const divElement2 = document.querySelector('#div-for-quick-actions2');
+            divElement2.style.display = 'flex';
+            divElement2.style.flexWrap = 'wrap';
+
+            for (var i = 0; i < data.length; i++) {
+                if(data[i].VariableCategory === 'Expense')
+                {
+                    const quickActionDiv = document.createElement('div');
+                    quickActionDiv.style.width = '20%';
+                    quickActionDiv.style.borderRadius = '5px';
+                    
+                    const link = document.createElement('a');
+                    const linkUrl = '@Url.Action("PlaceholderAction", "PlaceholderController")'
+                    .replace('PlaceholderAction', data[i].VariableAction)
+                    .replace('PlaceholderController', data[i].VariableController)
+                    + '?Type=' + encodeURIComponent(data[i].PerameterValue) ;
+                
+                    const roundDiv = document.createElement('div');
+                    roundDiv.style.width = '80px';
+                    roundDiv.style.height = '80px'; 
+                    roundDiv.style.borderRadius = '50%'; 
+                    roundDiv.style.boxShadow = '0px 1px 4px rgba(0,0,0,.2)';
+                    roundDiv.style.margin = 'auto';
+                    roundDiv.style.marginBottom  = '8px';
+                    roundDiv.style.cursor = 'pointer';
+
+                    const icon = document.createElement('i');
+                    icon.className = data[i].ClassName;
+
+                    icon.style.fontSize = '40px'; 
+                    icon.style.fontWeight = '600';
+                    icon.style.display = 'flex';
+                    icon.style.alignItems = 'center';
+                    icon.style.justifyContent = 'center';
+                    icon.style.width = '100%';
+                    icon.style.height = '100%';
+
+                    roundDiv.appendChild(icon);
+
+                    roundDiv.addEventListener('mouseenter', function () {
+                        this.style.backgroundColor = '#def3cc'; // Change background color on hover
+                    });
+
+                    roundDiv.addEventListener('mouseleave', function () {
+                        this.style.backgroundColor = ''; // Reset background color on mouse leave
+                    });
+
+                    link.appendChild(roundDiv);
+                    link.addEventListener('click', function (e) {
+                           // window.location.href = linkUrl;
+                            e.preventDefault();
+                            window.open(linkUrl, '_blank');
+                    });
+
+                    quickActionDiv.appendChild(link);
+
+                    const paragraph = document.createElement('p');
+                    paragraph.innerText = data[i].VariableName;
+                    paragraph.style.textAlign = 'center';
+                    paragraph.style.fontWeight = '600';
+                    paragraph.style.fontSize = '14px';
+                    paragraph.style.color = '#393a3d';
+                    quickActionDiv.appendChild(paragraph);
+
+                    divElement2.appendChild(quickActionDiv);
+                }
+            }
+        }
+
+
+        function addCommasToNumber(number) { 
+            let numString = number.toString();
+            let parts = numString.split('.');           
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");           
+            return parts.join('.');
+        }
+
+        function populateGetttingsForBankAccounts(data) {
+            const divElement = document.querySelector('#div-for-bank-account');
+            const company = '@CompanyName';
+
+            for (var i = 0; i < data.length; i++) {
+                const mainRowDiv = document.createElement('div');
+                mainRowDiv.className = 'row task-item';
+
+                mainRowDiv.style.borderBottom = '1px solid #ccc';
+                //mainRowDiv.style.padding = '10px';
+                mainRowDiv.style.margin = '10px';
+
+                const col1Div = document.createElement('div');
+                col1Div.className = 'col-md-8 col-8';
+
+                const contentSpan = document.createElement('span');
+                contentSpan.innerHTML = "<strong style='font-size: 12px;'>" + data[i].AccName + "</strong><br><span style='font-size: 11px;'>" + company + "</span > ";
+
+                col1Div.appendChild(contentSpan);
+
+                const col2Div = document.createElement('div');
+                col2Div.className = 'col-md-4 col-4';
+
+                const contentSpan2 = document.createElement('span');
+                // contentSpan2.innerHTML = "<span style='font-size: 11px;'>" + data[i].AccountBalance + "</span>";
+                const formattedBalance = addCommasToNumber(data[i].AccountBalance);
+                contentSpan2.innerHTML = "<span style='font-size: 11px;display: flex; justify-content: flex-end;'>" + formattedBalance + "</span>";
+
+                col2Div.appendChild(contentSpan2);
+
+                mainRowDiv.appendChild(col1Div);
+                mainRowDiv.appendChild(col2Div);
+
+                divElement.appendChild(mainRowDiv);
+            }
+
+        }
+
+        function ShowMore()
+        {
+            var moneyInOutDiv = document.getElementById('MoneyInOut');
+            var moreLessLink = document.getElementById('More/Less');
+
+            if (moneyInOutDiv.classList.contains('d-none')) {
+                // If the div is currently hidden, show it
+                moneyInOutDiv.classList.remove('d-none');
+                moreLessLink.innerText = 'Show less';
+            } else {
+                // If the div is currently visible, hide it
+                moneyInOutDiv.classList.add('d-none');
+                moreLessLink.innerText = 'See more';
+            }
+        }
+
+    </script>
+
+    <script>
+        // $("#GetthingsDone").on("click", function () {
+        //     var editUrl = '@Url.Action("getthingsDone", "Accounts")';
+        //     //window.location.href = editUrl;
+        //     window.open(editUrl, '_blank');
+        // })
+
+        // $("#Business").on("click", function () {
+        //     var editUrl = '@Url.Action("Business", "Accounts")';
+        //     //window.location.href = editUrl;
+        //     window.open(editUrl, '_blank');
+        // })
+
+        // $("#cashflow").on("click", function () {
+        //     var editUrl = '@Url.Action("cashflow", "Accounts")';
+        //     //window.location.href = editUrl;
+        //     window.open(editUrl, '_blank');
+        // })
+    </script>
+}
+
+
+                

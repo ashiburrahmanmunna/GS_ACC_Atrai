@@ -1,0 +1,526 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Approval Settings";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    #modal-content2 {
+        background-color: #fefefe;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 30%;
+    }
+
+    #transaction_table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+</style>
+
+    <div class="row py-3" style="background: #e9ecef6b;">
+        <div class="col-lg-2">
+            <p class="fs-4 fw-bold">Document Approval </p>
+        </div>
+        <div class="col-lg-4"></div>
+        <div class="col-lg-6">
+            <div class="form-check form-check-inline mt-2">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio4" value="option2" style="font-size: 20px;">
+                <label class="form-check-label" for="inlineRadio4" style="font-size: 20px;">ALL(<span id="TotalAllApproval" style="font-weight: bold;"></span>)</label>
+            </div>
+            <div class="form-check form-check-inline mt-2">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1" style="font-size: 20px;" >
+              <label class="form-check-label" for="inlineRadio1" style="font-size: 20px;">Check(<span id="TotalCheckApproval" style="font-weight: bold;"></span>)</label>
+            </div>
+            <div class="form-check form-check-inline mt-2">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2"  style="font-size: 20px;">
+              <label class="form-check-label" for="inlineRadio2" style="font-size: 20px;">Verify(<span id="TotalVerifyApproval" style="font-weight: bold;"></span>)</label>
+            </div>
+            <div class="form-check form-check-inline mt-2">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="option2"  style="font-size: 20px;">
+              <label class="form-check-label" for="inlineRadio3" style="font-size: 20px;">Approve(<span id="TotalFinalApproval" style="font-weight: bold;"></span>)</label>
+            </div>
+            <div class="form-check form-check-inline mt-2">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio5" value="option2" style="font-size: 20px;">
+                <label class="form-check-label" for="inlineRadio5" style="font-size: 20px;">Disapprove(<span id="TotalDisapproval" style="font-weight: bold;"></span>)</label>
+            </div>
+            
+        </div>
+    </div>
+    <div class="row mt-2">
+       <div class="col-md-2">
+            <label><strong>Doctype</strong></label>
+            <select id="DocTypeId" class="form-control" onchange="initTabulator()">
+                <option value="">Select DocType</option>
+            </select>
+        </div>
+       
+    </div>
+    <div class="d-flex justify-content-end">
+            <button title="Print" class="btn btn-white border-0" type="button" id="transactionPrint-pdf" style="padding: 0px;padding-bottom: 10px;" 
+                    aria-expanded="false">
+                <i class="bi bi-printer fs-5" style=" margin-right: 0px; "></i>
+            </button>
+            <button title="Export to excel" class="btn btn-white border-0" type="button" id="transactionPrint-excel" style="padding: 0px;padding-bottom: 10px;" 
+                    aria-expanded="false">
+                <i class="bi bi-file-earmark-excel fs-5" style=" margin-right: 0px; "></i>
+            </button>
+            <div title="Settings" class="dropdown1  custom-grid" style="display:inline-block;margin-left: 10px;">
+        
+                <a href="#" class="text-decoration-none text-black" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                   aria-expanded="false">
+                    <i class="bi bi-gear fs-5"></i>
+                </a>
+                <div class="dropdown-menu gear-dropdown" aria-labelledby="dropdownMenuButton-sales">
+                    <div class="row p-4 main-dropdown-size" style="overflow:hidden;">
+                        <div class="col">
+                            <span class="fw-bold ms-3">Columns</span>
+                            <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                            <ul class="list-unstyled">
+                                <li>
+                                    <div id="salesColumnList" class="custom-grid">
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    <div id="transaction_table" class="mt-2"></div>
+</div>
+
+<div class="col-md-2  col-2">
+    <div id="customModal" class="modal">
+        <div class="modal-content" id="modal-content2">
+            <p>Are you sure you want to Change?</p>
+            <div class="row">
+                <div class="col-md-6 col-6">
+                    <button id="confirmBtn" class="btn btn-success" style="width: 100px">OK</button>
+                </div>
+                <div class="col-md-6 col-6 d-flex justify-content-end">
+                    <button id="cancelBtn" class="btn btn-danger" style="width: 100px">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('inlineRadio1').checked = true;
+});
+
+        $('select').select2();
+                $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetDocTypeForDocApproval", "Admin")',
+            datatype: "Json",
+            success: function (data) {
+                //$('#doc_type').append('<option value="">Select Doc Type</option>');
+                $.each(data, function (index, value) {
+                    $('#DocTypeId').append('<option value="' + value.Id + '" >' + value.DocType + '</option>');
+                });
+            }
+        });
+
+        function setInactiveUrl(data, doctypeId, transactionId, type) {
+            var myUrlInactive = '@Url.Action("DisapproveDocInCheckGRR", "Admin")';
+
+            var modal = document.getElementById("customModal");
+            modal.style.display = "block";
+
+            document.getElementById("confirmBtn").onclick = function () {
+                $.ajax({
+                    type: "get",
+                    data: { Id: data , DocTypeId: doctypeId, Type: type, TransactionId : transactionId},
+                    url: myUrlInactive,
+                    success: function (response) {
+                        if (response.success == "1") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-green",
+                            });
+                            initTabulator();
+                        }
+                        else if (response.success == "0") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-red",
+                            });
+                        }
+                    }
+                });
+                modal.style.display = "none";
+            };
+
+            document.getElementById("cancelBtn").onclick = function () {
+                modal.style.display = "none";
+            };
+        }
+
+        function setActiveUrl(data, doctypeId, transactionId, type) {
+            var myUrlInactive = '@Url.Action("ApproveDocInCheckGRR", "Admin")';
+
+            var modal = document.getElementById("customModal");
+            modal.style.display = "block";
+
+            document.getElementById("confirmBtn").onclick = function () {
+                $.ajax({
+                    type: "get",
+                    data: { Id: data , DocTypeId: doctypeId, Type: type, TransactionId : transactionId},
+                    url: myUrlInactive,
+                    success: function (response) {
+                        if (response.success == "1") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-green",
+                            });
+                            initTabulator();
+                        }
+                        else if (response.success == "0") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-red",
+                            });
+                        }
+                    }
+                });
+                modal.style.display = "none";
+            };
+
+            document.getElementById("cancelBtn").onclick = function () {
+                modal.style.display = "none";
+            };
+        }
+
+        function navigateToUrl(url) {
+            window.location.href = url;
+        }
+
+        var column = [
+            {
+                title: "Id", field: "Id", hozAlign: "center", vertAlign: "middle", visible: false
+            },
+            {
+                title: "Id", field: "DoctypeId", hozAlign: "center", vertAlign: "middle", visible: false
+            },
+            {
+                title: "Id", field: "TransactionId", hozAlign: "center", vertAlign: "middle", visible: false
+            },
+            {
+                title: "TrxnType", field: "TrxnType", hozAlign: "center", vertAlign: "middle", visible: false
+            },
+            {
+                title: "DocFor", field: "DocFor", hozAlign: "center", vertAlign: "middle", visible: false
+            },
+            {
+                title: "Document Code", field: "DocCode", hozAlign: "center", vertAlign: "middle"
+            },
+            {
+                title: "Type", field: "DocType", hozAlign: "center", vertAlign: "middle"
+            },
+            {
+                title: "Date", field: "DocDate", hozAlign: "center", vertAlign: "middle"
+            },
+            {
+                title: "Amount", field: "Amount", hozAlign: "center", vertAlign: "middle"
+            },
+            {
+                title: "Location", field: "Location", hozAlign: "center", vertAlign: "middle"
+            },
+            {
+                title: "Created By", field: "CreatedBy", hozAlign: "center", vertAlign: "middle"
+            },
+            {
+                title: "Check By", field: "CheckBy", hozAlign: "center", vertAlign: "middle"
+            },
+            {
+                title: "Verify By", field: "VerifyBy", hozAlign: "center", vertAlign: "middle"
+            },
+            {
+                title: "Approve By", field: "ApproveBy", hozAlign: "center", vertAlign: "middle"
+            },
+            {
+                title: "Remarks", field: "Remarks", hozAlign: "center", vertAlign: "middle"
+            },
+            {
+                title: "Actions",
+                field: "button",
+                headerHozAlign: "center",
+                vertAlign: "middle",
+                headerSort: false,
+                hozAlign: "center",
+                resizable: false,
+                width: "300",
+                formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    console.log("see data::", data);
+                    var myUrlGetforInvoice = `@Url.Action("UpdateApprovalSettings", "Admin")?id=${data.Id}`;
+
+                    function getTypedata() {
+                        if (document.getElementById('inlineRadio1').checked) {
+                            return 'Check';
+                        } else if (document.getElementById('inlineRadio2').checked) {
+                            return 'Verify';
+                        } else if (document.getElementById('inlineRadio3').checked) {
+                            return 'Approve';
+                        } else if (document.getElementById('inlineRadio4').checked) {
+                            return 'All';
+                        } else if (document.getElementById('inlineRadio5').checked) {
+                            return 'Disapprove';
+                        }
+                    }
+
+                    var typedata = getTypedata();
+
+                    var myUrlPdf;
+                                                            
+                    if (data.DocFor === 'Purchase') {
+                        myUrlPdf = '@Url.Action("CustomFormStylePreview", "Admin")?type=RunningExpnesesReport&id=' + data.Id;
+                    } else if (data.DocFor === 'Sales') {
+                        myUrlPdf = '@Url.Action("CustomFormStylePreview", "Admin")?type=RunningSalesReport&id=' + data.Id;
+                    }
+
+                    var inActive = `setInactiveUrl(${data.Id}, ${data.DocTypeId}, ${data.TransactionId}, '${typedata}')`;
+                    var active = `setActiveUrl(${data.Id}, ${data.DocTypeId}, ${data.TransactionId}, '${typedata}')`;
+
+                    var previewHtml = `
+                                <button onclick="navigateToUrl('${myUrlPdf}')" class="btn btn-outline-info btn-sm ms-3 mt-1">
+                            <i class="fas fa-eye"></i>
+                        </button>`;
+
+                    var approveHtml = `
+                        <button onclick="${active}" class="btn btn-outline-success btn-sm ms-3 mt-1">
+                                    <i class="fas fa-check"></i>
+                        </button>`;
+
+                    var disapproveHtml = `
+                        <button onclick="${inActive}" class="btn btn-outline-danger btn-sm ms-3 mt-1">
+                            <i class="fas fa-times">
+                        </button>`;
+
+                    var html = previewHtml;
+
+                    // Assuming data.IsApprove is available and contains the value you want to check
+                    if (data.IsApprove === 0) {
+                        html += approveHtml;
+                    }
+
+
+                    if (!document.getElementById('inlineRadio5').checked) {
+                        html += disapproveHtml;
+                    }
+
+                    return html;
+                },
+                visible: true,
+                cellClick: function (e, cell) {
+                    cell.getElement().classList.add('active-cell');
+                },
+            }
+
+
+
+        ];
+
+        var salesTable;
+
+        function initTabulator() {
+
+            function getTypedata() {
+                if (document.getElementById('inlineRadio1').checked) {
+                    return 'Check';
+                } else if (document.getElementById('inlineRadio2').checked) {
+                    return 'Verify';
+                } else if (document.getElementById('inlineRadio3').checked) {
+                    return 'Approve';
+                } else if (document.getElementById('inlineRadio4').checked) {
+                    return 'All';
+                } else if (document.getElementById('inlineRadio5').checked) {
+                    return 'Disapprove';
+                }
+            }
+
+
+            function getDocTypeId() {
+                 return document.getElementById('DocTypeId').value || null;
+            }
+
+            var typedata = getTypedata() || 'Check';
+            // var doctypeId = getDocTypeId();
+            var doctypeId = document.getElementById('DocTypeId').value;
+
+            var queryParams = '?type=' + typedata;
+                                    
+            if (doctypeId) {
+                  queryParams += '&DocTypeId=' + doctypeId;
+            }
+
+            function fetchDataFromServer() {
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetCheckVerifyList", "Admin")' + queryParams
+                };
+                return $.ajax({
+                    url: MyAppUrlSettings.MyUsefulUrl,
+
+                    dataType: "json",
+                });
+            }
+
+            fetchDataFromServer().done(function (response) {
+
+                console.log("notrmal response:", response.data);
+                var dataTable = response.data.Table;
+                var countData = response.count[0];
+                 document.getElementById("TotalCheckApproval").textContent = countData.TotalCheckApproval;
+                 document.getElementById("TotalDisapproval").textContent = countData.TotalDisapproval;
+                 document.getElementById("TotalFinalApproval").textContent = countData.TotalFinalApproval;
+                 document.getElementById("TotalVerifyApproval").textContent = countData.TotalVerifyApproval;
+                         document.getElementById("TotalAllApproval").textContent = countData.TotalAllApproval;
+
+                salesApiUrl = '@Url.Action("GetCheckVerifyList", "Admin")' + queryParams;
+                   salesTable = new Tabulator("#transaction_table", {
+
+                        layout: "fitColumns",
+                        minHeight: 400,
+                        pagination: true,
+                        movableColumns: true,
+                        data: dataTable,
+                        columns: column,
+                        paginationMode: "local",
+                        paginationSize: 10,
+                        paginationInitialPage: 1,
+                        paginationSizeSelector: [5, 10, 25, 50, 100, true],
+                        paginationCounter: "rows",
+                        ajaxURL: salesApiUrl,
+                        ajaxConfig: "get",
+                        ajaxContentType: "json",
+                        rowFormatter: function(row) {
+                            var data = row.getData();
+                            if (data.IsApprove === 1) {
+                                        row.getElement().style.backgroundColor = "#FFE3E3"; // Light red background
+                            }
+                        }
+
+                    });
+                document.getElementById("transactionPrint-pdf").addEventListener("click", function () {
+                    salesTable.print(false, true);
+                });
+                document.getElementById("transactionPrint-excel").addEventListener("click", function () {
+                    salesTable.download("xlsx", "data.xlsx", { sheetName: "Table Data" });
+                });
+
+                
+            });
+        }
+
+
+        var columnListSales = $("#salesColumnList");
+        $.each(column, function (index, field) {
+            ////console.log("GLOBAL 2::",field);
+            var title = field.title;
+            var name = field.field;
+            var visible = true;
+            if (field.visible == false) {
+                visible = false;
+            }
+            titles = `<li>
+                                                     <a class="dropdown-item" href="#">
+                                                     <div class="custom-control custom-checkboxs" >
+                                                     <input type="checkbox" class="custom-control-input title-input" id="${name}" value="${name}">
+                                                             <label class="custom-control-label w-100 cursor-pointer" id="${name}" for="${name}">${title}</label>
+                                                     </div>
+                                                     </a>
+                                                     </li>`;
+            columnListSales.append(titles);
+
+            document.querySelector(`#${name}`).addEventListener('click', function (event) {
+                var checkbox = event.target;
+                var isChecked = checkbox.checked;
+
+                if (isChecked) {
+                    salesTable.showColumn(name);
+                } else {
+                    salesTable.hideColumn(name);
+                }
+            });
+
+
+            $(`${'#' + name}`).prop('checked', visible);
+
+
+            $('.custom-control-label').on('click', function (e) {
+                e.stopPropagation();
+            });
+            $('#dropdown-titles').on('click', function (e) {
+                e.stopPropagation();
+            });
+
+
+
+        });
+        initTabulator();
+        document.getElementById('inlineRadio1').addEventListener('change', initTabulator);
+        document.getElementById('inlineRadio2').addEventListener('change', initTabulator);
+        document.getElementById('inlineRadio3').addEventListener('change', initTabulator);
+        document.getElementById('inlineRadio4').addEventListener('change', initTabulator);
+        document.getElementById('inlineRadio5').addEventListener('change', initTabulator);
+    </script>
+}

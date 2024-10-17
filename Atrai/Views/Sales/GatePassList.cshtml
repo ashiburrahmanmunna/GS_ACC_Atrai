@@ -1,0 +1,1605 @@
+﻿
+@{ ViewData["Title"] = "Gate Pass list";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+@using (Html.BeginForm())
+{
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row my-3">
+                <div class="col-md-8 col-12">
+                    <h4 class="center fw-semibold">Gate Pass List</h4>
+                </div>
+                <div class="col-md-3 col-12 text-end pt-3">
+                    <label class="ps-1"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                    <label class="ps-1"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                    <label class="ps-1"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+
+                </div>
+                <div class="col-md-1 text-end">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            new
+                        </button>
+                          <ul class="dropdown-menu">
+                            
+
+                            <li class="dropdown-item">
+                                <a href="/Sales/AddGatePass" class="dropdown-link" style="color: black;">New Gate Pass</a>
+                            </li>
+                           
+                        </ul>
+                     
+                    </div>
+                </div>
+            </div>
+
+            <div class="heroSection" style="width:50%">
+
+                <div class="row mt-5" id="TheadDropdown">
+
+                    <div class="col-md-6 col-12" id="divAccountHead">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">
+                                User List
+                            </label>
+                            <select class="form-select select2me thead" id="THead"
+                                    aria-label="Floating label select example">
+                            </select>
+
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-12" id="divLocation">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">
+                                Warehouse
+                            </label>
+                            <select class="form-select select2me thead" id="location"
+                                    aria-label="Floating label select example">
+                            </select>
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row mt-5">
+                    <div class="col-md-6 col-12">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">From Date</label>
+                            <input type="text" class="form-control tg" id="Date">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-12">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">To Date</label>
+                            <input type="text" class="form-control tg" id="Date2">
+                        </div>
+                    </div>
+
+
+
+
+                </div>
+                @*<div class="row mt-5">
+                        <div class="col-md-12 col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked">
+                                <label class="form-check-label" for="flexSwitchCheckChecked"></label>
+                            </div>
+
+                        </div>
+
+
+                    </div>*@
+                <!-- Default checked -->
+
+            </div>
+
+
+
+            <div>
+
+                <div class="dropdown1 mt-3" style="display:inline-block;">
+                    <button class="btn btn-white border-0" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        <i class="bi bi-gear" me-1"></i>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <div class="row row-cols-lg-3 p-4 main-dropdown-size" style="overflow:hidden;">
+                            <div class="col" style="width: 188px; float:left;">
+                        <li class="fw-bold ms-3">Columns</li>
+                        <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                        <li>
+                            <div id="dropdown-titles">
+
+                            </div>
+                        </li>
+                </div>
+                <div class="vertical-hr"></div>
+
+                <div class="col right-dropdown" style="width: 188px;">
+                    <li class="fw-bold ms-3">Others</li>
+                    <hr class="m-0 w-75 w-sm-50  ms-3" />
+                    <li><a id="show-all" value="100" class="dropdown-item" href="#">Show all</a></li>
+                    <li><a id="hide-all" class="dropdown-item" href="#">Hide all</a></li>
+                    <li><a id="restore" class="dropdown-item" href="#">Restore</a></li>
+
+
+                    <li>
+                        <select name="rows" id="rows" class="border-0 cursor-pointer" style="margin-left: 13px;padding: 10px 0;width: 70px; ">
+                            @*<option value="0" class="w-100">Rows</option>*@
+                            <option value="0" disabled selected>Rows</option>
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input title-input" id="withChild" value="withChild">
+                                <label class="custom-control-label cursor-pointer" id="withChild-label" for="withChild">Export with Child</label>
+                            </div>
+                        </a>
+                    </li>
+                </div>
+            </div>
+            </ul>
+        </div>
+
+        @* <button style="border-top-right-radius: 0px; border-bottom-right-radius: 0px" class="btn btn-secondary" type="button">
+                <img src="~/assets/pdf 1.png" alt="">
+                <button class="btn btn-secondary another-dropdown" type="button" id="exportBtn" data-target="#exportUl" style="border-top-left-radius: 0px; border-bottom-left-radius: 0px; height: 35px; width: 0px; height:40px;">
+                    <img style="margin-left: -16px;" src="~/assets/collapsedown.png" />
+                </button>
+            </button>
+            <div class="export-dropdown-siz" style="width:10px;">
+                <ul style="margin-left:10px;" class="dropdown-menu" id="exportUl">
+                    <li><a class="dropdown-item" href="#"><img src="~/assets/excel 1.png" alt="">Export</a></li>
+                </ul>
+            </div>*@
+
+        <div class="btn-group">
+            <button class="btn btn-secondary btn-sm" type="button" id="exportUl">
+                <img src="~/assets/excel 1.png" alt="">
+            </button>
+            <button type="button" class="btn btn-lg btn-secondary dropdown-toggle dropdown-toggle-split" id="exportBtn" data-bs-toggle="dropdown" data-target="#exportUl" aria-expanded="false">
+                <span class="visually-hidden">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu" id="exportPDF">
+                <li><a class="dropdown-item" href="#"><img src="~/assets/pdf 1.png" alt="">PDF</a></li>
+                @*<li> <button onclick="exportToPDF()">PDF</button></li>*@
+            </ul>
+        </div>
+
+
+
+    </div>
+
+    @*  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+
+
+            <button class="btn btn-primary me-md-2" type="button">PDF</button>
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 me-md-2">
+                <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        CSV
+                      </a>
+                      <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" id="csv">With Child</a></li>
+                        <li><a class="dropdown-item" id="csvWithoutchild">Without Child</a></li>
+                      </ul>
+                </li>
+            </ul>
+        </div>*@
+    <div class="gridSection" style="overflow:hidden">
+        <div class="row">
+            <div class="col-12 col-md-12">
+                <div id="jsFilterGrid" style="font-size:14px;"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-12">
+                <hr />
+                <div id="jsGridItems"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <button type="button" id="checkmodalbuttonid" class="btn btn-primary d-none " data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Launch demo modal
+    </button>
+    @*<button id="checkmodalbuttonid" type="button" class="btn-purple btn-sm rounded-10 d-none" data-toggle="modal" data-target="#checkModal"><i class="fa fa-plus"></i></button>*@
+    <div class="modal fade modal-xl" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="card rounded-10">
+                        <div id="jsChildItems"></div>
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+
+}
+
+
+@section Scripts{
+    <script type="text/javascript">
+          $(document).ready(function() {
+
+
+            //  $('select').select2();
+              $('#THead').select2();
+              $('#location').select2();
+
+                $('#Date').datepicker({
+                dateFormat: 'dd-M-yy',
+                todayHighlight: true,
+                autoclose: true
+            }).datepicker("setDate", new Date());
+
+            $('#Date2').datepicker({
+                dateFormat: 'dd-M-yy',
+                todayHighlight: true,
+                autoclose: true
+            }).datepicker("setDate", new Date());
+
+              var globalFields = [
+                  {
+                      headerTemplate: function () {
+                          return $("<button>").attr("type", "button").css({
+                              'border': '0'
+                          }).html("<i class='fas fa-trash'></i>") //text("Delete")
+                              .on("click", function () {
+                                  deleteSelectedItems();
+                                  /*initjsGrid();*/
+                              });
+                      },
+                      itemTemplate: function (_, item) {
+                          return $("<input>").attr("type", "checkbox").css({
+                              'width': '20px',
+                              'height': '20px'
+                          }).prop("checked", $.inArray(item, selectedItems) > -1)
+                              .on("change", function () {
+                                  $(this).is(":checked") ? selectItem(item) : unselectItem(item);
+                              });
+                      },
+
+                      align: "center",
+                      width: 50
+                  },
+                    {
+                        name:'buttonDetails',width: '38', title: 'Details',align:'center',itemTemplate: function(value, item) {
+
+                            var $iconPencil = $(" <input class='jsgrid-button jsgrid-insert-button' type = 'button' title = 'Details' >").click(function (e) {
+
+                                $("#checkmodalbuttonid").trigger('click');
+                            });
+
+                            var $result = jsGrid.fields.control.prototype.itemTemplate.apply(this, arguments);
+                            return $result.add($iconPencil);
+
+                        }
+                  },
+                   
+                    { name: "GatePassId", title: 'Id.', type: "text" },
+                    { name: "GatePassCode", title: 'No.', type: "text" },
+                    { name: "Name", title: 'Item', type: "text" },
+                    { name: "ColorName", title: 'Color', type: "text" },
+                    { name: "SizeName", title: 'Size', type: "text",visible:false },
+                    { name: "GatePassDate", title: 'Date', type: "text" },
+                    { name: "Description", title: 'Description', type: "text" },
+                   
+                    { name: "isPosted", title: 'Is', visible: false },
+                
+                    {
+                        name: "button", width: '80', title: 'Actions', align: 'center', itemTemplate: function (value, data) {
+                        console.log(data);
+                    //var options = [
+                    //    { value: "Edit", text: "<i class='fa-solid fa-pen-to-square'></i> Edit"},
+                    //    { value: "Delete", text: "<i class='fa-sharp fa-solid fa-trash'></i> Delete" },
+                    //];
+                    //console.log(data);
+                    @*var myUrledit = '@Url.Action("EditAccountHead", "Admin")?AccountHeadId=' + data.Id;*@
+
+                             var myUrldelete = '@Url.Action("DeleteGatePass", "Sales")?GatePassId=' + data.Id;
+                    //var myUrlGet = `editAccountHead(${data.Id})`;
+                        var myUrlGet = '@Url.Action("AddGatePass", "Sales")?GatePassId=' + data.Id;
+
+                    var message = `return confirm('Are you sure you want to Remove the AccountHead Information ?')`;
+                    var myUrlprint = '@Url.Action("Print", "Accounts")/' + data.GatePassId;
+
+                            var $dropdown = $("<div class='dropdown ms-1'>").append(
+                                $("<button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'>")
+                            ).append(
+                                $("<ul class='dropdown-menu' aria-labelledby='dropdownMenuButton1'>").css({
+                                    'margin-left': '-105px'
+                                }).append(function () {
+                                    return $("<li>").append(
+
+                                    $(`<a href='${myUrlGet}' target="_blank" class=" text-decoration-none text-black ms-3 mt-1"><i class='fa-solid fa-pen-to-square'></i> <span>Edit</span>  <br /></a>`),
+                                    $(`<a class='text-decoration-none text-black ms-3 mt-1'>`).attr("href", `#`)
+                                        .html(`<i class='fa-sharp fa-solid fa-trash mt-2'></i><span class='ms-2 mt-2' >Delete</span>`).click(function () {
+                                            setDeleteUrl(data.Id);
+                                        })
+
+
+                                        //$(`<a class='text-decoration-none text-black ms-3 mt-1'>`).attr("href", `${myUrlGet}`).html("<i class='fa-solid fa-pen-to-square'></i> <span>Edit</span>  <br />")
+                                        ////.click(function () {
+                                        ////    editgatepasslist(data.Id , data.VoucherTypeNameShort);
+                                        ////})
+                                        //,
+                                        //$(`<a class='text-decoration-none text-black ms-3 mt-1'>`).attr("href", `#`)
+                                        //    .html(`<i class='fa-sharp fa-solid fa-trash mt-2'></i><span class='ms-2 mt-2' >Delete</span>`).click(function () {
+                                        //        setDeleteUrl(data.Id);
+                                        //    })
+                                    );
+                                }));
+
+                            var $iconButton = $(`<a href='${myUrlprint}' target="_blank" class="fw-bolder mt-2">Run Report</a>`)
+                    var $flex = $("<div class='d-flex'></div>").append($iconButton).append($dropdown)
+                var $result = jsGrid.fields.control.prototype.itemTemplate.apply(this, arguments);
+                    return $result.add($flex);
+                }
+                  },
+
+                //    {
+                //         name:"button", width: '80', title: 'Action', align: 'center', itemTemplate: function (value, data) {
+                //            var options = [
+                //                { value: "Edit", text: "<i class='fa-solid fa-pen-to-square'></i> Edit"},
+                //                { value: "Delete", text: "<i class='fa-sharp fa-solid fa-trash'></i> Delete" },
+                //            ];
+
+                //            var $dropdown = $("<div class='dropdown ms-1'>").append(
+                //                $("<button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'>")
+                //            ).append(
+                //                $("<ul class='dropdown-menu' aria-labelledby='dropdownMenuButton1'>").css({
+                //                    'margin-left':'-105px'
+                //                }).append(options.map(function (option) {
+                //                    return $("<li>").append(
+                //                        $("<a class='text-decoration-none text-black ms-3 mt-1'>").attr("href", "#").html(option.text)
+                //                    );
+                //                }))
+                //            );
+
+
+                //            var $iconButton = $("<a href='https://google.com'>Run Report</a>").click(function (e) {
+                //                e.preventDefault();
+
+                //        //alert('checjed');
+                //        });
+                //            var $flex = $("<div class='d-flex'></div>").append($iconButton).append($dropdown)
+                //        var $result = jsGrid.fields.control.prototype.itemTemplate.apply(this, arguments);
+                //            return $result.add($flex);
+                //}
+                //    },
+                //    {
+                //       name:"button",title:'Button',width: '80',editButton:false,align:'center', itemTemplate: function (value, item) {
+
+                //            var $iconPencil = $(" <input class='jsgrid-button jsgrid-edit-button' type = 'button' title = 'Edit' >").click(function (e) {
+
+                //                //$("#checkmodalbuttonid").trigger('click');
+                //                alert('checked');
+
+                //            });
+                //            var $iconTrash = $(" <input class='jsgrid-button jsgrid-delete-button' style='margin-left: 10px;' type = 'button'  data-bs-toggle='tooltip' data-bs-placement='top' title='Delete' >").click(function (e) {
+                //                console.log('item');
+                //                console.log(item);
+                //               $("#jsGridItems").jsGrid("deleteItem", item);
+
+                //            });
+
+
+                //            var $iconPrint = $('<a href="/atrai/Accounts/Print/6919" class="dropdown-item tooltip-test" title="Print" style="width: auto;display: inline-block;margin-left:10px;" target="_blank"><i class="bi bi-printer" style="height:30px;width:30px;"></i></a>').click(function (e) {
+
+                //            });
+                //            var $iconCopy = $('<a href="/atrai/Accounts/CreateCopy?Type=VJR&amp;Id=6919" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy" style="width: auto;display:inline-block;margin-left:10px;"  target="_blank"><i class="bi bi-files pe-1"></i></a>').click(function () {
+
+                //                });
+
+
+
+                //            var $result = jsGrid.fields.control.prototype.itemTemplate.apply(this, arguments);
+                //            return $result.add($iconPencil).add($iconTrash).add($iconPrint).add($iconCopy);
+
+                //        }
+                //    }
+
+
+                    // { name: "Currency", title: 'Currency', type: "text" },
+
+
+
+                ];
+              var eachGlobalIdForVoucherDelete = [];
+              var globalIdsForVoucherDelete = [];
+            var globalPageSize=5;
+           function restoreDropdown() {
+            $("#dropdown-titles").empty();
+            for (var i = 0; i < globalFields.length; i++) {
+                var title = globalFields[i].title;
+                var name = globalFields[i].name;
+                var visible = true;
+                if (globalFields[i].visible == false) {
+                    visible = false;
+                }
+                //console.log(visible);
+                titles = `<li>
+                        <a class="dropdown-item" href="#">
+                        <div class="custom-control custom-checkbox" >
+                        <input type="checkbox" class="custom-control-input title-input" id="${name}" value="${name}">
+                        <label class="custom-control-label w-100 cursor-pointer" id="${name}" for="${name}">${title}</label>
+                        </div>
+                        </a>
+                        </li>`;
+
+                $("#dropdown-titles").append(titles);
+
+                document.querySelector(`${'#' + name}`).addEventListener('click', function () {
+                    var checkbox = event.target;
+                    var isChecked = checkbox.checked;
+                    if (isChecked) {
+                        $("#jsGridItems").jsGrid("fieldOption", this.value, "visible", true);
+                    }
+                    else {
+                        $("#jsGridItems").jsGrid("fieldOption", this.value, "visible", false);
+                    }
+                });
+
+                $(`${'#' + name}`).prop('checked', visible);
+
+
+                $('.custom-control-label').on('click', function (e) {
+                    e.stopPropagation();
+                });
+                $('#dropdown-titles').on('click', function (e) {
+                    e.stopPropagation();
+                });
+
+                //console.log(data.BankBalance[i].AccName);
+            }
+
+            AccType = 'L';
+            IncludingInactive = false;
+        }
+
+        document.getElementById("rows").addEventListener("change", function (e) {
+
+            globalPageSize = this.value;
+
+             $("#jsGridItems").jsGrid({
+                    pageSize: globalPageSize
+             });
+
+
+        });
+
+         document.getElementById("hide-all").addEventListener("click", function (e) {
+            //e.stopPropagation();
+            //e.preventDefault();
+            globalPageSize = 0;
+             $("#jsGridItems").jsGrid({
+                pageSize: globalPageSize
+             });
+
+            $("#rows").prop('selectedIndex', 0);
+
+        });
+         document.getElementById("show-all").addEventListener("click", function (e) {
+
+            globalPageSize = 100;
+             $("#jsGridItems").jsGrid({
+                pageSize: globalPageSize
+             });
+            $("#rows").prop('selectedIndex', 0);
+
+        });
+        document.getElementById("restore").addEventListener("click", function (e) {
+
+            globalPageSize = 5;
+
+            $("#jsGridItems").jsGrid({
+                pageSize: globalPageSize
+             });
+            restoreDropdown();
+
+            //$('#rows').value(0);
+            $("#rows").prop('selectedIndex', 0);
+
+        });
+
+           var withChildFlag=false;
+           var FixedHeightFlag=false;
+
+          
+
+        document.getElementById("withChild").addEventListener("click", function (e) {
+                if (this.checked) {
+                    FixedHeightFlag = true;
+                } else {
+                    FixedHeightFlag = false;
+                }
+                
+            });
+
+            $.ajax({
+                method: "get",
+                async: false,
+                url: '@Url.Action("GetUserDropdown", "Admin")',
+              //  data: { VoucherType: "Cash Payment" },
+                //  data: {VoucherType:$('#VoucherTypeName').text() },
+                //headers: {
+                //    contentType: "application/json; charset=utf-8",
+                //    Authorization: token
+                //},
+                success: function (data) {
+
+                    console.log(data);
+
+                    const select = document.querySelector('#THead');
+                    for (var i = 0; i < data.length; i++) {
+                        const option = document.createElement('option');
+                        option.value = data[i].Value;
+                        option.text = data[i].Text;
+                        select.appendChild(option);
+                    }
+                }
+            });
+
+            $.ajax({
+                method: "get",
+                async: false,
+                url: '@Url.Action("GetWarehouseDropdown", "Admin")',//url: "https://www.pqstec.com/InvoiceApps/values/GetSupplierDropdown",
+                //headers: {
+                //    contentType: "application/json; charset=utf-8",
+                //    Authorization: token
+                //},
+                success: function (data) {
+
+                    const select = document.querySelector('#location');
+                    for (var i = 0; i < data.length; i++) {
+                        const option = document.createElement('option');
+                        option.value = data[i].Value;
+                        option.text = data[i].Text;
+                        select.appendChild(option);
+                    }
+                }
+            });
+
+
+
+
+
+
+
+
+            var jsGridItemsUrl = '@Url.Action("GetGatePassList", "Sales")';
+              function initJsGrid() {
+                  var jsGridItemsDB = {
+                      loadData: function (filter) {
+                          console.log(filter);
+                          var d = $.Deferred();
+                          $.ajax({
+                              type: "GET",
+                              url: jsGridItemsUrl,
+                              //headers: {
+                              //    contentType: "application/json; charset=utf-8",
+                              //    Authorization: token
+                              //},
+                              data: { searchquery: JSON.stringify(filter) },
+                              contentType: "application/json; charset=utf-8",
+                              dataType: "json"
+                          })
+
+                              .done(function (result) {
+                                  console.log(result);
+                                  d.resolve(result);
+                                  //console.log(result.ProductList);
+
+                              });
+                          return d.promise().then(function (q) {
+
+                              //console.log(q);
+                              return {
+
+                                  data: q.gatepasslist,
+                                  itemsCount: parseInt(q.PageInfo.TotalRecordCount)
+                              }
+                          });
+                      }
+
+                      //    .done(function(result) {
+                      //        d.resolve(result.gatepasslist);
+
+                      //        //for (let i = 0; i < result.ProductList.length; i++) {
+                      //        //    result.ProductList[i].Quantity = 0;
+
+
+                      //        //}
+                      //        console.log('///smrity');
+                      //         console.log(result.gatepasslist);
+
+                      //    });
+                      //return d.promise();
+
+                  }
+
+
+
+                  //$("#exampleModal").on('hide.bs.modal', function () {
+                  //      $("#jsGridItems .jsgrid-update-button").trigger( "click" );
+                  //  });
+                  var child = [];
+
+                  var serial = 0;
+                  $("#jsGridItems").jsGrid({
+                      height: '300px',
+                      width: "100%",
+                      filtering: true,
+                      editing: true,
+                      autoload: true,
+                      pageSize:5, //globalPageSize,
+                      pageLoading: true,
+                      pageIndex: 1,
+                      paging: true,
+                      controller: jsGridItemsDB,
+                      // selecting: true,
+
+                      fields: [
+                          {
+                        name:'buttonDetails',width: '38', title: 'Details',align:'center',itemTemplate: function(value, item) {
+
+                            var $iconPencil = $(" <input class='jsgrid-button jsgrid-insert-button' type = 'button' title = 'Details' >").click(function (e) {
+
+                                $("#checkmodalbuttonid").trigger('click');
+                            });
+
+                            var $result = jsGrid.fields.control.prototype.itemTemplate.apply(this, arguments);
+                            return $result.add($iconPencil);
+
+                        }
+                  },
+                   
+                       { name: "Id", title: 'Id.', type: "text",visible: false },
+                       { name: "ToName", title: 'Name', type: "text" },
+                    { name: "GatePassCode", title: 'Voucher No.', type: "text" },
+                    { name: "GatePassDate", title: 'Date', type: "text" },
+                    { name: "ManualNo", title: 'Manual', type: "text" },
+                    { name: "BuyerName", title: 'Buyer', type: "text" },
+                    { name: "StyleNo", title: 'Style', type: "text", visible: false },
+                    { name: "Transport", title: 'Transport', type: "text" },
+                    { name: "Remarks", title: 'Remarks', type: "text" },
+                   
+                    { name: "isPosted", title: 'Is', visible: false },
+                    {
+                        name: "button", width: '80', title: 'Actions', align: 'center', itemTemplate: function (value, data) {
+                            console.log(data);
+                    //var options = [
+                    //    { value: "Edit", text: "<i class='fa-solid fa-pen-to-square'></i> Edit"},
+                    //    { value: "Delete", text: "<i class='fa-sharp fa-solid fa-trash'></i> Delete" },
+                    //];
+                    //console.log(data);
+                    @*var myUrledit = '@Url.Action("EditAccountHead", "Admin")?AccountHeadId=' + data.Id;*@
+                   var myUrldelete = '@Url.Action("DeleteGatePass", "Sales")?GatePassId=' + data.Id;
+                    //var myUrlGet = `editAccountHead(${data.Id})`;
+                    var myUrlGet = '@Url.Action("AddGatePass", "Sales")?GatePassId=' + data.Id;
+
+                    var message = `return confirm('Are you sure you want to Remove Gate pass Information ?')`;
+                    var myUrlprint = '@Url.Action("Print", "Accounts")/' + data.Id;
+
+                            var $dropdown = $("<div class='dropdown ms-1'>").append(
+                                $("<button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'>")
+                            ).append(
+                                $("<ul class='dropdown-menu' aria-labelledby='dropdownMenuButton1'>").css({
+                                    'margin-left': '-105px'
+                                }).append(function () {
+                                    return $("<li>").append(
+
+                                    $(`<a href='${myUrlGet}' target="_blank" class=" text-decoration-none text-black ms-3 mt-1"><i class='fa-solid fa-pen-to-square'></i> <span>Edit</span>  <br /></a>`),
+                                    $(`<a class='text-decoration-none text-black ms-3 mt-1'>`).attr("href", `#`)
+                                        .html(`<i class='fa-sharp fa-solid fa-trash mt-2'></i><span class='ms-2 mt-2' >Delete</span>`).click(function () {
+                                            setDeleteUrl(data.Id);
+                                        })
+
+
+                                        //$(`<a class='text-decoration-none text-black ms-3 mt-1'>`).attr("href", `${myUrlGet}`).html("<i class='fa-solid fa-pen-to-square'></i> <span>Edit</span>  <br />")
+                                        ////.click(function () {
+                                        ////    editVoucherList(data.Id , data.VoucherTypeNameShort);
+                                        ////})
+                                        //,
+                                        //$(`<a class='text-decoration-none text-black ms-3 mt-1'>`).attr("href", `#`)
+                                        //    .html(`<i class='fa-sharp fa-solid fa-trash mt-2'></i><span class='ms-2 mt-2' >Delete</span>`).click(function () {
+                                        //        setDeleteUrl(data.Id);
+                                        //    })
+                                    );
+                                }));
+
+                            var $iconButton = $(`<a href='${myUrlprint}' target="_blank" class="fw-bolder mt-2">Run Report</a>`)
+                        var $flex = $("<div class='d-flex justify-content-center'></div>").append($iconButton).append($dropdown)
+                var $result = jsGrid.fields.control.prototype.itemTemplate.apply(this, arguments);
+                    return $result.add($flex);
+                }
+                  },
+                
+                      
+                      ],//globalFields,
+                      rowClick: function (args) {
+                          // this.select(args.itemIndex, true);
+                    var child = [];
+                          // console.log(args.item);
+                          // var Item=args.item;
+                    child = args.item.GatePassItems;
+                    for(var i=0;i<child.length;i++){
+                            if (child[i].ProductName == null && !child[i].Name.includes("(Item not Registered)")) {
+                                child[i].Name += '<br/><span style="color: red; font-size:9px;font-style: italic;">(Item not Registered)</span>';
+                            }
+                    }
+                    console.log(args);
+                    //// delete (Item);
+                    showModal(child);
+
+                          // $("#jsGridItems").jsGrid("updateItem", args.item);
+
+
+                          $checkbox = $(args.event.currentTarget).find("input[type=checkbox]");
+                          if ($(args.event.target).closest("td").index() !== 8) {
+                              $checkbox.prop("checked", !$checkbox.prop("checked"));
+
+                              // Update selected items array
+                              if ($checkbox.prop("checked")) {
+                                  selectItem(args.item);
+                              } else {
+                                  unselectItem(args.item);
+                              }
+                          }
+
+                      },
+
+                      onItemDeleting: function (args) {
+
+                          console.log(args.item);
+                          var abcvalue = args.item.isPosted;
+                          console.log(abcvalue);
+
+
+                          if (abcvalue == true) {
+                              //$("#grid").jsGrid("deleteItem", args);
+                              args.cancel = true;
+                              alert('Already Posted');
+                          }
+
+                      },
+                      onItemDeleted: function (args) {
+                          parentValue = $('#jsGridItems').jsGrid('option', 'data');
+                          var serial = 0;
+                          for (var i = 0; i < parentValue.length; i++) {
+                              parentValue[i].SLNo = serial + 1;
+                              serial++;
+                          }
+                          console.log('serial');
+                          console.log(serial);
+                          $("#jsGridItems").jsGrid("refresh");
+
+                      }
+                      //rowDoubleClick: function(args) {
+
+                      //    var args = args.item;
+                      //    console.log('args.....?/////');
+                      //    console.log(args);
+                      //    var parentValue= $('#jsGridItems').jsGrid('option','data');
+                      //    serial = parentValue.length+1;
+                      //    Entry(args,serial);
+
+                     // }
+                  });
+              }
+              initJsGrid();
+              restoreDropdown();
+
+            //function delete(Item){
+            //   alert('deleted');
+            //}
+
+            function showModal(child){
+
+                $('#jsChildItems').jsGrid({
+                    data: child
+                });
+
+            }
+            $('#jsChildItems').jsGrid({
+                width:'100%',
+                fields: [
+                    { name: "GatePassId", title: 'GatePass Id' },
+                    { name: "ProductName", title: 'Item',visible:false },
+                    { name: "Name", title: 'Item' },
+                    { name: "ColorName", title: 'Color', type: 'text' },
+                    { name: "SizeName", title: 'Size', type: 'text' },
+                    { name: "Quantity", title: 'Quantity' },
+                    { name: "PackageQuantity", title: 'Package Quantity' },
+                    { name: "Description", title: 'Description' }
+                ]
+            });
+
+
+
+
+
+
+
+
+            var nameTaker=[];
+            var jsonKey=[];
+              
+               var titleTaker = [];
+                
+             var   titlekey = [];
+
+
+
+//////////***** without child ****//////
+            $('#exportPDF').click(function () {
+                window.jsPDF = window.jspdf.jsPDF;
+
+                // Get the data from JSGrid
+                var data = $("#jsGridItems").jsGrid("option", "data");
+
+                // Initialize the PDF document
+                var doc = new jsPDF({
+                    orientation: 'landscape'
+                });
+
+
+                 var parentJson = $('#jsGridItems').jsGrid('option', 'data');
+                console.log(parentJson);
+                // Set the table headers
+               var headers = [];
+              $("#jsGridItems").jsGrid("option", "fields").forEach(function (field) {
+                  console.log(field);
+                    if ( field.name != "buttonDetails" && field.name != "button" && field.visible != false) {
+                        headers.push({
+                          title: field.title,
+                          dataKey: field.name
+                        });
+                    }
+              });
+              console.log(headers);
+
+            var tableData = [];
+            data.forEach(function (row) {
+              var rowData = [];
+              headers.forEach(function (header) {
+                rowData.push(row[header.dataKey]);
+              });
+              tableData.push(rowData);
+            });
+
+
+                // AutoTable is a plugin for jsPDF that allows generating tables
+                doc.autoTable({
+                    head: [headers],
+                    body: tableData
+                });
+
+              
+                var startY = 25; // Adjust the startY value as needed
+                doc.autoTable({
+                    startY: startY
+                });
+
+                // Add the text section
+                var text = "Gate Pass List";
+                var textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                var textHeight = doc.internal.getLineHeight() / doc.internal.scaleFactor;
+                var textX = (doc.internal.pageSize.width - textWidth) / 2;
+                var textY = startY - textHeight - 10; // Adjust the vertical position as needed
+                doc.text(text, textX, textY);
+                // Save the PDF
+                doc.save("jsgrid.pdf");
+
+
+            });
+
+
+
+//////////////////*** with child ****//////////
+
+
+  $('#exportPDF').click(function () {
+  window.jsPDF = window.jspdf.jsPDF;
+
+  // Get the data from JSGrid
+  var parentData = $("#jsGridItems").jsGrid("option", "data");
+
+  // Initialize the PDF document
+  var doc = new jsPDF({
+    orientation: 'landscape'
+  });
+
+  var parentHeaders = [];
+  var childHeaders = [];
+
+  // Extract headers for parent and child items separately
+  $("#jsGridItems").jsGrid("option", "fields").forEach(function (field) {
+    if (field.name != "buttonDetails" && field.name != "button" && field.visible != false) {
+      parentHeaders.push({
+        title: field.title,
+        dataKey: field.name
+      });
+    }
+  });
+
+  // Extract headers for child items
+  $("#jsChildItems").jsGrid("option", "fields").forEach(function (field) {
+    if (field.name != "GatePassId") { // Exclude the common key field
+      childHeaders.push({
+        title: field.title,
+        dataKey: field.name
+      });
+    }
+  });
+
+  var tableData = [];
+  parentData.forEach(function (parentRow) {
+    var rowData = [];
+    parentHeaders.forEach(function (header) {
+      rowData.push(parentRow[header.dataKey]);
+    });
+    tableData.push(rowData);
+
+    // Add child headers with color
+    var childHeaderRow = [];
+    childHeaders.forEach(function (header) {
+      childHeaderRow.push({
+        content: header.title,
+        styles: {
+          fillColor: '#CCCCCC' // Specify the desired color
+        }
+      });
+    });
+    tableData.push(childHeaderRow);
+
+    // Add child items to tableData
+    if (parentRow.GatePassItems) {
+      parentRow.GatePassItems.forEach(function (childItem) {
+        var childRow = [];
+        childHeaders.forEach(function (header) {
+          childRow.push(childItem[header.dataKey]);
+        });
+        tableData.push(childRow);
+      });
+    }
+  });
+
+  // AutoTable is a plugin for jsPDF that allows generating tables
+  doc.autoTable({
+    head: [parentHeaders],
+    body: tableData,
+    didParseCell: function (data) {
+      if (data.row.index === 1) { // Apply styles only to the child header row
+        data.cell.styles.fillColor = '#CCCCCC'; // Specify the desired color
+      }
+    }
+  });
+
+  var startY = 25; // Adjust the startY value as needed
+  doc.autoTable({
+    startY: startY
+  });
+
+  // Add the text section
+  var text = "Gate Pass List";
+  var textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+  var textHeight = doc.internal.getLineHeight() / doc.internal.scaleFactor;
+  var textX = (doc.internal.pageSize.width - textWidth) / 2;
+  var textY = startY - textHeight - 10; // Adjust the vertical position as needed
+  doc.text(text, textX, textY);
+
+  // Save the PDF
+  doc.save("jsgrid.pdf");
+});
+
+
+
+           
+
+
+            $('#exportUl').click(function () {
+
+
+
+                //for (var i = 0; i < globalFields.length; i++) {
+
+                //    if (globalFields[i].name != 'button' && globalFields[i].visible != false) {
+                //        nameTaker.push(globalFields[i]);
+
+                //    }
+                //}
+
+
+                let globalFieldsAbc = $('#jsGridItems').jsGrid('option', 'fields');
+                let globalFieldsTitle = $('#jsGridItems').jsGrid('option', 'title');
+                //console.log(globalFieldsTitle);
+                //for (var i = 0; i < globalFieldsTitle.length; i++) {
+
+                //    if (globalFieldsAbc[i].name != 'button' && globalFieldsAbc[i].visible != false) {
+                //        titleTaker.push(globalFieldsAbc[i]);
+
+                //    }
+                //}
+
+                for (var i = 0; i < globalFieldsAbc.length; i++) {
+
+                    if (globalFieldsAbc[i].name != 'button' && globalFieldsAbc[i].visible != false) {
+                        nameTaker.push(globalFieldsAbc[i]);
+                        titleTaker.push(globalFieldsAbc[i].title);
+                        //console.log(globalFieldsAbc[i].title);
+                    }
+                }
+
+                //console.log(titleTaker);
+
+
+                //let visibleColumnNames = [];
+                //$.each(grid.option("fields"), function (index, column) {
+                //    if (column.visible) {
+                //        visibleColumnNames.push(column.name);
+                //    }
+                //});
+                //console.log(grid);
+                //alert(grid);
+
+                var parentJson = $('#jsGridItems').jsGrid('option', 'data');
+                if (parentJson == '')
+                    return;
+                if (FixedHeightFlag == true) {
+                    var csv = convertJsonToCsv(parentJson);
+                }
+                else if (FixedHeightFlag == false) {
+                    var csv = convertJsonToCsvWithoutchild(parentJson, titleTaker);
+                }
+
+                nameTaker = [];
+                titleTaker = [];
+                jsonKey = [];
+                titlekey = [];
+
+                var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                var link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "data.csv";
+                link.click();
+
+
+            });
+
+
+
+            function convertJsonToCsv(jsonData) {
+                var csv = '';
+                var keys = Object.keys(jsonData[0]);
+
+                for (var k = 0; k < keys.length; k++) {
+                    for (var i = 0; i < nameTaker.length; i++) {
+                        if (nameTaker[i].name == keys[k]) {
+                            jsonKey[i] = keys[k];
+                        }
+                    }
+                }
+
+                csv += titleTaker.join(',') + '\n';
+
+                jsonData.forEach(function (item) {
+                    csv += jsonKey.map(function (key) {
+                        for (var i = 0; i < nameTaker.length; i++) {
+                            if (nameTaker[i].name == key) {
+                                return item[key];
+                            }
+                        }
+                    }).join(',') + '\n' + ',' + ',';
+
+                    var childkeys = Object.keys(item.GatePassItems[0]);
+                    csv += childkeys.join(',') + '\n' + ',' + ',';
+                    var count = 0;
+
+                    item.GatePassItems.forEach(function (childItems) {
+                        count++;
+
+                        if (count == item.GatePassItems.length) {
+                            csv += childkeys.map(function (key) {
+                                return childItems[key];
+                            }).join(',') + '\n';
+                        } else {
+                            csv += childkeys.map(function (key) {
+                                return childItems[key];
+                            }).join(',') + '\n' + ',' + ',';
+                        }
+                    });
+                });
+
+                return csv;
+            }
+
+            function convertJsonToCsvWithoutchild(jsonData, titletaker) {
+
+
+                var csv = '';
+                var keys = Object.keys(jsonData[0]);
+                //console.log(titletaker);
+
+
+                for (var k = 0; k < keys.length; k++) {
+                    for (var i = 0; i < nameTaker.length; i++) {
+
+                        if (nameTaker[i].name == keys[k]) {
+                            jsonKey[i] = keys[k];
+
+                        }
+                    }
+                }
+
+
+                //console.log(titleTaker);
+                for (var k = 0; k < keys.length; k++) {
+                    for (var i = 0; i < titleTaker.length; i++) {
+                        console.log(titleTaker[i]);
+                        console.log(keys[k]);
+                        if (titleTaker[i] == keys[k]) {
+                            titlekey[i] = keys[k];
+
+                        }
+                    }
+                }
+                //console.log(titletaker);
+
+
+
+                //csv += jsonKey.join(',') + '\n';
+                csv += titletaker.join(',') + '\n';
+
+                ////console.log(jsonData);
+                //jsonData.forEach(function (item) {
+                //    csv += jsonKey.map(function (key) {
+
+                //        for (var i = 0; i < nameTaker.length; i++) {
+                //            if (nameTaker[i].name == key) {
+                //                return item[key];
+                //            }
+                //        }
+
+                //    }).join(',') + '\n';
+
+                //});
+
+
+                jsonData.forEach(function (item) {
+
+                    csv += jsonKey.map(function (key) {
+                        for (var i = 0; i < nameTaker.length; i++) {
+                            if (nameTaker[i].name == key) {
+                                var value = item[key];
+                                if (typeof value === 'string' && value.includes(',')) {
+                                    // Wrap the value in double quotes if it contains commas
+                                    value = '"' + value + '"';
+                                }
+                                return value;
+                            }
+                        }
+                    }).join(',') + '\n';
+
+                });
+
+
+
+                //csv += jsonKey.map(function (key) {
+                //    for (var i = 0; i < nameTaker.length; i++) {
+                //        if (nameTaker[i].name == key) {
+                //            var value = item[key];
+                //            if (typeof value === 'string' && value.includes(',')) {
+                //                // Wrap the value in double quotes if it contains commas
+                //                value = '"' + value + '"';
+                //            }
+                //            return value;
+                //        }
+                //    }
+                //}).join(',') + '\n';
+
+
+                ///console.log(csv);
+                return csv;
+            }
+
+
+
+            //$('#exportUl').click(function () {
+
+
+
+            //      for (var i = 0; i < globalFields.length; i++) {
+
+            //            if (globalFields[i].name != 'button' && globalFields[i].visible!=false) {
+            //               nameTaker.push(globalFields[i]);
+
+            //            }
+            //     }
+
+            //    var parentJson = $('#jsGridItems').jsGrid('option', 'data');
+            //        if (parentJson == '')
+            //        return;
+            //        if(withChildFlag==true){
+            //            var csv = convertJsonToCsv(parentJson);
+            //        }
+            //        else if(withChildFlag==false){
+            //             var csv = convertJsonToCsvWithoutchild(parentJson);
+            //        }
+
+            //          nameTaker=[];
+            //          jsonKey=[];
+            //        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            //        var link = document.createElement("a");
+            //        link.href = URL.createObjectURL(blob);
+            //        link.download = "data.csv";
+            //        link.click();
+
+
+            //});
+
+
+
+
+          
+
+
+            //function convertJsonToCsv(jsonData) {
+
+
+            //    var csv = '';
+            //    var keys = Object.keys(jsonData[0]);
+            //    for(var k=0;k<keys.length;k++){
+            //         for(var i=0;i<nameTaker.length;i++){
+
+            //                if(nameTaker[i].name==keys[k]){
+            //                    jsonKey[i]=keys[k];
+
+            //                }
+            //       }
+            //    }
+
+
+            //    csv += jsonKey.join(',') + '\n';
+            //    jsonData.forEach(function(item) {
+            //      //
+                  
+            //             csv += jsonKey.map(function(key) {
+
+            //            for(var i=0;i<nameTaker.length;i++){
+            //                if(nameTaker[i].name==key){
+            //                    return item[key];
+            //                }
+            //            }
+
+            //             }).join(',') + '\n'+','+',';
+
+            //             var childkeys = Object.keys(item.GatePassItems[0]);
+            //              csv += childkeys.join(',') + '\n'+','+',';
+            //              var count=0;
+
+            //            item.GatePassItems.forEach(function(childItems){
+
+            //                count++;
+
+
+            //                if(count==item.GatePassItems.length){
+                                
+                           
+            //                    csv += childkeys.map(function(key) {
+
+            //                     return childItems[key];
+
+            //                     }).join(',') + '\n';
+            //                }
+            //                else {
+            //                    csv += childkeys.map(function(key) {
+
+            //                     return childItems[key];
+
+            //                     }).join(',') + '\n'+','+',';
+            //                }
+
+            //            });
+
+            //           // console.log('parent');
+
+            //         });
+            //     return csv;
+            //}
+
+
+            //function convertJsonToCsvWithoutchild(jsonData) {
+
+
+            //    var csv = '';
+            //    var keys = Object.keys(jsonData[0]);
+            //    for(var k=0;k<keys.length;k++){
+            //         for(var i=0;i<nameTaker.length;i++){
+
+            //                if(nameTaker[i].name==keys[k]){
+            //                    jsonKey[i]=keys[k];
+
+            //                }
+            //       }
+            //    }
+
+
+            //    csv += jsonKey.join(',') + '\n';
+            //    jsonData.forEach(function(item) {
+            //             csv += jsonKey.map(function(key) {
+
+            //            for(var i=0;i<nameTaker.length;i++){
+            //                if(nameTaker[i].name==key){
+            //                    return item[key];
+            //                }
+            //            }
+
+            //             }).join(',') + '\n';
+
+            //         });
+            //     return csv;
+            //  }
+
+
+
+              //To load get data in main modal
+              function editgatepasslist(data, type) {
+                  alert('edit clicked')
+                var myUrlGet = '@Url.Action("AddGatePass", "Sales")?GatePassId=' + data ;
+              }
+
+
+
+              //delete gatepasslist function
+              function setDeleteUrl(data) {
+            var myUrldelete = '@Url.Action("DeleteGatePass", "Sales")';
+                  @*var myUrldelete = '@Url.Action("DeleteCOA", "Admin")?Id=' + data;*@
+    //e.preventDefault();
+    //e.stopPropagation();
+            alert('Are you sure want to delete?');
+            $.ajax({
+        type: "get",
+                data: { GatePassId:data},
+                url: myUrldelete,
+        success: function (response) {
+            if (response.success == "1") {
+                toastr.success(response.msg, "", {
+                    "toastClass": "toast-green",
+                });
+                initJsGrid();
+                //initjsGrid();
+            }
+            else if (response.success == "0") {
+                //alert()
+                toastr.success(response.msg, "", {
+                    "toastClass": "toast-red",
+                });
+                //initjsGrid();
+            }
+        }
+            });
+              };
+
+              //functions to select/unselect and manage batch delete starts
+        var selectedItems = [];
+
+        var selectItem = function (item) {
+            selectedItems.push(item);
+        };
+
+        var unselectItem = function (item) {
+            selectedItems = $.grep(selectedItems, function (i) {
+                return i !== item;
+            });
+        };
+
+        var deleteSelectedItems = function () {
+            if (!selectedItems.length || !confirm("Are you sure?"))
+                return;
+
+            deleteClientsFromDb(selectedItems);
+
+            var $grid = $("#jsFilterGrid");
+            $grid.jsGrid("option", "pageIndex", 1);
+            $grid.jsGrid("loadData");
+
+            selectedItems = [];
+            eachGlobalIdForVoucherDelete=[];
+              };
+        //      var deleteClientsFromDb = function (deletingClients) {
+        //          console.log(deletingClients)
+        //          console.log(deletingClients.GatePassId)
+
+        //    globalIdsForVoucherDelete = [...deletingClients]
+        //    console.log(globalIdsForVoucherDelete);
+        //    for (var i = 0; i < globalIdsForVoucherDelete.length; i++) {
+        //        console.log(globalIdsForVoucherDelete[i].GatePassId);
+        //        eachGlobalIdForVoucherDelete.push(globalIdsForVoucherDelete[i].Id);
+        //    }
+        //    console.log(eachGlobalIdForVoucherDelete);
+        //};
+
+        var deleteClientsFromDb = function (deletingClients) {
+            globalIdsForVoucherDelete = [...deletingClients]
+            for (var i = 0; i < globalIdsForVoucherDelete.length; i++) {
+                eachGlobalIdForVoucherDelete.push(globalIdsForVoucherDelete[i].GatePassId);
+            }
+
+            for (var i = 0; i < eachGlobalIdForVoucherDelete.length; i++) {
+                var myUrldelete = '@Url.Action("DeleteGatePass", "Sales")?GatePassId=' + eachGlobalIdForVoucherDelete[i];
+                $.ajax({
+                    type: "get",
+                    url: myUrldelete, /*"/api/AccountHead/DeleteAccountHead?AccountHeadId=" + eachGlobalIdForVoucherDelete[i],*/
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.success == "1") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-green",
+                            });
+                        }
+                        else if (response.success == "0") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-red",
+                            });
+                        }
+                        //initjsGrid();
+                        //console.log(response);
+                    },
+                    error: function (error) {
+                        console.error(error);
+                    }
+                });
+            }
+        };
+          //  function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
+          //      //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+          //      var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+          //      var CSV = '';
+          //      var subCSV = '';
+
+          //      //Set Report title in first row or line
+
+          //      CSV += ReportTitle + '\r\n\n';
+
+          //      //This condition will generate the Label/Header
+          //      if (ShowLabel) {
+          //          var row = "";
+          //          var subrow = "";
+
+          //          //console.log(arrData[0]);
+          //          //This loop will extract the label from 1st index of on array
+          //          for (var index in arrData[0]) {
+          //              //
+          //              //Now convert each value to string and comma-seprated
+
+          //              if (index === 'subinfo') {
+          //                  row += ',' + ',' + index;
+          //              }
+          //              else {
+          //                  row += index + ',';
+          //              }
+
+          //          }
+
+          //          row = row.slice(0, -1);
+          //          //append Label row with line break
+          //          CSV += row + ',' + '\r\n';
+
+          //      }
+
+          //      //1st loop is to extract each row
+          //      for (var i = 0; i < arrData.length; i++) {
+          //          var row = "";
+          //          var subrow = "";
+
+          //          //2nd loop will extract each column and convert it in string comma-seprated
+          //          for (var index in arrData[i]) {
+          //              if (index != 'subinfo') {
+          //                  row += arrData[i][index] + ',';
+          //              }
+
+
+
+          //      }
+          //          CSV += row + ',';
+
+          //          row.slice(0, row.length - 1);
+
+          //          //add a line break after each row
+          //          // CSV += row + '\r\n';
+          //      }
+          //      //1st loop is to extract each row
+
+
+          //if (CSV == '') {
+          //          alert("Invalid data");
+          //          return;
+          //      }
+
+          //      //Generate a file name
+          //      var fileName = "MyReport_";
+          //      //this will remove the blank-spaces from the title and replace it with an underscore
+          //      fileName += ReportTitle.replace(/ /g, "_");
+
+          //      //Initialize file format you want csv or xls
+          //      var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+
+          //      // Now the little tricky part.
+          //      // you can use either>> window.open(uri);
+          //      // but this will not work in some browsers
+          //      // or you will not get the correct file extension
+
+          //      //this trick will generate a temp <a /> tag
+          //      var link = document.createElement("a");
+          //      link.href = uri;
+
+          //      //set the visibility hidden so it will not effect on your web-layout
+          //      link.style = "visibility:hidden";
+          //      link.download = fileName + ".csv";
+
+          //      //this part will append the anchor tag and remove it after automatic click
+          //      document.body.appendChild(link);
+          //      link.click();
+          //      document.body.removeChild(link);
+
+
+          //  }
+              @*function getReport(GatePassId) {
+                  alert(GatePassId)
+            var type = '';
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Print", "Accounts")',
+                dataType: 'json',
+                async: true,
+                data: { id: GatePassId, type: type },
+                success: function (response) {
+                    console.log('success');
+                    alert('ss')
+                    location.open(response, '_blank')
+
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+        }*@
+        
+          });
+    </script>
+}
+
+

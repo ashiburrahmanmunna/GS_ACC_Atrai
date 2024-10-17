@@ -1,0 +1,373 @@
+﻿@using Microsoft.AspNetCore.Http
+@using Atrai.Core.Common
+@inject IHttpContextAccessor HttpContextAccessor
+@inject clsProcedure clsproc
+
+@model List<Atrai.Controllers.AdminController.EmployeeLedgerModel>
+@{
+    ViewData["Title"] = "Employee Balance";
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+
+
+
+    var comimagepath = @HttpContextAccessor.HttpContext.Session.GetString("comImagePath");
+    var IsLogo = 1;
+
+    var ttldebit = 0m;  // Change 'var ttldebit = 0;' to 'var ttldebit = 0m;'
+    var ttlcredit = 0m; // Change 'var ttlcredit = 0;' to 'var ttlcredit = 0m;'
+                        //var closingbalance = ttldebit + ttlcredit;
+
+    var ttlopbalance = 0m;
+    var ttlAdvanceAmount = 0m;
+    var ttlLoanAmount = 0m;
+    var ttlAdvanceDeduction = 0m;
+    var ttlLoanDeduction = 0m;
+    var ttlFinalAmount = 0m;
+
+    if(Model != null && Model.Count() > 0)
+    {
+        ttldebit = Convert.ToDecimal(@Model.Sum(x => Convert.ToDecimal(x.OpeningBalance) + Convert.ToDecimal(x.AdvanceAmount) + Convert.ToDecimal(x.LoanAmount)));
+        ttlcredit = Convert.ToDecimal(@Model.Sum(x => Convert.ToDecimal(x.AdvanceDeduction) + Convert.ToDecimal(x.LoanDeduction)));
+        //var closingbalance = ttldebit + ttlcredit;
+
+        ttlopbalance = Convert.ToDecimal(@Model.Sum(x => Convert.ToDecimal(x.OpeningBalance)));
+        ttlAdvanceAmount = Convert.ToDecimal(@Model.Sum(x => Convert.ToDecimal(x.AdvanceAmount)));
+        ttlLoanAmount = Convert.ToDecimal(@Model.Sum(x => Convert.ToDecimal(x.LoanAmount)));
+        ttlAdvanceDeduction = Convert.ToDecimal(@Model.Sum(x => Convert.ToDecimal(x.AdvanceDeduction)));
+        ttlLoanDeduction = Convert.ToDecimal(@Model.Sum(x => Convert.ToDecimal(x.LoanDeduction)));
+        ttlFinalAmount = Convert.ToDecimal(@Model.Sum(x => Convert.ToDecimal(x.FinalAmount)));
+    }
+
+
+
+}
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>
+    </title>
+
+    @*<link rel="shortcut icon" href="http://www.unibuildltd.com/Images/favicon.ico">
+        <script src="./ReportLedgerBook_files/jquery-2.1.3.js.download" type="text/javascript"></script>
+        <script src="./ReportLedgerBook_files/jquery-ui.js.download" type="text/javascript"></script>*@
+
+    <script type="text/javascript">
+        function ClosePrint() {
+            var print = document.getElementById("print");
+            print.style.visibility = "hidden";
+            //            print.display = false;
+
+            window.print();
+        }
+    </script>
+
+    <style media="print">
+        .showHeader thead {
+            display: table-header-group;
+            border: 1px solid #000;
+        }
+    </style>
+
+    <style media="print">
+
+        @@media print {
+            .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,
+            .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+                float: left;
+            }
+
+            .col-md-12 {
+                width: 100%;
+            }
+
+            .col-md-11 {
+                width: 91.66666666666666%;
+            }
+
+            .col-md-10 {
+                width: 83.33333333333334%;
+            }
+
+            .col-md-9 {
+                width: 75%;
+            }
+
+            .col-md-8 {
+                width: 66.66666666666666%;
+            }
+
+            .col-md-7 {
+                width: 58.333333333333336%;
+            }
+
+            .col-md-6 {
+                width: 50%;
+            }
+
+            .col-md-5 {
+                width: 41.66666666666667%;
+            }
+
+            .col-md-4 {
+                width: 33.33333333333333%;
+            }
+
+
+            .col-md-3 {
+                width: 25%;
+            }
+
+            .col-md-2 {
+                width: 16.666666666666666%;
+            }
+
+            .col-md-1 {
+                width: 8.33333333333333%;
+            }
+
+
+            .showHeader thead {
+                display: table-header-group;
+                border: 1px solid #000;
+            }
+        }
+    </style>
+
+
+    <style type="text/css">
+
+
+        .table th, .table td {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+            padding-left: 0.40rem;
+            padding-right: 0.40rem;
+        }
+
+        a {
+            color: #000;
+            text-decoration: none;
+            background-color: transparent;
+        }
+
+
+
+        .whitespaceprewrap {
+            white-space: pre-wrap;
+        }
+
+
+        .table-hover tbody tr:hover {
+            color: #1c5b99;
+            font-size: 14px !important;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h3>
+        @{
+            System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+        }
+
+    </h3>
+
+
+
+
+    <div id="main">
+        <div class="container">
+            <form>
+                @if (Model != null && Model.Count() > 0)
+                {
+                    if (IsLogo == 1)
+                    {
+                        <div class="row">
+
+                            <div class="col-md-2 col-2">
+                                @if (@comimagepath != null)
+                                {
+                                    <img class="center img-fluid" style="max-height:120px;" src="..@comimagepath" onerror="this.onerror=null; this.src='.@comimagepath'" alt="" id="main-img">
+                                }
+                                else
+                                {
+                                    <h2 class="text-left m-0">@Model.FirstOrDefault().ComName</h2>
+                                }
+                            </div>
+                            <div class="col-md-10 col-10">
+                                <div class="row">
+                                    <div class="col-md-12 col-10">
+                                        <h3 class="text-left">@Model.FirstOrDefault().ComName</h3>
+                                    </div>
+                                    <div class="col-md-12 text-left">
+                                        <span>
+                                            @Model.FirstOrDefault().ComAddress
+                                        </span>
+                                        <span class="float-right">
+                                            <input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />
+                                        </span>
+                                    </div>
+                                    <div class="col-md-12 text-left">
+                                        <h5>@Model.FirstOrDefault().ReportCaption</h5>
+                                    </div>
+                                    <div class="col-md-12">
+                                        @Model.FirstOrDefault().ReportCaptionSmall
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            <div class="col-md-12 col-12 text-center">
+                                @if (@comimagepath != null)
+                                {
+                                    <img class="center img-fluid" style="max-height:120px;" src="..@comimagepath" onerror="this.onerror=null; this.src='.@comimagepath'" alt="" id="main-img">
+
+                                }
+                                else
+                                {
+                                    <h2 class="text-center m-0">@Model.FirstOrDefault().ComName</h2>
+
+                                }
+                            </div>
+
+                            <div class="col-md-12 text-center">
+                                <span>
+                                    @Model.FirstOrDefault().ComAddress
+                                </span>
+                                <span class="float-right">
+                                    <input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />
+                                </span>
+                            </div>
+                            <div class="col-md-12 text-center">
+                                <h5>Ledger Details Report || @Model.FirstOrDefault().ReportCaption</h5>
+                            </div>
+                            <div class="col-md-12">
+                                @Model.FirstOrDefault().ReportCaptionSmall
+                            </div>
+                        </div>
+                    }
+
+
+
+
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-4 border border-dark">
+                                GL NAME
+                            </div>
+                            <div class="col-md-4 border border-dark">
+                                GL NAME
+                            </div>
+                            <div class="col-md-4 border border-dark">
+                                GL TYPE
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 border border-dark">
+                            </div>
+                            <div class="col-md-4 border border-dark">
+                                @Model.FirstOrDefault().ReportCaption
+                            </div>
+                            <div class="col-md-4 border border-dark">
+                                Subsidiary Ledger
+                            </div>
+                        </div>
+                        <div class="row my-2 text-center">
+                            <div class="col-md-3 border border-dark">
+                                <h6>OP. Balance :  @(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttlopbalance)))</h6>
+                            </div>
+                            <div class="col-md-3 border border-dark">
+                                <h6>Total Dr :  @(String.Format(BDFormat, "{0:N}", ttldebit))</h6>
+                            </div>
+                            <div class="col-md-3 border border-dark">
+                                <h6>Total Cr :  @(String.Format(BDFormat, "{0:N}", -ttlcredit))</h6>
+                            </div>
+                            <div class="col-md-3 border border-dark">
+                                <h6>CL. Balance : @(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttlFinalAmount))) </h6>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-bordered table-hover table-striped" width="100%">
+                        <thead>
+                            <tr class="text-center">
+
+                                <th class="align-middle">Emloyee Name</th>
+                                <th class="align-middle">Department</th>
+                                <th class="align-middle">Designation</th>
+                                <th class="align-middle">Section</th>
+                                <th class="align-middle">Loan</th>
+                                <th class="align-middle">Advance</th>
+                                <th class="align-middle">Loan Deduction</th>
+                                <th class="align-middle">Adv Deduction</th>
+                                <th class="align-middle">Closing Balance</th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                foreach (var item in Model)
+                                {
+                                    <tr style="font-family:Arial Narrow;font-size:14.5px;">
+                                        <td style="max-width: 110px; overflow-wrap: break-word;">
+                                            @if (item.EmployeeId != null)
+                                            {
+                                                @Html.ActionLink(item.EmployeeName + "", "EmployeeWiseDetailsDataViewReport", "Admin", new { ReferanceId = item.EmployeeId, dtFrom = item.FromDate, dtTo = item.ToDate, Type = "EmployeeLoanDetailsData" }, new { @target = "_blank", title = "Go To Details Report" })
+                                            }
+                                        </td>
+                                        <td class="whitespaceprewrap">@Html.DisplayFor(modelItem => item.DepartmentName)</td>
+                                        <td class="whitespaceprewrap">@Html.DisplayFor(modelItem => item.DesignationName)</td>
+                                        <td class="whitespaceprewrap">@Html.DisplayFor(modelItem => item.SectionName)</td>
+                                        <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.LoanAmount)))</td>
+                                        <td class="text-right">@(String.Format(BDFormat, "{0:N}", item.AdvanceAmount))</td>
+                                        <td class="text-right">@(String.Format(BDFormat, "{0:N}", item.LoanDeduction))</td>
+                                        <td class="text-right">@(String.Format(BDFormat, "{0:N}", item.AdvanceDeduction))</td>
+                                        <td class="text-right">
+                                            @if (item.EmployeeId != null)
+                                            {
+                                                @Html.ActionLink(String.Format(BDFormat, "{0:N}", item.FinalAmount), "EmployeeWiseDetailsDataViewReport", "Admin", new { ReferanceId = item.EmployeeId, dtFrom = item.FromDate, dtTo = item.ToDate, Type = "EmployeeNotPosted" }, new { @target = "_blank", title = "Go To Employee Details" })
+                                            }
+
+                                        </td>
+                                    </tr>
+
+                                }
+                            }
+
+                        </tbody>
+                        <tfoot>
+                            @{
+                                <tr class="text-right font-weight-bold">
+                                    <td colspan="3"><h6>Total (Transaction) :</h6></td>
+                                    <td>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttlopbalance)))</td>
+                                    <td>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttlLoanAmount)))</td>
+                                    <td>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttlAdvanceAmount)))</td>
+                                    <td>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttlLoanDeduction))) </td>
+                                    <td>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttlAdvanceDeduction)))</td>
+                                    <td>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttlFinalAmount))) </td>
+
+                                </tr>
+
+                            }
+                        </tfoot>
+                    </table>
+                }
+                 else
+                {
+                <p>No data available</p>
+                }
+            </form>
+
+        </div>
+    </div>
+
+
+</body>
+</html>

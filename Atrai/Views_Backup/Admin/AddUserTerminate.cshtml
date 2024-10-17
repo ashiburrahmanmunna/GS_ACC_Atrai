@@ -1,0 +1,224 @@
+﻿@model Atrai.Core.Entity.UserTerminateModel
+@{ ViewData["Title"] = "AddUserTerminate";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-md-7 col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>User Terminate Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="admin" asp-action="AddUserTerminate" method="post">
+                                @if (Model != null)
+                                {
+                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" />
+                                                    <input type="hidden" asp-for="LuserId" /> }
+                                                else
+                                                {
+                                    <input type="hidden" asp-for="Id" value="0" />}
+                                @*<input type="hidden" asp-for="InternetUserId" />*@
+
+
+
+                            <div class="form-group row">
+
+
+                     
+                                <div class="col-md-6 col-12">
+
+                                    <label asp-for="InternetUserId">Apps User Id</label>
+                                    <input asp-for="InternetUserId" class="form-control" placeholder="eg User Id" readonly="@(true)">
+                                    <span asp-validation-for="InternetUserId" class="text-danger"></span>
+                                </div>
+
+
+                                <div class="col-md-6 col-12">
+                                    @Html.LabelFor(x => x.UserName)
+                                    @Html.TextBoxFor(x => x.UserName, null, new { @class = "form-control", @placeholder = "User Name ", @readonly = "readonly" })
+                                    @Html.ValidationMessageFor(x => x.UserName, "", new { @class = "text-danger" })
+                                </div>
+
+
+                            </div>
+
+                    
+                 
+                            <div class="form-group row">
+
+                                <div class="col-md-6 col-12">
+                                    @Html.LabelFor(x => x.UserId)
+                                    @Html.TextBoxFor(x => x.UserId, null, new { @class = "form-control", @placeholder = "User Id" })
+                                    @Html.ValidationMessageFor(x => x.UserId, "", new { @class = "text-danger" })
+                                </div>
+
+
+                                <div class="col-md-6 col-12">
+                                    <label for="Status"> Device Update : </label>
+                                    @Html.DropDownList("DeviceUpdate", new List<SelectListItem>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 {
+                                                    new SelectListItem() {Text = "Will Provide Later", Value="Will Provide Later"},
+                                                    new SelectListItem() {Text = "Will Not Provide", Value="Will Not Provide"},
+                                                    new SelectListItem() {Text = "Will Continue Connection", Value="Will Continue Connection"},
+                                                    new SelectListItem() {Text = "Device Lost", Value="Device Lost"},
+                                                    new SelectListItem() {Text = "Power Off", Value="Power Off"},
+                                                    new SelectListItem() {Text = "Not Receiving Call", Value="Not Receiving Call"},
+                                                    new SelectListItem() {Text = "Reconnected", Value="Reconnected"},
+                                                    new SelectListItem() {Text = "Device Withdrawn", Value="Device Withdrawn"},
+                                                    new SelectListItem() {Text = "User Deleted from SAS3", Value="User Deleted from SAS3"},
+
+
+                                                }, "Select Device Update", new { @class = "form-control" })
+
+                                </div>
+
+                            </div>
+
+                                        <div class="form-group row">
+                                            <div class="col-md-6 col-12">
+                                                <label asp-for="NextFollowDate"></label>
+                                                <input asp-for="NextFollowDate" class="form-control" type="date">
+                                                <span asp-validation-for="NextFollowDate" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-6 col-12">
+                                                <label asp-for="TerminateDate"></label>
+                                                <input asp-for="TerminateDate" class="form-control" type="date">
+                                                <span asp-validation-for="TerminateDate" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+
+
+
+                                        <div class="form-group row">
+                                            <div class="col-md-6 col-12">
+                                                <label asp-for="MobileNoIfNecessary"></label>
+                                                <input type="text" asp-for="MobileNoIfNecessary" class="form-control" placeholder="eg Mobile No">
+                                                <span asp-validation-for="MobileNoIfNecessary" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-6 col-12">
+                                                <label asp-for="Note"></label>
+                                                <textarea class="form-control" asp-for="Note" rows="4" placeholder="Text input"></textarea>
+                                                <span asp-validation-for="Note" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+
+
+
+                                        <div class="form-group">
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                              <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" /> }
+                                            else if (ViewBag.ActionType == "Edit")
+                                            {
+                                    <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" /> }
+                                                    else if (ViewBag.ActionType == "Delete")
+                                                    {
+                                        <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>}
+                                            @Html.ActionLink("Back", "UserTerminateList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                        </div>
+
+                          
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+@section scripts {
+    <script type="text/javascript">
+
+
+        autocompletefunction();
+
+
+        function autocompletefunction() {
+            $("#UserId").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '../admin/internetuserIddata/',
+                        dataType: "json",
+                        data: { query: $("#UserId").val() },
+                        success: function (data) {
+                            console.log(data);
+                            response($.map(data, function (item) {
+                                return {  label: item.UserId, UserName: item.UserName, Id: item.Id };//, , BillAmount: item.BillAmount
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                autoFocus: true,
+                minLength: 3,
+                change: function (event, ui) {
+                    if (ui.item === null) {
+                        $(this).val('');
+                        $('#UserId').val('');
+                        $('#UserName').val('');
+                        $('#InternetUserId').val('');
+                        //$('#MobileNoIfNecessary').val('');
+
+                    }
+                },
+                select: function (event, ui) {
+
+
+                    $("#UserName").val(ui.item.UserName);
+                    $("#UserId").val(ui.item.label);
+                    $("#InternetUserId").val(ui.item.Id);
+                    //$("#MobileNoIfNecessary").val(ui.item.MobileNoIfNecessary);
+
+                    
+
+                    //$("#BillAmount").val(ui.item.BillAmount);
+
+
+                    //$.ajax({
+                    //    url: '../admin/BillAmountbyId/',
+                    //    dataType: "json",
+                    //    data: { query: ui.item.Id },
+                    //    success: function (data) {
+                    //        console.log(data);
+                    //        $("#BillAmount").val(data.BillAmount);
+                    //    },
+                    //    error: function (xhr, status, error) {
+                    //        alert("Error");
+                    //    },
+                    //});
+
+                    //$("#ReceivedAmount").val(0);
+                    //$("#Discount").val(0);
+                    //$("#BadDebt").val(0);
+
+                    //newrowwithui(ui);
+                    //ExportOrderSummaryGrid();
+                    //calculatebalance();
+                    //$('#Search').val("");
+
+
+                    return false;
+                }
+            });
+        }
+
+    </script>
+
+}

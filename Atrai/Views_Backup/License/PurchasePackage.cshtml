@@ -1,0 +1,174 @@
+﻿@model IEnumerable<Atrai.Core.Entity.SoftwarePackageModel>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{ 
+    //var weburl = @HttpContextAccessor.HttpContext.Session.GetString("weburl").ToLower();
+    var CallBackUrlLink = @HttpContextAccessor.HttpContext.Session.GetString("CallBackUrlLink").ToLower();
+    var ComId = @HttpContextAccessor.HttpContext.Session.GetInt32("ComId");
+    var UserId = @HttpContextAccessor.HttpContext.Session.GetInt32("UserId");
+
+
+    ViewData["Title"] = "SoftwarePackage List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+
+@*@model IEnumerable<SalesPageDesign.Models.Sale>
+
+    @{
+        ViewData["Title"] = "Index";
+    }*@
+
+
+<style>
+
+
+   /* .card {
+        border-radius: 0 !important;
+        border: 0;
+        border-top: 3px solid #1B4475;
+        margin: auto;
+    }
+
+    h3 {
+        font-weight: 300;
+        font-size: 25px;
+        margin: auto;
+    }
+
+
+    .btn {
+        background-color: #217405;
+        color: white;
+        text-decoration: none;
+    }
+
+        .btn:hover {
+            color: #217405;
+            background: #fff;
+            border: 1px solid #217405;
+        }
+
+    .card_title {
+        width: 12rem;
+        height: 70px;
+    }
+
+    .card-title {
+        min-height: 100px;
+        font-weight: 400;
+    }
+
+    .bill_details {
+        height: 80px;
+        font-weight: 300;
+    }
+
+    .card-text {
+        color: #032D60 !important;
+    }
+
+    @@media (min-width: 1200px) {
+        .card {
+            width: 12rem;
+        }
+    }
+
+    @@media (max-width: 767px) {
+
+
+        .card {
+            width: 20rem;
+        }
+
+        h3 {
+            text-align: center;
+        }
+
+        .card-title {
+            min-height: 50px;
+        }
+
+        .bill_details {
+            margin: 0px !important;
+        }
+    }*/
+/**/
+
+    .card {
+        background: ivory;
+    }
+
+/*    li {
+        list-style: inherit!important;
+    }*/
+</style>
+<div class="page-wrapper">
+    <div class="container">
+
+        <div class="row">
+            @foreach (var item in Model)
+            {
+        <div class="col-md-4 col-12 animated slideInRight mx-auto">
+            <div class="card shadow-lg mt-5">
+                <h3 class="card-header bg-success text-center text-white">@Html.DisplayFor(modelItem => item.Name)</h3>
+                <div class="card-body text-center">
+
+
+                    <h6 class="mt-2">@Html.Raw(item.SoftwarePackageDescription)</h6>
+                    @{ var abc = 0.00;
+
+                        if (item.DurationType.DurationName == "Year")
+                        {
+                            abc = Math.Round(item.PackagePrice / 12 / item.UserCount);
+                        }
+                        else if (item.DurationType.DurationName == "Month")
+                        {
+                            abc = Math.Round(item.PackagePrice / item.UserCount);
+                        }
+                        else
+                        {
+                            abc = Math.Round(item.PackagePrice / item.UserCount);
+                        }
+
+                <h2 class="card-text">@abc</h2> }
+
+                    <p class="mb-4 bill_details">
+                        @*@Html.DisplayFor(modelItem => item.BillDetails)*@
+                        @item.Country.CurrencyShortName/user/month
+                        <br />
+                        (@item.DurationType.Description)
+                        @*(Billed annually)*@
+                    </p>
+
+                    @if (CallBackUrlLink.Contains("w2u.io"))
+                    {
+                        <a href="https://pqstec.com/invoiceapps/License/BkashAutoCheckOut?packageid=@item.Id&UserId=@UserId&CallBackURL=@CallBackUrlLink" class="btn btn-primary mb-3">Buy Package</a>
+                        @*<a href="http://localhost:2553/License/BkashAutoCheckOut?packageid=@item.Id&UserId=@UserId&CallBackURL=@weburl" class="btn btn-primary mb-3">Test Buy Package</a>*@ 
+                    }
+                    else
+                    {
+                    <a asp-controller="License" asp-action="CheckOut" asp-route-packageid="@item.Id" class="btn btn-success mb-3">Buy Package</a>
+                    }
+                </div>
+                </div>
+                </div>
+                <br />
+                }
+        </div>
+    </div>
+    </div>
+
+    @section scripts{
+        <script>
+            $(document).ready(function () {
+                $('#animationfahad').animate({ left: 0 });
+
+            });
+
+        </script>
+
+
+    }
+
+

@@ -1,0 +1,361 @@
+﻿@*@model List<Atrai.Model.Core.Entity.AccountHeadModel>*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model IEnumerable<Atrai.Controllers.AccountsController.BalanceSheetModel>
+@*@model Tuple<List<Atrai.Model.Core.Entity.AccountHeadModel>, IEnumerable<Atrai.Controllers.AccountsController.BalanceSheetModel>>*@
+@{
+    ViewData["Title"] = "Voucher Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var criteria = ViewBag.criteria;
+    var strId = ViewBag.strId;
+    var dtFrom = ViewBag.dtFrom;
+    var dtTo = ViewBag.dtTo;
+    System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+}
+<style>
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+             border-bottom-width: 0px;
+
+        }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    .tabulator-table .tabulator-row {
+        background-color: white;
+    }
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+    .customize-btn-another {
+        background: #2CA01C;
+        border: 1px solid black;
+        border-radius: 20px;
+        color: #FFFFFF;
+        border: 1px solid #2CA01C;
+    }
+
+        .customize-btn:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .dropdown-menu.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+    }
+    /*    .tabulator-row .tabulator-cell, .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: none;
+        border-left: none;
+    }*/
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+</style>
+<div class="row py-3" style="background: #e9ecef6b;">
+<div class="col-lg-2">
+    <p class="fs-4">Terms</p>
+</div>
+<div class="col-lg-10">
+    <div class="float-end">
+        <button id="run-report-btn" type="button" class="btn customize-btn fw-bold" onclick="GetReport()" style="">Run Report</button>
+        <button id="addNewOption" type="button" class="btn btn-success customize-btn-another fw-bold" onclick="GetReport()" style="">New</button>
+    </div>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content mx-auto w-25">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add New Term</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Inside the modal-body -->
+                    <form id="termForm">
+                        <div class="mb-3">
+                            <label for="termName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="termName" name="TermName" placeholder="Enter term name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dueInDays" class="form-label">Due in fixed number of days</label>
+                            <input type="number" class="form-control" id="dueInDays" name="DueInFixedDays">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dueByDay" class="form-label">Due by certain day of the month</label>
+                            <input type="number" class="form-control" id="dueByDay" name="DueByDayOfMonth">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dueNextMonthDays" class="form-label">Due the next month if issued within days of due date</label>
+                            <input type="number" class="form-control" id="dueNextMonthDays" name="DueNextMonthWithinDays">
+                        </div>
+                    </form>
+
+                </div>
+                <!-- At the bottom of the modal content, before the closing </div> -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveTermButton">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+</div>
+<div id="tableContainer" class="mt-4">
+    <div id="incomeStatementTable" style="height:400px"></div>
+</div>
+
+
+
+@section Scripts{
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+
+        //show modal when click add new button starts
+        var addNewBtn = document.getElementById("addNewOption");
+        addNewBtn.addEventListener("click", function () {
+            $("#exampleModal").modal("show");
+
+        })
+        //show modal when click add new button ends
+
+        //term save functionalities starts
+           $("#saveTermButton").click(function () {
+                Saveproductinfo();
+            });
+
+                function Saveproductinfo() {
+                    var TermName = $("#termName").val();
+                    var DueInFixedDays = $("#dueInDays").val();
+                    var DueByDayOfMonth = $("#dueByDay").val();
+                    var DueNextMonthWithinDays = $("#dueNextMonthDays").val();
+
+
+                    var AccountHead = {
+                        TermName: TermName,
+                        DueInFixedDays: DueInFixedDays,
+                        DueByDayOfMonth: DueByDayOfMonth,
+                        DueNextMonthWithinDays: DueNextMonthWithinDays
+
+                    }
+                    console.log(AccountHead);
+                    $.ajax({
+                        url: '@Url.Action("AddTerms", "Admin")',
+                        data: { model: AccountHead }, //use id here
+                        //data: JSON.stringify(purchasesmain),
+                        type: 'POST',
+                        async: true,
+                        //contentType: 'application/json;',
+                        dataType: 'json',
+                        success: function (result) {
+                            if (result.success == "1") {
+                                alert("Saved");
+                                $('#exampleModal').modal('hide');
+                                GetReport();
+                            }
+
+                        },
+                        error: function () {
+                            //toastr.error('Unable to Save');
+                            alert('Unable to Save');
+                        }
+                    });
+                }
+        //term save functionalities ends
+
+                //Tabulator function starts
+        GetReport();
+                    function GetReport() {
+            function fetchDataFromServer() {
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetTermsList", "Admin")'
+                };
+                return $.ajax({
+                    url: MyAppUrlSettings.MyUsefulUrl,
+                    dataType: "json",
+                });
+            }
+
+            fetchDataFromServer().done(function (response) {
+
+                console.log("notrmal response:",response);
+                var dataTable = response;
+                console.log("data table:", dataTable);
+                var columnsToExclude = ["DueInFixedDays", "DueByDayOfMonth","DueNextMonthWithinDays","Id","CreateDate","UpdateDate","IsDelete","ComId","LuserId","UserAccountList","LuserIdUpdate","CompanyList"]; // Define columns to be excluded
+
+                var columns = Object.keys(dataTable[0]).map((column) => {
+                    if (!columnsToExclude.includes(column)) {
+                        var columnDefinition = {
+                            title: column,
+                            field: column,
+                            formatter: function (cell, formatterParams) {
+
+                                var rowEl = cell.getRow().getElement();
+
+                                if (cell.getData().FontSignal === "B") {
+                                    rowEl.style.fontWeight = "bold";
+                                }
+                                return cell.getValue();
+                            },
+                            hozAlign: column === "TermName" ? "left" : "right",
+                            frozen: column === "AccName" ? true : (column === "AccCode" ? true : false),
+                        };
+
+                        return columnDefinition;
+                    }
+                }).filter((column) => column !== undefined);
+
+
+                var table = new Tabulator("#incomeStatementTable", {
+                    data: dataTable,
+                    dataTree: true,
+                    dataTreeStartExpanded: true ,
+                    dataTreeChildField: "children",
+                    layout: "datafit",
+                    frozenRows: 1,
+                    columns: columns,
+                    dataBound: function () {
+                        // Freeze the top 1 row (index 0) after the table is created
+                        var rows = table.getRows();
+                        if (rows.length > 0) {
+                            var cells = rows[0].getCells();
+                            cells.forEach(cell => {
+                                cell.freeze();
+                            });
+                        }
+                    },
+                });
+            });
+        };
+        //Tabulator function ends
+    </script>
+
+
+
+
+}

@@ -1,0 +1,116 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@*@model IEnumerable<Atrai.Core.Entity.VoterModel>*@
+@{ ViewData["Title"] = "Voter List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <card class="card-header">
+                        
+                        <div class="row m-0">
+                            <div class="col-md-2 col-12">
+                                @Html.ActionLink("Voter Entry", "NIDCheck", null,null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md-2 col-12">
+                                <h4 style="color: #1976d2;">Voter List</h4>
+                            </div>
+                        </div>
+                    </card>
+
+
+                    <div class="card-body">
+
+
+                        <div class="table-responsive mt-1">
+                            <table id="tbllist" class="table table-sm table-hover  table-bordered" width="100%">
+@*                                <thead>
+                                    <tr></tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr></tr>
+                                </tfoot>*@
+                            </table>
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+@*<td>
+        <div height="50px">
+            <div class="img-thumbnail flag flag-icon-background @item.FlagClass.ToString().ToLower()"></div>
+        </div>
+    </td>*@
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+                $(function () {
+                    var peopleList = $('#tbllist').DataTable({
+
+                        serverSide: true,  "scrollX": true,
+                        processing: true,
+
+                        ajax: {
+                            url: '@Url.Action("GetVoterList", "Admin")',
+                            type: "POST"
+                        },
+                        rowId: 'Id',
+                        columns: [
+
+                            { "title": "Id", "data": "Id", "visible": false },
+                            { "title": "Voter No", "data": "voterNo", "searchable": true },
+                            { "title": "Name", "data": "name", "searchable": true },
+                            { "title": "Permanent Address", "data": "permanentAddress", "searchable": false },
+                            { "title": "Present Address", "data": "presentAddressBN", "searchable": false },
+                            { "title": "Father", "data": "father", "searchable": false },
+                            { "title": "Mother", "data": "mother", "searchable": false },
+                            { "title": "DateOfBirth", "data": "DateOfBirth", "searchable": false },
+                            {
+                                "title": "Action",
+                                "data": "Id",
+                                "render": function (data, type, row) {
+                                    
+                                    var myUrlview = '@Url.Action("ViewVoter", "Admin")?VoterId=' + data;
+                                    return '<span data-toggle="tooltip" title="View"> <a href=\"' + myUrlview + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>';
+
+                                }
+
+                            }
+                        ]
+                    });
+
+
+                });
+
+                @*var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+                var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+                var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+                    {
+                    style: 'currency',
+                    currency: CurrencyShortNameViewFormat,///'BDT'
+                    minimumFractionDigits: 2,
+                });*@
+        //document.body.innerHTML += '<br />' + formatter.format(53425.34);
+
+
+    </script>
+}

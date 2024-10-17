@@ -1,0 +1,570 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@*@model IEnumerable<Atrai.Core.Entity.TransactionModel>*@
+@{
+    ViewData["Title"] = "Transaction List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<style>
+    p.lineheight {
+        line-height: 6px;
+        vertical-align: middle;
+    }
+
+    hr.hr-text {
+    position: relative;
+    border: none;
+    height: 1px;
+    background: #999;
+}
+    
+hr.hr-text::before {
+    content: attr(data-content);
+    display: inline-block;
+    background: #fff;
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: #999;
+    border-radius: 30rem;
+    padding: 0.2rem 0.5rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.dropdown-item {
+  padding: 5px 1rem;
+  color: #67757c;
+  /*text-align: center;*/
+}
+</style>
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+
+        @*
+
+            </div>*@
+
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+
+                                @Html.Hidden("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+                                @Html.Hidden("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+
+
+                        <div class="row mb-2">
+@*                            <div class="col-md-2 col-12">
+                                @Html.ActionLink("Create Transaction", "AddTransaction", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md-2 col-12">
+                                @Html.ActionLink("Received", "AddTransaction", new { Type = "Received" }, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md-2 col-12">
+                                @Html.ActionLink("Paid", "AddTransaction", new { Type = "Paid" }, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>*@
+
+                            <div class="col-md-3 col-12">
+                                <!-- Example single danger button -->
+                                <div class="dropdown">
+                                    <a class="btn btn-primary btn-block rounded-0 dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Add New Entry
+                                    </a>
+
+
+
+
+
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                            
+                                            @Html.ActionLink("Transaction", "AddTransaction", null, null, new { @class = "dropdown-item", @id = "btnBack" })
+                                            <hr data-content="Received" class="hr-text">
+                                           @* <div style="width: 100%; height: 20px; border-bottom: 1px solid black; text-align: center">
+                                                <span style="font-size: 20px; background-color: #F3F5F6; padding: 0 10px;">
+                                                Received 
+                                                </span>
+                                            </div>*@
+                                            @Html.ActionLink("By Income", "AddTransaction", new { Type = "Received" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("From Customer", "AddTransaction", new { Type = "Customer" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("By Invoice", "AddTransaction", new { Type = "Sales" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("From Customer - Multiple Invoice", "AddTransactionDetails", new { Type = "Customer" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("From Supplier", "AddTransaction", new { Type = "ReceivedFromSupplier" }, new { @class = "dropdown-item", @id = "btnFromSupplier" })
+                                            @*<div class="dropdown-divider"></div>*@
+                                            <hr data-content="Paid" class="hr-text">
+                                            @Html.ActionLink("For Expense", "AddTransaction", new { Type = "Paid" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("To Supplier", "AddTransaction", new { Type = "Supplier" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("By Purchase Order", "AddTransaction", new { Type = "Purchase" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("To Supplier - Multiple Invoice", "AddTransactionDetails", new { Type = "Supplier" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("To Customer", "AddTransaction", new { Type = "PaidToCustomer" }, new { @class = "dropdown-item", @id = "btnBack" })
+
+                                            <hr data-content="Accounts" class="hr-text">
+                                            @Html.ActionLink("Cash Received From Bank", "AddTransaction", new { Type = "CashContra" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("Cash Deposit To Bank", "AddTransaction", new { Type = "BankContra" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("Contra", "AddTransaction", new { Type = "Contra" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            <hr data-content="Discount" class="hr-text">
+                                            @Html.ActionLink("Discount To Customer", "AddTransaction", new { Type = "CustomerDiscount" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("Discount From Supplier", "AddTransaction", new { Type = "SupplierDiscount" }, new { @class = "dropdown-item", @id = "btnBack" })
+
+                                        </div>
+                                </div>
+                            </div>
+
+
+
+                            <div class="col-md-2 col-12">
+                                <h4 style="color: #1976d2;">Transaction List</h4>
+                            </div>
+                                               <div class="col-md-3 col-12 float-right">
+                                    <label class="pr-2"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+
+                                </div>
+                        </div>
+
+
+
+                        <div class="card p-2 mb-2">
+                            <div class="row">
+                                <div class="col-md-1 col-12 mb-2">
+                                @Html.DropDownList("Status", new List<SelectListItem>
+                                {
+                                   new SelectListItem() {Text = "All", Value=""},
+                                    new SelectListItem() {Text = "Post", Value="Post"},
+                                    new SelectListItem() {Text = "UnPost", Value="UnPost"}
+                              
+                                }, new { @class = "form-control form-control-sm" })
+                                </div>
+
+                                <div class="col-md-2 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Warehouse", ViewBag.Warehouse as List<SelectListItem>, "Select Location", new { id = "WarehouseId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-2 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("User", ViewBag.User as List<SelectListItem>, "Select User", new { id = "UserId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 col-12 mb-2">
+                                @Html.DropDownList("TransactionCategory", new List<SelectListItem>
+                                {
+                                   new SelectListItem() {Text = "All", Value=""},
+                                    
+                                    new SelectListItem() {Text = "By Income", Value="Received"},
+                                    new SelectListItem() {Text = "From Customer", Value="Customer"},
+                                    new SelectListItem() {Text = "By Invoice", Value="Sales"},
+                                    new SelectListItem() {Text = "From Customer - Multiple Invoice", Value="Customer"},
+
+                                    new SelectListItem() {Text = "For Expense", Value="Paid"},
+                                    new SelectListItem() {Text = "To Supplier", Value="Supplier"},
+                                    new SelectListItem() {Text = "By Purchase Order", Value="Purchase"},
+                                    new SelectListItem() {Text = "To Supplier - Multiple Invoice", Value="Supplier"},
+
+
+                                    new SelectListItem() {Text = "Cash Received From Bank", Value="CashContra"},
+                                    new SelectListItem() {Text = "Cash Deposit To Bank", Value="BankContra"},
+                                    new SelectListItem() {Text = "Discount To Customer", Value="CustomerDiscount"},
+                                    new SelectListItem() {Text = "Discount From Supplier", Value="SupplierDiscount"},
+                                }, new { @class = "form-control form-control-sm" })
+                                </div>
+
+    <div class="col-md-6 col-12  mb-2">
+                                               <div class="form-inline divHiddenItems">
+                                         <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text">
+                                               <i class="fa fa-calendar"></i>
+                                             </div>
+                                        </div>
+                                        <input type="text" class="form-control from-control-sm" name="date" id="daterange-btn" style="width: auto;">
+                                         <button id='btnDec' type="button" class="btn btn-danger rounded-0" title='Decrement month'><i class="fa fa-calendar-minus-o" aria-hidden="true"></i></button>
+                                        <button id='btnInc' type="button" class="btn btn-info  rounded-0" title='Increment month'><i class="fa fa-calendar-plus-o" aria-hidden="true"></i></button>
+                                        </div>
+                                        @*<span type="button" class="btn btn-sm btn-outline-info" id="daterange-btn">
+
+                                            <i class="fa fa-calendar"></i>&nbsp; <span>defaut date</span>
+
+                                            <i class="fa fa-caret-down"></i>
+                                        </span>
+                                        <input id="daterange-btn" size="40" value="">*@
+                                    </div>
+                                </div>
+
+@*                                <div class="col-md-3 col-12">
+                                    <div class="input-group input-group-sm mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                <label for="FDate">From Date</label>
+                                            </span>
+                                        </div>
+                                        @Html.TextBox("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "Select From Date ", @autocomplete = "off", name = "FromDate" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group  input-group-sm mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                <label for="TDate">To Date</label>
+                                            </span>
+                                        </div>
+                                        @Html.TextBox("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "Select To Date ", @autocomplete = "off", name = "ToDate" })
+                                    </div>
+                                </div>*@
+             
+
+                            </div>
+                        </div>
+
+
+
+                        <div class="table-responsive mt-1">
+                            <table id="tbllist" class="display compact text-nowrap table table-sm table-hover table-striped table-bordered" cellspacing="0" style="width:100%;">
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+
+@section scripts{
+<script TransactionId="text/javascript">
+
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            //CurrentDate();
+
+        //    $(".FromDate").datepicker({
+
+        //        dateFormat: "dd-M-y",
+        //        changeMonth: true,
+        //        changeYear: true
+
+        //    });
+
+
+        //$(".ToDate").datepicker({
+
+        //    dateFormat: "dd-M-y",
+        //    changeMonth: true,
+        //    changeYear: true
+
+        //});
+
+        //function CurrentDate() {
+        //    var date = new Date();
+        //    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        //    var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+        //    if ($(".FromDate").val() == '') {
+        //        $(".FromDate").val(val);
+        //    }
+        //    if ($(".ToDate").val() == '') {
+        //        $(".ToDate").val(val);
+        //    }
+        //}
+
+        var UserId = $("#UserId").val();
+        var WarehouseId = $("#WarehosueId").val();
+
+        var TransactionCategory = $("#TransactionCategory").val();
+
+        //alert(UserId);
+        var fromdate = $("#FromDate").val();
+        var todate = $("#ToDate").val();
+
+        loaddata(fromdate, todate, UserId ,1);
+
+        var filter = '@ViewBag.filter';
+        $("#Status").val(filter);
+
+        function loaddata(FromDate = "", ToDate = "", UserId = "", isAll = 1 , WarehouseId) {
+            //alert(UserId, FromDate, ToDate);
+
+            table = $('#tbllist').DataTable({
+                initComplete: function () {
+
+                    var input = $('.dataTables_filter input'),//.unbind(),
+                        self = this.api(),
+
+                        //$searchButton = $('<button class="btn rounded-0 btn-info btn-sm" tabindex="0" aria-controls="tbllist" TransactionId="button" title="Search"><span><i class="mdi mdi-file-excel"></i></span></button>')
+                        //    .text('Search')
+                        //    .click(function () {
+                        //        if (input.val().length > 0) {
+                        //            self.search(input.val()).draw();
+
+                        //        }
+                        //        else {
+                        //            loaddata(fromdate, todate, UserId, 1);
+
+                        //        }
+                        //    }),
+                        //$clearButton = $('<button class="btn rounded-0 btn-warning btn-sm" tabindex="0" aria-controls="tbllist" TransactionId="button" title="Export to PDF"><span><i class="mdi mdi-file-pdf"></i></span></button>')
+                        //    .text('Clear')
+                        //    .click(function () {
+                        //        input.val('');
+                        //        $searchButton.click();
+                        //    }),
+                        $allButton = $('<button class="ml-5 btn rounded-0 btn-primary btn-sm" tabindex="0" aria-controls="tbllist" TransactionId="button" title="Load"><span><i class="mdi mdi-file-excel"></i></span></button>')
+                            .text('Load')
+                            .click(function () {
+                                input.val('');
+                                //alert(FromDate);
+                                loaddata(fromdate, todate, UserId, 1 , WarehouseId);
+                                //table.ajax.reload();
+
+
+                            })
+                    $('.dataTables_filter').append($allButton);//, $clearButton // , $searchButton
+                },
+
+                serverSide: true,
+                "scrollX": true,
+                "orderCellsTop": true,
+                //"scrollX": true,
+                //"scrollY": "60vh",
+                //"scrollCollapse": true,
+                //"info": true,
+                "iDisplayLength": 10,
+                "lengthMenu": [[5, 10, 20, 50, 10000], [5, 10, 20, 50, "All"]],
+                //"columnDefs": [
+                //    // Hide second, third and fourth columns
+                //    { "visible": false, "targets": [] }
+                //    //{ targets: [7], className: "noWrapTd" } // white-space: nowrap;
+                //],
+                dom: '<"dom_wrapper fh-fixedHeader"flB>tip',
+                    buttons: {
+                        dom: {
+                            button: {
+                                className: 'btn rounded-0'
+                            }
+                        },
+                        buttons: [
+                            //'copy', 'csv', 'excel', 'pdf', 'print'
+                            //{ "extend": 'excel', "text": 'Excel', "className": 'btn btn-sm btn-success-info fa fa-excel rouned-0' }
+
+                            {       extend: 'excel',
+                                    text: '<i class="mdi mdi-file-excel"></i>',
+                                    className: 'btn-success',
+                                    titleAttr: 'Export to excel'
+                            }
+
+                        ],
+                    },
+                //"datatest": function (d) {
+                //    d.FromDate = $('#FromDate').val();
+                //    d.ToDate = $('#ToDate').val();
+                //    alert(d);
+                //},
+                //"fixedHeader": true,
+                //"responsive": true,
+                "ajax": {
+                    "url": "@Url.Action("GetTransactionList", "Admin")",
+                        "data": { FromDate: $("#FromDate").val(), ToDate: $("#ToDate").val(), UserId: $("#UserId").val(), isAll: isAll, TransactionCategory: $("#TransactionCategory").val(), Status: $("#Status").val(), WarehouseId: $("#WarehouseId").val() },
+
+                    //"url": "/Cities/GetListViewModel",
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "title": "TransactionId", "data": "Id", "searchable": true ,"visible" : false},
+                        { "title": "Location", "data": "LocationName", "searchable": true },
+
+                    { "title": "Transaction Code", "data": "TransactionCode", "searchable": true },
+
+                    {
+                        "TransactionId": 'datetime',
+                        "def": function () { return new Date(); },
+                        "format": 'M/D/YYYY',
+                        "fieldInfo": 'US style m/d/y format', "data": "InputDate", "title": "Entry Date", "searchable": false
+                    },
+                    { "title": "Amount", "data": "TransactionAmount", "searchable": false },
+                    { "title": "Description", "data": "Description", "searchable": true },
+                      { "title": "Transaction Type", "data": "TransactionType", "searchable": true },
+                      { "title": "Voucher Type", "data": "TransactionCategory", "searchable": true },
+
+                                          { "title": "Rec / Pay By", "data": "PayReceiveAccountName", "searchable": true },
+                    { "title": "Income / Expense", "data": "IncomeExpenseHead", "searchable": true },
+
+                    { "title": "Asset / Liability", "data": "LiabilityAssetHead", "searchable": true },
+
+                    {
+                        "title": "Referance Data",
+                        "className": "text-nowrap text-center",
+                        "data": {
+                            Id: "Id" //,
+                        },
+                        "render": function (data, type, row) {
+                            var salesreport = '@Url.Action("InvoiceViewReport", "Sales")?saleId=' + data.SalesId;
+                            var purchasereport = '@Url.Action("PurchaseInvoiceViewReport", "Purchase")?purchaseId=' + data.PurchaseId;
+
+
+                            var buttons = '';
+                            if (data.Customer != null) {
+                                buttons += '<p class="m-1" style="color:purple"> ' + data.Customer + ' </p>';
+                            }
+                            if (data.SalesCode != null) {
+                                buttons += '<a href='+ salesreport +' class="label label-purple text-white lineheight" style="font-size:16px" target=_blank> ' + data.SalesCode + '</a>';
+                            }
+
+
+
+                            if (data.Supplier != null) {
+                                buttons += '<p class="m-1" style="font-size:14px;color:red"> ' + data.Supplier + ' </p>';
+                            }
+                            if (data.PurchaseCode != null) {
+                                //buttons += '<p class="lineheight" style="font-size:16px;color:black"> ' + data.PurchaseCode + ' </p>';
+
+                                 buttons += '<a href='+ purchasereport +'  class="label label-danger text-white lineheight" style="font-size:13px"  target=_blank> ' + data.PurchaseCode + '</a>';
+                            }
+
+
+                            if (data.Member != null) {
+                                buttons += '<p style="color:black"> ' + data.Member + ' </p>';
+                            }
+                            if (data.Employee != null) {
+                                buttons += '<p style="color:blue"> ' + data.Employee + ' </p>';
+                            }
+
+
+                            //else {
+                            //    buttons += '<label class="lineheight" style="font-size:16px;color:black"> =N/A= </label>';
+
+                            //}
+                            return buttons;
+                        }
+                    },
+
+
+                    //{ "title": "Customer", "data": "Customer", "searchable": true },
+                    //{ "title": "Supplier", "data": "Supplier", "searchable": true },
+                    //{ "title": "Member", "data": "Member", "searchable": true },
+                    //{ "title": "Employee", "data": "Employee", "searchable": true },
+
+                    //{ "title": "PurchaseCode", "data": "PurchaseCode", "searchable": true },
+                    //{ "title": "SalesCode", "data": "SalesCode", "searchable": true },
+
+
+
+
+                    {
+                        "title": "Amount",
+                        "className": "text-nowrap text-center",
+                        "data": {
+                            Id: "Id" //,
+                        },
+                        "searchable": true,
+                        "render": function (data, type, row) {
+                            var buttons = '';
+                            if (data.TransactionAmount > 0) {
+                                if (data.TransactionType == "Paid") {
+
+                                    buttons += '<p class="label label-danger text-white mt-2" style="font-size:13px;"> ' + formatter.format(data.TransactionAmount) + ' </p>';
+
+                                }
+                                else if (data.TransactionType == "Received") {
+                                    buttons += '<label class="label label-success text-white mt-2" style="font-size:13px;color:black"> ' + formatter.format(data.TransactionAmount) + ' </label>';
+
+                                }
+                                else {
+                                    buttons += '<p style="color:black"> ' + formatter.format(data.TransactionAmount) + ' </p>';
+                                }
+                            }
+                            return buttons;
+                        }
+                    },
+
+                    { "title": "Status", "data": "Status", "searchable": true },
+                    {
+                        "className": "text-nowrap",
+                        "data": {
+                            Id: "Id" //,
+                            //VoucherTransactionIdName:"VoucherTransactionIdName",
+                            //isPosted:"isPosted"
+                        },
+
+                        "render": function (data, TransactionId, row) {
+                            var myUrlprint = '@Url.Action("TransactionPrint", "Admin")?TransactionId=' + data.Id;
+                            var myUrledit = '@Url.Action("EditTransaction", "Admin")?TransactionId=' + data.Id;
+                            var myUrldelete = '@Url.Action("DeleteTransaction", "Admin")?TransactionId=' + data.Id;
+                            var myUrlView = '@Url.Action("ViewTransaction", "Admin")?TransactionId=' + data.Id;
+                            var myReportlView = '@Url.Action("TransactionVoucherViewReport", "Admin")?TransactionId=' + data.Id;
+
+
+                            var message = `return confirm('Are you sure you want to Remove this Transaction ?')`;
+
+                            var buttons = '';
+                            //'<span data-toggle="tooltip" title="Print"> < a href =\"' + myUrlprint + '\" class=\"fa fa-eye text-success px-1 h4\" target=\"_blank\"></a></span>';
+                            //buttons += '<span data-toggle="tooltip" title="Copy"> <a href=\"' + myUrlCreateCopy + '\" class=\"fas fa-copy text-info px-1 h4\" target=\"_blank\"></a></span>'
+
+                            if (!data.isPost) {
+                                  buttons +=  '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                      '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick = \"' + message + '\"   class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-remove"></i></a></span>'+
+                                      '<span data-toggle="tooltip" title="View"> <a href=\"' + myUrlView + '\" class=\"fa fa-eye fa-2x text-info px-1 h4\" target=\"_blank\"></a></span>'+
+                                      '<span data-toggle="tooltip" title="View"> <a href=\"' + myReportlView + '\" class=\"fa fa-file-pdf-o text-success fa-2x px-1 h4\" target=\"_blank\"></a></span>';
+
+
+                            } else {
+                                                buttons += '<span data-toggle="tooltip" title="View"> <a href=\"' + myUrlView + '\" class=\"fa fa-eye fa-2x text-info px-1 h4\" target=\"_blank\"></a></span>'+
+                        '<span data-toggle="tooltip" title="View"> <a href=\"' + myReportlView + '\" class=\"fa fa-file-pdf-o fa-2x text-success px-1 h4\" target=\"_blank\"></a></span>';
+                            }
+                            return buttons;
+                        }
+
+                    }
+                ],
+                //"order": [0, "desc"],
+                "processing": true,
+                    "language": {
+                        "lengthMenu": "_MENU_",
+                        //"zeroRecords": "Nothing found - sorry",
+                        //"info": "Showing page _PAGE_ of _PAGES_",
+                        "infoEmpty": "No records available",
+                        "infoFiltered": "(filtered from _MAX_ total records)",
+                        "searchPlaceholder": "Search",
+                        "sSearch": '<em class="fa fa-search"></em>'
+                    },
+                "destroy": true
+            });
+            //$('#tbllist_filter input').unbind();
+            // alert('Load Successfully');
+            //$('.dataTables_filter input').bind('keyup', function (e) {
+            //    if (e.keyCode == 13) {
+            //        //alert('enter');
+            //        table.search(this.value).draw();
+            //    }
+            //});
+        }
+
+    });
+
+
+
+        var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+        var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+        var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+            {
+            style: 'currency',
+            currency: CurrencyShortNameViewFormat,///'BDT'
+            minimumFractionDigits: 2,
+        });
+
+</script>
+}
+

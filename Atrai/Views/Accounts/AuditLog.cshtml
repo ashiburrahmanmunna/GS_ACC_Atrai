@@ -1,0 +1,428 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Approval Settings";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    #modal-content2 {
+        background-color: #fefefe;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+        height: 90vh;
+        overflow-y: auto;
+    }
+
+    #example_table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+    .json-list {
+        list-style-type: none;
+        padding-left: 0; /* Remove left padding */
+    }
+
+        .json-list li {
+            margin-left: 20px; /* Optional: Indent list items */
+        }
+
+    .l-icon {
+        cursor: pointer; /* Changes cursor to hand sign on hover */
+        margin-right: 5px; /* Optional: adds space between icon and text */
+        display: inline-block;
+        width: 12px;
+    }
+
+</style>
+
+<div>
+    <div class="row py-3" style="background: #e9ecef6b;">
+        <div class="col-lg-2">
+            <p class="fs-4 fw-bold">Audit Log </p>
+        </div>
+        
+    </div>
+    <div class="row mt-2">
+        <div class="col-md-2">
+            <label><strong>Document Type</strong></label>
+            <select id="DocTypeId" class="form-control" onchange="initTabulator()">
+                <option value="">Select.. </option>
+            </select>
+        </div>
+
+    </div>
+    <div class="d-flex justify-content-end">
+        <button title="Print" class="btn btn-white border-0" type="button" id="Print-pdf" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-printer fs-5" style=" margin-right: 0px; "></i>
+        </button>
+        <button title="Export to excel" class="btn btn-white border-0" type="button" id="Print-excel" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-file-earmark-excel fs-5" style=" margin-right: 0px; "></i>
+        </button>
+        
+
+    </div>
+    <div id="example_table" class="mt-2"></div>
+</div>
+
+<div class="col-md-2  col-2">
+    <div id="customModal" class="modal">
+        <div class="modal-content" id="modal-content2">
+            
+            <div class="row mb-2" style="border-bottom: 1px solid black; padding-bottom: 5px;">
+                <div class="col-md-6 col-6 d-flex">
+                    <div class="form-check mt-2" style="margin-right: 10px;">
+                        <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" >
+                        <label class="form-check-label" for="flexCheckChecked" style="color: black;">
+                            <strong>Show Null Value</strong>
+                        </label>
+                    </div>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" value="" id="flexCheckZero">
+                        <label class="form-check-label" for="flexCheckZero" style="color: black;">
+                            <strong>Show Zero</strong>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6 col-6 d-flex justify-content-end">
+                    <button id="cancelBtn" class="btn btn-outline-danger" ><strong>X</strong></button>
+                </div>
+            </div>
+            <div id="KeyValue"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+
+        $('select').select2();
+                $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetDocType", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+                $.each(data, function (index, value) {
+                    $('#DocTypeId').append('<option value="' + value.Id + '" >' + value.DocType + '</option>');
+                });
+            }
+        });
+
+        function copyData(doctype, trxnId, Id) {
+            
+            var myUrlInactive = '@Url.Action("GetAuditLogDetails", "Accounts")';
+
+            $.ajax({
+                type: "get",
+                data: { DocType: doctype, Id: Id, TransactionId: trxnId },
+                url: myUrlInactive,
+                success: function (response) {
+                    if (response.success == "1") {
+                        
+                        navigator.clipboard.writeText(response.KeyValue).then(function () {
+                            toastr.success("KeyValue Copied", "", {
+                                "toastClass": "toast-green",
+                            });
+                        }, function (err) {
+                            console.error('Could not copy text: ', err);
+                        });
+                    }
+                    
+                }
+            });
+
+        }
+
+        function formatJsonToHtml(jsonObj, showNulls = false, showZero = false, depth = 0) {
+            if (typeof jsonObj === 'object' && jsonObj !== null) {
+                let html = '<ul class="json-list">';
+                for (let key in jsonObj) {
+                    if (jsonObj.hasOwnProperty(key)) {
+                        const value = jsonObj[key];
+                        if ((value !== null || showNulls) && (value !== 0 || showZero)) {
+                            html += '<li>';
+
+                            if (typeof value === 'object' && value !== null && Object.keys(value).length > 0) {
+                                // Add an L-shaped icon for expand/collapse
+                                html += `<span class="l-icon toggle-btn">▶</span>`;
+
+                                // Display key and child count only for the first stage parent
+                                if (depth === 0) {
+                                    html += ` "${key}" (${Object.keys(value).length}): `;
+                                } else {
+                                    html += ` "${key}": `;
+                                }
+
+                                // Recursively format the nested object
+                                html += `<div class="nested-content" style="display:none;">`;
+                                html += formatJsonToHtml(value, showNulls, showZero, depth + 1);
+                                html += '</div>';
+                            } else {
+                                html += ` "${key}": ${value === null ? 'null' : value}`;
+                            }
+
+                            html += '</li>';
+                        }
+                    }
+                }
+                html += '</ul>';
+                return html;
+            }
+            return jsonObj;
+        }
+
+        var doctype; 
+        var trxnId;
+        var id;
+
+        function showData(doctype, trxnId, Id) {
+            Doctype = doctype;
+            TrxnId = trxnId;
+            id = Id;
+            var modal = document.getElementById("customModal");
+            modal.style.display = "block";
+
+            var myUrlInactive = '@Url.Action("GetAuditLogDetails", "Accounts")';
+
+            $.ajax({
+                type: "get",
+                data: { DocType: doctype, Id: Id, TransactionId: trxnId },
+                url: myUrlInactive,
+                success: function (response) {
+                    if (response.success == "1") {
+                        toastr.success(response.msg, "", {
+                            "toastClass": "toast-green",
+                        });
+                        const jsonObject = JSON.parse(response.KeyValue);
+
+                        const showNulls = document.getElementById('flexCheckChecked').checked;
+
+                        const showZero = document.getElementById('flexCheckZero').checked;
+
+                        const formattedHtml = formatJsonToHtml(jsonObject, showNulls, showZero);
+
+                        document.getElementById('KeyValue').innerHTML = formattedHtml;
+
+                        document.querySelectorAll('.toggle-btn').forEach(button => {
+                            button.addEventListener('click', function () {
+                                const content = this.nextElementSibling;
+                                if (content.style.display === "none") {
+                                    content.style.display = "block";
+                                    this.textContent = "▼";
+                                } else {
+                                    content.style.display = "none";
+                                    this.textContent = "▶";
+                                }
+                            });
+                        });
+
+                    } else if (response.success == "0") {
+                        toastr.success(response.msg, "", {
+                            "toastClass": "toast-red",
+                        });
+                    }
+                }
+            });
+
+            document.getElementById("cancelBtn").onclick = function () {
+                modal.style.display = "none";
+            };
+        }
+
+
+        var auditTable;
+       
+        document.getElementById('flexCheckChecked').addEventListener('change', function () {
+            showData(Doctype, TrxnId, id);
+        });
+
+        document.getElementById('flexCheckZero').addEventListener('change', function () {
+            showData(Doctype, TrxnId, id);
+        });
+
+        var column = [
+            {
+                title: "Id", field: "Id", hozAlign: "center", vertAlign: "middle", visible: false
+            },
+            {
+                title: "TransactionId", field: "TransactionId", hozAlign: "center", vertAlign: "middle", visible: false
+            },
+            {
+                title: "DocTypeId", field: "DocTypeId", hozAlign: "center", vertAlign: "middle", visible: false
+            },
+            {
+                title: "Doc Type", field: "DocType", hozAlign: "center", vertAlign: "middle", headerFilter: "input"
+            },
+            {
+                title: "Action", field: "Action", hozAlign: "center", vertAlign: "middle", headerFilter: "input"
+            },
+            {
+                title: "Date", field: "CreateDate", hozAlign: "center", vertAlign: "middle", headerFilter: "input"
+            },
+            {
+                title: "KeyValue", field: "KeyValue", hozAlign: "center", vertAlign: "middle", headerFilter: "input"
+            },
+            
+            {
+                title: "Actions",
+                field: "button",
+                headerHozAlign: "center",
+                vertAlign: "middle",
+                headerSort: false,
+                hozAlign: "center",
+                resizable: false,
+                width: "300",
+                formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+
+                    var active = `showData('${data.DocType}', ${data.TransactionId}, ${data.Id})`;
+
+
+                    var copyToClipboard = `copyData('${data.DocType}', ${data.TransactionId}, ${data.Id})`;
+
+                    var approveHtml = `
+                    <button onclick="${active}" class="btn btn-outline-info btn-sm ms-3 mt-1 action-btn">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button onclick="${copyToClipboard}" class="btn btn-outline-secondary btn-sm ms-3 mt-1">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>`;
+
+                    var html = approveHtml;
+
+                    return html;
+                },
+                visible: true,
+                cellClick: function (e, cell) {
+                    cell.getElement().classList.add('active-cell');
+                },
+            }
+
+
+
+        ];
+
+
+        function initTabulator() {
+
+            function getDocTypeId() {
+                return document.getElementById('DocTypeId').value || null;
+            }
+
+            var doctypeId = getDocTypeId();
+
+            var queryParams;
+
+            if (doctypeId) {
+                queryParams = '?doctypeId=' + doctypeId;
+            }
+
+            var salesApiUrl = '@Url.Action("GetAuditLogList", "Accounts")' + (doctypeId === null ? '' : queryParams)
+
+            var auditTable = new Tabulator("#example_table", {
+                layout: "fitColumns",
+                minHeight: 400,
+                pagination: "remote",
+                paginationSize: 10,
+                paginationInitialPage: 1,
+                paginationSizeSelector: [5, 10, 25, 50, 100, true],
+                paginationCounter: "rows",
+                movableColumns: true,
+                columns: column,
+
+                ajaxURL: salesApiUrl,
+                ajaxConfig: "get",
+                ajaxContentType: "json",
+
+                ajaxResponse: function (url, params, response) {
+                    console.log("Server response:", response);
+
+                    auditTable.setMaxPage(response.last_page);
+
+                    return response.data;
+                },
+
+                ajaxURLGenerator: function (url, config, params) {
+                    //return request url
+                    return url + (doctypeId === null ? "?searchquery=" : "&searchquery=") + encodeURIComponent(JSON.stringify(params));
+                },
+            });
+
+            // Export functionality for printing and downloading
+            document.getElementById("Print-pdf").addEventListener("click", function () {
+                auditTable.print(false, true);
+            });
+            document.getElementById("Print-excel").addEventListener("click", function () {
+                auditTable.download("xlsx", "data.xlsx", { sheetName: "Table Data" });
+            });
+
+            
+
+        }
+
+        initTabulator();
+    </script>
+
+}

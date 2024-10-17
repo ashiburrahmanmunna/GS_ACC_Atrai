@@ -1,0 +1,69 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@using Atrai.Model.Core.Entity;
+@using Atrai.Model.Core.Common;
+@{
+    Layout = null;
+    string Isactive(string value)
+    {
+        return Context.Request.Path.Value.ToLower().Contains(value.ToLower()) ? "active" : "";
+    }
+  ;
+}
+<style>
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom: 4px solid green;
+    }
+ </style>
+<ul class="nav nav-tabs mt-5">
+
+    <li class="nav-item">
+        @{
+            var AllChildMenu = HttpContextAccessor.HttpContext.Session.GetObject<List<UserMenuPermissionViewModel>>("UserChildMenu");
+
+            var filterparentmenu = AllChildMenu.Where(x => x.ControllerName == "Accounts" && (x.ActionName == "GetthingsDone" || x.ActionName == "Business" || x.ActionName == "cashflow") && x.IsView == true).ToList();
+            var i = 0;
+            foreach (var childitem in filterparentmenu)
+            {
+
+                if (childitem.FirstParameter != null)
+                {
+
+                    if (i == 0)
+                    {
+                    <li class="nav-item">
+                        <a class="nav-link  fw-semibold active" href="#" id=@childitem.ActionName>@childitem.MenuName</a>
+                    </li>
+
+                    }
+                    else
+                    {
+                    <li class="nav-item">
+                        <a class="nav-link  fw-semibold" href="#" id=@childitem.ActionName>@childitem.MenuName</a>
+                    </li>
+
+                    }
+
+
+                }
+
+                i++;
+            }
+        }
+
+    </li>
+    @* <li class="nav-item">
+        <a class="nav-link @Isactive("Getthingsdone") fw-semibold " asp-action="getthingsDone" asp-controller="accounts" id="GetthingsDone-id">Get things done</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link fw-semibold @Isactive("Business")" asp-action="Business" asp-controller="accounts" id="BusinessOverview-id">Business overview</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link fw-semibold @Isactive("cashflow")" asp-action="cashflow" asp-controller="accounts" id="CashFlow-id">Cash flow</a>
+    </li> *@
+</ul>
+
+        

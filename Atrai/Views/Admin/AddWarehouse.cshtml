@@ -1,0 +1,150 @@
+﻿@model Atrai.Model.Core.Entity.WarehouseModel
+@{
+    ViewData["Title"] = "AddWarehouse";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    @*@Html.HiddenFor(m => m.Id, new { @value = Model.Id })
+                    @Html.HiddenFor(m => m.CreateDate, new { @value = Model.CreateDate })
+                    @Html.HiddenFor(m => m.LuserId, new { @value = Model.LuserId })*@
+
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <h4>New Location</h4>
+
+                        </div>
+                        <div class="basic-elements">
+                            <form asp-controller="admin" asp-action="AddWarehouse" method="post">
+                                @if (Model != null)
+                                {
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" />
+                                    <input type="hidden" asp-for="LuserId" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Id" value="0" />
+                                }
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-1">
+                                            <label class="form-label fw-semibold">
+                                                Location Name
+                                            </label>
+                                            <input type="text" asp-for="WhName" class="form-control" placeholder="eg Warehouse Name">
+                                            <span asp-validation-for="WhName" class="text-danger"></span>
+                                        </div>
+                                        <br />
+                                        <div class="mb-1">
+                                            <label class="form-label fw-semibold">Location Short Name</label>
+                                            <input asp-for="WhShortName" class="form-control" placeholder="Enter Short Name">
+                                            <span asp-validation-for="WhShortName" class="text-danger"></span>
+                                        </div>
+                                        <br />
+                                        <div class="mb-1">
+                                            <label class ="form-label fw-semibold" asp-for="StoreAddress"></label>
+                                            <textarea class="form-control" asp-for="StoreAddress" rows="6" placeholder="Store Address"></textarea>
+                                            <span asp-validation-for="StoreAddress" class="text-danger"></span>
+                                        </div>
+                                        <br />
+                                        <div class="mb-1">
+                                            <label class="form-label fw-semibold"  asp-for="Remarks"></label>
+                                            <textarea class="form-control" asp-for="Remarks" rows="6" placeholder="Vat / Tax Infor / Remarks"></textarea>
+                                            <span asp-validation-for="Remarks" class="text-danger"></span>
+                                        </div>
+                                        <br />
+                                        <div class="mb-1">
+                                            <label class="form-label fw-semibold"> Location Type </label>
+                                            @Html.DropDownList("WhType", new List<SelectListItem>
+                                            {
+                                            new SelectListItem() {Text = "Ledger", Value="L"},
+                                            new SelectListItem() {Text = "Group", Value="G"},
+
+                                            }, "Select Warehouse Type", new { @class = "form-control" })
+                                            @Html.ValidationMessage("WhType", "", new { @class = "text-danger" })
+                                            @*<small id="error_SPayment" class="form-text error_msg">Account Category</small>*@
+                                        </div>
+                                        <br />
+                                        <div class="mb-1">
+                                            <label class="form-label fw-semibold">
+                                                Parent Id
+                                            </label>
+                                            @Html.DropDownListFor(x => x.ParentId,
+                                            new SelectList((IEnumerable<SelectListItem>)ViewBag.WarehouseGroupHead, "Value", "Text"), "Select Group",
+                                            htmlAttributes: new { @class = "form-control", id = "ParentId" })
+                                            @Html.ValidationMessageFor(x => x.ParentId, "", new { @class = "text-danger" })
+                                        </div>
+                                        <br />
+                                        <div class="mb-1">
+                                            @*<button type="submit" class="btn btn-primary "> Save Changes </button>*@
+
+
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                                <input type="submit" value="Save" class="btn  btn-primary p-2" />
+                                            }
+                                            else if (ViewBag.ActionType == "Edit")
+                                            {
+                                                <input type="submit" value="Update" class="btn btn-warning p-2" />
+                                            }
+                                            else if (ViewBag.ActionType == "Delete")
+                                            {
+                                                <button class="btn btn-danger " type="button" onclick="Bank_delete()">Delete</button>
+                                            }
+                                            @Html.ActionLink(" ", "WarehouseList", "Admin", null, new { @class = "btn btn-danger bi bi-chevron-left ", @id = "btnBack" })
+
+                                        </div>
+
+
+                                        @*<div class="row text-center m-2">
+                                        <br />
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-4 col-xs-12 d-block mx-auto">
+
+                                        @if (ViewBag.ActionType == "Create")
+                                        {
+                                        <input type="submit" value="Save" class="btn  btn-success btn-block  " /> }
+                                        else if (ViewBag.ActionType == "Edit")
+                                        {
+                                        <input type="submit" value="Update" class="btn btn-warning btn-block " /> }
+                                        else if (ViewBag.ActionType == "Delete")
+                                        {
+                                        <button class="btn btn-danger btn-block " type="button" onclick="Bank_delete()">Delete</button>}
+
+
+                                        </div>
+
+                                        <div class="col-md-4 col-xs-12 d-block mx-auto">
+                                        @Html.ActionLink("Back", "WarehouseList", "Admin", null, new { @class = "btn btn-info btn-block ", @id = "btnBack" })
+
+                                        </div>
+                                        <div class="col-md-3"></div>
+
+                                        </div>*@
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+@section scripts {
+    <script>
+        $('#WhType, #ParentId').select2({
+            theme: 'bootstrap-5',
+        });
+    </script>
+}

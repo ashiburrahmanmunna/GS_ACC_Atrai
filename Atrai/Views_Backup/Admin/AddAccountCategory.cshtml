@@ -1,0 +1,163 @@
+﻿@model Atrai.Core.Entity.AccountCategoryModel
+@{
+    ViewData["Title"] = "AddAccountCategory";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>New Account Category</h4>
+
+                    </div>
+
+                    @*@Html.HiddenFor(m => m.Id, new { @value = Model.Id })
+                        @Html.HiddenFor(m => m.CreateDate, new { @value = Model.CreateDate })
+                        @Html.HiddenFor(m => m.LuserId, new { @value = Model.LuserId })*@
+
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="admin" asp-action="AddAccountCategory" method="post">
+                                @if (Model != null)
+                                {
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" />
+                                    @*<input type="hidden" asp-for="AccountType" />*@
+
+
+                                    @*<input type="hidden" asp-for="LuserId" />*@
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Id" value="0" />
+                                }
+
+                                <div class="row">
+                                    <div class="col-lg-8">
+                                        <div class="form-group row">
+
+
+
+                                            <div id="divAccountCategoryId" class="col-md-12 col-12">
+                                                <div class="input-group mb-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text py-0">
+                                                            @Html.LabelFor(x => x.AccountCategoryName)
+                                                        </span>
+                                                    </div>
+                                                    <input type="text" asp-for="AccountCategoryName" class="form-control" placeholder="eg Enter AccountCategory">
+                                                    <span asp-validation-for="AccountCategoryName" class="text-danger"></span>
+                                                </div>
+                                            </div>
+
+
+                                            <div id="divAccountCategoryId" class="col-md-12 col-12">
+                                                <div class="input-group mb-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text py-0">
+                                                            @Html.LabelFor(x => x.ParentAccountCategoryId)
+                                                        </span>
+                                                    </div>
+                                                    @Html.DropDownListFor(x => x.ParentAccountCategoryId,new SelectList((IEnumerable<SelectListItem>)ViewBag.ParentAccountCategoryId, "Value", "Text"), "Select Parent Category", htmlAttributes: new { @class = "form-control select", id = "ParentAccountCategoryId" })
+                                                    @Html.ValidationMessageFor(x => x.ParentAccountCategoryId, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-md-12 col-12">
+                                                <div class="input-group mb-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text py-0">
+                                                            @Html.LabelFor(model => model.AccountType, htmlAttributes: new { @class = "control-label" })
+                                                        </span>
+                                                    </div>
+                                                    @Html.DropDownList("AccountType", new List<SelectListItem>
+                                                    {
+                                                    new SelectListItem() {Text = "Asset", Value="Asset"},
+                                                    new SelectListItem() {Text = "Liability", Value="Liability"},
+                                                    new SelectListItem() {Text = "Income", Value="Income"},
+                                                    new SelectListItem() {Text = "Expense", Value="Expense"},
+                                                    }, "Select Account Type", new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.AccountType, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+
+
+                                            <div class="col-md-3 col-12 text-center">
+
+                                                <label asp-for="IsActive"></label>
+                                                <input asp-for="IsActive" class="form-control">
+                                                <span asp-validation-for="IsActive" class="text-danger"></span>
+
+                                            </div>
+
+                                            
+                                            <div class="col-md-3 col-12 text-center">
+
+                                               <div class="input-group mb-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text py-0">
+                                                            @Html.LabelFor(x => x.SLNo)
+                                                        </span>
+                                                    </div>
+                                                    <input type="text" asp-for="SLNo" class="form-control" placeholder="eg 1">
+                                                    <span asp-validation-for="SLNo" class="text-danger"></span>
+                                                </div>
+                                            </div>
+
+                                            
+                                            <div class="col-md-3 col-12 text-center">
+
+                                               <div class="input-group mb-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text py-0">
+                                                            @Html.LabelFor(x => x.NoteNo)
+                                                        </span>
+                                                    </div>
+                                                    <input type="text" asp-for="NoteNo" class="form-control" placeholder="eg 101">
+                                                    <span asp-validation-for="NoteNo" class="text-danger"></span>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+
+
+                                        <div class="form-group">
+                                            @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                                <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" />
+                                            }
+                                            else if (ViewBag.ActionType == "Edit")
+                                            {
+                                                <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" />
+                                            }
+                                            else if (ViewBag.ActionType == "Delete")
+                                            {
+                                                <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>
+                                            }
+                                            @Html.ActionLink("Back", "AccountCategoryList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+                                        </div>
+
+
+
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>

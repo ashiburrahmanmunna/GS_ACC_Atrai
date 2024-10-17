@@ -1,0 +1,1323 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Export Invoice";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    .form-control {
+        border: 1px solid #adb5bd !important;
+    }
+
+    #example-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+    #previousInvoice {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #393a3d;
+        color: #fff;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+
+    #modal-content2 {
+        background-color: #fefefe;
+        margin: 10px auto;
+        padding: 20px;
+        border: 3px solid #888;
+        width: 80%;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.5);
+    }
+</style>
+
+
+<div>
+    <div style="background: #F4F4F4; padding: 20px;">
+        <h3 style="border-bottom: 1px solid gray">Import Document</h3>
+        <input type="hidden" id="Id" value="0" />
+        <div class="row">
+            <div class="col-md-2 col-2">
+                <label>Document No</label>
+                <input type="text" id="CICode" class="form-control ps-1" style="padding:1px;">
+                <span class="text-danger" id="CICodeValidation"></span>
+            </div>
+            <div class="col-md-2 col-2">
+                <label>Date</label>
+                <input id="CIDate" class="form-control ps-1" style="padding:1px;">
+            </div>
+            <div class="col-md-2 col-2">
+                <label>Exporter</label>
+                <select id="CommercialCompanyID" class="form-control">
+                    <option value="">Select..</option>
+                </select>
+            </div>
+            <div class="col-md-2 col-2">
+                <label>Port of Loading</label>
+                <select id="PortOfLoadingId" class="form-control">
+                    <option value="">Select from list</option>
+                </select>
+            </div>
+            <div class="col-md-2 col-2">
+                <label>Port of Destination</label>
+                <select id="PortOfDestinationId" class="form-control">
+                    <option value="">Select from list</option>
+                </select>
+            </div>
+            <div class="col-md-2 col-2">
+                <label>Port of Discharge</label>
+                <select id="PortOfDischargeId" class="form-control">
+                    <option value="">Select from list</option>
+                </select>
+            </div>
+            <div class="col-md-2 col-2">
+                <label>Country of Origin</label>
+                <select id="CountryOfOriginId" class="form-control">
+                    <option value="">Select from list</option>
+                </select>
+            </div>
+            <div class="col-md-2 col-2">
+                <label>C&F</label>
+                <select id="CNFId" class="form-control">
+                    <option value="">Select from list</option>
+                </select>
+            </div>
+            <div class="col-md-2 col-2">
+                <label>BL No</label>
+                <input type="text" id="BLNo" class="form-control ps-1" style="padding:1px;">
+            </div>
+            <div class="col-md-2 col-2">
+                <label>Trade term</label>
+                <select id="TradeTermId" class="form-control">
+                    <option value="">Select from list</option>
+                </select>
+            </div>
+            <div class="col-md-3 col-3">
+                <label>Description</label>
+                <input type="text" id="Description" class="form-control ps-1" style="padding:1px;">
+            </div>
+            <div class="col-md-3 col-3">
+                <label>Remarks</label>
+                <input type="text" id="Remarks" class="form-control ps-1" style="padding:1px;">
+            </div>
+        </div>
+        <div class="row mt-2">
+           
+           
+        </div>
+    </div>
+
+    <div id="example-table" style="margin-top: 30px; margin-bottom: 5px;"></div>
+    <div class="row" style="margin-bottom: 50px;">
+        <div class="col-md-3 col-12">
+            <div class="btn-group">
+                <button type="button" class="btn btn-success btn-sm" id="add-row">Add Row</button>
+                <button type="button" class="btn btn-danger btn-sm" id="del-row">Clear Table</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="container-fluid">
+            <div class="row px-4">
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-outline-secondary text-white btn-sm rounded-pill " id="BtnBack" onclick="window.location.href = '@Url.Action("Import", "Variable", new { Type = "ImportDocument" })';">Cancel</button>
+                </div>
+                <div class="col-md-6 d-flex justify-content-center">
+                </div>
+
+                <div class="col-md-3 d-flex justify-content-end">
+                    <button class="btn btn-outline-secondary text-white btn-sm rounded-pill me-1" id="BtnSave">
+                        @if (ViewBag.ActionType == "Edit")
+                        {
+                            <span>Update</span>
+                        }
+                        else if (ViewBag.ActionType == "Create")
+                        {
+                            <span>Save </span>
+                        }
+
+                    </button>
+                    <div class="btn-group">
+                        <button class="btn btn-success btn-sm" id="BtnSaveClose">
+                            @if (ViewBag.ActionType == "Edit")
+                            {
+                                <span>Update and close</span>
+                            }
+                            else if (ViewBag.ActionType == "Create" || ViewBag.ActionType == "Copy")
+                            {
+                                <span>Save and close</span>
+                            }
+
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu" id="ul-id-for-expenses">
+                            <li><a class="dropdown-item" href="/Accounts/ImportTransaction">Time activity</a></li>
+                        </ul>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+        <input type="button" id="unknown" class="btn  btn-md" value="" />
+        <div class="dropdown" id="unknown1" style="display: inline-block;">
+        </div>
+    </div>
+</div>
+
+<div class="col-md-2  col-2">
+    <div id="childModal" class="modal">
+        <div class="modal-content" id="modal-content2">
+            <div class="row" style="border-bottom: 1px solid #dee2e6 ">
+                <div class="col-md-11 col-11">
+                    <h6>Container Details</h6>
+                </div>
+                <div class="col-md-1 col-1">
+                    <i class="bi bi-x-square-fill" style="color: red; font-size: 20px;" id="closechildModal"></i>
+                </div>
+            </div>
+
+            <div id="containerlist"></div>
+            <div class="row" style="margin-top: 10px;">
+                <div class="col-md-3 col-12">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success btn-sm" id="add-packing">Add</button>
+                        <button type="button" class="btn btn-warning btn-sm" id="show-all">Show All</button>
+                        <button type="button" class="btn btn-danger btn-sm" id="close-packing">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            $('#CountryOfOriginId').select2();
+            $('#PortOfDestinationId').select2();
+            $('#PortOfDischargeId').select2();
+            $('#PortOfLoadingId').select2();
+            $('#CommercialCompanyID').select2();
+            $('#CNFId').select2();
+            $('#TradeTermId').select2();
+
+            var today = new Date();
+            var day = today.getDate();
+            var month = today.toLocaleString('default', { month: 'short' });
+            var year = today.getFullYear();
+
+            var formattedDay = (day < 10 ? '0' : '') + day;
+
+            var formattedDate = formattedDay + '-' + month + '-' + year;
+
+            document.getElementById('CIDate').value = formattedDate;
+
+            $(function () {
+                $("#CIDate").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                });
+                
+            });
+
+
+        });
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetComercialCompany", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#CommercialCompanyID').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetLoadingPort", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#PortOfLoadingId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetCountryOfOrigin", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#CountryOfOriginId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetPortOfDestination", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#PortOfDestinationId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetDischargePort", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#PortOfDischargeId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetSupplier", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#CNFId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetTradeTerm", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#TradeTermId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+
+
+        document.getElementById("closechildModal").addEventListener("click", function () {
+            var modal = document.getElementById("childModal");
+            updateMainTable();
+            modal.style.display = "none";
+        });
+        
+        document.getElementById("close-packing").addEventListener("click", function () {
+            var modal = document.getElementById("childModal");
+            updateMainTable();
+            modal.style.display = "none";
+        });
+
+        //duplicate CI code error  handling
+        var currentPOLId = '@ViewBag.commercialInvoiceId';
+        var BtnSave = document.querySelector('#BtnSave');
+        var BtnSaveAndClose = document.querySelector('#BtnSaveClose');
+        function getBBLC(callback) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetImportDocumentList", "Variable")',
+                dataType: "json",
+                success: function (data) {
+                    // console.log("data::", data.data);
+                    var SizeCodeGetArray = [];
+
+                    data.data.forEach(function (item) {
+                        var SizeName = item.CICode;
+                        var SizeIdGet = item.Id;
+                        var SizeData = {
+                            SizeName: SizeName,
+                            Id: SizeIdGet
+                        };
+                        SizeCodeGetArray.push(SizeData);
+                    });
+
+                    if (typeof callback === "function") {
+                        callback(SizeCodeGetArray);
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                }
+            });
+        }
+
+        function checkPOLExists(sizeName) {
+            getBBLC(function (data) {
+                var lowercasedSizeName = sizeName.toLowerCase();
+
+                var sizeExists = data.some(function (item) {
+
+                    if (currentPOLId == item.Id) {
+                        return false;
+                    }
+
+                    return item.SizeName.trim().toLowerCase() === lowercasedSizeName;
+                });
+
+                console.log("sizeExists", sizeExists);
+
+                if (sizeExists) {
+                    $("#CICodeValidation").html("Already has the same CI Code!");
+                    BtnSave.disabled = true;
+                    BtnSaveAndClose.disabled = true;
+                } else {
+                    $("#CICodeValidation").html("");
+                    BtnSave.disabled = false;
+                    BtnSaveAndClose.disabled = false;
+
+                }
+            });
+        }
+
+        var POLNameHandle = document.getElementById("CICode");
+        POLNameHandle.addEventListener("input", function () {
+            var enteredSizeName = POLNameHandle.value;
+            checkPOLExists(enteredSizeName);
+        });
+    </script>
+
+    <script>
+
+            function containerEditor(cell, onRendered, success, cancel, editorParams) {
+            var editor = document.createElement("select");
+            editor.setAttribute("class", "select2");
+            editor.style.width = "100%";
+
+            onRendered(function () {
+                // Get the list of containers already used in the table
+                var usedContainers = packingtable.getRows().map(row => row.getData().Container).filter(name => name && name !== cell.getValue());
+                
+                $(editor).select2({
+                    closeOnSelect: false,
+                    dropdownParent: $("#childModal"),
+                    ajax: {
+                        url: '@Url.Action("GetContainerListEditor", "Variable")',
+                        dataType: 'json',
+                        data: function (params) {
+                            return {
+                                dropdownSearch: params.term,
+                                pageNo: params.page || 1
+                            };
+                        },
+                        processResults: function (data) {
+                            var options = data.ItemDescList
+                                .map(function (item) {
+                                    return {
+                                        id: item.Id,
+                                        text: item.ContainerName
+                                    };
+                                });
+                            return { results: options };
+                        },
+                        cache: false
+                    }
+                });
+
+                $(editor).select2('open');
+            });
+
+            function successFunc(e) {
+                var data = e.params.data;
+                cell.getRow().update({
+                    "ContainerId": data.id,
+                    "Container": data.text,
+                });
+                success(data.text);
+                $(editor).select2('close');
+            }
+
+            function DestroyFunc() {
+                cancel();
+                cell.navigateRight();
+            }
+
+            $(editor).on("select2:select", successFunc);
+            $(editor).on("select2:close", DestroyFunc);
+
+            return editor;
+        }
+
+
+
+        var containerOptions = @Html.Raw(Json.Serialize(ViewBag.ContainerList));
+        var packingcolumns = [
+            
+            { title: "Id", field: "Id", movable: false, visible: false },
+            { title: "SL.", field: "PSLNo", headerSort: false, frozen: true, width: 5, bottomCalc: "count", hozAlign: "right" },
+            { title: "ItemDescId", field: "ItemDescId", movable: false , visible: false},
+            { title: "Item Description", field: "Name", movable: false },
+            {
+                title: "Container",
+                field: "Container",
+                hozAlign: "center",
+                sorter: "number",
+                editor: containerEditor,
+                cellEdited: function (cell) {
+                    var rowData = cell.getRow().getData();
+                    var selectedText = cell.getValue();
+                    var selectedValue = containerOptions.find(option => option.Text === selectedText);
+                    if (selectedValue) {
+                        cell.getRow().update({ ContainerId: selectedValue.Value });
+                    }
+                },
+            },
+            {
+                title: "Hidden Value",
+                field: "ContainerId",
+                visible: false,
+                editor: "input",
+            },
+            { title: "PKG", field: "PKG", movable: false, editor: "input" },
+            { title: "Quantity", field: "GrossQty", movable: false, editor: "input", bottomCalc: "sum" },
+            { title: "Net Weight", field: "NetWeight", movable: false, editor: "input" },
+            { title: "Gross Weight", field: "GrossWeight", movable: false, editor: "input" },
+        ];
+
+        var deletepackingColumn = {
+            title: "",
+            field: "Delete",
+            movable: false,
+            formatter: function (cell, formatterParams) {
+                return "<i class='fas fa-trash-alt delete-icon'></i>";
+            },
+            width: 30,
+            headerSort: false,
+            cellClick: function (e, cell) {
+                var rowData = cell.getRow().getData();
+                var row = cell.getRow();
+                deletepackingRow(row);
+            }
+        };
+
+        packingcolumns.push(deletepackingColumn);
+
+
+
+        var packingtable = new Tabulator("#containerlist", {
+            height: "311px",
+            layout: "fitColumns",
+            addRowPos: "bottom",
+            columns: packingcolumns,
+        });
+
+        function renumberpackingRows() {
+            var rows = packingtable.getRows();
+            rows.forEach(function (row, index) {
+                row.update({ PSLNo: index + 1 });
+            });
+        }
+
+        function deletepackingRow(row) {
+
+            if (confirm("Are you sure you want to delete this row?")) {
+                packingtable.deleteRow(row);
+                renumberpackingRows();
+            }
+
+        }
+
+        document.getElementById("show-all").addEventListener("click", function () {
+            packingtable.clearFilter();
+        });
+        document.getElementById("add-packing").addEventListener("click", function () {
+
+            var selectedRows = table.getRows().filter(function (row) {
+                return row.getData().CheckBox === true;
+            });
+
+            var selectedData = selectedRows.map(function (row) {
+                return row.getData();
+            });
+
+            packingtable.setFilter("ItemDescId", "=", selectedData[0].ItemDescId);
+
+            packingtable.addRow({
+                ItemDescId: selectedData[0].ItemDescId,
+                Name: selectedData[0].Name,
+                PKG: 0,
+                GrossQty: 0,
+                NetWeight: 0,
+                GrossWeight: 0
+            });
+
+            renumberpackingRows();
+        });
+
+        function showpackingListModal(data) {
+            var modal = document.getElementById("childModal");
+            modal.style.display = "block";
+
+            packingtable.setFilter("ItemDescId", "=", data.ItemDescId);
+
+            var existingRow = packingtable.getData().find(function (row) {
+                return (
+                    row.ItemDescId === data.ItemDescId &&
+                    row.Name === data.Name 
+                );
+            });
+
+            if (!existingRow) {
+                packingtable.addRow({
+                    ItemDescId: data.ItemDescId,
+                    Name: data.Name,
+                    PKG: 0,
+                    GrossQty: 0,
+                    NetWeight: 0,
+                    GrossWeight: 0
+                });
+            }
+
+            renumberpackingRows();
+        }
+        function formatCurrency(value) {
+
+            if (value === undefined) {
+                return '0.00';
+            }
+            return parseFloat(value).toFixed(4).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+
+        function ItemDescEditor(cell, onRendered, success, cancel, editorParams) {
+            var editor = document.createElement("select");
+            editor.setAttribute("class", "select2");
+            editor.style.width = "100%";
+
+            onRendered(function () {
+                var usedNames = table.getRows().map(row => row.getData().Name).filter(name => name && name !== cell.getValue());
+
+                $(editor).select2({
+                    closeOnSelect: false,
+                    ajax: {
+                        url: '@Url.Action("GetImportDocumentSearchListEditor", "Variable")',
+                        dataType: 'json',
+                        data: function (params) {
+                            return {
+                                dropdownSearch: params.term,
+                                pageNo: params.page || 1
+                            };
+                        },
+                        processResults: function (data) {
+                            var options = data.ItemDescList
+                                .filter(item => !usedNames.includes(item.ItemDesc))
+                                .map(function (item) {
+                                    return {
+                                        id: item.Id,
+                                        text: item.ItemDesc
+                                    };
+                                });
+                            return { results: options };
+                        },
+                        cache: false
+                    }
+                });
+
+                $(editor).select2('open');
+            });
+
+            function successFunc(e) {
+                var data = e.params.data;
+                cell.getRow().update({
+                    "ItemDescId": data.id,
+                    "Name": data.text,
+                });
+                success(data.text);
+                $(editor).select2('close');
+            }
+
+            function DestroyFunc() {
+                cancel();
+                cell.navigateRight();
+            }
+
+            $(editor).on("select2:select", successFunc);
+            $(editor).on("select2:close", DestroyFunc);
+
+            return editor;
+        }
+
+
+        function UnitEditor(cell, onRendered, success, cancel, editorParams) {
+            var editor = document.createElement("select");
+            editor.setAttribute("class", "select2");
+            editor.style.width = "100%";
+
+            onRendered(function () {
+                $(editor).select2({
+                    closeOnSelect: false,
+                    ajax: {
+                        url: '@Url.Action("GetUnitListEditor", "Variable")',
+                        dataType: 'json',
+                        data: function (params) {
+                            return {
+                                dropdownSearch: params.term,
+                                pageNo: params.page || 1
+                            };
+                        },
+                        processResults: function (data) {
+                            var options = data.ItemDescList.map(function (item) {
+                                return {
+                                    id: item.Id,
+                                    text: item.UnitName
+                                };
+                            });
+                            return { results: options };
+                        },
+                        cache: false
+                    }
+                });
+                editor.style.css = "100%";
+                $(editor).select2('open');
+            });
+
+            function successFunc(e) {
+                var data = e.params.data;
+                cell.getRow().update({
+                    "UnitId": data.id,
+                    "Unit": data.text,
+                });
+                success(data.text);
+                $(editor).select2('close');
+            }
+
+            function DestroyFunc() {
+                cancel();
+                cell.navigateRight();
+            }
+
+            $(editor).on("select2:select", successFunc);
+            $(editor).on("select2:close", DestroyFunc);
+
+            return editor;
+        }
+
+        var selectOptions = @Html.Raw(Json.Serialize(ViewBag.ItemDescList));
+        var unitOptions = @Html.Raw(Json.Serialize(ViewBag.UnitList));
+
+        
+        var childcolumns = [
+            
+            {
+                title: "",
+                field: "CheckBox",
+                headerHozAlign: "left",
+                width: "9px",
+                headerSort: false,
+                hozAlign: "left",
+                formatter: function (cell, formatterParams, onRendered) {
+                    var isChecked = cell.getValue() === true;
+
+                    var checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.checked = isChecked;
+
+                    checkbox.addEventListener("click", function (event) {
+                        var newValue = event.target.checked;
+                        // Update the cell value
+                        cell.setValue(newValue);
+                    });
+
+                    return checkbox;
+                },
+                cellClick: function (e, cell) {
+                    table.getRows().forEach(function (row) {
+                        row.getCell("CheckBox").setValue(false);
+                    });
+
+                    cell.getRow().getCell("CheckBox").setValue(true);
+                    showpackingListModal(cell.getRow().getData());
+                },
+                visible: true,
+                width: 50
+            },
+            { title: "Id", field: "Id", movable: false, visible: false },
+            { title: "SL.", field: "SLNo", headerSort: false, frozen: true, width: 5, bottomCalc: "count", hozAlign: "right" },
+            {
+                title: "Item Description",
+                field: "Name",
+                hozAlign: "center",
+                sorter: "number",
+                editor: ItemDescEditor,
+                formatter: function (cell, formatterParams, onRendered) {
+                    var temp = cell.getValue();
+                    if(cell.getValue() !== undefined) {
+                        return "<span style='font-weight: bold; color: blue;'>" + cell.getValue() + "</span>";
+                    }
+                },
+                // editorParams: {
+                //     values: selectOptions.map(option => option.Text),
+                // },
+                // editorParams: function (cell) {
+                //     // Get all ItemDescId values from the table
+                //     var usedItemDescIds = table.getRows().map(row => row.getData().ItemDescId);
+
+                //     // Filter out the options that are already used
+                //     var availableOptions = selectOptions.filter(option => !usedItemDescIds.includes(option.Value));
+
+                //     // Convert the available options to the format needed for the select editor
+                //     var availableValues = availableOptions.map(option => option.Text);
+
+                //     return {
+                //         values: availableValues
+                //     };
+                // },
+                cellClick: function (e, cell) {
+                    table.getRows().forEach(function (row) {
+                        row.getCell("CheckBox").setValue(false);
+                    });
+
+                    cell.getRow().getCell("CheckBox").setValue(true);
+                    
+                },
+                cellEdited: function (cell) {
+                    var rowData = cell.getRow().getData();
+
+                    var selectedText = cell.getValue();
+                    var selectedValue = selectOptions.find(option => option.Text === selectedText);
+                    if (selectedValue) {
+                        cell.getRow().update({ ItemDescId: selectedValue.Value });
+
+                    }
+                },
+            },
+            {
+                title: "Hidden Value",
+                field: "ItemDescId",
+                visible: false,
+                editor: "input",
+            },
+            
+            { title: "HSCode", field: "HSCode", movable: false , editor: "input", hozAlign: "center"},
+            { title: "PKG", field: "PKG", movable: false, editor: "input", hozAlign: "center" },
+
+            {
+                title: "Gross Quantity", field: "GrossQty", movable: false, editor: "input", hozAlign: "right",
+                cellEdited: function (cell) {                  
+                    calculateTotalValue(cell.getRow());
+                }
+
+            },
+            { title: "Extra %", field: "ExtraPercentage", movable: false, editor: "input", hozAlign: "center",
+                cellEdited: function (cell) {
+                    calculateTotalValue(cell.getRow());
+                }
+            },
+            
+            {
+                title: "Quantity", field: "Quantity", movable: false, editor: "input", hozAlign: "center",
+                cellEdited: function (cell) {
+                    var rowData = cell.getRow().getData();
+
+                    var qty = parseFloat(rowData.Quantity) || 0;
+                    var rate = parseFloat(rowData.UnitPrice) || 0;
+                    var amount = qty * rate;
+
+                    cell.getRow().update({ TotalAmount: amount, Quantity: qty });
+
+                },
+            },
+           
+
+           
+
+            //{ title: "Unit", field: "Unit", movable: false, editor: "input", hozAlign: "center" },
+            {
+                title: "Unit",
+                field: "Unit",
+                hozAlign: "center",
+                sorter: "number",
+                editor: UnitEditor,
+                cellEdited: function (cell) {
+                    var rowData = cell.getRow().getData();
+
+                    var selectedText = cell.getValue();
+                    var selectedValue = unitOptions.find(option => option.Text === selectedText);
+                    if (selectedValue) {
+                        cell.getRow().update({ UnitId: selectedValue.Value });
+
+                    }
+                },
+            },
+            {
+                title: "Hidden Value",
+                field: "UnitId",
+                visible: false,
+                editor: "input",
+            },
+            {
+                title: "UnitPrice", field: "UnitPrice", movable: false, bottomCalc: "sum", editor: "input", hozAlign: "center",
+                bottomCalcFormatter: "money",
+                formatter: "money",
+                formatterParams: {
+                    decimal: ".",
+                    thousand: ",",
+                    precision: 2,
+                },
+                cellEdited: function (cell) {
+                    var rowData = cell.getRow().getData();
+
+                    var qty = parseFloat(rowData.Quantity) || 0;
+                    var rate = parseFloat(rowData.UnitPrice) || 0;
+                    var amount = qty * rate;
+
+                    cell.getRow().update({ TotalAmount: amount, UnitPrice: rate });
+                   
+                },
+            },
+            {
+                title: "Total Amount", field: "TotalAmount", movable: false, bottomCalc: "sum", hozAlign: "center",
+                bottomCalcFormatter: "money",
+                formatter: "money",
+                formatterParams: {
+                    decimal: ".",
+                    thousand: ",",
+                    precision: 2,
+                },
+                formatter: function (cell, formatterParams) {
+                    var rowData = cell.getRow().getData();
+                    var qty = parseFloat(rowData.Quantity) || 0;
+                    var rate = parseFloat(rowData.UnitPrice) || 0;
+                    var amount = qty * rate;
+
+                    return formatCurrency(amount);
+                },
+            },
+            {
+                title: "Net Weight", field: "NetWeight", movable: false, editor: "input", bottomCalc: "sum", hozAlign: "center",
+                bottomCalcFormatter: "money",
+                formatter: "money",
+                formatterParams: {
+                    decimal: ".",
+                    thousand: ",",
+                    precision: 2,
+                },
+            },
+            {
+                title: "Gross Weight", field: "GrossWeight", movable: false, editor: "input", bottomCalc: "sum", hozAlign: "center",
+                bottomCalcFormatter: "money",
+                formatter: "money",
+                formatterParams: {
+                    decimal: ".",
+                    thousand: ",",
+                    precision: 2,
+                },
+            },
+
+            { title: "CBM", field: "CBM", movable: false, editor: "input", hozAlign: "center" },
+            
+        ];
+
+
+        function calculateTotalValue(row) {
+            var grossQty = parseFloat(row.getCell("GrossQty").getValue()) || 0;
+            var extraPercentage = parseFloat(row.getCell("ExtraPercentage").getValue()) || 0;
+            var totalValue = grossQty * extraPercentage;
+
+            totalValue = Math.floor(totalValue);
+            // Set the TotalValue cell
+            row.getCell("Quantity").setValue(totalValue);
+        }
+
+        var deleteColumn = {
+            title: "",
+            field: "Delete",
+            movable: false,
+            formatter: function (cell, formatterParams) {
+                return "<i class='fas fa-trash-alt delete-icon'></i>";
+            },
+            width: 30,
+            headerSort: false,
+            cellClick: function (e, cell) {
+                var rowData = cell.getRow().getData();
+                var row = cell.getRow();
+                deleteRow(row);
+            }
+        };
+
+        childcolumns.push(deleteColumn);
+
+        var table = new Tabulator("#example-table", {
+            height: "311px",
+            layout: "fitColumns",
+            addRowPos: "bottom",
+            columns: childcolumns,
+        });
+
+        function updateMainTable() {
+            var mainTableData = {};
+
+            // Iterate over all rows in the packing table
+            packingtable.getRows().forEach(row => {
+                var rowData = row.getData();
+                var itemDescId = rowData.ItemDescId;
+
+                // Initialize the sums if not already present
+                if (!mainTableData[itemDescId]) {
+                    mainTableData[itemDescId] = {
+                        GrossQty: 0,
+                        NetWeight: 0,
+                        GrossWeight: 0
+                    };
+                }
+
+                // Sum the quantities, net weights, and gross weights
+                mainTableData[itemDescId].GrossQty += parseFloat(rowData.GrossQty) || 0;
+                mainTableData[itemDescId].NetWeight += parseFloat(rowData.NetWeight) || 0;
+                mainTableData[itemDescId].GrossWeight += parseFloat(rowData.GrossWeight) || 0;
+            });
+
+            // Update the main table with the summed values
+            Object.keys(mainTableData).forEach(itemDescId => {
+                var rowData = mainTableData[itemDescId];
+                var row = table.getRows().find(row => row.getData().ItemDescId == itemDescId);
+                if (row) {
+                    row.update({
+                        GrossQty: rowData.GrossQty,
+                        NetWeight: rowData.NetWeight,
+                        GrossWeight: rowData.GrossWeight
+                    });
+                }
+            });
+        }
+
+        function renumberRows() {
+            var rows = table.getRows();
+            rows.forEach(function (row, index) {
+                row.update({ SLNo: index + 1 });
+            });
+        }
+
+        function deleteRow(row) {
+            if (confirm("Are you sure you want to delete this row?")) {
+                table.deleteRow(row);
+                renumberRows();
+            }
+
+        }
+        
+        document.getElementById("add-row").addEventListener("click", function () {
+            table.addRow({ ExtraPercentage: 1 });
+            renumberRows();
+        });
+
+        document.getElementById("del-row").addEventListener("click", function () {
+            table.clearData();
+            renumberRows();
+        });
+
+        function gatherData() {
+
+            var dataList = [];
+            var packingdataList = [];
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+
+
+            var rows = table.getData();
+            var packingrows = packingtable.getData();
+            var id = @ViewBag.commercialInvoiceId;
+
+            packingrows.forEach(function (row) {
+                var rowData = {
+                    "Id": row["Id"] == null ? 0 : parseInt(row["Id"]),
+                    "ItemDescId": row.ItemDescId,
+                    "ContainerId": row.ContainerId,
+                    "ImportCI_DetailsId": 0,
+                    "PKG": parseFloat(row.PKG),
+                    "GrossQty": parseFloat(row.GrossQty),
+                    "NetWeight": parseFloat(row.NetWeight),
+                    "GrossWeight": parseFloat(row.GrossWeight),
+                    "ComId": ComId,
+                    "LuserId": UserId
+                };
+                packingdataList.push(rowData);
+            });
+
+
+            var groupedPackingRows = {};
+            packingdataList.forEach(function (packingRow) {
+                var ExportPoNo = packingRow.ItemDescId;
+                if (!groupedPackingRows[ExportPoNo]) {
+                    groupedPackingRows[ExportPoNo] = [];
+                }
+                groupedPackingRows[ExportPoNo].push(packingRow);
+            });
+
+            rows.forEach(function (row) {
+                var exportOrderNo = row.ItemDescId;
+                var packingDataForExportOrder = groupedPackingRows[exportOrderNo] || [];
+
+                var rowData = {
+                    "Id": row["Id"] == null ? 0 : parseInt(row["Id"]),
+                    "ItemDescId": row.ItemDescId,
+                    "HSCode": row.HSCode,
+                    "PKG": parseFloat(row.PKG),
+                    "Quantity": parseFloat(row.Quantity),
+                    "GrossQty": parseFloat(row.GrossQty),
+                    "ExtraPercentage": parseFloat(row.ExtraPercentage),
+                    "UnitId": row.UnitId,
+                    "UnitPrice": row.UnitPrice,
+                    "TotalAmount": row.TotalAmount,
+                    "NetWeight": parseFloat(row.NetWeight),
+                    "CBM": parseFloat(row.CBM),
+                    "GrossWeight": parseFloat(row.GrossWeight),
+                    "ImportCI_ContainerList": packingDataForExportOrder,
+                    "ComId": ComId,
+                    "LuserId": UserId
+                };
+                dataList.push(rowData);
+            });
+
+
+
+            var masterLCData = {
+                ComId: ComId,
+                LuserId: UserId,
+                Id: id,
+                CICode: $("#CICode").val(),
+                CNFId: $("#CNFId").val(),
+                BLNo: $("#BLNo").val(),
+                TradeTermId: $("#TradeTermId").val(),
+                PortOfDestinationId: $("#PortOfDestinationId").val(),
+                PortOfOriginId: $("#CountryOfOriginId").val(),
+                PortOfLoadingId: parseInt($("#PortOfLoadingId").val()),
+                PortOfDischargeId: parseInt($("#PortOfDischargeId").val()),
+                CIDate: $("#CIDate").val(),
+                CommercialCompanyID: $("#CommercialCompanyID").val(),
+                Description: $("#Description").val(),
+                Remarks: $("#Remarks").val(),
+
+                ImportCI_DetailsList: dataList
+            };
+
+
+            return masterLCData;
+
+        }
+
+        function sendDataToServer() {
+            var invoiceData = gatherData();
+
+            if (invoiceData.ImportCI_DetailsList.length == 0) {
+                setTimeout(function () {
+                    toastr.success("Include Import DocumentDetails", "", {
+                        "toastClass": "toast-red",
+                    });
+                }, 1500);
+            }
+            else {
+                var data = JSON.stringify(invoiceData);
+
+
+                $.ajax({
+
+                    url: '@Url.Action("ImportDocumentCreation", "Variable")',
+                    type: 'POST',
+                    data: data,
+                    async: false,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (response) {
+                        toastr.success(response.message, "", {
+                            "toastClass": "toast-green",
+                        });
+                        setTimeout(function () {
+                            window.location.href = '@Url.Action("Import", "Variable", new { Type = "ImportDocument" })';
+                        }, 1000);
+                    },
+                    error: function (error) {
+                        console.log("Error");
+                    }
+                });
+            }
+
+        }
+
+        var saveButton = document.getElementById('BtnSave');
+        saveButton.addEventListener('click', function () {
+            sendDataToServer();
+        });
+
+        var saveButton = document.getElementById('BtnSaveClose');
+        saveButton.addEventListener('click', function () {
+            sendDataToServer();
+        });
+
+        function formatDateToCustomString(inputDate) {
+            const months = [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+
+            if (inputDate instanceof Date && !isNaN(inputDate)) {
+                const day = inputDate.getDate();
+                const monthIndex = inputDate.getMonth();
+                const year = inputDate.getFullYear();
+                const formattedDay = day < 10 ? `0${day}` : day;
+
+                const formattedDate = `${formattedDay}-${months[monthIndex]}-${year}`;
+                return formattedDate;
+            } else {
+                return inputDate;
+            }
+        }
+
+        function initializeTabulatorEdit(data) {
+            if (table) {
+                data.forEach(function (row, index) {
+
+                    row.SLNo = index + 1;
+                });
+                table.setData(data);
+            } else {
+                table = new Tabulator("#example-table", {
+                    layout: "fitColumns",
+                    addRowPos: "bottom",
+                    columns: modalColumn,
+                    data: data,
+                });
+            }
+        }
+
+        function initializepackingTableEdit(data) {
+            if (packingtable) {
+                data.forEach(function (row, index) {
+
+                    row.PSLNo = index + 1;
+                });
+                packingtable.setData(data);
+            } else {
+                packingtable = new Tabulator("#packinglist", {
+                    layout: "fitColumns",
+                    addRowPos: "bottom",
+                    columns: packingcolumns,
+                    data: data,
+                });
+            }
+        }
+
+        if ('@actiontype' === "Edit") {
+            var id = @ViewBag.commercialInvoiceId;
+            console.log(id);
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetImportDocumentDetails", "Variable")',
+                data: { id: id },
+                dataType: "json",
+                success: function (response) {
+                    console.log(response.data);
+                    var model = response.data[0];
+
+                    $("#Id").val(model.Id);
+                    $("#CICode").val(model.CICode);
+                    $("#BLNo").val(model.BLNo);
+                    $("#Description").val(model.Description); // Corrected this line
+                    $("#Remarks").val(model.Remarks);
+                    $("#CIDate").val(formatDateToCustomString(new Date(model.CIDate)));
+
+                    setTimeout(function () {
+                        $("#CommercialCompanyID").val(model.CommercialCompanyID).trigger('change');
+                        $("#PortOfLoadingId").val(model.PortOfLoadingId).trigger('change');
+                        $("#PortOfDischargeId").val(model.PortOfDischargeId).trigger('change');
+                        $("#TradeTermId").val(model.TradeTermId).trigger('change');
+                        $("#PortOfDestinationId").val(model.PortOfDestinationId).trigger('change');
+                        $("#CountryOfOriginId").val(model.PortOfOriginId).trigger('change');
+                        $("#CNFId").val(model.CNFId).trigger('change');
+
+                        initializeTabulatorEdit(response.details);
+                        initializepackingTableEdit(response.packing); // Corrected function name
+                    }, 0); // Added 0 timeout to ensure the function is properly closed
+                },
+                error: function (error) {
+                    console.error("Error fetching data: ", error);
+                }
+            });
+        }
+
+    </script>
+}

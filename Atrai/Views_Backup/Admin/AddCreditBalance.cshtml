@@ -1,0 +1,167 @@
+﻿@model Atrai.Core.Entity.CreditBalanceModel
+@{
+    ViewData["Title"] = "AddCreditBalance";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+
+
+
+            <div class="row">
+                <div class="col-md-6 col-12">
+                    <div class="card">
+                        <div class="card-header py-1">
+                            <h4> Purchase / Balance</h4>
+                        </div>
+                        <div class="card-body">
+
+                                <form asp-controller="admin" asp-action="AddCreditBalance" method="post">
+                                    @if (Model != null)
+                                    {
+                        <input type="hidden" asp-for="Id" />
+                        @*<input type="hidden" asp-for="SMSUsedQuantity" />*@
+
+                        
+                                        <input type="hidden" asp-for="CreateDate" /> @*<input type="hidden" asp-for="LuserId" />*@ }
+                                    else
+                                    {
+                        <input type="hidden" asp-for="Id" value="0" />
+                                @*<input type="hidden" asp-for="SMSUsedQuantity"  />*@
+                                    }
+
+
+                                    <div class="form-group row">
+
+
+                                        <div class="col-md-6 col-12 ">
+                                            @Html.LabelFor(x => x.ComId)
+                                            @Html.DropDownListFor(x => x.ComId, new SelectList((IEnumerable<SelectListItem>)ViewBag.Company, "Value", "Text"), "Select Company", htmlAttributes: new { @class = "form-control", id = "ComId" })
+                                            @Html.ValidationMessageFor(x => x.ComId, "", new { @class = "text-danger" })
+                                        </div>
+
+
+                                                  <div class="col-md-6 col-12 ">
+                                            @Html.LabelFor(x => x.SoftwarePackageId)
+                                            @Html.DropDownListFor(x => x.SoftwarePackageId, new SelectList((IEnumerable<SelectListItem>)ViewBag.Package, "Value", "Text"), "Select Package For Purchase", htmlAttributes: new { @class = "form-control", id = "ComId" })
+                                            @Html.ValidationMessageFor(x => x.SoftwarePackageId, "", new { @class = "text-danger" })
+                                        </div>
+
+
+
+                                    </div>
+
+
+                                    <div class="form-group row">
+                                        <div class="col-md-6 col-12">
+
+                                            <label asp-for="ActivationDate"></label>
+                                            <input asp-for="ActivationDate" class="form-control" type="date">
+                                            <span asp-validation-for="ActivationDate" class="text-danger"></span>
+
+                                            @*@Html.LabelFor(x => x.ActiveFromDate)
+                                            @Html.TextBoxFor(x => x.ActiveFromDate, @"{0:dd-MMM-yyyy}", new { id = "ActiveFromDate", @class = "form-control", autocomplete = "off" })
+                                            @Html.ValidationMessageFor(x => x.ActiveFromDate, "", new { @class = "text-danger" })*@
+                                        </div>
+
+
+                                        <div class="col-md-6 col-12">
+
+                                            <label asp-for="ValidityDate"></label>
+                                            <input asp-for="ValidityDate" class="form-control" type="date">
+                                            <span asp-validation-for="ValidityDate" class="text-danger"></span>
+
+                                            @*@Html.LabelFor(x => x.ActiveToDate)
+                                            @Html.TextBoxFor(x => x.ActiveToDate, @"{0:dd-MMM-yyyy}", new { id = "ActiveToDate", @class = "form-control", autocomplete = "off" })
+                                            @Html.ValidationMessageFor(x => x.ActiveToDate, "", new { @class = "text-danger" })*@
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+
+                                        <div class="col-md-4 col-12">
+                                            <label for="Type">Balance For</label>
+                                            <input type="text" asp-for="Type" class="form-control">
+                                            <span asp-validation-for="Type" class="text-danger"></span>
+                                        </div>
+
+                                        
+
+@*                                          <div class="col-md-4 col-12">
+                                            <label for="Amount">Recharge Amount</label>
+                                            <input type="number" asp-for="RechargeAmount" class="form-control">
+                                            <span asp-validation-for="RechargeAmount" class="text-danger"></span>
+                                        </div>
+
+
+                                          <div class="col-md-4 col-12">
+                                            <label for="Amount">Used Amount</label>
+                                            <input type="number" asp-for="UsedAmount" class="form-control" readonly>
+                                            <span asp-validation-for="UsedAmount" class="text-danger"></span>
+                                        </div>*@
+
+
+                                        <div class="col-md-4 col-12">
+                                            <label for="Amount">Quantity</label>
+                                            <input type="number" asp-for="PurchaseQuantity" class="form-control">
+                                            <span asp-validation-for="PurchaseQuantity" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-4 col-12">
+                                            <label for="PurchaseRate"> Rate</label>
+                                            <input type="text" asp-for="PurchaseRate" class="form-control">
+                                            <span asp-validation-for="PurchaseRate" class="text-danger"></span>
+                                        </div>
+
+
+                                           <div class="col-md-4 col-12">
+                                            <label for="Amount">Used Qty</label>
+                                            <input type="number" asp-for="UsedQuantity" class="form-control" readonly>
+                                            <span asp-validation-for="UsedQuantity" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+
+
+
+                                        <div class="col-md-10 col-12">
+                                            <label asp-for="Remarks"></label>
+                                            <textarea class="form-control" asp-for="Remarks" rows="2" placeholder="Text input"></textarea>
+                                            <span asp-validation-for="Remarks" class="text-danger"></span>
+                                        </div>
+
+                                    </div>
+
+
+
+                                    <div class="form-group">
+                                        @if (ViewBag.ActionType == "Create")
+                                        {
+                            <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" /> }
+                        else if (ViewBag.ActionType == "Edit")
+                        {
+            <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" /> }
+        else if (ViewBag.ActionType == "Delete")
+        {
+    <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>}
+                                        @Html.ActionLink("Back", "CreditBalanceList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                    </div>
+
+
+
+
+                                </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End PAge Content -->
+    
+
+    </div>
+</div>

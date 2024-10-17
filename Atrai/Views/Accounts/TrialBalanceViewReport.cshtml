@@ -1,0 +1,238 @@
+﻿@model IEnumerable<Atrai.Controllers.AccountsController.TrialBalanceModel>
+@{
+    ViewData["Title"] = "Trial Balance";
+       Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>
+    </title>
+
+    <style>
+        .table th {
+            background: inherit;
+            color: black;
+            font-weight: 600;
+        }
+
+        .table thead th {
+            border-bottom: inherit;
+            
+        }
+
+        .table-bordered {
+            border: 1px solid #dee2e6;
+        }
+
+        .table th, .table td {
+          padding-top: 0.25rem;
+          padding-bottom: 0.25rem;
+          padding-left: 0.40rem;
+          padding-right: 0.40rem;
+        }
+
+        a {
+          color: #000;
+          text-decoration: none;
+          background-color: transparent;
+        }
+
+    </style>
+    <script type="text/javascript">
+        function ClosePrint() {
+            var print = document.getElementById("print");
+            print.style.visibility = "hidden";
+            //            print.display = false;
+
+            window.print();
+        }
+    </script>
+
+
+
+
+    @*
+    <style media="print">
+        .showHeader thead {
+            display: table-header-group;
+            border: 1px solid #000;
+        }
+
+    </style>
+
+        <style media="print">
+        
+     @@media print {
+      .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,
+      .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+           float: left;               
+      }
+
+      .col-md-12 {
+           width: 100%;
+      }
+
+      .col-md-11 {
+           width: 91.66666666666666%;
+      }
+
+      .col-md-10 {
+           width: 83.33333333333334%;
+      }
+
+      .col-md-9 {
+            width: 75%;
+      }
+
+      .col-md-8 {
+            width: 66.66666666666666%;
+      }
+
+       .col-md-7 {
+            width: 58.333333333333336%;
+       }
+
+       .col-md-6 {
+            width: 50%;
+       }
+
+       .col-md-5 {
+            width: 41.66666666666667%;
+       }
+
+       .col-md-4 {
+            width: 33.33333333333333%;
+       }
+
+
+       .col-md-3 {
+            width: 25%;
+       }
+       .col-md-2 {
+            width: 16.666666666666666%;
+       }
+       .col-md-1 {
+            width: 8.33333333333333%;
+       }
+
+           
+        .showHeader thead {
+            display: table-header-group;
+            border: 1px solid #000;
+        }
+    </style>*@
+</head>
+<body>
+    <form method="post" id="form1">
+        <h3>
+            @{
+                System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+            }
+        </h3>
+        <div id="main">
+            <div class="container">
+                <div class="row mb-2">
+                    <div class="col-md-12 col-10">
+                        <h3 class="text-center">@Model.FirstOrDefault().ComName</h3>
+                    </div>
+                    @*<div class="col-md-2 col-2 text-right">
+                            <input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()">
+                        </div>*@
+                    <div class="col-md-12 col-12 text-center">
+                        <span>
+                            @Model.FirstOrDefault().ComAddress
+                        </span>
+                        <span class="float-right">
+                            <input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />
+                        </span>
+                    </div>
+                    <div class="col-md-12 col-12 text-center">
+                        <h5><span class="border-bottoms">@Model.FirstOrDefault().Caption</span></h5>
+                    </div>
+
+
+                </div>
+                <table class="table table-bordered text-center  text-dark">
+                    <thead>
+                        <tr class="text-nowrap font-weight-bold">
+                            <th rowspan="2" class="align-middle">ACCOUNT CODE</th>
+                            <th rowspan="2" class="align-middle">ACCOUNT NAME</th>
+                            <th colspan="2">OPENING</th>
+                            <th colspan="2">PERIOD</th>
+                            <th colspan="2">CLOSING</th>
+
+                        </tr>
+                        <tr class="text-nowrap font-weight-bold">
+                            <th>DEBIT</th>
+                            <th>CREDIT</th>
+                            <th>DEBIT</th>
+                            <th>CREDIT</th>
+                            <th>DEBIT</th>
+                            <th>CREDIT</th>
+
+                        </tr>
+                    </thead>
+                    <tbody style="font-family:Arial Narrow;font-size:13px;">
+                        @if (Model != null)
+                        {
+                            foreach (var item in Model.OrderBy(x => x.AccCode))
+                            {
+                                if ((item.AccType == "G") || ((item.AccCode == "8")) || ((item.AccCode == "9")) )
+                                {
+                                    <tr class="font-weight-bold">
+                                        <td class="text-nowrap text-left"> @item.AccCode</td>
+                                        <td class="text-nowrap text-left">@item.AccName</td>
+                                        @*<td class="text-nowrap text-left">
+                                            <a href="#">
+                                                @Html.ActionLink(item.AccName + "", "LedgerViewReport" , new {criteria = item.criteria,strid = item.strid,AccId = item.AccId, type = "pdf" }, new { @target = "_blank" })
+                                            </a>
+                                        </td>
+                                        *@
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.opDebit)) )</td>
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.opCredit)) )</td>
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.TranDebit)) )</td>
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.TranCredit)) )</td>
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.clDebit)) )</td>
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.clCredit)) )</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td class="text-nowrap text-left">@item.AccCode</td>
+                                        <td class="text-nowrap text-left">
+                                            <a href="#">
+                                                @Html.ActionLink(item.AccName + "", "LedgerViewReport" , new {criteria = ViewBag.criteria,strid = ViewBag.strid, AccId = item.AccId, type = "pdf" }, new { @target = "_blank" })
+                                            </a>
+                                        </td>
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.opDebit)) )</td>
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.opCredit)) )</td>
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.TranDebit)) )</td>
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.TranCredit)) )</td>
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.clDebit)) )</td>
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.clCredit)) )</td>
+                                    </tr>
+                                }
+
+                            }
+
+
+                        }
+
+
+                    </tbody>
+                    <tfoot>
+
+                    </tfoot>
+                </table>
+
+
+            </div>
+        </div>
+    </form>
+
+
+</body>
+</html>

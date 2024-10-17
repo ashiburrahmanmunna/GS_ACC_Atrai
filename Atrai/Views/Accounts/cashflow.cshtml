@@ -1,0 +1,519 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@using Atrai.Model.Core.Entity;
+@using Atrai.Model.Core.Common;
+
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var ListType = ViewBag.ListType as string;
+    var CompanyName = ViewBag.CompanyName as string;
+    //await Html.RenderPartialAsync("~/Views/Shared/_Dashboardtabed.cshtml");
+
+}
+<link href="~/css/custom_QBstyle.css" rel="stylesheet" />
+<style>
+    .toast-red {
+        background-color: red !important;
+        color: white; /* Set text color as needed */
+    }
+    /* .left-box {
+          float:left;
+        }
+        .right-box {
+
+          overflow: hidden;
+        }*/
+    .btn-delete {
+        position: absolute;
+        left: 90%;
+        bottom: 85%;
+        margin-top: 2px;
+        cursor: pointer;
+        background: none;
+        border: none;
+    }
+
+    #title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 600;
+        line-height: 20px;
+        color: #393a3d;
+        text-transform: uppercase;
+        font-size: 14px !important;
+        float: left;
+        margin-left: 8px;
+        margin-bottom: 0px;
+    }
+
+    #title-container {
+        margin-top: 0;
+        margin-bottom: 4px;
+        line-height: 20px;
+        color: #6b6c72;
+        font-weight: 500;
+        font-size: 14px;
+        float: left;
+        margin-left: 8px;
+        margin-top: 4px;
+        margin-bottom: 0px;
+    }
+
+    #money-container {
+        margin-top: 0;
+        margin-bottom: 4px;
+        line-height: 20px;
+        color: black;
+        float: left;
+        margin-left: 8px;
+        margin-top: 8px;
+    }
+
+    .image-container {
+        position: relative; /* Make the container relative to position the check icon */
+        width: 100px; /* Adjust to match the width of your images */
+        height: 100px; /* Adjust to match the height of your images */
+    }
+
+    .compare-ul {
+        list-style: none;
+        padding: 0;
+        text-align: left;
+        display: inline-block;
+        vertical-align: top; /* Align the lists to the top */
+        margin-right: 20px;
+    }
+
+    .form-label {
+        font-weight: 400 !important;
+        font-size: 12px;
+        text-align: left;
+    }
+
+
+    .check-icon {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%; /* Make the check icon cover the entire container */
+        height: 100%; /* Make the check icon cover the entire container */
+    }
+
+
+    .chart-type-img {
+        width: 82px;
+        height: 82px;
+    }
+
+    .chart-type {
+        width: 100px;
+        float: left;
+    }
+
+    .stacked-field {
+        display: none !important;
+    }
+
+    .stacked-field-show {
+        display: block !important;
+    }
+
+    .selected-chart {
+        box-shadow: 0px 0px 5px 2px lightblue; /* Adjust the color to your preference */
+    }
+
+    .offcanvas-body .card {
+        /* background: linear-gradient(135deg, #3498db, #ecf0f1); */
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin: auto;
+        width: 70%;
+        transition: transform 0.2s, box-shadow 0.2s;
+        color: black;
+        text-align: center;
+        border: 0px solid;
+    }
+
+    .table-box {
+        border: 1px solid;
+        border-color: rgb(212, 215, 220) !important;
+        padding: 10px;
+        margin: 5px;
+        box-sizing: border-box;
+        border-radius: 10px;
+        width: 30%;
+        height: 250px;
+        float: left;
+        text-align: center;
+        position: relative;
+    }
+
+    .center-content {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+
+    .rightside {
+        padding-left: 6%;
+        overflow: hidden;
+        /*width:60%;*/
+    }
+
+
+    .offcanvas-header {
+        background-color: #ECEEF1;
+    }
+
+    .offcanvas-body {
+        background-color: #F4F5F8;
+    }
+
+    .scrollb {
+        overflow-y: auto;
+        height: 100vh;
+    }
+</style>
+
+<ul class="nav nav-tabs mt-5">
+@{
+    var AllChildMenu = HttpContextAccessor.HttpContext.Session.GetObject<List<UserMenuPermissionViewModel>>("UserChildMenu");
+            
+    var filterparentmenu = AllChildMenu.Where(x => x.ControllerName == "Accounts" && x.ActionName == "cashflow" && x.IsView == true).ToList();
+    var i = 0;
+    foreach (var childitem in filterparentmenu)
+    {
+
+        if (childitem.FirstParameter != null)
+        {
+
+            if (i == 0)
+            {
+            <li class="nav-item">
+                <a class="nav-link  fw-semibold active" href="#" id=@childitem.FirstValue>@childitem.MenuName</a>
+            </li>
+
+            }
+            else
+            {
+            <li class="nav-item">
+                <a class="nav-link  fw-semibold" href="#" id=@childitem.FirstValue>@childitem.MenuName</a>
+            </li>
+
+            }
+
+
+        }
+
+        i++;
+    }
+}
+</ul>
+
+<h4>@ViewBag.CompanyName</h4>
+
+    <div class="card mt-3">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="row">
+                        <label for="DateRangeDropdown2" class="form-label col-sm-4 col-form-label px-1"><p class="fw-bold">Against a time period</p></label>
+                    <div class="col-sm-8">
+                        <select onchange="LoadData()" id="DateRangeDropdown2" class="form-select">
+                            @*<option selected="selected" disabled="disabled">Select an Option</option>*@
+                            <option value="1"> All Dates</option>
+                            @* <option value="2">Custom</option> *@
+                            <option value="3">Today</option>
+                            <option value="4">This Week</option>
+                            <option value="5">This Week-to-date</option>
+                            <option value="6" selected>This Month</option>
+                            <option value="7">This Month-to-date</option>
+                            <option value="8">This Quarter</option>
+                            <option value="9">This Quarter-to-date</option>
+                            <option value="10">This Year</option>
+                            <option value="11">This Year-to-date</option>
+                            <option value="12">This Year-to-last-month</option>
+                            <option value="13">Yesterday</option>
+                            <option value="14">Recent</option>
+                            <option value="15">Last Week</option>
+                            <option value="16">Last Week-to-date</option>
+                            <option value="17">Last Month</option>
+                            <option value="18">Last Month-to-date</option>
+                            <option value="19">Last Quarter</option>
+                            <option value="20">Last Quarter-to-date</option>
+                            <option value="21">Last Year</option>
+                            <option value="22">Last Year-to-date</option>
+                            <option value="23">Since 30 days ago</option>
+                            <option value="24">Since 60 days ago</option>
+                            <option value="25">Since 90 days ago</option>
+                            <option value="26">Since 365 days ago</option>
+                            @*  <option value="27">Next Week</option>
+                            <option value="28">Next 4 Weeks</option>
+                            <option value="29">Next Month</option>
+                            <option value="30">Next Quarter</option>
+                            <option value="30">Next Year</option> *@
+                        </select>
+                    </div>
+                    </div>
+                    
+                </div>
+                <div class="col-md-7">
+                    <h6 class="text-end fw-bold">Current Cash Balance <span id="carrent-cash" class="px-2"></span></h6>
+                </div>
+
+            </div>
+
+        </div>
+    <div class="card-body">
+    <div class="row">
+        <div class="col-6">
+            <div class="card ">
+                <div class="card-body">
+                    <div class="row mb-5">
+                        <div class="col-md-6 col-6">
+                            <h5 class="card-title section-heading-c d-inline"><img src="~/admin_theme_gtr/assets/images/moneIn.svg" class="img-fluid pe-2">Money In</h5>
+                            <p class="section-heading-c-sub timepriodtext d-inline">this month</p>
+                        </div>
+                        <div class ="col-md-6 col-6 text-end">
+                            <h5 class="pf-acc"><span id="moneyin"></span></h5>
+                        </div>
+                       
+                        
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-6">
+                                <p class="custom-p">Overdue Invoices <span id="TotalOverdue" class="text-black-50 pe-2"></span> <span id="OverdueInvoice"></span></p>
+                            <hr />
+                            </div>
+                           
+                        <div class="col-md-6 col-6">
+                               <p class="custom-p">Open Invoices <span id="OpenInvoices" class="text-black-50 pe-2"></span>  <span id="OpenInvoice"></span></p>
+                            <hr />
+                        </div>
+                        <div class="col-md-12 text-end">
+                            <div class="dropdown">
+                                <button class="btn button-report-sty dropdown-toggle rounded-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    View reports
+                                </button>
+                                <ul class="dropdown-menu">
+                                   <li><a class="dropdown-item" target="_blank" href="@Url.Action("OpenInvoices", "Accounts")">Open invoices report</a></li>
+                                   <li><a class="dropdown-item" target="_blank" href="@Url.Action("CustomerBalanceDetail", "Accounts")">Customer balance detail report</a></li>
+
+                                </ul>
+                            </div>
+                        </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card ">
+                <div class="card-body">
+                    <div class="row mb-5">
+                        <div class="col-md-6 col-6">
+                         <h5 class="card-title section-heading-c d-inline"> <img src="~/admin_theme_gtr/assets/images/moneyOut.svg" class="img-fluid pe-2">Money Out</h5>
+                        <p class="section-heading-c-sub timepriodtext d-inline">this month</p>
+                      
+                    </div>
+                        <div class="col-md-6 col-6 text-end">
+                            <h5 class="pf-acc"><span id="moneyout"></span></h5>
+                    </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-6">
+                            <p class="custom-p">Overdue Bills <span id="OverdueBills" class="text-black-50 pe-2"></span> <span id="OverDueBills"></span></p>
+                            <hr />
+                        </div>
+                      
+                        <div class="col-md-6 col-6">
+                            <p class="custom-p">Open Bills <span id="OpenBill" class="text-black-50 pe-2"></span> <span id="OpenBills"></span></p>
+                            <hr />
+                        </div>
+                    <div class="col-md-12 text-end">
+                            <div class="dropdown">
+                                <button class="btn button-report-sty dropdown-toggle rounded-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    View reports
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" target="_blank" href="@Url.Action("ExpensesbySupplierSummary", "Accounts")">Expenses by supplier summary report</a></li>
+                                    <li><a class="dropdown-item" target="_blank" href="@Url.Action("AccountsUnpaidBillReportQB", "Accounts")">Unpaid bills report</a></li>
+                                   
+                                </ul>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+       
+       
+    </div>
+  
+    <div class="row my-2 d-flex">
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body" style="overflow-y:auto;height:300px">
+                            <div class="mb-2">
+                        <h5 class="section-heading-c d-inline">Money In</h5>
+                        <p class="section-heading-c-sub timepriodtext d-inline">this month</p>
+                    </div>
+                    <ul class="list-group" id="moneyinlist">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body" style="overflow-y:auto;height:300px">
+                    <div class="mb-2">
+                        <h5 class="section-heading-c d-inline">Money Out</h5>
+                                <p class="section-heading-c-sub timepriodtext d-inline">this month</p>
+                    </div>
+                    <ul class="list-group" id="moneyoutlist">
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            LoadData();
+        });
+        function LoadData() {
+            var timePriod = $("#DateRangeDropdown2 option:selected").text();
+            $.get(`@Url.Action("GetCasflowData", "Accounts")?timePriod=${timePriod}`, function (data) {
+                let cashflow = JSON.parse(data);
+                const { Table, Table1,Table2,Table3 } = cashflow;
+                //console.log(Table);
+                //console.log(Table1);
+                let carrentcash=$("#carrent-cash");
+                let moneyin = $("#moneyin");
+                let moneyout = $("#moneyout");
+                let TotalOverdue = $("#TotalOverdue");
+                let OpenInvoices = $("#OpenInvoices");
+                let OverdueBills = $("#OverdueBills");
+                let OpenBill = $("#OpenBill");
+                let OverdueInvoice = $("#OverdueInvoice");
+                let OpenInvoice = $("#OpenInvoice");
+                let OverDueBills = $("#OverDueBills");
+                let OpenBills = $("#OpenBills");
+                $(".timepriodtext").html(timePriod);
+                //console.log(Number(Table[0].MoneyIn) - Number(Table1[0].MoneyOut));
+                carrentcash.html(CurrencyFormat(Number(Table[0].MoneyIn) - Number(Table1[0].MoneyOut)));
+                moneyin.html(CurrencyFormat(Table[0].MoneyIn));
+                moneyout.html(CurrencyFormat(Table1[0].MoneyOut));               
+                TotalOverdue.html(`(${Table[0].TotalOverdue})`);
+                OpenInvoices.html(`(${Table[0].OpenInvoices})`);
+                OverdueBills.html(`(${Table1[0].OverdueBills})`);
+                OpenBill.html(`(${Table1[0].OpenBill})`);
+                OverdueInvoice.html(CurrencyFormat(Table[0].OverDue));
+                OpenInvoice.html(CurrencyFormat(Table[0].OpenInvoice));
+                OverDueBills.html(CurrencyFormat(Table1[0].OverDueBill));
+                OpenBills.html(CurrencyFormat(Table1[0].OpenInvoicebill));
+
+                generateList("#moneyinlist", Table2);
+                generateList("#moneyoutlist", Table3);
+            }).fail(function (xhr, status, error) {
+                console.error("Error:", error);
+            });
+        }
+        function generateList(selector, Data) {
+            
+            let design = '';
+            for (let i in Data) {
+                let stmData = Data[i];
+                design += ` <li class="list-group-item d-flex justify-content-between align-items-center px-4 py-2">
+                               <h6> ${stmData.AccName}</h6><br>
+
+                                        <span class="badge bg-primary rounded-pill"> ${CurrencyFormat(stmData.AccountBalance)}</span>
+                                </li>`
+            }
+            $(selector).html(design);
+            // <p>${ stmData.groupsName } </p><br>
+            //     < p > ${ stmData.AccountCategoryName } </p><br>
+        }
+
+
+    </script>
+
+    <script>       
+
+         if ('@ListType' === "GetthingsDone") {
+                $("#GetthingsDone").addClass("active");
+                $("#Business").removeClass("active");
+                $("#cashflow").removeClass("active");
+
+                $("#GetthingsDone-view-id").removeClass("d-none");
+                $("#BusinessOverview-view-id").addClass("d-none");
+                $("#CashFlow-view-id").addClass("d-none");
+
+                GetDataForGetthingsDone();
+            }
+            if ('@ListType' === "BusinessOverview") {
+                $("#GetthingsDone").removeClass("active");
+                $("#Business").addClass("active");
+                $("#cashflow").removeClass("active");
+
+                $("#GetthingsDone-view-id").addClass("d-none");
+                $("#BusinessOverview-view-id").removeClass("d-none");
+                $("#CashFlow-view-id").addClass("d-none");
+            }
+            if ('@ListType' === "CashFlow") {
+                $("#GetthingsDone").removeClass("active");
+                $("#Business").removeClass("active");
+                $("#cashflow").addClass("active");
+
+                $("#GetthingsDone-view-id").addClass("d-none");
+                $("#BusinessOverview-view-id").addClass("d-none");
+                $("#CashFlow-view-id").removeClass("d-none");
+            }
+        
+
+        $("#GetthingsDone").on("click", function () {
+            $("#GetthingsDone").addClass("active");
+            $("#Business").removeClass("active");
+            $("#cashflow").removeClass("active");
+
+            $("#GetthingsDone-view-id").removeClass("d-none");
+            $("#BusinessOverview-view-id").addClass("d-none");
+            $("#CashFlow-view-id").addClass("d-none");
+            GetDataForGetthingsDone();
+        })
+
+        $("#Business").on("click", function () {
+            $("#GetthingsDone").removeClass("active");
+            $("#Business").addClass("active");
+            $("#cashflow").removeClass("active");
+
+            $("#GetthingsDone-view-id").addClass("d-none");
+            $("#BusinessOverview-view-id").removeClass("d-none");
+            $("#CashFlow-view-id").addClass("d-none");
+        })
+
+        $("#cashflow").on("click", function () {
+            $("#GetthingsDone").removeClass("active");
+            $("#Business").removeClass("active");
+            $("#cashflow").addClass("active");
+
+            $("#GetthingsDone-view-id").addClass("d-none");
+            $("#BusinessOverview-view-id").addClass("d-none");
+            $("#CashFlow-view-id").removeClass("d-none");
+        })
+
+
+    </script>
+}

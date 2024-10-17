@@ -1,0 +1,1456 @@
+﻿@using Microsoft.AspNetCore.Http
+
+@{
+    ViewData["Title"] = "Voucher Created Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var ListType = ViewBag.ListType as string;
+}
+
+@inject IHttpContextAccessor HttpContextAccessor
+
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<style>
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 99%;
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+
+    .bottom-bar-css:hover {
+        background: #212529;
+    }
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btn:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+
+
+
+        /*added style*/
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    .tabulator-table .tabulator-row {
+        background-color: white;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator .tabulator-header .tabulator-col {
+        background: white !important;
+    }
+
+    #tableContainer {
+        text-align: center; /* Horizontally center its children */
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    #incomeStatementTable {
+        display: inline-block; /* Make it a block element and align it inline */
+        /* margin: 0 auto; */ /* Center it horizontally */
+        white-space: nowrap;
+    }
+
+    .icon-space {
+        margin-right: 10px; /* Adjust the margin value to your desired spacing */
+    }
+
+    .tabulator .tabulator-header .tabulator-col {
+        border-right-color: #f8f9fa;
+    }
+
+    /* Add left border to Tabulator body */
+    .tabulator .tabulator-table {
+        border-left: 1px solid #ced4da;
+    }
+
+    .tabulator .tabulator-col {
+        border-right-color: #dee2e6 !important;
+    }
+
+    .tabulator {
+        border-right-color: white;
+        border-left-color: white;
+        border-top: none !important;
+    }
+
+    .tabulator-row:nth-child(odd) .tabulator-cell {
+        border-right-color: transparent;
+    }
+
+    .tabulator-row:nth-child(even) .tabulator-cell {
+        border-right-color: transparent;
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right-color: transparent;
+    }
+</style>
+
+<div class="hiddenSector">
+    <div class="row">
+        <input type="hidden" id="Id" name="Id" value="" />
+        <input type="hidden" id="ComId" name="ComId" value="" />
+    </div>
+
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="row m-0 ps-4 upper-form-style pt-2" style="background: #e9ecef6b;">
+            <div class="col-md-12 mb-2">
+                @*<span class="report-text-style"><i class="bi bi-chevron-left"></i> Back to report list</span>*@
+                <h4 class="fw-bold fs-3 mt-3">Budget vs. Actuals Report</h4>
+            </div>
+            <div class="col-md-8 col-12 mb-2">
+                <div class="row">
+                    @*<div class="col-lg-4 col-12">
+                        <div class="mb-2" id="reportrange">
+                            <label class="form-label">Report period</label>
+                            <select onclick="setDateRange()" id="select2" class="form-select">
+                                <option value="1">All Dates</option>
+                                <option value="2">Custom</option>
+                                <option value="3" selected>Today</option>
+                                <option value="4">This Week</option>
+                                <option value="5">This Week-to-date</option>
+                                <option value="6">This Month</option>
+                                <option value="7">This Month-to-date</option>
+                                <option value="8">This Quarter</option>
+                                <option value="9">This Quarter-to-date</option>
+                                <option value="10">This Year</option>
+                                <option value="11">This Year-to-date</option>
+                                <option value="12">This Year-to-last-month</option>
+                                <option value="13">Yesterday</option>
+                                <option value="14">Recent</option>
+                                <option value="15">Last Week</option>
+                                <option value="16">Last Week-to-date</option>
+                                <option value="17">Last Month</option>
+                                <option value="18">Last Month-to-date</option>
+                                <option value="19">Last Quarter</option>
+                                <option value="20">Last Quarter-to-date</option>
+                                <option value="21">Last Year</option>
+                                <option value="22">Last Year-to-date</option>
+                                <option value="23">Since 30 days ago</option>
+                                <option value="24">Since 60 days ago</option>
+                                <option value="25">Since 90 days ago</option>
+                                <option value="26">Since 365 days ago</option>
+                                <option value="27">Next Week</option>
+                                <option value="28">Next 4 Weeks</option>
+                                <option value="29">Next Month</option>
+                                <option value="30">Next Quarter</option>
+                                <option value="31">Next Year</option>
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-4 col-12">
+                        <div class="mb-2">
+                            <label class="form-label">From Date</label>
+
+                            <input class="form-control" id="start-date" disabled="disabled" />
+
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-12">
+                        <div class="mb-2">
+                            <label class="form-label">To Date</label>
+
+                            <input class="form-control" id="end-date" disabled="disabled" />
+
+                        </div>
+                    </div>*@
+
+                    <div class="row mt-3">
+                        <div class="col-lg-3 col-12">
+                            <div class="mb-2">
+                                <label class="form-label">Budget</label>
+                                <select class="form-select" id="budget">
+                                    <option value="0">Select</option>
+                                </select>
+
+                            </div>
+                        </div>
+
+                        @*<div class="col-lg-4  col-12">
+                            <label class="form-label">Show non-zero or active only</label>
+                            <div class="dropdown1 d-grid">
+                                <button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    Active rows/columns
+                                </button>
+                                <ul class="dropdown-menu" id="dropdown-menu-id" aria-labelledby="dropdownMenuButton">
+                                    <li class="fw-bold ms-3">Show rows</li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input checked id="active-id" class="form-check-input" type="radio" name="flexRadioDefault">
+                                                <label class="custom-control-label cursor-pointer" id="active-id-label" for="active-id">Active</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input id="all-id" class="form-check-input" type="radio" name="flexRadioDefault" value="All">
+                                                <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="all-id">All</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input id="non-zero" class="form-check-input" type="radio" name="flexRadioDefault">
+                                                <label class="custom-control-label cursor-pointer" for="non-zero">Non-zero</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="fw-bold ms-3">Show columns</li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="form-check-input" type="radio" name="flexRadioDefault" id="column-active">
+                                                <label class="custom-control-label cursor-pointer" id="with-group-label" for="column-active">Active</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="form-check-input" type="radio" name="flexRadioDefault" id="column-all">
+                                                <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="column-all">All</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input id="non-zero-column" class="form-check-input" type="radio" name="flexRadioDefault">
+                                                <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="non-zero-column">Non-zero</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-12">
+                            <div class="dropdown1 d-grid">
+                                <label class="form-label">Compare another period</label>
+                                <button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    <span class="me-5">Select period </span>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li>
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="form-check-input ms-3" type="checkbox" value="Months" name="flexRadioDefault" id="previous-period">
+                                            <label class="custom-control-label cursor-pointer" id="PP" for="with-group">Previous period (PP)</label>
+                                        </div>
+                                        <div class="ms-4 d-flex my-2">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="form-check-input" type="checkbox" name="flexRadioDefault" value="1" id="TkChange" disabled>
+                                                <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="TkChange">Tk change</label>
+                                            </div>
+                                            <div class="custom-control custom-checkbox ms-2">
+                                                <input class="form-check-input" type="checkbox" value="1" name="flexRadioDefault" id="PercentageChange" disabled>
+                                                <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="PercentageChange">% change</label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="form-check-input ms-3" type="checkbox" value="Months PY" name="flexRadioDefault" id="previous-year">
+                                            <label class="custom-control-label cursor-pointer" id="PY" for="with-group">Previous year (PY)</label>
+                                        </div>
+                                        <div class="ms-4 d-flex my-2">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="form-check-input" type="checkbox" name="flexRadioDefault" value="1" id="TkChangePy" disabled>
+                                                <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="TkChangePy">Tk change</label>
+                                            </div>
+                                            <div class="custom-control custom-checkbox ms-2">
+                                                <input class="form-check-input" type="checkbox" value="1" name="flexRadioDefault" id="PercentageChangePy" disabled>
+                                                <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="PercentageChangePy">% change</label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="percent-of-row">
+                                                <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="with-inactive">% of Row</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="percent-of-column">
+                                                <label class="custom-control-label cursor-pointer" id="with-group-label" for="with-group">% of Column</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="percent-of-income">
+                                                <label class="custom-control-label cursor-pointer" id="with-group-label" for="with-group">% of Income</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="percent-of-expense">
+                                                <label class="custom-control-label cursor-pointer" id="with-group-label" for="with-group">% of Expense</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="mt-3 ms-3"><a href="#">Reorder columns</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-12">
+                            <div class="mb-2">
+                                <label class="form-label">Currency</label>
+                                <div class="mt-2">
+                                    <input class="form-check-input" type="checkbox" name="flexCheckboxDefault" id="CheckCurr" style="width: 20px; height: 20px;">
+                                </div>
+                            </div>
+                        </div>*@
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4 col-12 mb-2 mt-5 d-flex justify-content-center">
+                <div>
+                    <button type="button" class="btn customize-btn fw-bold" style="" onclick="GetReport()">Run Report</button>
+                </div>
+            </div>
+        </div>
+        <div id="balance-sheet" class="me-lg-auto ms-lg-auto " style="border: 1px solid #e3eaf3;  margin-top:40px;">
+            <div class="ms-3 mt-3">
+                <a class="text-decoration-none text-black cursor-pointer" id="add-notes"><span>Add notes</span></a>
+                <span class="float-end">
+                    <a href="#" class="text-decoration-none text-black" id="print-table">
+                        <i class="bi bi-printer me-3 fs-5"></i>
+                    </a>
+                    <span class="dropdown1 me-3">
+                        <a class="dropdown-toggle text-decoration-none text-black cursor-pointer" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            <i class="bi bi-upload fs-5"></i>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                            <li><a class="dropdown-item" href="#" id="export-excel">Export to Excel</a></li>
+                        </ul>
+                    </span>
+                    <span class="dropdown1 me-3">
+                        <a class="text-decoration-none text-black cursor-pointer" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            <i class="bi bi-gear fs-5"></i>
+
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                            <li class="fw-bold ms-3">Display density</li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input title-input" id="compact" value="compact">
+                                        <label class="custom-control-label cursor-pointer" id="compact-label" for="compact">Compact</label>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </span>
+                </span>
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content" style="border-radius:0px;">
+                            <div class="d-flex mt-4 mb-3">
+                                <h4 class="ms-3 fw-bold">Print, email, or save as PDF</h4>
+                                <div class="ms-auto"><button type="button" class="btn-close me-2 mt-2" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                            </div>
+                            <div class="modal-body">
+                                To print, right-click the preview and select <span class="fw-bold">Print</span>. Or, click the <span class="fw-bold">Print</span> icon if you see one below.
+                                <div class="row">
+                                    @*report-print-setting-style*@
+                                    <p class="fw-bold">Report print settings</p>
+                                    <div class="col-lg-1 mt-2">
+                                        Orientation
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <select class="form-select" id="orientation">
+                                            <option value="portrait" selected>Portrait</option>
+                                            <option value="landscape">Landscape</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <iframe id="pdf-iframe" name="pdf-iframe" style="width: 100%; height: 500px;"></iframe>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3 mt-3">
+                                <button type="button" class="btn ms-5 customize-btn fw-bolder" data-bs-dismiss="modal">Close</button>
+                                <button id="print-pdf" type="button" class="btn float-end me-5 customization-btn fw-bolder">Print</button>
+                                <button type="button" class="btn float-end me-2 customize-btn fw-bolder">Save as PDF</button>
+                                <button type="button" class="btn float-end me-2 customize-btn fw-bolder">Email</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div id="parentDiv">
+                <div id="tableLoading">
+                </div>
+                <div class="row">
+                    <div class="col">
+
+                        <div id="make-editable" class="text-center company-and-other-text-style" onclick="makeEditable()">
+                            <div class="form-check d-none" id="form-check-visibility">
+                                <input class="form-check-input float-md-none" type="checkbox" name="flexCheckDefaultforImage" id="flexCheckDefaultforImage">
+                                <label class="form-check-label" for="flexCheckDefaultforImage">
+                                    Show Image
+                                </label>
+                            </div>
+                            <img id="company-image" style="width:10%" class="d-none" src="~/assets/Custom-URL-Shortener.jpg" />
+                            <h3 id="company-name">@HttpContextAccessor.HttpContext.Session.GetString("CompanyName")</h3>
+                            <h6 id="primary-address">@HttpContextAccessor.HttpContext.Session.GetString("PrimaryAddress")</h6>
+                            <h6 id="trial-balance" class="text-black fw-bolder">Profit and Loss % of Total Income</h6>
+                            <h6 id="date-month-year"></h6>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div id="tableContainer">
+                    <div id="incomeStatementTable"></div>
+                </div>
+                <br />
+                <div class="row m-0 p-0">
+                    <div class="table-responsive">
+                        <table class="table table-condensed table-hover tree bg-white border" data-statement-id="balancesheet" id="treegridTable">
+                            <tbody id="body" class="treegrid-body">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="form-floating d-none" id="add-notes-textarea">
+                        <textarea class="form-control" placeholder="Add notes or include additional info with your report" id="floatingTextarea2" style="height: 200px"></textarea>
+                        <label for="floatingTextarea2">Add notes or include additional info with your report</label>
+                        <i class="bi bi-x cursor-pointer float-end" id="close-textarea" style="position: absolute; top: -10px; right: 13px; font-size:25px; "></i>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+</div>
+</div>
+
+
+
+
+
+@section Scripts{
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript">
+        //Tabulator function starts
+        var budgetTable;
+        var globalBudgetId='@ViewBag.BudgetId';
+        var globalFyId='@ViewBag.FyId';
+        @*var globalFyName'@ViewBag.FyName';*@
+GetReport();
+        function GetReport(FyId) {
+            let FiscalYearId = FyId;
+    $.ajax({
+        url: '@Url.Action("GetBudgetVSActualReporData", "Admin")',
+        data: { FyId: globalFyId,BudgetId: globalBudgetId },
+        success: function (response) {
+        console.log("main response", response)
+            function buildTree(dataArray) {
+                const tree = [];
+                const parentMap = {};
+
+                //console.log("Received data in buildTree:", dataArray);
+
+                dataArray.forEach(item => {
+                    if (item.AccName !== null && item.AccName !== undefined) {
+                        item.AccName = item.AccName.trim(); // Remove extra whitespace from account names
+                    }
+
+                    if (item.ParentId === 0 || !parentMap[item.ParentId]) {
+                        // Root level node or parent not found in parentMap
+                        tree.push(item);
+                    } else {
+                        const parent = parentMap[item.ParentId];
+
+                        if (!parent.hasOwnProperty('children')) {
+                            parent.children = [];
+                        }
+
+                        parent.children.push(item);
+                    }
+
+                    parentMap[item.AccId] = item;
+                });
+
+                //console.log("Final tree:", tree);
+                return tree;
+            }
+        //console.log("notrmal response:", response.data.Table);
+        var dataTable = buildTree(response.data.Table);
+            console.log("data table:", dataTable);
+
+            var currentDate = new Date();
+            var currentYear = currentDate.getFullYear();
+
+            var ColumnsOfBudgets = [
+                { title: "Id", field: "ID", movable: false, headerSort: false, visible: false },
+                { title: "ParentId", field: "ParentId", movable: false, headerSort: false, visible: false },
+                { title: "", field: "AccName", movable: false, headerSort: false, visible: true },
+                { title: "BudgetId", field: "BudgetId", editor: "input", headerSort: false, editable: true, movable: false, visible: false },
+                { title: "AccCode", field: "AccCode", editor: "input", headerSort: false, editable: true, movable: false, visible: false },
+                { title: "AccType", field: "AccType", editor: "input", headerSort: false, editable: true, movable: false, visible: false },
+                //{ title: "DataLevel", field: "DataLevel", editor: "input", headerSort: false, editable: true, movable: false, visible: true },
+                {
+                    title: "Jan" +' '+ currentYear, headerHozAlign: "center", hozAlign: "center",
+                    columns: [
+                        {
+                            title: "Actual", field: "Jan_Actual", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Jan_Actual;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            },
+},
+                        {
+                            title: "Budget", field: "Jan_Budget", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Jan_Budget;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {title: "OVER BUDGET",field: "JanOverBudget",hozAlign: "center",width: 80,formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Jan_Actual;
+                                var janBudget = cell.getRow().getData().Jan_Budget;
+                            var overBudget = janActual - janBudget;
+                            if (overBudget == 0) {
+                                return '';
+                            }
+                            else {
+                                return overBudget;
+                            }
+                            },
+                        },
+                        {
+                            title: "% OF BUDGET",field: "JanOverBudget",hozAlign: "center",width: 80,formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Jan_Actual;
+                                var janBudget = cell.getRow().getData().Jan_Budget;
+                                //console.log("janActual", janActual)
+                                //console.log("janBudget", janBudget)
+                                var overBudget = janActual / janBudget;
+                                //console.log("overBudget", overBudget);
+                                if (isNaN(overBudget) || !isFinite(overBudget)) {
+                                    return '';
+                                } else {
+                                    return overBudget + ' %';
+                                }
+                            },
+                        },
+                    ],
+                },
+                {
+                    title: "Feb" + ' ' + currentYear, headerHozAlign: "center", hozAlign: "center",
+                    columns: [
+                        {
+                            title: "Actual", field: "Feb_Actual", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Feb_Actual;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "Budget", field: "Feb_Budget", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Feb_Budget;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "OVER BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Feb_Actual;
+                                var janBudget = cell.getRow().getData().Feb_Budget;
+                                var overBudget = janActual - janBudget;
+                                if (overBudget == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return overBudget;
+                                }
+                            },
+},
+                        {
+                            title: "% OF BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Feb_Actual;
+                                var janBudget = cell.getRow().getData().Feb_Budget;
+                                var overBudget = janActual / janBudget;
+                                if (isNaN(overBudget) || !isFinite(overBudget)) {
+                                    return '';
+                                } else {
+                                    return overBudget + ' %';
+                                }
+                            },
+},
+                    ],
+                },
+                {
+                    title: "Mar" + ' ' + currentYear, headerHozAlign: "center", hozAlign: "center",
+                    columns: [
+                        {
+                            title: "Actual", field: "Mar_Actual", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Mar_Actual;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "Budget", field: "Mar_Budget", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Mar_Budget;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "OVER BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Mar_Actual;
+                                var janBudget = cell.getRow().getData().Mar_Budget;
+                                var overBudget = janActual - janBudget;
+                                if (overBudget == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return overBudget;
+                                }
+                            },
+                        },
+                        {
+                            title: "% OF BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Mar_Actual;
+                                var janBudget = cell.getRow().getData().Mar_Budget;
+                                var overBudget = janActual / janBudget;
+                                if (isNaN(overBudget) || !isFinite(overBudget)) {
+                                    return '';
+                                } else {
+                                    return overBudget + ' %';
+                                }
+                            },
+                        },
+                    ],
+                },
+                {
+                    title: "Apr" + ' ' + currentYear, headerHozAlign: "center", hozAlign: "center",
+                    columns: [
+                        {
+                            title: "Actual", field: "Apr_Actual", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Apr_Actual;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "Budget", field: "Apr_Budget", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Apr_Budget;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "OVER BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Apr_Actual;
+                                var janBudget = cell.getRow().getData().Apr_Budget;
+                                var overBudget = janActual - janBudget;
+                                if (overBudget == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return overBudget;
+                                }
+                            }, },
+                        {
+                            title: "% OF BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Apr_Actual;
+                                var janBudget = cell.getRow().getData().Apr_Budget;
+                                var overBudget = janActual / janBudget;
+                                if (isNaN(overBudget) || !isFinite(overBudget)) {
+                                    return '';
+                                } else {
+                                    return overBudget + ' %';
+                                }
+                            }, },
+                    ],
+                },
+                {
+                    title: "May" + ' ' + currentYear, headerHozAlign: "center", hozAlign: "center",
+                    columns: [
+                        {
+                            title: "Actual", field: "May_Actual", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().May_Actual;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "Budget", field: "May_Budget", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().May_Budget;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "OVER BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().May_Actual;
+                                var janBudget = cell.getRow().getData().May_Budget;
+                                var overBudget = janActual - janBudget;
+                                if (overBudget == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return overBudget;
+                                }
+                            }, },
+                        {
+                            title: "% OF BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().May_Actual;
+                                var janBudget = cell.getRow().getData().May_Budget;
+                                var overBudget = janActual / janBudget;
+                                if (isNaN(overBudget) || !isFinite(overBudget)) {
+                                    return '';
+                                } else {
+                                    return overBudget + ' %';
+                                }
+                            }, },
+                    ],
+                },
+                {
+                    title: "Jun" + ' ' + currentYear, headerHozAlign: "center", hozAlign: "center",
+                    columns: [
+                        {
+                            title: "Actual", field: "Jun_Actual", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Jun_Actual;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "Budget", field: "Jun_Budget", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Jun_Budget;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "OVER BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Jun_Actual;
+                                var janBudget = cell.getRow().getData().Jun_Budget;
+                                var overBudget = janActual - janBudget;
+                                if (overBudget == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return overBudget;
+                                }
+                            }, },
+                        {
+                            title: "% OF BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Jun_Actual;
+                                var janBudget = cell.getRow().getData().Jun_Budget;
+                                var overBudget = janActual / janBudget;
+                                if (isNaN(overBudget) || !isFinite(overBudget)) {
+                                    return '';
+                                } else {
+                                    return overBudget + ' %';
+                                }
+                            }, },
+                    ],
+                },
+                {
+                    title: "Jul" + ' ' + currentYear, headerHozAlign: "center", hozAlign: "center",
+                    columns: [
+                        {
+                            title: "Actual", field: "Jul_Actual", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Jul_Actual;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "Budget", field: "Jul_Budget", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Jul_Budget;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            },
+},
+                        {
+                            title: "OVER BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Jul_Actual;
+                                var janBudget = cell.getRow().getData().Jul_Budget;
+                                var overBudget = janActual - janBudget;
+                                if (overBudget == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return overBudget;
+                                }
+                            }, },
+                        {
+                            title: "% OF BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Jul_Actual;
+                                var janBudget = cell.getRow().getData().Jul_Budget;
+                                var overBudget = janActual / janBudget;
+                                if (isNaN(overBudget) || !isFinite(overBudget)) {
+                                    return '';
+                                } else {
+                                    return overBudget + ' %';
+                                }
+                            }, },
+                    ],
+                },
+                {
+                    title: "Aug" + ' ' + currentYear, headerHozAlign: "center", hozAlign: "center",
+                    columns: [
+                        {
+                            title: "Actual", field: "Aug_Actual", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Aug_Actual;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            },
+},
+                        {
+                            title: "Budget", field: "Aug_Budget", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Aug_Budget;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "OVER BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Aug_Actual;
+                                var janBudget = cell.getRow().getData().Aug_Budget;
+                                var overBudget = janActual - janBudget;
+                                if (overBudget == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return overBudget;
+                                }
+                            }, },
+                        {
+                            title: "% OF BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Aug_Actual;
+                                var janBudget = cell.getRow().getData().Aug_Budget;
+                                var overBudget = janActual / janBudget;
+                                if (isNaN(overBudget) || !isFinite(overBudget)) {
+                                    return '';
+                                } else {
+                                    return overBudget + ' %';
+                                }
+                            }, },
+                    ],
+                },
+                {
+                    title: "Sep" + ' ' + currentYear, headerHozAlign: "center", hozAlign: "center",
+                    columns: [
+                        {
+                            title: "Actual", field: "Sep_Actual", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Sep_Actual;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "Budget", field: "Sep_Budget", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Sep_Budget;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "OVER BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Sep_Actual;
+                                var janBudget = cell.getRow().getData().Sep_Budget;
+                                var overBudget = janActual - janBudget;
+                                if (overBudget == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return overBudget;
+                                }
+                            }, },
+                        {
+                            title: "% OF BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Sep_Actual;
+                                var janBudget = cell.getRow().getData().Sep_Budget;
+                                var overBudget = janActual / janBudget;
+                                if (isNaN(overBudget) || !isFinite(overBudget)) {
+                                    return '';
+                                } else {
+                                    return overBudget + ' %';
+                                }
+                            }, },
+                    ],
+                },
+                {
+                    title: "Oct" + ' ' + currentYear, headerHozAlign: "center", hozAlign: "center",
+                    columns: [
+                        {
+                            title: "Actual", field: "Oct_Actual", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Oct_Actual;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "Budget", field: "Oct_Budget", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Oct_Budget;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "OVER BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Oct_Actual;
+                                var janBudget = cell.getRow().getData().Oct_Budget;
+                                var overBudget = janActual - janBudget;
+                                if (overBudget == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return overBudget;
+                                }
+                            }, },
+                        {
+                            title: "% OF BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Oct_Actual;
+                                var janBudget = cell.getRow().getData().Oct_Budget;
+                                var overBudget = janActual / janBudget;
+                                if (isNaN(overBudget) || !isFinite(overBudget)) {
+                                    return '';
+                                } else {
+                                    return overBudget + ' %';
+                                }
+                            }, },
+                    ],
+                },
+                {
+                    title: "Nov" + ' ' + currentYear, headerHozAlign: "center", hozAlign: "center",
+                    columns: [
+                        {
+                            title: "Actual", field: "Nov_Actual", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Nov_Actual;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            },
+},
+                        {
+                            title: "Budget", field: "Nov_Budget", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Nov_Budget;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "OVER BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Nov_Actual;
+                                var janBudget = cell.getRow().getData().Nov_Budget;
+                                var overBudget = janActual - janBudget;
+                                if (overBudget == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return overBudget;
+                                }
+                            },
+},
+                        {
+                            title: "% OF BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Nov_Actual;
+                                var janBudget = cell.getRow().getData().Nov_Budget;
+                                var overBudget = janActual / janBudget;
+                                if (isNaN(overBudget) || !isFinite(overBudget)) {
+                                    return '';
+                                } else {
+                                    return overBudget + ' %';
+                                }
+                            },
+},
+                    ],
+                },
+                {
+                    title: "Dec" + ' ' + currentYear, headerHozAlign: "center", hozAlign: "center",
+                    columns: [
+                        {
+                            title: "Actual", field: "Dec_Actual", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Dec_Actual;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            },
+},
+                        {
+                            title: "Budget", field: "Dec_Budget", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Dec_Budget;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "OVER BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Dec_Actual;
+                                var janBudget = cell.getRow().getData().Dec_Budget;
+                                var overBudget = janActual - janBudget;
+                                if (overBudget == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return overBudget;
+                                }
+                            }, },
+                        {
+                            title: "% OF BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Dec_Actual;
+                                var janBudget = cell.getRow().getData().Dec_Budget;
+                                var overBudget = janActual / janBudget;
+                                if (isNaN(overBudget) || !isFinite(overBudget)) {
+                                    return '';
+                                } else {
+                                    return overBudget + ' %';
+                                }
+                            }, },
+                    ],
+                },
+                {
+                    title: "Total", headerHozAlign: "center", hozAlign: "center",
+                    columns: [
+                        {
+                            title: "Actual", field: "Total_Actual", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Total_Actual;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "Budget", field: "Total_Budget", headerSort: false, movable: false, visible: true,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Total_Budget;
+                                if (janActual == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return janActual;
+                                }
+                            }, },
+                        {
+                            title: "OVER BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Total_Actual;
+                                var janBudget = cell.getRow().getData().Total_Budget;
+                                var overBudget = janActual - janBudget;
+                                if (overBudget == 0) {
+                                    return '';
+                                }
+                                else {
+                                    return overBudget;
+                                }
+                            }, },
+                        {
+                            title: "% OF BUDGET", field: "OverBudget", hozAlign: "center", width: 80, formatter: function (cell, formatterParams, onRendered) {
+                                var janActual = cell.getRow().getData().Total_Actual;
+                                var janBudget = cell.getRow().getData().Total_Budget;
+                                var overBudget = janActual / janBudget;
+                                //console.log("overBudget", overBudget);
+                                if (isNaN(overBudget) || !isFinite(overBudget)) {
+                                    return '';
+                                } else {
+                                    return overBudget + ' %';
+                                }
+                            }, },
+                    ],
+                },
+
+            ];
+
+
+
+
+            budgetTable = new Tabulator("#incomeStatementTable", {
+                data: dataTable,
+                //layout: "fitColumns",
+                dataTree: true,
+                dataTreeStartExpanded: true,
+                dataTreeChildField: "children",
+                columns: ColumnsOfBudgets,
+                printAsHtml: true,
+                dataBound: function () {
+                    var rows = budgetTable.getRows();
+                    if (rows.length > 0) {
+                        var cells = rows[0].getCells();
+                        cells.forEach(cell => {
+                            cell.freeze();
+                        });
+                    }
+                }
+            });
+
+            function calculateAndSetTotal(row) {
+                var total = 0;
+                var columnsToSum = ["Jan", "Feb", "Mar", "April", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+                columnsToSum.forEach(column => {
+                    var value = row.getData()[column];
+                    //console.log(`Column: ${column}, Value: ${value}`);
+
+                    // Check for null, undefined, and empty string
+                    if (value === null || value === undefined || value === "") {
+                        value = 0;
+                    }
+
+                    total += parseFloat(value);
+                });
+
+                //console.log(`Total: ${total}`);
+                row.update({ Total: total });
+            }
+
+    }
+});
+
+
+        };
+        getBudgetDropdown();
+        function getBudgetDropdown() {
+        $.ajax({
+            //url: '@Url.Action("GetBudgetName", "Admin")',
+            url: '@Url.Action("budgetListData", "Admin")',
+            success: function (data) {
+                console.log("getBudgetDropdown data::", data);
+                var selected = document.querySelector("#budget");
+
+
+                for (var i = 0; i < data.length; i++) {
+                    let option = document.createElement('option');
+                    option.text = data[i].Name + " - [" + data[i].FYName + "] - " + ' P&L';
+                    option.value = data[i].Id;
+                    option.setAttribute('data-FyId', data[i].FiscalYearId)
+                    option.setAttribute('data-FyName', data[i].FYName)
+                    selected.appendChild(option);
+                }
+            }
+        });
+        };
+
+        $("#budget").on("change", function () {
+            var BudgetId = $(this).find("option:selected").val();
+            var FyId = $(this).find("option:selected").data('fyid');
+            var FyName = $(this).find("option:selected").text();
+            var fiscalYearRange;
+            var regex = /\[(\d{4}\( [a-zA-Z]+ \) - \d{4}\( [a-zA-Z]+ \))\]/;
+            var match = regex.exec(FyName);
+            if (match && match.length > 1) {
+                fiscalYearRange = match[1];
+                console.log(fiscalYearRange);
+            }
+
+            if (FyId == undefined) {
+                globalFyId = '@ViewBag.FyId';
+                globalBudgetId = '@ViewBag.BudgetId';
+                //alert(globalFyId);
+            }
+            else {
+                globalFyId = FyId;
+                globalBudgetId = BudgetId;
+                $("#date-month-year").text(fiscalYearRange);
+                //alert(globalFyId);
+            }
+            //alert(FyId);
+            //GetReport(selectedVal);
+        });
+
+//Tabulator function ends
+
+        $("#preFillData").on("change", function () {
+            var selectedVal = $(this).find("option:selected").val();
+            //alert(selectedVal);
+            GetReport(selectedVal);
+        });
+
+              $('#BtnSave').click(function () {
+                var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+                var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+                $("#ComId").val(ComId);
+                $("#LuserId").val(UserId);
+                        let BudgetSubs = budgetTable.getData();
+
+                        console.log("BudgetSubs", BudgetSubs);
+
+                        const allChildrenArray = BudgetSubs
+                            .map(item => item && item.children)
+                            .flat()
+                            .filter(child => child !== undefined && child !== null)
+                            .flatMap(item => item && item.children ? item.children : []);
+
+                        console.log("All Children Array without undefined and null", allChildrenArray);
+
+
+
+
+                                            const filteredArray = allChildrenArray.map(item => {
+                                                // Filter out properties with empty values
+                                                const filteredItem = Object.entries(item)
+                                                    .filter(([key, value]) => value !== "" && value !== undefined && value !== null)
+                                                    .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
+                                                return filteredItem;
+                                            });
+
+                                            //console.log("Filtered Array", filteredArray);
+                                            const filteredArrayyyy = Array.from(new Set(filteredArray.map(JSON.stringify)))
+                                                .map(JSON.parse);
+
+                                            console.log("Filtered Array", filteredArrayyyy);
+
+
+
+
+                var Name = $('#name').val();
+                var FiscalYearId = $('#financialYear option:selected').val();
+                var Interval = $('#interval option:selected').text();
+                var PreFillId = $('#preFillData option:selected').val();
+
+                 var vouchermodel =
+                    {
+                     ComId: ComId,
+                     Id: "@ViewBag.BudgetId",
+                     Name: Name,
+                     FiscalYearId: FiscalYearId,
+                     Interval: Interval,
+                     PreFillId: PreFillId,
+                     BudgetSubs: filteredArrayyyy,
+                    };
+
+
+
+                console.log("after save console:", vouchermodel)
+                var PurchaseIdAbc = 0;
+
+
+                $.ajax({
+                    async: false,
+                    type: "POST",
+                    url: "@Url.Action("AddBudget", "Admin")",
+                    data: JSON.stringify(vouchermodel),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        PurchaseIdAbc = response.Id;
+                        Doctype = response.Doctype;
+
+                        if (response.message =="Purchase updated successfully") {
+
+                        }
+                        setTimeout(function () {
+                            toastr.success(response.message, "", {
+                                "toastClass": "toast-green"
+                            });
+                        }, 1500);
+
+                        setTimeout(function () {
+                             window.location.href = '@Url.Action("budgets", "Admin")';
+                        },3000)
+
+                    },
+                    error: function (response) {
+                    }
+                });
+
+
+            });
+
+
+
+
+        document.getElementById("print-table").addEventListener("click", function () {
+            budgetTable.print(false, true);
+        });
+        document.getElementById("export-excel").addEventListener("click", function () {
+            budgetTable.download("xlsx", "table.xlsx", { sheetName: "Table Data"});
+        });
+
+
+
+    </script>
+
+}

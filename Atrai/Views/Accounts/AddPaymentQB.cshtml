@@ -1,0 +1,2299 @@
+﻿@using Microsoft.AspNetCore.Http 
+@inject IHttpContextAccessor HttpContextAccessor 
+@model int 
+@{ 
+    ViewData["Title"] = "Purchase Entry"; 
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; 
+    var DocTypeValue = ViewBag.DocTypeValue;
+    var PurchaseId = ViewBag.PurchaseId; 
+    var SupplierId = ViewBag.SupplierId; 
+    var MakePayment = ViewBag.MakePayment; 
+    var TrxnId = ViewBag.TransactionId;
+    var actionType = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+
+<style>
+  span.arrow-icon {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .red-text {
+    color: white;
+    background-color: red;
+    padding: 5px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-style: italic;
+  }
+
+  .footerButton {
+    margin-top: 40px;
+  }
+
+  .green-text {
+    color: white;
+    background-color: green;
+    border-radius: 8px;
+    padding: 5px;
+    font-weight: bold;
+    font-style: italic;
+  }
+
+  .italic-text {
+    font-style: italic;
+  }
+  .customize-btnew {
+    background: transparent;
+    border: 1px solid black;
+    border-radius: 20px;
+  }
+
+  .customize-btnew:hover {
+    background: #ffffff;
+    border: 1px solid black;
+    color: black;
+    border-radius: 20px;
+  }
+
+  .loader {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    opacity: 0.6;
+  }
+  .select2-container {
+    font-size: 16px;
+  }
+
+  .select2-container--default .select2-selection--single {
+    border: 1px solid #aaaaaa94;
+  }
+
+  .select2-container--default
+    .select2-selection--single
+    .select2-selection__rendered {
+    line-height: 23px;
+  }
+  .select2-selection {
+    background-color: #f2f2f2;
+    border-radius: 5px;
+    height: 30px;
+    padding-bottom: 37px;
+    border: 1px solid #ced4da;
+  }
+
+  .select2-selection__rendered,
+  .select2-selection__arrow {
+    margin-top: 8px;
+  }
+
+  .bootstrap-tagsinput {
+    height: 45px;
+  }
+
+  .move-right {
+    margin-left: 160px;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .customize-btn {
+    background: #e9ecef6b;
+    border: 1px solid black;
+    border-radius: 20px;
+  }
+
+  .customize-btn-another {
+    background: #2ca01c;
+    border: 1px solid black;
+    border-radius: 20px;
+    color: #ffffff;
+    border: 1px solid #2ca01c;
+  }
+
+  .customize-btn-another:hover {
+    background: #2ca01c;
+    border: 1px solid black;
+    border-radius: 20px;
+    border-radius: 20px;
+    color: #ffffff;
+    border: 1px solid #2ca01c;
+  }
+
+  .customize-btn:hover {
+    background: #ffffff;
+    border: 1px solid black;
+    color: black;
+    border-radius: 20px;
+  }
+
+  input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+
+  .collapse-icon {
+    cursor: pointer;
+  }
+
+  input::placeholder {
+    font-style: italic;
+    font-size: 15px;
+  }
+
+
+
+  .content {
+    height: 1500px;
+  }
+
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 99%;
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    margin-left: 39px;
+  }
+
+  .tabulator .tabulator-tableholder {
+    overflow-x: hidden !important;
+  }
+    .fw-bold {    @*important*@
+      text-align: right;
+    }
+
+    .tabulator-tableholder {
+       background-color: white;
+    }
+
+   .tabulator .tabulator-header .tabulator-col {                
+        background: #ffffff !important;      
+    }
+    
+    .file-wrapper {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .remove-button {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        z-index: 10;
+    }
+
+    .file-iframe {
+        width: 50%;
+        height: auto;
+        border: 1px solid #ccc;
+        overflow: hidden;
+    }
+</style>
+
+
+<div class="page-wrapper">
+
+    <div class="container-fluid">
+        @*<div class="col-md-12 row mt-5" >*@
+
+        <div class="hiddenSector">
+            <div class="row">
+                <input type="hidden" id="CountryIdLocal" name="CountryIdLocal" value="" />
+                <input type="hidden" id="Id" name="Id" value="" />
+                <input type="hidden" id="PurchaseSerialId" name="PurchaseSerialId" value="" />
+                <input type="hidden" id="LuserId" name="LuserId" value="" />
+                <input type="hidden" id="ComId" name="ComId" value="" />
+                <input type="hidden" id="LuserIdUpdate" name="LuserIdUpdate" value="" />
+                <input type="hidden" id="CreateDate" name="CreateDate" value="" />
+                <input type="hidden" id="UpdateDate" name="UpdateDate" value="" />
+                <input type="hidden" id="isPosted" name="isPosted" value="" />
+                <input type="hidden" id="IsCash" name="IsCash" value="" />
+                <input type="hidden" id="LuserIdApprove" name="LuserIdApprove" value="" />
+                <input type="hidden" id="LuserIdCheck" name="LuserIdCheck" value="" />
+                <input type="hidden" id="vAmountInWords" name="vAmountInWords" value="" />
+                <input type="hidden" id="PurchaseFilePath" name="PurchaseFilePath" value="" />
+
+
+
+            </div>
+
+        </div>
+
+        <div>
+            <div class="upperSection">
+                <div class="row">
+                    <div class="col-md col-12">
+                        <button type="button" id="modal-btn-id" class="btn text-center border" data-bs-toggle="modal" data-bs-target="#historyModal">
+                            <i class="bi bi-clock-history fw-bold"></i>
+                        </button>
+                        <!---Modal start-->
+                        <div class="modal fade modal-lg" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="historyModalLabel">Purchase History</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+
+                                        <div class="card rounded-10">
+                                            <div id="jsClockHistory"></div>
+
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        @*<button type="button" class="btn btn-primary">Save changes</button>*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!---Modal ends-->
+                        <span class="ms-2 fs-5 fw-bold">Bill Payment No.<span id="bill-payment-cocde"></span></span>
+                    </div>
+
+
+                </div>
+
+                <div class="col-lg" style="padding: 5px; position: fixed; right: 0px; top: 7%; border-top-right-radius: 0; border-bottom-right-radius: 0; ">
+                    <button class="btn btn-primary float-end" id="showoffcanvas"><i class="bi bi-chevron-double-right"></i></button>
+                </div>
+                <div class="offcanvas-class">
+                    <div class="col-12 col-md-12">
+                        <div class="row account_offcanvas">
+
+                            <div class="offcanvas offcanvas-end overflow-scroll" style="width: 400px" tabindex="-1" id="offcanvasRightRate" aria-labelledby="offcanvasRightLabelRate">
+                                <div class="offcanvas-header">
+                                    <h5 class="offcanvas-title" id="offcanvasRightLabelRate">To Link Invoice</h5>
+                                    <button @*onclick="clearModalData()"*@ type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                                </div>
+                                <div class="offcanvas-body">
+                                    <div id="invoice-table"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-2 mt-3" id="divLocation">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Payee<span class="text-danger"> *</span>
+                        </label>
+                        <select id="Supplier" class="form-control">
+                            <option value="">Select Payee</option>
+                        </select>
+                        <span class="text-danger" id="supplier-id-validation"></span>
+                    </div>
+                </div>
+                <div class="col-lg-2 mt-4">
+                    @*<label class="form-label d-flex justify-content-between">Email <span id="cc-bcc-id" style="color: #0077c5;cursor:pointer;">Cc/Bcc</span></label>*@
+                    <div class="dropdown d-flex justify-content-between">
+                        Email
+                        <span class="dropdown-toggle" data-bs-toggle="dropdown" id="dropdownMenuButton1" aria-expanded="false" style="color: #0077c5;cursor:pointer;">Cc/Bcc</span>
+                        <div class="dropdown-menu dropdown-of" aria-labelledby="filter-btn" id="filter-dropdown-id" style="width:350px;">
+                            <div class="ms-3">
+                                <div class="row">
+                                    <div class="mb-3 col-lg-5">
+                                        <label for="typeDropdown" class="form-label fw-bold">Cc</label>
+                                        <input id="cc-id" placeholder="Emai(Separate emails with a comma)" style="width: 315px; border: 1px solid #808080a6" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="mb-3 col-lg-5">
+                                        <label for="typeDropdown" class="form-label fw-bold">Bcc</label>
+                                        <input id="bcc-id" placeholder="Emai(Separate emails with a comma)" style="width: 315px; border: 1px solid #808080a6" />
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <button type="reset" class="btn customize-btn radius-30 fw-bold px-4" onclick="resetForm(event)">Cancel</button>
+                                    <button type="reset" class="btn customize-btn radius-30 fw-bold px-4">Done</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input class="form-control" id="purchase-mail-address" />
+                </div>
+
+
+
+                <div class="col-lg-2 col-12 col-md-12 mt-3">
+                    <div class="mb-2">
+                        <label class="form-label">
+                            Bank/Credit account<span class="text-danger"> *</span>
+                        </label>
+                        <select id="bank-credit-account" class="form-control">
+                            <option value="">Cash and cash equivalents</option>
+                        </select>
+                        <span class="text-danger" id="bank-credit-account-validation"></span>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-2" style="margin-top:40px;">
+                    <div class="d-flex mb-2" id="yourRateParent" style="width: 300px; display: none !important">
+                        <label>1 <span class="rate"></span><span class="flag"></span> = </label>
+                        <input type="text" class="form-control w-50 h-100 ms-2 me-2" id="CurrencyRate" style="border-radius:0px;">
+                        <input type="text" class="form-control w-50 h-100 ms-2 me-2" id="MultiiCurrencyId" style="border-radius:0px;" hidden>
+                        <label>BDT</label><i class="flag-icon flag-icon-bd" style="margin-top: -10px;"></i>
+                    </div>
+
+                </div>
+
+
+                <div class="col-lg">
+                    <span class="float-lg-end">AMOUNT PAID</span> <br />
+                    <span class="float-lg-end fs-1 fw-bold"><span class="rate"></span>&nbsp;<span id="balance-due">0.00</span></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="mb-2 d-none">
+                    <label class="form-label fw-semibold">
+                        Terms
+                    </label>
+                    <div id="termsContainer">
+                        <select class="form-select select2me" id="terms" aria-label="Floating label select example">
+                            <option value="0">Select an option</option>
+                            <option id="addNewOption" value="add-new" data-icon="bi bi-plus-lg">Add New</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-12 col-md-12">
+                    <div class="mb-2">
+
+                        <label class="form-label d-flex justify-content-between">Mailing address </label>
+                        <textarea class="form-control" id="mail-address"></textarea>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-12 col-md-12">
+                    <div class="mb-2">
+                        <label class="form-label">Payment date</label><span class="text-danger"> *</span>
+
+                        <input class="form-control" id="payment-date" />
+                        <span class="text-danger" id="payment-date-validation"></span>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-12 col-md-12">
+                    <div class="mb-2">
+                        <label class="form-label">Ref No.</label>
+                        <input id="ref-no" value="@ViewBag.DefaultInvoice" type="text" class="form-control"  placeholder="Auto generated.."/>
+                        <span class="text-danger" id="reference-no-validation"></span>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-12 col-md-12">
+                    <div class="mb-2">
+                        <label class="form-label">Location</label><span class="text-danger"> *</span>
+                        @Html.DropDownList("WarehouseIdMain", ViewBag.WarehouseIdMain as List<SelectListItem>, null, new { id = "WarehouseIdMain", @class = "form-select form-select-sm" })
+                        <span class="text-danger" id="warehouse-validation"></span>
+                    </div>
+                </div>
+                <div class="col-md-2 col-12">
+                    <div class="d-none" id="FiscalMonthDiv">
+                        <label class="form-label fw-semibold">Fiscal month</label>
+                        <select class="wide-dropdown form-select form-select-sm" id="FiscalMonthId"
+                                aria-label="Floating label select example">
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-1 col-1"></div>
+                <div class="col-md-1 col-1 d-none">
+                    <div class="form-check" style="margin-top: 30px;">
+                        <input class="form-check-input" type="checkbox" value="" id="isAdvance">
+                        <label class="form-check-label" for="isAdvance" style="padding-left: 5px;">Is Advance</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="float-lg-end">
+            <label class="form-label" style="font-size: 12px;">
+                Amount
+            </label> <br />
+            <input style="border: 1px solid #808080a6; height: 34px;border-radius: 4px;" id="amount-received" type="text" dir="rtl" class="wide-dropdown" />
+        </div>
+        <div class="row mt-5">
+            <div class="col-12 col-md-12">
+                <h4 id="PaymentsDetails">
+                    Outstanding Transactions
+                </h4>
+            </div>
+        </div>
+        <div class="d-flex">
+            <div class="mb-3">
+                <input style="border: 1px solid #808080a6; height: 34px;border-radius: 4px;" id="find-invoice" class="py-1" type="text" placeholder="Find bill no." />
+            </div>
+            <div class="dropdown filter-dropdown" style="display:inline-block;">
+                @*<button id="filter-btn" type="button" class="btn customize-btnew fw-bold ms-2 dropdown-toggle mt-3 px-4" data-bs-toggle="dropdown" aria-expanded="false">Filter</button>*@
+                <button class="btn dropdown-toggle ms-2" type="button" id="filter-btn" data-bs-toggle="dropdown" aria-expanded="false" style="height: 35px; border: 1px solid #8080805e ">
+                    Filter
+                </button>
+                <div class="dropdown-menu dropdown-of filter-drop" aria-labelledby="filter-btn" id="filter-dropdown-id">
+                    <form class="p-3" style="width: 400px;">
+                        <div class="row" id="fromToDateParent">
+                            <div class="mb-3 col-lg">
+                                <label for="fromInput" class="form-label fw-bold">Bills from</label>
+                                <input class="form-control" id="start-date" style="border-radius:0;"  />
+                            </div>
+                            <div class="mb-3 col-lg">
+                                <label for="toInput" class="form-label fw-bold">To</label>
+                                <input class="form-control" id="end-date" style="border-radius:0;"  />
+                            </div>
+                        </div>
+                        @* <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                            <label class="form-check-label" for="flexCheckDefault">
+                                Overdue bills only
+                            </label>
+                        </div> *@
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="reset" class="btn customize-btn radius-30 fw-bold" onclick="resetForm(event)">Reset</button>
+                            <button type="button" class="btn  customize-btn-another fw-bold" onclick="reloadTableData()">Apply</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="payment-list-content">
+            <div id="tabulatorPaymentGrid"></div>
+            <span class="text-danger" id="payment-table-validation"></span>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12 col-md-12">
+                <h4 id="PaymentsDetails">
+                    Supplier Credit
+                </h4>
+            </div>
+        </div>
+        <div class="d-flex">
+            <div class="mb-3">
+                <input style="border: 1px solid #808080a6; height: 34px;border-radius: 4px;" id="find-invoice" class="py-1" type="text" placeholder="Find Credit" />
+            </div>
+            <div class="dropdown filter-dropdown" style="display:inline-block;">
+
+                <button class="btn dropdown-toggle ms-2" type="button" id="filter-btn1" data-bs-toggle="dropdown" aria-expanded="false" style="height: 35px; border: 1px solid #8080805e ">
+                    Filter
+                </button>
+                <div class="dropdown-menu dropdown-of filter-drop1" aria-labelledby="filter-btn1" id="filter-dropdown-id">
+                    <form class="p-3" style="width: 400px;">
+                        <div class="row" id="fromToDateParent">
+                            <div class="mb-3 col-lg">
+                                <label for="fromInput" class="form-label fw-bold">Bills from</label>
+                                <input class="form-control" id="start-date1" style="border-radius:0;"  />
+                            </div>
+                            <div class="mb-3 col-lg">
+                                <label for="toInput" class="form-label fw-bold">To</label>
+                                <input class="form-control" id="end-date1" style="border-radius:0;"  />
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="reset" class="btn customize-btn radius-30 fw-bold" onclick="resetForm(event)">Reset</button>
+                            <button type="button" class="btn  customize-btn-another fw-bold" onclick="reloadTableDataForCredit()">Apply</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="credit-list-content">
+            <div id="tabulatorCreditGrid"></div>
+        </div>
+        
+    </div>
+
+
+</div>
+<div class="d-flex float-lg-end mt-5 me-3">
+    <div class="me-4">
+        <div class="fw-bold">Total Paid(<span class="rate"></span>)</div>
+        <div class="fw-bold inBDT">Total Paid(BDT)</div>
+        <div class="fw-bold" style="margin-top: 10px;">Amount to Apply</div>
+        <div class="fw-bold">Amount to Credit</div>
+    </div>
+    <br />
+    <div>
+        <div id="" class="fw-bold"><span id="total-paid">0.00</span></div>
+        <div id="" class="fw-bold inBDT"><span id="total-paid-bdt">0.00</span></div>
+        <div id="amount-to-apply" class="fw-bold" style="margin-top: 10px;"></div>
+        <div id="amount-to-credit" class="fw-bold"></div>
+    </div>
+    <br />
+</div>
+
+
+
+<div style="margin-top: 140px;">
+    <button id="clear-payment-btn" type="button" class="btn customize-btnew fw-bold px-4 float-lg-end d-none" onclick="Clearpayment()">Clear Payment</button>
+    <div class="row">
+        <div class="col-md-4 col-12">
+            <div class="mb-2">
+                <label class="form-label fw-bold">
+                    Memo
+                </label>
+
+                <textarea class="form-control text-box multi-line" id="memo" name="PurchaseDesc" rows="4"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 col-12 mt-4 pt-1">
+            <div class="mb-3">
+                <label class="form-label">
+                    <i class="fas fa-link"></i> <span>Attachments Maximum size: 20MB</span>
+                </label>
+                <div id="file-drop-area">
+                    <p>Drag and drop files here or click to select files.</p>
+                    <ul id="selected-files-list"></ul>
+                </div>
+                <input id="image-uploadify" type="file" accept=".xlsx,.xls,image/*,.doc,audio/*,.docx,video/*,.ppt,.pptx,.txt,.pdf" multiple>
+            </div>
+        </div>
+        <div class="footerButton">
+            <button class="btn btn-outline-dark fw-bolder btn-sm mt-4 d-none" id="view-image-or-pdf">Full view <i class="bi bi-eye-fill"></i></button>
+            <button class="btn btn-outline-dark fw-bolder btn-sm mt-4 bg-danger text-white d-none" id="remove-image-or-pdf">X</button>
+        </div>
+        <div class="col-lg-12">
+            <iframe id="pdf-iframe" class="d-none" style="width: 66%; height: 500px;"></iframe>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="mb-3">
+                    <div class="col-lg-12 row" id="file-container">
+                        <!-- Placeholder for dynamically added iframes and buttons -->
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+        @if (ViewBag.ActionType == "Edit")
+        {
+            <div class="bottom-bar">
+                <div>
+                    <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3" style="border: 1px solid #808080b5; background: transparent;" onclick="gotoBillList()">Cancel</button>
+                </div>
+                <div>
+                    <button class="text-white border-0 py-1" style=" background: transparent;">Print</button>
+                </div>
+                <div class="dropdown">
+                     @if (ViewBag.IsCopy != 2)
+                    {
+                    <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Update</button>
+
+                    <button id="BtnSaveAndClose" class="btn-success dropdown-toggle fw-bold radius-30 py-1 me-3" type="button" data-bs-toggle="" >
+                        Update and close
+                    </button>
+                    }
+                    <ul class="dropdown-menu" id="ul-id-for-expenses">
+                        <li class="dropdown-item">
+                            <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        }
+        else if (ViewBag.ActionType == "Create")
+        {
+            <div class="bottom-bar">
+                <div>
+                    <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3" style="border: 1px solid #808080b5; background: transparent;" onclick="gotoBillList()">Cancel</button>
+                </div>
+                <div>
+                    <button class="text-white border-0 py-1" style=" background: transparent;">Print</button>
+                </div>
+                <div class="dropdown">
+                    <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Save</button>
+
+                    <button id="BtnSaveAndClose" class="btn-success fw-bold radius-30 py-1 me-3" type="button" data-bs-toggle="">
+                        Save and close
+                    </button>
+                    <ul class="dropdown-menu" id="ul-id-for-expenses">
+                        <li class="dropdown-item">
+                            <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="bottom-bar">
+                <div>
+                    <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3" style="border: 1px solid #808080b5; background: transparent;" onclick="gotoBillList()">Cancel</button>
+                </div>
+                <div>
+                    <button class="text-white border-0 py-1" style=" background: transparent;">Print</button>
+                </div>
+                <div class="dropdown">
+                    <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Save</button>
+
+                    <button id="BtnSaveAndClose" class="btn-success fw-bold radius-30 py-1 me-3" type="button" data-bs-toggle="">
+                        Save and close
+                    </button>
+                    <ul class="dropdown-menu" id="ul-id-for-expenses">
+                        <li class="dropdown-item">
+                            <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        }
+        <input type="button" id="unknown" class="btn  btn-md" value="" />
+        <div class="dropdown" id="unknown1" style="display: inline-block;">
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this file?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js" ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsPurchaseReport.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        const today = new Date();
+
+        const OpeningDateAbc = document.getElementById('payment-date');
+
+        const day = String(today.getDate()).padStart(2, '0');
+        const month = today.toLocaleString('default', { month: 'short' });
+        const year = today.getFullYear();
+
+        const formattedDateAbc = `${day}-${month}-${year}`;
+
+        //OpeningDateAbc.value = formattedDateAbc;
+        var selectedSupplierId = '@ViewBag.SupplierId';
+
+
+        $(document).ready(function () {
+
+            $("#Supplier").select2();
+            $("#bank-credit-account").select2();
+            $("#FiscalMonthId").select2();
+            $("#WarehouseIdMain").select2();
+
+
+
+            $(".inBDT").addClass("d-none");
+              $("#start-date").removeClass("hasDatepicker").datepicker({
+                  dateFormat: "dd-M-yy",
+                  showOn: "focus" 
+              });
+              $("#start-date1").removeClass("hasDatepicker").datepicker({
+                  dateFormat: "dd-M-yy",
+                  showOn: "focus" 
+              });
+              $("#payment-date").removeClass("hasDatepicker").datepicker({
+                  dateFormat: "dd-M-yy",
+                showOn: "focus",
+                todayHighlight: true,
+                autoclose: true,
+                onSelect: function (dateText, inst) {
+                    getverifyFiscalMonth(dateText);
+                }
+            }).attr('readonly', 'readonly');
+
+              $("#end-date").removeClass("hasDatepicker").datepicker({
+                  dateFormat: "dd-M-yy",
+                  showOn: "focus" 
+              });
+              $("#end-date1").removeClass("hasDatepicker").datepicker({
+                  dateFormat: "dd-M-yy",
+                  showOn: "focus" 
+              });
+              $("#payment-date").attr("autocomplete", "off");
+              $(".ui-datepicker").on("click", function (event) {
+                  event.stopPropagation();
+              });
+
+              $("#filter-btn").on("click", function (event) {
+                  if (!$(event.target).closest(".filter-drop").length && !$(event.target).is("#start-date, #end-date")) {
+                      $(".filter-drop").addClass("show");
+                  }
+              });
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetSuppliers", "Purchase")',/* "../Atrai/Purchase/GetSuppliers", */
+                datatype: "Json",
+                success: function (data) {
+
+                    $.each(data, function (index, value) {
+                        console.log("value dekhi supplier er", value);
+                        $('#Supplier').append('<option value="' + value.Id + '" data-currency-id="' + value.SupplierCurrencyId + '" >' + value.SupplierName + '-' + value.CurrencyShortName + '</option>');
+                    });
+                }
+            });
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetBanksAccountHeads", "Admin")', 
+                datatype: "Json",
+                success: function (data) {
+                    $.each(data, function (index, value) {
+                        $('#bank-credit-account').append('<option value="' + value.Id + '">' + value.AccName + '</option>');
+                    });
+                    $.each(data, function (index, value) {
+                        $('#bank-debit-account').append('<option value="' + value.Id + '">' + value.AccName + '</option>');
+                    });
+                }
+            });
+
+            if ('@actionType' === "Create")
+            {
+                LoadData();
+            }
+            if ('@actionType' === "Edit") {
+                PopulateData();
+            }
+
+            function initializeFiscalMonth(date) {
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetFiscalMonthDateWise", "Accounts")',
+                    data: { fiscalDate: date },
+                    datatype: "Json",
+                    success: function (data) {
+
+                        if (data.length > 1) {
+                            $("#FiscalMonthDiv").removeClass('d-none');
+                        }
+                        else {
+                            $("#FiscalMonthDiv").addClass('d-none');
+                        }
+                        $('#FiscalMonthId').empty();
+                        $.each(data, function (index, value) {
+                            $('#FiscalMonthId').append('<option value="' + value.Id + '" >' + value.MonthName + '</option>');
+                        });
+                        console.log($('#FiscalMonthId').val());
+                    }
+                });
+            }
+
+            function getverifyFiscalMonth(selectedDate) {
+
+                $.ajax({
+                    url: '@Url.Action("VerifyFiscalMonth", "Accounts")',
+                    data: { fiscalDate: selectedDate },
+                    type: 'GET',
+                    success: function (result) {
+
+                        if (result.IsLocked == true) {
+                            //$('#VoucherDate').val(result.data);
+                            // var formattedDate = moment(result.data).format('DD-MMM-YYYY');
+                            // $('#payment-date').val(formattedDate);
+                            // $('#payment-date-validation').text('The fiscal month you choosed is closed');
+                            if (result.data == null) {
+                                $('#payment-date-validation').text('Open a fiscal month.');
+                                $('#payment-date').val('');
+                            }
+                            else {
+                                //$('#VoucherDate').val(result.data);
+                                var formattedDate = moment(result.data).format('DD-MMM-YY');
+                                $('#payment-date').val(formattedDate);
+                                $('#payment-date-validation').text('The fiscal month you choosed is closed');
+                                initializeFiscalMonth(result.data);
+                            }
+                        }
+                        else {
+                            $('#payment-date-validation').text('');
+                            initializeFiscalMonth($('#payment-date').val());
+                        }
+                    },
+                    error: function (error) {
+                        console.log('Error fetching group list:', error);
+                    }
+                });
+            }
+        });
+        var supplierDropdown = $("#Supplier");
+        supplierDropdown.on("select2:select", function () {
+            var selectedValue = $(this).val();
+            credittable.clearData();
+            LoadDataSupplierWise(selectedValue);
+        });
+
+        function reloadTableData()
+        {
+            var SupplierId = $("#Supplier").val();
+            var startDate = $("#start-date").val();
+            var endDate = $("#end-date").val();
+            $.ajax({
+                url: '@Url.Action("GetFilteredSupplierTransaction", "Admin")',
+                data: { "SupplierId": SupplierId, startDate: startDate, endDate: endDate, criteria: 'Supplier' },
+                type: 'GET',
+                async: true,
+                dataType: 'json',
+                success: function (result) {
+                    console.log(result.data);
+                    if (result.success == "1") {
+
+                        $("#Supplier").val(SupplierId);
+                        //LoadDataforCreditSupplierWise(id);
+                        populatePaymentData(result.data);
+                        toastr.success("Data loaded successfully", "", {
+                            "toastClass": "toast-green",
+                        });
+                    }
+                },
+                error: function () {
+                    toastr.error('Unable to Save');
+                    //alert('Unable to Save');
+                }
+            });
+
+        }
+        function reloadTableDataForCredit() {
+            var SupplierId = $("#Supplier").val();
+            var startDate = $("#start-date1").val();
+            var endDate = $("#end-date1").val();
+            $.ajax({
+                url: '@Url.Action("GetFilteredSupplierTransaction", "Admin")',
+                data: { "SupplierId": SupplierId, startDate: startDate, endDate: endDate, criteria: 'Supplier credit' },
+                type: 'GET',
+                async: true,
+                dataType: 'json',
+                success: function (result) {
+                    console.log(result.data);
+                    if (result.success == "1") {
+
+                        $("#Supplier").val(SupplierId);
+                        populateCreditData(result.data);
+                        toastr.success("Data loaded successfully", "", {
+                            "toastClass": "toast-green",
+                        });
+                    }
+                },
+                error: function () {
+                    toastr.error('Unable to Save');
+                    //alert('Unable to Save');
+                }
+            });
+
+        }
+
+        function LoadDataSupplierWise(id) {
+
+            var purchaseId = @PurchaseId;
+            var SupplierId = @SupplierId;
+            $.ajax({
+                url: '@Url.Action("GetRefDetailsNewForQb", "Admin")',
+                data: { "SupplierId": id },
+                type: 'GET',
+                async: true,
+                dataType: 'json',
+                success: function (result) {
+                    console.log(result.data);
+                    if (result.success == "1") {
+
+                        $("#Supplier").val(id);
+                        LoadDataforCreditSupplierWise(id);
+                        populatePaymentData(result.data);
+                        toastr.success("Data loaded successfully", "", {
+                            "toastClass": "toast-green",
+                        });
+
+
+                    }
+                },
+                error: function () {
+                    toastr.error('Unable to Save');
+                    //alert('Unable to Save');
+                }
+            });
+        }
+
+        function gotoBillList() {
+            window.location.href = '@Url.Action("billlistqb", "Accounts")?Type=Payments';
+        }
+        function LoadDataforCreditSupplierWise(id) {
+
+            var purchaseId = @PurchaseId;
+            var SupplierId = @SupplierId;
+            console.log(SupplierId);
+            $.ajax({
+                url: '@Url.Action("GetSupplierCredit", "Admin")',
+                data: { SupplierId: id },
+                type: 'GET',
+                async: true,
+                dataType: 'json',
+                success: function (result) {
+                    if (result.success == "1") {
+
+                        $("#Supplier").val(id);
+                        populateCreditData(result.data);
+                    }
+                },
+                error: function () {
+                    toastr.error('Unable to Save');
+                    //alert('Unable to Save');
+                }
+            });
+        }
+        function LoadData() {
+
+                var purchaseId = @PurchaseId;
+                var SupplierId = @SupplierId;
+                $.ajax({
+                    url: '@Url.Action("GetRefDetailsNewForQb", "Admin")',
+                    data:  {"SupplierId":@ViewBag.SupplierId},
+                    type: 'GET',
+                    async: true,
+                    dataType: 'json',
+                    success: function (result) {
+                        console.log(result.data);
+                        if (result.success == "1") {
+                        if(SupplierId != 0)
+                        {
+                            $("#Supplier").val(SupplierId).trigger('change.select2');
+                        }
+                        
+                        var selectedOption = $("#Supplier").find("option:selected");
+                        var currencyId = selectedOption.data('currency-id');
+
+                            getCurrencyRate(currencyId);
+
+                            LoadDataforCredit();
+                            populatePaymentData(result.data);
+                            toastr.success("Data loaded successfully", "", {
+                                "toastClass": "toast-green",
+                            });
+                            
+                            
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Unable to Save');
+                        //alert('Unable to Save');
+                    }
+                });
+            }
+        function LoadDataforCredit() {
+
+                var purchaseId = @PurchaseId;
+                var SupplierId = @SupplierId;
+                console.log(SupplierId);
+                $.ajax({
+                url: '@Url.Action("GetSupplierCredit", "Admin")',
+                data: { SupplierId: SupplierId },
+                    type: 'GET',
+                    async: true,
+                    dataType: 'json',
+                    success: function (result) {
+                    if (result.success == "1") {
+
+                        //$("#Supplier").val(SupplierId);
+                            populateCreditData(result.data);
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Unable to Save');
+                        //alert('Unable to Save');
+                    }
+                });
+            }
+
+   </script>
+
+
+   <script>
+
+       var currentPurchaseId = @ViewBag.PurchaseId;
+
+       function customCheckBoxFormatter(cell, formatterParams, onRendered) {
+           if ('@actionType' === "Create") {
+               var rowData = cell.getRow().getData();
+               if (rowData.RefId == currentPurchaseId) {
+                   return '<input type="checkbox" class="custom-checkbox" data-id="' + rowData.id + '" checked>';
+               }
+               else {
+                   return '<input type="checkbox" class="custom-checkbox" data-id="' + rowData.id + '">';
+               }
+           }
+           else {
+                var rowData = cell.getRow().getData();
+                return '<input type="checkbox" class="custom-checkbox" data-id="' + rowData.id + '" checked>';
+           }
+          
+        }
+       var columns = 
+       [
+        {
+            headerSort: false,
+            field: "drag",
+            formatter: function (cell, formatterParams) {
+            return "<i class='fas fa-bars drag-icon'></i>";
+            },
+            width: 30,
+            headerSort: false,
+            rowHandle: true,
+        },
+        { title: "", field: "CheckBox", headerHozAlign: "left", width: "3px", headerSort: false, hozAlign: "center", visible: true, formatter: customCheckBoxFormatter }, 
+        {
+            title: "DESCRIPTION", field: "PurchaseDate", editable: true, headerSort: false, width: '25px',
+            formatter: 
+            function(cell, formatterParams, onRendered) {
+            var purchaseDate = cell.getRow().getData().RefDate;
+            var purchaseCode = cell.getRow().getData().RefCode;
+            var purchaseId = cell.getRow().getData().RefId;
+
+            var container = document.createElement('div');
+
+            var link = document.createElement('a');
+            link.href = `@Url.Action("AddBillByType", "Accounts")?Type=Bill&PurchaseId=${purchaseId}`;
+            link.textContent = "Bill";
+            link.target = "_blank";
+            var text = document.createElement('span');
+            text.textContent = `(${purchaseDate}) - Bill No: ${purchaseCode}`; 
+
+            container.appendChild(link);
+            container.appendChild(text);
+
+            return container;
+            },
+            editorParams: {
+            listOnEmpty: true,
+            autocomplete: true,
+        }
+        },
+        { title: "Id", field: "Id", movable: false, headerSort: false, visible: false },
+        { title: "PurchaseCode", field: "PurchaseCode", movable: false, headerSort: false, visible: false, editor: false, default: "RefId" },
+        { title: "PurchaseId", field: "RefId", movable: false, headerSort: false, visible: false, editor: false, },
+        {
+            title: "DUE DATE", field: "DueDate", width: "10px", editable: false, hozAlign: "left", headerSort: false, movable: false, editor: "input",
+            formatter: function (cell, formatterParams, onRendered) {
+                var date = new Date(cell.getData().DueDate);
+                var day = date.getDate();
+                var monthNames = [
+                "Jan", "Feb", "Mar",
+                "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep",
+                "Oct", "Nov", "Dec"
+                ];
+                var monthIndex = date.getMonth();
+                var year = date.getFullYear().toString().substr(-2);
+
+                var formattedDate = day + '-' + monthNames[monthIndex] + '-' + year;
+
+                cell.getData().DueDate = formattedDate;
+
+                return cell.getData().DueDate;
+            }
+        },
+        {  title: "ORIGINAL AMOUNT", field: "Amount", editable: false, hozAlign: "right", width: "13px", headerSort: false, movable: false, editor: "input",
+           formatter: "money", 
+           formatterParams: {
+               precision: 2,  
+               symbol: "",  
+               thousand: ",",  
+               decimal: ".",  
+           },   
+            bottomCalcFormatter: "money",  
+            bottomCalcFormatterParams: {
+            precision: 2,  
+            symbol: "",  
+            thousand: ",",  
+            decimal: ".",  
+            },
+        },
+                {
+                    title: "Currency Rate", field: "CurrencyRate", editable: false, hozAlign: "right", width: "13px", headerSort: false, movable: false,
+                    formatter: "money",
+                    formatterParams: {
+                        precision: 2,
+                        symbol: "",
+                        thousand: ",",
+                        decimal: ".",
+                    },
+                    bottomCalcFormatter: "money",
+                    bottomCalcFormatterParams: {
+                        precision: 2,
+                        symbol: "",
+                        thousand: ",",
+                        decimal: ".",
+                    },
+                },
+        {
+            title: "OPEN BALANCE", field: "Amount", editable: false, hozAlign: "right", width: '12px', headerSort: false, movable: false, editor: "input",
+            formatter: "money",  
+            formatterParams: {
+                precision: 2,  
+                symbol: "",  
+                thousand: ",",  
+                decimal: ".",  
+            },
+            bottomCalcFormatter: "money", 
+            bottomCalcFormatterParams: {
+                precision: 2,  
+                symbol: "",  
+                thousand: ",",  
+                decimal: ".", 
+            },
+        },
+        {
+            title: "PAYMENT", field: "NetAmount", editable: true, hozAlign: "right", width: '10px', headerSort: false, movable: false,
+            editor: "input",
+            formatter: "money",  
+            formatterParams: {
+                precision: 2, 
+                symbol: "",  
+                thousand: ",",  
+                decimal: ".",  
+            },            
+            cellEdited: function(cell) {
+                    var newValue = parseFloat(cell.getValue());
+                    var openBalance = parseFloat(cell.getRow().getData().NetAmount);
+
+                    if (newValue > openBalance) {
+                        var previousValue = cell.getOldValue();
+                        cell.setValue(previousValue);
+                    }
+
+                    var netAmount = parseFloat(cell.getValue()) || 0;
+                    var currencyRate = cell.getRow().getData().CurrencyRate || 0;
+                    var amount = cell.getRow().getData().Amount || 0;
+                     var MasterCurrencyRate = parseFloat($("#CurrencyRate").val()) || 1;
+
+                    var exchangeGLValue = (currencyRate - MasterCurrencyRate) * netAmount;
+
+                    // Update the ExchangeGL column
+                    cell.getRow().getCell("ExchangeLossGain").setValue(exchangeGLValue.toFixed(4));
+                    
+                },
+                formatter: function (cell, formatterParams, onRendered) {
+                    var formattedNumber = cell.getValue().toLocaleString();
+
+                    return "<div>" + formattedNumber + "</div>";
+                },
+        },
+                {
+                    title: "Exchange G/L", field: "ExchangeLossGain", editable: true, hozAlign: "right", width: '10px', headerSort: false, movable: false,
+                    
+                    formatter: "money",
+                    formatterParams: {
+                        precision: 2,
+                        symbol: "",
+                        thousand: ",",
+                        decimal: ".",
+                    },
+
+                     formatter: function (cell, formatterParams, onRendered) {
+                        
+                         var exchangeGLValue = parseFloat(cell.getValue()) || 0;                    
+                                          
+                        return exchangeGLValue.toFixed(4).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                        
+                     },                   
+                   
+                },
+
+       ];
+
+       var creditcolumns =
+            [
+                {
+                    headerSort: false,
+                    field: "drag",
+                    formatter: function (cell, formatterParams) {
+                        return "<i class='fas fa-bars drag-icon'></i>";
+                    },
+                    width: 30,
+                    headerSort: false,
+                    rowHandle: true,
+                },
+                { title: "", field: "CheckBox", headerHozAlign: "left", width: "9px", headerSort: false, hozAlign: "left", visible: true, formatter: customCheckBoxFormatter },
+                {
+                    title: "DESCRIPTION", field: "PurchaseDate", editable: true, headerSort: false, width: '30px',
+                    formatter:
+                        function (cell, formatterParams, onRendered) {
+                            var purchaseDate = cell.getRow().getData().RefDate;
+                            var purchaseCode = cell.getRow().getData().RefCode;
+                            var purchaseId = cell.getRow().getData().PurchaseId;
+
+                            var container = document.createElement('div');
+
+                            var link = document.createElement('a');
+                            link.href = `@Url.Action("AddBillByType", "Accounts")?Type=Bill&PurchaseId=${purchaseId}`;
+                            link.textContent = "Bill";
+                            link.target = "_blank";
+                            var text = document.createElement('span');
+                            text.textContent = `(${purchaseDate}) - Bill No: ${purchaseCode}`;
+
+                            container.appendChild(link);
+                            container.appendChild(text);
+
+                            return container;
+                        },
+                    editorParams: {
+                        listOnEmpty: true,
+                        autocomplete: true,
+                    }
+                },
+                { title: "Id", field: "Id", movable: false, headerSort: false, visible: false },
+                { title: "PurchaseCode", field: "PurchaseCode", movable: false, headerSort: false, visible: false, editor: false, default: "RefId" },
+                { title: "PurchaseId", field: "RefId", movable: false, headerSort: false, visible: true, editor: false, },
+                { title: "TrxnId", field: "TrxnId", movable: false, headerSort: false, visible: false, editor: false, },
+                {
+                    title: "DUE DATE", field: "DueDate", width: "10px", editable: false, hozAlign: "left", headerSort: false, movable: false, editor: "input",
+                    formatter: function (cell, formatterParams, onRendered) {
+                        var date = new Date(cell.getData().DueDate);
+                        var day = date.getDate();
+                        var monthNames = [
+                            "Jan", "Feb", "Mar",
+                            "Apr", "May", "Jun",
+                            "Jul", "Aug", "Sep",
+                            "Oct", "Nov", "Dec"
+                        ];
+                        var monthIndex = date.getMonth();
+                        var year = date.getFullYear().toString().substr(-2);
+
+                        var formattedDate = day + '-' + monthNames[monthIndex] + '-' + year;
+
+                        cell.getData().DueDate = formattedDate;
+
+                        return cell.getData().DueDate;
+                    }
+                },
+                {
+                    title: "ORIGINAL AMOUNT", field: "OrgAmount", editable: false, hozAlign: "right", width: "13px", headerSort: false, movable: false, editor: "input",
+                    formatter: "money",
+                    formatterParams: {
+                        precision: 2,
+                        symbol: "",
+                        thousand: ",",
+                        decimal: ".",
+                    },
+                    bottomCalcFormatter: "money",
+                    bottomCalcFormatterParams: {
+                        precision: 2,
+                        symbol: "",
+                        thousand: ",",
+                        decimal: ".",
+                    },
+                },              
+                {
+                    title: "OPEN BALANCE", field: "Amount", editable: false, hozAlign: "right", width: '17px', headerSort: false, movable: false, editor: "input",
+                    formatter: "money",
+                    formatterParams: {
+                        precision: 2,
+                        symbol: "",
+                        thousand: ",",
+                        decimal: ".",
+                    },
+                    bottomCalcFormatter: "money",
+                    bottomCalcFormatterParams: {
+                        precision: 2,
+                        symbol: "",
+                        thousand: ",",
+                        decimal: ".",
+                    },
+                },
+                {
+                    title: "PAYMENT", field: "NetAmount", editable: true, hozAlign: "right", width: '10px', headerSort: false, movable: false,
+                    editor: "input",
+                    formatter: "money",
+                    formatterParams: {
+                        precision: 2,
+                        symbol: "",
+                        thousand: ",",
+                        decimal: ".",
+                    },
+
+                    cellEdited: function (cell) {
+                        
+                        var newValue = parseFloat(cell.getValue());
+                        var openBalance = parseFloat(cell.getRow().getData().Amount);
+
+                        if (newValue > openBalance) {
+                            var previousValue = cell.getOldValue();
+                            cell.setValue(previousValue);
+                        }
+                        AutoDistributor();
+                        var checkbox = cell.getRow().getElement().querySelector('.custom-checkbox');
+
+                        if (newValue > 0) {
+                            checkbox.checked = true;
+                        } else {
+                            checkbox.checked = false;
+                        }
+                        
+                    },
+                    formatter: function (cell, formatterParams, onRendered) {
+                        var formattedNumber = cell.getValue().toLocaleString();
+
+                        return "<div>" + formattedNumber + "</div>";
+                    },
+                },
+            ];
+
+       var paymenttable = new Tabulator("#tabulatorPaymentGrid", {
+            layout: "fitDataStretch",
+            addRowPos: "bottom",
+            columns: columns,
+        });
+      
+        var clearpaymentButton = document.getElementById('amount-received');
+
+        clearpaymentButton.addEventListener('input', function () {
+            var inputFieldValue = clearpaymentButton.value.trim();
+
+            // Check if the input field value is empty or contains only whitespace
+            if (inputFieldValue === '') {
+                var allRows = paymenttable.getRows();
+
+                allRows.forEach(function (row) {
+                    row.getCell("NetAmount").setValue("0");
+                });
+            }
+        });
+
+        $("#CurrencyRate").on("input", function () {
+        // Get the new value from the input field
+        var MasterCurrencyRate = parseFloat($(this).val()) || 1; // Default to 1 if undefined or NaN
+
+            paymenttable.getRows(true).forEach(function (row) {
+
+                var netAmount = parseFloat(row.getCell("NetAmount").getValue()) || 0;
+                var currencyRate = parseFloat(row.getData().CurrencyRate) || 0;
+                var amount = parseFloat(row.getData().Amount) || 0;        
+
+                var exchangeGLValue = (currencyRate - MasterCurrencyRate) * netAmount;
+
+                // Update the ExchangeGL column
+                row.getCell("ExchangeLossGain").setValue(exchangeGLValue.toFixed(4));
+            });
+   
+     });
+
+       var credittable = new Tabulator("#tabulatorCreditGrid", {
+            layout: "fitDataStretch",
+            addRowPos: "bottom",
+            columns: creditcolumns,
+        });
+
+        function formatDateToCustom(dateString) {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const monthIndex = date.getMonth();
+            const monthName = monthNames[monthIndex];
+            const day = date.getDate();
+            return `${day}-${monthName}-${year}`;
+        }
+
+        function initializeFiscalMonthForEdit(date, FiscalMonthId) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetFiscalMonthDateWise", "Accounts")',
+                data: { fiscalDate: date },
+                datatype: "Json",
+                success: function (data) {
+
+                    if (data.length > 1) {
+                        $("#FiscalMonthDiv").removeClass('d-none');
+                    }
+                    else {
+                        $("#FiscalMonthDiv").addClass('d-none');
+                    }
+                    $('#FiscalMonthId').empty();
+                    $.each(data, function (index, value) {
+                        $('#FiscalMonthId').append('<option value="' + value.Id + '" >' + value.MonthName + '</option>');
+                    });
+                    console.log($('#FiscalMonthId').val());
+                    $("#FiscalMonthId").val(FiscalMonthId).trigger('change');
+                }
+            });
+        }
+        function getFileType(fileName) {
+            var extension = fileName.split('.').pop().toLowerCase();
+            if (extension === 'pdf') {
+                return 'pdf';
+            } else if (extension === 'xls' || extension === 'xlsx') {
+                return 'excel';
+            } else if (extension === 'jpg' || extension === 'jpeg' || extension === 'png' || extension === 'gif') {
+                return 'image';
+            } else {
+                return 'unknown';
+            }
+        }
+
+        function deleteFile(filename) {
+            $.ajax({
+                url: '@Url.Action("DeleteFileName", "Admin")',
+                type: 'Post',
+                data: { fileName: filename },
+                success: function (result) {
+
+                },
+                error: function (error) {
+                    console.log('Error fetching group list:', error);
+                }
+            });
+        }
+        function PopulateData() {
+            var SupplierId = @SupplierId;
+            $.ajax({
+                url: "@Url.Action("GetTransactionQB", "Admin")",
+                data: { "TransactionId": @ViewBag.TransactionId, "SupplierId": @ViewBag.SupplierId, "IsCopy": @ViewBag.IsCopy},
+                type: 'GET',
+                async: true,
+                dataType: 'json',
+                success: function (response) {
+                    if (response.Success == "1") {
+                        $("#Id").val(response.transaction.Id);
+                        $("#Supplier").val(SupplierId).trigger('change');
+                        var selectedOption = $("#Supplier").find("option:selected");
+                        var currencyId = selectedOption.data('currency-id');
+
+                        getCurrencyRate(currencyId);
+                     
+                        $('#purchase-mail-address').val(response.transaction.Email);
+                        $('#bank-credit-account').val(response.transaction.CreditAccountId).change();
+                        $('#WarehouseIdMain').val(response.transaction.WarehouseId).change();
+                        $('#mail-address').val(response.transaction.PrimaryAddress);
+                        const newPaymentDate = new Date(response.transaction.PaymentDate);
+                        const formattedDueDate = formatDateToCustom(newPaymentDate);
+                        initializeFiscalMonthForEdit(response.transaction.PaymentDate, response.transaction.FiscalMonthId);
+                        $('#payment-date').val(formattedDueDate);
+                        $('#ref-no').val(response.transaction.RefNo);
+                        $('#CurrencyRate').val(response.transaction.CurrencyRate);
+                        $('#MultiiCurrencyId').val(response.transaction.CurrencyId);
+                        $('#memo').val(response.transaction.Description);
+                        $('#bill-payment-cocde').html(response.transaction.RefNo);
+                        var tempReceived = response.transaction.TransactionDetailsAmountSum - response.transaction.TransactionDetailsCreditSum;
+                           $('#amount-received').val(tempReceived == 0 ? response.transaction.TransactionAmount : tempReceived);
+
+                        $("#balance-due").text(response.transaction.TransactionAmount.toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }));
+                        $("#total-paid").text(response.transaction.TransactionAmount.toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }));
+                        $("#amount-to-apply").text("$" + response.transaction.TransactionAmount.toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }));
+                        $("#amount-to-credit").text("$" + response.transaction.TransactionDetailsCreditSum.toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }));
+
+                        populatePaymentData(response.transaction.TransactionDetails);
+                        populateCreditData(response.transaction.CreditDetails);
+
+                        var fileNames = response.transaction.FilePath ? response.transaction.FilePath.split(';') : [];
+
+                        var fileContainer = $('#file-container');
+
+                        // Clear any existing elements
+                        fileContainer.empty();
+
+                        fileNames.forEach(function (fileName, index) {
+                            if (fileName) {
+                                // Determine file type based on extension
+                                var fileType = getFileType(fileName);
+                                var fileName2 = fileName.split('/').pop();
+
+                                var actualFileName = fileName2.match(/[^_]+$/)[0];
+
+                                // Wrapper div
+                                var fileWrapper = $('<div>', {
+                                    class: 'file-wrapper col-md-1',
+                                    css: {
+                                        position: 'relative',
+                                        marginBottom: '20px' // space between files
+                                    }
+                                });
+
+                                // Create iframe for PDF and Excel files
+                                var iframe;
+                                if (fileType === 'pdf' || fileType === 'excel') {
+                                    iframe = $('<iframe>', {
+                                        id: 'pdf-iframe-' + index,
+                                        class: 'file-iframe',
+                                        css: {
+                                            width: '100%',
+                                            height: '0',
+                                            border: '1px solid #ccc',
+                                            overflow: 'hidden'
+                                        },
+
+                                    });
+
+                                    // Display filename as text overlay
+                                    var filenameOverlay = $('<div>', {
+                                        class: 'filename-overlay',
+                                        css: {
+                                            position: 'absolute',
+                                            top: '0',
+                                            left: '0',
+                                            width: '100%',
+                                            background: 'rgba(0, 0, 0, 0.5)',
+                                            color: '#fff',
+                                            padding: '5px',
+                                            boxSizing: 'border-box',
+                                            zIndex: '5'
+                                        },
+                                        text: fileName.split('/').pop() // Extract filename from path
+                                    });
+
+                                    // Append filename overlay to iframe container
+                                    iframe.append(filenameOverlay);
+                                } else if (fileType === 'image') {
+                                    // Create img element for image files
+                                    iframe = $('<img>', {
+                                        class: 'file-img',
+                                        css: {
+                                            width: '100%',
+                                            height: 'auto',
+                                            border: '1px solid #ccc',
+                                            objectFit: 'contain' // Adjust as needed for image display
+                                        },
+                                        src: "../" + fileName
+                                    });
+                                } else {
+                                    // Handle unknown file types (optional)
+                                    console.log("Unknown file type for fileName: " + fileName);
+                                    return; // Skip processing this file
+                                }
+
+                                // Create download button for PDF and Excel files
+                                var downloadButton;
+                                if (fileType === 'pdf' || fileType === 'excel') {
+                                    downloadButton = $('<a>', {
+                                        class: 'btn btn-primary btn-sm download-button',
+                                        text: actualFileName,
+                                        href: "../" + fileName,
+                                        //download: fileName.split('/').pop()
+                                    });
+                                }
+
+                                // Create remove button
+                                var removeButton = $('<button>', {
+                                    class: 'btn btn-danger btn-sm remove-button',
+                                    text: 'X',
+                                    css: {
+                                        position: 'absolute',
+                                        top: '5px',
+                                        right: '5px',
+                                        zIndex: 10
+                                    },
+                                    click: function () {
+                                        $('#confirmDeleteModal').modal('show');
+
+                                        // Handle click on confirmation button
+                                        $('#confirmDeleteBtn').on('click', function () {
+                                            // Close modal
+                                            $('#confirmDeleteModal').modal('hide');
+                                            fileWrapper.remove();
+                                            deleteFile(fileName);
+                                        });
+                                    }
+                                });
+
+                                // Append iframe (or img) and buttons to the wrapper
+                                fileWrapper.append(iframe);
+                                fileWrapper.append(removeButton);
+                                if (downloadButton) {
+                                    fileWrapper.append(downloadButton);
+                                }
+
+                                // Append the wrapper to the container
+                                fileContainer.append(fileWrapper);
+
+                                // Show initial elements if necessary
+                                if (fileType === 'pdf' || fileType === 'excel' || fileType === 'image') {
+                                    iframe.removeClass('d-none');
+                                    removeButton.removeClass('d-none');
+                                    if (downloadButton) {
+                                        downloadButton.removeClass('d-none');
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    else
+{
+    toastr.error(response.message, "", {
+        "className": "toast-red",
+    });
+}
+                },
+                error: function () {
+                    toastr.error('Unable to Save');
+                }
+            });
+        }
+        
+        function populatePaymentData(data) {
+
+            paymenttable = new Tabulator("#tabulatorPaymentGrid", {
+                layout: "fitDataStretch",
+                addRowPos: "bottom",
+                columns: columns,
+                data: data,
+            });
+            console.log(data);
+
+        }
+
+        function populateCreditData(data) {
+
+            credittable = new Tabulator("#tabulatorCreditGrid", {
+                layout: "fitDataStretch",
+                addRowPos: "bottom",
+                columns: creditcolumns,
+                data: data,
+            });
+            console.log(data);
+
+        }
+
+       
+
+       function AutoDistributor()
+       {
+            var checkboxes = document.querySelectorAll('.custom-checkbox');
+            checkboxes.forEach(function (checkbox) {
+                checkbox.checked = false;
+            });
+            var inputValue = event.target.value;
+
+
+            var totalAmountReceived = parseFloat(document.getElementById("amount-received").value || 0);
+
+            var data1 = credittable.getData();
+            var totalAmount = data1.reduce(function (sum, row) {
+                if (row.NetAmount > 0) {
+                    var amount = parseFloat(row.NetAmount) || 0;
+                    return sum + amount;
+                }
+                return sum;
+            }, 0);
+
+            totalAmountReceived = totalAmountReceived + totalAmount;
+
+            document.getElementById('amount-to-apply').textContent = totalAmountReceived;
+            // document.getElementById('balance-due').textContent = totalAmountReceived + totalAmount;
+            if($(".rate").val() == "BDT" || $(".rate").val() == "")
+            {
+                $("#balance-due").text((totalAmountReceived).toLocaleString('en-BD', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }));
+
+                $("#total-paid").text((totalAmountReceived).toLocaleString('en-BD', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }));               
+            }
+            else
+            {
+                $("#balance-due").text((totalAmountReceived).toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }));
+                $("#total-paid").text((totalAmountReceived).toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }));
+            }
+            
+            //document.getElementById('total-paid').textContent = totalAmountReceived + totalAmount;
+            var totalBDTpaid = parseFloat($("#CurrencyRate").val());
+            //document.getElementById('total-paid-bdt').textContent = (totalAmountReceived + totalAmount) * totalBDTpaid;
+
+            $("#total-paid-bdt").text(((totalAmountReceived) * totalBDTpaid).toLocaleString('en-BD', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }));
+            document.getElementById('amount-to-credit').textContent = totalAmount;
+
+            var allRows = paymenttable.getRows();
+            var totalOpenBalance = allRows.reduce(function (acc, row) {
+                return acc + parseFloat(row.getCell("Amount").getValue());
+            }, 0);
+
+            allRows.forEach(function (row) {
+                var openBalance = parseFloat(row.getCell("Amount").getValue());
+                var purchaseId = parseFloat(row.getCell("RefId").getValue());
+
+                if (totalAmountReceived > 0 && purchaseId == @PurchaseId) {
+                    var amountToDistribute = Math.min(openBalance, totalAmountReceived);
+
+                    row.getCell("NetAmount").setValue(amountToDistribute.toFixed(4));
+                    var checkbox = row.getElement().querySelector('.custom-checkbox');
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    }
+                    totalAmountReceived -= amountToDistribute;
+                }
+            });
+            allRows.forEach(function (row) {
+                var openBalance = parseFloat(row.getCell("Amount").getValue());
+                var purchaseId = parseFloat(row.getCell("RefId").getValue());
+
+                if (totalAmountReceived > 0 && openBalance > 0) {
+                    var amountToDistribute = Math.min(openBalance, totalAmountReceived);
+
+                    row.getCell("NetAmount").setValue(amountToDistribute.toFixed(4));
+                    var checkbox = row.getElement().querySelector('.custom-checkbox');
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    }
+                    totalAmountReceived -= amountToDistribute;
+
+                }
+                // else
+                // {
+                //      row.getCell("NetAmount").setValue(0);
+                // }
+
+
+            });
+
+            if (totalAmountReceived > 0) {
+                allRows.forEach(function (row) {
+                    var openBalance = parseFloat(row.getCell("Amount").getValue());
+
+                    if (openBalance > 0 && totalAmountReceived > 0) {
+                        var amountToDistribute = Math.min(openBalance, totalAmountReceived);
+
+                        row.getCell("NetAmount").setValue(amountToDistribute.toFixed(4));
+
+                        totalAmountReceived -= amountToDistribute;
+
+                    }
+                });
+            }
+       }
+
+        var amountReceivedInput = document.getElementById("amount-received");
+        amountReceivedInput.addEventListener("blur", function (event) {
+
+            AutoDistributor();
+        });
+
+        var childDetails;
+        var checkedRows;
+
+        $("#Supplier").on("change", function () {
+            if ($("#Supplier").val() != "") {
+                $("#supplier-id-validation").html("");
+            }
+        });
+
+        $("#payment-date").on("change", function () {
+            if ($("#payment-date").val() != "") {
+                $("#payment-date-validation").html("");
+            }
+        });
+
+        $("#bank-credit-account").on("change", function () {
+            if ($("#bank-credit-account").val() != "") {
+                $("#bank-credit-account-validation").html("");
+            }
+        });
+
+        $("#WarehouseIdMain").on("change", function () {
+            if ($("#WarehouseIdMain").val() != "") {
+                $("#warehouse-validation").html("");
+            }
+        });
+
+
+        function saveAndProcess(isSaveAndClose) {
+            var loaderinAajx = `<div class="loader"></div>`;
+
+            var isMultiCurrency = '@HttpContextAccessor.HttpContext.Session.GetInt32("isMultiCurrency")';
+            var DefaultCurrencyId = '@HttpContextAccessor.HttpContext.Session.GetInt32("defaultcurrencyid").ToString()';
+
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            $("#ComId").val(ComId);
+            $("#LuserId").val(UserId);
+
+            checkedRows = [];
+            var rows = paymenttable.getRows();
+            var rows1 = credittable.getRows();
+
+            rows.forEach(function (row) {
+                var checkbox = row.getCell("CheckBox").getElement().querySelector(".custom-checkbox");
+                if (checkbox.checked) {
+                    var rowData = row.getData();
+                    rowData.PurchaseId = rowData.RefId;
+                    checkedRows.push(rowData);
+                }
+            });
+            rows1.forEach(function (row) {
+                var amount = row.getData().NetAmount;
+                var refId = row.getData().RefId;
+                if (amount > 0 && refId != 0) {
+                    var rowData = row.getData();
+                    rowData.PurchaseId = rowData.RefId;
+                    checkedRows.push(rowData);
+                }
+            });
+
+            var parenttrxnId = null;
+            var adjustAmount = 0;
+            rows1.forEach(function (row) {
+                var amount = row.getData().NetAmount;
+                var refId = row.getData().RefId;
+                if (amount > 0 && refId == 0) {
+                    var rowData = row.getData();
+                    parenttrxnId = rowData.TrxnId;
+                    adjustAmount = rowData.NetAmount;
+                }
+            });
+
+            ChildDetails = paymenttable.getData();
+
+            let TransactionDetails = checkedRows;
+            let TransactionDetailsForUpdate = ChildDetails;
+            var TransactionId = $('#Id').val() || 0;
+            var SupplierId = Number($('#Supplier option:selected').val());
+            var CreditAccountId = Number($('#bank-credit-account option:selected').val());
+            var WarehouseId = Number($('#WarehouseIdMain option:selected').val());
+            var SupplierName = $('#Supplier option:selected').text();
+            var PrimaryAddress = $('#mail-address').val();
+            var Email = $('#purchase-mail-address').val();
+            var InputDate = $('#payment-date').val();
+            var TransactionCode = $('#ref-no').val();
+            var FilePath = $('#PurchaseFilePath').val();
+            var Description = $('#memo').val();
+            var balanceDue = $("#balance-due").text();
+            var amountToCredit = $("#amount-to-credit").text();
+
+            var balanceDueInt = parseInt(balanceDue.replace(/[, $]/g, '')) || 0;
+            var amountToCreditInt = parseInt(amountToCredit.replace(/[, $]/g, '')) || 0;
+
+            var TransactionAmount = balanceDueInt;
+            var CurrencyRate = $("#CurrencyRate").val();
+            var CurrencyId = $("#MultiiCurrencyId").val();
+
+            var DebitAccount = @ViewBag.DebitAccountId ;
+               var fileInput = $('input[type=file]')[0];
+
+            // ==== Validation handle starts ======
+            if (!InputDate) {
+                $("#payment-date-validation").html("Please enter Payment date");
+                $("html, body").animate({
+                    scrollTop: $("#modal-btn-id").offset().top
+                }, 100);
+            }
+            if (!CreditAccountId) {
+                $("#bank-credit-account-validation").html("Please select a Bank/Credit account");
+                $("html, body").animate({
+                    scrollTop: $("#modal-btn-id").offset().top
+                }, 100);
+            }
+            if (!WarehouseId) {
+                $("#warehouse-validation").html("Please select a location");
+                $("html, body").animate({
+                    scrollTop: $("#modal-btn-id").offset().top
+                }, 100);
+            }
+            // ==== Validation handle ends ======
+            var fiscalMonthId = $("#FiscalMonthId").val();
+            var checkbox = document.getElementById('isAdvance');
+
+            var vouchermodel = {
+                TransactionCategory: "",
+                Id: TransactionId,
+                SupplierId: SupplierId,
+                SupplierName: SupplierName,
+                PrimaryAddress: PrimaryAddress,
+                Email: Email,
+                Description: Description,
+                CreditAccountId: CreditAccountId,
+                InputDate: InputDate,
+                TransactionCode: TransactionCode,
+                WarehouseId: WarehouseId,
+                DebitAccountId: TransactionDetails.length === 0 ? 0 : @ViewBag.DebitAccountId,
+                TransactionAmount: TransactionAmount,
+                CurrencyRate: CurrencyRate,
+                CurrencyId: CurrencyId,
+                FiscalMonthId: fiscalMonthId,
+                FilePath: FilePath,
+                TransactionDetails: TransactionDetails,
+                TransactionCategory: "Payment",
+                ParentTransactionId: parenttrxnId,
+                AdjustedAmount: adjustAmount,
+                isPayment: true
+            };
+
+            var TransactionIdAbc = 0;
+            $.ajax({
+                    async: false,
+                    type: "POST",
+                    url: "@Url.Action("AddTransactionQB", "Admin")",
+                    data: JSON.stringify(vouchermodel),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        TransactionIdAbc = response.TransactionId;
+                        if (response.message == "Data Save Successfully.") {
+                            if (isSaveAndClose) {
+                                setTimeout(function () {
+                                    window.location.href = '@Url.Action("billlistqb", "Accounts")?Type=Payments';
+                                }, 3000);
+                            }
+                        }
+                        if (response.message == "Purchase updated successfully") {
+                            $("#bill-no").on("focus", function () {
+                                $("#bill-no-validation").html("");
+                            });
+                        }
+
+                        if(response.Success == 1)
+                        {
+                            setTimeout(function () {
+                            toastr.success(response.message, "", {
+                                "toastClass": "toast-green"
+                            });
+                        }, 1500);
+                        }
+                                else
+        {
+            toastr.error(response.message, "", {
+                        "toastClass": "toast-red",
+            });
+        }
+
+                        
+                    },
+                    error: function (response) { }
+                });
+
+            // if (TransactionDetails.length === 0 && !checkbox.checked) {
+            //     var myUrlInactive = '@Url.Action("DeleteTransaction", "Admin")';
+            //     $.ajax({
+            //         type: "get",
+            //         data: { TransactionId: @ViewBag.TransactionId },
+            //         url: myUrlInactive,
+            //         success: function (response) {
+            //             if (response.success == "1") {
+            //                 toastr.success(response.msg, "", {
+            //                     "toastClass": "toast-green",
+            //                 });
+            //                 setTimeout(function () {
+            //                     window.location.href = '@Url.Action("AddPayment", "Accounts")';
+            //                 }, 1000);
+            //             } else if (response.success == "0") {
+            //                 toastr.success(response.msg, "", {
+            //                     "toastClass": "toast-red",
+            //                 });
+            //                 getPayment();
+            //                 getCredit();
+            //             }
+            //         }
+            //     });
+            // } else {
+            //     $.ajax({
+            //         async: false,
+            //         type: "POST",
+            //         url: "@Url.Action("AddTransactionQB", "Admin")",
+            //         data: JSON.stringify(vouchermodel),
+            //         contentType: "application/json; charset=utf-8",
+            //         dataType: "json",
+            //         success: function (response) {
+            //             TransactionIdAbc = response.Id;
+            //             if (response.message == "Data Save Successfully.") {
+            //                 if (isSaveAndClose) {
+            //                     setTimeout(function () {
+            //                         window.location.href = '@Url.Action("billlistqb", "Accounts")';
+            //                     }, 3000);
+            //                 }
+            //             }
+            //             if (response.message == "Purchase updated successfully") {
+            //                 $("#bill-no").on("focus", function () {
+            //                     $("#bill-no-validation").html("");
+            //                 });
+            //             }
+            //             setTimeout(function () {
+            //                 toastr.success(response.message, "", {
+            //                     "toastClass": "toast-green"
+            //                 });
+            //             }, 1500);
+            //         },
+            //         error: function (response) { }
+            //     });
+            // }
+
+
+            if (fileInput.files.length > 0 && fileInput.files[0].size > 0) {
+                var formData = new FormData();
+                //formData.append("file", fileInput.files[0]);
+                for (var i = 0; i < fileInput.files.length; i++) {
+                    formData.append("files", fileInput.files[i]);
+                }
+                formData.append("InvoiceId", TransactionIdAbc);
+
+                $.ajax({
+                    async: false,
+                    type: "POST",
+                    url: "@Url.Action("UploadImageForPayment", "Sales")",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) { }
+                });
+            }
+
+            if (TransactionIdAbc > 0 && isSaveAndClose) {
+                setTimeout(function () {
+                    window.location.href = '@Url.Action("BillListQB", "Accounts")?Type=Payments';
+                }, 3000);
+            }
+        }
+
+        $('#BtnSave').click(function () {
+            saveAndProcess(false);
+        });
+
+        $('#BtnSaveAndClose').click(function () {
+            saveAndProcess(true);
+        });
+
+
+        $("#Supplier").on("change", function () {
+            var selectedOption = $(this).find("option:selected");
+            var currencyId = selectedOption.data('currency-id');
+            console.log('Selected Currency ID:', currencyId);
+
+            getCurrencyRate(currencyId);
+
+        });
+
+        $("#Supplier").on("select2:select", function () {
+            var selectedOption = $(this).find("option:selected");
+            var currencyId = selectedOption.data('currency-id');
+            console.log('Selected Currency ID:', currencyId);
+
+            $.ajax({
+                url: '@Url.Action("GetCurrencyRateForExpense", "Admin")' + '?CurrencyId=' + currencyId,
+                success: function (data) {
+                    console.log("see currency", data);
+                    if (data.success == "0") {
+                        toastr.success(data.msg, "", {
+                            "toastClass": "toast-red",
+                        });
+                    }
+                    else {
+                        if (data[0].CurrencyShortName == "BDT") {
+                            //$("#yourRateParent").css("display", "none !important");
+                            $("#yourRateParent").addClass("d-none");
+                            $(".totalspan").css("display", "none !important");
+                            $(".rate").text(data[0].CurrencyShortName);
+                            var previousRate = $("#CurrencyRate").val();
+                            $("#MultiiCurrencyId").val(data[0].CurrencyId);
+
+                            $("#CurrencyRate").val(data[0].CurrencyRate);
+                            $(".inBDT").addClass("d-none");
+                            
+                        }
+                        else {
+                            $("#yourRateParent").css("display", "");
+                            $(".totalspan").css("display", "");
+                            $(".rate").text(data[0].CurrencyShortName);
+                            var flag = '<i class="flag-icon ' + data[0].FlagClass + '"></i>';
+                            $(".flag").html(flag);
+                            var previousRate = $("#CurrencyRate").val();
+                            $("#CurrencyRate").val(data[0].CurrencyRate);
+                            $("#MultiiCurrencyId").val(data[0].CurrencyId);
+
+                            var inBDT = data[0].CurrencyShortName;
+                            if (inBDT == "" || inBDT == "BDT") {
+                                $(".inBDT").addClass("d-none");
+                            }
+                            else {
+                                $(".inBDT").removeClass("d-none");
+                                //var totalReceivedBDT = document.getElementById("total-paid-bdt");
+                                var amountreceived = parseFloat($("#total-paid").text().replace(/,/g, ''));
+                                //totalReceivedBDT.textContent = (amountreceived * data[0].CurrencyRate).toFixed(4);
+                                $("#total-paid-bdt").text((amountreceived * data[0].CurrencyRate).toLocaleString('en-BD', {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                }));
+
+
+                            }
+                            
+
+                        }
+                    }
+
+
+                }
+            });
+
+        });
+
+        function getCurrencyRate(currencyId) {
+            if(currencyId !== undefined)
+            {
+                $.ajax({
+                    url: '@Url.Action("GetCurrencyRateForExpense", "Admin")' + '?CurrencyId=' + currencyId,
+                    success: function (data) {
+                        console.log("see currency", data);
+                        if (data.success == "0") {
+                            toastr.success(data.msg, "", {
+                                "toastClass": "toast-red",
+                            });
+                        }
+                        else {
+                            if (data[0].CurrencyShortName == "BDT") {
+                                //$("#yourRateParent").css("display", "none !important");
+                                $("#yourRateParent").addClass("d-none");
+                                $(".totalspan").css("display", "none !important");
+                                $(".rate").text(data[0].CurrencyShortName);
+                                var previousRate = $("#CurrencyRate").val();
+                                $("#MultiiCurrencyId").val(data[0].CurrencyId);
+
+                                $("#CurrencyRate").val(data[0].CurrencyRate);
+                                $(".inBDT").addClass("d-none");
+
+                            }
+                            else {
+                                $("#yourRateParent").removeClass("d-none");
+                                $(".totalspan").css("display", "");
+                                $(".rate").text(data[0].CurrencyShortName);
+                                var previousRate = $("#CurrencyRate").val();
+                                //$("#CurrencyRate").val(data[0].CurrencyRate);
+                                $("#MultiiCurrencyId").val(data[0].CurrencyId);
+                                var flag = '<i class="flag-icon ' + data[0].FlagClass + '"></i>';
+                                $(".flag").html(flag);
+                                var inBDT = data[0].CurrencyShortName;
+                                if (inBDT == "" || inBDT == "BDT") {
+                                    $(".inBDT").addClass("d-none");
+                                }
+                                else {
+                                    $(".inBDT").removeClass("d-none");
+                                    //var totalReceivedBDT = document.getElementById("total-paid-bdt");
+                                    var amountreceived = parseFloat($("#total-paid").text().replace(/,/g, ''));
+                                    //totalReceivedBDT.textContent = (amountreceived * data[0].CurrencyRate).toFixed(4);
+                                    $("#total-paid-bdt").text((amountreceived * data[0].CurrencyRate).toLocaleString('en-BD', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }));
+
+
+                                }
+
+
+                            }
+                        }
+
+
+                    }
+                });
+            }
+            
+        }
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var POLNameHandle = document.getElementById("ref-no");
+            var BtnSave = document.querySelector('#BtnSave');
+            var BtnSaveClose = document.querySelector('#BtnSaveAndClose');
+            var paymentid = $("#Id").val();
+
+            function getAllCodes(callback) {
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetTransactionCodes", "Admin")',
+                    dataType: "json",
+                    success: function (data) {
+                        var CustCodeGetArray = [];
+                        data.forEach(function (item) {
+                            var CustomerCode = item.Text;
+                            var CustomerId = item.Value;
+                            var SizeData = {
+                                CustomerCode: CustomerCode,
+                                Id: CustomerId
+                            };
+                            CustCodeGetArray.push(SizeData);
+                        });
+                        if (typeof callback === "function") {
+                            callback(CustCodeGetArray);
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Error:", error);
+                    }
+                });
+            }
+
+            function checkCustomerCodeExists(code) {
+                getAllCodes(function (data) {
+                    var lowercasedSizeName = code.toLowerCase();
+                    var sizeExists = data.some(function (item) {
+                        if (paymentid && paymentid === item.Id) {
+                            return false;
+                        }
+                        return item.CustomerCode.trim().toLowerCase() === lowercasedSizeName;
+                    });
+
+                    console.log("Size exists:", sizeExists);
+                    if (sizeExists) {
+                        $("#reference-no-validation").html("Already Exist.!");
+                        BtnSave.disabled = true;
+                        BtnSaveClose.disabled = true;
+                        console.log("Button disabled");
+                    } else {
+                        $("#reference-no-validation").html("");
+                        BtnSave.disabled = false;
+                        BtnSaveClose.disabled = false;
+                        console.log("Button enabled");
+                    }
+                });
+            }
+
+            POLNameHandle.addEventListener("input", function () {
+                console.log("Input value:", POLNameHandle.value);
+                var enteredSizeName = POLNameHandle.value;
+                checkCustomerCodeExists(enteredSizeName);
+            });
+        });
+
+   </script>
+
+
+
+}

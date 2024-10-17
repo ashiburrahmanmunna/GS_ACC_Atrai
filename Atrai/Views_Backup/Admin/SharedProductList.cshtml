@@ -1,0 +1,286 @@
+﻿@*@model IEnumerable<Atrai.Core.Entity.ProductModel>*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Product List";
+    Layout = "~/Views/Shared/_customerLayout.cshtml";
+}
+<style>
+
+
+    hr.solid {
+        border-top: 2px solid #bbb;
+        margin-top: .2rem;
+        margin-bottom: .2rem;
+        vertical-align:middle;
+    }
+
+
+
+</style>
+
+<div>
+    @Html.AntiForgeryToken()
+    <div class="container">
+        <!-- Start Page Content -->
+    
+     
+                <div class="card mt-5">
+
+                    <div class="card-body">
+
+
+                    <div class="row">
+
+
+
+            @*            <div class="col-md-3 col-12  mb-2">
+                                @Html.ActionLink("Back to Dashboard", "CustomerDashboard", "Admin", null, new { @class = "btn btn-primary rounded-0", @id = "btnBack" })
+                        </div>*@
+
+                        <div class="col-md-3 col-12">
+                            <div class="input-group input-group-sm mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        Category
+                                    </span>
+                                </div>
+                                @Html.DropDownList("CategoryId", null, "--Select--", htmlAttributes: new { @id = "CategoryId", @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-12">
+                            <div class="input-group input-group-sm mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        Brand
+                                    </span>
+                                </div>
+                                @Html.DropDownList("BrandName", null, "--Select--", htmlAttributes: new { @id = "BrandName", @class = "form-control" })
+                            </div>
+                        </div>
+                        
+
+                    </div>
+
+                        <div class="table-responsive mt-1 mb-4">
+                            <table id="tbllist" class="table table-sm table-striped table-bordered" width="100%" cellspacing=0>
+                            </table>
+                        </div>
+
+
+
+                        </div>
+                </div>
+
+
+   
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+
+              @section Scripts{
+
+            <script type="text/javascript">
+
+                 var tblProductSearc;
+
+                var CategoryId = $('#CategoryId').val();
+                var BrandName = $('#BrandName').text();
+                
+                var WarehouseId = $('#WarehouseId').val();
+                var ROL = $('#ROL').val();
+                var tblProductSearc
+          
+                //$('.dataTables_wrapper').addClass('col-md-12'); // <-- add this line
+
+                $("#CategoryId").change(function () {
+                    //tblProductSearc.destroy();
+
+                    CategorySearch();
+                    //alert($("#CategoryId").val());
+                });
+
+                $("#BrandName").change(function () {
+                    //tblProductSearc.destroy();
+                    CategorySearch();
+                    //alert($("#BrandName option:selected").text());
+                });
+
+
+
+
+
+                CategorySearch();
+
+                function CategorySearch() {
+
+                    var BrandName = null;
+
+                    if ($("#BrandName").val() > 0)
+                    {
+                        BrandName = $("#BrandName option:selected").text();
+                    }
+
+
+                    var othersearchvalue = $("#myInput").val() || "";
+
+                    tblProductSearc = $('#tbllist').DataTable({
+                        initComplete: function () {
+
+                            //var input = $('.dataTables_filter input'),//.unbind(),
+                            //    self = this.api(),
+
+                    
+                            //    $allButton = $('<span class="ml-2 btn rounded-0 btn-primary btn-sm" tabindex="0" aria-controls="saleslist" TransactionId="button" title="Load"><span></span></span>')
+                            //        .text('Load')
+                            //        .click(function () {
+                            //            input.val('');
+                            //            CategorySearch();
+                            //        })
+                            //$('.dataTables_filter').append($allButton);//, $clearButton //, $searchButton
+                            
+                           $("#myInput").on("click", function () {
+                        
+                            setTimeout(function () {
+                                // whene transaction error then reload page
+                                 table.page.len(10).draw();
+                            }, 1);
+
+                       
+                            });
+
+
+                            $("#myInput").on("keyup", function () {
+                                var value = $(this).val().toLowerCase();
+                                $("#tbllist tr").filter(function () {
+                                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                                    //$(this).addClass("selected");
+                            });
+                    });
+                        },
+                        serverSide: true, 
+                        processing: true,
+                        //"language": {
+                        //    sLengthMenu: " _MENU_",
+                        //    search: "",
+                        //    searchPlaceholder: "Search..."
+                        //},
+                        //"language": {
+                        //    //"lengthMenu": "Display _MENU_ records per page",
+                        //    "zeroRecords": "Nothing found - sorry",
+                        //    "info": "Showing page _PAGE_ of _PAGES_",
+                        //    "infoEmpty": "No records available",
+                        //    "infoFiltered": "(filtered from _MAX_ total records)"
+                        //},
+                        "destroy": true,
+                        ajax: {
+                            url: '@Url.Action("GetProductList", "Admin")',
+                            data: { CategoryId: $("#CategoryId").val(), BrandName:BrandName },
+                            type: "POST",
+                            "datatype": "json"
+                        },
+                        //"order": [[1, "asc"], [ 2, "asc" ]],
+                        "ordering": false,
+
+                        //select: {
+                        //    style: 'single',
+                        //    selector: 'td:nth-child(1),td:nth-child(2),td:nth-child(3),td:nth-child(4),td:nth-child(5),td:nth-child(6),td:nth-child(7),td:nth-child(8),td:nth-child(9),td:nth-child(10)'
+                        //},
+                        "pageLength": 100,
+                        "lengthMenu": [[5, 10, 20, 50, 100, 500, 1000], [5, 10, 20, 50, 100, 500, 1000]],
+                        //rowId: 'Id',
+                        // dom: "<'row'<'col-md-10 col-12 'f><'col-md-2 col-12 text-right float-right p-0 m-0'lB>><'row'<'col-sm-12'tr>><'row'<'col-sm-12'ip>>",
+                        //dom: '<"dom_wrapper"flB>tip',
+                        buttons: [
+                            { "extend": 'excel', "text": 'Excel', "className": 'btn btn-success rouned-0 btn-sm' }
+                        ],
+                        dom: 'Bflrtip',
+                        columns: [
+
+                            { "title": "Id", "data": "Id", "visible": false },
+                            { "title": "Category", "data": "CategoryName", "searchable": true,"visible": false },
+
+                            { "title": "Name", "data": "Name", "searchable": true },
+                            //{ "title": "Local Name", "data": "LocalName", "searchable": true },
+
+
+                            //{ "title": "Code", "data": "Code", "searchable": true },
+                            //{ "title": "ModelName", "data": "ModelName", "searchable": true },
+
+                            //{ "title": "Color", "data": "ColorName", "searchable": true },
+                            { "title": "Variant", "data": "SizeName", "searchable": true },
+
+
+                            //{ "title": "Category", "data": "CategoryName", "searchable": true },
+
+                            //{ "title": "Barcode", "data": "ProductBarcode", "searchable": true },
+
+                            //{ "title": "Description", "data": "Description", "searchable": true },
+
+                            //{ "title": "Unit", "data": "UnitName", "searchable": true },
+                            //{ "title": "Brand", "data": "BrandName", "searchable": true },
+
+                            
+
+                            { "title": "MRP", "data": "Price", "searchable": false },
+                            { "title": "Whole Sale", "data": "WholeSalePrice", "searchable": false },
+
+                            {
+                                "title": "Stock", "data": "WarehouseList",
+                                "className": "text-nowrap text-center",
+                                "searchable": false
+
+                                , "render": function (data, type, row) {
+                                    //console.log(data);
+                                    if (data != null) {
+
+                                        var output = "";
+                                        var totalstock = 0;
+                                        var totalcostingvalue = 0;
+                                        var totalsalesvalue = 0;
+
+                                        var totalstock = 0;
+
+                                        var count = 0;
+                                        for (var i = 0; i < data.length; i++) {
+                     
+                                            totalstock = totalstock + parseFloat(data[i].CurrentStock.toFixed(2))
+                                        
+                                            count++;
+                                        };
+
+                                        if (totalstock > 0) {
+                                            if (count > 1) {
+                                                output += totalstock;
+                                            }
+                                        };
+
+                                        //console.log(output);
+                                        //console.log(totalstock);
+
+                                        return output;
+                                    }
+                                    else {
+                                        return null;
+                                    }
+                                }
+
+                            },
+                            {
+                                "title": "Image", "data": "ImagePath", "class": "p-1 rounded-0" , "searchable": false, "render": function (data) {
+                                    console.log(data);
+                                    return '<img src="..' + data + '" class="img-thumbnail" width="80px" onerror=this.onerror=null;this.src="../Content/MemberImages/0.png">';
+
+                                }
+                            }
+                        ]
+                    });
+
+                }
+
+                        </script>
+        }

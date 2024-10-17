@@ -1,0 +1,119 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@*@model IEnumerable<Atrai.Core.Entity.UserTerminateModel>*@
+@{ ViewData["Title"] = "UserTerminate List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+
+                    <div class="card-body">
+
+                        <div class="row mb-2">
+                            <div class="col-md-2 col-12">
+                                @Html.ActionLink("User Terminate Entry", "AddUserTerminate", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md-2 col-12 m-t-8">
+                                <h4 class="card-header" style="color: #1976d2;">Terminate User List</h4>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive m-t-10">
+                            <table id="tbllist" class="display nowrap table table-sm table-hover  table-bordered" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr></tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr></tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+@*<td>
+        <div height="50px">
+            <div class="img-thumbnail flag flag-icon-background @item.FlagClass.ToString().ToLower()"></div>
+        </div>
+    </td>*@
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+                $(function () {
+                    var peopleList = $('#tbllist').DataTable({
+
+                        serverSide: true,  "scrollX": true,
+                        processing: true,
+
+                        ajax: {
+                            url: '@Url.Action("GetUserTerminateList", "Admin")',
+                            type: "POST"
+                        },
+                        rowId: 'Id',
+                        columns: [
+
+                            { "title": "Id", "data": "Id", "visible": false },
+                            { "title": "User Name", "data": "UserName", "searchable": false },
+                            { "title": "Terminate Date", "data": "TerminateDateString", "searchable": false },
+                            { "title": "Next Follow Date", "data": "NextFollowDateString", "searchable": false },
+
+                            { "title": "Note", "data": "Note", "searchable": false },
+                            { "title": "Device Update", "data": "DeviceUpdate", "searchable": false },
+                            { "title": "Mobile No (If Necessary)", "data": "MobileNoIfNecessary", "searchable": false },
+                            { "title": "Created On", "data": "CreateDateString", "searchable": false },
+
+
+                            {
+                                "title": "Action",
+                                "data": "Id",
+                                "render": function (data, type, row) {
+                                    var myUrledit = '@Url.Action("EditUserTerminate", "Admin")?UserTerminateId=' + data;
+                                    var myUrldelete = '@Url.Action("DeleteUserTerminate", "Admin")?UserTerminateId=' + data;
+                                    var message = `return confirm('Are you sure you want to Remove the User Terminate Information ?')`;
+
+
+                                    return '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-remove"></i></a></span>';
+
+                                }
+
+                            }
+                        ]
+                    });
+
+
+                });
+
+                @*var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+                var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+                var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+                    {
+                    style: 'currency',
+                    currency: CurrencyShortNameViewFormat,///'BDT'
+                    minimumFractionDigits: 2,
+                });*@
+        //document.body.innerHTML += '<br />' + formatter.format(53425.34);
+
+
+    </script>
+}

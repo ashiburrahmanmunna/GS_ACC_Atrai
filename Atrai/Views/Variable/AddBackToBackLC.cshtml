@@ -1,0 +1,1751 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Order management";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<style>
+    /*li {
+        cursor: pointer;
+        padding: 10px;
+        margin: 5px;
+        border: 1px solid #ccc;
+    }*/
+
+    /* Set the anchor tag to have full width */
+    li a {
+        display: block;
+        width: 100%;
+    }
+
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+                     border-bottom-width: 0px;
+
+                }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    /*   .tabulator-table .tabulator-row {
+        background-color: white;
+    } */
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customize-btn-another {
+        background: #2CA01C;
+        border: 1px solid black;
+        border-radius: 20px;
+        color: #FFFFFF;
+        border: 1px solid #2CA01C;
+    }
+
+        .customize-btn-another:hover {
+            background: #2CA01C;
+            border: 1px solid black;
+            border-radius: 20px;
+            color: #FFFFFF;
+            border: 1px solid #2CA01C;
+        }
+
+    .customize-btn:hover {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .gear-dropdown.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+        margin-top: 7px;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-bottom: 1px solid #aaaaaa38;
+        border-right: 1px solid #aaaaaa38;
+        /*border-left: 1px solid #aaaaaa38;*/
+        /* padding-left: 2px;*/
+    }
+    /*    .tabulator-row .tabulator-cell, .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+                border-right: none;
+                border-left: none;
+            }*/
+/*    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }*/
+
+    .tabulator-row .tabulator-cell {
+        border-right: none;
+        border-left: none;
+        padding-left: 10px;
+        border: 1px solid #aaaaaa29;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        /*margin-top: 27px;*/
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+        /* Add any other styles you need for the active cell */
+    }
+
+    .tabulator-row {
+        /*   border: 1px solid #aaaaaa38;*/
+        border-left: none;
+        border-right: none;
+    }
+
+    input[type="checkbox"] {
+        width: 20px; /* Set the width */
+        height: 20px; /* Set the height */
+    }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom: 4px solid green;
+    }
+
+        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active:hover {
+            background-color: #F8F8F8;
+            border-top-color: transparent !important;
+            border-left-color: transparent !important;
+            border-right-color: transparent !important;
+        }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link:hover {
+        background-color: #F8F8F8;
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+    }
+
+    .customize-btnew {
+        background: transparent;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btnew:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .tabulator-row .tabulator-cell.tabulator-editing {
+        border: 1px solid #404c5d;
+        outline: none;
+        padding: 0;
+    }
+
+    .tabulator-cell.tabulator-editable[tabulator-field="AccName"] {
+        border: 1px solid #0003;
+        margin-bottom: 10px;
+    }
+
+    .filter-dropdown > .filter-dropdown-class.show {
+        width: 580px;
+    }
+
+    p {
+        margin: 1em 0;
+    }
+
+    .button {
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        position: relative;
+        background: #aa0000;
+        padding: 10px 15px;
+        color: white;
+        box-shadow: 0 2px black;
+        text-decoration: none;
+        border-radius: 5px;
+        /*text-shadow: 0 1px 1px black;*/
+    }
+
+        .button:hover {
+            top: -2px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+        .button:active {
+            top: 1px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+    .unbilledbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .overduebtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .openbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .paidbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .scrollable-offcanvas {
+        /* max-height: 80vh;*/ /* Adjust the maximum height as needed */
+        overflow-y: auto;
+    }
+
+    .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:hover {
+        background-color: deepskyblue;
+    }
+
+    .tabulator .tabulator-footer {
+        background-color: #fff;
+        color: black;
+    }
+
+        .tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row {
+            background: white !important;
+        }
+
+
+    .offcanvas {
+        /* Add position relative to its parent */
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* Ensure offcanvas takes full viewport height */
+    }
+
+    .offcanvas-footer {
+        margin-top: auto; /* Push footer to the bottom */
+        width: 100%; /* Occupy full width */
+    }
+
+    .modal-footer {
+        width: 100%; /* Ensure buttons occupy full width */
+        padding: 10px; /* Add padding for better appearance */
+    }
+
+    .w-15 {
+        width: fit-content !important;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+    }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #999;
+        }
+
+        .separator:not(:empty)::before {
+            margin-right: .25em;
+        }
+
+        .separator:not(:empty)::after {
+            margin-left: .25em;
+        }
+
+    .tabulator-row.tabulator-selected {
+        background-color: #9abcea !important;
+    }
+
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 24px;
+        }
+
+            .rating label:before {
+                content: '\2605'; /* Unicode star character */
+            }
+
+        .rating input:checked ~ label:before {
+            color: gold; /* Change color of selected stars */
+        }
+
+    .child-table-hidden {
+        display: none;
+    }
+
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-calcs {
+        background: #fff !important;
+    }
+
+    .tabulator .tabulator-footer {
+        border-top: 1px solid #fff;
+    }
+
+    #file-drop-area {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    #image-uploadify {
+        display: none;
+    }
+
+    .footerButton {
+        margin-top: 40px;
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 99%;
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+
+    .bottom-bar-css:hover {
+        background: #212529;
+    }
+
+    .bottom-bar-css-s-n-c:hover {
+        background: #007611d6;
+    }
+
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        height: 40px;
+    }
+
+/*     .select2-container--default .select2-selection--multiple {
+        height: 40px;
+    } */
+/*     .select2-container {
+        font-size: 16px;
+    }
+ */
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #aaaaaa94;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 23px;
+        }
+    /* Customize the Select2 selection box */
+    .select2-selection {
+        background-color: #f2f2f2;
+        border-radius: 5px;
+        height: 30px;
+        padding-bottom: 37px;
+        border: 1px solid #ced4da
+    }
+
+    .select2-selection__rendered, .select2-selection__arrow {
+        margin-top: 8px;
+    }
+
+</style>
+
+<input type="hidden" id="Id" name="Id" value="" />
+    <div class="row">
+        <div class="col-lg-3">
+            <label class="form-label fw-bold">Supplier</label>
+            <select id="supplierID" class="form-control">
+                <option value="">Select Supplier</option>
+            </select>
+        </div>
+        <div class="col-lg-2">
+        <label class="form-label fw-bold">BBLC No</label><span class="text-danger  fw-bold"> *</span>
+        <input id="bblcNo" class="form-control w-10" />
+        <span class="text-danger" id="bblcNoValidation"></span>
+        </div>
+        <div class="col-lg-2">
+        <label class="form-label fw-bold">BBLC Amend. No</label><span class="text-danger  fw-bold"> *</span>
+        <input id="bblcAmendmentNo" class="form-control w-10" />
+        </div>
+        <div class="col-lg-2">
+            <label class="form-label fw-bold">Item Group</label>
+            <select id="itemGroup" class="form-control">
+                <option value="">Select Item Group</option>
+            </select>
+        </div>
+        <div class="col-lg-3">
+            <label class="form-label fw-bold">Concern</label>
+            <select id="concern" class="form-control">
+                <option value="">Select Concern</option>
+            </select>
+        </div>
+    </div>
+
+
+
+<div class="row mt-3">
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">Group LC</label>
+        <select id="groupLc" class="form-control">
+            <option value="">Select Group LC</option>
+        </select>
+    </div>
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">ShipMode</label>
+        <select id="shipMode" class="form-control">
+            <option value="">Select ShipMode</option>
+        </select>
+    </div>
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">Concern Bank</label>
+        <select id="concernBank" class="form-control">
+            <option value="">Select Concern Bank</option>
+        </select>
+    </div>
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">Group LC Value</label>
+        <input id="groupLCValue" class="form-control" disabled />
+    </div>
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">Supplier Bank</label>
+        <select id="supplierBank" class="form-control">
+            <option value="">Select Supplier Bank</option>
+        </select>
+    </div>
+     <div class="col-lg-2">
+        <label class="form-label fw-bold">First Shipment Date</label>
+        <input id="FirstShipmentDate" class="form-control" />
+    </div>
+</div>
+
+
+<div class="row mt-3">
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">LC Opening Date</label>
+        <input id="lcOpeningDate" class="form-control" />
+    </div>
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">Expiry Date</label>
+        <input id="expiryDate" class="form-control" />
+    </div>
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">Last Shipment Date</label>
+        <input id="lastShipmentDate" class="form-control" />
+    </div>
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">Currency</label>
+        <select id="currency" class="form-control">
+            <option value="">Select Currency</option>
+        </select>
+    </div>
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">IncoTerms</label>
+        <select id="incoTerms" class="form-control">
+            <option value="">Select IncoTerms</option>
+        </select>
+    </div>
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">Payment Term</label>
+        <select id="payemntTerms" class="form-control">
+            <option value="">Select Payment Term</option>
+        </select>
+    </div>
+</div>
+
+
+<div class="row mt-3">
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">Days</label>
+        <select id="days" class="form-control">
+            <option value="">Select Days</option>
+        </select>
+    </div>
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">Day Term Desc.</label>
+        <select id="daysTermDesc" class="form-control">
+            <option value="">Select Day Term Desc.</option>
+        </select>
+    </div>
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">Insurance </label>
+        <input id="insurance" class="form-control" />
+    </div>
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">ConvertRate </label>
+        <input id="covertRate" class="form-control" value="1"/>
+    </div>
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">Port Of Loading</label>
+        <select id="portOfLoading" class="form-control">
+            <option value="">Select Port</option>
+        </select>
+    </div>
+    <div class="col-lg-2">
+        <label class="form-label fw-bold">Forwarder</label>
+        <select id="ForwarderId" class="form-control">
+            <option value="">Select Forwarder</option>
+        </select>
+    </div>
+</div>
+
+
+
+
+<div class="row mt-3">
+    <div class="col-lg">
+        <label class="form-label fw-bold">Destination </label>
+        <select id="destination" class="form-control">
+            <option value="">Select Destination </option>
+        </select>
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">BBLC Qty </label>
+        <input id="bblcQty" class="form-control" />
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">Secondary Qty </label>
+        <input id="SecondaryQty" class="form-control" value="0"/>
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">BBLC Value </label>
+        <input id="bblcValue" class="form-control" />
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">Increase </label>
+        <input id="increase" class="form-control" value="0"/>
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">Decrease </label>
+        <input id="decrease" class="form-control" value="0" />
+    </div>
+</div>
+
+
+
+
+<div class="row mt-3">
+    <div class="col-lg">
+        <label class="form-label fw-bold">Final Value</label>
+        <input id="finalValue" class="form-control" disabled />
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">Balance</label>
+        <input id="balance" class="form-control" />
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">Margin [%]</label>
+        <input id="margin" class="form-control" />
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">UD NO</label>
+        <input id="udNo" class="form-control" />
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">UD Date</label>
+        <input id="udDate" class="form-control" />
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">UD Amendment NO</label>
+        <input id="udAmendmentNo" class="form-control" />
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md-5">
+        <label class="form-label fw-bold">Remarks</label>
+        <textarea id="Remarks" class="form-control"></textarea>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-lg-6">
+        <label class="form-label fw-bold mt-2"><u>Group LC Info.</u></label>
+            <div class="mt-2" id="buyerTable"></div>
+    </div>
+    <div class="col-lg-6">
+        <div class="row">
+            <div class="col-lg">
+                <label class="form-label fw-bold">Previously Created BBLC Value</label>
+                <input id="previousbblcValue" class="form-control" disabled />
+            </div>
+            <div class="col-lg">
+                <label class="form-label fw-bold">Margin [%]</label>
+                <input id="marginPercent" class="form-control h-80 w-50 bg-gradient-danger text-white text-center fw-bolder" style="font-size: 20px;" disabled />
+                <strong><span id="remaining_margin" style="color:blue;"></span></strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-lg-6">
+        <label class="form-label fw-bold mt-2"><u>Related PI.</u></label>
+        <div class="mt-2" id="piSampleTable"></div>
+        <button id="add-row-color-table" class="btn mt-5 d-none" style="border: 1px solid;margin-right: 30px;">Add Row</button>
+        <button id="clear-color-table" class="btn mt-5 d-none" style="border: 1px solid;margin-right: 30px;">Clear All Rows</button>
+    </div>
+    <div class="col-lg-6">
+        <label class="form-label fw-bold mt-2"><u>Attached PI.</u></label>
+        <div class="mt-2" id="piMainTable"></div>
+        <button id="add-row-size-table" class="btn mt-5 d-none" style="border: 1px solid;margin-right: 30px;">Add Row</button>
+        <button id="clear-size-table" class="btn mt-5 d-none" style="border: 1px solid;margin-right: 30px;">Clear All Rows</button>
+    </div>
+</div>
+@if (ViewBag.ActionType == "Edit")
+{
+    <div class="bottom-bar">
+        <div>
+            <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("Import", "Variable", new { Type = "BacktoBackLC" })';">Cancel</button>
+        </div>
+        <div>
+        </div>
+        <div class="dropdown">
+            <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Update</button>
+
+            <button id="BtnSaveAndClose" class="btn-success  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="" data-purchase-Id="@Model">
+                Update and close
+            </button>
+            <ul class="dropdown-menu" id="ul-id-for-expenses">
+                <li class="dropdown-item">
+                    <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+else if (ViewBag.ActionType == "Create")
+{
+    <div class="bottom-bar">
+        <div>
+            <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("Import", "Variable", new { Type = "BacktoBackLC" })';">Cancel</button>
+        </div>
+        <div class="d-flex">
+            <div>
+            </div>
+            <div id="makeRecurringDiv" style="padding-top: 5px; border-left: 3px solid white;">
+                <div style="margin-left: 5px;">
+                </div>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Save</button>
+
+            <button id="BtnSaveAndClose" class="btn-success  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="" data-purchase-Id="@Model">
+                Save and close
+            </button>
+            <ul class="dropdown-menu" id="ul-id-for-expenses">
+                <li class="dropdown-item">
+                    <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+@section scripts{
+    <script type="text/javascript">
+                //===========================bblc functionalities starts=====================
+        var SampleTable;
+        var MainTable;
+        var BuyerTable;
+        var samplePiData = [
+            { StyleId: '@ViewBag.BBLCID' } //SLNo: 1,
+        ];
+        var mainPiData = [
+            { StyleId: '@ViewBag.BBLCID' }
+        ];
+
+
+
+        let currentActiveInput = null;
+        var localFieldsForBuyerTable = [
+            {
+                headerSort: false,
+                field: "drag",
+                formatter: function (cell, formatterParams) {
+                    return "<i class='fas fa-bars drag-icon'></i>";
+                },
+                width: 30,
+                headerSort: false,
+                rowHandle: true,
+            },
+            { title: "Id", field: "Id", movable: false, headerSort: false, visible: false },
+            { title: "BUYER", field: "buyerName", headerSort: false, frozen: true,hozAlign: "right", visible: true },
+            { title: "BENIFICIARY", field: "Benificiary", movable: false, headerSort: false, visible: true },
+            { title: "CONTACT REF", field: "ContactRef", movable: false, headerSort: false, visible: true },
+            { title: "LC DATE", field: "LCDate", movable: false, headerSort: false, visible: true },
+            { title: "AMOUNT", field: "Amount", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+        ];
+
+        var localFieldsForSampleTable = [
+            {
+                headerSort: false,
+                field: "drag",
+                formatter: function (cell, formatterParams) {
+                    return "<i class='fas fa-bars drag-icon'></i>";
+                },
+                width: 30,
+                headerSort: false,
+                rowHandle: true,
+
+
+            },
+            { title: "Id", field: "piid", movable: false, headerSort: false, visible: false },
+            { title: "BBLCMainId", field: "BBLCMainId", movable: false, headerSort: false, visible: false },
+            { title: "PI NO", field: "PINo", headerSort: false, frozen: true, hozAlign: "right", visible: true },
+            { title: "Import Po No", field: "ImportPONo", movable: false, headerSort: false, visible: true },
+            { title: "Item Group", field: "ItemGroupName", movable: false, headerSort: false, visible: true },
+            { title: "Item Des.", field: "ItemDescName", movable: false, headerSort: false, visible: true },
+            { title: "Primary Unit", field: "PrimaryUnit", movable: false, headerSort: false, visible: true },
+            { title: "Import Qty", field: "ImportQty", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+            { title: "Sec. Unit", field: "SecondaryUnit", movable: false, headerSort: false, visible: true },
+            { title: "Sec. Qty", field: "SecondaryQty", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+            { title: "Import Rate", field: "ImportRate", movable: false, headerSort: false, visible: true },
+            { title: "Total Value", field: "TotalValue", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+        ];
+
+        var BBLCIDSet = [
+            { BLCMainId: @ViewBag.BBLCID }
+        ];
+        var localFieldsForMainTable = [
+            {
+                headerSort: false,
+                field: "drag",
+                formatter: function (cell, formatterParams) {
+                    return "<i class='fas fa-bars drag-icon'></i>";
+                },
+                width: 30,
+                headerSort: false,
+                rowHandle: true,
+
+
+            },
+            { title: "Id", field: "Id", movable: false, headerSort: false, visible: false },            
+            { title: "Id", field: "piid", movable: false, headerSort: false, visible: false },
+            { title: "BBLCMainId", field: "BBLCMainId", movable: false, headerSort: false, visible: false },
+            { title: "PI NO", field: "PINo", headerSort: false, frozen: true, hozAlign: "right", visible: true },
+            { title: "Import Po No", field: "ImportPONo", movable: false, headerSort: false, visible: true },
+            { title: "Item Group", field: "ItemGroupName", movable: false, headerSort: false, visible: true },
+            { title: "Item Des.", field: "ItemDescName", movable: false, headerSort: false, visible: true },
+            { title: "Primary Unit", field: "PrimaryUnit", movable: false, headerSort: false, visible: true },
+            { title: "Import Qty", field: "ImportQty", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+            { title: "Sec. Unit", field: "SecondaryUnit", movable: false, headerSort: false, visible: true },
+            { title: "Sec. Qty", field: "SecondaryQty", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+            { title: "Import Rate", field: "ImportRate", movable: false, headerSort: false, visible: true },
+            { title: "Total Value", field: "TotalValue", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+        ];
+        //===========================style functionalities ends=======================
+
+
+        $(document).ready(function () {
+            var bblcValue = $("#bblcValue").val();
+            var increaseValue = 0;
+            var deccreaseValue = 0;
+
+            $("#increase").on("blur", function () {
+                increaseValue = parseFloat($(this).val()) || 0; // Parse float to handle potential non-numeric inputs
+                calculateFinalValue();
+            });
+
+            $("#decrease").on("blur", function () {
+                deccreaseValue = parseFloat($(this).val()) || 0; // Parse float to handle potential non-numeric inputs
+                calculateFinalValue();
+            });
+
+            function calculateFinalValue() {
+                var finalValue = parseFloat($("#bblcValue").val()) + (increaseValue - deccreaseValue); // Perform calculation inside this function
+                $("#finalValue").val(finalValue||0);
+
+                var buyersum = BuyerTable.getCalcResults().bottom.Amount || 0;
+                var previouslyCreatedBBLCValue = parseFloat($("#previousbblcValue").val())||0;
+                //var finalValue = parseFloat($("#finalValue").val()) || 0;
+                var Balance = buyersum - (previouslyCreatedBBLCValue + finalValue);
+                $("#balance").val(Balance||0);
+
+
+                var margin = ((Balance / buyersum) * 100).toFixed(2);
+                $("#margin").val(margin||0);
+                $("#marginPercent").val(margin||0);
+                $('#remaining_margin').text('Already Use ' + (100 - margin).toFixed(2) + '%');
+                console.log("finalValue", finalValue);
+            }
+        });
+
+
+        $('#BtnSave').click(function () 
+        {
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            $("#ComId").val(ComId);
+            $("#LuserId").val(UserId);
+
+            var BBLCDetails = MainTable.getData();
+            var BBLCID = '@ViewBag.BBLCID';
+            var rowCount = MainTable.getDataCount();
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+
+            if (rowCount == 0) {
+                setTimeout(function () {
+                    toastr.success("Include Proforma Invoice", "", {
+                        "toastClass": "toast-red",
+                    });
+                }, 1500);
+
+            }
+            else {
+                var Model =
+                {
+                    ComId: ComId,
+                    LuserId: UserId,
+                    Id: BBLCID,
+                    BBLCNo: $("#bblcNo").val(),
+                    BBLCAmdNo: $("#bblcAmendmentNo").val(),
+                    UDNo: $("#udNo").val(),
+                    AmdNo: $("#udAmendmentNo").val(),
+                    commercialcompanyid: $("#concern option:selected").val(),
+                    supplierid: $("#supplierID option:selected").val(),
+                    shipmodeid: $("#shipMode option:selected").val(),
+                    grouplcid: $("#groupLc option:selected").val(),
+                    totalvalue: $("#finalValue").val(),
+                    PaymentTermsId: $("#payemntTerms option:selected").val(),
+                    DayListId: $("#days option:selected").val(),
+                    DayListTermId: $("#daysTermDesc option:selected").val(),
+                    Insurance: $("#insurance").val(),
+                    CurrencyId: $("#currency option:selected").val(),
+                    PortOfLoadingId: $("#portOfLoading option:selected").val(),
+                    OpeningBankId: $("#concernBank option:selected").val(),
+                    LienBankId: $("#supplierBank option:selected").val(),
+                    TradeTermId: $("#incoTerms option:selected").val(),
+                    LcOpeningDate: $("#lcOpeningDate").val(),
+                    ExpiryDate: $("#expiryDate").val(),
+                    UDDate: $("#udDate").val(),
+                    FirstShipmentDate: $("#FirstShipmentDate").val(),
+                    LastShipmentDate: $("#lastShipmentDate").val(),
+                    DestinationID: $("#destination option:selected").val(),
+                    ConvertRate: $("#covertRate").val(),
+                    BBLCValue: $("#bblcValue").val(),
+                    BBLCQty: $("#bblcQty").val(),
+                    SecondaryQty: $("#SecondaryQty").val(),
+                    Balance: $("#balance").val(),
+                    PrevBBLCValue: $("#previousbblcValue").val(),
+                    IncreaseValue: $("#increase").val(),
+                    DecreaseValue: $("#decrease").val(),
+                    ItemGroupId: $("#itemGroup option:selected").val(),
+                    ForwarderId: $("#ForwarderId option:selected").val(),
+                    Tenor: $("#margin").val(),
+                    Remarks: $("#Remarks").val(),
+                    BBLC_Details: BBLCDetails,
+                };
+
+
+                if (Model.BBLCNo == "") {
+                    $('#bblcNoValidation').text('Enter a BBLC No.');
+                }
+                else {
+                    $('#bblcNoValidation').text('');
+
+                    console.log("after save console", Model)
+                    var PurchaseIdAbc = 0;
+
+                    $.ajax({
+                        async: false,
+                        type: "POST",
+                        url: "@Url.Action("SaveBBLC", "Variable")",
+                        data: JSON.stringify(Model),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (response) {
+                            PurchaseIdAbc = response.Id;
+                            setTimeout(function () {
+                                toastr.success(response.message, "",
+                                    {
+                                        "toastClass": "toast-green"
+                                    });
+                            }, 1500);
+
+                        },
+                        error: function (response) {
+                        }
+                    });
+
+                    if (PurchaseIdAbc > 0) {
+                        setTimeout(function () {
+                            window.location.href = '@Url.Action("CreateBackToBackLC", "Variable")?&backtobacklcid=' + PurchaseIdAbc;
+                        }, 3000)
+                    }
+                }
+            }
+            
+
+
+        });
+
+        $('#BtnSaveAndClose').click(function () {
+             var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+             var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+             $("#ComId").val(ComId);
+             $("#LuserId").val(UserId);
+             var BBLCDetails = MainTable.getData();
+             var rowCount = MainTable.getDataCount();
+             var BBLCID = '@ViewBag.BBLCID';
+
+            //====validation handle ends======
+
+            var Model =
+            {
+                ComId: ComId,
+                LuserId: UserId,
+                Id: BBLCID,
+                BBLCNo: $("#bblcNo").val(),
+                BBLCAmdNo: $("#bblcAmendmentNo").val(),
+                UDNo: $("#udNo").val(),
+                AmdNo: $("#udAmendmentNo").val(),
+                commercialcompanyid: $("#concern option:selected").val(),
+                supplierid: $("#supplierID option:selected").val(),
+                shipmodeid: $("#shipMode option:selected").val(),
+                grouplcid: $("#groupLc option:selected").val(),
+                totalvalue: $("#finalValue").val(),
+                PaymentTermsId: $("#payemntTerms option:selected").val(),
+                DayListId: $("#days option:selected").val(),
+                DayListTermId: $("#daysTermDesc option:selected").val(),
+                Insurance: $("#insurance").val(),
+                CurrencyId: $("#currency option:selected").val(),
+                PortOfLoadingId: $("#portOfLoading option:selected").val(),
+                OpeningBankId: $("#concernBank option:selected").val(),
+                LienBankId: $("#supplierBank option:selected").val(),
+                TradeTermId: $("#incoTerms option:selected").val(),
+                LcOpeningDate: $("#lcOpeningDate").val(),
+                ExpiryDate: $("#expiryDate").val(),
+                UDDate: $("#udDate").val(),
+                FirstShipmentDate: $("#FirstShipmentDate").val(),
+                LastShipmentDate: $("#lastShipmentDate").val(),
+                DestinationID: $("#destination option:selected").val(),
+                ConvertRate: $("#covertRate").val(),
+                BBLCValue: $("#bblcValue").val(),
+                BBLCQty: $("#bblcQty").val(),
+                SecondaryQty: $("#SecondaryQty").val(),
+                Balance: $("#balance").val(),
+                PrevBBLCValue: $("#previousbblcValue").val(),
+                IncreaseValue: $("#increase").val(),
+                DecreaseValue: $("#decrease").val(),
+                ItemGroupId: $("#itemGroup option:selected").val(),
+                ForwarderId: $("#ForwarderId option:selected").val(),
+                Tenor: $("#margin").val(),
+                Remarks: $("#Remarks").val(),
+                BBLC_Details: BBLCDetails,
+            };
+
+            if (rowCount == 0) {
+                setTimeout(function () {
+                    toastr.success("Include Proforma Invoice", "", {
+                        "toastClass": "toast-red",
+                    });
+                }, 1500);
+
+            }
+            else
+            {
+                if (Model.BBLCNo == "") {
+                    $('#bblcNoValidation').text('Enter a BBLC No.');
+                }
+                else {
+                    $('#bblcNoValidation').text('');
+
+                    console.log("after save console", Model)
+                    var PurchaseIdAbc = 0;
+
+                    $.ajax({
+                        async: false,
+                        type: "POST",
+                        url: "@Url.Action("SaveBBLC", "Variable")",
+                        data: JSON.stringify(Model),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (response) {
+                            PurchaseIdAbc = response.Id;
+                            setTimeout(function () {
+                                toastr.success(response.message, "", {
+                                    "toastClass": "toast-green"
+                                });
+                            }, 1500);
+                        },
+                        error: function (response) {
+                        }
+                    });
+
+                    if (PurchaseIdAbc > 0) {
+                        setTimeout(function () {
+                            window.location.href = '@Url.Action("Import", "Variable", new { Type = "BacktoBackLC" })';
+                        }, 3000)
+                    }
+                }
+            }
+            
+
+
+        });
+      
+          
+
+                       //=============edit mode starts==============
+        var globalStyleNo;
+      if ('@ViewBag.ActionType' == "Edit") {
+                  $.ajax({
+                  type: "GET",
+                url: "@Url.Action("getBBLCData", "Variable")",
+                  data: { "id": '@ViewBag.BBLCID'},
+                  dataType: "json",
+                  success: function (response) {
+                      console.log("edit mode er data dekhi:", response);
+                    var detailsTableData = response.BBLCDetails;
+
+                    var MainTableData = detailsTableData;
+                      MainTable.setData(MainTableData);
+                    $("#bblcNo").val(response.BBLCNo);
+                    $("#bblcAmendmentNo").val(response.BBLCAmdNo);
+                    $("#lcOpeningDate").val(response.LcOpeningDate);
+                    $("#expiryDate").val(response.ExpiryDate);
+                    $("#FirstShipmentDate").val(response.FirstShipmentDate);
+                    $("#lastShipmentDate").val(response.LastShipmentDate);
+                    $("#insurance").val(response.Insurance);
+                    $("#covertRate").val(response.ConvertRate ?? 1);
+                    $("#bblcQty").val(response.BBLCQty);
+                    $("#SecondaryQty").val(response.SecondaryQty);
+                    $("#bblcValue").val(response.BBLCValue);
+                    $("#increase").val(response.IncreaseValue ?? 0);
+                    $("#decrease").val(response.DecreaseValue ?? 0);
+                      setTimeout(function(){
+                        $("#finalValue").val(response.TotalValue);
+                        $("#margin").val(response.Tenor);
+                        $("#marginPercent").val(response.Tenor);
+                        $('#remaining_margin').text('Already Use ' + (100 - response.Tenor).toFixed(2) + '%');
+                      }, 3000);
+                    // $("#balance").val(response.Balance);
+                    // $("#margin").val(response.GroupLCAverage);
+                    $("#udNo").val(response.UDNo);
+                    $("#udDate").val(response.UDDate);
+                    $("#udAmendmentNo").val(response.AmdNo);
+                    $("#previousbblcValue").val(response.PrevBBLCValue);
+                    $("#Percentage").val(response.BBLCNo);
+                    $("#Remarks").val(response.Remarks);
+
+                      setTimeout(function () {
+                        $('#supplierID').val(response.SupplierId).change();
+                        $('#itemGroup').val(response.ItemGroupId).change();
+                        $('#concern').val(response.CommercialCompanyId).change();
+                        $('#groupLc').val(response.GroupLCId).change();
+                        $('#shipMode').val(response.ShipModeId).change();
+                        $('#concernBank').val(response.OpeningBankId).change();
+                        $('#groupLCValue').val(response.BuyerId).change();
+                        $('#supplierBank').val(response.LienBankId).change();
+                        $('#currency').val(response.CurrencyId).change();
+                        $('#incoTerms').val(response.TradeTermId).change();
+                        $('#payemntTerms').val(response.PaymentTermsId).change();
+                        $('#days').val(response.DayListId).change();
+                        $('#daysTermDesc').val(response.DayListTermId).change();
+                        $('#portOfLoading').val(response.PortOfLoadingId).change();
+                        $('#destination').val(response.DestinationID).change();
+                        $('#ForwarderId').val(response.ForwarderId).change();
+                      }, 2000);
+
+                  },
+                  error: function (error) {
+                      // console.error("Error fetching data: " + error);
+                  }
+              });
+            setTimeout(function () {
+                var buyerTableSum = BuyerTable.getCalcResults().bottom.Amount || 0;
+
+                var previouslyCreatedBBLCValue = parseFloat($("#previousbblcValue").val())||0;
+                var finalValue = parseFloat($("#finalValue").val()) || 0;
+                var Balance = (buyerTableSum - (previouslyCreatedBBLCValue + finalValue)) || 0;
+                $("#balance").val(Balance);
+
+
+                // var margin = ((buyerTableSum / Balance) * 100).toFixed(2)
+                // $("#margin").val(margin);
+                // $("#marginPercent").val(margin);
+            }, 4000);
+      }
+      //=============edit mode ends===========
+
+
+
+
+        //duplicate bblc no error  handling
+        var currentPOLId = '@ViewBag.BBLCID';
+        var BtnSave = document.querySelector('#BtnSave');
+        var BtnSaveAndClose = document.querySelector('#BtnSaveAndClose');
+        function getBBLC(callback) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetBBLCList", "Variable")',
+                dataType: "json",
+                success: function (data) {
+                    // console.log("data::", data.data);
+                    var SizeCodeGetArray = [];
+
+                    data.data.forEach(function (item) {
+                        var SizeName = item.BBLCNo;
+                        var SizeIdGet = item.Id;
+                        var SizeData = {
+                            SizeName: SizeName,
+                            Id: SizeIdGet
+                        };
+                        SizeCodeGetArray.push(SizeData);
+                    });
+
+                    if (typeof callback === "function") {
+                        callback(SizeCodeGetArray);
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                }
+            });
+        }
+
+        function checkPOLExists(sizeName) {
+            getBBLC(function (data) {
+                var lowercasedSizeName = sizeName.toLowerCase();
+
+                var sizeExists = data.some(function (item) {
+                    // console.log("item.Id", item.Id);
+                    //console.log("currentSizeIdd", currentSizeIdd);
+
+                    if (currentPOLId == item.Id) {
+                        return false;
+                    }
+
+                    return item.SizeName.trim().toLowerCase() === lowercasedSizeName;
+                });
+
+                console.log("sizeExists", sizeExists);
+
+                if (sizeExists) {
+                    $("#bblcNoValidation").html("Already has the same BBLC No!");
+                    BtnSave.disabled = true;
+                    BtnSaveAndClose.disabled = true;
+                } else {
+                    $("#bblcNoValidation").html("");
+                    BtnSave.disabled = false;
+                    BtnSaveAndClose.disabled = false;
+
+                }
+            });
+        }
+
+        var POLNameHandle = document.getElementById("bblcNo");
+        POLNameHandle.addEventListener("input", function () {
+            //console.log("currentSizeId", currentSizeIdd);
+
+            var enteredSizeName = POLNameHandle.value;
+            checkPOLExists(enteredSizeName);
+        });
+     //==================dropdown populate===============
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("supplierDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#supplierID').append('<option value="' + value.Value+ '">' + value.Text + '</option>');
+                    $('#ForwarderId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("itemGroupDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#itemGroup').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("concernDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#concern').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("groupLCMainDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#groupLc').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("shipModeDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#shipMode').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("concernBankDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#concernBank').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("supplierBankDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#supplierBank').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("currencyDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#currency').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("incoTermDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#incoTerms').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("paymentTermsDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#payemntTerms').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("dayListDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#days').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("dayTermDescDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi day terms er", value);
+                    $('#daysTermDesc').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("portOFLoadingDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#portOfLoading').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("destinationDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#destination').append('<option value="' + value.Value+ '">' + value.Text + '</option>');
+                });
+            }
+        });
+
+
+
+
+        //===group lc chose table data generate starts=====
+        var totalGroupLCValue;
+        var previouslyCreatedBBLCValue;
+        $("#groupLc").on("change", function () {
+            var groupLcId= $(this).val();
+            // console.log("groupLcId", groupLcId);
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("getMasterLCData", "Variable")?groupLCid=' + groupLcId,
+                datatype: "Json",
+                success: function (data) {
+                    console.log("grouplc wise pi value dekhi",data);
+                    // console.log("grouplc wise pi value dekhi", data.datasetabc.Table[0].TotalValue);
+                    
+                    if(data.datasetabc != 0){
+                        $("#previousbblcValue").val(data.datasetabc[0].TotalValue);
+                         previouslyCreatedBBLCValue = data.datasetabc[0].TotalValue || 0;
+
+                    }
+
+                    totalGroupLCValue = data.sumAmount || 0;
+                    var finalValue = $("#finalValue").val()||0;
+                    var Balance = ((previouslyCreatedBBLCValue + finalValue) - totalGroupLCValue)||0;
+                    $("#balance").val(Balance);
+
+
+                    var margin = (((totalGroupLCValue / Balance) * 100).toFixed(2))||0;
+                    if(margin==0){
+                        $("#margin").val(data.margin);
+                        $("#marginPercent").val(data.margin);
+                        $('#remaining_margin').text('Already Use ' + (100 - data.margin).toFixed(2) + '%');
+                    }
+                    else{
+
+                        $("#margin").val(margin);
+                        $("#marginPercent").val(margin);
+                        $('#remaining_margin').text('Already Use ' + (100 - margin).toFixed(2) + '%');
+                    }
+
+                    $("#groupLCValue").val(totalGroupLCValue);
+
+                    BuyerTable = new Tabulator("#buyerTable", {
+                        height: "auto",
+                        layout: "fitColumns",
+                        data: data.data,
+                        columns: [
+                            ...localFieldsForBuyerTable,
+                        ],
+                        movableRows: true,
+                        movableColumns: true,
+                        responsiveLayout: true
+                    });
+                }
+            });
+        });
+
+
+        //===group lc chose table data generate ends=======
+
+        //===supplier chose table data generate starts=====
+        var buyerTableSum = 0;
+        function attachchRow(row) {
+            var rowData = row.getData();
+            SampleTable.deleteRow(row);
+            MainTable.addRow(rowData);
+
+            var sum = MainTable.getCalcResults().bottom.ImportQty || 0;
+            document.getElementById('bblcQty').value = sum;
+
+            var sumValue = MainTable.getCalcResults().bottom.TotalValue || 0;
+            document.getElementById('bblcValue').value = sumValue;
+
+            //buyerTableSum = BuyerTable.getCalcResults().bottom.Amount || 0;
+            if (BuyerTable && BuyerTable.getCalcResults) {
+                buyerTableSum = BuyerTable.getCalcResults().bottom.Amount || 0;
+            } else {
+                buyerTableSum = 0;
+            }
+
+            var previouslyCreatedBBLCValue = parseFloat($("#previousbblcValue").val()) ||0;
+            var finalValue = parseFloat($("#bblcValue").val()) + (parseFloat($("#increase").val()) - parseFloat($("#decrease").val()));
+            
+            //var finalValue = parseFloat($("#finalValue").val()) ||0;
+            var Balance = (buyerTableSum - (previouslyCreatedBBLCValue + finalValue)) || 0;
+            $("#balance").val(Balance);
+
+
+            var margin = (((Balance / buyerTableSum) * 100).toFixed(2)) || 0;
+            $("#margin").val(margin);
+            $("#marginPercent").val(margin);
+            $('#remaining_margin').text('Already Use ' + (100 - margin).toFixed(2) + '%');
+
+             // Perform calculation inside this function
+            $("#finalValue").val(finalValue||0);
+
+        }
+        function detachRow(row) {
+            var rowData = row.getData();
+            MainTable.deleteRow(row);
+            SampleTable.addRow(rowData);
+
+            var sum = MainTable.getCalcResults().bottom.ImportQty || 0;
+            document.getElementById('bblcQty').value = sum;
+
+            var sumValue = MainTable.getCalcResults().bottom.TotalValue || 0;
+            document.getElementById('bblcValue').value = sumValue;
+
+            if (BuyerTable && BuyerTable.getCalcResults) {
+                buyerTableSum = BuyerTable.getCalcResults().bottom.Amount || 0;
+            } else {
+                buyerTableSum = 0;
+            }
+
+            var previouslyCreatedBBLCValue = parseFloat($("#previousbblcValue").val()) || 0;
+
+            var finalValue = parseFloat($("#bblcValue").val()) + (parseFloat($("#increase").val()) - parseFloat($("#decrease").val())); // Perform calculation inside this function
+            $("#finalValue").val(finalValue);
+
+            //var finalValue = parseFloat($("#finalValue").val()) ||0;
+            var Balance = (buyerTableSum - (previouslyCreatedBBLCValue + finalValue)) || 0;
+            $("#balance").val(Balance);
+
+
+            var margin = (((Balance / buyerTableSum) * 100).toFixed(2)) || 0;
+            $("#margin").val(margin);
+            $("#marginPercent").val(margin);
+            $('#remaining_margin').text('Already Use ' + (100 - margin).toFixed(2) + '%');
+        }
+
+        function getPI(SupplierId, GroupLCId){
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("getProformaInvoiceData", "Variable")',
+                data: {
+                    SupplierID: SupplierId,
+                    GroupLCId: GroupLCId
+                },
+                datatype: "Json",
+                success: function (data) {
+
+                    SampleTable = new Tabulator("#piSampleTable", {
+                        height: "auto",
+                        layout: "fitDataTable",
+                        data: data.data.Table,
+                        columns: [
+                            ...localFieldsForSampleTable,
+                            {
+                                title: "",
+                                field: "Delete",
+                                movable: false,
+                                frozen: true,
+                                formatter: function (cell, formatterParams) {
+                                    return "<i id='attach-row' class='bi bi-plus-circle'></i>";
+                                },
+                                width: "6px",
+                                headerSort: false,
+                                cellClick: function (e, cell) {
+                                    var rowData = cell.getRow().getData();
+                                    var row = cell.getRow();
+                                    attachchRow(row);
+                                }
+                            }
+                        ],
+                    });
+                }
+            });
+        }
+
+        $("#supplierID").on("change", function () {
+            var SupplierID= $(this).val();
+            var GroupLCId = $("#groupLc").val();
+
+            if (GroupLCId != "") {
+                getPI(SupplierID, GroupLCId);
+            }
+        });
+        $("#groupLc").on("change", function () {
+            var GroupLCId = $(this).val();
+            var SupplierID = $("#supplierID").val();
+
+            if (SupplierID != "") {
+                getPI(SupplierID, GroupLCId);
+            }
+        });
+
+
+        //===supplier chose table data generate ends=======
+
+
+
+
+        // Function to handle detaching rows
+        function handleDetachRow(e, cell) {
+            var rowData = cell.getRow().getData();
+            var row = cell.getRow();
+            alert("qqq");
+        }
+        MainTable = new Tabulator("#piMainTable", {
+            height: "auto",           
+            // data: BBLCIDSet,
+            columns: [
+                ...localFieldsForMainTable,
+                {
+                    title: "",
+                    field: "Delete",
+                    movable: false,
+                    frozen: true,
+                    formatter: function (cell, formatterParams) {
+                        return "<i id='detach-row' class='fas fa-trash-alt delete-icon'></i>";
+                    },
+                    width: "6px",
+                    headerSort: false, 
+                    cellClick: function (e, cell) {
+                        var rowData = cell.getRow().getData();
+                        var row = cell.getRow();
+                        detachRow(row);
+                    }
+                }
+            ],
+
+            // Define custom functions to update input field value
+            dataFiltered: function (filters, rows) {
+                updateInputFieldValue();
+            },
+            dataLoaded: function (data) {
+                updateInputFieldValue();
+            },
+            movableRows: true,
+            movableColumns: true,           
+
+        });
+
+        function updateInputFieldValue() {
+            var sum = MainTable.getCalcResults().bottom.ImportQty || 0; // Get the sum of "IMPORT QTY" column
+            console.log("sum", sum);
+            document.getElementById('bblcQty').value = sum; // Update the value of the input field
+        }
+
+        var today = new Date();
+        var day = today.getDate();
+        var month = today.toLocaleString('default', { month: 'short' });
+        var year = today.getFullYear();
+
+        var formattedDay = (day < 10 ? '0' : '') + day;
+
+        var formattedDate = formattedDay + '-' + month + '-' + year;
+        $('#lcOpeningDate').val(formattedDate);
+        $('#expiryDate').val(formattedDate);
+        $('#FirstShipmentDate').val(formattedDate);
+        $('#lastShipmentDate').val(formattedDate);
+
+        // $('select').select2();
+        $(function () {
+            $("#lcOpeningDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            })
+            $("#expiryDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#FirstShipmentDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#lastShipmentDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#udDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#lcOpeningDate").attr("autocomplete", "off");
+            $("#expiryDate").attr("autocomplete", "off");
+            $("#FirstShipmentDate").attr("autocomplete", "off");
+            $("#lastShipmentDate").attr("autocomplete", "off");
+            $("#udDate").attr("autocomplete", "off");
+        });
+        //===============================bblc functionaloties end========================
+
+
+        $('select').select2();       
+        $("select").on("select2:open", function () {
+            console.log($(`[aria-controls="select2-${this.id}-results"]`));
+            // When Select2 dropdown is opened           
+            $(`[aria-controls="select2-${this.id}-results"]`)[0].focus(); // Focus on the input field
+        });
+       
+    </script>
+}

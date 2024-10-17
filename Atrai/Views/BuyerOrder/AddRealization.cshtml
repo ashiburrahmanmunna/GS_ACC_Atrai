@@ -1,0 +1,851 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Export Invoice";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    .form-control {
+        border: 1px solid #adb5bd !important;
+    }
+
+    #example-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #393a3d;
+        color: #fff;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+
+    #modal-content2 {
+        background-color: #fefefe;
+        margin: 10px auto;
+        padding: 20px;
+        border: 3px solid #888;
+        width: 80%;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.5);
+    }
+</style>
+
+<div>
+    <div style="background: #F4F4F4; padding: 20px;">
+        <h3 style="border-bottom: 1px solid gray">Export Realization</h3>
+        <input type="hidden" id="Id" value="0" />
+        <div class="row">
+            <div class="col-md-2 col-2">
+                <label>Master LC/Contact No</label>
+                <select id="MasterLCId" class="form-control">
+                    <option value="">Select Master LC</option>
+                </select>
+            </div>
+            <div class="col-md-2 col-2">
+                <label>Buyer</label>
+                <input type="text" id="Buyer" class="form-control ps-1" style="padding:1px;" readonly>
+            </div>
+            <div class="col-md-2 col-2">
+                <label>File Number</label>
+                <input type="text" id="FileNumber" class="form-control ps-1" style="padding:1px;">
+            </div>
+            <div class="col-md-2 col-2">
+                <label>FBP Number</label>
+                <input type="text" id="FBPNo" class="form-control ps-1" style="padding:1px;">
+            </div>
+            <div class="col-md-2 col-2">
+                <label>FBP Date</label>
+                <input id="FBPDate" class="form-control" style="padding:1px;">
+            </div>
+            <div class="col-md-2 col-2">
+                <label>Total Value</label>
+                <input type="text" id="TotalValue" class="form-control ps-1" style="padding:1px;" readonly>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-2 col-2">
+                <label>Courier Date</label>
+                <input id="CourierDate" class="form-control" style="padding:1px;">
+            </div>
+            <div class="col-md-2 col-2">
+                <label>Courier No</label>
+                <input type="text" id="CourierNo" class="form-control ps-1" style="padding:1px;">
+            </div>
+            <div class="col-md-2 col-2">
+                <label>Bank Ref.</label>
+                <input type="text" id="BankRef" class="form-control ps-1" style="padding:1px; ">
+            </div>
+            <div class="col-md-2 col-2">
+                <label>Receiving Value</label>
+                <input type="text" id="ReceivingValue" class="form-control ps-1" style="padding:1px;" readonly>
+            </div>
+            <div class="col-md-2 col-2">
+                <label>Bank Charge</label>
+                <input type="text" id="BankCharge" class="form-control ps-1" style="padding:1px;" readonly>
+            </div>
+            <div class="col-md-2 col-2">
+                <label>Realization Amount</label>
+                <input type="text" id="RealizationAmount" class="form-control ps-1" style="padding:1px;" readonly>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-2 md-2">
+                <label>Realization Date</label>
+                <input id="RealizationDate" class="form-control" style="padding:1px;">
+            </div>
+            <div class="col-md-3 col-3">
+                <label>Remarks</label>
+                <input type="text" id="Remarks" class="form-control ps-1" style="padding:1px; ">
+            </div>
+        </div>
+
+    </div>
+
+    <div style="margin-top: 30px; padding: 10px;">
+        <div id="example-table"></div>
+        <div class="row" style="margin-bottom: 50px;">
+            <div class="col-md-3 col-12">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-success btn-sm" id="add-row">Add Row</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-bar">
+        <div class="container-fluid">
+            <div class="row px-4">
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-outline-secondary text-white btn-sm rounded-pill " id="BtnBack" onclick="gotoInvoiceList()">Cancel</button>
+                </div>
+                <div class="col-md-6 d-flex justify-content-center">
+                </div>
+
+                <div class="col-md-3 d-flex justify-content-end">
+                    <button class="btn btn-outline-secondary text-white btn-sm rounded-pill me-1" id="BtnSave">
+                        @if (ViewBag.ActionType == "Edit")
+                        {
+                            <span>Update</span>
+                        }
+                        else if (ViewBag.ActionType == "Create")
+                        {
+                            <span>Save </span>
+                        }
+
+                    </button>
+                    <div class="btn-group">
+                        <button class="btn btn-success btn-sm" id="BtnSaveClose">
+                            @if (ViewBag.ActionType == "Edit")
+                            {
+                                <span>Update and close</span>
+                            }
+                            else if (ViewBag.ActionType == "Create" || ViewBag.ActionType == "Copy")
+                            {
+                                <span>Save and close</span>
+                            }
+
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu" id="ul-id-for-expenses">
+                            <li><a class="dropdown-item" href="/Accounts/ImportTransaction">Time activity</a></li>
+                        </ul>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+        <input type="button" id="unknown" class="btn  btn-md" value="" />
+        <div class="dropdown" id="unknown1" style="display: inline-block;">
+        </div>
+    </div>
+</div>
+
+
+<div class="col-md-2  col-2">
+    <div id="customModal" class="modal">
+        <div class="modal-content" id="modal-content2">
+            <div class="row">
+                <div class="col-md-11 col-11">
+                    <p>Export Invoice List</p>
+                </div>
+                <div class="col-md-1 col-1">
+                    <i class="bi bi-x-square-fill" style="color: red; font-size: 20px;" id="closeModal"></i>
+                </div>
+            </div>
+
+            <div id="invoiceList"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+    <script>
+        $('#MasterLCId').select2();
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetMasterLC", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#MasterLCId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+
+
+        var today = new Date();
+        var day = today.getDate();
+        var month = today.toLocaleString('default', { month: 'short' });
+        var year = today.getFullYear();
+
+        var formattedDay = (day < 10 ? '0' : '') + day;
+
+        var formattedDate = formattedDay + '-' + month + '-' + year;
+
+        document.getElementById('FBPDate').value = formattedDate;
+        document.getElementById('CourierDate').value = formattedDate;
+        document.getElementById('RealizationDate').value = formattedDate;
+
+
+        $(function () {
+            $("#FBPDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#CourierDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#RealizationDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            
+        });
+
+        function gotoInvoiceList()
+        {
+            window.location.href = '@Url.Action("Export", "BuyerOrder", new { Type = "Realization" })';
+        }
+        
+    </script>
+
+    <script>
+        var childcolumns = [
+            {
+                headerSort: false,
+                field: "drag",
+                frozen: true,
+                formatter: function (cell, formatterParams) {
+                    return "<i class='fas fa-bars drag-icon'></i>";
+                },
+                width: 30,
+                headerSort: false,
+                rowHandle: true,
+
+
+            },
+            { title: "Id", field: "Id", movable: false, visible: false },
+            { title: "InvoiceId", field: "InvoiceId", movable: false, visible: false },
+            { title: "SL.", field: "SLNo", headerSort: false, frozen: true, width: 5, bottomCalc: "count", hozAlign: "right" },
+            { title: "Buyer LC Ref", field: "BuyerLCRef", movable: false },
+            { title: "Invoice No", field: "InvoiceNo", movable: false },
+            {
+                title: "Invoice Date", field: "InvoiceDate",
+                editorParams: {
+                    dateFormat: "d-M-Y",
+                },
+                cellEdited: function (cell) {
+                    cell.getRow().update({ "InvoiceDate": cell.getValue() });
+                },
+            },
+            { title: "ExpNo", field: "ExpNo", movable: false },
+            { title: "Buyer Bank", field: "BuyerBank", movable: false},
+            { title: "Commercial Company", field: "CommercialCompany", movable: false },
+            { title: "Buyer Name", field: "BuyerName", movable: false },
+            { title: "BL No", field: "BLNo", movable: false },
+            {
+                title: "BL Date", field: "BLDate",
+                editorParams: {
+                    dateFormat: "d-M-Y",
+                },
+                cellEdited: function (cell) {
+                    cell.getRow().update({ "BLDate": cell.getValue() });
+                },
+            },
+            { title: "Destination Name", field: "DestinationName", movable: false},
+            { title: "Payment Terms", field: "PaymentTerms", movable: false},
+            { title: "Day", field: "Day", movable: false },
+            { title: "Total Invoice Qty", field: "TotalQty", movable: false, bottomCalc: "sum" },
+            { title: "Total Value", field: "TotalValue", movable: false, bottomCalc: "sum" },
+            { title: "Receiving Value", field: "ReceivingValue", movable: false, editor: "input", bottomCalc: "sum" },
+            { title: "Bank Charge", field: "BankCharge", movable: false, editor: "input", bottomCalc: "sum" },
+            
+        ];
+
+        var deleteColumn = {
+            title: "",
+            field: "Delete",
+            movable: false,
+            formatter: function (cell, formatterParams) {
+                return "<i class='fas fa-trash-alt delete-icon'></i>";
+            },
+            width: 30,
+            headerSort: false,
+            cellClick: function (e, cell) {
+                var rowData = cell.getRow().getData();
+                var row = cell.getRow();
+                deleteRow(row);
+            }
+        };
+
+        childcolumns.push(deleteColumn);
+
+
+
+        var table = new Tabulator("#example-table", {
+            height: "311px",
+            addRowPos: "bottom",
+            columns: childcolumns,
+        });
+
+        table.on("cellEdited", function (cell) {
+            var editedCell = cell.getField();
+
+            if (editedCell === "ReceivingValue" || editedCell === "BankCharge") {
+                var data = cell.getRow().getData();
+
+                var newValue = data.TotalValue - data.ReceivingValue;
+
+                cell.getRow().update({ BankCharge: newValue });
+            }
+
+            
+
+            if (editedCell === "ReceivingValue") {
+                var allData = table.getData();
+                var sumReceivingValue = allData.reduce(function (acc, row) {
+                    return acc + parseFloat(row.ReceivingValue || 0);
+                }, 0);
+
+                $("#ReceivingValue").val(sumReceivingValue);
+                $("#RealizationAmount").val(sumReceivingValue);
+
+                var sumBankCharge = allData.reduce(function (acc, row) {
+                    return acc + parseFloat(row.BankCharge || 0);
+                }, 0);
+
+                $("#BankCharge").val(sumBankCharge);
+            }
+            if (editedCell === "BankCharge") {
+                var allData = table.getData();
+                var sumBankCharge = allData.reduce(function (acc, row) {
+                    return acc + parseFloat(row.BankCharge || 0);
+                }, 0);
+
+                $("#BankCharge").val(sumBankCharge);
+            }
+
+            var bankcharge = parseFloat($("#BankCharge").val());
+            var receive = parseFloat($("#ReceivingValue").val());
+
+            // var temp = receive - bankcharge;
+            // $("#RealizationAmount").val(temp);
+        });
+
+        function renumberRows() {
+            var rows = table.getRows();
+            rows.forEach(function (row, index) {
+                row.update({ SLNo: index + 1 });
+            });
+        }
+
+        function deleteRow(row) {
+
+            if (confirm("Are you sure you want to delete this row?")) {
+                table.deleteRow(row);
+                renumberRows();
+            }
+
+        }
+
+        function calculateTotalValue()
+        {
+            var allData = table.getData();
+            var sumReceivingValue = allData.reduce(function (acc, row) {
+                return acc + parseFloat(row.TotalValue || 0);
+            }, 0);
+
+            var ReceivingValue = allData.reduce(function (acc, row) {
+                return acc + parseFloat(row.ReceivingValue || 0);
+            }, 0);
+
+            var RealizationValue = allData.reduce(function (acc, row) {
+                return acc + parseFloat(row.ReceivingValue || 0);
+            }, 0);
+
+            $("#TotalValue").val(sumReceivingValue);
+
+            $("#ReceivingValue").val(ReceivingValue);
+
+            $("#RealizationAmount").val(RealizationValue);
+
+            var rows = table.getRows();
+            rows.forEach(function (row, index) {
+                row.update({ SLNo: index + 1 });
+            });
+        }
+
+
+
+        var modalcolumns = [
+            {
+                title: "",
+                field: "Add",
+                movable: false,
+                hozAlign: "center",
+                formatter: function (cell, formatterParams) {
+                    return "<i class='bi bi-plus-square-fill' style='color: green; font-size: 20px;'></i>";
+                },
+                headerSort: false,
+                cellClick: function (e, cell) {
+                    var rowData = cell.getRow().getData();
+                    var row = cell.getRow();
+
+                    table.addRow(rowData);
+
+                    modalTable.deleteRow(row);
+
+                    calculateTotalValue();
+                }
+            },
+            { title: "Id", field: "Id", movable: false, visible: false },
+            { title: "InvoiceId", field: "InvoiceId", movable: false, visible: false },
+            { title: "Buyer LC Ref", field: "BuyerLCRef", movable: false, headerFilter: "input" },
+            { title: "Invoice No", field: "InvoiceNo", movable: false, headerFilter: "input" },
+            {
+                title: "Invoice Date", field: "InvoiceDate",
+                editorParams: {
+                    dateFormat: "d-M-Y",
+                },
+                cellEdited: function (cell) {
+                    cell.getRow().update({ "InvoiceDate": cell.getValue() });
+                },
+            },
+            { title: "ExpNo", field: "ExpNo", movable: false, headerFilter: "input" },
+            { title: "Buyer Bank", field: "BuyerBank", movable: false, headerFilter: "input" },
+            { title: "Commercial Company", field: "CommercialCompany", movable: false, headerFilter: "input" },
+            { title: "Buyer Name", field: "BuyerName", movable: false, headerFilter: "input" },
+            { title: "BL No", field: "BLNo", movable: false, headerFilter: "input" },
+            {
+                title: "BL Date", field: "BLDate",
+                editorParams: {
+                    dateFormat: "d-M-Y",
+                },
+                cellEdited: function (cell) {
+                    cell.getRow().update({ "BLDate": cell.getValue() });
+                },
+            },
+            { title: "Destination Name", field: "DestinationName", movable: false, headerFilter: "input" },
+            { title: "Payment Terms", field: "PaymentTerms", movable: false, headerFilter: "input" },
+            { title: "Day", field: "Day", movable: false, headerFilter: "input" },
+            { title: "Total Invoice Qty", field: "TotalQty", movable: false, editor: "input", bottomCalc: "sum", headerFilter: "input" },
+            { title: "Total Value", field: "TotalValue", movable: false, editor: "input", bottomCalc: "sum", headerFilter: "input" },
+            { title: "Receiving Value", field: "ReceivingValue", movable: false, editor: "input", bottomCalc: "sum" , visible: false},
+            { title: "Bank Charge", field: "BankCharge", movable: false, editor: "input", bottomCalc: "sum", visible: false },
+        ];
+
+        // var addColumn = {
+        //     title: "Add",
+        //     field: "Add",
+        //     movable: false,
+        //     hozAlign: "center",
+        //     formatter: function (cell, formatterParams) {
+        //         return "<i class='bi bi-plus-square-fill' style='color: green; font-size: 20px;'></i>";
+        //     },
+        //     headerSort: false,
+        //     cellClick: function (e, cell) {
+        //         var rowData = cell.getRow().getData();
+        //         var row = cell.getRow();
+
+        //         table.addRow(rowData);
+
+        //         modalTable.deleteRow(row);
+        //     }
+        // };
+
+        //modalcolumns.push(addColumn);
+
+
+        var modalTable = new Tabulator("#invoiceList", {
+            height: "311px",
+            addRowPos: "bottom",
+            columns: modalcolumns,
+        });        
+
+
+        function initializeTabulator(data) {
+            data.forEach(function (row) {
+                var invoiceDate = new Date(row.InvoiceDate);
+                row.InvoiceDate = invoiceDate.getDate() + '-' +
+                    new Intl.DateTimeFormat('en-us', { month: 'short' }).format(invoiceDate) + '-' +
+                    invoiceDate.getFullYear();
+
+                var blDate = new Date(row.BLDate);
+                row.BLDate = blDate.getDate() + '-' +
+                    new Intl.DateTimeFormat('en-us', { month: 'short' }).format(blDate) + '-' +
+                    blDate.getFullYear();
+
+                
+            });
+
+            if (modalTable) {
+                modalTable.setData(data);
+            } else {
+                modalTable = new Tabulator("#modalTable", {
+                    layout: "fitColumns",
+                    addRowPos: "bottom",
+                    columns: modalcolumns,
+                    data: data,
+                });
+            }
+
+        }
+
+
+        function getMasterLCDetails() {
+
+            var masterLCId = $("#MasterLCId").val();
+            var id = @ViewBag.Id;
+            $.ajax({
+                type: "get",
+                url: '@Url.Action("GetMasterLCForRealization", "BuyerOrder")',
+                data: { MasterLCId: masterLCId, Id: id },
+
+                success: function (response) {
+
+                    var model = response.data;
+                    console.log(model);
+                    $("#Buyer").val(response.buyer);
+
+                    //modalTable.clearData();
+                    initializeTabulator(model);
+
+                },
+                error: function (error) {
+                    console.error("Error fetching price:", error);
+                }
+            });
+
+            
+            
+        }
+
+        $("#MasterLCId").on("select2:select", function () {
+            table.clearData();
+            getMasterLCDetails();
+        });
+
+        document.getElementById("add-row").addEventListener("click", function () {
+            var modal = document.getElementById("customModal");
+            modal.style.display = "block";
+
+            getMasterLCDetails();
+            //getModalTabledata();
+        });
+
+        document.getElementById("closeModal").addEventListener("click", function () {
+            var modal = document.getElementById("customModal");
+            modal.style.display = "none";
+        });
+
+        var modal = document.getElementById('customModal');
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        function gatherData() {
+
+            var dataList = [];
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+
+
+            var rows = table.getData();
+            var id = @ViewBag.Id;
+
+            
+            rows.forEach(function (row) {
+
+                var rowData = {
+                    "Id": row["Id"] == null ? 0 : parseInt(row["Id"]),
+                    "InvoiceId": parseFloat(row.InvoiceId),
+                    "TotalQty": parseFloat(row.TotalQty),
+                    "TotalValue": parseFloat(row.TotalValue),
+                    "ReceivingValue": parseFloat(row.ReceivingValue),
+                    "BankCharge": parseFloat(row.BankCharge),
+                    "RealizationId": id,
+                    "ComId": ComId
+                };
+                dataList.push(rowData);
+            });
+
+            
+
+            var masterLCData = {
+                Id: id,
+                MasterLCId: parseInt($("#MasterLCId").val()),
+                FileNumber: $("#FileNumber").val(),
+                FBPNo: $("#FBPNo").val(),
+                FBPDate: $("#FBPDate").val(),
+                TotalValue: parseInt($("#TotalValue").val()),
+                CourierDate: $("#CourierDate").val(),
+                CourierNo: $("#CourierNo").val(),
+                BankRef: $("#BankRef").val(),
+                ReceivingVlaue: parseInt($("#ReceivingValue").val()),
+                BankCharge: parseInt($("#BankCharge").val()),
+                RealizationAmount: parseInt($("#RealizationAmount").val()),
+                RealizationDate: $("#RealizationDate").val(),
+                Remarks: $("#Remarks").val(),
+                ExportRealization_Details: dataList
+            };
+
+
+            return masterLCData;
+
+        }
+
+        function sendDataToServer() {
+            var invoiceData = gatherData();
+
+            if (invoiceData.ExportRealization_Details.length == 0) {
+                setTimeout(function () {
+                    toastr.success("Include Export Invoice", "", {
+                        "toastClass": "toast-red",
+                    });
+                }, 1500);
+            }
+            else 
+            {
+                var data = JSON.stringify(invoiceData);
+
+
+                $.ajax({
+
+                    url: '@Url.Action("RealizationCreation", "BuyerOrder")',
+                    type: 'POST',
+                    data: data,
+                    async: false,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (response) {
+                        toastr.success(response.message, "", {
+                            "toastClass": "toast-green",
+                        });
+                        setTimeout(function () {
+                            window.location.href = '@Url.Action("Export", "BuyerOrder", new { Type = "Realization" })';
+                        }, 1000);
+                    },
+                    error: function (error) {
+                        console.log("Error");
+                    }
+                });
+            }
+            
+
+        }
+
+        var saveButton = document.getElementById('BtnSave');
+        saveButton.addEventListener('click', function () {
+            sendDataToServer();
+        });
+
+        var saveButton = document.getElementById('BtnSaveClose');
+        saveButton.addEventListener('click', function () {
+            sendDataToServer();
+        });
+
+        function formatDateToCustomString(inputDate) {
+            const months = [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+
+            if (inputDate instanceof Date && !isNaN(inputDate)) {
+                const day = inputDate.getDate();
+                const monthIndex = inputDate.getMonth();
+                const year = inputDate.getFullYear();
+                const formattedDay = day < 10 ? `0${day}` : day;
+
+                const formattedDate = `${formattedDay}-${months[monthIndex]}-${year}`;
+                return formattedDate;
+            } else {
+                return inputDate;
+            }
+        }
+
+        function initializeTabulatorEdit(data) {
+            if (table) {
+                data.forEach(function (row, index) {
+                    var dateObj1 = new Date(row.InvoiceDate);
+                    var dateObj2 = new Date(row.BLDate);
+
+                    row.InvoiceDate = dateObj1.getDate() + '-' +
+                        new Intl.DateTimeFormat('en-us', { month: 'short' }).format(dateObj1) + '-' +
+                        dateObj1.getFullYear();
+
+                    row.BLDate = dateObj2.getDate() + '-' +
+                        new Intl.DateTimeFormat('en-us', { month: 'short' }).format(dateObj2) + '-' +
+                        dateObj2.getFullYear();
+
+                    row.SLNo = index + 1;
+                });
+                table.setData(data);
+            } else {
+                table = new Tabulator("#example-table", {
+                    layout: "fitColumns",
+                    addRowPos: "bottom",
+                    columns: childcolumns,
+                    data: data,
+                });
+            }
+        }
+
+        function modalTableEdit(data) {
+            if (modalTable) {
+                data.forEach(function (row, index) {
+                    var dateObj1 = new Date(row.InvoiceDate);
+                    var dateObj2 = new Date(row.BLDate);
+
+                    row.InvoiceDate = dateObj1.getDate() + '-' +
+                        new Intl.DateTimeFormat('en-us', { month: 'short' }).format(dateObj1) + '-' +
+                        dateObj1.getFullYear();
+
+                    row.BLDate = dateObj2.getDate() + '-' +
+                        new Intl.DateTimeFormat('en-us', { month: 'short' }).format(dateObj2) + '-' +
+                        dateObj2.getFullYear();
+
+                    row.SLNo = index + 1;
+                });
+                modalTable.setData(data);
+            } else {
+                modalTable = new Tabulator("#invoiceList", {
+                    layout: "fitColumns",
+                    addRowPos: "bottom",
+                    columns: modalcolumns,
+                    data: data,
+                });
+            }
+        }
+
+        if ('@actiontype' === "Edit") {
+            var masterLCId = $("#MasterLCId").val();
+            var id = @ViewBag.Id;
+            $.ajax({
+                type: "get",
+                url: '@Url.Action("GetMasterLCForRealization", "BuyerOrder")',
+                data: { MasterLCId: masterLCId, Id: id },
+                dataType: "json",
+                success: function (response) {
+                    console.log(response.data);
+                    var model = response.data[0];
+
+                    $("#Id").val(model.Id);
+                    $("#MasterLCId").val(model.MasterLCId).trigger('change');
+                    $("#Buyer").val(model.Buyer);
+                    $("#FileNumber").val(model.FileNumber);
+                    $("#FBPNo").val(model.FBPNo);
+                    $("#FBPDate").val(formatDateToCustomString(new Date(model.FBPDate)));
+                    $("#TotalValue").val(model.TotalValue);
+                    $("#CourierDate").val(formatDateToCustomString(new Date(model.CourierDate)));
+                    $("#CourierNo").val(model.CourierNo);
+                    $("#BankRef").val(model.BankRef);
+                    $("#ReceivingValue").val(model.ReceivingValue);
+                    $("#BankCharge").val(model.BankCharge);
+                    $("#RealizationAmount").val(model.RealizationAmount);
+                    $("#RealizationDate").val(formatDateToCustomString(new Date(model.RealizationDate)));
+                    $("#Remarks").val(model.Remarks);
+
+                    initializeTabulatorEdit(response.details);
+                    modalTableEdit(response.modal);
+                    //table.setData(response.details);
+                },
+                error: function (error) {
+                    console.error("Error fetching data: " + error);
+                }
+            });
+        }
+    </script>
+}

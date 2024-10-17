@@ -1,0 +1,526 @@
+﻿@{
+    ViewData["Title"] = "Job Card";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+@*@inject IAntiforgery AntiForgery*@
+@model Atrai.Core.ViewModel.JobCardVM
+
+<style>
+    .dataTables_filter input[type=search] {
+        /* width: 100%;*/
+        /*padding: 5px 15px;*/
+        background-color: transparent;
+        transition: transform 250ms ease-in-out;
+        font-size: 11px;
+        line-height: 18px;
+        color: #575756;
+        background-color: transparent;
+        background-image: url(data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' w…5 11.99 14 9.5 14z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E); background-repeat: no-repeat; background-size: 18px 18px; background-position: 95% center; border-radius: 50px; border: 1px soLId #575756; transition: all 250ms ease-in-out; backface-visibility: hidden; transform-style: preserve-3d;
+    }
+
+    .unselectable {
+        background-color: #ddd;
+        cursor: not-allowed;
+    }
+
+    table.dataTable tbody tr.selected, table.dataTable tbody th.selected, table.dataTable tbody td.selected {
+        color: green;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+@using (Html.BeginForm("JobCard", "HRVariable", FormMethod.Post))
+{
+    <div class="page-wrapper">
+
+        <div class="card p-2 m-2">
+            <div class="form-header bg-info">
+                <div class="row">
+
+                    <div class="col-md-6 col-12">
+                        <i class="fa fa-file-pdf" style="color:white;"></i>&nbsp; Job Card
+                        <div id="loading" style="display: inLine;">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-12 text-right">
+                        <div class="form-check form-check-inline custom-radio pl-4">
+                            <input id="PDF" name="ReportFormat" type="radio" class="custom-control-input" value="PDF" checked required>
+                            <label class="custom-control-label" for="PDF">PDF</label>
+                        </div>
+                        <div class="form-check form-check-inline custom-radio pl-4">
+                            <input id="Word" name="ReportFormat" type="radio" class="custom-control-input" value="Word" required>
+                            <label class="custom-control-label" for="Word">Word</label>
+                        </div>
+                        <div class="form-check form-check-inline custom-radio pl-4">
+                            <input id="Excel" name="ReportFormat" type="radio" class="custom-control-input" value="Excel" required>
+                            <label class="custom-control-label" for="Excel">Excel</label>
+                        </div>
+                        <div class="form-check form-check-inline custom-radio pl-4">
+                            <button type="submit" id="previewBtn" class="btn btn-primary" formtarget="_blank">
+                                <span class="fas fa-eye"> </span> Preview
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-2">
+                <!--Top Rows-->
+                <div class="row">
+                    <div class="col-md-12 col-12 mb-2">
+                        <fieldset class="boxStyle pt-2">
+                            <div class="row justify-content-end">
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                From Date
+                                            </span>
+                                        </div>
+                                        <input type="text" value="@ViewBag.DateFrom.ToString("yyyy-MM-dd")" id="FromDate" name="FromDate" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                To Date
+                                            </span>
+                                        </div>
+                                        <input type="text" value="@ViewBag.DateTo.ToString("yyyy-MM-dd")" id="ToDate" name="ToDate" class="form-control" />
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="row pb-3 justify-content-end">
+                                <div class="col-md-3 col-12">
+                                    <input id="btnPrev" type="button" class="btn btn-sm btn-info float-left btn-block rounded-0" value="<< prev" />
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <input id="btnNext" type="button" class="btn btn-sm btn-info float-right btn-block rounded-0" value="next >>" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                Employee Type
+                                            </span>
+                                        </div>
+                                        @Html.DropDownList("EmpType", null, "--Select--", htmlAttributes: new { @id = "EmpType", @class = "form-control form-control-sm" })
+
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                Unit
+                                            </span>
+                                        </div>
+                                        @Html.DropDownList("UnitId", null, "--Select--", htmlAttributes: new { @id = "Unit", @class = "form-control  form-control-sm" })
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                Shift
+                                            </span>
+                                        </div>
+                                        @Html.DropDownList("ShiftList", null, "--Select--", htmlAttributes: new { @id = "Shift", @class = "form-control  form-control-sm" })
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                Floor
+                                            </span>
+                                        </div>
+
+                                        @Html.DropDownList("FloorList", null, "--Select--", htmlAttributes: new { @id = "Floor", @class = "form-control  form-control-sm" })
+
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                Line
+                                            </span>
+                                        </div>
+                                        @Html.DropDownList("LineId", null, "--Select--", htmlAttributes: new { @id = "Line", @class = "form-control  form-control-sm" })
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <!--Department-->
+                    <div class="col-md-2 col-12 mr-0 pr-0">
+
+                        <fieldset class="boxStyle  mCustomScrollbar py-3" data-mcs-theme="minimal-dark" style="height:635px;">
+                            <table id="DeptTable" class="dataTable DeptTable table table-hover table-bordered table-striped trow" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th class="hidden">DeptId</th>
+                                        <th>Department</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="hidden">0</td>
+                                        <td>=ALL=</td>
+                                    </tr>
+                                    @foreach (var Departments in ViewBag.Department)
+                                    {
+                                        <tr>
+                                            <td class="hidden">@Departments.Value</td>
+                                            <td>@Departments.Text</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </fieldset>
+                    </div>
+
+                    <!--Section-->
+                    <div class="col-md-2 col-12">
+                        <div class="row">
+                            <div class="col-md-12 col-12">
+                                <fieldset class="boxStyle mCustomScrollbar py-3" data-mcs-theme="minimal-dark" id="sdSearch" style="height:313px">
+                                    <table id="SectTable" class="dataTable SectTable table table-hover table-bordered table-striped trow" cellspacing="0" width="100%">
+                                        <thead>
+                                            <tr>
+                                                <th class="hidden">SectId</th>
+                                                <th>Section</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="hidden">0</td>
+                                                <td>=ALL=</td>
+                                            </tr>
+                                            @foreach (var Sections in ViewBag.Sections)
+                                            {
+                                                <tr>
+                                                    <td class="hidden">@Sections.Value</td>
+                                                    <td>@Sections.Text</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </fieldset>
+                            </div>
+
+                            <!--Sub Selction-->
+                            <div class="col-md-12 col-12 my-2">
+
+                                <fieldset class="boxStyle mCustomScrollbar py-3" data-mcs-theme="minimal-dark" id="sdSearch" style="height:315px">
+                                    <table id="SubSectTable" class="dataTable SubSectTable table table-hover table-bordered table-striped trow" cellspacing="0" width="100%">
+                                        <thead>
+                                            <tr>
+                                                <th class="hidden">SubSectId</th>
+                                                <th>Sub Section</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="hidden">0</td>
+                                                <td>=ALL=</td>
+                                            </tr>
+                                            @foreach (var subsec in ViewBag.SubSection)
+                                            {
+                                                <tr>
+                                                    <td class="hidden">@subsec.Value</td>
+                                                    <td>@subsec.Text</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!--Designation-->
+                    <div class="col-md-2 col-12 pl-0 mr-0 pr-0 text-center">
+                        <fieldset class="boxStyle mCustomScrollbar pt-3 " data-mcs-theme="minimal-dark" id="locationsearch" style="height:635px;">
+                            <table id="DesignationTable" class="dataTable DesignationTable table table-hover table-bordered table-striped trow" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th class="hidden"></th>
+                                        <th>Designation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="hidden">0</td>
+                                        <td>=ALL=</td>
+                                    </tr>
+                                    @foreach (var desig in ViewBag.Designaiton)
+                                    {
+                                        <tr>
+                                            <td class="hidden">@desig.Value</td>
+                                            <td>@desig.Text</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </fieldset>
+                    </div>
+
+
+                    <div class="col-md-6 col-12">
+                        <fieldset class="boxStyle mCustomScrollbar pt-2" data-mcs-theme="minimal-dark" id="edSearch" style="height:635px">
+                            <table id="EmpTable" class="EmpTable table table-hover table-bordered table-striped trow" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th class="hidden"></th>
+
+                                        <th>Employee Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="hidden">0</td>
+  
+                                        <td>=ALL=</td>
+
+                                    </tr>
+                                    @foreach (var employees in ViewBag.Employee)
+                                    {
+                                        <tr>
+                                            <td class="hidden">@employees.Value</td>
+                                            <td>@employees.Text</td>
+
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </fieldset>
+                    </div>
+
+
+
+                    @Html.HiddenFor(m => m.JobCardGrid.EmpId)
+                    @Html.HiddenFor(m => m.JobCardGrid.EmpName)
+                    @Html.HiddenFor(m => m.JobCardGrid.ShiftId)
+                    @Html.HiddenFor(m => m.JobCardGrid.EmpTypeId)
+                    @Html.HiddenFor(m => m.JobCardGrid.FloorId)
+                    @Html.HiddenFor(m => m.JobCardGrid.LineId)
+                    @Html.HiddenFor(m => m.JobCardGrid.UnitId)
+                    @Html.HiddenFor(m => m.JobCardGrid.FloorId)
+                    @Html.HiddenFor(m => m.JobCardGrid.ReportType)
+                    @Html.HiddenFor(m => m.JobCardGrid.ReportName)
+                    @Html.HiddenFor(m => m.JobCardGrid.DeptId)
+                    @Html.HiddenFor(m => m.JobCardGrid.SectId)
+                    @Html.HiddenFor(m => m.JobCardGrid.DesigId)
+                    @Html.HiddenFor(m => m.JobCardGrid.ReportFormat)
+                    @Html.HiddenFor(x => x.JobCardGrid.SubSectionId)
+                    @Html.HiddenFor(m => m.JobCardGrid.FromDate)
+                    @Html.HiddenFor(x => x.JobCardGrid.ToDate)
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+}
+
+@section Scripts{
+
+    <script type="text/javascript">
+
+        var abcdate  = new Date();
+        CurrentDate(abcdate);
+
+        function CurrentDate(da) {
+            var now = new Date(da);
+            var day = ("0" + now.getDate()).slice(-2);
+            var month = ("0" + (now.getMonth() + 1)).slice(-2);
+
+            var today = now.getFullYear() + "-" + (month) + "-" + (day);
+            return today;
+        };
+
+        $(document).ready(function() {
+
+
+
+            $("#btnPrev").click(function() {
+                let fDate;
+                let lDate;
+
+                if ($("#FromDate").val() == "" || $("#ToDate").val() == "") {
+                    fDate = new Date();
+                    lDate = new Date();
+                } else {
+                    fDate = new Date($("#FromDate").val());
+                    lDate = new Date($("#ToDate").val());
+                }
+
+                let a = new Date(fDate.getFullYear(), fDate.getMonth() - 1, 1)
+                let b = new Date(lDate.getFullYear(), lDate.getMonth(), 0)
+                $("#FromDate").val(CurrentDate(a));
+                $("#ToDate").val(CurrentDate(b));
+                //alert($("#DtFrom").val());
+
+            })
+
+            $("#btnNext").click(function() {
+                let fDate;
+                let lDate;
+
+                if ($("#FromDate").val() == "" || $("#ToDate").val() == "") {
+                    fDate = new Date();
+                    lDate = new Date();
+                } else {
+                    fDate = new Date($("#FromDate").val());
+                    lDate = new Date($("#ToDate").val());
+                }
+
+
+
+                let a = new Date(fDate.getFullYear(), fDate.getMonth() + 1, 1)
+                let b = new Date(lDate.getFullYear(), lDate.getMonth() + 2, 0)
+                $("#FromDate").val(CurrentDate(a));
+                $("#ToDate").val(CurrentDate(b));
+
+                //alert($("#DtTo").val());
+            })
+
+
+            $.fn.removeText = function() {
+                this.each(function() {
+                    var $cont = $(this).contents();
+                    $cont.each(function() {
+                        var $this = $(this);
+                        if (this.nodeType === 3) {
+                            $this.remove();
+                        } else if (this.nodeType === 1) {
+                            $this.removeText();
+                        }
+                    });
+                });
+            }
+        });   
+
+        $("#FromDate").datepicker({
+            dateFormat: 'yy-mm-dd'
+        });
+        $("#ToDate").datepicker({
+            dateFormat: 'yy-mm-dd'
+        });
+
+        var jobcard = {
+            Id: 0,
+            EmpTypeId: "",
+            DeptId: 0,
+            DeptName: "",
+            SectId: 0,
+            SectName: "",
+            EmpCode: "",
+            EmpId: 0,
+            EmpName: "",
+            ReportType: "",
+            FloorId: 0,
+            FloorName: "",
+            ShiftId: 0,
+            ShiftName: "",
+            DesigId: 0,
+            DesigName: "",
+            SubSectId: 0,
+            SubSectName: "",
+            FromDate: "",
+            ToDate: "",
+            UnitId: 0,
+            LineId: 0
+        };
+
+        $('#pdSearch').DataTable({ 'select': true, language: { search: '', searchPlaceholder: "Search..." }, "info": false, "ordering": false, "paging": false, "lengthChange": false }).row(':eq(0)', { page: 'current' }).select();
+        $('#EmpTable').DataTable({ 'select': true, language: { search: '', searchPlaceholder: "Search..." }, "info": false, "ordering": false, "paging": false, "lengthChange": false }).row(':eq(0)', { page: 'current' }).select();
+        $('#DeptTable').DataTable({ 'select': true, language: { search: '', searchPlaceholder: "Search..." }, "info": false, "ordering": false, "paging": false, "lengthChange": false }).row(':eq(0)', { page: 'current' }).select();
+        $('#SectTable').DataTable({ 'select': true, language: { search: '', searchPlaceholder: "Search..." }, "info": false, "ordering": false, "paging": false, "lengthChange": false }).row(':eq(0)', { page: 'current' }).select();
+        $('#SubSectTable').DataTable({ 'select': true, language: { search: '', searchPlaceholder: "Search..." }, "info": false, "ordering": false, "paging": false, "lengthChange": false }).row(':eq(0)', { page: 'current' }).select();
+        $('#DesignationTable').DataTable({ 'select': true, language: { search: '', searchPlaceholder: "Search..." }, "info": false, "ordering": false, "paging": false, "lengthChange": false }).row(':eq(0)', { page: 'current' }).select();
+        //$('#RptTypeTable').DataTable({ 'select': true, "info": false, language: { search: '', searchPlaceholder: "Search..." }, "ordering": false, "paging": false, "lengthChange": false }).row(':eq(0)', { page: 'current' }).select();
+
+        $("select").select2({
+        });
+        $('.dataTables_wrapper .col-md-6').addClass('col-md-12'); // <-- add this line
+
+        $("#previewBtn").click(function(event) {
+
+
+            //alert(Unit);
+            var empId = $("#EmpTable tbody tr.selected td:first-child").text() || 0;
+            //alert(empId);
+            var Dept = $("#DeptTable tbody tr.selected td:first-child").text() || 0;
+            var Sect = $("#SectTable tbody tr.selected td:first-child").text() || 0;
+            var subSect = $("#SubSectTable tbody tr.selected td:first-child").text() || 0;
+            var Desig = $("#DesignationTable tbody tr.selected td:first-child").text() || 0;
+            var fromDate = $("#FromDate").val();
+            var toDate = $("#ToDate").val();
+            // for select list
+            var Floor = $("#Floor option:selected").val() || 0;
+            var Unit = $("#Unit option:selected").val() || 0;
+            var Line = $("#Line option:selected").val() || 0;
+            var Emptype = $("#EmpType option:selected").val() || 0;
+            var Shift = $("#Shift option:selected").val() || 0;
+
+            var rptType = $("#RptTypeTable tbody tr.selected td:nth-child(2)").text() || 0;
+            var ReportFormat = $("input[name=ReportFormat]:checked").val() || 0;
+
+            //alert(fromDate);
+            //alert(toDate);
+            //alert(subSect);
+            //alert(Shift);
+            //alert(Emptype);
+            //alert(Floor);
+            //alert(Desig);
+            //alert(rptType);
+            ////alert(ReportFormat);
+            //alert(Unit);
+            //alert(Line);
+
+            if (empId !== "") {
+                //alert('enter');
+
+                $("#JobCardGrid_EmpTypeId").val(Emptype);
+                $("#JobCardGrid_EmpId").val(empId);
+                $("#JobCardGrid_DeptId").val(Dept);
+                $("#JobCardGrid_DesigId").val(Desig);
+                $("#JobCardGrid_SectId").val(Sect);
+                $("#JobCardGrid_SubSectionId").val(subSect);
+                $("#JobCardGrid_ShiftId").val(Shift);
+                $("#JobCardGrid_FloorId").val(Floor);
+                $("#JobCardGrid_UnitId").val(Unit);
+                $("#JobCardGrid_LineId").val(Line);
+                $("#JobCardGrid_FromDate").val(fromDate);
+                $("#JobCardGrid_ToDate").val(toDate);
+                $("#JobCardGrid_ReportType").val(rptType);
+                $("#JobCardGrid_ReportFormat").val(ReportFormat);
+
+            } else {
+                event.preventDefault();
+                alert("Please select data first!");
+            }
+        });
+
+
+
+
+    </script>
+}

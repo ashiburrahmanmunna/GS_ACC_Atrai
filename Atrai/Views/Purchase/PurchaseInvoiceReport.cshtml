@@ -1,0 +1,367 @@
+﻿@using Microsoft.AspNetCore.Http
+@using Atrai.Core.Common
+@inject IHttpContextAccessor HttpContextAccessor
+@inject clsProcedure clsproc
+@{
+    ViewData["Title"] = "Purchase Invoice";
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+    var comimagepath = @HttpContextAccessor.HttpContext.Session.GetString("comImagePath");
+
+    var PrintProductName = @HttpContextAccessor.HttpContext.Session.GetInt32("PrintProductName");
+    var PrintProductCode = @HttpContextAccessor.HttpContext.Session.GetInt32("PrintProductCode");
+    var PrintProductDescription = @HttpContextAccessor.HttpContext.Session.GetInt32("PrintProductDescription");
+    var PrintBrandName = @HttpContextAccessor.HttpContext.Session.GetInt32("PrintBrandName");
+    var PrintModelName = @HttpContextAccessor.HttpContext.Session.GetInt32("PrintModelName");
+    var PrintSizeName = @HttpContextAccessor.HttpContext.Session.GetInt32("PrintSizeName");
+
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<style>
+        .table > tbody > tr > td {
+            line-height: 15px !important;
+            border: 1px solid black;
+        }
+
+        .tabulator {
+            font-size: 20px;
+        }
+
+        .table tbody tr td {
+            /* border: 1px solid #c9c9c9;*/
+            /*        font: 14px;
+    */ color: #8A8A8A;
+            line-height: 15px;
+        }
+
+        .tabulator {
+            border: 2px solid black;
+        }
+
+        .tabulator-col .tabulator-col-title {
+            text-align: center;
+        }
+
+        .tabulator-tableholder {
+            background-color: white;
+        }
+
+        .tabulator[tabulator-layout=fitDataTable] {
+            display: inherit;
+        }
+
+        .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+            margin-top: 7px;
+        }
+
+        .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+            background-color: white;
+            border-top: 1px solid black;
+            border-bottom: 1px solid black;
+            border-right: 1px solid black;
+            border-left: 1px solid black;
+            color: black;
+        }
+
+        .tabulator-row .tabulator-cell {
+            border-right: none;
+            border-left: none;
+            padding-left: 10px;
+            border: 1px solid black;
+            /**/
+        }
+
+        .tabulator-cell {
+            padding-top: 10px;
+            padding-bottom: 10px;
+            /*margin-top: 27px;*/
+        }
+
+        .tabulator .tabulator-row .active-cell {
+            overflow: visible;
+            /* Add any other styles you need for the active cell */
+        }
+
+        .tabulator-row {
+            /*   border: 1px solid #aaaaaa38;*/
+            border-left: none;
+            border-right: none;
+        }
+    #terms {
+        overflow-x: hidden !important;
+    }
+/*        @@media print {
+        #terms {
+        overflow-x: hidden !important;
+    }
+}
+*/
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+    table, th, td {
+        border: 3px solid black;
+    }
+    td {
+        height: 75px;
+    }
+/*    @@media print {
+    .tabulator-row {
+        overflow-x: hidden !important;
+    }
+        #tabulator{
+            margin-top:200px;
+        }
+}
+*/</style>
+
+
+<div class="container-fluid">
+    @if (ViewBag.ReportStyle == 1)
+    {
+        <div class="d-flex mt-5 justify-content-between">
+            <div class="">
+                <label style="font-weight: 900; font-size: large;">Order Place By: </label><span id="orderPlaceBy" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Vendor PO: </label><span id="VendorPO" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Com. Name: </label><span id="ComName" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Phone: </label><span class="phone" id="Phone" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Mob: </label><span id="Mob" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Email: </label><span class="email" id="Email" style=" font-size: large;"></span>
+            </div>
+            <div class="">
+                <label style="font-weight: 900; font-size: large;">Reference # </label><span id="Reference" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">To: </label><span id="To" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Attn: </label><span id="Attn" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Vendor Expected Delivery: </label><span id="VendorDel" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Garment Style: </label><span id="GarmentStyle" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Lot Number: </label><span id="LotNumber" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Order Date: </label><span id="OrderDate" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Expected Date: </label><span id="ExpectedDate" style=" font-size: large;"></span><br />
+            </div>
+        </div>
+
+    }
+    @if (ViewBag.ReportStyle == 2)
+    {
+        <div class="d-flex justify-content-between mt-3" style="border-bottom: 3px solid;">
+            <div><label class="com font-weight-bold"></label></div>
+            <div><label class="font-weight-bold">Print Date :</label> <span id="printDate"></span></div>
+        </div>
+        <label>Plot # </label><span id="plot"></span><span>,</span>
+        <label>Sector # </label><span id="sector"></span><span>,</span>
+        <label>Phone : </label><span class="phone" id="PhoneTwo"></span><span>,</span>
+        <label>Email : </label><span class="email" id="EmailTwo"></span><span>,</span>
+
+        <h5 class="text-center mb-5 mt-3 font-weight-bold" style="border-bottom: 3px solid;">Purchase Order</h5>
+        <h5 id="comTwo" class="text-center com font-weight-bold"></h5>
+        <h5 class="font-weight-bold" style=" border-top: 3px solid black; border-left: 3px solid black; border-right: 3px solid black; margin-bottom: 0px;">Supplier</h5>
+        <div class="d-flex" style="border: 3px solid black;">
+            <div class="p-3" style="border-right: 3px solid black;">
+                <label style="font-weight: 900; font-size: large;">Order Place By: </label><span id="orderPlaceBy" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Vendor PO: </label><span id="VendorPO" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Com. Name: </label><span id="ComName" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Phone: </label><span id="Phone" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Mob: </label><span id="Mob" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Email: </label><span id="Email" style=" font-size: large;"></span>
+                @*<div class="vertical-hr"></div>*@
+            </div>
+            <div class="p-3">
+                <label style="font-weight: 900; font-size: large;">Reference # </label><span id="Reference" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">To: </label><span id="To" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Attn: </label><span id="Attn" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Vendor Expected Delivery: </label><span id="VendorDel" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Garment Style: </label><span id="GarmentStyle" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Lot Number: </label><span id="LotNumber" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Order Date: </label><span id="OrderDate" style=" font-size: large;"></span><br />
+                <label style="font-weight: 900; font-size: large;">Expected Date: </label><span id="ExpectedDate" style=" font-size: large;"></span><br />
+            </div>
+        </div>
+
+    }
+    <div class="mt-5"></div>
+    <div class="mt-5" id="tabulator"></div>
+    <div class="mt-5"></div>
+    <div class="mt-4" id="terms"></div>
+    @if (ViewBag.ReportStyle == 1)
+    {
+        <div class="mt-5" style="font-weight: 900;">For nakano int ltd.</div>
+        <div class="mt-5" style="font-weight: 900;">Signature</div>
+    }
+    @if (ViewBag.ReportStyle == 2)
+    {
+        <div class="my-5">
+            <table>
+                <tr>
+                    <th class="text-center">INCHARGE</th>
+                    <th class="text-center">SR. EXECUTIVE </th>
+                    <th class="text-center">AGM/DGM</th>
+                    <th class="text-center">DIRECTOR</th>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+    }
+</div>
+
+
+@section scripts{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.20/jspdf.plugin.autotable.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+    <script type="text/javascript">
+        function getTodayDate() {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mmm = months[today.getMonth()];
+            const yyyy = today.getFullYear();
+            return dd + '-' + mmm + '-' + yyyy;
+        }
+        var date = getTodayDate();
+        $("#printDate").text(date);
+
+        function formatDateToCustomDate(originalDate) {
+            const months = [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+
+            const dateObj = new Date(originalDate);
+            const day = dateObj.getDate();
+            const month = months[dateObj.getMonth()];
+            const year = dateObj.getFullYear();
+            const formattedDay = day < 10 ? `0${day}` : day;
+
+            return `${formattedDay}-${month}-${year}`;
+        }
+         GetReport();
+        function GetReport() {
+    function fetchDataFromServer() {
+        var MyAppUrlSettings = {
+            MyUsefulUrl: '@Url.Action("GetReportData", "Purchase")?PurchaseId='+'@ViewBag.PurchaseId'
+        };
+        return $.ajax({
+            url: MyAppUrlSettings.MyUsefulUrl,
+            dataType: "json"
+        });
+    }
+
+            
+
+
+    function createColumns(dataTable) {
+        var columns = [];
+
+        // Iterate over the first row of the data to create columns
+        for (var key in dataTable[0]) {
+            if (dataTable[0].hasOwnProperty(key)) {
+                  if (key !== "Image") {
+                       columns.push({ title: key, field: key });
+                  } 
+            }
+
+        }
+
+        return columns;
+    }
+
+    fetchDataFromServer().done(function (response) {
+        console.log("main res", response);
+        console.log("table 1", response.data.Table);
+        var masterData = response.data.Table;
+        console.log("asas", masterData[0]);
+        $("#orderPlaceBy").text(" " + masterData[0].OrderPlaceBy ? masterData[0].OrderPlaceBy :"");
+        $(".com").text(" " + masterData[0].OrderPlaceBy ? masterData[0].OrderPlaceBy :"");
+        $("#VendorPO").text(" " + masterData[0].VendorPo ? masterData[0].VendorPo:"");
+        var comName = masterData[0].ComName.replace(/,\s*/g, ",<br>");
+        $("#ComName").html(comName);
+        $(".phone").text(" " + masterData[0].Phone ? masterData[0].Phone : "");
+        $("#Mob").text(" " + masterData[0].Mobile ? masterData[0].Mobile:"");
+        $(".email").text(" " + masterData[0].Email ? masterData[0].Email:"");
+
+        $("#Reference").text(" " + masterData[0].Reference ? masterData[0].Reference:"");
+        $("#To").text(" " + masterData[0].To ? masterData[0].To:"");
+        $("#Attn").text(" " + masterData[0].Attn ? masterData[0].Attn:"");
+        $("#VendorDel").text(" " + masterData[0].VendorDel ? masterData[0].VendorDel:"");
+        $("#GarmentStyle").text(" " + masterData[0].GarmentStyle ? masterData[0].GarmentStyle:"");
+        $("#LotNumber").text(" " + masterData[0].BuyerPO1 ? masterData[0].BuyerPO1:"");
+        $("#OrderDate").text(" " + masterData[0].OrderDate ? formatDateToCustomDate(masterData[0].OrderDate) : "");
+        $("#ExpectedDate").text(" " + masterData[0].ExpectedDate ? formatDateToCustomDate(masterData[0].ExpectedDate) : "");
+
+        console.log("table 2",response.data.Table1);
+        var dataTable = response.data.Table1;
+        //var columns = createColumns(dataTable);
+        var columns = createColumns(dataTable);
+                var imageColumn = {
+                    title: "Image",
+                    field: "Image",
+                    movable: false,
+                    formatter: function (cell, formatterParams, onRendered) {
+                        var imagePath = cell.getValue();
+                        var fullImagePath = window.location.origin + imagePath;
+                        return `<img src="${fullImagePath}" alt="Image" style="height: 50px; width: 50px;" onerror="this.onerror=null;this.src='/Content/ProductImages/0.png';" />`;
+                    }
+                };
+
+
+                columns.unshift(imageColumn);
+
+        // Main Tabulator table
+        var table = new Tabulator("#tabulator", {
+            // Set the height to "fitData" to adjust the height according to the content
+            //height: "fitData",
+            data: dataTable,
+            columns: columns,
+            layout: "fitDataStretch", 
+            tooltips: true,
+            printAsHtml: true,
+        });
+
+
+    });
+}
+
+        getTerms();
+
+        function getTerms() {
+    $.ajax({
+        url: '@Url.Action("getTermsForReport", "Purchase")?PurchaseId=' + '@ViewBag.PurchaseId',
+        success: function (response) {
+            //console.log("response", response.data);
+            var termsTable = new Tabulator("#terms", {
+                data: response.data,
+                layout: "fitColumns",
+                //height: "fitData",
+                printAsHtml: true,
+                columns: [
+                    { title: "TERMS & CONDITIONS", headerHozAlign: "center", field: "TermsDescription", vertAlign: "middle", hozAlign: "left", visible: true},
+                ],
+            });
+        }
+    });
+};
+
+    </script>
+}

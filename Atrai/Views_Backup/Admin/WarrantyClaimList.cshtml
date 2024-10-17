@@ -1,0 +1,166 @@
+﻿@*@model IEnumerable<Atrai.Core.Entity.Warranty ClaimModel>*@
+@{
+    ViewData["Title"] = "Warranty Claim List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<style>
+
+
+/*    hr.solid {
+        border-top: 2px solid #bbb;
+        margin-top: .5rem;
+        margin-bottom: .5rem;
+        vertical-align:middle;
+    }
+
+    p.lineheight {
+        line-height: 6px;
+        vertical-align:middle;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+        line-height: 18px;
+        padding-top: 6px;
+        vertical-align: top;
+        vertical-align: middle;
+        text-align: center;
+        color: dimgray;
+        font-family: Poppins;
+    }*/
+
+</style>
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                        <div class="card-header text-primary">
+                            <div class="row mb-2">
+
+                                          <div class="col-md-4 col-12">
+                                @Html.ActionLink("Create Warranty Claim", "AddWarrantyClaim", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <h4 >Warranty Claim List</h4>
+                        
+                        
+                             
+                  
+                    
+                             </div>
+
+                        </div>
+
+
+                    <div class="card-body">
+
+         
+
+                        @*<div class="table-responsive mt-1">
+        <table id="tbllist" class="display table table-sm table-hover  table-bordered" cellspacing="0" width="100%">*@
+
+                        <div class="table-responsive mt-1">
+                            <table id="tbllist" class="display table table-sm table-hover  table-bordered table-striped" cellspacing="0" width="100%">
+
+                            </table>
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+            </div>
+                </div>
+                <!-- End PAge Content -->
+            </div>
+        </div>
+
+
+
+
+
+        @section Scripts{
+
+            <script type="text/javascript">
+                $(function () {
+
+
+
+                    var peopleList = $('#tbllist').DataTable({
+
+                        serverSide: true,  "scrollX": true,
+                        processing: true,
+
+                        ajax: {
+                            url: '@Url.Action("GetWarrantyClaimList", "Admin")',
+                            type: "POST"
+                        },
+                        //"order": [[0, "desc"]],
+
+                        order: false,
+                        columnDefs: [{
+                            targets: "_all",
+                            orderable: false
+                        }],
+
+
+                        "pageLength": 7,
+                        "lengthMenu": [[5,7 , 10, 20, 50, 100, 500, 1000], [5, 10, 20, 50, 100, 500, 1000]],
+                        rowId: 'Id',
+                        dom: 'Blfrtip',
+                        buttons: [
+                            //'copy', 'csv', 'excel', 'pdf', 'print'
+                         
+                        {       extend: 'excel',
+                                text: '<i class="mdi mdi-file-excel"></i>',
+                                className: 'btn-success',
+                                titleAttr: 'Export to excel'
+                        }
+                        ],
+                        columns: [
+
+                            { "title": "Id", "data": "Id", "visible": false },
+                            { "title": "ComplainNo", "data": "ComplainNo", "searchable": true },
+
+                            { "title": "Complainer", "data": "Complainer", "searchable": true },
+                            { "title": "Contact No", "data": "ContactNo", "searchable": true },
+                            { "title": "Invoice No", "data": "InvoiceNo", "searchable": true },
+
+
+                            { "title": "Serial No", "data": "SerialNo", "searchable": true },
+                            { "title": "Product Name", "data": "ProductName", "searchable": true },
+                            { "title": "Received Date", "data": "CreateDateString", "searchable": false },
+                            { "title": "Next Follow Date", "data": "NextFollowDateString", "searchable": false },
+                            { "title": "Replaced Serial No", "data": "ReplacedSerialNo", "searchable": true },
+                            { "title": "Replaced Date", "data": "ReplacedDateString", "searchable": false },
+
+                            { "title": "Problem", "data": "Problem", "searchable": true },
+                            { "title": "Remarks", "data": "Remarks", "searchable": true },
+
+                            {
+                                "title": "Action",
+                                "data": "Id",
+                                "className": "text-nowrap text-center",
+                                "searchable": false,
+                                "render": function (data, type, row) {
+                                    var myUrledit = '@Url.Action("EditWarrantyClaim", "Admin")?WarrantyId=' + data;
+                                    var myUrlReport = '@Url.Action("WarrantyClaimReport", "Admin")?WarrantyId=' + data;
+                                    var myUrldelete = '@Url.Action("DeleteWarrantyClaim", "Admin")?WarrantyId=' + data;
+                                    var message = `return confirm('Are you sure you want to Remove the Warranty Claim Information ?')`;
+
+                                    return '<span data-toggle="tooltip" title="Report"> <a href=\"' + myUrlReport + '\"  class=\"btn btn-icon btn-success btn-sm rounded-0 m-b-5\" target=\"_blank\"><i class="fa fa-print"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 m-b-5\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\"  onclick = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 m-b-5\" target=\"_blank\"><i class="fa fa-remove"></i></a></span>';
+
+                                }
+
+                            }
+                        ]
+                    });
+
+
+                });
+            </script>
+        }

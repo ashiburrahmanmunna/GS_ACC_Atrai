@@ -1,0 +1,371 @@
+﻿@model Atrai.Core.Entity.WarrantyItemsModel
+@{
+    ViewData["Title"] = "Add Warranty Claim";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>New Warranty Claim</h4>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="admin" asp-action="AddWarrantyClaim" method="post">
+
+                                @if (Model != null)
+                                {
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" />
+                                    <input type="hidden" asp-for="LuserId" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Id" value="0" />
+                                }
+                                @Html.HiddenFor(x => x.PurchaseBatchId)
+                                @Html.HiddenFor(x => x.ProductId)
+                                @Html.HiddenFor(x => x.SalesId)
+                      
+
+
+
+
+
+                                <div class="row">
+                                    <div class="col-md-11 col-12">
+
+
+
+                                        @*<div class="form-group row">
+
+                                            <div class="col-md-2 col-md-offset-1">
+                                            <img src="..@Model.ImagePath" alt="img" id="UploadFile" class="img-thumbnail" style="height: 150px;width:150px"  onerror="this.onerror=null;this.src='../Content/Warranty ClaimImages/0.png'" /> <br />
+                                            <input type="file" name="logoPostedFileBase" accept="image/x-png, image/gif, image/jpeg" id="FileUpload" onchange="PreviewImage()" />
+                                            </div>
+
+                                            </div>*@
+
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4 col-12 ">
+                                                    <label asp-for="ComplainNo"></label>
+                                                    <input type="text" asp-for="ComplainNo" class="form-control" placeholder="Enter Complainer Name" readonly="readonly">
+                                                    <span asp-validation-for="ComplainNo" class="text-danger"></span>
+                                                </div>
+                                                <div class="col-md-4 col-12 ">
+                                                    <label asp-for="CreateDate">Received Date and Time </label>
+                                                    <input type="text" asp-for="CreateDate" class="form-control" placeholder="Enter Complainer Name" readonly="readonly">
+                                                    <span asp-validation-for="CreateDate" class="text-danger"></span>
+                                                </div>
+                                                <div class="col-md-4 col-12 ">
+                                                    <label asp-for="NextFollowDate">Next Follow Date</label>
+                                                    <input type="text" asp-for="NextFollowDate" class="form-control">
+                                                    <span asp-validation-for="NextFollowDate" class="text-danger"></span>
+                                                </div>
+
+                                                @*<div class="col-md-3 col-12">
+                                                    @Html.LabelFor(x => x.NextFollowDate)
+                                                    @Html.TextBoxFor(x => x.NextFollowDate, @"{0:dd-MMM-yyyy}", new { id = "NextFollowDate", @class = "form-control", @placeholder = "Enter Follow Date", autocomplete = "off" })
+                                                    @Html.ValidationMessageFor(x => x.NextFollowDate, "", new { @class = "text-danger" })
+                                                    </div>*@
+
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4 col-12">
+                                                    @Html.LabelFor(x => x.SerialNo)
+                                                    @Html.TextBoxFor(x => x.SerialNo, null, new { @id = "SerialNo", @class = "form-control", @placeholder = "Serial No" })
+                                                    @Html.ValidationMessageFor(x => x.SerialNo, "", new { @class = "text-danger" })
+                                                </div>
+
+                                                <div class="col-md-5 col-12">
+                                                    @Html.LabelFor(x => x.ProductName)
+                                                    @Html.TextBoxFor(x => x.ProductName, null, new { @id = "ProductName", @class = "form-control", @readonly = "readonly" })
+                                                    @Html.ValidationMessageFor(x => x.ProductName, "", new { @class = "text-danger" })
+                                                </div>
+
+                                                <div class="col-md-3 col-12">
+                                                    @Html.LabelFor(x => x.InvoiceNo)
+                                                    @Html.TextBoxFor(x => x.InvoiceNo, null, new {@id= "InvoiceNo" , @class = "form-control", @readonly = "readonly" })
+                                                    @Html.ValidationMessageFor(x => x.InvoiceNo, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="row">
+
+                                                <div class="col-md-4 col-12 ">
+                                                    <label asp-for="Complainer"></label>
+                                                    <input type="text" asp-for="Complainer" class="form-control" placeholder="Enter Complainer Name">
+                                                    <span asp-validation-for="Complainer" class="text-danger"></span>
+                                                </div>
+                                                <div class="col-md-4 col-12 ">
+                                                    <label asp-for="ContactNo"></label>
+                                                    <input type="text" asp-for="ContactNo" class="form-control" placeholder="Enter Complainer Contact No">
+                                                    <span asp-validation-for="ContactNo" class="text-danger"></span>
+                                                </div>
+
+                                                <div class="col-md-4 col-12">
+                                                    <label for="Status"> Status : </label>
+                                                    @Html.DropDownList("Status", new List<SelectListItem>
+                                                    {
+                                                    new SelectListItem() {Text = "Received", Value="Received"},
+                                                    new SelectListItem() {Text = "Delivered", Value="Delivered"},
+                                                    new SelectListItem() {Text = "Send to Supplier", Value="Send To Supplier"} }, "Select Status", new { @class = "form-control" })
+                                                </div>
+
+
+
+
+                                            </div>
+                                        </div>
+
+
+
+
+
+
+                                        <div class="form-group row">
+
+                                            <div class="col-md-4 col-12">
+                                                @Html.LabelFor(x => x.ReplacedSerialNo)
+                                                @Html.TextBoxFor(x => x.ReplacedSerialNo, null, new { @class = "form-control", @placeholder = "Serial No" })
+                                                @Html.ValidationMessageFor(x => x.ReplacedSerialNo, "", new { @class = "text-danger" })
+                                            </div>
+
+
+                                            <div class="col-md-4 col-12">
+                                                @Html.LabelFor(x => x.SupplierId)
+                                                @Html.DropDownListFor(x => x.SupplierId,
+                                                new SelectList((IEnumerable<SelectListItem>)ViewBag.SupplierList, "Value", "Text"), "Select Supplier",
+                                                htmlAttributes: new { @class = "form-control", id = "SupplierId" })
+                                                @Html.ValidationMessageFor(x => x.SupplierId, "", new { @class = "text-danger" })
+                                            </div>
+
+
+
+                                            <div class="col-md-4 col-12">
+                                                @Html.LabelFor(x => x.ReplacedDate)
+                                                @Html.TextBoxFor(x => x.ReplacedDate, null, new { @class = "form-control", @placeholder = "Replaced Date" })
+                                                @Html.ValidationMessageFor(x => x.ReplacedDate, "", new { @class = "text-danger" })
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="form-group row">
+                                            <div class="col-md-6 col-12 ">
+                                                <label asp-for="Remarks"></label>
+                                                <textarea asp-for="Remarks" class="form-control" placeholder="Enter Remarks"></textarea>
+                                                <span asp-validation-for="Remarks" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-6 col-12 ">
+                                                <label asp-for="Problem"></label>
+                                                <textarea asp-for="Problem" class="form-control" placeholder="Enter Problem"></textarea>
+                                                <span asp-validation-for="Problem" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+
+
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                                <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" />
+                                            }
+                                            else if (ViewBag.ActionType == "Edit")
+                                            {
+                                                <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" />
+                                            }
+                                            else if (ViewBag.ActionType == "Delete")
+                                            {
+                                                <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>
+                                            }
+
+
+                                            @Html.ActionLink("Back", "WarrantyClaimList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+
+
+                                            <a href="@Url.Action("AddWarrantyClaim", "Admin")" class="btn btn-danger rounded-0">
+                                                Clear / Reset
+                                            </a>
+
+
+                                        </div>
+
+
+
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+@section scripts {
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+
+
+
+
+        $('#NextFollowDate').datepicker({
+            //dateFormat: 'dd/mm/yy',
+            dateFormat: 'dd-M-yy',
+            todayHighlight: true,
+            autoclose: true
+        });
+
+        $('#ReplacedDate').datepicker({
+            //dateFormat: 'dd/mm/yy',
+            dateFormat: 'dd-M-yy',
+            todayHighlight: true,
+            autoclose: true
+        });
+
+
+        if ($("#Id").val() > 0) {
+
+            if ($("#ReplacedDate").val() == "") {
+
+                //CurrentDateForReplacedDate();
+            }
+
+            if ($("#ReplacedDate").val() == "01-Jan-01 12:00:00 AM")
+            {
+                $("#ReplacedDate").val("");
+            };
+
+        }
+        else {
+
+            //CurrentDateForReplacedDate();
+
+        }
+
+
+        function CurrentDateForReplacedDate() {
+            var date = new Date();
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear();
+            $("#ReplacedDate").val(val);
+
+        }
+
+
+
+        autocompletefunctionBarcodeScan();
+        function autocompletefunctionBarcodeScan() {
+            $("#SerialNo").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '../admin/SerialSearchForWarrenty/',///fahad after dinner
+                        dataType: "json",
+                        data: { query: $("#SerialNo").val() },
+                        success: function (data) {
+                            console.log(data);
+                            //alert('Wait');
+                            response($.map(data, function (item) {
+                                return { SerialId: item.Id, ProductId: item.ProductId, label: item.BatchSerialNo + ' ' + item.ProductName, ProductName: item.ProductName, Description: item.Descriptionm, BatchSerialNo: item.BatchSerialNo, Price: item.SalePrice, InvoiceId: item.InvoiceId, InvoiceNo: item.InvoiceNo, InvoiceDate: item.InvoiceDate  , CustomerId: item.CustomerId, CustomerName: item.CustomerName, PhoneNo: item.PhoneNo, PrimaryAddress: item.PrimaryAddress , SupplierId:item.SupplierId};
+                            }));
+
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                //response: function (event, ui) {
+                //    // Make your preferred selection here
+
+                //    var downKeyEvent = $.Event("keydown");
+                //    downKeyEvent.keyCode = $.ui.keyCode.DOWN; // event for pressing "down" key
+
+                //    var enterKeyEvent = $.Event("keydown");
+                //    enterKeyEvent.keyCode = $.ui.keyCode.ENTER; // event for pressing "enter" key
+                //    ////alert('found');
+
+                //    ////$("#SerialNo").val("SSD20"); // enter text to trigger autocomplete
+                //    $("#SerialNo").trigger(downKeyEvent); // First downkey invokes search
+                //    $("#SerialNo").trigger(downKeyEvent); // Second downkey highlights first item
+
+
+                //    $("#SerialNo").trigger(enterKeyEvent); // Enter key selects
+
+                //},
+                autoFocus: true,
+                focus: function (event, ui) { event.preventDefault(); },
+                minLength: 0,
+                select: function (event, ui) {
+
+
+                    var duplicatefound = 0;
+
+                    $("#ProductId").val(ui.item.ProductId);
+                    $("#ProductName").val(ui.item.ProductName);
+                    $("#SalesId").val(ui.item.InvoiceId);
+                    $("#InvoiceNo").val(ui.item.InvoiceNo);
+                    $("#PurchaseBatchId").val(ui.item.SerialId);
+                    $("#SerialNo").val(ui.item.BatchSerialNo);
+
+
+                    $("#Complainer").val(ui.item.CustomerName);
+                    $("#ContactNo").val(ui.item.PhoneNo);
+
+
+                    //$("#PrimaryAddress").val(ui.item.PrimaryAddress);
+                    $("#CustomerId").val(ui.item.CustomerId);
+                    $("#SupplierId").val(ui.item.SupplierId);
+
+
+
+
+                    return false;
+                }
+            }).on("focus", function () {
+                if ($("#SerialNo").val().length > 0) {
+                    $(this).autocomplete("search", '');
+                    //$(this).data('ui-autocomplete').menu.element.children().first().click();
+                    //var e = $.Event("keypress", { which: 9 });
+                    //$('#SerialNo').trigger(e);
+                };
+
+            });
+        }
+
+
+
+
+    });
+
+    function PreviewImage() {
+        var oFReader = new FileReader();
+        oFReader.readAsDataURL(document.getElementById("FileUpload").files[0]);
+
+        oFReader.onload = function (oFREvent) {
+            document.getElementById("UploadFile").src = oFREvent.target.result;
+        };
+    };
+</script>
+}
+

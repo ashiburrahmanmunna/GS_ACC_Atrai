@@ -1,0 +1,163 @@
+﻿@model List<Atrai.Core.Entity.UserCompanyView>
+@{ ViewData["Title"] = "AddCompanyPermission";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; 
+}
+<style>
+    .row ul li {
+        list-style-type: none;
+    }
+
+    .list-group-item {
+        display: flex;
+        width: 80%;
+        justify-content: space-between;
+        flex-direction: row;
+        flex-flow: row wrap;
+        min-height: 3em;
+    }
+
+    .items {
+    }
+</style>
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>Company Permission</h4>
+                    </div>
+                            <div class="card-body">
+                
+                                    <div class="form-group">
+                                        <form asp-controller="Admin" asp-action="AddCompanyPermission" method="get">
+                                            <div class="row">
+                                                <div class="col-md-4 col-12 ">
+                                                    @Html.DropDownList("LUserId", new SelectList((IEnumerable<SelectListItem>)ViewBag.UserList, "Value", "Text"), "Select User",
+                                                        htmlAttributes: new { @class = "form-control", id = "UserId" })
+                                                </div>
+                                                <div class="col-md-2 col-12 text-center">
+                                                    <button type="submit" class="btn btn-success btn-block  rounded-0"> Load </button>
+                                                </div>
+
+
+                                            </div>
+                                        </form>
+
+
+
+                                        <form asp-action="AddCompanyPermission" id="fahadCompanylist">
+
+                                            <div class="form-group">
+                                                <div class="row">
+
+                                                    <div class="col-md-4 col-12 text-center">
+
+                                                        <input class="form-control" type="checkbox" id="myCheckAll" /> Check All
+
+                                                        <br />
+                                                        <br />
+                                                    </div>
+
+                                                    <div class="col-md-2 col-12 text-center">
+                                                        <input type="submit" value="Save" class="btn btn-primary btn-block rounded-0" />
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+
+                                @*            <input type="text" class="form-control col-md-3" id="filter" value="" placeholder="Search"/>*@
+                                        @*    <span id="filter-count"></span>*@
+
+                                            <div class="row display">
+                                                <div class="col-md-8 col-12">
+
+                                                    <div class="form-group">
+                                                        <ul>
+                                                @if (Model != null)
+                                                {
+                                                <li class="list-group-item">
+                                                    <span class="col-md-4">
+                                                        SLNo
+                                                    </span>
+                                                    <span class="col-md-8">
+                                                        Company Permission
+                                                    </span>
+                                                </li>
+                                                 var slno = 0;
+                                                for (var i = 0; i < Model.Count; i++)
+                                                {
+                                                    slno++;
+                                            <li class="list-group-item tr">
+
+                                            <span class="td col-md-4">
+
+                                                @slno
+                                            </span>
+                  
+                                            <span class="col-md-8">
+                                                <input type="checkbox" class="checkboxpermit" asp-for="@Model[i].Permitted" /> -  @Model[i].CompnayName
+                                                <input type="hidden" asp-for="@Model[i].Id" />
+                                                <input type="hidden" asp-for="@Model[i].ComId" />
+                                                <input type="hidden" asp-for="@Model[i].LuserId" />
+
+                                            </span>
+
+
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+
+
+        </div>
+
+
+
+         
+
+               
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div> 
+</div>
+
+
+
+@section scripts {
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $('#myCheckAll').click(function () {
+            var chk = $(this).is(':checked');
+            var cnt = $('input[type=checkbox]').length;
+            $('input[type=checkbox]').each(function () {
+                if (chk) {
+                    $(this).attr('checked', 'checked');
+                }
+                else {
+                    $(this).removeAttr('checked');
+                }
+            });
+        }); 
+
+
+    });
+
+
+
+
+    </Script>
+    
+}

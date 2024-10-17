@@ -1,0 +1,679 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@*@using Atrai.Core.Entity*@
+@{
+    ViewData["Title"] = "Barcode Print";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<link href="~/AdminEla/Assets/css/barcode.css" rel="stylesheet" />
+
+
+<STYLE TYPE="text/css">
+    @@font-face {
+        font-family: "IDAutomationHC39M";
+        /*src: url(https://www.pqstec.com/invoiceapps/fonts/IDAutomationHC39M.ttf) format("truetype");*/
+        src: url(~/wwwroot/Font/IDAutomationHC39M.ttf) format("truetype");
+    }
+</STYLE>
+
+
+<style>
+    p.lineheight {
+        line-height: 16px;
+        vertical-align: middle;
+    }
+
+/*    .table > tbody > tr > td {
+        padding-right: .20rem;
+        padding-top: 0.10rem;
+        padding-bottom: 0.0rem;
+        padding-left: 0.15rem;
+        padding-right: 0.45rem;
+    }
+
+    .dataTables_scrollHeadInner {
+        width: 100% !important;
+    }
+
+        .dataTables_scrollHeadInner table {
+            width: 100% !important;
+        }*/
+
+    .select2-selection {
+        overflow: hidden !important;
+        height: 32px !important;
+        font-size: 14px;
+                height: 42px !important;
+        vertical-align:middle;
+    }
+
+</style>
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        Barcode Generation
+                    </div>
+                    <div class="card-body">
+                 
+
+                        <div class="col-md-12">
+                                   <div class="row">
+                            @*<label class="col-md-2">Search Product</label>*@
+                            <div class="input-group input-group-default col-md-5 col-6">
+                                     <div class="input-group-prepend">
+                                                <span class="input-group-text bg-purple text-white">
+                                                     <i class="ti-search "></i>
+                                                </span>
+                                                </div>
+                                <input type="text" placeholder="Search Product" name="Search" id="Search" class="form-control">
+                            </div>
+                            <div class="col-md-4 col-12">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text py-0">
+                                            Warehouse &nbsp
+                                        </span>
+                                    </div>
+
+
+                                        @Html.DropDownList("Warehouse" , ViewBag.Warehouse as List<SelectListItem>, "Please Select", new { id = "Warehouse", @class = "form-control" })
+                                        @*@Html.DropDownList("Users", ViewBag.Users as List<SelectListItem>, "Select User", new { id = "UserId", @class = "form-control form-control-sm" })*@
+
+                                </div>
+                            </div>
+                            </div>
+
+
+                            <br />
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="detailsTable" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th style="min-width:80px">Id</th>
+                                            <th style="min-width:80px">Product Id</th>
+                                            <th style="min-width:300px">Name</th>
+                                            <th style="min-width:100px">Barcode</th>
+                                            <th style="min-width:80px;max-width:100px">Unit Price</th>
+                                            <th style="min-width:80px;max-width:100px">Quantity</th>
+                                            <th style="min-width:80px;max-width:100px">Amount</th>
+                                            <th style="min-width:80px;max-width:100px"></th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemDetails"></tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td> <strong> Total:</strong> </td>
+                                            <td> <strong id="TotalQty">  </strong> </td>
+                                            <td> <strong id="SubTotal">  </strong> </td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            @*<small id="error_SubTotal" class="form-text error_msg">Atleast add one item</small>
+                                <br />*@
+                            @*<br />
+
+                            <div class="form-horizontal">
+                                <label> </label>
+                                <input id="BtnBarcodePrint" class="btn btn-success col-md-3 pull-right" value="Make Barcode" onclick="MakeBarcode()" />
+                            </div>*@
+                        </div>
+                    </div>
+                </div>
+                <!-- panel-body -->
+            </div>
+            <!-- panel -->
+        </div>
+    </div>
+
+    <div>
+@*        <div class="right-corder-container">
+            <button class="right-corder-container-button" onclick="printDiv('printableArea')">
+                <span class="iconposition">
+                    <i class="fa fa-print"></i>
+                </span>
+                <span class="short-text">
+                    <i class="fa fa-print mb-5 iconposition"></i>
+                </span>
+                <span class="long-text">Print Me</span>
+            </button>
+        </div>*@
+
+        @*<div id="exporttoword" class="right-corder-container" style="bottom: 100px">
+            <button class="right-corder-container-button" style="background-color: royalblue" onclick="exportHTML('printableArea')">
+                <span class="iconposition">
+                    <i class="fa fa-file-word-o"></i>
+                </span>
+                <span class="long-text"> Word</span>
+            </button>
+        </div>*@
+
+
+
+        <div id="exporttoword" class="right-corder-container" style="bottom: 100px">
+            <button class="right-corder-container-button" style="background-color: royalblue" onclick="ReportPrint('PrintBarcode')">
+                <span class="iconposition">
+                    <i class="fa fa-file-pdf-o"></i>
+                </span>
+                <span class="long-text"> PDF</span>
+            </button>
+        </div>
+     
+
+
+        <div class="container-fluid">
+            <!-- Start Page Content -->
+            @*<input class="button" type="button" onclick="printDiv('printableArea')" value="print" />*@
+
+
+@*            <div class="card">
+                <div class="card-body">
+                   
+                    <div id="printableArea">
+
+
+
+                        <div id="fahadbarcode" class="row text-center">
+
+                            <div class="col-md-3 col-12">
+                                <p class="lineheight">@HttpContextAccessor.HttpContext.Session.GetString("ComName")</p>
+                                <p class="lineheight">Description</p>
+                                <br class="lineheight" />
+                                <p class="lineheight light" style="font-size:12pt ; font-family: IDAutomationHC39M">*1022300111*</p>
+                                <br class="lineheight" />
+                                <p class="lineheight" style="font-weight:bold; font-size:14px">TK. 150/-</p>
+                               
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+            </div>*@
+        </div>
+    </div>
+
+    </div>
+
+
+
+@*<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker3.css" rel="stylesheet" />*@
+@section scripts {
+    @*<script src="~/js/site.js" asp-append-version="true"></script>*@
+
+    @*<script src="~/js/FileSaver.js"></script>
+        <script src="~/js/jquery.wordexport.js"></script>
+        <script type="text/javascript">
+            jQuery(document).ready(function ($) {
+                $("#exporttoword").click(function (event) {
+                    $("#printableArea").wordExport();
+                });
+            });
+        </script>*@
+
+<script type="text/javascript">
+
+
+ function ReportPrint(btnvalue) {
+
+                //var peopleList = $('#detailsTable').DataTable();
+                var reporttype = $("input[name=RptType]:checked").val();
+
+                //console.log(peopleList);
+                var productidlist = [];
+
+
+     //var orderArr = ['',''];
+     //orderArr.length = 0;
+     //var i = 0
+     //alert('wait');
+
+     $.each($("#detailsTable tbody tr"), function () {
+
+
+         //var array = $(this).find('.description').val();
+         //var stringtext = $(this).find('.description option:selected').text();
+
+         //var option_all = $(this).find('.description option:selected').map(function () {
+         //    return $(this).text();
+         //}).get().join(',');
+         //console.log(option_all);
+         //var arraytext = option_all.split(",");
+
+
+         //alert($(this).find('td:eq(0)').html());
+         ///////////////////alert($(this).find('td:eq(1)').html());
+         //alert($(this).find('td:eq(2)').html());
+         //alert($(this).find('td:eq(3)').html());
+         //alert($(this).find('td:eq(5)').html());
+
+         //alert($(this).find('.prdname').val());
+         //alert($(this).find('.price').val());
+         ////////////////////alert($(this).find('.quantity').val());
+
+         //parseFloat($(this).find('.quantity').val())
+
+         //alert('wait');
+
+        //orderArr.push({
+
+
+        //    ProductId: $(this).find('td:eq(0)').html(),
+        //    Name: $(this).find('.prdname').val(),
+        //    Price: $(this).find('.price').val(),
+        //    Quantity: parseFloat($(this).find('.quantity').val()),
+        //    ComId: ComId
+        //});
+
+         var productdata = {
+             productid: $(this).find('td:eq(1)').html(),
+             quantity: $(this).find('.quantity').val() || 1 
+         };
+
+         productidlist.push(productdata)
+
+     });
+
+     //console.log(productidlist);
+     //alert('foreach complete');
+
+
+
+
+                //var pid = 0;
+
+                //if (peopleList.length > 0) {
+                //    pid = peopleList[0]["Id"];
+                //}
+                //console.log(pid);
+                //alert(WarehouseId);
+                //alert(btnvalue);
+
+
+                //if (btnvalue == "PrintLedger") {
+
+                //    if ((WarehouseId == null) || (WarehouseId == "")) {
+                //        toastr.error("Please Select Store First.");
+                //        return true;
+
+                //    }
+                //    else if ((pid == null) || (pid == ""))
+                //    {
+                //        toastr.error("Please Select Product from the List.");
+                //        return true;
+                //    }
+                //    //alert('Wait');
+                //}
+                //else if (btnvalue == "rptPrdAvgRateCalculation") {
+
+                //    if ((pid == null) || (pid == "")) {
+                //        toastr.error("Please Select Product from the List.");
+                //        return true;
+                //    }
+                //}
+
+
+
+
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("BarcodeReport", "Admin")',
+                dataType: 'json',
+                async: true,
+                data: { rptFormat: reporttype, action: btnvalue, productinfo: productidlist, WarehouseMain: $("#Warehouse").val() },
+                success: function (response) {
+
+                    window.open(response.Url, '_blank')
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+
+        }
+
+
+        $('#detailsTable').on('change', ".quantity , .price", update);
+
+        function update() {
+
+            var qty = parseFloat($(this).parents('tr').find(".quantity").val());
+            var price = parseFloat($(this).parents('tr').find(".price").val());
+            var amount = qty * price;
+            $(this).parents('tr').find(".amount").text(amount);
+            calculateSum();
+        }
+
+
+
+
+        function generateRandom() {
+            const randomNum = 100000 + Math.random() * 100000;
+            return Math.round(randomNum / 10) * 10;
+        }
+        var finalrowid='N1234';
+        var detailsTable = $('#detailsTable').DataTable({
+            dom: '<"dom_wrapper fh-fixedHeader"fl>tip',
+            'aoColumns': [
+                { 'sClass': 'id d-none', 'visible': true },
+                { 'sClass': 'productid d-none', 'visible': true },
+                { 'sClass': 'prdname_row', 'visible': true },
+                { 'sClass': 'description_row', 'visible': true },
+                { 'sClass': 'price_row', 'visible': true },
+                { 'sClass': 'quantity_row', 'visible': true },
+                { 'sClass': 'amount', 'visible': true },
+
+                null
+            ],
+            columnDefs: [
+                {
+                    'render': function (data, type, row) {
+                        //alert(data);
+                        //return '<input class="form-control Name"  type="text" data-val="true" value=' + data + '>';
+                        return '<input class="prdname form-control" tabindex="-1" name="prdname" type="text" value="' + data + '">';
+
+                    },
+                    'targets': 2
+                },
+                {
+                    "render": function (data, type, row) {
+
+                        return '<input class="form-control description"  disabled name="description" type="text" data-val="true"  value="' + data + '">';
+                    },
+                    "targets": 3
+                },
+                {
+                    'render': function (data, type, row) {
+                        return '<input class="form-control price" disabled name="price" type="text" data-val="true"  value="' + data + '">';
+                    },
+                    'targets': 4
+                },
+                {
+                    'render': function (data, type, row) {
+
+                        return '<input class="form-control quantity" name="quantity"  type="number"  value="' + data + '" >';
+                    },
+                    "targets": 5
+                }
+                //{
+                //    "targets": 7,
+                //    "data": null,
+                //    "defaultContent": '<a data-itemId="0" href="#" class="dlttrashsubsection deleteItem"> <i class="fa fa- trash"></i></a>'
+                //}
+            ],
+            "fnCreatedRow": function (nRow, aData, iDataIndex) {
+                var rowid = generateRandom();
+                //alert(aData);
+                $(nRow).attr('id', 'rowid' + rowid);
+                $('td:eq(1)', nRow).attr('id', 'PI' + rowid);
+                $('td:eq(2)', nRow).find("input[name='prdname']").attr('id', 'N' + rowid);
+                $('td:eq(3)', nRow).find("input[name='description']").attr('id', 'D' + rowid);
+                $('td:eq(4)', nRow).find("input[name='price']").attr('id', 'P' + rowid);
+                $('td:eq(5)', nRow).find("input[name='quantity']").attr('id', 'Q' + rowid);
+                $('td:eq(6)', nRow).attr('id', 'A' + rowid);
+                
+
+                finalrowid = rowid;
+
+                //$("#N" + rowid).val(ui.item.label);
+                //$("#D" + rowid).val(ui.item.description);
+                //$("#P" + rowid).val(ui.item.Price);
+
+                //alert($('#N' + rowid).val());
+
+                //$('#N' + rowid).autocomplete({
+                //    source: function (request, response) {
+                //        $.ajax({
+                //            url: '../admin/ProductSearch/',
+                //            dataType: "json",
+                //            data: { query: $("#N" + rowid).val() },
+                //            success: function (data) {
+                //                //console.log(data);
+                //                response($.map(data, function (item) {
+                //                    return { ProductId: item.Id, description: '', Code: item.Code, label: item.Name, Price: item.Price };
+                //                }));
+                //            },
+                //            error: function (xhr, status, error) {
+                //                alert("Error");
+                //            },
+                //        });
+                //    },
+                //    minLength: 1,
+                //    select: function (event, uirow) {
+
+                //        //alert("#P" + rowid);
+                //        $("#PI" + rowid).html(uirow.item.ProductId);
+                //        $("#P" + rowid).val(uirow.item.Price);
+                //        var quantity = $("#Q" + rowid).val();
+
+                //        $("#A" + rowid).html(uirow.item.Price * quantity);
+
+                //    }
+                //});
+
+                //alert('binding done');
+
+            },
+            'paging': false,
+            'info': false,
+            'ordering': false,
+            'searching': false,
+
+            language: { search: '', searchPlaceholder: "Search..." }
+        });
+
+
+        $(document).on('click', 'a.deleteItem', function (e) {
+        
+            //var myTable = $('#detailsTable').DataTable();
+            
+            e.preventDefault();
+            var $self = $(this);
+            $(this).parents('tr').css("background-color", "#1f306f").fadeOut(800, function () {
+                $(this).remove();
+                calculateSum();
+            });
+
+
+            var table = $('#detailsTable').DataTable();
+            var removingRow = $(this).closest('tr');
+            table.row(removingRow).remove().draw();
+
+
+
+            // myTable.row(this).delete().draw();
+
+
+
+        });
+
+        $("#Search").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '../admin/ProductSearch/',
+                    dataType: "json",
+                    data: { query: $("#Search").val() },
+                    success: function (data) {
+                        console.log(data);
+                        //response($.map(data, function (item) {
+                        //    return { ProductId: item.Id, description: item.Description, label: item.Name, Price: item.Price , Code:item.Code };
+                        //}));
+                        response($.map(data, function (item) {
+                            return { ProductId: item.Id,Id: item.Id, description: item.Description, label: item.Category.Name + ' ' + item.Name + ' ' + item.BrandName + ' ' + item.Description + ' ' + item.SizeName + ' ' + item.ColorName + ' ' + item.Code, Price: item.Price, Code: item.Code};
+                        }));
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error");
+                    },
+                });
+            },
+            minLength: 1,
+            autoFocus:true,
+            select: function (event, ui) {
+                var rowid = generateRandom();
+
+                //var name = ui.item.label;
+                //var description = ui.item.description;
+                //var Price = ui.item.Price;
+                //alert(name);
+
+
+                $('#detailsTable').dataTable().fnAddData(['0', ui.item.ProductId, ui.item.label, ui.item.Code, ui.item.Price, '1', ui.item.Price, '<a data-itemId="0" tabindex="-1" href="#" class="dlttrashsubsection deleteItem"> <i class="fa fa-trash"></i></a>']);
+
+                //var currentRow = $(this).closest("tr").attr('id');
+                //alert(currentRow);
+
+                //var currentRowtest = $(this).closest("tr");
+                //var prdnametest = currentRowtest.find(".prdname").html();
+                rowid = finalrowid;
+                //alert($("#N" + rowid).val());
+
+                $("#N" + rowid).autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: '../admin/ProductSearch/',
+                            dataType: "json",
+                            data: { query: $("#N" + rowid).val() },
+                            //data: { query: prdnametest },
+
+                            success: function (data) {
+                                console.log(data);
+                                response($.map(data, function (item) {
+                                    return { ProductId: item.Id,Id: item.Id, description: item.Description, label: item.Category.Name + ' ' + item.Name + ' ' + item.BrandName + ' ' + item.Description + ' ' + item.SizeName + ' ' + item.ColorName  + ' ' + item.Code, Price: item.Price, Code: item.Code };
+                                }));
+                            },
+                            error: function (xhr, status, error) {
+                                alert("Error");
+                            },
+                        });
+                    },
+                    minLength: 1,
+                    select: function (event, uirow) {
+
+
+                                                //alert("#P" + rowid);
+                        $("#PI" + rowid).html(uirow.item.ProductId);
+                        $("#D" + rowid).val(uirow.item.Code);
+
+                        $("#P" + rowid).val(uirow.item.Price);
+
+                        var quantity = $("#Q" + rowid).val();
+
+                        $("#A" + rowid).html(uirow.item.Price * quantity);
+
+                      
+
+                    }
+                });
+
+              
+                calculateSum();
+                $('#Search').val("");
+
+
+                return false;
+            }
+        });
+
+
+
+
+
+        //function MakeBarcode() {
+
+        //    var abcd = $("#fahadbarcode");
+        //    var ComName = "";
+        //    var Name = "";
+        //    var Description = "";
+        //    var Price = "";
+        //    var Quantity = "";
+
+        //    abcd.empty();
+        //    var i = 0;
+
+
+
+        //    $.each($("#detailsTable tbody tr"), function () {
+
+        //        //alert($(this).find('td:eq(3)').html());
+        //        //alert($(this).find('td:eq(3)').text());
+        //        var ComName = '@HttpContextAccessor.HttpContext.Session.GetString("ComName")';
+        //        //ComName = "Dominate Bd";
+        //        Name = $(this).find('.prdname').val(),
+        //        Description = '*' + $(this).find('.description').val() + '*',
+        //        Price = $(this).find('.price').val(),
+        //        Quantity = parseInt($(this).find('.quantity').val())
+
+        //        for (i = 0; i < Quantity; i++) {
+        //            var barcodeitems = '<div class="col-md-3 col-12 p-2"><p  class="lineheight">' + ComName + '</p><p class="lineheight px-4">' + Name + '</p><br class="lineheight"/><p class="light lineheight" style="font-size:12pt ; font-family: IDAutomationHC39M">' + Description + '</p><br class="lineheight"/><p  class="lineheight" style="font-weight:bold; font-size:14px">TK.' + Price + '/-</p></div>';
+        //        abcd.append(barcodeitems);
+        //        }
+        //        i = 0;
+
+
+        //        });
+
+        //        }
+
+
+        //        $(".right-corder-container-button").hover(function () {
+        //        $(".long-text").addClass("show-long-text");
+        //        }, function () {
+        //        $(".long-text").removeClass("show-long-text");
+        //        });
+
+
+
+
+        //        function calculateSum() {
+        //        var sum = 0;
+        //        var sumQty = 0;
+
+        //        // iterate through each td based on class and add the values
+        //        $("#detailsTable > tbody  > tr .amount").each(function () {
+
+        //        var value = $(this).text();
+        //        // add only if the value is number
+        //        if (!isNaN(value) && value.length !== 0) {
+        //        sum += parseFloat(value);
+        //        }
+        //        });
+
+        //        $.each($("#detailsTable tbody tr"), function () {
+
+        //        var Quantity = parseInt($(this).find('.quantity').val());
+        //        if (!isNaN(Quantity) && Quantity.length !== 0) {
+        //        sumQty += parseFloat(Quantity);
+        //        }
+        //        });
+
+
+        //        //console.log(sum);
+        //        $('#SubTotal').text(sum.toFixed(2));
+        //        $('#TotalQty').text(sumQty.toFixed(2));
+
+        //        };
+
+
+
+</script>
+}
+

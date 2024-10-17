@@ -1,0 +1,676 @@
+﻿@using Microsoft.AspNetCore.Http
+@using Atrai.Core.Common
+@inject IHttpContextAccessor HttpContextAccessor
+@inject clsProcedure clsproc
+@model Atrai.Core.Entity.PurchaseModel
+@{
+    ViewData["Title"] = "Purchase Invoice";
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+     var comimagepath = @HttpContextAccessor.HttpContext.Session.GetString("comImagePath");
+
+    var PrintProductName = @HttpContextAccessor.HttpContext.Session.GetInt32("PrintProductName");
+    var PrintProductCode = @HttpContextAccessor.HttpContext.Session.GetInt32("PrintProductCode");
+    var PrintProductDescription = @HttpContextAccessor.HttpContext.Session.GetInt32("PrintProductDescription");
+    var PrintBrandName = @HttpContextAccessor.HttpContext.Session.GetInt32("PrintBrandName");
+    var PrintModelName = @HttpContextAccessor.HttpContext.Session.GetInt32("PrintModelName");
+    var PrintSizeName = @HttpContextAccessor.HttpContext.Session.GetInt32("PrintSizeName");
+
+}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2" />
+    <title> ViewBag.ReportType
+    </title>
+    <script type="text/javascript">
+
+
+
+
+        function ClosePrint() {
+            var print = document.getElementById("print");
+            //print.style.visibility = "hidden";
+            //print.display = false;
+
+            window.print();
+        }
+
+           function createPDF() {
+
+           window.scrollTo({ top: 0});
+
+            var element = document.getElementById('element-to-print');
+            html2pdf(element, {
+                margin:0.7,
+                padding:0.6,
+                filename: 'myfile.pdf',
+                image: { type: 'jpeg', quality: 2.5 },
+                html2canvas: { scale: 2,  logging: true },
+                jsPDF: { unit: 'in', format: 'A3', orientation: 'P' },
+                class: createPDF
+            });
+        };
+
+
+    </script>
+
+    <style media="print">
+
+        @@media print {
+            .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,
+            .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+                float: left;
+            }
+
+            .col-md-12 {
+                width: 100%;
+            }
+
+            .col-md-11 {
+                width: 91.66666666666666%;
+            }
+
+            .col-md-10 {
+                width: 83.33333333333334%;
+            }
+
+            .col-md-9 {
+                width: 75%;
+            }
+
+            .col-md-8 {
+                width: 66.66666666666666%;
+            }
+
+            .col-md-7 {
+                width: 58.333333333333336%;
+            }
+
+            .col-md-6 {
+                width: 50%;
+            }
+
+            .col-md-5 {
+                width: 41.66666666666667%;
+            }
+
+            .col-md-4 {
+                width: 33.33333333333333%;
+            }
+
+
+            .col-md-3 {
+                width: 25%;
+            }
+
+            .col-md-2 {
+                width: 16.666666666666666%;
+            }
+
+            .col-md-1 {
+                width: 8.33333333333333%;
+            }
+
+
+            .showHeader thead {
+                display: table-header-group;
+                border: 1px solid #000;
+            }
+
+
+            #print  {
+                display: none;
+              
+            }
+
+
+            .border-0 { border: none !important; } 
+
+
+            .table-bordered thead td, .table-bordered thead th {
+              
+               border: 1px solid black!important;
+            }
+
+           .table-bordered td, .table-bordered th, .table-bordered {
+                border: 1px solid black !important;
+                color: black;
+            }
+
+
+            .table-bordered td .border-0, .table-bordered .border-0 {
+                border: none !important;
+               
+            }
+
+            .shadow {
+              box-shadow: none!important;
+            }
+
+                    .bg-asswhite {
+            background-color: #F5F5F5 !important;
+        }
+            
+        }
+
+    </style>
+
+    <style type="text/css">
+/*
+        @@media screen and (max-width: 33em) {
+          th.optional-1,
+          td.optional-1 {
+            display: none !important;
+          }
+        }
+        @@media screen and (max-width: 43em) {
+          th.optional-2,
+          td.optional-2 {
+            display: none !important;
+          }
+        }
+
+        @@media only screen and (max-width: 320px) {
+          body { 
+                  font-size: 2em; 
+               }
+
+        }*/
+
+        .table-bordered td, .table-bordered th, .table-bordered {
+            border: 1px solid black;
+            color: black;
+        }
+
+
+        .table-bordered thead td, .table-bordered thead th {
+              
+            border: 1px solid black!important;
+        }
+
+        .bg-asswhite {
+            background-color: #F5F5F5 !important;
+        }
+
+       
+
+
+        .table th, .table td {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+            padding-left: 0.40rem;
+            padding-right: 0.60rem;
+            vertical-align: middle;
+        }
+/*
+        html, body {
+            height: 100%;
+            margin: 0;
+        }*/
+
+        .footer,
+        .push {
+            height: 50px;
+        }
+
+               .border-0 {
+                border:0!important;
+            }
+
+
+
+
+.fabprint {
+ /* background: #03A9F4;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  text-align: center;
+  color: #FFF;*/
+  box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.5), 3px 3px 3px rgba(0, 0, 0, 0.25);
+  position: fixed;
+  bottom: 72px;
+  right: 48px;
+  font-size: 2em;
+  display: inline-block;
+  cursor: pointer;
+  z-index:999999;
+}
+
+
+
+.fabpdf {
+  box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.5), 3px 3px 3px rgba(0, 0, 0, 0.25);
+  position: fixed;
+  bottom: 122px;
+  right: 48px;
+  font-size: 2em;
+  display: inline-block;
+  cursor: pointer;
+    z-index:999999;
+}
+
+
+    </style>
+</head>
+<body>
+
+    <h3>
+        @{
+            System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("bn-BD");
+        }
+
+    </h3>
+    <div id="main">
+
+        @*<div class="row p-0 m-0">
+            <div class="col-md-12 text-center">
+                <input class="right-corder-container-button btn btn-lg btn-success rounded-0" id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />
+            </div>
+        </div>*@
+
+               
+            <div id="print" class="">
+
+            <span class=""   onclick="ClosePrint()">
+              <i class="fabprint fa fa-print text-white align-middle btn btn-success" >
+              </i>
+            </span>
+
+            <span class=""   onclick="createPDF()">
+              <i class="fabpdf fa fa-file-pdf-o text-white align-middle btn btn-danger" >
+              </i>
+            </span>
+
+
+            </div>
+
+
+
+        <div class="container  shadow p-2 my-0">
+     
+        <!-- Sample Table -->
+        <div class="mx-2" id="element-to-print" >
+        <form class="form">
+            <div class="row mb-2">
+
+                     <div class="col-md-12 text-center">
+
+                        @if (@comimagepath != null)
+                        {
+                            <img  class="center img-fluid" style="max-height:120px;" src="..@comimagepath" onerror="this.onerror=null; this.src='.@comimagepath'" alt="" id="main-img">
+
+                        }
+                        else        
+                        {
+                    <h2 class="text-center m-0">@Model.CompanyList.CompanyName</h2>
+                        
+                        }
+
+                
+                     </div>
+                      <div class="col-md-12 text-center">
+                        <h5 class="text-center  m-0">@Model.CompanyList.storeinfo.FirstOrDefault().ReportCaptionSmall </h5>
+                        <h6 class="text-center  m-0">Website : @Model.CompanyList.storeinfo.FirstOrDefault().Web ; Email : @Model.CompanyList.storeinfo.FirstOrDefault().Email ; Facebook : @Model.CompanyList.storeinfo.FirstOrDefault().Facebook</h6>  
+                        <h6 class="text-center  m-0">@Model.CompanyList.PrimaryAddress @Model.CompanyList.SecoundaryAddress</h6>
+                        <h6 class="text-center  m-0">Phone : @Model.CompanyList.storeinfo.FirstOrDefault().Phone ; @Model.CompanyList.storeinfo.FirstOrDefault().PhoneTwo</h6>
+                
+                      
+        
+
+                  
+                </div>
+
+
+
+                <div class="col-md-12 text-center">
+                    @*<h5><span class="border-bottom border-dark">BANK PAYMENT VOUCHER</span></h5>*@
+                    <h4 class="m-0">
+                       
+                            @if (Model.DocTypeList.DocType.ToUpper().Contains("Purchase"))
+                            {
+                            <span class="border-bottom border-dark">
+                                @ViewBag.ReportType
+                            </span>
+                            }
+                            else
+                            {
+                                    <span class="border-bottom border-dark">
+                                    @Model.DocTypeList.DocType
+                                    </span>
+                            }
+                                           
+                    </h4>
+
+
+
+                </div>
+
+
+            </div>
+                <hr class="m-0" />
+
+
+
+          
+            <div class="col-md-12 mb-1">
+                <div class="row  pt-1 pl-2 pr-2 mr-2">
+                    <div class="col-md-8 col-6 mb-2">
+
+
+                       <div class="row font-weight-bold text-center">
+                        No : @Model.PurchaseCode
+                     
+
+                        </div>
+                        <div class="row font-weight-bold text-center">
+                            Date : @Model.PurchaseDate.ToString("dd-MMM-yy")
+
+
+                        </div>
+
+                        <div class="row font-weight-bold text-center">
+                        Billed To :
+                            @if (@Model.SupplierModel.SupplierName.ToUpper().Contains("Supplier"))
+                            {
+                                @Model.SupplierName
+                            }
+                            else
+                            {
+                                @Model.SupplierModel.SupplierName
+                            }
+
+                        </div>
+                        <div class="row font-weight-bold text-center">
+
+                            @if (@Model.SupplierModel.SupplierName.ToUpper().Contains("Supplier"))
+                            {
+                                @Model.PhoneNo
+                            }
+                            else
+                            {
+                                @Model.SupplierModel.Phone
+                            }
+
+
+                        </div>
+                        <div class="row font-weight-bold text-center">
+
+                            @if (@Model.SupplierModel.SupplierName.ToUpper().Contains("Supplier"))
+                            {
+                                @Model.PrimaryAddress
+                            }
+                            else
+                            {
+                                @Model.SupplierModel.PrimaryAddress       @Model.SupplierModel.SecoundaryAddress
+                            }
+
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 col-6 mb-2">
+                        @if (Model.PurchasePayments.Count > 0)
+                        {
+
+                            <div class="font-weight-bold">
+                                Paid By :
+                            </div>
+
+                            @foreach (var item in Model.PurchasePayments)
+                            {
+                                <div class="row text-center border-top border-bottom">
+
+                                    @if (@item.vChartofAccounts != null)
+                                            {
+                                            <span class="font-weight-bold">
+                                                &nbsp; &nbsp; &nbsp; &nbsp;    @item.vChartofAccounts.AccName :
+                                            </span>   
+                                            }
+                      
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                    <span>
+                                        @(String.Format(BDFormat, "{0:c0}", Convert.ToDecimal(@item.Amount))) 
+                                    </span>
+
+                                    @if(@item.Transaction != null)
+                                    {
+                                           <span>
+                                       &nbsp; &nbsp;   &nbsp;  Due Received :
+                                            <a href="#">
+                                                 @Html.ActionLink(@item.Transaction.TransactionCode + "","TransactionVoucherViewReport" , "Admin" , new { TransactionId = @item.Transaction.Id, type = "pdf" }, new { @target = "_blank" , title="Go To The Link"})
+                                            </a>
+                                    </span>
+
+                                    }
+
+                                </div>
+                            }
+                        }
+
+                    </div>
+
+
+                </div>
+            </div>
+
+
+            <div class="table-responsive">
+            
+            <table class="table table-bordered border-dark text-dark" style="width:100%">
+                <thead class="bg-asswhite font-weight-bold">
+                    <tr class="text-nowrap text-center">
+                        <th class="font-weight-bold">SL No.</th>
+                        <th class="font-weight-bold">Item Name</th>
+                        <th class="font-weight-bold">Quantity</th>
+                        <th class="font-weight-bold">Unit</th>
+                        <th class="font-weight-bold">Unit Price</th>
+                        <th class="font-weight-bold">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        
+                        double ttlQty = 0;
+                        double subTotal = 0;
+                        int slno = 0;
+
+
+                        foreach (var item in Model.Items)
+                        {
+                            ttlQty += item.Quantity;
+                            subTotal += (item.Quantity * item.Price);
+                            slno++;
+
+
+                            <tr style="font-size:16px;">
+                                <td class="text-center"> @slno </td>
+                                <td>
+                                        @item.Product.Name 
+
+                                             @if ( PrintProductDescription == 1) { <span> &nbsp;  @item.Product.Description </span>  }
+                                             @if ( PrintModelName == 1) { <span>&nbsp;  @item.Product.ModelName </span>  }
+                                             @if ( PrintSizeName == 1) { <span>&nbsp;  @item.Product.SizeName </span>  }
+                                                         @if ( PrintBrandName == 1 && @item.Product.Brand != null) { <span>&nbsp; @item.Product.Brand.BrandName</span>  }
+                                             @if ( PrintProductCode == 1) { <span>&nbsp;  [  @item.Product.Code ] </span>  }
+
+
+                                            @if (item.PurchaseBatchItems != null)
+                                            {
+                                                @foreach (var batchitem in item.PurchaseBatchItems)
+                                                {
+                                                      <p class="mb-0 font-italic font-weight-bold">  SL No. :  @batchitem.BatchSerialNo - @item.Product.Warrenty.Name ;</p>
+                                                }
+                                            }
+
+
+                                
+
+                                </td>
+                                <td class="text-center">@(String.Format(BDFormat, "{0:n0}", Convert.ToDecimal(item.Quantity)))  </td>
+                                <td class="text-center">@Html.DisplayFor(modelItem => item.Product.Unit.UnitName) </td>
+                                <td class="text-right">@(String.Format(BDFormat, "{0:n0}", Convert.ToDecimal(item.Price))) </td>
+                                <td class="text-right">@(String.Format(BDFormat, "{0:c0}", Convert.ToDecimal(item.Quantity*item.Price))) </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="text-right">
+                        <td colspan="2" class="border-0"></td>
+                        <td class="text-center font-weight-bold border-0"><h6>@(String.Format(BDFormat, "{0:n0}", Convert.ToDecimal(ttlQty)))</h6></td>
+                        <td class=" border-0" colspan="1"></td>
+                        <td class="bg-asswhite font-weight-bold"><h6>Sub Total :</h6></td>
+
+                        <td><h6>@(String.Format(BDFormat, "{0:c0}", Convert.ToDecimal(@subTotal)))</h6></td>
+                    </tr>
+                    @if (@Model.Shipping > 0)
+                    {
+                        <tr class="text-right">
+                            <td colspan="4" class="border-0"></td>
+                            <td class="bg-asswhite font-weight-bold"><h6>Shipping :</h6></td>
+
+                            <td><h6>@(String.Format(BDFormat, "{0:n0}", Convert.ToDecimal(@Model.Shipping)))</h6></td>
+                        </tr>
+                    }
+                    @if (@Model.ServiceCharge > 0)
+                    {
+                        <tr class="text-right">
+                            <td colspan="4" class="border-0"></td>
+                            <td class="bg-asswhite font-weight-bold"><h6>Service Charge :</h6></td>
+
+                            <td><h6>@(String.Format(BDFormat, "{0:n0}", Convert.ToDecimal(@Model.ServiceCharge)))</h6></td>
+                        </tr>
+                    }
+                    @if (@Model.TotalVat > 0)
+                    {
+                        <tr class="text-right">
+                            <td colspan="4" class="border-0"></td>
+                            <td class="bg-asswhite font-weight-bold"><h6>Purchase Tax :</h6></td>
+
+                            <td><h6>@(String.Format(BDFormat, "{0:n0}", Convert.ToDecimal(@Model.TotalVat)))</h6></td>
+                        </tr>
+                    }
+                    @if (@Model.Discount > 0)
+                    {
+
+                        <tr class="text-right">
+                            <td colspan="4" class="border-0"></td>
+                            <td class="bg-asswhite font-weight-bold"><h6>Discount :</h6></td>
+
+                            <td><h6>@(String.Format(BDFormat, "{0:n0}", Convert.ToDecimal(@Model.Discount)))</h6></td>
+                        </tr>
+                    }
+                    @if (@Model.GrandTotal != Convert.ToDecimal(@Model.PurchasePayments.Where(x => x.TransactionId == null).Sum(x => x.Amount)))
+                    {
+                        <tr class="text-right">
+                            <td colspan="4" class="border-0"></td>
+                            <td class="bg-asswhite font-weight-bold"><h6>Grand Total :</h6></td>
+
+                            <td><h6>@(String.Format(BDFormat, "{0:n0}", Convert.ToDecimal(@Model.GrandTotal)))</h6></td>
+                        </tr>
+                    }
+                    @if (@Model.GrandTotal >  Convert.ToDecimal(@Model.PurchasePayments.Where(x => x.TransactionId == null).Sum(x => x.Amount)))
+                    {
+                        <tr class="text-right">
+                            <td colspan="4" class="border-0"></td>
+                            <td class="bg-asswhite font-weight-bold"><h6>Due Amount :</h6></td>
+
+                            <td><h6>@(String.Format(BDFormat, "{0:c0}", Convert.ToDecimal(@Model.GrandTotal - Convert.ToDecimal(@Model.PurchasePayments.Where(x => x.TransactionId == null).Sum(x => x.Amount)))))</h6></td>
+                        </tr>
+                    }
+
+                    <tr class="text-right">
+                        <td colspan="4" class="border-0"></td>
+                        <td class="bg-asswhite font-weight-bold"><h6>Net Paid :</h6></td>
+
+                        <td><h6>@(String.Format(BDFormat, "{0:c0}", Convert.ToDecimal(@Model.PurchasePayments.Where(x=>x.TransactionId == null).Sum(x=>x.Amount))))</h6></td>
+                    </tr>
+
+                    <tr class="text-right">
+                        <td colspan="6" class="border-0"></td>
+                     
+                    </tr>
+
+
+                    <tr>
+                        <td colspan="6"><h6>In Words (Net Payable) :  @clsproc.GTRInwordsFormatBD(@Model.GrandTotal.ToString(), "", "");</h6></td>
+                    </tr>
+                    <tr>
+                        <td colspan="6">
+                            <p>Narration : @Model.Notes</p>
+                        </td>
+
+
+                    </tr>
+
+
+
+                </tfoot>
+            </table>
+            </div>
+
+
+
+            @if (@ViewBag.TermsMain != null)
+            {
+                <table class="table table-bordered border-dark text-dark">
+                    <thead class="bg-asswhite font-weight-bold">
+
+                        <tr>
+                            <td colspan="6" class="bg-asswhite font-weight-bold"><h6>** Terms :</h6></td>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        @foreach (var item in @ViewBag.TermsMain.TermsSubs)
+                        {
+                            <tr>
+                                <td colspan="6">
+                                    <p>@item.TermsDescription</p>
+                                </td>
+
+                            </tr>
+
+                        }
+
+
+                    </tfoot>
+                </table>
+
+                <br />
+            }
+            <br />
+            <br />
+
+
+            <div class="row mt-5 pt-4 text-center">
+                <div class="col-md-4 col-4">
+                    <p class=" border-top border-dark"> Receiver Signature With Seal</p>
+                </div>
+                <div class="col-md-4 col-4">
+                </div>
+
+                <div class="col-md-4 col-4">
+                    <p class=" border-top border-dark"> Authorize Signature With Seal</p>
+                </div>
+
+
+            </div>
+
+            </form>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <hr />
+    <footer class="footer text-center">
+        <div class="col-md-12">
+            <h6>Software Generated Report || Developed By : Dominate Software Solution</h6>
+        </div>
+    </footer>
+</body>
+</html>

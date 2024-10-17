@@ -1,0 +1,616 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Master LC";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    .form-control {
+        border: 1px solid #adb5bd !important;
+    }
+
+    #example-table {
+        height: auto !important;
+        border-bottom: 1px solid black;
+        margin-bottom: 10px
+    }
+
+    .custom-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 300px);
+        background-color: white;
+    }
+
+    .gear-dropdown1{
+        width: 740px;
+    }
+
+    .label-hover-effect:hover {
+        background-color: #f0f0f0; /* Change this to the desired hover color */
+        padding-right: 5px;
+    }
+
+    .left-modal .modal-dialog {
+        display: flex;
+        align-items: flex-start; /* Align the modal to the top */
+        justify-content: flex-start; /* Align the modal to the left */
+        margin-left: 50px;
+        margin-top: 50px;
+        
+    }
+</style>
+<div>
+    <h5><strong>Commercial Report</strong></h5>
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <label>Report</label>
+            @Html.DropDownList("ReportName", ViewBag.ReportName as List<SelectListItem>, "Select a report", new { id = "ReportName", @class = "form-select form-select-sm"})
+        </div>
+        <div class="col-md-2 col-2">
+            <label>Company</label>
+            <select id="CommercialCompanyId" class="form-control">
+                <option value="">Select Company</option>
+            </select>
+        </div>
+        <div class="col-md-2 col-2">
+            <label>Buyer Group</label>
+            <select id="BuyerGroupId" class="form-control">
+                <option value="">Select Buyer Group</option>
+            </select>
+        </div>
+        <div class="col-md-2 col-2">
+            <label>From</label>
+            <input id="dtFrom" class="form-control" style="padding:1px;" autocomplete="off" readonly>
+        </div>
+        <div class="col-md-2 col-2">
+            <label>To</label>
+            <input id="dtTo" class="form-control" style="padding:1px;" autocomplete="off" readonly>
+        </div>
+        <div class="col-md-1 mt-3">
+            <button type="button" class="btn btn-primary" onclick="LoadData()" id="loadButton">Load</button>
+            <div class="spinner-border text-primary d-none" role="status" id="loader">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-between">
+
+        <div class="d-flex" style="margin-right: 5px;">
+            <label class="form-label mt-1">Filter</label>
+            <select id="filter" class="form-select" >
+                <option value="1">On</option>
+                <option value="2">Off</option>
+            </select>
+        </div>
+        <div class="d-flex justify-content-end">
+        <button title="Print" class="btn btn-white border-0" type="button" id="salesPrint-pdf" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-printer fs-5" style=" margin-right: 0px; "></i>
+        </button>
+            <button title="Export to excel" class="btn btn-white border-0" type="button" id="salesPrint-excel" style="padding: 0px;padding-bottom: 10px;margin-left: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-file-earmark-excel fs-5" style=" margin-right: 0px; "></i>
+        </button>
+        <div title="Settings" class="dropdown1 custom-grid" style="display:inline-block;margin-left: 10px;" id="dropdownWrapper">
+            <a href="#" class="text-decoration-none text-black me-1" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+               aria-expanded="false">
+                <i class="bi bi-gear fs-5"></i>
+            </a>
+            <div class="dropdown-menu gear-dropdown1" aria-labelledby="dropdownMenuButton1" id="dropdownMenu">
+                <div class="row p-4 main-dropdown-size" style="overflow:hidden;">
+                    <div class="col">
+                        <span class="fw-bold ms-3">Columns</span>
+                        <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                        <ul class="list-unstyled">
+                            <li>
+                                <div id="POLColumnList" class="custom-grid">
+                                </div>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                    <div class="d-flex">
+                        @* <div class="ms-3">
+                        <label>Rows</label> <br />
+                        <select name="rows" id="POLRows" class="cursor-pointer" style="padding: 10px 0 10px 5px; width: 70px;">
+                        <option value="0" disabled selected>Rows</option>
+                        <option value="5" selected>5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="1000">1000</option>
+                        </select>
+                        </div> *@
+
+                        <div class=" p-4">
+                            <button id="ComReports" class="btn btn-success btn-sm">Save Filter</button>
+                        </div>
+
+                        <div style=" padding-top: 24px; ">
+                            <button class="btn btn-danger btn-sm" onclick="DeleteFilter($('#ReportName option:selected').text())">Remove Filter</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+        </div>
+    </div>
+    <div style="border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black; padding-top: 10px;">
+        <div style="text-align: center;">
+            <h6 id="Company_Name"></h6>
+            <h6 id="Company_Address"></h6>
+            <h6 id="Company_Phone"></h6>
+        </div>
+        <div id="example-table"></div>
+    </div>
+    
+    <div class="modal left-modal" id="btbValueModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" style=" width: 1300px; ">
+                <div class="modal-header">
+                    <h5 class="modal-title">BTB Value Details</h5>
+                    <div style="margin-left: auto; display: flex; align-items: center;">
+                    <button title="Export to excel" class="btn btn-white border-0" type="button" id="com-excel" style="padding: 0px;margin-left: 10px;"
+                            aria-expanded="false">
+                        <i class="bi bi-file-earmark-excel fs-5" style=" margin-right: 0px; "></i>
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    
+                    <div id="com-table"></div>
+                </div>
+                <div class="modal-footer">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+    <script>
+
+        // $(document).ready(function () {
+            
+        // });
+
+        $('select').select2();
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetComercialCompany", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#CommercialCompanyId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetBuyerGroup", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#BuyerGroupId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $(document).ready(function () {
+            var today = new Date();
+            var day = today.getDate();
+            var month = today.toLocaleString('default', { month: 'short' });
+            var year = today.getFullYear();
+
+            var formattedDay = (day < 10 ? '0' : '') + day;
+
+            var formattedDate = formattedDay + '-' + month + '-' + year;
+
+            document.getElementById('dtFrom').value = formattedDate;
+            document.getElementById('dtTo').value = formattedDate;
+
+            $(function () {
+                $("#dtFrom").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                });
+                $("#dtTo").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                }); 
+            });
+        });
+
+        var table;
+         table = new Tabulator("#example-table", {
+
+            layout: "datafit",
+            movableColumns: true,
+            selectable: 1,
+            placeholder: "No data available",            
+
+        });
+
+        document.getElementById("salesPrint-pdf").addEventListener("click", function () {
+            table.print(false, true);
+        });
+        document.getElementById("salesPrint-excel").addEventListener("click", function () {
+            table.download("xlsx", "data.xlsx", { sheetName: "Table Data" });
+        });
+
+        var modalData = [];
+        var modalTable;        
+
+        table.on("cellClick", function (e, cell) {
+            // Check if the clicked cell is in the "Details" column
+            if (cell.getColumn().getField() === "BTB VALUE") {
+                var row = cell.getRow(); // Get the row component
+                var rowData = row.getData(); // Get data of the clicked row
+
+                $('#btbValueModal').modal('show'); // Show the modal
+
+                var selectedRowId = rowData.GroupLCId;
+                var filteredModalData = modalData.filter(function (item) {
+                    return item.GroupLCId === selectedRowId;
+                });                
+
+                var columns = [];
+                for (var key in filteredModalData[0]) {
+                    if (filteredModalData[0].hasOwnProperty(key)) {
+                       // columns.push({ title: key, field: key, visible: true }); 
+                        if (key === "BBLCValue") {
+                            columns.push({ title: key, field: key, visible: true, bottomCalc: "sum", hozAlign: "right" });
+                        } else if (key === "PINo" || key === "FileNo" || key === "UnitMasterId") {
+                            columns.push({ title: key, field: key, visible: true, width: 150 });
+                        }
+                        else {
+                            columns.push({ title: key, field: key, visible: true });
+                        }
+                    }
+                }
+
+                // If filter is applied, add header filters to the columns
+                
+                columns.forEach(function (column) {
+                    column.headerFilter = "input";
+                });
+                
+
+
+                // Initialize or update the new Tabulator table inside the modal
+                modalTable = new Tabulator("#com-table", {
+                    layout: "fitData", // Fit columns to data size
+                    data: filteredModalData, // Data to display in the modal's Tabulator table
+                    columns: columns // Set the columns dynamically
+                });
+            }
+        });
+
+        document.getElementById("com-excel").addEventListener("click", function () {
+            modalTable.download("xlsx", "data.xlsx", { sheetName: "Table Data" });
+        });
+
+        var filteredColumns = [];
+        function LoadData() {
+
+            var reportName = $("#ReportName option:selected").text();
+            var CommercialCompanyId = $("#CommercialCompanyId option:selected").val();
+            var BuyerGroupId = $("#BuyerGroupId option:selected").val();
+            var filter = $("#filter option:selected").val();
+
+            var dtFrom = $("#dtFrom").val();
+            var dtTo = $("#dtTo").val();
+
+            DynamicGear();
+
+            $("#loader").removeClass('d-none');
+            $("#loadButton").addClass('d-none');
+            $.ajax({
+                url: '@Url.Action("LoadCommercialReport", "BuyerOrder")',
+                type: 'GET',
+                data: { reportName: reportName, dtFrom: dtFrom, dtTo: dtTo, CommercialCompanyId: CommercialCompanyId, BuyerGroupId: BuyerGroupId },
+                success: function (response) {
+                    if (response.Success === 1) {
+
+                        $("#loader").addClass('d-none');
+                        $("#loadButton").removeClass('d-none');
+
+                        var titleData = response.data[0];
+                        var tableData = response.data1;
+                         modalData = response.data2;
+                        console.log(tableData);
+                        var columns = [];
+
+                        for (var key in tableData[0]) {
+                            if (tableData[0].hasOwnProperty(key) && key !== "GroupLCId") {
+                                //columns.push({ title: key, field: key, visible: true });
+                                if (key === "BTB VALUE") {
+                                    columns.push({ title: key, field: key, visible: true, hozAlign: "right",
+                                        formatter: function (cell) {
+                                            // Apply blue color to the text
+                                            return "<span style='color: blue;'>" + cell.getValue() + "</span>";
+                                        }
+                                    });
+                                } else {
+                                    columns.push({ title: key, field: key, visible: true });
+                                }
+                            }
+                        }
+
+                        if (filter == 1) {
+                            columns.forEach(function (column) {
+                                column.headerFilter = "input"; 
+                            });
+                        }                        
+
+                        if (filteredColumns.length != 0) {
+                            if (filteredColumns.colDefs.length > 0) {
+                                // Use filteredColumns for the table
+                                console.log("Using filteredColumns:", filteredColumns);
+                                table.setColumns(filteredColumns.colDefs);
+                                table.setData(tableData);
+                                populatePOLColumnList(filteredColumns.colDefs);                               
+                            }
+                        } else  {
+                            // Use default columns
+                            console.log("Using default columns:", columns);
+                            table.setColumns(columns);
+                            table.setData(tableData);
+                            populatePOLColumnList(columns);                           
+                        }
+
+                        //table.setColumns(columns);
+                        console.log("Munna: :",columns);
+                        //table.setData(tableData); 
+                        //populatePOLColumnList(columns);
+
+                        $("#Company_Name").text(titleData.CompanyName);
+                        $("#Company_Address").text(titleData.PrimaryAddress);
+                        $("#Company_Phone").text(titleData.ComPhone);
+                    } else {
+                        console.error('Error updating rates:', response.Ex);
+                    }
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        }
+
+
+        function DynamicGear() {
+            var reportName = $('#ReportName option:selected').text();
+            $.ajax({
+                url: '@Url.Action("GetFilteredColumn", "BuyerOrder")',
+                type: 'GET',
+                contentType: 'application/json',
+                data: { type: reportName },
+                success: function (response) {
+
+                    // console.log("check munna::", JSON.parse(response.data.KeyValue));
+
+                    if (response.Success == 1) {
+                        
+                        if (response.data.KeyValue != null || response.data.KeyValue != "") {
+                            filteredColumns = JSON.parse(response.data.KeyValue); 
+                        }
+                    }                    
+                    
+                },
+
+                error: function (error) {
+                    // Handle error
+                    console.error("Error saving settings:", error);
+                }
+            });
+
+        }
+
+
+        function populatePOLColumnList(columns) {
+            var polColumnList = $("#POLColumnList");
+            polColumnList.empty(); // Clear any existing content
+
+            columns.forEach(function (column) {
+                var checkboxId = 'col_' + column.field.replace(/\s+/g, '_');
+                var displayTitle = column.title.replace(/\s+/g, '_');
+
+                // Append checkbox and label with click functionality
+                polColumnList.append(`
+                    <div class="form-check ms-3">
+                             <input class="form-check-input com-column" type="checkbox" value="${column.field}" id="${checkboxId}" ${column.visible ? 'checked' : ''}>
+                             <label class="form-check-label label-hover-effect" for="${checkboxId}" style="cursor: pointer;">${displayTitle}</label>
+                    </div>
+                `);
+
+                // Add event listener to toggle column visibility
+                $('#' + checkboxId).on('change', function () {
+                    if ($(this).is(':checked')) {
+                        table.showColumn(column.field);  // Show column
+                    } else {
+                        table.hideColumn(column.field);  // Hide column
+                    }
+                });
+
+                // Add click event to the label to toggle the checkbox
+                $('#' + checkboxId).next('label').on('click', function (event) {
+                    event.preventDefault();
+                    var checkbox = $('#' + checkboxId);
+                    var isChecked = checkbox.prop('checked');
+                    checkbox.prop('checked', !isChecked).trigger('change');                    
+                });
+            });
+        }
+
+
+        $("#ComReports").on("click", function () {            
+            //var colDefs = GroupLCTable.getColumnDefinitions();
+
+            var colDefs = table.getColumns().map(function (column) {
+                return {
+                    field: column.getField(),    // Get the field name
+                    title: column.getDefinition().title, // Get the title
+                    visible: column.isVisible()  // Get the current visibility state
+                };
+            });
+
+            // var selectElement = document.getElementById("GroupLCRows");
+            // var selectedValue = selectElement.value;
+
+            $(".com-column").each(function () {
+                var field = $(this).val();
+                var title = $(`label[for='${field}']`).text();
+                var isVisible = $(this).is(":checked");
+
+                colDefs.forEach(function (colDef) {
+                    if (colDef.field === field) {
+                        colDef.visible = isVisible;  // Set visibility based on checkbox state
+                    }
+                });
+                // columnData.push({
+                //     Title: title,
+                //     Field: field,
+                //     IsVisible: isVisible
+                // });
+            });
+
+            var finaldata = {
+                colDefs: colDefs,
+                //pageSize: selectedValue
+            };
+
+            var reportName = $('#ReportName option:selected').text();
+
+            var jsonData = JSON.stringify(finaldata);
+
+            // Send data via AJAX
+            $.ajax({
+                url: '@Url.Action("ColumnFilterCreation", "BuyerOrder")', // Update with your controller/action
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ keyValue: jsonData, type: reportName}),
+                success: function (response) {
+                    toastr.success(response.ex, "", {
+                        "toastClass": "toast-green",
+                    });
+                },
+                error: function (error) {
+                    // Handle error
+                    console.error("Error saving settings:", error);
+                }
+            });
+        });
+
+        function DeleteFilter(data) {
+
+            $.ajax({
+                url: '@Url.Action("DeleteColumnFilter", "BuyerOrder")',
+                type: "get",
+                data: { type: data },
+                success: function (response) {
+                    if (response.success == "1") {
+                        toastr.success(response.msg, "", {
+                            "toastClass": "toast-green",
+                        });
+                        
+                    }
+
+                },
+                error: function (xhr, status, error) {
+                    console.error(xhr.responseText);
+                    toastr.error("Error during delete.", "", { "toastClass": "toast-red" });
+                }
+            });
+
+
+        };
+
+        $(document).ready(function () {
+            var dropdownWrapper = $('#dropdownWrapper');
+            var dropdownMenu = $('#dropdownMenu');
+
+            // Prevent dropdown from closing when clicking inside it
+            dropdownMenu.on('click', function (e) {
+                e.stopPropagation();
+            });
+
+            // Close the dropdown if clicking outside
+            $(document).on('click', function (e) {
+                if (!dropdownWrapper.is(e.target) && dropdownWrapper.has(e.target).length === 0) {
+                    dropdownMenu.removeClass('show'); // Close the dropdown
+                }
+            });
+        });
+
+
+    </script>
+}

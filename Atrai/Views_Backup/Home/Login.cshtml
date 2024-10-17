@@ -1,0 +1,156 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model Atrai.Core.ViewModel.LoginViewModel
+@{
+    string weburl = HttpContextAccessor.HttpContext.Session.GetString("weburl");
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+
+    label {
+      margin-bottom: .0rem!important;
+    }
+
+</style>
+
+
+<div class="container pt-5 mt-5">
+    <div class="container mt-3">
+        <div class="row justify-content-md-center">
+            <div class="col-md-5 col-12">
+                <div class="card">
+                    <div class="card-header">
+
+                        <div class="form-group row my-0">
+                            <div class="col">
+
+                                @*id="styletext"*@
+
+                                <h2 class="text-left">
+                                    Login
+                                </h2>
+                            </div>
+                            <div class="col text-right">
+                                @if (@ViewBag.comImagePath != null)
+                                {
+                                    <img width="60" class="img-circle" src="..@ViewBag.comImagePath" onerror="this.style.display='none'" id="main-img">
+                                }
+                                else
+                                {
+                                    <img width="10" class="img-circle" src="../Content/ProductImages/0.png" id="main-img">
+                                }
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                    <div class="card-body">
+
+
+                        @*<hr />*@
+                        @if (TempData["UserLoginFailed"] != null)
+                        {
+                            <p class="alert alert-danger">@TempData["UserLoginFailed"]</p>
+                        }
+                        <form asp-action="Login" asp-controller="Home" method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+
+                            <div class="form-group">
+                                <div class="input-group mb-1">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text py-0">
+                                          @*  <label asp-for="Email" class="control-label"></label>*@
+                                            <label asp-for="Email" class="control-label">User Id :</label>
+                                        </span>
+                                    </div>
+
+                                    @*@ViewBag.comImagePath*@
+                                    <input asp-for="Email" class="form-control" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+
+
+
+                            <div class="form-group">
+                                <div class="input-group mb-1">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text py-0">
+                                            <label asp-for="Password" class="control-label">Password :</label>
+                                        </span>
+                                    </div>
+
+                                    <input type="password" asp-for="Password" class="form-control" />
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                <div class="input-group mb-1">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text py-0">
+                                            <label> Login As : </label>
+                                        </span>
+                                    </div>
+
+                                    @Html.DropDownList("CredentialType", new List<SelectListItem>
+                                    {
+                                    new SelectListItem() {Text = "User", Value="U"},
+                                    new SelectListItem() {Text = "Customer", Value="C"},
+                                    new SelectListItem() {Text = "Supplier", Value="S"},
+                                    },  new { @class = "form-control" })
+                                </div>
+                            </div>
+
+                            <div class="form-group text-center">
+                                <input type="submit" value="Login" class="btn btn-default btn-success btn-block" />
+                            </div>
+
+                        </form>
+                    </div>
+                    <div class="card-footer">
+
+                        @if (weburl.ToLower().Contains("w2u.io"))
+                        {
+                            <div class="d-flex justify-content-center links">
+                                Don't have an account? <a href="@Url.Action("signupurl")" class="ml-2">Sign Up</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex justify-content-center links">
+                                Don't have an account? <a href="@Url.Action("signup")" class="ml-2">Sign Up</a>
+                            </div>
+                        }
+                        <div class="d-flex justify-content-center links">
+                            Forget Password ? <a href="@Url.Action("ForgetPassword")" class="ml-2">Password Recovery</a>
+                        </div>
+                        <div class="d-flex justify-content-center links" style="color:red">
+                            Need Support 24/7 ? Hotline : 01709-383003
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        @*<br /><br /><br /><br /><br /><br /><br />*@
+        @*<br />
+        <br />
+        <br />
+        <br />
+
+
+        <br />*@
+    </div>
+
+</div>
+
+
+

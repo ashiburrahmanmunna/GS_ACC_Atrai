@@ -1,0 +1,310 @@
+﻿
+@{
+    ViewData["Title"] = "Employee Salary";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+
+}
+
+<h2>Employee Salary</h2>
+<div class="upperSection">
+ <div class="row mt-5" id="TheadDropdown">
+
+                    <div class="col-md-4 col-12" id="divEmpType">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">
+                                Employee Type
+                            </label>
+                            <select class="form-select select2me thead" id="EmpType"
+                                    aria-label="Floating label select example">
+                            </select>
+
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-12" id="divSalary">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">
+                                Salary Type
+                            </label>
+                            <select class="form-select select2me thead" id="salarytype" aria-label="Floating label select example"></select>
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-4 col-12">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">From Date</label>
+                            <input type="text" class="form-control tg" id="Date">
+                        </div>
+                    </div>
+
+                     <div class="col-md-4 col-12" id="divSalary">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">
+                                Week Segment
+                            </label>
+                            <select class="form-select select2me thead" id="weeksegment" aria-label="Floating label select example"></select>
+
+                        </div>
+                    </div>
+
+
+
+
+                </div>
+                <div col-md-2 col-12 >
+                   <button type="button" class="btn btn-warning mt-3" id="loaddata">Load Data</button>
+                </div>
+</div>
+<div class="HeroSection mt-5">
+    <div id="jsGrid">
+
+    </div>
+</div>
+
+
+@section Scripts{
+    <script type="text/javascript">
+          $(document).ready(function() {
+            $('#Date').datepicker({
+                dateFormat: 'MM yy',
+                todayHighlight: true,
+                autoclose: true,
+                minViewMode: 'months'
+            }).datepicker("setDate", new Date());
+
+
+
+                      $.ajax({
+                        method: "get",
+                        async: false,
+                        url: '@Url.Action("GetEmployeeTypeDropdown", "HrVariable")',
+                        success: function (data) {
+                            console.log(data);
+                            const select = document.querySelector('#EmpType');
+                            for (var i = 0; i < data.length; i++) {
+                                const option = document.createElement('option');
+                                option.value = data[i].Value;
+                                option.text = data[i].Text;
+                                select.appendChild(option);
+                            }
+                        }
+                    });
+
+                        $.ajax({
+                            method: "get",
+                            async: false,
+                            url: '@Url.Action("GetSalaryTypeDropdown", "HrVariable")',
+                            success: function (data) {
+                                console.log(data);
+                                    const select = document.querySelector('#salarytype');
+                                for (var i = 0; i < data.length; i++) {
+                                    const option = document.createElement('option');
+                                    option.value = data[i].Value;
+                                    option.text = data[i].Text;
+                                    select.appendChild(option);
+                                }
+                            }
+                        });
+
+                            $.ajax({
+                            method: "get",
+                            async: false,
+                            url: '@Url.Action("GetWeekSegmentDropdown", "HrVariable")',
+                            success: function (data) {
+                                console.log(data);
+                                    const select = document.querySelector('#weeksegment');
+                                for (var i = 0; i < data.length; i++) {
+                                    const option = document.createElement('option');
+                                    option.value = data[i].Value;
+                                    option.text = data[i].Text;
+                                    select.appendChild(option);
+                                }
+                            }
+                        });
+
+            const salaryTypeSelect = document.querySelector('#EmpType');
+
+                    $('#jsGrid').jsGrid({
+                    width:'100%',
+                    inserting: true,
+                    editing: true,
+                    fields: [
+                            { name: "EmpCode", title: 'Employee Code',type:'text' },
+                            { name: "Name", title: 'Name',type:'text' },
+                            { name: "Gs", title: 'GS',type:'text' },
+                            { name: "hourrate", title: 'Hour Rate',type:'text',visible:false },
+                            { name: "productiverate", title: 'Productive Rate',type:'text',visible:false },
+                            { name: "BS", title: 'BS', type: "label", align: "right" },
+                            { name: "Allowance", title: 'Allowance',type:'text' },
+                            { name: "Absent", title: 'Absent',type:'text' },
+                            { name: "Absentmoney", title: 'Absent Money', type: "label", align: "right"},
+                            { name: "deduction", title: 'Other Deduction',type:'text'},
+                            { name: "OtherAllowance", title: 'Other Allowance',type:'text'},
+                            { name: "total", title: 'Total Amount', type: "label", align: "right"},
+                            {type:'control'}
+                                    
+                                    
+                    ],
+                    onItemInserting:function(args){
+
+                    args.item.Gs = parseInt(args.item.Gs);
+                    args.item.BS = parseInt(args.item.BS);
+                    args.item.Allowance = parseInt(args.item.Allowance);
+                    args.item.Absent = parseInt(args.item.Absent);
+                    args.item.Absentmoney = parseInt(args.item.Absentmoney);
+                    args.item.deduction = parseInt(args.item.deduction);
+                    args.item.OtherAllowance = parseInt(args.item.OtherAllowance);
+                    args.item.hourrate = parseInt(args.item.hourrate);
+                    args.item.BS = (args.item.Gs - args.item.Allowance).toFixed(3);
+
+
+                    if (args.item.hourrate > 0) {
+                        alert('fs');
+                        args.item.total = (args.item.Gs * args.item.hourrate - args.item.deduction) + (args.item.OtherAllowance);
+
+                    }
+                   
+
+                    else if (args.item.productiverate > 0) {
+                        alert('fs');
+                        args.item.total = (args.item.Gs * args.item.productiverate - args.item.deduction) + (args.item.OtherAllowance);
+
+                    }
+                    else {
+                        args.item.total = (args.item.Gs - args.item.Absent - args.item.deduction) + (args.item.OtherAllowance);
+                    }
+                    args.item.Absentmoney = ((args.item.BS / 30) * args.item.Absent).toFixed(3);
+                    console.log(args);
+                    alert(args.item.total);
+                    $("#jsGrid").jsGrid("refresh");
+                
+                    },
+                    onItemEditing: function(args){
+                    args.item.Gs = parseInt(args.item.Gs);
+                    args.item.BS = parseInt(args.item.BS);
+                    args.item.Allowance = parseInt(args.item.Allowance);
+                    args.item.Absent = parseInt(args.item.Absent);
+                    args.item.Absentmoney = parseInt(args.item.Absentmoney);
+                    args.item.deduction = parseInt(args.item.deduction);
+                    args.item.OtherAllowance = parseInt(args.item.OtherAllowance);
+                    args.item.hourrate = parseInt(args.item.hourrate);
+                    args.item.BS = (args.item.Gs - args.item.Allowance).toFixed(3);
+
+
+                    if (args.item.hourrate > 0) {
+                        alert('fs');
+                        args.item.total = (args.item.Gs * args.item.hourrate - args.item.deduction) + (args.item.OtherAllowance);
+
+                    }
+
+
+                    else if (args.item.productiverate > 0) {
+                        alert('fs');
+                        args.item.total = (args.item.Gs * args.item.productiverate - args.item.deduction) + (args.item.OtherAllowance);
+
+                    }
+                    else {
+                        args.item.total = (args.item.Gs - args.item.Absent - args.item.deduction) + (args.item.OtherAllowance);
+                    }
+                    args.item.Absentmoney = ((args.item.BS / 30) * args.item.Absent).toFixed(3);
+                    console.log(args);
+                    alert(args.item.total);
+                    
+                
+                   
+                    },
+                    onItemUpdated: function(args){
+                            args.item.Gs = parseInt(args.item.Gs);
+                            args.item.BS = parseInt(args.item.BS);
+                            args.item.Allowance = parseInt(args.item.Allowance);
+                            args.item.Absent = parseInt(args.item.Absent);
+                            args.item.Absentmoney = parseInt(args.item.Absentmoney);
+                            args.item.deduction = parseInt(args.item.deduction);
+                            args.item.OtherAllowance = parseInt(args.item.OtherAllowance);
+                            args.item.hourrate = parseInt(args.item.hourrate);
+                            args.item.BS = (args.item.Gs - args.item.Allowance).toFixed(3);
+
+
+                    if (args.item.hourrate > 0) {
+                        alert('fs');
+                        args.item.total = (args.item.Gs * args.item.hourrate - args.item.deduction) + (args.item.OtherAllowance);
+
+                    }
+
+
+                    else if (args.item.productiverate > 0) {
+                        alert('fs');
+                        args.item.total = (args.item.Gs * args.item.productiverate - args.item.deduction) + (args.item.OtherAllowance);
+
+                    }
+                    else {
+                        args.item.total = (args.item.Gs - args.item.Absent - args.item.deduction) + (args.item.OtherAllowance);
+                    }
+                            args.item.Absentmoney = ((args.item.BS / 30) * args.item.Absent).toFixed(3);
+                            console.log(args);
+                            alert(args.item.total);
+                            $("#jsGrid").jsGrid("refresh");
+                    }
+                });
+
+
+
+                    salaryTypeSelect.addEventListener('change', () => {
+                        const selectedValue = salaryTypeSelect.value;
+                                if (selectedValue === 'hour_rate'|| 'productive_rate') {
+                                        $("#jsGrid").jsGrid("fieldOption", "BS", "visible", false);
+                                        $("#jsGrid").jsGrid("fieldOption", "Allowance", "visible", false);
+                                        $("#jsGrid").jsGrid("fieldOption", "Absent", "visible", false);
+                                        $("#jsGrid").jsGrid("fieldOption", "Absentmoney", "visible", false);
+                            
+                        }
+                             if(selectedValue === 'fixed'){
+                                 $("#jsGrid").jsGrid("fieldOption", "BS", "visible", true);
+                                            $("#jsGrid").jsGrid("fieldOption", "Allowance", "visible", true);
+                                            $("#jsGrid").jsGrid("fieldOption", "Absent", "visible", true);
+                                            $("#jsGrid").jsGrid("fieldOption", "Absentmoney", "visible", true);
+                                                 $("#jsGrid").jsGrid("fieldOption", "hourrate", "visible", false);
+                                         $("#jsGrid").jsGrid("fieldOption", "productiverate", "visible", false);
+                                        $("#jsGrid").jsGrid("fieldOption", "Gs", "title", "GS");
+                             
+                             }
+                            if(selectedValue === 'hour_rate'){
+                                     $("#jsGrid").jsGrid("fieldOption", "hourrate", "visible", true);
+                                     $("#jsGrid").jsGrid("fieldOption", "productiverate", "visible", false);
+                                        $("#jsGrid").jsGrid("fieldOption", "hourrate", "title", "Total Hour");
+                                        $("#jsGrid").jsGrid("fieldOption", "Gs", "title", "Hour Rate");
+                        }
+                                if(selectedValue === 'productive_rate'){
+                                        $("#jsGrid").jsGrid("fieldOption", "hourrate", "visible", false);
+                                     $("#jsGrid").jsGrid("fieldOption", "productiverate", "visible", true);
+
+                                         $("#jsGrid").jsGrid("fieldOption", "productiverate", "title", "Total Hour");
+                                        $("#jsGrid").jsGrid("fieldOption", "Gs", "title", "Production Rate");
+                        }
+                            jsGrid.refresh();
+                    });
+
+
+                       $('#loaddata').click(function() {
+                       
+                        $.ajax({
+                           url: '@Url.Action("GetEmployeeListData", "HrVariable")',
+                        type: 'GET',
+                        dataType: 'json',
+                        
+                        success: function(result) {
+                            console.log(result);
+                             $("#jsGrid").jsGrid("insertItem", { EmpCode: result.EmpCode,OtherAllowance:result.OtherAllowance,BS:result.BS, Name: result.Name, Gs: result.Gs,hourrate:result.hourrate,productiverate:result.productiverate,Allowance: result.Allowance, Absent: result.Absent, Absentmoney: result.Absentmoney,deduction:result.deduction,total:result.total}).done(function() {
+                                console.log("insertion completed");
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            // Handle error
+                        }
+                    });
+    });
+          });
+        </script>
+}

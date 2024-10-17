@@ -1,0 +1,109 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@*@model IEnumerable<Atrai.Model.Core.Entity.VoterModel>*@
+@{ 
+    ViewData["Title"] = "Document Referance List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; 
+}
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <card class="card-header">
+                        
+                        <div class="row m-0">
+                            <div class="col-md-2 col-12">
+                                @Html.ActionLink("Upload Docs", "AddDocRefFileUpload", null,null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md col-12">
+                                <h4 style="color: #1976d2;">Document Referance List</h4>
+                            </div>
+                        </div>
+                    </card>
+
+
+                    <div class="card-body">
+
+
+                        <div class="table-responsive mt-1">
+                            <table id="tbllist" class="table table-sm table-hover  table-bordered" width="100%">
+                            </table>
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+                $(function () {
+                    var peopleList = $('#tbllist').DataTable({
+
+                        serverSide: true,  "scrollX": true,
+                        processing: true,
+
+                        ajax: {
+                        url: '@Url.Action("GetDocRefFileUploadList", "Admin")',
+                            type: "POST"
+                        },
+                        rowId: 'Id',
+                        columns: [
+
+                            { "title": "Id", "data": "Id", "visible": false },
+                            { "title": "Document No.", "data": "DocNo", "searchable": true },
+                            { "title": "Doc Type", "data": "DocType", "searchable": true },
+                            { "title": "FileLink", "data": "FileLink", "searchable": false },
+
+
+                            {
+                                "title": "Action",
+                                "data": "Id",
+                                "render": function (data, type, row) {
+                                    var returnurl = '';
+                                var myUrledit = '@Url.Action("EditDocRefFileUpload", "Admin")?DocId=' + data+'&IsEdit=1';
+                            var myUrlview = '@Url.Action("EditDocRefFileUpload", "Admin")?DocId=' + data + '&IsEdit=0';
+                                var myUrldelete = '@Url.Action("DeleteDocRefFileUpload", "Admin")?DocId=' + data;
+
+                                returnurl = '<span data-toggle="tooltip" title="View"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>';
+                                returnurl += '<span data-toggle="tooltip" title="View"> <a href=\"' + myUrlview + '\" class=\"btn btn-icon btn-info btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-eye"></i></a></span>';
+                                returnurl += '<span data-toggle="tooltip" title="View"> <a href=\"' + myUrldelete + '\" class=\"btn btn-icon btn-danger text-white btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-trash"></i></a></span>';
+
+                            return returnurl;
+
+                                }
+
+                            }
+                        ]
+                    });
+
+
+                });
+
+                @*var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+                var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+                var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+                    {
+                    style: 'currency',
+                    currency: CurrencyShortNameViewFormat,///'BDT'
+                    minimumFractionDigits: 2,
+                });*@
+        //document.body.innerHTML += '<br />' + formatter.format(53425.34);
+
+
+    </script>
+}

@@ -1,0 +1,342 @@
+﻿@model int
+@{
+    ViewData["Title"] = "Edit Sale";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<style type="text/css">
+    .bg_1 {
+        background-color: green;
+    }
+
+    .bg_2 {
+        background-color: gray;
+    }
+
+
+    .error_msg {
+        color: #f00;
+        display: none;
+    }
+
+    .table {
+        /* width: 100%; */
+        /* max-width: 100%; */
+        margin-bottom: 0px;
+    }
+</style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker3.css" rel="stylesheet" />
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-title">
+
+                    </div>
+                    <div class="card-body" id="masterSale">
+                        <div class="col-md-12">
+                            <div class="form-inline">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="Name">Customer &nbsp  </label>
+                                        <select id="Customer" class="form-control" onchange="blankme(this.id)">
+                                            <option value="">Select Customer</option>
+                                        </select>
+                                        <small id="error_Customer" class="form-text error_msg">Select customer from list</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="Code"> Code  &nbsp</label>
+                                        @Html.TextBox("Code", null, new { @class = "form-control", @placeholder = "Enter Sale No", onkeyup = "blankme(this.id)" })
+                                        <small id="error_Code" class="form-text error_msg col-md-offset-2 "> Sale Code is Required</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="Date"> Date  &nbsp</label>
+                                        @Html.TextBox("Date", null, new { @class = "form-control mydatepicker", @placeholder = "Select Sale Date ", onchange = "blankme(this.id)" })
+                                        <small id="error_Date" class="form-text error_msg col-md-offset-2 ">Sale Date is Required</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br /> <br />
+                               <div class="col-md-12">
+                                   <label class="col-md-2">Search Product</label>
+                                   <div class="input-group input-group-default col-md-8">
+                                       <span class="input-group-btn"><button class="btn btn-primary rounded-0" type="submit"><i class="ti-search"></i></button></span>
+                                       <input type="text" placeholder="Search Product" name="Search" id="Search" class="form-control">
+                                   </div>
+
+                                   <br />
+                                   <div class="table-responsive">
+
+
+                                       <table class="table table-hover  col-md-12" id="detailsTable">
+                                           <thead>
+                                               <tr>
+                                                   <th class="d-none">Id</th>
+                                                   <th class="d-none">Product Id</th>
+                                                   <th style="min-width:200px">Name</th>
+                                                   <th style="min-width:200px">Description</th>
+                                                   <th style="min-width:80px;max-width:100px">Unit Price</th>
+                                                   <th style="min-width:80px;max-width:100px">Quantity</th>
+                                                   <th style="min-width:80px;max-width:100px">Amount</th>
+                                                   <th></th>
+
+                                               </tr>
+                                           </thead>
+                                           <tbody id="itemDetails"></tbody>
+                                           <tfoot>
+                                               <tr>
+                                                   <td class="d-none"></td>
+                                                   <td class="d-none"></td>
+                                                   <td></td>
+                                                   <td></td>
+                                                   <td></td>
+                                                   <td> <strong> Total:</strong> </td>
+                                                   <td> <strong id="SubTotal">  </strong> </td>
+                                                   <td></td>
+                                               </tr>
+                                           </tfoot>
+                                       </table>
+                                   </div>
+
+                                   <small id="error_SubTotal" class="form-text error_msg">Atleast add one item</small>
+                                   <br />
+                                   <br />
+
+                                   <div class="row">
+                                       <div class="col-md-5">
+
+                                           <div class="form-group">
+                                               <label for="Payment"> Payment Method : </label>
+                                               @Html.DropDownList("Payment", new List<SelectListItem>
+                                                   {
+                                                       new SelectListItem() {Text = "Cash", Value="Cash"},
+                                                       new SelectListItem() {Text = "Check", Value="Check"},
+                                                   }, "Select Payment", new { @class = "form-control", onchange = "blankme(this.id)" })
+                                               <small id="error_Payment" class="form-text error_msg">Select Payment Method</small>
+                                           </div>
+
+                                           <div class="form-group">
+                                               <label for="Status"> Status : </label>
+                                               @Html.DropDownList("Status", new List<SelectListItem>
+                                               {
+                                                   new SelectListItem() {Text = "Due", Value="Due"},
+                                                   new SelectListItem() {Text = "Paid", Value="Paid"},
+                                                   new SelectListItem() {Text = "Advance", Value="Advance"},
+                                               }, "Select Status", new { @class = "form-control", onchange = "blankme(this.id)" })
+                                               <small id="error_Status" class="form-text error_msg">Select Sale Status</small>
+                                           </div>
+
+                                           <div class="form-group">
+                                               <label for="Notes"> Notes: </label>
+                                               @Html.TextArea("Notes", new { @class = "form-control", @rows = "5", @placeholder = "Enter Notes" })
+                                           </div>
+                                       </div>
+
+                                       <div class="col-md-3 col-md-offset-3"></div>
+                                       <div class="col-md-4">
+                                           <div class="form-group">
+                                               <label for="Discount"> Discount : </label>
+                                               @Html.TextBox("Discount", null, new { @class = "form-control", @Value = 0, @type = "number", @placeholder = "Discount Amount ", onchange = "DiscountAmount()" })
+                                               <small id="error_Discount" class="form-text error_msg">Discount can't be empty</small>
+                                           </div>
+                                           <div class="form-group">
+                                               <label for="GrandTotal"> Grand Total : </label>
+                                               <input type="text" id="GrandTotal" class="form-control" readonly />
+                                               <small id="error_GrandTotal" class="form-text error_msg">Total is empty</small>
+                                           </div>
+                                       </div>
+                                   </div>
+
+                                   <div class="form-horizontal">
+                                       <label> </label>
+                                       <input id="BtnUpdate" data-sale-Id="@Model" class="btn btn-success col-md-3 pull-right" type="submit" value="Update Sale" />
+                                   </div>
+                               </div>
+                    </div>
+                </div>
+                <!-- panel-body -->
+            </div>
+            <!-- panel -->
+        </div>
+    </div>
+
+</div>
+
+
+
+
+@section scripts {
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+
+            $('.mydatepicker').datepicker({
+                dateFormat: 'dd-M-yy',
+                todayHighlight: true,
+                autoclose: true
+            });
+
+            function getSale(id) {
+                return $.ajax({
+                    type: 'GET',
+                    datatype: "Json",
+                    url: "../Sales/GetSales",
+                    data: "saleId=" + id
+                });
+            }
+
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            var saleId = $("#BtnUpdate").attr("data-sale-Id");
+
+            function calculateSum() {
+                var sum = 0;
+                // iterate through each td based on class and add the values
+                $(".amount").each(function () {
+
+                    var value = $(this).text();
+                    // add only if the value is number
+                    if (!isNaN(value) && value.length !== 0) {
+                        sum += parseFloat(value);
+                    }
+                });
+
+                if (sum == 0.0) {
+                    $('#Discount').text("0");
+                    $('#GrandTotal').text("0");
+                }
+                //console.log(sum);
+                $('#SubTotal').text(sum.toFixed(2));
+                $('#GrandTotal').val(sum.toFixed(2));
+
+                var b = parseFloat($('#Discount').val()).toFixed(2);
+                if (isNaN(b)) return;
+                var a = parseFloat($('#SubTotal').text()).toFixed(2);
+                var c = parseFloat(a - b).toFixed(2);
+                $('#GrandTotal').val(c);
+            };
+
+            $('#masterSale').ready(function () {
+                $.when(getSale(saleId)).then(function (res) {
+                    //console.log(res);
+                    var detArr = [];
+                    $("#Code").val(res.SaleCode);
+                    //alert(res.customerId);
+
+                    //var date = new Date(res.SalesDate);
+                    //var ret = date.getMonth() + 1 + "/" + date.getDate() + "/" + date.getFullYear();
+                    //alert(res.SalesDate);
+                    //alert(res.SalesDate.substr(6));
+
+                    var value = new Date(res.SalesDate);
+                    //var ret = value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
+                    var ret = value.getDate() + "-" + months[value.getMonth()] + "-" + value.getFullYear(); //value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
+                    //alert(ret);
+
+                    $("#Date").val(ret);
+
+                    $("#Notes").val(res.Notes);
+                    $("#Payment").val(res.PaymentMethod);
+                    $("#Status").val(res.Status);
+                    $("#SubTotal").text(res.Total);
+                    $("#Discount").val(res.Discount);
+                    $("#GrandTotal").val(res.GrandTotal);
+                    $.each(res.Items, function (i, v) {
+                        //detArr.push(
+                        //    '<tr><td class="d-none">' + v.Id +
+                        //    '</td><td class="d-none">' + v.ProductId +
+                        //    '</td><td>' + v.Name +
+                        //    '</td><td> <input  class="description form-control" value= ' + v.Description + '  max="99" />' + '</td><td>' + v.Price +
+                        //    '</td><td>' + '<input  class="qunatity text-center form-control" type= "number" min= "1" step= "1" value= ' + v.Quantity + '  max="99" />' +
+                        //    '</td><td class="amount">' + v.Amount +
+                        //    '</td><td> <a data-itemId="' + v.Id + '" href="#" class="deleteItem"><i class="fa fa-trash"></i></a></td></tr>'
+                        //);
+                        var rowid = generateRandom();
+                        var productItem =
+                            '<tr><td class="d-none SalesItemId">' + v.Id +
+                            '</td><td class="d-none ProductId" id = \'PI' + rowid + '\'>' + v.ProductId +
+                            '</td><td>' + '<input class="name form-control"  id = \'N' + rowid + '\'      type= "text" value= 1  />' +
+                            '</td><td>' + '<input class="description form-control"  id = \'D' + rowid + '\' type= "text" value= 2 />' +
+                            '</td><td style="min-width:80px;max-width:100px" >' + '<input class="price text-center form-control" type= "text"  id = \'P' + rowid + '\'   value= ' + v.Price +'  />' +
+                            '</td><td style="min-width:80px;max-width:100px" >' + '<input class="quantity text-center form-control" type= "number"  id = \'Q' + rowid + '\' min= "1" step= "1" value= ' + v.Quantity +'  max="99" />' +
+                            '</td><td style="min-width:80px;max-width:100px" class="amount" id = \'A' + rowid + '\' >' + v.Amount +
+                            '</td><td><a data-itemId="' + v.Id + '" href="#" class="deleteItem"><i class="fa fa-trash"></i></a></td></tr>';
+
+                        $("#detailsTable tbody").append(productItem);
+
+                        //detArr.push(productItem);
+
+                        //alert(v.Name);
+                        //alert(v.Description);
+
+
+                        $("#N" + rowid).val(v.Name);
+                        $("#D" + rowid).val(v.Description);
+                        $("#P" + rowid).val(v.Price);
+
+
+                        $("#N" + rowid).autocomplete({
+                            source: function (request, response) {
+                                $.ajax({
+                                    url: '../admin/products/',
+                                    dataType: "json",
+                                    data: { query: $("#N" + rowid).val() },
+                                    success: function (data) {
+                                        //console.log(data);
+                                        response($.map(data, function (item) {
+                                            return { ProductId: item.Id, Description: item.Description, label: item.Name, Price: item.Price };
+                                        }));
+                                    },
+                                    error: function (xhr, status, error) {
+                                        alert("Error");
+                                    },
+                                });
+                            },
+                            minLength: 1,
+                            select: function (event, uirow) {
+                                $("#PI" + rowid).html(uirow.item.ProductId);
+                                $("#P" + rowid).val(uirow.item.Price);
+                                $("#D" + rowid).val(uirow.item.Description);
+                                var quantity = $("#Q" + rowid).val();
+                                $("#A" + rowid).html(uirow.item.Price * quantity);
+                                calculateSum();
+                            }
+
+                            
+  
+                        });
+
+
+                    });
+
+
+            
+                    //alert("load done");
+                    //$("#detailsTable tbody").append(detArr);
+                    //var customerid = res.CustomerId;
+                    //alert('Data Load Successfully.');
+                    //$("#Customer").val(res.CustomerId);
+                    //$("#Customer").val(res.CustomerId);
+                    $("#Customer").val(res.CustomerId);//.change();
+
+                    calculateSum();
+
+                    //$("#orderMasterId").val(res.result.MasterId);
+
+                }).fail(function (err) {
+                    console.log(err);
+                });
+            });
+
+        });
+    </script>
+}

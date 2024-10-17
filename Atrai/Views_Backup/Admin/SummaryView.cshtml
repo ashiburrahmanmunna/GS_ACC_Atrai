@@ -1,0 +1,875 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model Atrai.Core.ViewModel.SummaryViewModel
+@{
+    ViewData["Title"] = "Summary View";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    //var profitpermission  = @HttpContextAccessor.HttpContext.Session.GetString("UserRole");
+
+
+
+    var permission = false;
+    var UserRole = @HttpContextAccessor.HttpContext.Session.GetString("UserRole").ToString().ToLower();
+    //alert(UserRole);
+    //alert(permission);
+
+    if (UserRole.Contains("admin")) { permission = true; };
+
+}
+<style>
+    /*.p-15 {
+                padding: 10px 13px 15px 13px !important;
+            }
+
+            .card-dashboard p {
+                font-size: 14px;
+                font-family: arial narrow;
+            }
+
+            .media p {
+                font-size: 13px;
+                font-family: "Arial Narrow";
+            }
+
+            .media {
+                font-size: 15px;
+                font-family: "Arial Narrow";
+                text-align: right;
+                padding-bottom: 2px !important;
+            }
+
+            a {
+                color: #0a275ec9;
+            }
+
+            tbody tr td {
+                font-family: "Arial Narrow";
+                font-size: 13px;
+            }*/
+
+
+    /*    .table th:first-child, .table tbody td:first-child {
+                position: inherit !important;
+                left: 0px;
+                background-color: none;
+                z-index: 1;
+            }
+
+            .table th:last-child, .table tbody td:last-child {
+                position: inherit !important;
+                right: 0px;
+                background-color: none;
+                z-index: 1;
+            }*/
+</style>
+
+<div class="page-wrapper">
+    <!-- Bread crumb -->
+    <div class="row page-titles">
+        <div class="col-md-5 align-self-center">
+            <div class="row">
+                <div class="mx-2 mt-2">
+                    <h5 class="text-primary">Summary</h5>
+                </div>
+                <div class="text-center mx-1">
+                    @*          <a class="card p-1" href="@Url.Action("AddSaleBySerialSearch", "Sales")">
+                    <span><i class="fa fa-cubes fontshadow text-primary"></i><small class="">Sales</small></span>
+                    </a>*@
+                    <a href="@Url.Action("AddSaleBySerialSearch", "Sales")" class="card p-1"><i class="ti-layout-accordion-list  fontshadow text-primary"></i> <small class="">Sales</small></a>
+
+                    @*<a href="@Url.Action("AddSaleBySerialSearch", "Sales")">SalesTest</a>*@
+
+
+
+                </div>
+                <div class="text-center mx-1">
+                    <a href="@Url.Action("PostDocument", "Admin")" class="card p-1"><i class="fa fa-check text-info"></i> <small class="">Post</small></a>
+                </div>
+                <div class="text-center mx-1">
+                    <a href="@Url.Action("AddTransaction", "Admin",  new { Type = "Customer" })" class="card p-1"><i class="fa fa-money text-info"></i> <small class="">Collection</small></a>
+                </div>
+                <div class="text-center mx-1">
+                    <a href="@Url.Action("AddTransaction", "Admin", new { Type = "Paid" })" class="card p-1"><i class="ti-bookmark-alt text-info"></i> <small class="">Payment</small></a>
+                </div>
+                <div class="text-center mx-1">
+                    <a href="@Url.Action("Index", "Admin")" class="card p-1"><i class="fa fa-tachometer text-primary"></i> <small class="">Dashboard</small></a>
+                </div>
+            </div>
+
+
+
+        </div>
+        <div class="col-md-7 align-self-center">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
+                <li class="breadcrumb-item active">Dashboard</li>
+                @*<li class="breadcrumb-item">
+                <div class="text-center mx-1">
+                <a href="@Url.Action("SummaryView", "Admin")" class="card p-1"><i class="ti-bookmark-alt text-info"></i> <small class="">Summary</small></a>
+                </div>
+                </li>*@
+
+            </ol>
+        </div>
+    </div>
+    <!-- End Bread crumb -->
+    <!-- Container fluid  -->
+    <div class="container-fluid ">
+        <!-- Start Page Content -->
+
+
+        <div class="panel-body">
+
+            <div class="card p-2 my-2">
+                <div class="row">
+                    <div class="col-md-3 col-12">
+                        <h4 class="text-center">Overall Summary</h4>
+                    </div>
+
+                                          
+                                <div class="col-md-2 col">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Warehouse", ViewBag.Warehouse as List<SelectListItem>,  new { id = "WarehouseId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+                                @Html.Hidden("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+                                @Html.Hidden("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+
+                                <div class="col-md col  mb-2">
+                                               <div class="form-inline divHiddenItems">
+                                         <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text">
+                                               <i class="fa fa-calendar"></i>
+                                             </div>
+                                        </div>
+                                        <input type="text" class="form-control from-control-sm" name="date" id="daterange-btn" style="width: auto;">
+                                         <button id='btnDec' type="button" class="btn btn-danger rounded-0" title='Decrement month'><i class="fa fa-calendar-minus-o" aria-hidden="true"></i></button>
+                                        <button id='btnInc' type="button" class="btn btn-info  rounded-0" title='Increment month'><i class="fa fa-calendar-plus-o" aria-hidden="true"></i></button>
+                                        </div>
+                                        @*<span type="button" class="btn btn-sm btn-outline-info" id="daterange-btn">
+
+                                            <i class="fa fa-calendar"></i>&nbsp; <span>defaut date</span>
+
+                                            <i class="fa fa-caret-down"></i>
+                                        </span>
+                                        <input id="daterange-btn" size="40" value="">*@
+                                    </div>
+                                </div>
+
+          
+
+@*                    <div class=" col-md-3 col-12">
+                        <div class="row mt-md-1">
+                            <label for="formdate" class="col-sm-4">From date</label>
+                            <div class="col-sm-8">
+                                <input id="dtfromdateall" name="dtfromdate" type="text" class="form-control form-control-sm text-center FromDate" value="@ViewBag.FromDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div class=" col-md-3 col-12">
+                        <div class="row mt-md-1">
+                            <label for="todate" class="col-sm-4">To date </label>
+                            <div class="col-sm-8">
+                                <input id="dttodateall" name="dttodate" style="background-color:white;" type="text" class="form-control form-control-sm text-center ToDate" value="@ViewBag.ToDate">
+                            </div>
+                        </div>
+                    </div>*@
+                    <div class="col-md-1 col">
+                        <input id="btnloadall" type="button" class="btn btn-sm btn-success  mb-1 btn-block rounded-0 rounded-0" value="Load">
+                    </div>
+                    @*                                    <div class="col-md-1 col-12">
+                        <input id="btnloadall" type="button" class="btn btn-sm btn-primary btn-block rounded-0" value="Report">
+                        </div>*@
+
+                    <div class="col-md-1 col">
+                        <button class="btn btn-sm btn-info mb-1 btn-block rounded-0 rounded-0" type="button" onclick="ReportPrint('PrintBusinessSummary')">Report</button>
+                    </div>
+                </div>
+                @*<p class="card-category">New employees on 15th September, 2016</p>*@
+
+            </div>
+
+
+            <div class="form-group row">
+                <div class="col-md-6">
+
+                    <div class="card-dashboard">
+                        <div class="card-header bg-primary text-center p-1">
+                            <h5>Daily Sales Summary</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+
+                                <table class="table table-sm table-striped table-condensed table-bordered">
+                                    <thead>
+
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Sales Date</th>
+                                            <th>Total Sales Count</th>
+                                            <th>Items Qty</th>
+                                            <th>Total Sales Amount</th>
+
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        @foreach (var item in @Model.DayWiseSales.OrderBy(x=>DateTime.Parse(x.SalesDate)))
+                                        {
+                                            <tr>
+                                                <td>@item.SalesType</td>
+                                                <td>@item.SalesDate</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.SalesCount)</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.SalesQty)</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.TotalSalesAmount)</td>
+                                            </tr>
+                                        }
+@*                                        @foreach (var item in @Model.DayWiseSalesReturn)
+                                        {
+                                            <tr>
+                                                <td>Exchange / Return</td>
+                                                <td>@item.SalesReturnDate</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.SalesReturnCount)</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.TotalSalesReturnAmount)</td>
+                                            </tr>
+                                        }*@
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="font-weight-bolder text-center">
+                                            <td colspan="2">Total </td>
+                                            <td>@String.Format("{0:#,##0.00}",@Model.DayWiseSales.Sum(x=>x.SalesCount))</td>
+                                            <td>@String.Format("{0:#,##0.00}",@Model.DayWiseSales.Sum(x=>x.SalesQty))</td>
+                                            <td>@String.Format("{0:#,##0.00}",@Model.DayWiseSales.Sum(x=>x.TotalSalesAmount))</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col-md-6">
+
+                    <div class="card-dashboard">
+                        <div class="card-header bg-success text-white text-center p-1">
+                            <h5>Daily Purchase Summary</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+
+                                <table class="table table-sm table-striped table-condensed table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Purchase Date</th>
+                                            <th>Type</th>
+                                            <th>Total Purchase Count</th>
+                                            <th>Items Qty</th>
+                                            <th>Total Purchase Amount</th>
+
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        @foreach (var item in @Model.DayWisePurchase)
+                                        {
+                                            <tr>
+                                                <td>@item.PurchaseDate</td>
+                                                <td>@item.PurchaseType</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.PurchaseCount)</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.PurchaseQty)</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.TotalPurchaseAmount)</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="font-weight-bolder text-center">
+                                            <td colspan="2">Total </td>
+                                            <td>@String.Format("{0:#,##0.00}",@Model.DayWisePurchase.Sum(x=>x.PurchaseCount))</td>
+                                            <td>@String.Format("{0:#,##0.00}",@Model.DayWisePurchase.Sum(x=>x.PurchaseQty))</td>
+                                            <td>@String.Format("{0:#,##0.00}",@Model.DayWisePurchase.Sum(x=>x.TotalPurchaseAmount))</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+                
+                <div class="col-md-6">
+
+                    <div class="card-dashboard">
+                        <div class="card-header bg-success text-center p-1 text-white">
+                            <h5>Cash and Bank Balance</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+
+                                <table class="table table-sm table-striped table-condensed table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Account Head</th>
+                                            <th>Account Category</th>
+                                            <th>Account Type</th>
+                                            <th>Balance</th>
+
+
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @foreach (var item in @Model.AccountHeadBalance)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @Html.ActionLink(item.AccName + "", "AccountsLedgerViewReport","Admin" , new { ReferanceId = item.Id,dtFrom = DateTime.Now.Date.ToString("dd-MMM-yy"),dtTo = DateTime.Now.Date.ToString("dd-MMM-yy"), type = "Asset" }, new { @target = "_blank" , title="View Ledger"})
+                                                </td>
+                                                <td>@item.AccountCategory</td>
+                                                <td>@item.AccType</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.AccountBalance)</td>
+
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="font-weight-bolder text-center">
+                                            <td></td>
+                                            <td></td>
+                                            <td>Total Amount :</td>
+                                            <td>@String.Format("{0:#,##0.00}", @Model.AccountHeadBalance.Sum(x=>x.AccountBalance))</td>
+
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+
+
+                @{
+
+                    if (permission == true)
+                    {
+                                        <div class="col-md-6">
+
+                                            <div class="card-dashboard">
+                                                <div class="card-header bg-primary text-center p-1 text-white">
+                                                    <h5>Income Summary</h5>
+                                                </div>
+                                                <div class="card-body p-0">
+                                                    <div class="table-responsive">
+
+                                                        <table class="table table-sm table-striped table-condensed table-bordered">
+                                                            <thead>
+
+                                                                <tr>
+                                                                    <th>Income / Expense Head</th>
+                                                                    <th>Income Amount</th>
+                                                                    <th>Expense Amount</th>
+
+
+                                                                </tr>
+                                                            </thead>
+
+                                                            <tbody>
+
+                                                                @foreach (var item in @Model.DayWiseIncome)
+                                                {
+                                                                    <tr>
+                                                                        <td>@item.AccName</td>
+                                                                        <td>@String.Format("{0:#,##0.00}",@item.TransactionAmount)</td>
+                                                                        <td>@String.Format("{0:#,##0.00}",@item.TransactionExpenseAmount)</td>
+
+                                                                    </tr>
+                                                }
+                                                            </tbody>
+                                                            <tfoot>
+                                                                <tr class="font-weight-bolder text-center">
+                                                                    <td>Total Paid / Received :</td>
+                                                                    <td>@String.Format("{0:#,##0.00}",@Model.DayWiseIncome.Sum(x=>x.TransactionAmount))</td>
+                                                                    <td>@String.Format("{0:#,##0.00}",@Model.DayWiseIncome.Sum(x=>x.TransactionExpenseAmount))</td>
+
+                                                                </tr>
+                                                                <tr class="h5 text-center">
+                                                                    @if (@Model.DayWiseIncome.Sum(x => x.TransactionAmount) - @Model.DayWiseIncome.Sum(x => x.TransactionExpenseAmount) > 0)
+                                                    {
+                                                                        <td class="text-success">Total Profit :</td>
+                                                                        <td colspan="2" class="text-success text-right">@String.Format("{0:#,##0.00}",@Model.DayWiseIncome.Sum(x=>x.TransactionAmount) - @Model.DayWiseIncome.Sum(x=>x.TransactionExpenseAmount))</td>
+                                                    }
+                                                    else
+                                                    {
+                                                                        <td class="text-danger">Total Loss :</td>
+                                                                        <td colspan="2" class="text-danger text-right">@String.Format("{0:#,##0.00}",@Model.DayWiseIncome.Sum(x=>x.TransactionAmount) - @Model.DayWiseIncome.Sum(x=>x.TransactionExpenseAmount))</td>
+                                                    }
+                                                                </tr>
+                                                            </tfoot>
+
+                                                        </table>
+                                                    </div>
+
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                    }
+
+
+
+                }
+
+                            
+                   <div class="col-md-6">
+
+                    <div class="card-dashboard">
+                        <div class="card-header bg-info text-center p-1">
+                            <h5>Received Summary</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+
+                                <table class="table table-sm table-striped table-condensed table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Received Head</th>
+                                            <th>Received Amount</th>
+
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        @foreach (var item in @Model.DayWiseReceived)
+                                        {
+                                            <tr>
+                                                <td>@item.AccName</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.TransactionAmount)</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="font-weight-bolder text-center">
+                                            <td>Total Received :</td>
+                                            <td>@String.Format("{0:#,##0.00}",@Model.DayWiseReceived.Sum(x=>x.TransactionAmount))</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+                    <div class="col-md-6">
+
+                    <div class="card-dashboard">
+                        <div class="card-header bg-danger text-white text-center p-1">
+                            <h5>Customer Due Summary</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+
+                                <table class="table table-sm table-striped table-condensed table-bordered">
+                                    <thead>
+
+                                        <tr>
+                                            <th>Customer Name</th>
+                                            <th>Sales Amount</th>
+                                            <th>Received Amount</th>
+                                            <th>Due Amount</th>
+
+
+
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        @foreach (var item in @Model.CustomerWiseDue)
+                                        {
+                                            <tr>
+                                                <td>@item.CustomerName</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.TotalSales)</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.TotalReceived)</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.TotalDue)</td>
+
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="font-weight-bolder text-center">
+                                            <td>Total Due :</td>
+                                            <td>@String.Format("{0:#,##0.00}",@Model.CustomerWiseDue.Sum(x=>x.TotalSales))</td>
+                                            <td>@String.Format("{0:#,##0.00}",@Model.CustomerWiseDue.Sum(x=>x.TotalReceived))</td>
+                                            <td>@String.Format("{0:#,##0.00}",@Model.CustomerWiseDue.Sum(x=>x.TotalDue))</td>
+
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+                @if (permission == true)
+                {
+                    <div class="col-md-6">
+
+                        <div class="card-dashboard">
+                            <div class="card-header bg-dark text-center p-1">
+                                <h5>Supplier Due Summary</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+
+                                    <table class="table table-sm table-striped table-condensed table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Supplier Name</th>
+                                                <th>Purchase Amount</th>
+                                                <th>Paid Amount</th>
+                                                <th>Due Amount</th>
+
+
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            @foreach (var item in @Model.SupplierWiseDue)
+                                            {
+                                                <tr>
+                                                    <td>@item.SupplierName</td>
+                                                    <td>@String.Format("{0:#,##0.00}",@item.TotalPurchase)</td>
+                                                    <td>@String.Format("{0:#,##0.00}",@item.TotalPaid)</td>
+                                                    <td>@String.Format("{0:#,##0.00}",@item.TotalDue)</td>
+
+                                                </tr>
+                                            }
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="font-weight-bolder text-center">
+                                                <td>Total Due :</td>
+                                                <td>@String.Format("{0:#,##0.00}", @Model.SupplierWiseDue.Sum(x=>x.TotalPurchase))</td>
+                                                <td>@String.Format("{0:#,##0.00}", @Model.SupplierWiseDue.Sum(x=>x.TotalPaid))</td>
+                                                <td>@String.Format("{0:#,##0.00}", @Model.SupplierWiseDue.Sum(x=>x.TotalDue))</td>
+
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+
+                            </div>
+
+                        </div>
+                    </div>
+                }
+
+
+
+
+                <div class="col-md-6">
+
+                    <div class="card-dashboard">
+                        <div class="card-header bg-warning text-center p-1">
+                            <h5>Paid Summary</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+
+                                <table class="table table-sm table-striped table-condensed table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Paid Head</th>
+                                            <th>Paid Amount</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @foreach (var item in @Model.DayWisePaid)
+                                        {
+                                            <tr>
+                                                <td>@item.AccName</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.TransactionAmount)</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="font-weight-bolder text-center">
+                                            <td>Total Paid :</td>
+                                            <td>@String.Format("{0:#,##0.00}",@Model.DayWisePaid.Sum(x=>x.TransactionAmount))</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+                @if (permission == true)
+                {
+                      <div class="col-md-6">
+
+                    <div class="card-dashboard">
+                        <div class="card-header bg-info text-center p-1 text-white">
+                            <h5>Asset Summary</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+
+                                <table class="table table-sm table-striped table-condensed table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Account Head</th>
+                                            <th>Account Category</th>
+                                            <th>Account Type</th>
+                                            <th>Balance</th>
+
+
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @foreach (var item in @Model.AssetBalance)
+                                        {
+                                            <tr>
+                                                <td>@item.AccName</td>
+                                                <td>@item.AccountCategory</td>
+                                                <td>@item.AccType</td>
+                                                <td>@String.Format("{0:#,##0.00}",@item.AccountBalance)</td>
+
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="font-weight-bolder text-center">
+                                            <td></td>
+                                            <td></td>
+                                            <td>Total Amount :</td>
+                                            <td>@String.Format("{0:#,##0.00}", @Model.AssetBalance.Sum(x=>x.AccountBalance))</td>
+
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
+                }
+                
+                
+                @if (permission == true)
+                {
+                <div class="col-md-6">
+
+                    <div class="card-dashboard">
+                        <div class="card-header bg-primary text-center p-1 text-white">
+                            <h5>Liability Summary</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+
+                                <table class="table table-sm table-striped table-condensed table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Account Head</th>
+                                            <th>Account Category</th>
+                                            <th>Account Type</th>
+                                            <th>Balance</th>
+
+
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @foreach (var item in @Model.LiabilityBalance)
+                                        {
+                                            <tr>
+                                                <td>@item.AccName</td>
+                                                <td>@item.AccountCategory</td>
+                                                <td>@item.AccType</td>
+                                                <td>@String.Format("{0:#,##0.00}",-@item.AccountBalance)</td>
+
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="font-weight-bolder text-center">
+                                            <td></td>
+                                            <td></td>
+                                            <td>Total Amount :</td>
+                                            <td>@String.Format("{0:#,##0.00}", -@Model.LiabilityBalance.Sum(x=>x.AccountBalance))</td>
+
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+                }
+             
+
+
+
+
+
+
+                
+          
+
+
+
+
+
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+
+
+@section Scripts{
+
+
+<script type="text/javascript">
+
+
+
+
+
+
+      function ReportPrint(btnvalue) {
+
+           //var peopleList = $('#tbllist').DataTable();
+           //var rows = peopleList.rows('.selected').data();
+
+          //var CustomerId = $('#CustomerId').val();
+          //var UserId = $('#UserId').val();
+          //var WarehouseId = $('#WarehouseId').val();
+          //var CategoryId = $('#CategoryId').val();
+
+          //var Status = $('#Status').val();
+
+
+           //var reporttype = $("input[name=RptType]:checked").val();
+           var FromDate = $(".FromDate").val();
+           var ToDate = $(".ToDate").val();
+
+
+
+       $.ajax({
+           type: 'POST',
+           url: '@Url.Action("AllSalesReport", "Sales")',
+           dataType: 'json',
+           async: true,
+           data: { action: btnvalue, FromDate: FromDate, ToDate: ToDate},
+           success: function (response) {
+               //console.log(response.Url)
+               window.open(response.Url, '_blank')
+           },
+           error: function (ex) {
+               alert('Failed.' + ex);
+           }
+
+       });
+
+
+    }
+
+
+      $(document).ready(function () {
+            var viewbagwarehouseid = parseInt(@ViewBag.WarehouseId);
+            //alert(@ViewBag.WarehouseId);
+            $('#WarehouseId').val(@ViewBag.WarehouseId);
+
+            $("#btnloadall").click(function () {
+                var dtfromdateall = $('#FromDate').val();
+                var dttodateall = $('#ToDate').val();
+                var warehouseid = $('#WarehouseId').val();
+
+                window.location.href = `?FromDate=${dtfromdateall}&ToDate=${dttodateall}&WarehouseId=${warehouseid}`
+            });
+
+      });
+
+
+       //  function CurrentDate() {
+       //    var date = new Date();
+       //    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+       //        "Aug", "Sep", "Oct", "Nov", "Dec"];
+       //    var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear();
+
+
+       //    if ($("#dtfromdate").val() == '') {
+       //        $("#dtfromdate").val(val);
+       //    }
+       //    if ($("#dttodate").val() == '') {
+       //        $("#dttodate").val(val);
+       //    }
+
+
+       //}
+       //CurrentDate();
+
+
+      //$("#dtfromdate,#dttodate,#dtfromdateall,#dttodateall").datepicker({
+      // onSelect: function (date) {
+      //     // Your CSS changes, just in case you still need them
+      //     $('a.ui-state-default').removeClass('ui-state-highlight');
+      //     $(this).addClass('ui-state-highlight');
+
+      //     //var dateFormat = $("#LCOpenDate").datepicker("option", "dateFormat");
+      //     ////setter
+      //     //$("#LCOpenDate").datepicker("option", "dateFormat", 'dd-M-yy');
+      // }
+      // ,
+      // dateFormat: "dd-M-yy",
+      // changeMonth: true,
+      // changeYear: true
+      // });
+
+
+</script>
+        }

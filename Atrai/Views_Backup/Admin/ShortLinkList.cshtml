@@ -1,0 +1,85 @@
+﻿@using Microsoft.AspNetCore.Http
+@model IEnumerable<Atrai.Core.Entity.ShortLinkModel>
+@{ ViewData["Title"] = "ShortLink List";
+                Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+@inject IHttpContextAccessor _http
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+
+        @*
+
+            </div>*@
+
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-md-3 col-12">
+                                @Html.ActionLink("Create Short Link", "AddShortLink", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md-5 col-12 m-t-2">
+                                <h4 style="color: #1976d2;">Short Link List</h4>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive m-t-10">
+                            <table id="example23" class="display table table-sm table-hover  table-bordered table-striped" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Short Link</th>
+
+                                        <th class="text-wrap" style="max-width:400px">@Html.DisplayNameFor(model => model.Url)</th>
+
+                                        <th>Hit Count</th>
+                                        @*<th>Action</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                  
+                                    <tr>
+                                            <td>@item.Name</td>
+                                        @*<td>@item.GetUrlChunk()</td>*@
+                                        <td>
+                                            @{ var abc = $"{_http.HttpContext.Request.Scheme}://{_http.HttpContext.Request.Host}/{@item.GetUrlChunk()}"; }
+                                        <a href="@abc" target="_blank" >
+                                            @abc
+                                        </a>
+                                    </td>
+                                    <td class="text-wrap" style="max-width:600px">@item.Url</td>
+
+                                    <td>@item.ShortLinkHitList.Count()</td>
+
+                                    @*<td>
+                                        <a href="@Url.Action("EditShortLink", "Admin", new {ShortLinkId = item.Id})" class="btn btn-icon btn-warning btn-sm rounded-0 mb-1">
+                                            <i class="fa fa-edit"></i>
+                                        </a>
+                                        <a href="@Url.Action("DeleteShortLink", "Admin", new {ShortLinkId = item.Id})" onclick="return confirm('Are you sure you want to Remove this ShortLink?')" class="btn btn-icon btn-danger btn-sm rounded-0 mb-1">
+                                            <i class="fa fa-remove"></i>
+                                        </a>
+                                    </td>*@
+                                    </tr>}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+
+@section scripts{
+
+}

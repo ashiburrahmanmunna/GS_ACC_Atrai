@@ -1,0 +1,1100 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "Ecommerce";
+    Layout = "~/Views/Shared/_EcommerceLayout.cshtml";
+}
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+@*<link href="~/AdminEla/Assets/css/lib/data-table/buttons.bootstrap.min.css" rel="stylesheet" />
+    <link href="~/AdminEla/Assets/css/lib/data-table/buttons.dataTables.min.css" rel="stylesheet" />*@
+
+<style>
+
+    /* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+                                            for details on configuring this project to bundle and minify static web assets. */
+
+
+
+    a.navbar-brand {
+        white-space: normal;
+        text-align: center;
+        word-break: break-all;
+    }
+
+    /* Provide sufficient contrast against white background */
+    a {
+        color: #0366d6;
+    }
+
+    .btn-primary {
+        color: #fff;
+        background-color: #1b6ec2;
+        border-color: #1861ac;
+    }
+
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+        color: #fff;
+        background-color: #1b6ec2;
+        border-color: #1861ac;
+    }
+
+    /* Sticky footer styles
+                                            -------------------------------------------------- */
+    html {
+        font-size: 14px;
+    }
+
+    @@media (min-width: 768px) {
+        html {
+            font-size: 16px;
+        }
+    }
+
+    .border-top {
+        border-top: 1px solid #e5e5e5;
+    }
+
+    .border-bottom {
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    .box-shadow {
+        box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+    }
+
+    button.accept-policy {
+        font-size: 1rem;
+        line-height: inherit;
+    }
+
+    /* Sticky footer styles
+                                            -------------------------------------------------- */
+    html {
+        position: relative;
+        min-height: 100%;
+    }
+
+    body {
+        /* Margin bottom by footer height */
+        margin-bottom: 30px;
+        margin-top: 30px;
+    }
+
+    .footer {
+        position: absolute;
+        /*bottom: 0;*/
+        width: 100%;
+        white-space: nowrap;
+        /*line-height: 60px; */
+    }
+
+    .cards tbody tr {
+        width: 164px;
+        border: 1px solid #D3D3D3;
+        text-align: center;
+        transition: transform .2s;
+        justify-content: center;
+        align-items: center;
+        display: inline-block;
+        margin: 6px 6px;
+    }
+
+    /*    .cards tbody tr {
+                                                width: 170px;
+                                                border: 1px solid #D3D3D3;
+                                                text-align: center;
+                                                transition: transform .2s;
+                                                justify-content: center;
+                                                align-items: center;
+                                                display: inline-block;
+                                                margin: 5px 10px;
+                                            }*/
+
+    .cards tbody td {
+        display: block;
+    }
+
+    .fa-star {
+        color: #F8C53C;
+    }
+
+
+
+
+    .cards thead {
+        display: none;
+    }
+
+
+
+    .cards td:before {
+        content: attr(data-label);
+        position: relative;
+        float: left;
+        color: #808080;
+        min-width: 4rem;
+        margin-left: 0;
+        margin-right: 1rem;
+        text-align: left;
+    }
+
+    tr.selected td:before {
+        color: #CCC;
+    }
+    /*
+                                            .tbl .avatar {
+                                                width: 50px;
+                                            }*/
+
+    .cards .avatar {
+        /*        width: 165px;
+                                    height: 170px;*/
+        height: 170px;
+        width: 100%;
+    }
+
+    .product-description {
+        font-size: 14px;
+        min-height: 20px;
+        overflow: hidden;
+        font-family: 'Arial Narrow';
+    }
+
+        .product-description:hover {
+            color: #602069;
+        }
+
+    .cards tbody tr:hover {
+        border-radius: 0px;
+        box-shadow: 3px 3px 4px #ededed, -3px -3px 4px #ededed;
+        transition: ease-in-out .2s;
+        transform: translateY(2px);
+        background: #815d6e2b;
+        cursor: pointer;
+    }
+
+    .cards .avatar:hover {
+        transform: translateY(2px);
+        transition: ease-in-out .2s;
+    }
+
+    .product-price {
+        color: #F47E6D;
+        font-weight: bold;
+        /*margin-bottom: 8px;*/
+        font-size: 16px;
+    }
+
+    .old-price {
+        margin-left: 2px;
+    }
+
+    .money {
+        font-size: 16px;
+        font-weight: bold;
+        /*font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;*/
+    }
+
+    .category-image-container {
+        /*height: 100px;*/
+        /*  background-color: #fff;
+                              overflow: hidden;
+                              padding: 10px;*/
+    }
+
+        .category-image-container img {
+            max-height: 100px;
+            max-width: 100%;
+            width: auto;
+            padding: 2px;
+            margin-top: 8px;
+        }
+
+    .mx-auto {
+        margin-right: auto !important;
+        margin-left: auto !important;
+    }
+
+
+
+    
+
+</style>
+
+
+<div class="">
+    <div class="row px-0 mt-2">
+
+
+
+        <div class="appPageContent px-3 mt-4">
+            <section class="slider-section">
+                <div class="row g-0 align-items-end">
+                    <div class="col-lg-6 order-2 order-lg-1">
+                        <h2 class="display-4 mb-3 lh-1">
+                            Welcome to Online Store
+                        </h2>
+                        <p class="lead">
+                            Search from all classifieds categories &amp; Post unlimited classifieds for free!
+                        </p>
+                    </div>
+                    <div class="col-lg-6 order-1 order-lg-2">
+                        <div class="mb-4 mb-lg-0">
+                            <img alt="Welcome to Online Store" class="lazyimg img-fluid rounded mx-auto d-block" onerror="this.onerror=null;this.src='/content/images/site/default-picture.png';" src="https://demo.easyfieds.com/content/images/514d3d8b-803a-4696-8983-e1e0c66dfdcb.png" style="">
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <hr />
+
+            <section class="featured-categorys">
+                <div class="text-center mb-3">
+                    <h2 class="display-6">
+                        Featured Categories
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Our Featured Categories
+                    </p>
+                </div>
+                <div class="m-2 p-2">
+
+                    <div class="row row-cols-2 row-cols-sm-4 row-cols-md-6 g-2">
+                        <div class="col mb-3 zoom  hover14">
+                            <div class="card card_red text-center">
+                                <div class="category-image-container align-categorys-center">
+                                    <img class="lazyimg card-img-top rounded-0 mx-auto" onerror="this.onerror=null;this.src='/content/images/site/default-picture.png';" src="https://demo.easyfieds.com/content/images/d3f7eb83-d379-4059-9b9c-5afb4ffe9e8f.png" style="">
+                                </div>
+                                <div class="card-body p-2 ">
+                                    <h6 class="card-title">
+                                        <a href="/search/vehicles" class="link-secondary text-decoration-none stretched-link">
+                                            Vehicles
+                                        </a>
+                                    </h6>
+                                </div>
+                                <div class="card-footer border-0 p-2 pt-0">
+                                    (8)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col mb-3 zoom hover14">
+                            <div class="card card_violet text-center">
+                                <div class="category-image-container align-categorys-center">
+                                    <img class="lazyimg card-img-top rounded-0 mx-auto" onerror="this.onerror=null;this.src='/content/images/site/default-picture.png';" src="https://demo.easyfieds.com/content/images/bfb7734f-45d8-4a5b-ad52-36978b10ef8d.png" style="">
+                                </div>
+                                <div class="card-body p-2 ">
+                                    <h6 class="card-title">
+                                        <a href="/search/services" class="link-secondary text-decoration-none stretched-link">
+                                            Services
+                                        </a>
+                                    </h6>
+                                </div>
+                                <div class="card-footer border-0 p-2 pt-0">
+                                    (1)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col mb-3 zoom hover14">
+                            <div class="card card_three text-center">
+                                <div class="category-image-container align-categorys-center">
+                                    <img class="lazyimg card-img-top rounded-0 mx-auto" onerror="this.onerror=null;this.src='/content/images/site/default-picture.png';" src="https://demo.easyfieds.com/content/images/a475cf18-a73f-4dba-89c7-ff73e99873b8.png" style="">
+                                </div>
+                                <div class="card-body p-2 ">
+                                    <h6 class="card-title">
+                                        <a href="/search/realestate" class="link-secondary text-decoration-none stretched-link">
+                                            Realestate
+                                        </a>
+                                    </h6>
+                                </div>
+                                <div class="card-footer border-0 p-2 pt-0">
+                                    (5)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col mb-3 zoom hover14">
+                            <div class="card card_four text-center">
+                                <div class="category-image-container align-categorys-center">
+                                    <img class="lazyimg card-img-top rounded-0 mx-auto" onerror="this.onerror=null;this.src='/content/images/site/default-picture.png';" src="https://demo.easyfieds.com/content/images/4369a998-2f4a-41f4-b39f-749c72c46902.png" style="">
+                                </div>
+                                <div class="card-body p-2 ">
+                                    <h6 class="card-title">
+                                        <a href="/search/mobiles" class="link-secondary text-decoration-none stretched-link">
+                                            Mobiles
+                                        </a>
+                                    </h6>
+                                </div>
+                                <div class="card-footer border-0 p-2 pt-0">
+                                    (2)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col mb-3 zoom hover14">
+                            <div class="card card_five text-center">
+                                <div class="category-image-container align-categorys-center">
+                                    <img class="lazyimg card-img-top rounded-0 mx-auto" onerror="this.onerror=null;this.src='/content/images/site/default-picture.png';" src="https://demo.easyfieds.com/content/images/8bca4069-5754-4fc4-bcbf-c406a0e89ade.png" style="">
+                                </div>
+                                <div class="card-body p-2 ">
+                                    <h6 class="card-title">
+                                        <a href="/search/kids" class="link-secondary text-decoration-none stretched-link">
+                                            Kids
+                                        </a>
+                                    </h6>
+                                </div>
+                                <div class="card-footer border-0 p-2 pt-0">
+                                    (3)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col mb-3 zoom hover14">
+                            <div class="card card_six text-center">
+                                <div class="category-image-container align-categorys-center">
+                                    <img class="lazyimg card-img-top rounded-0 mx-auto" onerror="this.onerror=null;this.src='/content/images/site/default-picture.png';" src="https://demo.easyfieds.com/content/images/70c4b123-aaa3-444a-967d-7c07a069bd52.png" style="">
+                                </div>
+                                <div class="card-body p-2 ">
+                                    <h6 class="card-title">
+                                        <a href="/search/jobs" class="link-secondary text-decoration-none stretched-link">
+                                            Jobs
+                                        </a>
+                                    </h6>
+                                </div>
+                                <div class="card-footer border-0 p-2 pt-0">
+                                    (2)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col mb-3 zoom hover14">
+                            <div class="card card_seven text-center">
+                                <div class="category-image-container align-categorys-center">
+                                    <img class="lazyimg card-img-top rounded-0 mx-auto" onerror="this.onerror=null;this.src='/content/images/site/default-picture.png';" src="https://demo.easyfieds.com/content/images/3b4e4045-54c4-454f-9cf4-123e4d450ec3.png" style="">
+                                </div>
+                                <div class="card-body p-2 ">
+                                    <h6 class="card-title">
+                                        <a href="/search/furniture-home-decor" class="link-secondary text-decoration-none stretched-link">
+                                            Furniture &amp; Home Decor
+                                        </a>
+                                    </h6>
+                                </div>
+                                <div class="card-footer border-0 p-2 pt-0">
+                                    (7)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col mb-3 zoom hover14">
+                            <div class="card card_eight text-center">
+                                <div class="category-image-container align-categorys-center">
+                                    <img class="lazyimg card-img-top rounded-0 mx-auto" onerror="this.onerror=null;this.src='/content/images/site/default-picture.png';" src="https://demo.easyfieds.com/content/images/e0d4697a-3405-4bc3-86dd-1062748c05b8.png" style="">
+                                </div>
+                                <div class="card-body p-2 ">
+                                    <h6 class="card-title">
+                                        <a href="/search/fashion-beauty" class="link-secondary text-decoration-none stretched-link">
+                                            Fashion &amp; Beauty
+                                        </a>
+                                    </h6>
+                                </div>
+                                <div class="card-footer border-0 p-2 pt-0">
+                                    (2)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col mb-3 zoom hover14">
+                            <div class="card card_nine text-center">
+                                <div class="category-image-container align-categorys-center">
+                                    <img class="lazyimg card-img-top rounded-0 mx-auto" onerror="this.onerror=null;this.src='/content/images/site/default-picture.png';" src="https://demo.easyfieds.com/content/images/fb645f1c-09fb-4b28-8df3-5fe023bd1dbd.png" style="">
+                                </div>
+                                <div class="card-body p-2 ">
+                                    <h6 class="card-title">
+                                        <a href="/search/electronics-home-appliances" class="link-secondary text-decoration-none stretched-link">
+                                            Electronics &amp; Home Appliances
+                                        </a>
+                                    </h6>
+                                </div>
+                                <div class="card-footer border-0 p-2 pt-0">
+                                    (7)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col mb-3 zoom hover14">
+                            <div class="card card_ten text-center">
+                                <div class="category-image-container align-categorys-center">
+                                    <img class="lazyimg card-img-top rounded-0 mx-auto" onerror="this.onerror=null;this.src='/content/images/site/default-picture.png';" src="https://demo.easyfieds.com/content/images/24c73402-eefb-4910-b701-762e9352c099.png" style="">
+                                </div>
+                                <div class="card-body p-2 ">
+                                    <h6 class="card-title">
+                                        <a href="/search/business-industrial-agriculture" class="link-secondary text-decoration-none stretched-link">
+                                            Business, Industrial &amp; Agriculture
+                                        </a>
+                                    </h6>
+                                </div>
+                                <div class="card-footer border-0 p-2 pt-0">
+                                    (3)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col mb-3 zoom hover14">
+                            <div class="card card_eleven text-center">
+                                <div class="category-image-container align-categorys-center">
+                                    <img class="lazyimg card-img-top rounded-0 mx-auto" onerror="this.onerror=null;this.src='/content/images/site/default-picture.png';" src="https://demo.easyfieds.com/content/images/fad29b50-b748-4ff5-a20f-ac0b091f4de8.png" style="">
+                                </div>
+                                <div class="card-body p-2 ">
+                                    <h6 class="card-title">
+                                        <a href="/search/books-sports-hobbies" class="link-secondary text-decoration-none stretched-link">
+                                            Books, Sports &amp; Hobbies
+                                        </a>
+                                    </h6>
+                                </div>
+                                <div class="card-footer border-0 p-2 pt-0">
+                                    (3)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col mb-3 zoom hover14">
+                            <div class="card card_tweleve text-center">
+                                <div class="category-image-container align-categorys-center">
+                                    <img class="lazyimg card-img-top rounded-0 mx-auto" onerror="this.onerror=null;this.src='/content/images/site/default-picture.png';" src="https://demo.easyfieds.com/content/images/77beb776-5dae-416b-9798-695ef03d4678.png" style="">
+                                </div>
+                                <div class="card-body p-2 ">
+                                    <h6 class="card-title">
+                                        <a href="/search/bikes" class="link-secondary text-decoration-none stretched-link">
+                                            Bikes
+                                        </a>
+                                    </h6>
+                                </div>
+                                <div class="card-footer border-0 p-2 pt-0">
+                                    (2)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+
+
+        </div>
+    </div>
+
+
+    <div class="row mb-5">
+                        <div class="col-6 col-md-4 col-lg-2 mb-8">
+                            <!--== Start Product Categories Item ==-->
+                            <a class="product-two-category-item" href="shop.html">
+                                <img class="product-two-category-thumb" src="https://htmldemo.net/merier/merier/assets/images/shop/category/c1.png" width="80" height="80" alt="Image-HasTech">
+                                <h4 class="product-two-category-title">Clothes</h4>
+                            </a>
+                            <!--== End Product Categories Item ==-->
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2 mb-8">
+                            <!--== Start Product Categories Item ==-->
+                            <a class="product-two-category-item" href="shop.html">
+                                <img class="product-two-category-thumb" src="https://htmldemo.net/merier/merier/assets/images/shop/category/c2.png" width="80" height="80" alt="Image-HasTech">
+                                <h4 class="product-two-category-title">Shoes</h4>
+                            </a>
+                            <!--== End Product Categories Item ==-->
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2 mb-8">
+                            <!--== Start Product Categories Item ==-->
+                            <a class="product-two-category-item" href="shop.html">
+                                <img class="product-two-category-thumb" src="https://htmldemo.net/merier/merier/assets/images/shop/category/c3.png" width="80" height="80" alt="Image-HasTech">
+                                <h4 class="product-two-category-title">Shirts</h4>
+                            </a>
+                            <!--== End Product Categories Item ==-->
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2 mb-8">
+                            <!--== Start Product Categories Item ==-->
+                            <a class="product-two-category-item" href="shop.html">
+                                <img class="product-two-category-thumb" src="https://htmldemo.net/merier/merier/assets/images/shop/category/c4.png" width="80" height="80" alt="Image-HasTech">
+                                <h4 class="product-two-category-title">Pants</h4>
+                            </a>
+                            <!--== End Product Categories Item ==-->
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2 mb-8">
+                            <!--== Start Product Categories Item ==-->
+                            <a class="product-two-category-item" href="shop.html">
+                                <img class="product-two-category-thumb" src="https://htmldemo.net/merier/merier/assets/images/shop/category/c5.png" width="80" height="80" alt="Image-HasTech">
+                                <h4 class="product-two-category-title">Bags</h4>
+                            </a>
+                            <!--== End Product Categories Item ==-->
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2 mb-8">
+                            <!--== Start Product Categories Item ==-->
+                            <a class="product-two-category-item" href="shop.html">
+                                <img class="product-two-category-thumb" src="https://htmldemo.net/merier/merier/assets/images/shop/category/c6.png" width="80" height="80" alt="Image-HasTech">
+                                <h4 class="product-two-category-title">Hats</h4>
+                            </a>
+                            <!--== End Product Categories Item ==-->
+                        </div>
+    </div>
+
+
+    <hr />
+
+    <section class="featured-categorys">
+        <div class="text-center mb-3">
+            <h2 class="display-6">
+                New Arraival
+            </h2>
+            <p class="text-muted mb-0">
+                Newly Added Item
+            </p>
+        </div>
+
+
+        <div class="row">
+
+            <div class="col-sm-6 col-lg-4 mb-5">
+                <!--== Start Product Item ==-->
+                <div class="product-item product-item-border">
+                    <a class="product-thumb" href="shop-single-product.html">
+                        <img src="https://htmldemo.net/merier/merier/assets/images/shop/1.png" width="300" height="286" alt="Image-HasTech">
+                    </a>
+                    <span class="badges">New</span>
+                    <div class="product-action">
+                        <button type="button" class="product-action-btn action-btn-quick-view" data-toggle="modal" data-target="#action-QuickViewModal">
+                            <i class="fa fa-expand"></i>
+                        </button>
+                        <button type="button" class="product-action-btn action-btn-cart" data-toggle="modal" data-target="#action-CartAddModal">
+                            <i class="fa fa-shopping-cart"></i>
+                        </button>
+                        <button type="button" class="product-action-btn action-btn-compare" data-toggle="modal" data-target="#action-CompareModal">
+                            <i class="fa fa-exchange"></i>
+                        </button>
+                    </div>
+                    <div class="product-info">
+                        <h4 class="title"><a href="shop-single-product.html">Literature Classical</a></h4>
+                        <div class="price">$650.00 <span class="price-old">$650.00</span></div>
+                        <button type="button" class="info-btn-wishlist" data-toggle="modal" data-target="#action-WishlistModal">
+                            <i class="fa fa-heart-o"></i>
+                        </button>
+                    </div>
+                </div>
+                <!--== End prPduct Item ==-->
+            </div>
+            <div class="col-sm-6 col-lg-4 mb-5">
+                <!--== Start Product Item ==-->
+                <div class="product-item product-item-border">
+                    <a class="product-thumb" href="shop-single-product.html">
+                        <img src="https://htmldemo.net/merier/merier/assets/images/shop/3.png" width="300" height="286" alt="Image-HasTech">
+                    </a>
+                    <span class="badges">New</span>
+                    <div class="product-action">
+                        <button type="button" class="product-action-btn action-btn-quick-view" data-toggle="modal" data-target="#action-QuickViewModal">
+                            <i class="fa fa-expand"></i>
+                        </button>
+                        <button type="button" class="product-action-btn action-btn-cart" data-toggle="modal" data-target="#action-CartAddModal">
+                            <i class="fa fa-shopping-cart"></i>
+                        </button>
+                        <button type="button" class="product-action-btn action-btn-compare" data-toggle="modal" data-target="#action-CompareModal">
+                            <i class="fa fa-exchange"></i>
+                        </button>
+                    </div>
+                    <div class="product-info">
+                        <h4 class="title"><a href="shop-single-product.html">Literature Classical</a></h4>
+                        <div class="price">$650.00 <span class="price-old">$650.00</span></div>
+                        <button type="button" class="info-btn-wishlist" data-toggle="modal" data-target="#action-WishlistModal">
+                            <i class="fa fa-heart-o"></i>
+                        </button>
+                    </div>
+                </div>
+                <!--== End prPduct Item ==-->
+            </div>
+            <div class="col-sm-6 col-lg-4 mb-5">
+                <!--== Start Product Item ==-->
+                <div class="product-item product-item-border">
+                    <a class="product-thumb" href="shop-single-product.html">
+                        <img src="https://htmldemo.net/merier/merier/assets/images/shop/2.png" width="300" height="286" alt="Image-HasTech">
+                    </a>
+                    <span class="badges">New</span>
+                    <div class="product-action">
+                        <button type="button" class="product-action-btn action-btn-quick-view" data-toggle="modal" data-target="#action-QuickViewModal">
+                            <i class="fa fa-expand"></i>
+                        </button>
+                        <button type="button" class="product-action-btn action-btn-cart" data-toggle="modal" data-target="#action-CartAddModal">
+                            <i class="fa fa-shopping-cart"></i>
+                        </button>
+                        <button type="button" class="product-action-btn action-btn-compare" data-toggle="modal" data-target="#action-CompareModal">
+                            <i class="fa fa-exchange"></i>
+                        </button>
+                    </div>
+                    <div class="product-info">
+                        <h4 class="title"><a href="shop-single-product.html">Literature Classical</a></h4>
+                        <div class="price">$650.00 <span class="price-old">$650.00</span></div>
+                        <button type="button" class="info-btn-wishlist" data-toggle="modal" data-target="#action-WishlistModal">
+                            <i class="fa fa-heart-o"></i>
+                        </button>
+                    </div>
+                </div>
+                <!--== End prPduct Item ==-->
+            </div>
+
+        </div>
+    </section>
+    <hr />
+
+
+
+
+    <section class="featured-categorys">
+        <div class="text-center mb-3">
+            <h2 class="display-6">
+                Search Product
+            </h2>
+            <p class="text-muted mb-0">
+                Purchase Your Desired Items
+            </p>
+        </div>
+        <div class="row">
+
+            <div class="col-offset-1 col-md-5 col-12 mt-3 ml-5" id="toremove">
+                <div class="input-group" id="divCategory">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text rounded-0 py-0">
+                            Category
+                        </span>
+
+                    </div>
+                    @Html.DropDownList("Category", ViewBag.Category as List<SelectListItem>, new { id = "Category", @class = "form-control form-control-sm rounded-0" })
+
+                </div>
+            </div>
+
+
+            <div class="col-md-5 col-12 mt-3">
+                <div class="input-group" id="divSeach">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text py-0 rounded-0">
+                            Search
+                        </span>
+
+                        @*@Html.TextBox("myInputTextField" , new { id = "myInputTextField" ,@class = "form-control form-control-sm rounded-0"  }) *@
+                        @*@Html.DropDownList("Category", ViewBag.Category as List<SelectListItem>, new { id = "Category", @class = "form-control form-control-sm rounded-0" })*@
+
+                    </div>
+                    <input type="text" id="myInputTextField" class="form-control form-control-sm rounded-0" />
+
+                </div>
+            </div>
+
+
+
+
+            @*<div class="col-md-5 mt-3 ml-5" id ="toremove">
+                <div class="input-group input-group-sm  my-2" id="divCategory">
+                <div class="input-group-prepend">
+                <span class="input-group-text rounded-0 py-0">
+                Search
+                </span>
+                <input type="text" id="myInputTextField"  class = "form-control form-control-sm rounded-0">
+
+                </div>
+                </div>
+                </div>*@
+
+            @*<div class="col-md-5 rounded-0"><div id="tblProductSearc_filter" class="dataTables_filter"><label>Search:<input type="search" class="form-control form-control-sm" placeholder="" aria-controls="tblProductSearc"></label></div></div>*@
+            <div class="col-md-12">
+                <table class="tbl cards table-sm no-footer text-center dataTable" cellspacing="0" width="100%" id="tblProductSearc">
+                </table>
+            </div>
+        </div>
+    </section>
+    @*<div>
+        <div data-role="rangeslider">
+        <label for="range-10a">Rangeslider:</label>
+        <input type="range" name="range-10a" id="range-10a" min="0" max="10" step=".1" value="2.6">
+        <label for="range-10b">Rangeslider:</label>
+        <input type="range" name="range-10b" id="range-10b" min="0" max="10" step=".1" value="5.4">
+        </div>
+        </div>*@
+
+
+    <div class="scroll-to-top" style="display: block;"><span class="fa fa-angle-double-up"></span></div>
+
+
+    <aside class="product-cart-view-modal modal fade" id="action-QuickViewModal" tabindex="-1" aria-modal="true" role="dialog" padding-left: 0px;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="product-quick-view-content">
+                        <button type="button" class="btn-close" data-dismiss="modal"><span>×</span></button>
+                        <div class="row row-gutter-0">
+                            <div class="col-lg-6">
+                                <div class="single-product-slider">
+                                    <div class="single-product-thumb">
+                                        <div class="swiper mySwiper">
+                                            <div class="swiper-wrapper">
+                                                <div class="swiper-slide">
+                                                    <div class="thumb-item">
+                                                        <img SRC="https://htmldemo.net/merier/merier/assets/images/shop/details/m1.jpg" alt="Image" width="640" height="710">
+                                                    </div>
+                                                </div>
+                                                <div class="swiper-slide">
+                                                    <div class="thumb-item">
+                                                        <img SRC="https://htmldemo.net/merier/merier/assets/images/shop/details/m2.jpg" alt="Image" width="640" height="710">
+                                                    </div>
+                                                </div>
+                                                <div class="swiper-slide">
+                                                    <div class="thumb-item">
+                                                        <img src="https://htmldemo.net/merier/merier/assets/images/shop/details/m3.jpg" alt="Image" width="640" height="710">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Add Arrows -->
+                                            <div class="swiper-button-next"></div>
+                                            <div class="swiper-button-prev"></div>
+                                            <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="product-details-content pt-3">
+                                    <h3 class="product-details-title">Casual Women pants</h3>
+                                    <div class="product-details-review">
+                                        <div class="product-review-icon">
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star-half-o"></i>
+                                        </div>
+                                        <button type="button" class="product-review-show">156 reviews</button>
+                                    </div>
+                                    <p class="product-details-desc">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Delectus, repellendus.</p>
+                                    <div class="product-details-color-list">
+                                        <h4>Color:</h4>
+                                        <div class="color-list-check">
+                                            <input class="form-check-input bg-red" type="radio" name="flexRadioColorList" id="colorLista1">
+                                            <label class="form-check-label" for="colorLista1">Red</label>
+                                        </div>
+                                        <div class="color-list-check">
+                                            <input class="form-check-input bg-green" type="radio" name="flexRadioColorList" id="colorLista2" checked="">
+                                            <label class="form-check-label" for="colorLista2">Green</label>
+                                        </div>
+                                        <div class="color-list-check me-0">
+                                            <input class="form-check-input bg-blue" type="radio" name="flexRadioColorList" id="colorLista3">
+                                            <label class="form-check-label" for="colorLista3">Blue</label>
+                                        </div>
+                                    </div>
+                                    <div class="product-details-pro-qty">
+                                        <h4>QTY :</h4>
+                                        <div class="pro-qty">
+                                            <input type="text" title="Quantity" value="01">
+                                            <div class="dec qty-btn">-</div><div class="inc qty-btn">+</div>
+                                        </div>
+                                    </div>
+                                    <div class="product-details-price">$550.00 <span class="price-old">$650.00</span></div>
+                                    <div class="product-details-action">
+                                        <button type="button" class="product-action-btn" data-toggle="modal" data-target="#action-CartAddModal">Add to cart</button>
+                                        <button type="button" class="product-action-wishlist" data-toggle="modal" data-target="#action-WishlistModal">
+                                            <i class="fa fa-heart"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+
+    <aside class="product-action-modal modal fade" id="action-CompareModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="product-action-view-content">
+                        <button type="button" class="btn-close" data-dismiss="modal">
+                            <i class="fa fa-times"></i>
+                        </button>
+                        <div class="modal-action-messages">
+                            <i class="fa fa-check-square-o"></i> Added to compare successfully!
+                        </div>
+                        <div class="modal-action-product">
+                            <div class="thumb">
+                                <img SRC="https://htmldemo.net/merier/merier/assets/images/shop/modal1.jpg" alt="Organic Food Juice" width="466" height="320">
+                            </div>
+                            <h4 class="product-name"><a href="single-product.html">CRAS NEQUE METUS</a></h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+</div>
+
+@section Scripts{
+    @*<script src="~/AdminEla/Assets/js/lib/datatables/datatables.min.js"></script>*@
+
+
+
+<script type="text/javascript">
+
+
+         var iscompanysession = '@HttpContextAccessor.HttpContext.Session.GetString("iscompany").ToString()';
+
+
+         var isTrueSet = (iscompanysession === 'true');
+
+    var tblProductSearc;
+
+        $(document).ready(function () {
+
+            var divcategory  = $('#divCategory').html();
+
+
+                function myFunction() {
+
+                    ///var oTable = $('#tblProductSearc').DataTable();   //pay attention to capital D, which is mandatory to retrieve "api" datatables' object, as //Lionel said
+                    $('#myInput').keyup(function () {
+                        tblProductSearc.search($(this).val()).draw();
+                    })
+
+
+                }
+
+
+                CategorySearch(0);
+                //$('.dataTables_wrapper').addClass('col-md-12'); // <-- add this line
+
+                $("#Category").change(function () {
+                    tblProductSearc.destroy();
+
+                    CategorySearch($('#Category').val());
+                });
+
+
+
+
+                function CategorySearch(CategoryId) {
+
+                    tblProductSearc = $('#tblProductSearc').DataTable({
+
+
+                        // initComplete: function () {
+
+                        //    //var input = $('.dataTables_filter input'),//.unbind(),
+                        //    //self = this.api(),
+
+
+
+
+                        //},
+
+
+
+
+
+
+
+
+                        serverSide: true,  "scrollX": true,
+                        //processing: true,
+
+                        //"bInfo" : false,
+                        //searchDelay: 1,
+                        ajax: {
+                            url: '@Url.Action("GetProductListClick", "Home")',
+                            "data": { CategoryId: CategoryId , iscompany : isTrueSet },
+
+                            type: "POST"
+                        },
+                        columns: [
+                            //{ "title": "ProductId", "data": "ProductId", "visible": false, "searchable": false },
+                            {
+                                "title": "Image", "data": "ImagePath", "searchable": false,
+                                "render": function (data) {
+                                    return '<img src="..' + data + '" class="avatar" onerror=this.onerror=null;this.src="../Content/ProductImages/0.png">';
+                                }
+                            },
+                            {
+
+                                "data": "Rating",
+                                "render": function (data, type, row) {
+
+                                    return '<span class="fa fa-star checked"></span>' +
+                                        '<span class="fa fa-star checked"></span>' +
+                                        '<span class="fa fa-star checked"></span>';
+
+                                }
+
+                            },
+                            {
+                                "title": "Product",
+                                "data": "ProductName",
+                                "searchable": true,
+                                "render": function (data) {
+                                    var res = data.toString().replace(".", " ").substring(0, 25).toString();
+                                    var finaltext = res;//pad(res, 17);
+                                    return '<div class="product-description"> ' + finaltext + '</div>';
+                                }
+                            },
+                            {
+                                "title": "Brand",
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "searchable": true,
+                                "render": function (data) {
+                                    var res = data.BrandName.toString().replace(".", " ").substring(0, 17).toString() + data.SizeName;
+                                    var finaltext = res;//pad(res, 17);
+                                    return '<div class="product-description"> ' + finaltext + '</div>';
+                                }
+                            },
+                            {
+                                "title": "Color", "data": "ColorName", "searchable": true, "render": function (data) {
+                                    var res = data.toString().replace(".", " ").substring(0, 17).toString();
+                                    var finaltext = res;//pad(res, 17);
+                                    return '<div class="product-description"> ' + finaltext + '</div>';
+                                }
+                            },
+                            //{
+                            //    "title": "Size", "data": "SizeName", "searchable": true, "render": function (data) {
+                            //        var res = data.toString().replace(".", " ").substring(0, 17).toString();
+                            //        var finaltext = res;//pad(res, 17);
+                            //        return '<div class="product-description"> ' + finaltext + '</div>';
+                            //    }
+                            //},
+
+
+                            {
+
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "render": function (data, type, row) {
+                                    var showdata = '';
+
+                                    if (data.OldPrice > 0) {
+                                        showdata=   '  <div class="product-price">  <span class="money">৳</span>' + data.SalesPrice + ' <span class="old-price"><del class="money">৳ ' + data.OldPrice + '</del></span> </div> ';
+                                    }
+                                    else {
+                                        showdata =  '  <div class="product-price">  <span class="money">৳</span>' + data.SalesPrice + ' <span class="old-price"></span> </div> ';
+
+                                    }
+                                    return  showdata ;
+                                }
+                            },
+
+                            {
+                                "title": "Action",
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "render": function (data, type, row) {
+                                    var myurldetails = '@Url.Action("ProductDetails", "home")?ProductId=' + data.ProductId;
+                                    var content = '<span data-toggle="tooltip" title="Details"> <a href=\"' + myurldetails + '\" class=\"btn btn-sm btn-dark rounded-0\" target=\"_self\">Details</a></span>';
+                                    content += '<a href="#" data-id="' + data.ProductId + '" data-name="' + data.ProductName + '"    data-price=' + data.SalesPrice + ' data-size = "' + data.SizeName + '"  data-color="' + data.ColorName + '" data-brand="' + data.BrandName + '"  class="btn btn-sm btn-success rounded-0 add-to-cart">Add to cart </a>';
+                                    return content;
+                                }
+
+                            }
+
+
+
+                        ],
+                        "paging": true,
+                        "ordering": false,
+                        //"searching": true,
+                        //'select': true,
+                        //language: {
+                        //    sLengthMenu: " _MENU_",
+                        //    search: '',
+                        //    searchPlaceholder: "Search..."
+                        //},
+                        "bSortable": false ,
+                        //"info": true,
+                        "iDisplayLength": 6,
+                        "lengthMenu": [[4, 6 , 5, 8, 10, 12, 25, 50, -1], [4,6, 5, 8, 10, 12, 25, 50, "All"]],
+                        "bLengthChange": false, //thought this line could hide the LengthMenu
+                        //"dom": '<"top"i>flp<"bottom"rt><"clear">'
+                        "bInfo": false,
+                        "dom": '<"top"<"#fahadabc.row"<"col rounded-0"><"col">>>rt<"bottom"<"row"<"col"><"col"p><"col">>><"clear">'
+                       // "dom": '<"top"fl>rt<"bottom"pi><"row view-pager"<"col-sm-12"<"text-center"pi><"clear">'
+                        //"dom":'<"row"<"col-sm-4"><"col-sm-4 text-center"f><"col-sm-4">>'
+
+                    });
+
+                     //$('#fahadabc').prepend('<div class="col ml-5">'+$('#divCategory').html()+'</div').change();
+                    //$('#toremove').remove();
+
+                }
+
+
+
+                $('#myInputTextField').keyup(function(){
+                     tblProductSearc.search($(this).val()).draw() ;
+                })
+
+            //$('.add-to-cart-table').click(function (event) {
+            //    event.preventDefault();
+            //    var id = $(this).data('ProductId');
+            //    var name = $(this).data('ProductName');
+            //    var price = Number($(this).data('SalesPrice'));
+            //    shoppingCart.addItemToCart(id, name, price, 1);
+            //    displayCart();
+            //});
+
+
+
+
+            $('#tblProductSearc tbody').on('click', '.add-to-cart', function () {
+                var table = $('#tblProductSearc').DataTable();
+
+                var data = table.row($(this).parents('tr')).data();
+                //console.log(data);
+                //console.log(data.ProductId);
+                //console.log(data.ProductName);
+                //console.log(data.SalesPrice);
+
+                shoppingCart.addItemToCart(data.ProductId, data.ProductName, data.SalesPrice, 1, data.ColorName, data.BrandName, data.SizeName);
+                displayCart();
+
+
+                $('html, body').animate({
+                    'scrollTop': $(".cart_anchor").position().top
+                });
+                //Select item image and pass to the function
+                //console.log($(this).parent('td').parent('tr').find('img'));
+
+                var itemImg = $(this).parent('td').parent('tr').find('img').eq(0);
+                flyToElement($(itemImg), $('.cart_anchor'));
+
+                //alert(data[0] + "'s salary is: " + data[3]);
+
+                //table.row($(this).parents('tr')).remove().draw();
+                //var x = "1300.00";
+                //var y = $('#tblpayments').height();
+                //var z = parseFloat(x) + parseFloat(y);
+
+                //$("html, body").animate({ scrollTop: z }, 1300);
+
+
+                //calculateSum();
+
+            });
+
+
+            //$('#tblProductSearc tbody').on('click', '.btn', function () {
+            //    var table = $('#tblpayments').DataTable();
+            //        var data = tblProductSearc.row($(this).parents('tr')).data();
+            //        alert(data[0] + "'s salary is: " + data[3]);
+            //    });
+
+            });
+
+
+</script>
+
+<script>
+    var swiper = new Swiper(".mySwiper", {
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+      },
+    });
+</script>
+}

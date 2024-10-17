@@ -1,0 +1,427 @@
+﻿@model Atrai.Core.Entity.TermsMainModel
+@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery AntiForgery
+
+@inject IHttpContextAccessor HttpContextAccessor
+@{ ViewData["Title"] = "Terms Entry";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+<style>
+    .table > tbody > tr > td, .table > tbody > tr > td > input {
+        line-height: 32px;
+        vertical-align: middle;
+        font-size: 13px;
+        font-weight: 500;
+        font-family: Arial 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        background: whitesmoke;
+    }
+
+    .table td {
+        padding-right: .20rem;
+        padding-top: 0.10rem;
+        padding-bottom: 0.0rem;
+        padding-left: 0.15rem;
+        padding-right: 0.45rem;
+        /*border-top: none;*/
+    }
+</style>
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>New Terms</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="basic-elements">
+
+                            @using (Html.BeginForm("AddTerms", "Admin", FormMethod.Post))
+                            {
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            @Html.HiddenFor(model => model.Id)
+
+                            @Html.AntiForgeryToken() @*<div class="form-group row">
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="Name" class="control-label"></label>
+                                        <input asp-for="Name" class="form-control" />
+                                        <span asp-validation-for="Name" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="PhoneNumber" class="control-label"></label>
+                                        <input asp-for="PhoneNumber" class="form-control" />
+                                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                    </div>
+                                </div>*@
+
+                            <div class="form-group">
+                                <div class="row">
+
+                                    <div class="col-md-4">
+                                        <div class="input-group input-group-sm  mb-1" id="divtermsname">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-0">
+                                                    @Html.LabelFor(model => model.TermsName, htmlAttributes: new { @class = "control-label" })
+                                                </span>
+                                            </div>
+                                            @Html.EditorFor(model => model.TermsName, new { htmlAttributes = new { @class = "form-control" } })
+                                            @Html.ValidationMessageFor(model => model.TermsName, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-8">
+                                        <div class="input-group input-group-sm  mb-2" id="divtermsremarks">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-0">
+                                                    @Html.LabelFor(model => model.TermsName, htmlAttributes: new { @class = "control-label" })
+                                                </span>
+                                            </div>
+                                            @Html.EditorFor(model => model.TermsRemarks, new { htmlAttributes = new { @class = "form-control" } })
+                                            @Html.ValidationMessageFor(model => model.TermsRemarks, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+
+                                <div class="row">
+                                    <div class="col-md-12 mb-2">
+                                        <form class="card p-2">
+
+                                            @*<legend>Add Item</legend>*@
+
+           
+                                            <div class="table-responsive text-nowrap">
+                                                <table id="tbl" class="tbl table table-striped table-hover" style="width:100%">
+
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="d-none">Terms Sub Id </th>
+                                                            <th style="width:20%">Terms</th>
+                                                            <th style="width:80%">Terms Description</th>
+                                                            <th>Serial No</th>
+                                                            <th></th>
+
+                                                        </tr>
+                                                    </thead>
+
+                                                    <tbody>
+                                                        @if (Model != null)
+                                                        {
+                                                            foreach (var item in Model.TermsSubs)
+                                                            {
+                                            <tr class="txtMult">
+                                                <td>
+                                                    @Html.DisplayTextFor(i => item.Id)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayTextFor(i => item.Terms)
+                                                </td>
+
+                                                <td>
+                                                    @Html.DisplayTextFor(i => item.TermsDescription)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayTextFor(i => item.TermsSerialNo)
+                                                </td>
+                                                <td>
+                                                    <a class="dlttrash" data-itemId="0" href="#"><i class="fa fa-trash"></i></a>
+                                                </td>
+                                            </tr>
+}
+                                    }
+
+                                                    </tbody>
+
+
+                                                </table>
+                                            </div>
+                                    
+
+                                        </form>
+                                
+                                        <div class="card-body p-2">
+                                            <div class="row my-1">
+
+                                                <div class="col-md-3 col-12">
+                                                    <div class="input-group input-group-sm  mb-2" id="divPaymentAmount">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text py-0">
+                                                                Terms
+                                                            </span>
+                                                        </div>
+                                                        @Html.TextBox("subTerms", "", new { @class = "form-control" })
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-7 col-12">
+                                                    <div class="input-group input-group-sm  mb-2" id="divPaymentCardNo">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text py-0">
+                                                                Description
+                                                            </span>
+                                                        </div>
+                                                        @Html.TextBox("subTermsDesc", "", new { @class = "form-control" })
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2 col-12">
+                                                    <div class="input-group input-group-sm  mb-2" id="divSlNo">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text py-0">
+                                                                SLNo.
+                                                            </span>
+                                                        </div>
+                                                        @Html.TextBox("slno", "0", new { @class = "form-control" })
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3 col-12">
+                                                    <button type="button" id="addpayment" onclick="Add()" class="btn btn-success mb-2 btn-block rounded-0">Add</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+
+                            <div>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                                <button class="btn btn-primary btn btn-block rounded-0" type="button" onclick="Terms_save()">Create</button> }
+                                            else if (ViewBag.ActionType == "Edit")
+                                            {
+                                                            <button class="btn btn-warning btn btn-block rounded-0" type="button" onclick="Terms_save()">Update</button> }
+                                                        else if (ViewBag.ActionType == "Delete")
+                                                        {
+                                            <button class="btn btn-danger btn btn-block rounded-0" type="button" onclick="Terms_delete()">Delete</button>}
+                                                                                    </td>
+                                        <td>
+                                            @Html.ActionLink("Back", "TermsList", "Admin", null, new { @class = "btn btn-info rounded-0 btn-block" })
+
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+                            </div>
+                            }
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script type="text/javascript">
+
+
+    function Add() {
+        // alert('test');
+        $('#tbl').dataTable().fnAddData(['', $('#subTerms').val(), $('#subTermsDesc').val(), $('#slno').val(), '<a data-itemId="0" href="#" class="dlttrash deleteItem"> <i class="fa fa-trash"></i></a>']);
+
+        //table.draw;
+        //ckbox = $('input.clickchk');
+    }
+        $(document).ready(function () {
+
+
+
+            //var table = $('#tbl').DataTable();
+
+            $('#tbl').dataTable({
+                "aoColumns": [
+                    { "sClass": "id d-none", "visible": true },
+                    { "sClass": "terms", "visible": true },
+                    { "sClass": "termsdescription", "visible": true },/////  7
+                    { "sClass": "termsserialno", "visible": true }, //////////  16
+                    null
+                ],
+                columnDefs: [
+                    {
+                        "render": function (data, type, row) {
+                            return '<input class="termsrow form-control" name="termsrow" type="text"  value="' + data + '" >';
+                        },
+                        "targets": 1
+                    },
+                    {
+
+                        'render': function (data, type, row) {
+                            return '<input class="form-control termsdescriptionrow text-center"  name="termsdescriptionrow" type="text" data-val="true"  value="' + data + '"  autocomplete = "off" >';
+                        },
+                        'targets': 2
+                    },
+                    {
+                        "render": function (data, type, row) {
+
+                            return '<input class="form-control termsslnorow text-center" name="termsslnorow" type="number"   value="' + data + '"  autocomplete = "off"  >';
+                        },
+                        "targets": 3
+                    }
+                ],
+                searching: false, paging: false, info: false, sorting: false
+                //"stateSave": true,
+                //"retrieve": true,
+                //rowCallback: function (row) {
+                //    $(row).addClass('txtMult');
+                //}
+            })
+
+
+
+
+
+
+        })
+
+
+
+    $('#btnDelete').click(function () {
+        var table = $('#tbl').DataTable();
+        table.row('.selected').remove().draw(false);
+    });
+
+    $('#tbl tbody').on('click', '.dlttrash', function () {
+        var table = $('#tbl').DataTable();
+
+        table.row($(this).parents('tr')).remove().draw();
+        var x = "500.00";
+        var y = $('#tbl').height();
+        var z = parseFloat(x) + parseFloat(y);
+
+        $("html, body").animate({ scrollTop: z }, 500);
+
+
+        //multInputs();
+    });
+
+
+
+
+        function Terms_save() {
+
+
+            //alert('termsmains');
+            // Step 1: Read View Data and Create JSON Object
+
+            //var Termssub = { "TermsId": "", "Terms": "", "TermsDescription": "", "TermsSerialNo": "", "TermsSerialsubs": [] };
+
+
+
+            // Creating TermsMain Json Object
+            //var Termsmain = {
+            //    "Id": "", "TermsName": "", "TermsRemarks": "", "comid": "", "userid": "",
+            //    "TermsSubs": []
+            //};
+
+            // Set Terms Main Value
+            //Termsmain.TermsId = $("#TermsId").val();
+            //Termsmain.TermsName = $("#TermsName").val();
+            //Termsmain.TermsRemarks = $("#TermsRemarks").val();
+
+            //Termsmain.comid = $("#comid").val();
+            //Termsmain.userid = $("#userid").val();
+                @*//@Session["userid"];*@
+
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+
+            var TermsSubArr = [];
+            TermsSubArr.length = 0;
+            $.each($("#tbl tbody tr"), function () {
+                TermsSubArr.push({
+                    Id: 0, // $(this).find('td:eq(0)').html() || 
+                    TermsId: parseInt($("#Id").val()) || 0,
+                    Terms: $(this).find('.termsrow').val(),
+                    TermsDescription: $(this).find('.termsdescriptionrow').val(),
+                    TermsSerialNo: $(this).find('.termsslnorow').val(),
+                    ComId: ComId,
+                    UserId: UserId
+                });
+            });
+
+            if (TermsSubArr.length == 0) {
+
+                toastr.error("Please Insert Add At least One data in the table Row.");
+            }
+
+
+            var data = {
+                Id: parseInt($("#Id").val()) || 0,
+                TermsName: $("#TermsName").val(),
+                TermsRemarks: $("#TermsRemarks").val(),
+                TermsSubs: TermsSubArr
+            };
+
+
+            //console.log(data);
+            //alert('test');
+            var antiForgeryToken = $("input[name=Dominate_ANTIFORZERY]").val();
+            // Send an Ajax request to the server with the state object
+            $.ajax({
+                //url: '/TermsMains/Create',
+                url: '@Url.Action("AddTerms", "Admin")',
+                //contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                async: 'true',
+                headers: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                type: 'POST',
+                data: { model: data },
+                success: function (result) {
+
+                    if (result.Success == "1") {
+                        window.location.href = '@Url.Action("TermsList", "Admin")';
+                    }
+                    else {
+                        alert(result.ex);
+                    }
+                }
+            });
+
+
+        }
+
+
+        function Terms_delete() {
+            var TermsId = $("#Id").val();
+            //alert(TermsId);
+
+            $.ajax({
+                url: '@Url.Action("DeleteTerms", "Admin")',
+                //url: '@Url.Action("Delete")',
+                data: JSON.stringify({ id: TermsId }), //use id here
+                //data: JSON.stringify(salesmain),
+                type: 'POST',
+                contentType: 'application/json;',
+                dataType: 'json',
+                success: function (result) {
+
+                    if (result.Success == "1") {
+                        window.location.href = '@Url.Action("TermsList", "Admin")';
+                    }
+                    else {
+                        alert(result.ex);
+                    }
+                }
+            });
+
+        }
+
+    </script>
+}

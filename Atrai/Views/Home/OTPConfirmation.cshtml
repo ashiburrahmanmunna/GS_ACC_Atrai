@@ -1,0 +1,101 @@
+﻿@model Atrai.Model.Core.ViewModel.OTPSetViewModel
+@{
+    ViewData["Title"] = "Home Page";
+    //string weburl = ViewBag.weburl;
+}
+
+<style>
+    .center-input {
+        text-align: center;
+    }
+
+    .green-check {
+        color: green;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link href="~/admin_theme_gtr/assets/css/customMultistepformcss.css" rel="stylesheet" />
+
+<form id="myform" asp-action="OTPSet" asp-controller="Home" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="container pt-5 mt-5">
+        <div class="container mt-3">
+            <div class="row justify-content-md-center  mt-5 pt-5">
+                <div class="col-md-4 col-12">
+                    <div class="card shadow border-0">
+                        <div class="card-body px-4 py-5">
+                            <div style="padding-left: 0px;padding-right: 0px;">
+                                <h1 class="text-start" style="width: 290px; height: 37px; font-style: normal; font-weight: 600; font-size: 30px; line-height: 37px; /* identical to box height */ color: #403D3D; ">Check your OTP code</h1>
+                                <div class="text-center customSubHead">
+                                    <div>
+                                        We sent a OTP code to
+                                        @Model.EmailOrPhone
+                                        <input type="hidden" asp-for="EmailOrPhone" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12 mb-2 mt-3">
+                                    <label class="control-label customLebel">OTP Code</label>
+                                    <div class="input-group">
+                                        <span id="checkField" class="input-group-text bg-white border-end-0">
+                                            @*<i class="fa-light fa-lock"></i>*@
+                                            <i class="bi bi-patch-check-fill"></i>
+                                        </span>
+                                 @*       <input class="form-control border-start-0  ps-0"
+                                               placeholder="Enter your OTP code" />*@
+
+                                        <input type="number" asp-for="OTP" class="form-control center-input" />
+                                        <div asp-validation-for="ContactName" class="text-danger"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12 mb-2">
+                                    <button class="btn btn-block rounded-0 text-white" type="submit" style="width: 100%;
+                                height: 41px;
+
+                                background: #3777DB;
+                                box-shadow: 0px 0px 20px rgba(162, 157, 155, 0.15);
+                                border-radius: 7px;">
+                                        Log In
+                                    </button>
+                                </div>                                
+                            </div>
+                            <div class="my-3">
+                                <p class="text-center">
+                                    Didn’t receive the email?<a href="@Url.Action("ResendOTPEmailConfirmation","Home",new{EmailorPhone=@Model.EmailOrPhone})"
+                                                                class="text-decoration-none fw-bold"> Click to resend</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @*<div class="d-flex justify-content-center links mt-3">
+                    <span class="fw-semibold">
+                        Don't have an account? <a href="@Url.Action(" signup")"
+                                                  class="ms-1 text-decoration-none">Sign Up</a>
+                    </span>
+                </div>*@
+            </div>
+        </div>
+    </div>
+
+    </form>
+
+ <script>
+  // Get a reference to the OTP input field
+  const otpInput = document.querySelector('input[name="OTP"]');
+
+  // Get a reference to the check field
+  const checkField = document.getElementById('checkField');
+
+  // Add an event listener to the OTP input field
+  otpInput.addEventListener('input', function() {
+    // Check if the OTP input is filled
+    if (otpInput.value.trim() !== '') {
+      // Add the class to make the check field green
+      checkField.classList.add('green-check');
+    } else {
+      // Remove the class to revert the check field to its normal color
+      checkField.classList.remove('green-check');
+    }
+  });
+</script>

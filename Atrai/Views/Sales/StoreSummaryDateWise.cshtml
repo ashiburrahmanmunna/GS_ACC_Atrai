@@ -1,0 +1,387 @@
+﻿@model Atrai.Controllers.AccountsController.StoreSummaryModel
+@{
+    ViewData["Title"] = "Voucher";
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>
+    </title>
+    <script type="text/javascript">
+        function ClosePrint() {
+            var print = document.getElementById("print");
+            print.style.visibility = "hidden";
+            //            print.display = false;
+
+            window.print();
+        }
+    </script>
+
+    <style media="print">
+        
+     @@media print {
+      .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,
+      .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+           float: left;               
+      }
+
+      .col-md-12 {
+           width: 100%;
+      }
+
+      .col-md-11 {
+           width: 91.66666666666666%;
+      }
+
+      .col-md-10 {
+           width: 83.33333333333334%;
+      }
+
+      .col-md-9 {
+            width: 75%;
+      }
+
+      .col-md-8 {
+            width: 66.66666666666666%;
+      }
+
+       .col-md-7 {
+            width: 58.333333333333336%;
+       }
+
+       .col-md-6 {
+            width: 50%;
+       }
+
+       .col-md-5 {
+            width: 41.66666666666667%;
+       }
+
+       .col-md-4 {
+            width: 33.33333333333333%;
+       }
+
+
+       .col-md-3 {
+            width: 25%;
+       }
+       .col-md-2 {
+            width: 16.666666666666666%;
+       }
+       .col-md-1 {
+            width: 8.33333333333333%;
+       }
+
+           
+        .showHeader thead {
+            display: table-header-group;
+            border: 1px solid #000;
+        }
+        }
+    
+    </style>
+
+    <style type="text/css">
+        .bg-offwhite {
+            background-color: #D3D3D3;
+        }
+
+        .table-bordered td, .table-bordered th, .table-bordered {
+            border: 1px solid black;
+            color: black;
+        }
+
+        .table thead th {
+            border-bottom: inherit;
+        }
+
+        .table th {
+            background: inherit;
+        }
+
+        .bg-asswhite {
+            background-color: #F5F5F5 !important;
+        }
+       
+        .table th:last-child, .table tbody tr.even td:last-child {
+            position: inherit !important;
+            right: 0px;
+            background-color: inherit !important;
+            z-index: 1;
+        }
+
+        .table th, .table td {
+          padding-top: 0.25rem;
+          padding-bottom: 0.25rem;
+          padding-left: 0.40rem;
+          padding-right: 0.40rem;
+        }
+
+
+    </style>
+</head>
+<body>
+
+        <h3>
+            @{
+                System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+            }
+
+        </h3>
+        <div id="main">
+
+
+
+
+            <div class="container">
+                <div class="row mb-2">
+                    <div class="col-md-12">
+                        <h2 class="text-center">@Model.CompanyList.StoreName</h2>
+                    </div>
+                    <div class="col-md-12 text-center">
+                        <span>
+                            <h4 class="text-center">@Model.CompanyList.Address</h4>
+                        </span>
+                        <span class="float-right">
+                            <input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />
+                        </span>
+                    </div>
+                    <div class="col-md-12 text-center">
+
+                        <h3><span class="border-bottom border-dark">Sales</span></h3>
+                    </div>
+                </div>
+
+
+
+
+
+                <table class="table table-bordered border-dark text-dark">
+                    <thead class="bg-asswhite font-weight-bold">
+                        <tr class="text-nowrap text-center">
+                            <th class="font-weight-bold">Store Name</th>
+                            <th class="font-weight-bold">Cash Sales</th>
+                            <th class="font-weight-bold">Card Sales</th>
+                            <th class="font-weight-bold">Net Sales</th>
+                            <th class="font-weight-bold">ItemCost</th>
+                            <th class="font-weight-bold">TotalProfit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            double CashSales = 0;
+                            double CardSales = 0;
+                            double NetSales = 0;
+                            double ItemCost = 0;
+                            double TotalProfit = 0;
+
+                            foreach (var item in Model.StoreSummaryDetails.Where(x=>x.Criteria == "Sales"))
+                            {
+                                CashSales += item.CashSales;
+                                CardSales += item.CardSales;
+                                NetSales += item.NetSales;
+                                ItemCost += item.ItemCost;
+                                TotalProfit += item.TotalProfit;
+
+                                    <tr style="font-family:Arial Narrow;font-size:16px;">
+                                        <td>@Html.DisplayFor(modelItem => item.WhShortName) </td>
+                                        <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.CashSales))) </td>
+                                        <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.CardSales))) </td>
+                                        <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.NetSales))) </td>
+                                        <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.ItemCost))) </td>
+                                        <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.TotalProfit))) </td>
+                                    </tr>
+                            }
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="text-right">
+                            <td colspan="1" class="bg-asswhite font-weight-bold"><h6>Total :</h6></td>
+                            <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(CashSales)))</h6></td>
+                            <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(CardSales)))</h6></td>
+                            <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(NetSales)))</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ItemCost)))</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(TotalProfit)))</h6></td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+
+
+
+                <div class="row mb-2">
+                    <div class="col-md-12 text-center">
+                        <h3><span class="border-bottom border-dark">Sales Return</span></h3>
+                    </div>
+                </div>
+
+
+            <table class="table table-bordered border-dark text-dark">
+                <thead class="bg-asswhite font-weight-bold">
+                    <tr class="text-nowrap text-center">
+                        <th class="font-weight-bold">Store Name</th>
+                        <th class="font-weight-bold">Cash Sales</th>
+                        <th class="font-weight-bold">Card Sales</th>
+                        <th class="font-weight-bold">Net Sales</th>
+                        <th class="font-weight-bold">ItemCost</th>
+                        <th class="font-weight-bold">TotalProfit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        CashSales = 0;
+                        CardSales = 0;
+                        NetSales = 0;
+                        ItemCost = 0;
+                        TotalProfit = 0;
+
+                        foreach (var item in Model.StoreSummaryDetails.Where(x => x.Criteria == "Sales Return"))
+                        {
+                            CashSales += item.CashSales;
+                            CardSales += item.CardSales;
+                            NetSales += item.NetSales;
+                            ItemCost += item.ItemCost;
+                            TotalProfit += item.TotalProfit;
+
+                            <tr style="font-family:Arial Narrow;font-size:16px;">
+                                <td>@Html.DisplayFor(modelItem => item.WhShortName) </td>
+                                <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.CashSales))) </td>
+                                <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.CardSales))) </td>
+                                <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.NetSales))) </td>
+                                <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.ItemCost))) </td>
+                                <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.TotalProfit))) </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="text-right">
+                        <td colspan="1" class="bg-asswhite font-weight-bold"><h6>Total :</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(CashSales)))</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(CardSales)))</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(NetSales)))</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ItemCost)))</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(TotalProfit)))</h6></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+
+
+                @foreach (var group in Model.StoreSummaryDetails.Where(x=>x.Criteria == "Expense").GroupBy(item => item.WhShortName))
+                {
+                             <div class="col-md-12 text-center">
+                        <h4><span class="border-bottom border-dark">Expense : @group.FirstOrDefault().WhShortName</span></h4>
+                    </div>
+                    <table class="table table-bordered border-dark text-dark">
+                    <thead class="bg-asswhite font-weight-bold">
+                        <tr class="text-nowrap text-center">
+                            <th class="font-weight-bold">Store Name</th>
+                            <th class="font-weight-bold">Expense Head</th>
+                            <th class="font-weight-bold">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            double Amount = 0;
+
+                            foreach (var item in group)
+                            {
+                                Amount += item.Amount;
+
+                                    <tr style="font-family:Arial Narrow;font-size:16px;">
+                                        <td>@Html.DisplayFor(modelItem => item.WhShortName) </td>
+                                       <td>@Html.DisplayFor(modelItem => item.AccName) </td>
+                                        <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.Amount))) </td>
+                                    </tr>
+                            }
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="text-right">
+                        <td colspan="2" class="bg-asswhite font-weight-bold"><h6>Total :</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(Amount)))</h6></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                }
+
+
+
+
+
+                <div class="row mb-2">
+@*                    <div class="col-md-12">
+                        <h2 class="text-center">@Model.WhShortName</h2>
+                    </div>*@
+                    <div class="col-md-12 text-center">
+                        <h3><span class="border-bottom border-dark">Income Report</span></h3>
+                    </div>
+                </div>
+
+                   <table class="table table-bordered border-dark text-dark">
+                    <thead class="bg-asswhite font-weight-bold">
+                        <tr class="text-nowrap text-center">
+                            <th class="font-weight-bold">Store Name</th>
+                            <th class="font-weight-bold">Net Sales</th>
+                            <th class="font-weight-bold">Item Cost</th>
+                            <th class="font-weight-bold">Expense</th>
+                            <th class="font-weight-bold">Net Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            double TotalNetSales = 0;
+                            double TotalNetSalesReturn = 0;
+                            double TotalItemCost = 0;
+                            double TotalExpense = 0;
+
+
+                            foreach (var item in Model.StoreSummaryDetails.Where(x=>x.Criteria == "NetProfit"))
+                            {
+                                
+                                TotalNetSales += item.NetSales;
+
+                                TotalItemCost += item.ItemCost;
+                                TotalExpense += item.TotalExpense;
+                                TotalProfit += item.TotalProfit;
+
+
+                                    <tr style="font-family:Arial Narrow;font-size:16px;">
+                                        <td>@Html.DisplayFor(modelItem => item.WhShortName) </td>
+                                        <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.NetSales))) </td>
+                                        <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.ItemCost))) </td>
+                                        <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.TotalExpense))) </td>
+                                        <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.TotalProfit))) </td>
+                                    </tr>
+                            }
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="text-right">
+                        <td colspan="1" class="bg-asswhite font-weight-bold"><h6>Total :</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(TotalNetSales)))</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(TotalItemCost)))</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(TotalExpense)))</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(TotalProfit)))</h6></td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6>Software Generated Report || Developed By : Dominate Software Solution</h6>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+</body>
+</html>

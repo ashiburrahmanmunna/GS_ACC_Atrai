@@ -1,0 +1,152 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@*@model IEnumerable<Atrai.Core.Entity.SubscriptionActivationModel>*@
+@{ ViewData["Title"] = "SubscriptionActivation List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-4 col-12">
+                                <h4>Subscription Activation List</h4>
+                            </div>
+
+                            <div class="col-md-4 col-12">
+                                @Html.ActionLink("Create Subscription Activation", "AddSubscriptionActivation", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                        </div>
+
+                    </div>
+
+                        <div class="card-body">
+
+
+
+
+                            <div class="table-responsive m-t-10">
+                                <table id="tbllist" class="display nowrap table table-sm table-hover  table-bordered" cellspacing="0" width="100%">
+                                    <thead>
+                                        <tr></tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                    <tfoot>
+                                        <tr></tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+@*<td>
+        <div height="50px">
+            <div class="img-thumbnail flag flag-icon-background @item.FlagClass.ToString().ToLower()"></div>
+        </div>
+    </td>*@
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+                $(function () {
+                    var peopleList = $('#tbllist').DataTable({
+
+                        serverSide: true,  "scrollX": true,
+                        processing: true,
+
+                        ajax: {
+                            url: '@Url.Action("GetSubscriptionActivationList", "Admin")',
+                            type: "POST"
+                        },
+                        rowId: 'Id',
+                        columns: [
+
+                            { "title": "Id", "data": "Id", "visible": false },
+
+                            { "title": "UserName", "data": "UserName", "searchable": true },
+                            { "title": "Email", "data": "Email", "searchable": true },
+                            { "title": "Company", "data": "CompanyName", "searchable": true },
+
+                            { "title": "UserMobile", "data": "UserMobile", "searchable": true },
+                            { "title": "Remarks", "data": "Remarks", "searchable": true },
+
+
+                            { "title": "Amount", "data": "Amount", "searchable": false },
+                            { "title": "ValidityDay", "data": "ValidityDay", "searchable": false },
+
+
+                            { "title": "Subscription Type", "data": "SubscriptionTypeName", "searchable": false },
+                            { "title": "From Date", "data": "ActivateFromDateString", "searchable": false },
+                            { "title": "To Date", "data": "ActivateToDateString", "searchable": false },
+
+
+                            {
+                                "title": "Active Yes/No",
+                                "className": "text-nowrap text-center",
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "render": function (data, type, row) {
+                                    var buttons = '';
+                                    if (data.IsActive == false) {
+                                        buttons += '<p style="color:red"> No </p>';
+                                    }
+                                    else {
+                                        buttons += '<p style="color:black"> Yes </p>';
+
+                                    }
+                                    return buttons;
+                                }
+                            },
+                            {
+                                "title": "Action",
+                                "data": "Id",
+                                "render": function (data, type, row) {
+                                    var myUrledit = '@Url.Action("EditSubscriptionActivation", "Admin")?SubscriptionActivationId=' + data;
+                                    var myUrldelete = '@Url.Action("DeleteSubscriptionActivation", "Admin")?SubscriptionActivationId=' + data;
+                                    var message = `return confirm('Are you sure you want to Remove the SubscriptionActivation Information ?')`;
+
+
+                                    return '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-remove"></i></a></span>';
+
+                                }
+
+                            }
+                        ],
+                        "order": [0, "desc"],
+                    });
+
+
+                });
+
+        var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+        var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+        var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+            {
+            style: 'currency',
+            currency: CurrencyShortNameViewFormat,///'BDT'
+            minimumFractionDigits: 2,
+        });
+        //document.body.innerHTML += '<br />' + formatter.format(53425.34);
+
+
+    </script>
+}

@@ -1,0 +1,1952 @@
+﻿@using Microsoft.AspNetCore.Http
+@using System.Linq
+@inject IHttpContextAccessor HttpContextAccessor
+@model Atrai.Model.Core.Entity.StoreSettingModel
+@{
+    ViewData["Title"] = "Account and Settings";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var VatViewActivate = HttpContextAccessor.HttpContext.Session.GetInt32("VatViewActivate").ToString();
+}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+@*<link href="~/admin_theme_gtr/assets/css/custommultistepformcss.css" rel="stylesheet" />*@
+
+<style>
+    .cancelbtn {
+        border: 1px solid black;
+        border-radius: 30px;
+        background: white;
+        color: black;
+        font-weight: 600;
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .savebtn {
+        border: none;
+        border-radius: 30px;
+        background: #0b970bd9;
+        color: white;
+        font-weight: 600;
+        padding-left: 20px;
+        padding-right: 20px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+    .customize-btn-another {
+        background: #2CA01C;
+        border: 1px solid black;
+        border-radius: 20px;
+        color: #FFFFFF;
+        border: 1px solid #2CA01C;
+    }
+
+        .customize-btn-another:hover {
+            background: #2CA01C;
+            border: 1px solid black;
+            border-radius: 20px;
+            color: #FFFFFF;
+            border: 1px solid #2CA01C;
+        }
+
+    .customize-btn:hover {
+        background: #ffffff;
+        border: 1px solid black;
+        color: black;
+        border-radius: 20px;
+    }
+</style>
+
+<div class="page-wrapper">
+
+    <div class="container-fluid">
+
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card ">
+                    <div class="card-header">
+                        <h4>Account and Settings</h4>
+
+                    </div>
+
+
+
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form id="MainForm" asp-controller="admin" asp-action="AccountAndSettings" method="post" enctype="multipart/form-data">
+                                <input type="hidden" asp-for="Id" />
+                                <input type="hidden" asp-for="SubscriptionTypeId" />
+                                <input type="hidden" asp-for="CreateDate" />
+                                <input type="hidden" asp-for="UpdateDate" />
+                                <input type="hidden" asp-for="LuserId" />
+                                <input type="hidden" asp-for="LuserIdUpdate" />
+                                <input type="hidden" asp-for="BaseComId" />
+
+
+
+
+                                <div class="row">
+                                    <div class="col">
+
+                                        <nav @*class="navbar navbar-expand-lg navbar-light bg-light fixed-top" style=" margin-top: 6%; margin-left: 5%;"*@>
+                                            <div class="nav nav-tabs pt-3" id="nav-tab" role="tablist">
+                                                <a class="nav-item nav-link active" id="nav-company-tab" data-bs-toggle="tab" href="#nav-company" role="tab" aria-controls="nav-company" aria-selected="true">Company</a>
+                                                @if (VatViewActivate == "0")
+                                                {
+                                                    @if (!Model.BusinessType.BusinessTypeName.Contains("NID Verification"))
+                                                    {
+                                                        <a class="nav-item nav-link " target="_blank" href="@Url.Action("PurchasePackage","License")" role="tab" aria-controls="nav-billingAndSubscription" aria-selected="false">Billing & subscription</a>
+                                                        <a class="nav-item nav-link " id="nav-sales-tab" data-bs-toggle="tab" href="#nav-sales" role="tab" aria-controls="nav-sales" aria-selected="false">Sales</a>
+                                                        <a class="nav-item nav-link " id="nav-expenses-tab" data-bs-toggle="tab" href="#nav-expenses" role="tab" aria-controls="nav-expenses" aria-selected="false">Expenses</a>
+                                                        <a class="nav-item nav-link " id="nav-time-tab" data-bs-toggle="tab" href="#nav-time" role="tab" aria-controls="nav-time" aria-selected="false">Time</a>
+                                                        <a class="nav-item nav-link " id="nav-advanced-tab" data-bs-toggle="tab" href="#nav-advanced" role="tab" aria-controls="nav-advanced" aria-selected="false">Advanced</a>
+                                                    }
+                                                }
+
+                                            </div>
+
+                                            @*btn btn-sm btn-outline-info rounded-0*@
+                                        </nav>
+                                        <br />
+                                        <div class="tab-content mt-4" id="nav-tabContent">
+                                            @*========company tab starts==================*@
+                                            <div class="tab-pane fade show active" id="nav-company" role="tabpanel" aria-labelledby="nav-company-tab">
+                                                <h6 class="fw-bold">Company name</h6>
+                                                <div class="row company-name" style="margin-left: 200px">
+                                                    <div class="col-lg-3" style="margin-top: 7%;">
+                                                        <p>Company logo</p>
+                                                        <p>Company name</p>
+                                                        <p>Legal name</p>
+                                                        <p>Business ID No.</p>
+                                                        <p>VAT#</p>
+                                                        <p>Time zone</p>
+                                                    </div>
+                                                    <div class="col-lg" id="company-name-second-col">
+                                                        <img src="../@Model.Logo" alt="img" id="UploadFile" class="" style="height: 150px;" />
+                                                        <input id="store-name" asp-for="StoreName" type="text" class="form-control form-control-sm w-50 border-0 mb-1" placeholder="Company name">
+                                                        <input checked class="form-check-input d-none mb-1 checkbox-company" type="checkbox" value="" id="legal-name-id">
+                                                        <label class="form-check-label ms-2 mb-1" for="">
+                                                            Same as company name
+                                                        </label>
+                                                        <input asp-for="LegalName" id="legal-name" type="text" class="legal-name form-control form-control-sm w-50 mb-1 d-none" placeholder="Legal name">
+                                                        <input asp-for="BusinessIdNo" id="business-id" type="text" class="form-control form-control-sm w-50 border-0 mb-1" placeholder="business id no">
+                                                        <input asp-for="vat" id="vat" type="text" class="form-control form-control-sm w-50 border-0 mb-1" placeholder="vat">
+                                                        <p class="mt-3 ms-2" id="time-zone-tag-id">All</p>
+                                                        <div class="w-25 d-none mt-3">
+                                                            @Html.DropDownListFor(x => x.TimeZoneSettingsId,
+                                                            new SelectList((IEnumerable<SelectListItem>)ViewBag.TimeZoneSettings, "Value", "Text"), "Select TimeZone",
+                                                            htmlAttributes: new { @class = "form-control form-control-sm", id = "TimeZoneSettingsId" })
+                                                        </div>
+                                                        <button class="d-none cancelbtn mt-2" id="BtnCancelCom" type="button">Cancel</button>
+                                                        <button class="d-none savebtn mt-2" id="BtnSaveCom" type="button">Save</button>
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="CompanyNameEditButton"></i>
+                                                    </div>
+                                                </div>
+
+                                                <hr />
+
+                                                @*<h6 class="fw-bold">Company type</h6>
+                                                <div class="row company-type" style="margin-left: 200px">
+                                                    <div class="col-lg-3">
+                                                        <p>Tax form</p>
+                                                        <p>Industry</p>
+                                                    </div>
+                                                    <div class="col-lg  company-type-second-col">
+                                                        <p id="tax-form-tag" class="ms-2">All</p>
+                                                        <p id="industry-tag" class="ms-2">All</p>
+                                                        <select class="form-select w-50 d-none" id="tax-form-id">
+                                                            <option value="0">All</option>
+                                                        </select>
+                                                        <select class="form-select w-50 d-none" id="industry-id">
+                                                            <option value="0">All</option>
+                                                        </select>
+                                                        <button class="d-none cancelbtn mt-2" type="button">Cancel</button>
+                                                        <button class="d-none savebtn mt-2" type="button">Save</button>
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="CompanyTypeEditButton"></i>
+                                                    </div>
+                                                </div>*@
+
+
+                                                <hr />
+
+
+                                                <h6 class="fw-bold">Contact info</h6>
+                                                <div class="row contact-info" style="margin-left: 200px">
+                                                    <div class="col-lg-3 contact-info-col">
+                                                        <p>Company email</p>
+                                                        <p class="d-none Customer-facing-email">Customer-facing email</p>
+                                                        <p>Company phone</p>
+                                                        <p>website</p>
+                                                    </div>
+                                                    <div class="col-lg contact-info-col">
+                                                        <input id="email" type="text" asp-for="Email" class="form-control form-control-sm w-50 border-0 mb-1" placeholder="email-address-id">
+                                                        <input checked class="form-check-input d-none mb-1 checkbox-company" type="checkbox" value="" id="custome-facing-email-id">
+                                                        <label class="form-check-label d-none ms-2 mb-1" for="custome-facing-email-id">
+                                                            Same as company email
+                                                        </label>
+                                                        <input id="customer-facing-email" type="text" class="form-control custom-facing-email form-control-sm w-50 border-0 mb-1 d-none" placeholder="Customer facing email" />
+                                                        <input id="phone" type="text" asp-for="Phone" class="form-control form-control-sm w-50 border-0 mb-1" placeholder="Phone">
+                                                        <input id="web" type="text" asp-for="Web" class="form-control form-control-sm w-50 border-0 mb-1" placeholder="website">
+                                                        <button class="d-none cancelbtn mt-2" id="cInfoCancel" type="button">Cancel</button>
+                                                        <button class="d-none savebtn mt-2" type="button">Save</button>
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="ContactInfoEditButton"></i>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <hr />
+
+                                                <h6 class="fw-bold"> Address</h6>
+                                                <div class="row address" style="margin-left: 200px">
+                                                    <div class="col-lg-3">
+                                                        <p>Company address</p>
+                                                        <p>Customer-facing address</p>
+                                                        <p>Legal address</p>
+                                                    </div>
+                                                    <div class="col-lg address-info-col">
+                                                        <input id="address" type="text" asp-for="Address" class="form-control form-control-sm w-50 border-0 mb-1" placeholder="Street address">
+                                                        <input id="city" type="text" asp-for="City" class="other-addresses border-0 form-control form-control-sm w-50 mb-1 d-none" placeholder="City">
+                                                        <input id="state" type="text" asp-for="State" class="other-addresses border-0 form-control form-control-sm w-50 mb-1 d-none" placeholder="State">
+                                                        <input id="zip-code" type="text" asp-for="ZipCode" class="other-addresses border-0 form-control form-control-sm w-50 mb-1 d-none" placeholder="Zip code">
+
+                                                        <input checked class="form-check-input d-none mb-1 checkbox-company" type="checkbox" value="" id="custome-facing-address-id">
+                                                        <label class="form-check-label ms-2" for="custome-facing-address-id">
+                                                            Same as company address
+                                                        </label><br />
+                                                        <input id="customer-facing-address" type="text" asp-for="CustomerFacingAddress" class="custome-facing-address form-control d-none form-control-sm w-50  mb-1" placeholder="Street address">
+                                                        <input id="customer-facing-city" type="text" asp-for="CustomerFacingCityAddress" class="custome-facing-address  form-control form-control-sm w-50 mb-1 d-none" placeholder="City">
+                                                        <input id="customer-facing-state" type="text" asp-for="CustomerFacingState" class="custome-facing-address  form-control form-control-sm w-50 mb-1 d-none" placeholder="State">
+                                                        <input id="customer-facing-zip-code" type="text" asp-for="CustomerFacingZipCode" class="custome-facing-address  form-control form-control-sm w-50 mb-1 d-none" placeholder="Zip code">
+
+                                                        <input checked class="form-check-input d-none mb-1 checkbox-company" type="checkbox" value="" id="legal-address-id">
+                                                        <label class="form-check-label ms-2 mb-1" for="legal-address-id">
+                                                            Same as company address
+                                                        </label><br />
+                                                        <input id="legal-address" type="text" asp-for="LegalAddress" class="legal-address form-control d-none form-control-sm w-50 mb-1" placeholder="Street address">
+                                                        <input id="legal-city" type="text" asp-for="LegalCityAddress" class="legal-address form-control form-control-sm w-50 mb-1 d-none" placeholder="City">
+                                                        <input id="legal-state" type="text" asp-for="LegalState" class="legal-address form-control form-control-sm w-50 mb-1 d-none" placeholder="State">
+                                                        <input id="legal-zip-code" type="text" asp-for="LegalZipCode" class="legal-address form-control form-control-sm w-50 mb-1 d-none" placeholder="Zip code">
+
+                                                        <button class="d-none cancelbtn mt-2" id="addressCancelbtn" type="button">Cancel</button>
+                                                        <button class="d-none savebtn mt-2" type="button">Save</button>
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="AddressEditButton"></i>
+                                                    </div>
+                                                </div>
+
+
+                                                <hr />
+                                                <h6 class="fw-bold">
+                                                    Communications with
+                                                    Atrai
+                                                </h6>
+                                                <div class="row coomunicate" style="margin-left: 200px">
+                                                    <div class="col-lg-3">
+                                                        <p><a href="#">View Privacy Statement</a></p>
+                                                    </div>
+                                                </div>
+                                                <hr />
+                                            </div>
+                                            @*========company tab ends==================*@
+
+
+
+                                            @*========sales tab starts==================*@
+                                            <div class="tab-pane fade show" id="nav-sales" role="tabpanel" aria-labelledby="nav-sales-tab">
+                                                <h6 class="fw-bold">Customize</h6>
+                                                <div class="row company-name" style="margin-left: 200px">
+                                                    <div class="col-lg-3">
+                                                        <p>Customise the way forms look to your customers</p>
+                                                    </div>
+                                                    <div class="col-lg" id="">
+                                                        <a href="@Url.Action("CustomFormStyleList","Admin")" class="button savebtn py-2">Customize look and feel</a>
+                                                    </div>
+                                                </div>
+
+                                                <hr />
+
+                                                <h6 class="fw-bold">Sales form content</h6>
+                                                <div class="row sales-form-content" style="margin-left: 200px">
+                                                    <div class="col-lg-3">
+                                                        <p>Preferred invoice terms</p>
+                                                        <p>Preferred delivery method</p>
+                                                        <p>Shipping</p>
+                                                        <p>Custom transaction numbers</p>
+                                                        <p>Service date</p>
+                                                        <p>Discount</p>
+                                                        <p>Deposit</p>
+                                                        <p>Tags</p>
+                                                        <button class="d-none cancelbtn mt-2" id="BtnCancelSales" type="button">Cancel</button>
+                                                        <button class="d-none savebtn mt-2" id="BtnSaveSales" type="button">Save</button>
+                                                    </div>
+                                                    <div class="col-lg" id="sales-form-content-second-col">
+                                                        <select asp-for="TermsId" class="form-select w-25 mb-2" asp-items="@ViewBag.Terms" id="terms" disabled>
+                                                            @*<option id="addNewOption" data-icon="bi bi-plus-lg">Add New</option>*@
+                                                        </select>
+
+                                                        <select asp-for="DeliveryMethod" class="form-select w-25 mb-2" id="delivery-method" disabled>
+                                                            <option value="">None</option>
+                                                            <option value="Print later">Print later</option>
+                                                            <option value="Send later">Send later</option>
+                                                        </select>
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsShipping" class="form-check-input" type="checkbox" id="shipping" disabled>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsCustomTransactionNumber" class="form-check-input" type="checkbox" id="custom-transaction-numbers" disabled>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsServiceDate" class="form-check-input" type="checkbox" id="service-date" disabled>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsDiscount" class="form-check-input" type="checkbox" id="discount" disabled>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsDeposit" class="form-check-input" type="checkbox" id="deposit" disabled>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsTags" class="form-check-input" type="checkbox" id="tags" disabled>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="SalesFormContentEditButton"></i>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <hr />
+
+
+                                                <h6 class="fw-bold">Invoice payments</h6>
+                                                <div class="row invoice-payments" style="margin-left: 200px">
+                                                    <div class="col-lg-3 invoice-payments-col">
+                                                        <p class="fw-bold">Payment instructions</p>
+                                                        <p id="invoice-payments-text-area-tag"></p>
+                                                        <div class="form-floating">
+                                                            <textarea asp-for="PaymentInstructions" class="form-control d-none" placeholder="Leave payment instructions here" id="invoice-payments-text-area" style="height: 100px"></textarea>
+                                                        </div>
+
+
+
+                                                        <button class="d-none cancelbtn mt-2" id="IPaymentsCancelBtn" type="button">Cancel</button>
+                                                        <button class="d-none savebtn mt-2" type="button">Save</button>
+                                                    </div>
+                                                    <div class="col-lg contact-info-col">
+
+
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="InvoicePaymentsEditButton"></i>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <hr />
+
+                                                <h6 class="fw-bold">Product and services</h6>
+                                                <div class="row product-and-services" style="margin-left: 200px">
+                                                    <div class="col-lg-3" id="product-and-services-first-col">
+                                                        <p>Show Product/Service column on sales forms</p>
+                                                        <p>Show SKU column</p>
+                                                        <p>Track quantity and price/rate</p>
+                                                        <p>Track inventory quantity on hand</p>
+                                                        <button class="d-none cancelbtn mt-2" id="BtnCancelPr" type="button">Cancel</button>
+                                                        <button class="d-none savebtn mt-2" id="BtnSavePr" type="button">Save</button>
+                                                    </div>
+                                                    <div class="col-lg" id="product-and-services-second-col">
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsShowProductServiceColumn" class="form-check-input" type="checkbox" id="columns-on-sales-form" disabled>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsShowSku" class="form-check-input" type="checkbox" id="sku-column" disabled>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsTracktyRatePrice" class="form-check-input" type="checkbox" id="track-qty-rate-price" disabled>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsTrackQtyOnHand" class="form-check-input" type="checkbox" id="TrackInventory" disabled>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="ProductAndServicesEditButton"></i>
+                                                    </div>
+                                                </div>
+                                                <hr />
+
+
+                                                <h6 class="fw-bold">Progress invoicing</h6>
+                                                <div class="row ProgressInvoicing" style="margin-left: 200px">
+                                                    <div class="col-lg-3" id="ProgressInvoicing-first-col">
+                                                        <p>Create multiple partial invoices from a single estimate</p>
+                                                        <button class="d-none cancelbtn mt-2" id="BtnCancelprog" type="button">Cancel</button>
+                                                        <button class="d-none savebtn mt-2" id="BtnSaveProg" type="button">Save</button>
+                                                    </div>
+                                                    <div class="col-lg" id="ProgressInvoicing-second-col">
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsCreateMultiplePartialInvoice" class="form-check-input" type="checkbox" id="ProgressInvoicingCheck" disabled>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="ProgressInvoicingEditButton"></i>
+                                                    </div>
+                                                </div>
+                                                <hr />
+
+                                                <h6 class="fw-bold">Messages</h6>
+                                                <div class="row message" style="margin-left: 200px">
+                                                    <div class="col-lg-8" id="message-col-one">
+                                                        <p>Default email message sent with sales forms </p>
+                                                        <div class="d-none" id="message-parentDiv">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="" id="UseGreetings">
+                                                                <label class="form-check-label" for="UseGreetings">
+                                                                    Use greeting
+                                                                </label>
+                                                                <select asp-for="GreetingAppeal" id="greetingsOne">
+                                                                    <option value="blank">blank</option>
+                                                                    <option value="To:">To:</option>
+                                                                    <option value="Dear">Dear</option>
+                                                                </select>
+                                                                <select asp-for="GreetingNameFormat" id="greetingsTwo">
+                                                                    <option value="[First][Last]">[First][Last]</option>
+                                                                    <option value="[Title][Last]">[Title][Last]</option>
+                                                                    <option value="[First]">[First]</option>
+                                                                    <option value="[Full Name]">[Full Name]</option>
+                                                                    <option value="[Company Name]">[Company Name]</option>
+                                                                    <option value="[Display Name]">[Display Name]</option>
+                                                                </select>
+                                                            </div>
+                                                            <label class="mt-2">Email subject line</label> <br />
+                                                            <input id="emailSubjectLine" type="text" asp-for="EmailSubjectLine" class="legal-address form-control form-control-sm w-50 mb-1">
+                                                            <label class="mt-2">Email messages</label><br />
+                                                            <div class="form-floating">
+                                                                <textarea asp-for="EmailMessage" class="form-control w-50" placeholder="Leave payment instructions here" id="emailMessageTextArea" style="height: 100px"></textarea>
+                                                            </div>
+                                                            <div class="form-check mt-2">
+                                                                <input asp-for="IsCopyEmail" class="form-check-input" type="checkbox" value="" id="EmailCopyTo">
+                                                                <label class="form-check-label" for="flexCheckDefault">
+                                                                    Email me a copy at fahad@gtrbd.com
+                                                                </label>
+                                                            </div>
+                                                            <label class="mt-2">Copy (Cc) new invoices to address</label> <br />
+                                                            <input asp-for="Cc" id="CC" type="text" class="legal-address form-control form-control-sm w-50 mb-1" placeholder="Cc (Separate multiple emails with a comma)">
+
+                                                            <label class="mt-2">Blind Copy (Bcc) new invoices to address</label> <br />
+                                                            <input asp-for="Bcc" id="Bcc" type="text" class="legal-address form-control form-control-sm w-50 mb-1" placeholder="Bcc (Separate multiple emails with a comma)">
+                                                            <label>Sales form</label><br />
+                                                            <select asp-for="DocTypeId" asp-items="@ViewBag.Doctypes" id="estimate">
+                                                                <option value="" selected>Estimate</option>
+                                                            </select>
+                                                            <div class="form-floating mt-2">
+                                                                <textarea class="form-control w-50" placeholder="Leave payment instructions here" id="estimateTextArea" style="height: 100px"></textarea>
+                                                            </div>
+
+                                                            <button class="cancelbtn mt-2" id="MessageBtnCancel" type="button">Cancel</button>
+                                                            <button class="savebtn mt-2" id="BtnSave" type="button">Save</button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg" id="">
+
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="MessageEditButton"></i>
+                                                    </div>
+                                                </div>
+                                                <hr />
+
+
+                                                <h6 class="fw-bold">Reminders</h6>
+                                                <div class="row reminders" style="margin-left: 200px">
+                                                    <div class="col-lg-8">
+                                                        <p>Default email message sent with sales forms </p>
+                                                        <div class="form-check form-switch mb-2 ms-1 d-none" id="switchParent">
+                                                            <label>Automatic invoice reminders</label>
+                                                            <input class="form-check-input" type="checkbox" id="automaticInvoiceReminders">
+                                                        </div>
+                                                        <div class="d-none" id="messageParentDiv">
+                                                            <p>Automatic email reminders only apply to new invoices. Turning off automatic reminders removes them from all invoices.</p>
+
+                                                            <div class="accordion" id="accordionExample">
+                                                                <div class="accordion-item mb-3 w-75">
+                                                                    <h2 class="accordion-header" id="headingOne">
+                                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                                                            Reminder 1 @*(3 day(s) before due date) <span>off</span>*@
+                                                                        </button>
+                                                                    </h2>
+                                                                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                                                                        <div class="accordion-body">
+                                                                            <div class="form-check form-switch mb-2 ms-1">
+                                                                                <strong>Reminder 1</strong>
+                                                                                <div class="form-check form-switch mb-2 ms-1">
+                                                                                    <input class="form-check-input" type="checkbox" id="reminderOne">
+                                                                                </div>
+                                                                            </div>
+                                                                            <select asp-for="ReminderOneDays" class="mb-2" id="daysRemOne">
+                                                                                <option value="" selected>Select</option>
+                                                                                <option value="On due date">On due date</option>
+                                                                                <option value="7">7</option>
+                                                                                <option value="14">14</option>
+                                                                                <option value="30">30</option>
+                                                                                <option value="90">90</option>
+                                                                            </select> <label>day(s)</label>
+                                                                            <select asp-for="ReminderOneDueDate" class="mb-2" id="dueDateRemOne">
+                                                                                <option value="Before">Before</option>
+                                                                                <option value="After">After</option>
+                                                                            </select> <label>due date</label>
+                                                                            <p class="mb-2">Use [Invoice No.] and [Company Name] as placeholders in the email.</p>
+                                                                            <label class="mt-2 mb-2">Email subject line</label> <br />
+                                                                            <input asp-for="ReminderOneSubjectLine" id="emailSubjectLineRemOne" type="text" class="legal-address form-control form-control-sm w-50 mb-1">
+                                                                            <div class="form-check mb-2">
+                                                                                <input class="form-check-input" type="checkbox" value="" id="useEmailGreetRemOne">
+                                                                                <label class="form-check-label" for="useEmailGreetRem">Use email greeting </label>
+                                                                                <select as-for="ReminderOneGreetingAppeal" class="ms-3" id="GreetOneRemOne">
+                                                                                    <option value="blank">blank</option>
+                                                                                    <option value="To:">To:</option>
+                                                                                    <option value="Dear">Dear</option>
+                                                                                </select>
+                                                                                <select as-for="ReminderOneGreetingNameFormat" id="GreetTwoRemOne">
+                                                                                    <option value="[First][Last]">[First][Last]</option>
+                                                                                    <option value="[Title][Last]">[Title][Last]</option>
+                                                                                    <option value="[First]">[First]</option>
+                                                                                    <option value="[Full Name]">[Full Name]</option>
+                                                                                    <option value="[Company Name]">[Company Name]</option>
+                                                                                    <option value="[Display Name]">[Display Name]</option>
+                                                                                </select>
+                                                                            </div>
+                                                                            <label class="mb-2">Email messages</label><br />
+                                                                            <div class="form-floating mb-2">
+                                                                                <textarea asp-for="ReminderOneMessage" class="form-control" placeholder="Leave payment instructions here" id="EmailMessageRemOne" style="height: 100px"></textarea>
+                                                                            </div>
+                                                                            <a href="#">Use default reminder message</a> <br />
+                                                                            <button class="cancelbtn mt-2" id="RemindersOneBtnCancel" type="button">Cancel</button>
+                                                                            <button class="savebtn mt-2" id="BtnSave" type="button">Save</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="accordion-item mb-3 w-75">
+                                                                    <h2 class="accordion-header" id="headingTwo">
+                                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                                                            Reminder 2 @*(on due date) <span>off</span>*@
+                                                                        </button>
+                                                                    </h2>
+                                                                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                                                                        <div class="accordion-body">
+                                                                            <div class="form-check form-switch mb-2 ms-1">
+                                                                                <strong>Reminder 1</strong>
+                                                                                <div class="form-check form-switch mb-2 ms-1">
+                                                                                    <input class="form-check-input" type="checkbox" id="reminderTwo">
+                                                                                </div>
+                                                                            </div>
+                                                                            <select asp-for="ReminderTwoDays" class="mb-2" id="daysRemTwo">
+                                                                                <option value="" selected>Select</option>
+                                                                                <option value="On due date">On due date</option>
+                                                                                <option value="7">7</option>
+                                                                                <option value="14">14</option>
+                                                                                <option value="30">30</option>
+                                                                                <option value="90">90</option>
+                                                                            </select>
+                                                                            <p class="mb-2">Use [Invoice No.] and [Company Name] as placeholders in the email.</p>
+                                                                            <label class="mt-2 mb-2">Email subject line</label> <br />
+                                                                            <input asp-for="ReminderTwoSubjectLine" id="emailSubjectLineRemTwo" type="text" class="legal-address form-control form-control-sm w-50 mb-1">
+                                                                            <div class="form-check mb-2">
+                                                                                <input class="form-check-input" type="checkbox" value="" id="useEmailGreetRemTwo">
+                                                                                <label class="form-check-label" for="useEmailGreetRem">Use email greeting </label>
+                                                                                <select asp-for="ReminderTwoGreetingAppeal" class="ms-3" id="GreetOneRemTwo">
+                                                                                    <option value="blank">blank</option>
+                                                                                    <option value="To:">To:</option>
+                                                                                    <option value="Dear">Dear</option>
+                                                                                </select>
+                                                                                <select asp-for="ReminderTwoGreetingNameFormat" id="GreetTwoRemTwo">
+                                                                                    <option value="[First][Last]">[First][Last]</option>
+                                                                                    <option value="[Title][Last]">[Title][Last]</option>
+                                                                                    <option value="[First]">[First]</option>
+                                                                                    <option value="[Full Name]">[Full Name]</option>
+                                                                                    <option value="[Company Name]">[Company Name]</option>
+                                                                                    <option value="[Display Name]">[Display Name]</option>
+                                                                                </select>
+                                                                            </div>
+                                                                            <label class="mb-2">Email messages</label><br />
+                                                                            <div class="form-floating mb-2">
+                                                                                <textarea asp-for="ReminderTwoMessage" class="form-control" placeholder="Leave payment instructions here" id="EmailMessageRemTwo" style="height: 100px"></textarea>
+                                                                            </div>
+                                                                            <a href="#">Use default reminder message</a> <br />
+                                                                            <button class="cancelbtn mt-2" id="RemindersTwoBtnCancel" type="button">Cancel</button>
+                                                                            <button class="savebtn mt-2" id="BtnSave" type="button">Save</button>
+                                                                        </div>
+
+                                                                    </div>
+                                                                </div>
+                                                                <div class="accordion-item mb-3 w-75">
+                                                                    <h2 class="accordion-header" id="headingThree">
+                                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                                                            Reminder 3 @*(3 day(s) after due date) <span>off</span>*@
+                                                                        </button>
+                                                                    </h2>
+                                                                    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                                                                        <div class="accordion-body">
+                                                                            <div class="form-check form-switch mb-2 ms-1">
+                                                                                <strong>Reminder 1</strong>
+                                                                                <div class="form-check form-switch mb-2 ms-1">
+                                                                                    <input class="form-check-input" type="checkbox" id="reminderThree">
+                                                                                </div>
+                                                                            </div>
+                                                                            <select asp-for="ReminderThreeDays" class="mb-2" id="dayseRemThree">
+                                                                                <option value="" selected>Select</option>
+                                                                                <option value="On due date">On due date</option>
+                                                                                <option value="7">7</option>
+                                                                                <option value="14">14</option>
+                                                                                <option value="30">30</option>
+                                                                                <option value="90">90</option>
+                                                                            </select><label>day(s)</label>
+                                                                            <select asp-for="ReminderThreeDueDate" class="mb-2" id="dueDateRemThree">
+                                                                                <option value="Before">Before</option>
+                                                                                <option value="After">After</option>
+                                                                            </select><label>due date</label>
+                                                                            <p class="mb-2">Use [Invoice No.] and [Company Name] as placeholders in the email.</p>
+                                                                            <label class="mt-2 mb-2">Email subject line</label> <br />
+                                                                            <input asp-for="ReminderThreeSubjectLine" id="emailSubjectLineRemThree" type="text" class="legal-address form-control form-control-sm w-50 mb-1">
+                                                                            <div class="form-check mb-2">
+                                                                                <input class="form-check-input" type="checkbox" value="" id="useEmailGreetRemThree">
+                                                                                <label class="form-check-label" for="useEmailGreetRemThree">Use email greeting </label>
+                                                                                <select asp-for="ReminderThreeGreetingAppeal" class="ms-3" id="GreetOneRemThree">
+                                                                                    <option value="blank">blank</option>
+                                                                                    <option value="To:">To:</option>
+                                                                                    <option value="Dear">Dear</option>
+
+                                                                                </select>
+                                                                                <select asp-for="ReminderThreeGreetingNameFormat" id="GreetTwoRemThree">
+                                                                                    <option value="[First][Last]">[First][Last]</option>
+                                                                                    <option value="[Title][Last]">[Title][Last]</option>
+                                                                                    <option value="[First]">[First]</option>
+                                                                                    <option value="[Full Name]">[Full Name]</option>
+                                                                                    <option value="[Company Name]">[Company Name]</option>
+                                                                                    <option value="[Display Name]">[Display Name]</option>
+                                                                                </select>
+                                                                            </div>
+                                                                            <label class="mb-2">Email messages</label><br />
+                                                                            <div class="form-floating mb-2">
+                                                                                <textarea asp-for="ReminderThreeMessage" class="form-control" placeholder="Leave payment instructions here" id="EmailMessageRemThree" style="height: 100px"></textarea>
+                                                                            </div>
+                                                                            <a href="#">Use default reminder message</a> <br />
+                                                                            <button class="cancelbtn mt-2" id="RemindersThreeBtnCancel" type="button">Cancel</button>
+                                                                            <button class="savebtn mt-2" id="BtnSave" type="button">Save</button>
+                                                                        </div>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg" id="">
+
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="ReminderEditButton"></i>
+                                                    </div>
+                                                </div>
+                                                <hr />
+
+
+                                                <h6 class="fw-bold">Online deliver</h6>
+                                                <div class="row onlineDeliver" style="margin-left: 200px">
+                                                    <div class="col-lg-3 d-none" id="onlineDeliverParent">
+                                                        <p>	Email options for all sales forms</p>
+
+                                                        <input asp-for="IsShowSummaryInEmail" class="form-check-input" type="radio" value="0" name="abc" id="showShortSummaryInMail">
+                                                        <label class="mb-2">Show short summary in email</label> <br />
+                                                        <input asp-for="IsShowFullDetailsInEmail" class="form-check-input" type="radio" value="0" name="abc" id="showFullDetailsInMail">
+                                                        <label class="mb-2">Show full details in email</label> <br />
+                                                        <input asp-for="IsPdfAttached" class="form-check-input" type="checkbox" id="pdfAttached">
+                                                        <label class="mb-2">PDF Attached</label> <br />
+
+                                                        <label class="mb-2">Additional email options for invoices</label><br />
+                                                        <select asp-for="AdditionalEmailOptions" id="onlineInvoice">
+                                                            <option value="Online invoice">Online invoice</option>
+                                                            <option value="Plain text">Plain text</option>
+                                                        </select>
+                                                        <br />
+                                                        <button class="cancelbtn mt-2" id="OnlineBtnCancel" type="button">Cancel</button>
+                                                        <button class="savebtn mt-2" id="BtnSave" type="button">Save</button>
+                                                    </div>
+                                                    <div class="col-lg" id="">
+
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="OnlineDeliverEditButton"></i>
+                                                    </div>
+                                                </div>
+                                                <hr />
+
+                                                <h6 class="fw-bold">Statements</h6>
+                                                <div class="row statement" style="margin-left: 200px">
+                                                    <div class="col-lg-3 d-none" id="statementParentDiv">
+                                                        <p>	Email options for all sales forms</p>
+
+                                                        <input asp-for="IsListAllTransaction" class="form-check-input" type="radio" name="abcd" value="0" id="transactionAsSingle">
+                                                        <label class="mb-2">List each transaction as a single line</label> <br />
+                                                        <input asp-for="IsListAllTransaction" class="form-check-input" type="radio" name="abcd" value="0" id="transactionAll">
+                                                        <label class="mb-2">List each transaction including all detail lines</label> <br />
+
+                                                        <strong>Show ageing table at bottom of statement</strong>
+                                                        <div class="form-check form-switch ms-1">
+                                                            <input class="form-check-input" type="checkbox" id="showAgeingTable">
+                                                        </div>
+
+                                                        <button class="cancelbtn mt-2" id="StatementBtnCancel" type="button">Cancel</button>
+                                                        <button class="savebtn mt-2" id="BtnSave" type="button">Save</button>
+                                                    </div>
+                                                    <div class="col-lg" id="">
+
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="SatetmentsEditButton"></i>
+                                                    </div>
+                                                </div>
+                                                <hr />
+                                            </div>
+                                            @*========sales tab ends==================*@
+
+                                            @*========expenses tab starts==================*@
+                                            <div class="tab-pane fade show" id="nav-expenses" role="tabpanel" aria-labelledby="nav-expenses-tab">
+                                                <h6 class="fw-bold">Bills and expenses</h6>
+                                                <div class="row billsAndExpenses" style="margin-left: 200px">
+                                                    <div class="col-lg-4">
+                                                        <p>Show Items table on expense and purchase forms</p>
+                                                        <p>Show Tags field on expense and purchase forms</p>
+                                                        <p>Track expenses and items by customer</p>
+                                                        <p>Make expenses and items billable</p>
+                                                        @*<p class="fw-bold">Default bill payment terms</p>*@
+                                                        <button class="d-none cancelbtn mt-2" id="BtnCancelBillExp" type="button">Cancel</button>
+                                                        <button class="d-none savebtn mt-2" id="BtnSaveBillExp" type="button">Save</button>
+                                                    </div>
+                                                    <div class="col-lg" id="billsAndExpenses-second-col">
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsShowItemsTablesOnForms" class="form-check-input" type="checkbox" id="showItems" disabled>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsShowTagsOnFroms" class="form-check-input" type="checkbox" id="showTags" disabled>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsTrackedByCustomer" class="form-check-input" type="checkbox" id="track" disabled>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsBillableItemAndExpenses" class="form-check-input" type="checkbox" id="billable" disabled>
+                                                        </div>
+                                                        @*<select asp-for="TermsId" class="form-select w-25 mb-2" asp-items="@ViewBag.Terms" id="terms" disabled>
+                                                            <option value="" selected>Select terms</option>
+                                                            <option id="" value="add-new" data-icon="bi bi-plus-lg">Add New</option>
+                                                        </select>*@
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="BillsExpenseEditButton"></i>
+                                                    </div>
+                                                </div>
+
+                                                <hr />
+
+                                                <h6 class="fw-bold">Purchase orders</h6>
+                                                <div class="row po" style="margin-left: 200px">
+                                                    <div class="col-lg-8">
+                                                        <p>Use purchase orders</p>
+                                                        <div class="form-check form-switch mb-2 ms-1 d-none" id="switchUsePurchaseorderParent">
+                                                            <input class="form-check-input" type="checkbox" id="usePurchaseorders">
+                                                        </div>
+                                                        <div class="d-none" id="parentDivOfPoBody">
+                                                            <div class="form-check form-switch mb-2 ms-1" id="switchCustomtranParent">
+                                                                <label>Custom transaction numbers</label>
+                                                                <input asp-for="IsSalesCustomtransactionNumber" class="form-check-input" type="checkbox" id="customeTransReminders">
+                                                            </div>
+                                                            <label>Default message on purchase orders</label><br />
+                                                            <textarea asp-for="DefaultMessageForPurchase" class="form-control w-50" id="emailMessageTextArea" style="height: 100px"></textarea>
+                                                            <button class="cancelbtn mt-2" id="BtnCancelPO" type="button">Cancel</button>
+                                                            <button class="savebtn mt-2" id="BtnSaveBillPO" type="button">Save</button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg" id="">
+
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="PoEditButton"></i>
+                                                    </div>
+                                                </div>
+
+                                                <hr />
+
+                                                <h6 class="fw-bold">Messages</h6>
+                                                <div class="row messageExpenses" style="margin-left: 200px">
+                                                    <div class="col-lg-8" id="messageExpenses-col-one">
+                                                        <p>Default email message sent with sales forms </p>
+                                                        <div class="d-none" id="messageExpenses-parentDiv">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" value="" id="messageExpensesUseGreetings">
+                                                                <label class="form-check-label" for="messageExpensesUseGreetings">
+                                                                    Use greeting
+                                                                </label>
+                                                                <select asp-for="SalesGreetingAppeal" id="messageExpensesgreetingsOne">
+                                                                    <option value="blank">blank</option>
+                                                                    <option value="To:">To:</option>
+                                                                    <option value="Dear">Dear</option>
+                                                                </select>
+                                                                <select asp-for="SalesGreetingNameFormat" id="messageExpensesgreetingsTwo">
+                                                                    <option value="[First][Last]">[First][Last]</option>
+                                                                    <option value="[Title][Last]">[Title][Last]</option>
+                                                                    <option value="[First]">[First]</option>
+                                                                    <option value="[Full Name]">[Full Name]</option>
+                                                                    <option value="[Company Name]">[Company Name]</option>
+                                                                    <option value="[Display Name]">[Display Name]</option>
+                                                                </select>
+                                                            </div>
+                                                            <label class="mt-2">Email subject line</label> <br />
+                                                            <input id="messageExpensesemailSubjectLine" type="text" asp-for="SalesEmailSubjectLine" class="legal-address form-control form-control-sm w-50 mb-1">
+                                                            <label class="mt-2">Email messages</label><br />
+                                                            <div class="form-floating">
+                                                                <textarea asp-for="SalesEmailMessage" class="form-control w-50" id="messageExpensesemailMessageTextArea" style="height: 100px"></textarea>
+                                                            </div>
+                                                            <div class="form-check mt-2">
+                                                                <input asp-for="IsSalesCopyEmail" class="form-check-input" type="checkbox" value="" id="EmailCopyTo">
+                                                                <label class="form-check-label" for="flexCheckDefault">
+                                                                    Email me a copy at fahad@gtrbd.com
+                                                                </label>
+                                                            </div>
+                                                            <label class="mt-2">Copy (Cc) new invoices to address</label> <br />
+                                                            <input asp-for="SalesCc" id="CC" type="text" class="legal-address form-control form-control-sm w-50 mb-1" placeholder="Cc (Separate multiple emails with a comma)">
+
+                                                            <label class="mt-2">Blind Copy (Bcc) new invoices to address</label> <br />
+                                                            <input asp-for="SalesBcc" id="Bcc" type="text" class="legal-address form-control form-control-sm w-50 mb-1" placeholder="Bcc (Separate multiple emails with a comma)">
+
+                                                            <button class="cancelbtn mt-2" id="expenseMessageBtnCancel" type="button">Cancel</button>
+                                                            <button class="savebtn mt-2" id="BtnSave" type="button">Save</button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg" id="">
+
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="messageExpensesEditButton"></i>
+                                                    </div>
+                                                </div>
+                                                <hr />
+                                            </div>
+                                            @*========expenses tab ends==================*@
+
+
+
+
+
+                                            @*========time tab starts==================*@
+                                            <div class="tab-pane fade show" id="nav-time" role="tabpanel" aria-labelledby="nav-time-tab">
+                                                <h6 class="fw-bold">General</h6>
+                                                <div class="row General" style="margin-left: 200px">
+                                                    <div class="col-lg-4">
+                                                        <p>First day of work week</p>
+                                                        <button class="d-none cancelbtn mt-2" id="BtnCancelTime" type="button">Cancel</button>
+                                                        <button class="d-none savebtn mt-2" id="BtnSaveTime" type="button">Save</button>
+                                                    </div>
+                                                    <div class="col-lg" id="General-second-col">
+                                                        <select asp-for="FirstDayOfWeek" class="form-select w-25 mb-2" id="days" disabled>
+                                                            <option value="Sunday">Sunday</option>
+                                                            <option value="Monday">Monday</option>
+                                                            <option value="Tuesday">Tuesday</option>
+                                                            <option value="Wednesday">Wednesday</option>
+                                                            <option value="Thursday">Thursday</option>
+                                                            <option value="Friday">Friday</option>
+                                                            <option value="Saturday">Saturday</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="TimeEditButton"></i>
+                                                    </div>
+                                                </div>
+
+                                                <hr />
+
+                                                <h6 class="fw-bold">Timesheet</h6>
+                                                <div class="row po" style="margin-left: 200px">
+                                                    <div class="col-lg-4">
+                                                        <p>Show service field</p>
+                                                        <p>Allow time to be billable</p>
+                                                        <div class="d-none" id="billigRate">
+                                                            <input asp-for="IsShowServiceField" class="form-check-input" type="checkbox" id="showBillingRate">
+                                                            <label>Show billing rate to users entering time</label>
+                                                        </div>
+                                                        <button class="d-none cancelbtn mt-2" id="BtnCancelTimeSheet" type="button">Cancel</button>
+                                                        <button class="d-none savebtn mt-2" id="BtnSaveTimeSheet" type="button">Save</button>
+                                                    </div>
+                                                    <div class="col-lg" id="billsAndExpenses-second-col">
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsAllowTimeToBillable" class="form-check-input" type="checkbox" id="showServiceField" disabled>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-2 ms-1">
+                                                            <input asp-for="IsShowBillingRateToUser" class="form-check-input" type="checkbox" id="timeToBillable" disabled>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="col-lg" id="">
+
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        <i class="bi bi-pen cursor-pointer" id="TimeSheetEditButton"></i>
+                                                    </div>
+                                                </div>
+
+                                                <hr />
+                                            </div>
+                                            @*========time tab ends==================*@
+
+
+
+
+
+
+
+                                            @*========advanced tab starts==================*@
+                                        <div class="tab-pane fade show" id="nav-advanced" role="tabpanel" aria-labelledby="nav-advanced-tab">
+                                            <h6 class="fw-bold">Accounting</h6>
+                                            <div class="row accounting" style="margin-left: 200px">
+                                                <div class="col-lg-3">
+                                                    <p>First month of financial year</p>
+                                                    <p>First month of tax year</p>
+                                                    <p>Accounting method</p>
+                                                    <p>Close the books</p>
+                                                    <p>Default tax rate selection</p>
+                                                    <button class="d-none cancelbtn mt-2" id="BtnCancelAcc" type="button">Cancel</button>
+                                                    <button class="d-none savebtn mt-2" id="BtnSaveAcc" type="button">Save</button>
+                                                </div>
+                                                <div class="col-lg" id="sales-form-content-second-col">
+                                                    <select asp-for="FinancialYearId" asp-items="@ViewBag.FinacialYears" class="form-select w-25 mb-2" id="financialYear" disabled>
+                                                    </select>
+
+                                                    <select asp-for="fixMonthofTaxYear" class="form-select w-25 mb-2" id="firstMonthOfTaxYear" disabled>
+                                                        <option value="">Same as financial year</option>
+                                                        <option value="Januray">Januray</option>
+                                                    </select>
+
+                                                    <select asp-for="AccountingMethodId" asp-items="@ViewBag.AccountingMethod" class="form-select w-25 mb-2" id="accountingMethod" disabled>
+                                                    </select>
+                                                    <div class="form-check form-switch mb-2 ms-1">
+                                                        <input asp-for="IsCloseTheBooks" class="form-check-input" type="checkbox" id="closeTheBooks" disabled>
+                                                    </div>
+                                                    <select asp-for="TaxRateId" asp-items="@ViewBag.TaxRate" class="form-select w-25 mb-2" id="taxSelection" disabled>
+                                                    </select>
+                                                </div>
+                                                <div class="col-lg-2">
+                                                    <i class="bi bi-pen cursor-pointer" id="AccountingEditButton"></i>
+                                                </div>
+                                            </div>
+
+
+
+                                            <hr />
+
+                                            <h6 class="fw-bold">Company type</h6>
+                                            <div class="row product-and-services" style="margin-left: 200px">
+                                                <div class="col-lg-3" id="product-and-services-first-col">
+                                                    <p>Tax form</p>
+                                                    <button class="d-none cancelbtn mt-2" id="BtnCancelComType" type="button">Cancel</button>
+                                                    <button class="d-none savebtn mt-2" id="BtnSaveComType" type="button">Save</button>
+                                                </div>
+                                                <div class="col-lg" id="product-and-services-second-col">
+                                                    <select asp-for="TaxFormId" asp-items="@ViewBag.TaxForm" class="form-select w-25 mb-2" id="taxFormmB" disabled>
+                                                    </select>
+                                                    <select asp-for="BusinessTypeId" asp-items="@ViewBag.BusinessType" class="form-select w-25 mb-2" id="taxForm" disabled>
+                                                    </select>
+                                                </div>
+                                                <div class="col-lg-2">
+                                                    <i class="bi bi-pen cursor-pointer" id="CompanyTypeeEditButton"></i>
+                                                </div>
+                                            </div>
+                                            <hr />
+                                            <h6 class="fw-bold">Chart of accounts</h6>
+                                            <div class="row product-and-services" style="margin-left: 200px">
+                                                <div class="col-lg-3" id="product-and-services-first-col">
+                                                    <p>Enable account numbers </p>
+                                                    <button class="d-none cancelbtn mt-2" id="BtnCancelCAcc" type="button">Cancel</button>
+                                                    <button class="d-none savebtn mt-2" id="BtnSaveCAcc" type="button">Save</button>
+                                                </div>
+                                                <div class="col-lg" id="product-and-services-second-col">
+                                                    <div class="form-check form-switch mb-2 ms-1">
+                                                        <input asp-for="IsEnabledAccNumbers" class="form-check-input" type="checkbox" id="enableAccNumbers" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-2">
+                                                    <i class="bi bi-pen cursor-pointer" id="CofAccountEditButton"></i>
+                                                </div>
+                                            </div>
+                                            <hr />
+
+
+
+                                            <h6 class="fw-bold">Categories</h6>
+                                            <div class="row product-and-services" style="margin-left: 200px">
+                                                <div class="col-lg-3" id="product-and-services-first-col">
+                                                    <p>Track classes</p>
+                                                    <p>Track locations</p>
+                                                    <button class="d-none cancelbtn mt-2" id="BtnCancelCat" type="button">Cancel</button>
+                                                    <button class="d-none savebtn mt-2" id="BtnSaveCat" type="button">Save</button>
+                                                </div>
+                                                <div class="col-lg" id="product-and-services-second-col">
+                                                    <div class="form-check form-switch mb-2 ms-1">
+                                                        <input asp-for="IsTrackedClasses" class="form-check-input" type="checkbox" id="trackClasses" disabled>
+                                                    </div>
+                                                    <div class="form-check form-switch mb-2 ms-1">
+                                                        <input asp-for="IsTrackedLocations" class="form-check-input" type="checkbox" id="trackLocations" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-2">
+                                                    <i class="bi bi-pen cursor-pointer" id="CatEditButton"></i>
+                                                </div>
+                                            </div>
+                                            <hr />
+
+
+
+                                            <h6 class="fw-bold">Automation</h6>
+                                            <div class="row product-and-services" style="margin-left: 200px">
+                                                <div class="col-lg-3" id="product-and-services-first-col">
+                                                    <p>Pre-fill forms with previously entered content</p>
+                                                    <p>Automatically invoice unbilled activity</p>
+                                                    <p>Automatically apply bill payments</p>
+                                                    <button class="d-none cancelbtn mt-2" id="BtnCancelAut" type="button">Cancel</button>
+                                                    <button class="d-none savebtn mt-2" id="BtnSaveAut" type="button">Save</button>
+                                                </div>
+                                                <div class="col-lg" id="product-and-services-second-col">
+                                                    <div class="form-check form-switch mb-2 ms-1">
+                                                        <input asp-for="IsPreFillFormsPrevEnteredContent" class="form-check-input" type="checkbox" id="preFill" disabled>
+                                                    </div>
+                                                    <div class="form-check form-switch mb-2 ms-1">
+                                                        <input asp-for="IsAutoInvoicedUnbilled" class="form-check-input" type="checkbox" id="unbilledActivity" disabled>
+                                                    </div>
+                                                    <div class="form-check form-switch mb-2 ms-1">
+                                                        <input asp-for="IsAutoAppliedBillPayment" class="form-check-input" type="checkbox" id="billPayment" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-2">
+                                                    <i class="bi bi-pen cursor-pointer" id="AutEditButton"></i>
+                                                </div>
+                                            </div>
+                                            <hr />
+
+
+
+
+                                            <h6 class="fw-bold">Projects</h6>
+                                            <div class="row product-and-services" style="margin-left: 200px">
+                                                <div class="col-lg-3" id="product-and-services-first-col">
+                                                    <p>Organise all job-related activity in one place</p>
+                                                    <button class="d-none cancelbtn mt-2" id="BtnCancelProj" type="button">Cancel</button>
+                                                    <button class="d-none savebtn mt-2" id="BtnSaveProj" type="button">Save</button>
+                                                </div>
+                                                <div class="col-lg" id="product-and-services-second-col">
+                                                    <div class="form-check form-switch mb-2 ms-1">
+                                                        <input asp-for="IsOrganisedJob" class="form-check-input" type="checkbox" id="activityOnePlace" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-2">
+                                                    <i class="bi bi-pen cursor-pointer" id="ProjectEditButton"></i>
+                                                </div>
+                                            </div>
+                                            <hr />
+
+
+                                            <h6 class="fw-bold">Language</h6>
+                                            <div class="row product-and-services" style="margin-left: 200px">
+                                                <div class="col-lg-3" id="product-and-services-first-col">
+                                                    <p>Language</p>
+                                                    <button class="d-none cancelbtn mt-2" id="BtnCancelLan" type="button">Cancel</button>
+                                                    <button class="d-none savebtn mt-2" id="BtnSaveLan" type="button">Save</button>
+                                                </div>
+                                                <div class="col-lg" id="product-and-services-second-col">
+                                                    <select asp-for="LanguageId" asp-items="@ViewBag.Languages"  class="form-select w-25 mb-2" id="language" disabled>
+                                                    </select>
+                                                </div>
+                                                <div class="col-lg-2">
+                                                    <i class="bi bi-pen cursor-pointer" id="LanguageEditButton"></i>
+                                                </div>
+                                            </div>
+                                            <hr />
+
+                                            <h6 class="fw-bold">Currency</h6>
+                                            <div class="row ProgressInvoicing" style="margin-left: 200px">
+                                                <div class="col-lg-3" id="ProgressInvoicing-first-col">
+                                                    <p>Home Currency</p>
+                                                    <p>Multicurrency</p>
+                                                    <button class="d-none cancelbtn mt-2" id="BtnCancelCurency" type="button">Cancel</button>
+                                                    <button class="d-none savebtn mt-2" id="BtnSaveCurency" type="button">Save</button>
+                                                </div>
+                                                <div class="col-lg" id="ProgressInvoicing-second-col">
+                                                    @*<select asp-for="CountryId" asp-items="@ViewBag.Country" class="form-select w-25 mb-2" id="homeCurency" disabled>
+                                                    </select>*@
+                                                    @Html.LabelFor(x => x.CountryId)
+                                                    @Html.DropDownListFor(x => x.CountryId,
+                                                    new SelectList((IEnumerable<SelectListItem>)ViewBag.Country, "Value", "Text"), "Select Country",
+                                                    htmlAttributes: new { @class = "form-control form-control-sm w-25", id = "CountryId",disabled = true })
+                                                    @Html.LabelFor(x => x.CurrencyId)
+                                                    @Html.DropDownListFor(x => x.CurrencyId,
+                                                    new SelectList((IEnumerable<SelectListItem>)ViewBag.Country, "Value", "Text"), "Select Country",
+                                                    htmlAttributes: new { @class = "form-control form-control-sm w-25", id = "CurrencyId", disabled = true })
+                                                    <div class="form-check form-switch mb-2 ms-1">
+                                                        <input asp-for="isMultiCurrency" class="form-check-input" type="checkbox" id="multiCurecny" disabled>
+                                                    </div>
+
+                                                </div>
+                                                <div class="col-lg-2">
+                                                    <i class="bi bi-pen cursor-pointer" id="CurencyEditButton"></i>
+                                                </div>
+                                            </div>
+                                            <hr />
+
+
+                                            <h6 class="fw-bold">Other preferences</h6>
+                                            <div class="row accounting" style="margin-left: 200px">
+                                                <div class="col-lg-3">
+                                                    <p>Date format</p>
+                                                    <p>Number format</p>
+                                                    <p>Warn if duplicate cheque number is used</p>
+                                                    <p>Warn me when I enter a bill number that’s already been used for that supplier</p>
+                                                    <p>Warn if duplicate journal number is used</p>
+                                                    <p>Sign me out if inactive for</p>
+                                                    <button class="d-none cancelbtn mt-2" id="BtnCancelOtherPref" type="button">Cancel</button>
+                                                    <button class="d-none savebtn mt-2" id="BtnSaveOtherPref" type="button">Save</button>
+                                                </div>
+                                                <div class="col-lg" id="sales-form-content-second-col">
+                                                    <select asp-for="DateFormatId" asp-items="@ViewBag.DateFormat" class="form-select w-25 mb-2" id="dateFormat" disabled>
+                                                    </select>
+                                                    <select asp-for="NumberFormatId" asp-items="@ViewBag.DateFormat" class="form-select w-25 mb-2" id="numberFormat" disabled>
+                                                    </select>
+
+
+                                                    <div class="form-check form-switch mb-2 ms-1">
+                                                        <input asp-for="IsDuplicateCheque" class="form-check-input" type="checkbox" id="duplicateCheque" disabled>
+                                                    </div>
+                                                    <div class="form-check form-switch mb-2 ms-1">
+                                                        <input asp-for="IsDuplicateBillNo" class="form-check-input" type="checkbox" id="usedBillNumber" disabled>
+                                                    </div>
+                                                    <div class="form-check form-switch mb-2 ms-1">
+                                                        <input asp-for="IsDuplicateJournal" class="form-check-input" type="checkbox" id="duplicateJournal" disabled>
+                                                    </div>
+                                                    <select asp-for="SignOutDurationId" asp-items="@ViewBag.SignoutDuration" class="form-select w-25 mb-2" id="signMeOut" disabled>
+                                                    </select>
+                                                </div>
+                                                <div class="col-lg-2">
+                                                    <i class="bi bi-pen cursor-pointer" id="OtherPrefEditButton"></i>
+                                                </div>
+                                            </div>
+                                            <hr />
+                                        </div>
+                                            @*========advanced tab ends==================*@
+
+
+
+
+
+
+
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content mx-auto">
+            <div>
+                <button onclick="modalClear()" type="button" class="btn-close float-lg-end me-2 mt-2" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div>
+                <h5 class="modal-title ms-5 fw-bold text-dark" id="exampleModalLabel">New Term</h5>
+            </div>
+            <div class="modal-body px-5">
+                <!-- Inside the modal-body -->
+                <form id="termForm">
+                    <input type="hidden" id="Id" value="0" />
+
+                    <div class="mb-3">
+                        <label for="termName" class="form-label fw-bold"><span class="text-danger">*</span>Name</label>
+                        <input type="text" class="form-control w-50" id="termName" name="TermName" style="border-radius:0px;">
+                        <div id="termNameValidation" class="text-danger"></div>
+                    </div>
+                    <div class="mb-3">
+                        <input checked id="dueInDaysRadio" type="radio" />
+                        <label for="dueInDaysRadio" class="form-label fw-bold">Due in fixed number of days</label>
+                    </div>
+                    <div class="mb-3 d-flex ms-3">
+                        <input type="text" class="form-control" id="dueInDays" name="DueInFixedDays" style="width: 45px; border-radius: 0px;">
+                        <label for="dueInDays" class="form-label ms-1 my-auto">days</label>
+                    </div>
+                    <div class="mb-3">
+                        <input id="dueByDaysRadio" type="radio" />
+                        <label for="dueByDaysRadio" class="form-label fw-bold">Due by certain day of the month</label>
+                    </div>
+                    <div class="mb-3 d-flex ms-3">
+                        <input type="text" class="form-control" id="dueByDay" name="DueByDayOfMonth" style="width: 45px; border-radius: 0px;" disabled>
+                        <label for="dueByDay" class="form-label ms-1 my-auto">day of month</label>
+                    </div>
+                    <div class="mb-3 ms-3">
+                        <label class="form-label fw-bold">Due the next month if issued within</label>
+                    </div>
+                    <div class="mb-3 d-flex ms-3">
+                        <input type="text" class="form-control" id="dueNextMonthDays" name="DueNextMonthWithinDays" style="width: 45px; border-radius: 0px;" disabled>
+                        <label for="dueNextMonthDays" class="form-label ms-1 my-auto">days of due date</label>
+                    </div>
+                </form>
+
+            </div>
+            <!-- At the bottom of the modal content, before the closing </div> -->
+            <hr class="w-75 mx-auto" />
+            <div class="d-flex justify-content-around mb-4">
+                <button onclick="modalClear()" type="button" class="btn customize-btn fw-bold" data-bs-dismiss="modal" type="button">Cancel</button>
+                <button type="button" class="btn customize-btn-another fw-bold" id="saveTermButton">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        //========================================company nav functionalities starts===================================================
+
+
+        //company name func starts----
+
+        $("#TimeZoneSettingsId").change(function () {
+            var selectedText = $("#TimeZoneSettingsId option:selected").text();
+            $("#time-zone-tag-id").text(selectedText);
+        })
+        
+        var selectedText = $("#TimeZoneSettingsId option:selected").text();
+        $("#time-zone-tag-id").text(selectedText);
+        $("#tax-form-id").change(function () {
+            var selectedText = $("#tax-form-id option:selected").text();
+            $("#tax-form-tag").text(selectedText);
+        });
+
+        $("#industry-id").change(function () {
+            var selectedText = $("#industry-id option:selected").text();
+            $("#industry-tag").text(selectedText);
+        });
+
+        $('#CompanyNameEditButton').click(function () {
+            var companyNameContainer = $(this).closest('.company-name');
+            $("#company-name-second-col .w-25").toggleClass('d-none');
+
+            // Toggle the class 'd-none' for the p elements
+            $("#company-name-second-col p#time-zone-tag-id").toggleClass('d-none');
+
+            $(this).closest('.company-name').find('input.form-control').toggleClass('border-0');
+            $(this).closest('.company-name').find('input[type="checkbox"].form-check-input').first().toggleClass('d-none');
+            companyNameContainer.find('#BtnCancelCom, #BtnSaveCom').toggleClass('d-none');
+        });
+        $('#BtnCancelCom').click(function () {
+            var companyNameContainer = $(this).closest('.company-name');
+            $("#company-name-second-col .w-25").toggleClass('d-none');
+
+            // Toggle the class 'd-none' for the p elements
+            $("#company-name-second-col p#time-zone-tag-id").toggleClass('d-none');
+
+            $(this).closest('.company-name').find('input.form-control').toggleClass('border-0');
+            $(this).closest('.company-name').find('input[type="checkbox"].form-check-input').first().toggleClass('d-none');
+            companyNameContainer.find('#BtnCancelCom, #BtnSaveCom').toggleClass('d-none');
+        });
+        $('#legal-name-id').change(function () {
+            var legalName = $('.legal-name');
+
+            if (!$(this).prop('checked')) {
+                legalName.toggleClass('d-none border-0');
+            } else {
+                legalName.toggleClass('d-none border-0');
+            }
+        });
+        //compnay name func ends------
+
+
+
+        //compnay type func starts------
+        $('#CompanyTypeEditButton').click(function () {
+            var companyNameContainer = $(this).closest('.company-type');
+
+            var companyTypeSecondCol = $(this).closest('.company-type').find('div.company-type-second-col');
+
+            // Toggle the class 'd-none' for the select elements
+            companyTypeSecondCol.find('select').toggleClass('d-none');
+
+            // Toggle the class 'd-none' for the p elements
+            companyTypeSecondCol.find('p').toggleClass('d-none');
+            companyNameContainer.find('.cancelbtn, .savebtn').toggleClass('d-none');
+
+        });
+        //compnay type func ends------
+
+
+        //contact info func starts------
+        $('#ContactInfoEditButton').click(function () {
+            var companyNameContainer = $(this).closest('.contact-info');
+            var companyTypeSecondCol = $(this).closest('.contact-info').find('div.contact-info-col');
+
+            $(this).closest('.contact-info').find('input.form-control').toggleClass('border-0');
+
+            $(this).closest('.contact-info').find('input[type="checkbox"].form-check-input').first().toggleClass('d-none');
+            $(this).closest('.contact-info').find('.Customer-facing-email').toggleClass('d-none');
+            companyTypeSecondCol.find('label').toggleClass('d-none');
+            companyNameContainer.find('.cancelbtn, .savebtn').toggleClass('d-none');
+
+        });
+        $('#cInfoCancel').click(function () {
+            var companyNameContainer = $(this).closest('.contact-info');
+            var companyTypeSecondCol = $(this).closest('.contact-info').find('div.contact-info-col');
+
+            $(this).closest('.contact-info').find('input.form-control').toggleClass('border-0');
+
+            $(this).closest('.contact-info').find('input[type="checkbox"].form-check-input').first().toggleClass('d-none');
+            $(this).closest('.contact-info').find('.Customer-facing-email').toggleClass('d-none');
+            companyTypeSecondCol.find('label').toggleClass('d-none');
+            companyNameContainer.find('.cancelbtn, .savebtn').toggleClass('d-none');
+
+        });
+        $('#custome-facing-email-id').change(function () {
+            var legalName = $('.custom-facing-email');
+
+            if (!$(this).prop('checked')) {
+                legalName.toggleClass('d-none');
+            } else {
+                legalName.toggleClass('d-none');
+            }
+        });
+        //contact info func ends------
+
+        //address func starts------
+        $('#AddressEditButton').click(function () {
+            var companyNameContainer = $(this).closest('.address');
+
+            $(this).closest('.address').find('input.form-control').toggleClass('border-0');
+
+            companyNameContainer.find('input.other-addresses').toggleClass('d-none');
+
+            $(this).closest('.address').find('input[type="checkbox"].form-check-input').toggleClass('d-none');
+            companyNameContainer.find('.cancelbtn, .savebtn').toggleClass('d-none');
+
+        });
+        $('#addressCancelbtn').click(function () {
+            var companyNameContainer = $(this).closest('.address');
+
+            $(this).closest('.address').find('input.form-control').toggleClass('border-0');
+
+            companyNameContainer.find('input.other-addresses').toggleClass('d-none');
+
+            $(this).closest('.address').find('input[type="checkbox"].form-check-input').toggleClass('d-none');
+            companyNameContainer.find('.cancelbtn, .savebtn').toggleClass('d-none');
+
+        });
+        $('#custome-facing-address-id').change(function () {
+            var legalName = $('.custome-facing-address');
+
+            if (!$(this).prop('checked')) {
+                legalName.toggleClass('d-none');
+                legalName.removeClass('border-0');
+            } else {
+                legalName.toggleClass('d-none');
+            }
+        });
+        $('#legal-address-id').change(function () {
+            var legalName = $('.legal-address');
+
+            if (!$(this).prop('checked')) {
+                legalName.toggleClass('d-none');
+                legalName.removeClass('border-0');
+
+            } else {
+                legalName.toggleClass('d-none');
+            }
+        });
+        //address info func ends------
+
+
+
+        //populate tax form dropdown starts-----
+                @*$.ajax({
+            url: '@Url.Action("GetTaxForm", "Admin")',
+            success: function (data) {
+                //console.log("tax ajax data::", data);
+                const select = document.querySelector('#tax-form-id');
+
+                for (var i = 0; i < data.length; i++) {
+                    const option = document.createElement('option');
+                    //console.log(" data[i]::", data[i]);
+                    option.value = data[i].Value;
+                    option.text = data[i].Text;
+                    select.appendChild(option);
+                }
+            }
+        });*@
+        //populate tax form dropdown ends==-----
+
+        //populate inductry dropdown starts-----
+                @*$.ajax({
+            url: '@Url.Action("GetIndustry", "Admin")',
+            success: function (data) {
+                //console.log("industry ajax data::", data);
+                const select = document.querySelector('#industry-id');
+
+                for (var i = 0; i < data.length; i++) {
+                    const option = document.createElement('option');
+                   /* console.log(" data[i]::", data[i]);*/
+                    option.value = data[i].Value;
+                    option.text = data[i].Text;
+                    select.appendChild(option);
+                }
+            }
+        });*@
+        //populate inductry dropdown ends==-----
+
+
+
+        //save func starts---------------
+
+
+        //save func ends-----------------
+
+
+        //==========================================company nav functionalities ends===================================================
+
+
+
+
+
+        //==========================================Sales nav functionalities stars===================================================
+
+        $("#SalesFormContentEditButton").click(function () {
+            $("#terms, #delivery-method, #shipping, #custom-transaction-numbers, #service-date, #discount, #deposit, #tags")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelSales, #BtnSaveSales").toggleClass("d-none");
+        });
+        $("#BtnCancelSales").click(function () {
+            $("#terms, #delivery-method, #shipping, #custom-transaction-numbers, #service-date, #discount, #deposit, #tags")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelSales, #BtnSaveSales").toggleClass("d-none");
+        });
+
+        $("#InvoicePaymentsEditButton").click(function () {
+            $("#invoice-payments-text-area").toggleClass("d-none");
+            $(".invoice-payments-col .cancelbtn, .invoice-payments-col .savebtn").toggleClass("d-none");
+        });
+        
+        $("#IPaymentsCancelBtn").click(function () {
+            $("#invoice-payments-text-area").toggleClass("d-none");
+            $(".invoice-payments-col .cancelbtn, .invoice-payments-col .savebtn").toggleClass("d-none");
+        });
+
+
+        $("#ProductAndServicesEditButton").click(function () {
+            $("#columns-on-sales-form, #sku-column, #track-qty-rate-price, #TrackInventory")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelPr,#BtnSavePr").toggleClass("d-none");
+        });
+
+        $("#BtnCancelPr").click(function () {
+            $("#columns-on-sales-form, #sku-column, #track-qty-rate-price, #TrackInventory")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelPr,#BtnSavePr").toggleClass("d-none");
+        });
+
+        $("#ProgressInvoicingEditButton").click(function () {
+            $("#ProgressInvoicingCheck")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnSaveProg,#BtnCancelprog").toggleClass("d-none");
+        });
+        $("#BtnCancelprog").click(function () {
+            $("#ProgressInvoicingCheck")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnSaveProg,#BtnCancelprog").toggleClass("d-none");
+        });
+
+        $("#MessageEditButton").click(function () {
+            $("#message-parentDiv").toggleClass("d-none");
+        });
+        $("#MessageBtnCancel").click(function () {
+            $("#message-parentDiv").toggleClass("d-none");
+        });
+
+        $("#ReminderEditButton").click(function () {
+            $("#switchParent").toggleClass("d-none");
+            /*$("#messageParentDiv").toggleClass("d-none");*/
+        });
+        
+        $("#RemindersOneBtnCancel,#RemindersTwoBtnCancel,#RemindersThreeBtnCancel").click(function () {
+            $("#switchParent").toggleClass("d-none");
+            /*$("#messageParentDiv").toggleClass("d-none");*/
+        });
+
+        $('#switchParent').change(function () {
+            var legalName = $('#messageParentDiv');
+
+            if (!$(this).prop('checked')) {
+                legalName.toggleClass('d-none');
+
+            } else {
+                legalName.toggleClass('d-none');
+            }
+        });
+
+        $("#OnlineDeliverEditButton").click(function () {
+            $("#onlineDeliverParent").toggleClass("d-none");
+        });
+        $("#OnlineBtnCancel").click(function () {
+            $("#onlineDeliverParent").toggleClass("d-none");
+        });
+        $("#SatetmentsEditButton").click(function () {
+            $("#statementParentDiv").toggleClass("d-none");
+        });
+        $("#StatementBtnCancel").click(function () {
+            $("#statementParentDiv").toggleClass("d-none");
+        });
+
+
+
+         $.ajax({
+            url: '@Url.Action("GetDoctypeListt", "Admin")',
+            success: function (data) {
+                //console.log("term ajax data::", data);
+                const select = document.querySelector('#estimate');
+
+                for (var i = 0; i < data.length; i++) {
+                    const option = document.createElement('option');
+                    option.value = data[i].Id;
+                    option.text = data[i].DocType;
+                    select.appendChild(option);
+                }
+            }
+        });
+
+
+        //modal close and clear data function starts
+       @*function getTermsDropdown() {
+    $.ajax({
+        url: '@Url.Action("GetAllTradeTermsid", "Admin")',
+        success: function (data) {
+            const select = document.querySelector('#terms');
+            // Clear existing options before adding new ones
+            select.innerHTML = '<option value="">Terms</option><option id="addNewOption" value="add-new" data-icon="bi bi-plus-lg">Add New</option>';
+
+            var abc = '@Model.TermsId';
+            for (var i = 0; i < data.length; i++) {
+                const option = document.createElement('option');
+                option.value = data[i].Id;
+                option.text = data[i].TermName;
+                select.appendChild(option);
+            }
+        }
+    });
+        }
+        getTermsDropdown();*@
+
+
+        $("#terms").on("change", function () {
+            // Check if the selected option is the "Add New" option
+            if ($(this).val() === "add-new") {
+                $("#exampleModal").modal("show");
+            }
+        })
+        function modalClear() {
+            $("#termName").val('');
+            $("#dueInDays").val('');
+            $("#dueByDay").val('');
+            $("#dueNextMonthDays").val('');
+            $("#dueByDaysRadio").val('');
+            $("#dueInDaysRadio").val('');
+        }
+        $("#saveTermButton").click(function () {
+            Saveproductinfo();
+            modalClear()
+        });
+
+       function Saveproductinfo() {
+    var TermName = $("#termName").val();
+    var DueInFixedDays = $("#dueInDays").val();
+    var DueByDayOfMonth = $("#dueByDay").val();
+    var DueNextMonthWithinDays = $("#dueNextMonthDays").val();
+
+    var AccountHead = {
+        TermName: TermName,
+        DueInFixedDays: DueInFixedDays,
+        DueByDayOfMonth: DueByDayOfMonth,
+        DueNextMonthWithinDays: DueNextMonthWithinDays
+    }
+
+    console.log(AccountHead);
+    $.ajax({
+        url: '@Url.Action("AddTerms", "Admin")',
+        data: { model: AccountHead },
+        type: 'POST',
+        async: true,
+        dataType: 'json',
+        success: function (result) {
+            if (result.success == "1") {
+                alert("Saved");
+                $('#exampleModal').modal('hide');
+                //getTermsDropdown();
+                $('#terms').val("0");
+            }
+            if (result.success == "2") {
+                $('#termNameValidation').text("Name Must Be Unique");
+            }
+        },
+        error: function () {
+            alert("Failed");
+        }
+    });
+}
+             //modal radio check uncheck functionalities starts
+            const dueInDaysRadio = document.getElementById("dueInDaysRadio");
+            const dueByDaysRadio = document.getElementById("dueByDaysRadio");
+
+            dueInDaysRadio.addEventListener("change", () => {
+                if (dueInDaysRadio.checked) {
+                    $("#dueInDays").prop("disabled", false)
+                    $("#dueByDay").prop("disabled", true)
+                    $("#dueNextMonthDays").prop("disabled", true)
+                    dueByDaysRadio.checked = false;
+                }
+            });
+
+            dueByDaysRadio.addEventListener("change", () => {
+                if (dueByDaysRadio.checked) {
+                    $("#dueInDays").prop("disabled", true)
+                    $("#dueByDay").prop("disabled", false)
+                    $("#dueNextMonthDays").prop("disabled", false)
+                    dueInDaysRadio.checked = false;
+                }
+            });
+
+        //modal close and clear data function ends
+
+
+            $.ajax({
+        url: '@Url.Action("GetDoctypeList", "Admin")',
+        success: function (data) {
+            const select = document.querySelector('#estimate');
+            for (var i = 0; i < data.length; i++) {
+                const option = document.createElement('option');
+                option.value = data[i].Id;
+                option.text = data[i].DocType;
+                select.appendChild(option);
+            }
+        }
+    });
+
+        //==========================================Sales nav functionalities ends===================================================
+
+
+
+
+        //==========================================Expenses nav functionalities starts===================================================
+        $("#BillsExpenseEditButton").click(function () {
+            $("#terms,#showItems, #showTags, #track,#billable")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelBillExp, #BtnSaveBillExp").toggleClass("d-none");
+        });
+        $("#BtnCancelBillExp").click(function () {
+            $("#terms,#showItems, #showTags, #track,#billable")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelBillExp, #BtnSaveBillExp").toggleClass("d-none");
+        });
+        
+        $("#PoEditButton").click(function () {
+            $("#switchUsePurchaseorderParent").toggleClass("d-none");
+        });
+        $("#BtnCancelPO").click(function () {
+            $("#switchUsePurchaseorderParent").toggleClass("d-none");
+        });
+        $('#switchUsePurchaseorderParent').change(function () {
+            var legalName = $('#parentDivOfPoBody');
+
+            if (!$(this).prop('checked')) {
+                legalName.toggleClass('d-none');
+
+            } else {
+                legalName.toggleClass('d-none');
+            }
+        });
+        $("#messageExpensesEditButton").click(function () {
+            $("#messageExpenses-parentDiv").toggleClass("d-none");
+        });
+        $("#expenseMessageBtnCancel").click(function () {
+            $("#messageExpenses-parentDiv").toggleClass("d-none");
+        });
+        //==========================================Expenses nav functionalities ends===================================================
+
+
+
+
+        //==========================================Time nav functionalities starts===================================================
+        $("#TimeEditButton").click(function () {
+            $("#days")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelTime, #BtnSaveTime").toggleClass("d-none");
+        });
+        $("#BtnCancelTime").click(function () {
+            $("#days")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelTime, #BtnSaveTime").toggleClass("d-none");
+        });
+        $("#TimeSheetEditButton").click(function () {
+            $("#showServiceField,#timeToBillable")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#billigRate").toggleClass("d-none");
+            $("#BtnCancelTimeSheet, #BtnSaveTimeSheet").toggleClass("d-none");
+        });
+        $("#BtnCancelTimeSheet").click(function () {
+            $("#showServiceField,#timeToBillable")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#billigRate").toggleClass("d-none");
+            $("#BtnCancelTimeSheet, #BtnSaveTimeSheet").toggleClass("d-none");
+        });
+        //==========================================Time nav functionalities ends===================================================
+
+
+
+
+
+
+
+
+        //==========================================Advanced nav functionalities starts===================================================
+        $("#OtherPrefEditButton").click(function () {
+            $("#dateFormat, #numberFormat, #duplicateCheque, #usedBillNumber, #duplicateJournal, #signMeOut")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelOtherPref, #BtnSaveOtherPref").toggleClass("d-none");
+        });
+        $("#BtnCancelOtherPref").click(function () {
+            $("#dateFormat, #numberFormat, #duplicateCheque, #usedBillNumber, #duplicateJournal, #signMeOut")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelOtherPref, #BtnSaveOtherPref").toggleClass("d-none");
+        });
+        $("#CurencyEditButton").click(function () {
+            $("#CountryId, #multiCurecny,#CurrencyId")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelCurency, #BtnSaveCurency").toggleClass("d-none");
+        });
+        $("#BtnCancelCurency").click(function () {
+            $("#CountryId, #multiCurecny,#CurrencyId")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelCurency, #BtnSaveCurency").toggleClass("d-none");
+        });
+        $("#LanguageEditButton").click(function () {
+            $("#language")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelLan, #BtnSaveLan").toggleClass("d-none");
+        });
+        $("#BtnCancelLan").click(function () {
+            $("#language")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelLan, #BtnSaveLan").toggleClass("d-none");
+        });
+        $("#ProjectEditButton").click(function () {
+            $("#activityOnePlace")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelProj, #BtnSaveProj").toggleClass("d-none");
+        });
+        $("#BtnCancelProj").click(function () {
+            $("#activityOnePlace")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelProj, #BtnSaveProj").toggleClass("d-none");
+        });
+        $("#AutEditButton").click(function () {
+            $("#billPayment,#unbilledActivity,#preFill")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelAut, #BtnSaveAut").toggleClass("d-none");
+        });
+        $("#BtnCancelAut").click(function () {
+            $("#billPayment,#unbilledActivity,#preFill")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelAut, #BtnSaveAut").toggleClass("d-none");
+        });
+        $("#CatEditButton").click(function () {
+            $("#trackLocations,#trackClasses")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelCat, #BtnSaveCat").toggleClass("d-none");
+        });
+        $("#BtnCancelCat").click(function () {
+            $("#trackLocations,#trackClasses")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelCat, #BtnSaveCat").toggleClass("d-none");
+        });
+        $("#CofAccountEditButton").click(function () {
+            $("#enableAccNumbers")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnSaveCAcc, #BtnCancelCAcc").toggleClass("d-none");
+        });
+        $("#BtnCancelCAcc").click(function () {
+            $("#enableAccNumbers")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnSaveCAcc, #BtnCancelCAcc").toggleClass("d-none");
+        });
+        $("#CompanyTypeeEditButton").click(function () {
+            $("#taxForm,#taxFormmB")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnSaveComType, #BtnCancelComType").toggleClass("d-none");
+        });
+        $("#BtnCancelComType").click(function () {
+            $("#taxForm,#taxFormmB")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnSaveComType, #BtnCancelComType").toggleClass("d-none");
+        });
+        $("#AccountingEditButton").click(function () {
+            $("#taxSelection,#closeTheBooks,#accountingMethod,#firstMonthOfTaxYear,#financialYear")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelAcc, #BtnSaveAcc").toggleClass("d-none");
+        });
+        $("#BtnCancelAcc").click(function () {
+            $("#taxSelection,#closeTheBooks,#accountingMethod,#firstMonthOfTaxYear,#financialYear")
+                .prop("disabled", function (i, value) {
+                    return !value;
+                });
+            $("#BtnCancelAcc, #BtnSaveAcc").toggleClass("d-none");
+        });
+        //==========================================Advanced nav functionalities ends===================================================
+
+
+
+
+
+        $(document).ready(function () {
+
+            $("form").submit(function () {
+                $("#BusinessTypeId").prop("disabled", false);
+            });
+
+
+            var VatViewActivate = '@HttpContextAccessor.HttpContext.Session.GetInt32("VatViewActivate").ToString()';
+            if (VatViewActivate == 1) { $('.divHiddenItems').hide(); }
+
+
+        });
+
+        function PreviewImage() {
+            var oFReader = new FileReader();
+            oFReader.readAsDataURL(document.getElementById("FileUpload").files[0]);
+
+            oFReader.onload = function (oFREvent) {
+                document.getElementById("UploadFile").src = oFREvent.target.result;
+            };
+        };
+
+
+
+        $("#TimeZoneSettingsId").select2();
+        $("#SalesReportStyleId").select2();
+        $("#PurchaseReportStyleId").select2();
+        $("#BarcodeReportStyleId").select2();
+        //$("#CountryId").select2();
+
+        //multi step form
+        var currentTab = 0;
+        document.addEventListener("DOMContentLoaded", function (event) {
+
+
+
+
+        });
+
+        //====handle submitting the form starts=====
+        $(document).ready(function () {
+            $(document).on("click", ".savebtn", function () {
+                //alert("aa");
+                //console.log("Save button clicked");
+                $("#MainForm select").prop("disabled", false);
+                setTimeout(function () {
+                    $("#MainForm").submit();
+                }, 1000);
+            });
+
+        });
+        //====handle submitting the form ends=======
+
+
+
+    </script>
+}

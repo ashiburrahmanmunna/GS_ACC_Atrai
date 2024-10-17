@@ -1,0 +1,467 @@
+﻿
+@{
+    ViewData["Title"] = "BarcodeGenerate";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+<STYLE TYPE="text/css">
+
+    <!-- /* include the idautomation.com Code39 WOFF Font -- */
+
+    @@font-face {
+        font-family: "IDAutomationHC39M";
+        src: url(https://www.pqstec.com/invoiceapps/fonts/IDAutomationHC39M.ttf) format("truetype");
+    }
+
+/*    @@font-face {
+        font-family: "Name-Of-Font";
+        src: url("yourfont.ttf") format("truetype");
+    }*/
+
+    @@media print {
+        #printPageButton {
+            display: none;
+        }
+    }
+
+    @@media print {
+        h1 {
+            color: rgba(0, 0, 0, 0);
+            text-shadow: 0 0 0 #ccc;
+        }
+
+        @@media print and (-webkit-min-device-pixel-ratio:0) {
+            h1 {
+                color: #ccc;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+    }
+
+    p {
+        color: black;
+    }
+    -->
+
+    .font4 {
+        font-family: 'IDAutomationHC39M';
+        font-size: 102px;
+    }
+
+
+    .font3 {
+        font-family: 'Libre Barcode 128';
+        font-size: 122px;
+    }
+
+    .font1 {
+        font-family: 'boxyfont';
+        text-shadow: -1px -1px white, -1px 1px white, 2px -1px white, -1px -1px white;
+        margin-top: 10px;
+        display: block;
+        float: left;
+    }
+
+    .font2 {
+        font-family: 'noteworthy';
+        padding: 4px 10px 4px 10px;
+        color: white;
+        font-weight: bold;
+        text-shadow: 1px 0 black, 0 2px black, 2px 0 black, 0 -1px black;
+        margin-top: -10px;
+    }
+
+    p.normal {
+        font-weight: normal;
+    }
+
+    p.light {
+        font-weight: lighter;
+    }
+
+    p.thick {
+        font-weight: bold;
+    }
+
+    p.thicker {
+        font-weight: 900;
+    }
+
+    .button {
+        /*display: none;*/
+        position: fixed;
+        bottom: 20px;
+        right: 30px;
+        z-index: 99;
+        font-size: 18px;
+        border: none;
+        outline: none;
+        background-color: red;
+        color: white;
+        cursor: pointer;
+        padding: 15px;
+        border-radius: 100%;
+    }
+
+        .button:hover {
+            background-color: #3e8e41
+        }
+
+        .button:active {
+            background-color: #3e8e41;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+
+
+
+    .iconposition {
+        vertical-align: central;
+        text-align: center;
+        font-size:40px;
+        font-weight:lighter;
+
+        
+    }
+
+
+    .right-corder-container {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index:9999;
+    }
+
+
+        .right-corder-container .right-corder-container-button {
+            height: 62px;
+            width: 62px;
+            border: none;
+            background-color: green; 
+     /*       #6FB583;*/
+            border-radius: 62px; /*Transform the square into rectangle, sync that value with the width/height*/
+            transition: all 300ms; /*Animation to close the button (circle)*/
+            box-shadow: 2px 2px 5px rgb(25, 73, 15);
+            cursor: pointer;
+        }
+
+
+            .right-corder-container .right-corder-container-button span {
+                font-size: 30px;
+                color: white;
+                position: absolute;
+                left: 18px;
+                top: 18px;
+                line-height: 28px;
+            }
+
+
+            .right-corder-container .right-corder-container-button:hover {
+                transition: all 400ms cubic-bezier(.62,.1,.5,1);
+                width: 200px;
+                border-top-right-radius: 5px;
+                border-bottom-right-radius: 5px;
+            }
+
+            /*
+    Long text appears slowly with an animation. That code prepare the animation by hidding the text.
+    The use of display is not there because it does not work well with CSS3 animation.
+*/
+            .right-corder-container .right-corder-container-button .long-text {
+                transition: opacity 1000ms; /*Only the text fadein/fadeout is animated*/
+                opacity: 0; /*By default we do not display the text, we want the text to fade in*/
+                color: white;
+                white-space: nowrap;
+                font-size: 0; /*Set to 0 to not have overflow on the right of the browser*/
+                width: 0; /*Set to 0 to not have overflow on the right of the browser*/
+                margin: 0; /*Set to 0 to not have overflow on the right of the browser*/
+            }
+
+                /*
+    Animation to have a text that appear progressively. We need to play with a delay
+    on the width and the font-size to not have the browser have the text appears on the right
+    side of the browser view port. This has the side-effect of having an horizontal bar.
+*/
+                .right-corder-container .right-corder-container-button .long-text.show-long-text {
+                    transition: opacity 700ms, width 1ms linear 270ms, /*two thirds of the animation on the container width*/
+                    font-size 1ms linear 270ms; /*two thirds of the animation on the container width*/
+                    opacity: 1;
+                    margin-top: 2px; /*Center the position vertically*/
+                    margin-left: 65px; /*Center between the + and the right end side*/
+                    font-size: 20px; /*Text size, cannot be defined initially without moving the scrollbar*/
+                    width: auto; /*Required to be set with a delay (see animation) to not have scrollbar. Delay is to wait container to size up*/
+                }
+
+
+</STYLE>
+@*<h2>Barcode Generate</h2>*@
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Libre Barcode 128' rel='stylesheet'>
+
+
+</head>
+
+<div class="page-wrapper">
+    <div class="right-corder-container">
+        <button class="right-corder-container-button" onclick="printDiv('printableArea')">
+            <span class="iconposition">
+                <i class="bi bi-printer"></i>
+            </span>
+            @*<span class="short-text">
+                <i class="fa fa-print mb-5 iconposition"></i>
+            </span>*@
+            <span class="long-text">Print Me</span>
+        </button>
+    </div>
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        @*<input class="button" type="button" onclick="printDiv('printableArea')" value="print" />*@
+
+        <div class="card">
+            <div class="card-body">
+                @*<h5 class="card-header">Sales List</h5>*@
+                <form asp-controller="admin" asp-action="BarcodeGenerate" method="post">
+
+
+                    <div id="printableArea">
+
+
+                        <div class="row text-center">
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1022300111*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1022330111*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1022333001*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1033300111*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+                            @*<div>
+            <span class="font1">Hello</span> <span class="font2">World</span> !
+        </div>
+
+
+
+
+        <p style="font-size:16pt ; font-family: IDAutomationHC39M">(WOFF_FONT)</p>
+
+        <h1>Libre Barcode 128</h1>
+        <p class="font1">Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</p>
+        <p class="font3">123456790</p>
+        <p>ABCDEFGHIJKLMNOPQRSTUVWXYZ</p>
+        <p>abcdefghijklmnopqrstuvwxyz</p>*@
+
+                        </div>
+                        <div class="row text-center">
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1022300111*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1022330111*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1022333001*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1033300111*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+
+                        </div>
+                        <div class="row text-center">
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1022300111*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1022330111*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1022333001*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1033300111*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+
+                        </div>
+                        <div class="row text-center">
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1022300111*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1022330111*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1022333001*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+                            <div class="col-md-3 col-12">
+                                <p>Dominate BD</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1033300111*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <p>Inc. Vat</p>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+
+
+        function printDiv(divName) {
+            var printContents = document.getElementById(divName).innerHTML;
+            var originalContents = document.body.innerHTML;
+
+            document.body.innerHTML = printContents;
+
+            window.print();
+
+            document.body.innerHTML = originalContents;
+        }
+
+
+
+        $(".right-corder-container-button").hover(function () {
+            $(".long-text").addClass("show-long-text");
+        }, function () {
+            $(".long-text").removeClass("show-long-text");
+        });
+
+    </script>
+}

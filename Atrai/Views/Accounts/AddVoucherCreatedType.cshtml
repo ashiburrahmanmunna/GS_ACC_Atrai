@@ -1,0 +1,135 @@
+﻿@model Atrai.Core.Entity.Acc_VoucherNoCreatedTypeModel
+@{
+    ViewData["Title"] = "Voucher Created Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<style>
+    .footer {
+        position: fixed;
+        bottom: 0;
+    }
+</style>
+
+
+<div class="page-wrapper">
+    @using (Html.BeginForm("AddVoucherCreatedType", "Accounts", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <div class="container">
+            <div id="modalbodyrakin" class="row mt-5 pt-5">
+                <div class="col-md-6 offset-md-3 col-12 order-md-1">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="mb-4">Voucher Created Type Setup</h4>
+                            <div class="needs-validation" novalidate>
+                                <div class="row">
+                                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                    @if (Model != null)
+                                    {
+
+                                        <input type="hidden" id="Id" name="Id" value="@Model.Id" />
+                                    }
+                                    else
+                                    {
+                                        <input type="hidden" id="ComId" name="ComId" value="" />
+                                    }
+                                    <div class="col-md-12 col-12">
+                                        <div class="input-group mb-2">
+
+                                            <span class="input-group-text">
+                                                Types Name
+                                                @*@Html.LabelFor(model => model.VoucherNoCreatedTypeName)*@
+                                            </span>
+                                            @Html.EditorFor(model => model.VoucherNoCreatedTypeName, new { htmlAttributes = new { @class = "form-control" } })
+                                            @Html.ValidationMessageFor(model => model.VoucherNoCreatedTypeName, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-12 col-12">
+                                        <div class="input-group mb-2">
+                                            <span class="input-group-text">
+                                                Types Code
+                                                @*@Html.LabelFor(model => model.VoucherNoCreatedTypeCode)*@
+                                            </span>
+                                            @Html.EditorFor(model => model.VoucherNoCreatedTypeCode, new { htmlAttributes = new { @class = "form-control" } })
+                                            @Html.ValidationMessageFor(model => model.VoucherNoCreatedTypeCode, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-3"></div>
+                                    <div class="col-md-3 col-6 d-grid mb-2">
+                                        @if (ViewBag.ActionType == "Create")
+                                        {
+                                            <input type="submit" value="Create" class="btn btn-primary btn-block " />
+
+                                            @*<button class="btn btn-primary btn-lg btn-block " type="button" onclick="Products_save()">Save</button>*@
+                                        }
+                                        else if (ViewBag.ActionType == "Edit")
+                                        {
+                                            <input type="submit" value="Update" class="btn btn-warning btn-block " />
+
+                                            @*<button class="btn btn-warning btn-lg btn-block " type="button" onclick="Products_save()">Update</button>*@
+                                        }
+                                        else if (ViewBag.ActionType == "Delete")
+                                        {
+                                            <button class="btn btn-danger btn-lg btn-block " type="button" onclick="VoucherType_delete()">Delete</button>
+                                        }
+                                    </div>
+                                    <div class="col-md-3 col-6  d-grid mb-2">
+                                        @Html.ActionLink("Back", "VoucherCreatedTypeList", "Accounts", null, new { @class = "btn btn-info btn-block " })
+                                    </div>
+                                    <div class="col-md-3"></div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    }
+
+
+</div>
+
+
+@section Scripts {
+    <script type="text/javascript">
+
+        function VoucherType_delete() {
+
+            var Id = $("#Id").val();
+            //alert(Id);
+            $.ajax({
+
+                url: '@Url.Action("DeleteVoucherCreatedType", "Accounts")',
+                //url: '@Url.Action("Delete")',
+                data: JSON.stringify({ id: Id }), //use id here
+                //data: JSON.stringify(salesmain),
+                type: 'POST',
+                contentType: 'application/json;',
+                dataType: 'json',
+                success: function (result) {
+
+                    if (result.Success == "1") {
+                        window.location.href = '@Url.Action("VoucherCreatedTypeList", "Accounts")';
+                    }
+                    else {
+                        alert(result.ex);
+                    }
+                }
+            });
+        }
+
+
+
+
+    </script>
+}

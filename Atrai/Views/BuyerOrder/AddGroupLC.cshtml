@@ -1,0 +1,1305 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Order management";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<style>
+    /*li {
+            cursor: pointer;
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+        }*/
+
+    /* Set the anchor tag to have full width */
+    li a {
+        display: block;
+        width: 100%;
+    }
+
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+                         border-bottom-width: 0px;
+
+                    }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    /*   .tabulator-table .tabulator-row {
+            background-color: white;
+        } */
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customize-btn-another {
+        background: #2CA01C;
+        border: 1px solid black;
+        border-radius: 20px;
+        color: #FFFFFF;
+        border: 1px solid #2CA01C;
+    }
+
+        .customize-btn-another:hover {
+            background: #2CA01C;
+            border: 1px solid black;
+            border-radius: 20px;
+            color: #FFFFFF;
+            border: 1px solid #2CA01C;
+        }
+
+    .customize-btn:hover {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .gear-dropdown.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+        margin-top: 7px;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-bottom: 1px solid #aaaaaa38;
+        border-right: 1px solid #aaaaaa38;
+        /*border-left: 1px solid #aaaaaa38;*/
+        /* padding-left: 2px;*/
+    }
+    /*    .tabulator-row .tabulator-cell, .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+                    border-right: none;
+                    border-left: none;
+                }*/
+    /*    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+            border-right: 2px solid #aaaaaa38;
+        }*/
+
+    .tabulator-row .tabulator-cell {
+        border-right: none;
+        border-left: none;
+        padding-left: 10px;
+        border: 1px solid #aaaaaa29;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        /*margin-top: 27px;*/
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+        /* Add any other styles you need for the active cell */
+    }
+
+    .tabulator-row {
+        /*   border: 1px solid #aaaaaa38;*/
+        border-left: none;
+        border-right: none;
+    }
+
+    input[type="checkbox"] {
+        width: 20px; /* Set the width */
+        height: 20px; /* Set the height */
+    }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom: 4px solid green;
+    }
+
+        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active:hover {
+            background-color: #F8F8F8;
+            border-top-color: transparent !important;
+            border-left-color: transparent !important;
+            border-right-color: transparent !important;
+        }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link:hover {
+        background-color: #F8F8F8;
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+    }
+
+    .customize-btnew {
+        background: transparent;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btnew:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .tabulator-row .tabulator-cell.tabulator-editing {
+        border: 1px solid #404c5d;
+        outline: none;
+        padding: 0;
+    }
+
+    .tabulator-cell.tabulator-editable[tabulator-field="AccName"] {
+        border: 1px solid #0003;
+        margin-bottom: 10px;
+    }
+
+    .filter-dropdown > .filter-dropdown-class.show {
+        width: 580px;
+    }
+
+    p {
+        margin: 1em 0;
+    }
+
+    .button {
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        position: relative;
+        background: #aa0000;
+        padding: 10px 15px;
+        color: white;
+        box-shadow: 0 2px black;
+        text-decoration: none;
+        border-radius: 5px;
+        /*text-shadow: 0 1px 1px black;*/
+    }
+
+        .button:hover {
+            top: -2px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+        .button:active {
+            top: 1px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+    .unbilledbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .overduebtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .openbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .paidbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .scrollable-offcanvas {
+        /* max-height: 80vh;*/ /* Adjust the maximum height as needed */
+        overflow-y: auto;
+    }
+
+    .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:hover {
+        background-color: deepskyblue;
+    }
+
+    .tabulator .tabulator-footer {
+        background-color: #fff;
+        color: black;
+    }
+
+        .tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row {
+            background: white !important;
+        }
+
+
+    .offcanvas {
+        /* Add position relative to its parent */
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* Ensure offcanvas takes full viewport height */
+    }
+
+    .offcanvas-footer {
+        margin-top: auto; /* Push footer to the bottom */
+        width: 100%; /* Occupy full width */
+    }
+
+    .modal-footer {
+        width: 100%; /* Ensure buttons occupy full width */
+        padding: 10px; /* Add padding for better appearance */
+    }
+
+    .w-15 {
+        width: fit-content !important;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+    }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #999;
+        }
+
+        .separator:not(:empty)::before {
+            margin-right: .25em;
+        }
+
+        .separator:not(:empty)::after {
+            margin-left: .25em;
+        }
+
+    .tabulator-row.tabulator-selected {
+        background-color: #9abcea !important;
+    }
+
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 24px;
+        }
+
+            .rating label:before {
+                content: '\2605'; /* Unicode star character */
+            }
+
+        .rating input:checked ~ label:before {
+            color: gold; /* Change color of selected stars */
+        }
+
+    .child-table-hidden {
+        display: none;
+    }
+
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-calcs {
+        background: #fff !important;
+    }
+
+    .tabulator .tabulator-footer {
+        border-top: 1px solid #fff;
+    }
+
+    #file-drop-area {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    #image-uploadify {
+        display: none;
+    }
+
+    .footerButton {
+        margin-top: 40px;
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 99%;
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+
+    .bottom-bar-css:hover {
+        background: #212529;
+    }
+
+    .bottom-bar-css-s-n-c:hover {
+        background: #007611d6;
+    }
+
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        height: 40px;
+    }
+
+    .select2-container--default .select2-selection--multiple {
+        height: 40px;
+    }
+
+    .select2-container {
+        font-size: 16px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #aaaaaa94;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 23px;
+        }
+    /* Customize the Select2 selection box */
+    .select2-selection {
+        background-color: #f2f2f2;
+        border-radius: 5px;
+        height: 30px;
+        padding-bottom: 37px;
+        border: 1px solid #ced4da
+    }
+
+    .select2-selection__rendered, .select2-selection__arrow {
+        margin-top: 8px;
+    }
+
+</style>
+
+<input type="hidden" id="Id" name="Id" value="" />
+<div class="row">
+    <div class="col-lg-3">
+        <label class="form-label fw-bold">Buyer</label>
+        <select id="BuyerId" class="form-control">
+            <option value="">Select Buyer</option>
+        </select>
+    </div>
+    <div class="col-lg-3">
+        <label class="form-label fw-bold">Company</label>
+        <select id="concern" class="form-control">
+            <option value="">Select Company</option>
+        </select>
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">Group LC Ref.<span class="text-danger">*</span></label>
+        <input id="groupLCRef" class="form-control" />
+        <span class="text-danger" id="groupLCValidation"></span>
+
+    </div>
+</div>
+
+
+
+<div class="row mt-3">
+    <div class="col-lg-3">
+        <label class="form-label fw-bold">First Shipment Date</label>
+        <input id="expiryDate" class="form-control" />
+    </div>
+    <div class="col-lg-3">
+        <label class="form-label fw-bold">Last Shipment Date</label>
+        <input id="lastShipmentDate" class="form-control" />
+    </div>
+    <div class="col-lg-4">
+        <label class="form-label fw-bold">Group LC Rev. Amd No.</label>
+        <input id="grpLCRevAmdNo" class="form-control" />
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">Margin<span class="text-danger"></span></label>
+        <input id="margin" class="form-control" value="65" />
+    </div>
+</div>
+
+
+<div class="row mt-3">
+    <div class="col-lg">
+        <label class="form-label fw-bold">Freight Charge %<span class="text-danger"></span></label>
+        <input id="freightCharge" class="form-control" value="0" />
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">Group LC Qty</label>
+        <input id="grpLCqty" class="form-control" disabled />
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">Group LC Value [Final Export Value]</label>
+        <input id="grplcvalue" class="form-control" disabled />
+    </div>
+    <div class="col-lg">
+        <label class="form-label fw-bold">Group LC Value [LC Opening Value]</label>
+        <input id="grplcopeningvalue" class="form-control" disabled />
+    </div>
+</div>
+
+
+<div class="row mb-5">
+    <div class="col-lg-6">
+        <div class="mt-5" id="grpLCSampleTable"></div>
+        <button id="add-row-color-table" class="btn mt-5 d-none" style="border: 1px solid;margin-right: 30px;">Add Row</button>
+        <button id="clear-color-table" class="btn mt-5 d-none" style="border: 1px solid;margin-right: 30px;">Clear All Rows</button>
+    </div>
+    <div class="col-lg-6">
+        <div class="mt-5" id="grpLCMainTable"></div>
+        <button id="add-row-size-table" class="btn mt-5 d-none" style="border: 1px solid;margin-right: 30px;">Add Row</button>
+        <button id="clear-size-table" class="btn mt-5 d-none" style="border: 1px solid;margin-right: 30px;">Clear All Rows</button>
+    </div>
+</div>
+@if (ViewBag.ActionType == "Edit")
+{
+    <div class="bottom-bar">
+        <div>
+            <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("Export", "BuyerOrder", new { Type = "GroupLC" })';">Cancel</button>
+        </div>
+        <div>
+        </div>
+        <div class="dropdown">
+            <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Update</button>
+
+            <button id="BtnSaveAndClose" class="btn-success  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="" data-purchase-Id="@Model">
+                Update and close
+            </button>
+            <ul class="dropdown-menu" id="ul-id-for-expenses">
+                <li class="dropdown-item">
+                    <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+else if (ViewBag.ActionType == "Create")
+{
+    <div class="bottom-bar">
+        <div>
+            <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("Export", "BuyerOrder", new { Type = "GroupLC" })';">Cancel</button>
+        </div>
+        <div class="d-flex">
+            <div>
+            </div>
+            <div id="makeRecurringDiv" style="padding-top: 5px; border-left: 3px solid white;">
+                <div style="margin-left: 5px;">
+                </div>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Save</button>
+
+            <button id="BtnSaveAndClose" class="btn-success  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="" data-purchase-Id="@Model">
+                Save and close
+            </button>
+            <ul class="dropdown-menu" id="ul-id-for-expenses">
+                <li class="dropdown-item">
+                    <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+@section scripts {
+    <script type="text/javascript">
+        //===========================bblc functionalities starts=====================
+        var SampleTable;
+        var MainTable;
+        var BuyerTable;
+        var samplePiData = [
+            { StyleId: '@ViewBag.GroupLCID' } //SLNo: 1,
+        ];
+        var mainPiData = [
+            { StyleId: '@ViewBag.GroupLCID' }
+        ];
+
+
+
+        let currentActiveInput = null;
+
+        var localFieldsForSampleTable = [
+            {
+                headerSort: false,
+                field: "drag",
+                formatter: function (cell, formatterParams) {
+                    return "<i class='fas fa-bars drag-icon'></i>";
+                },
+                width: 30,
+                headerSort: false,
+                rowHandle: true,
+
+
+            },
+            { title: "grouplcid", field: "grouplcid", movable: false, headerSort: false, visible: false },
+            { title: "MasterLCID", field: "MasterLCID", movable: false, headerSort: false, visible: false },
+            { title: "MASTER LC REF", field: "LCRefNo", headerSort: false, frozen: true, hozAlign: "right", visible: true },
+            { title: "LC DATE", field: "LCOpenDate", movable: false, headerSort: false, visible: true },
+            { title: "ORDER QTY", field: "TotalLCQty", hozAlign: "right", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+            { title: "OPENING VALUE", field: "LCValue", hozAlign: "right", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+            { title: "FINAL EXPORT VALUE", field: "ExportLCValueManual", hozAlign: "right", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+        ];
+
+        var GroupLCIDSet = [
+            { BLCMainId: @ViewBag.GroupLCID }
+        ];
+        var localFieldsForMainTable = [
+            {
+                headerSort: false,
+                field: "drag",
+                formatter: function (cell, formatterParams) {
+                    return "<i class='fas fa-bars drag-icon'></i>";
+                },
+                width: 30,
+                headerSort: false,
+                rowHandle: true,
+
+
+            },
+            { title: "grouplcid", field: "grouplcid", movable: false, headerSort: false, visible: false },
+            { title: "Id", field: "Id", movable: false, headerSort: false, visible: false },
+            { title: "MasterLCID", field: "MasterLCID", movable: false, headerSort: false, visible: false },
+            { title: "Id", field: "glcid", movable: false, headerSort: false, visible: false },
+            { title: "MASTER LC REF", field: "LCRefNo", headerSort: false, frozen: true, hozAlign: "right", visible: true },
+            { title: "LC DATE", field: "LCOpenDate", movable: false, headerSort: false, visible: true },
+            { title: "ORDER QTY", field: "TotalLCQty", hozAlign: "right", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+            { title: "OPENING VALUE", field: "LCValue", hozAlign: "right", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+            { title: "FINAL EXPORT VALUE", field: "ExportLCValueManual", hozAlign: "right", movable: false, headerSort: false, visible: true, bottomCalc: "sum" },
+        ];
+        //===========================style functionalities ends=======================
+
+
+        $(document).ready(function () {
+            var bblcValue = $("#bblcValue").val();
+            var increaseValue;
+            var deccreaseValue;
+
+            $("#increase").on("blur", function () {
+                increaseValue = parseFloat($(this).val()) || 0; // Parse float to handle potential non-numeric inputs
+                calculateFinalValue();
+            });
+
+            $("#decrease").on("blur", function () {
+                deccreaseValue = parseFloat($(this).val()) || 0; // Parse float to handle potential non-numeric inputs
+                calculateFinalValue();
+            });
+
+            function calculateFinalValue() {
+                var finalValue = parseFloat(bblcValue) || 0 + increaseValue + deccreaseValue; // Perform calculation inside this function
+                $("#finalValue").val(finalValue);
+                console.log("finalValue", finalValue);
+            }
+        });
+
+
+        $('#BtnSave').click(function () {
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            $("#ComId").val(ComId);
+            $("#LuserId").val(UserId);
+
+            var GroupLCDetails = MainTable.getData();
+
+            var GroupLCID = '@ViewBag.GroupLCID';
+
+
+            //====validation handle ends======
+            var styleModel =
+            {
+                ComId: ComId,
+                Id: GroupLCID,
+                Margin: $("#margin").val(),
+                FreightChargePer: $("#freightCharge").val(),
+                BuyerId: $("#BuyerId  option:selected").val(),
+                CommercialCompanyId: $("#concern option:selected").val(),
+                GroupLCRefName: $("#groupLCRef").val(),
+                TotalGroupLCValue: $("#grplcvalue").val(),
+                TotalGroupLCValueManual: $("#grplcopeningvalue").val(),
+                TotalGroupLCQty: $("#grpLCqty").val(),
+                FirstShipDate: $("#expiryDate").val(),
+                LastShipDate: $("#lastShipmentDate").val(),
+                GroupLCAmdNo: $("#grpLCRevAmdNo").val(),
+                GroupLC_Sub: GroupLCDetails,
+            };
+
+
+
+            console.log("after save console", styleModel)
+            var PurchaseIdAbc = 0;
+
+            $.ajax({
+                async: false,
+                type: "POST",
+                url: "@Url.Action("SaveGroupLC", "BuyerOrder")",
+                data: JSON.stringify(styleModel),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //console.log("after save console::", response);
+                    PurchaseIdAbc = response.Id;
+                    setTimeout(function () {
+                        toastr.success(response.message, "", {
+                            "toastClass": "toast-green"
+                        });
+                    }, 1500);
+                    //alert(" Data Saved");
+
+                },
+                error: function (response) {
+                }
+            });
+
+            if (PurchaseIdAbc > 0) {
+                setTimeout(function () {
+                    window.location.href = '@Url.Action("Export", "BuyerOrder")?&grouplcid=' + PurchaseIdAbc;
+                }, 3000)
+            }
+
+
+        });
+
+        $('#BtnSaveAndClose').click(function () {
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            $("#ComId").val(ComId);
+            $("#LuserId").val(UserId);
+
+            var GroupLCDetails = MainTable.getData();
+
+            var GroupLCID = '@ViewBag.GroupLCID';
+
+
+            //====validation handle ends======
+            var styleModel =
+            {
+                ComId: ComId,
+                Id: GroupLCID,
+                Margin: $("#margin").val(),
+                FreightChargePer: $("#freightCharge").val(),
+                BuyerId: $("#BuyerId  option:selected").val(),
+                CommercialCompanyId: $("#concern option:selected").val(),
+                GroupLCRefName: $("#groupLCRef").val(),
+                TotalGroupLCValue: $("#grplcvalue").val(),
+                TotalGroupLCValueManual: $("#grplcopeningvalue").val(),
+                TotalGroupLCQty: $("#grpLCqty").val(),
+                FirstShipDate: $("#expiryDate").val(),
+                LastShipDate: $("#lastShipmentDate").val(),
+                GroupLCAmdNo: $("#grpLCRevAmdNo").val(),
+                GroupLC_Sub: GroupLCDetails,
+            };
+
+
+
+            console.log("after save console", styleModel)
+            var PurchaseIdAbc = 0;
+
+            $.ajax({
+                async: false,
+                type: "POST",
+                url: "@Url.Action("SaveGroupLC", "BuyerOrder")",
+                data: JSON.stringify(styleModel),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //console.log("after save console::", response);
+                    PurchaseIdAbc = response.Id;
+                    setTimeout(function () {
+                        toastr.success(response.message, "", {
+                            "toastClass": "toast-green"
+                        });
+                    }, 1500);
+                    //alert(" Data Saved");
+
+                },
+                error: function (response) {
+                }
+            });
+
+            if (PurchaseIdAbc > 0) {
+                setTimeout(function () {
+                    window.location.href = '@Url.Action("Export", "BuyerOrder", new { Type = "GroupLC" })';
+                }, 3000)
+            }
+
+
+        });
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetBuyerGroupDrodpwonForGroupLC", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    //console.log("value dekhi buyer er",value);
+                    $('#BuyerId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+
+        //=============edit mode starts==============
+        var globalStyleNo;
+        if ('@ViewBag.ActionType' == "Edit") {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("getGroupLCData", "BuyerOrder")",
+                data: { "id": '@ViewBag.GroupLCID' },
+                dataType: "json",
+                success: function (response) {
+                    console.log("edit mode er data dekhi:", response);
+                    var detailsTableData = response.GroupLc;
+
+                    var MainTableData = detailsTableData;
+                    MainTable.setData(MainTableData);
+                    $("#groupLCRef").val(response.GroupLCRefName);
+                    $("#expiryDate").val(response.FirstShipDate);
+                    $("#lastShipmentDate").val(response.LastShipDate);
+                    $("#grpLCRevAmdNo").val(response.GroupLCAmdNo);
+                    $("#margin").val(response.Margin);
+                    $("#freightCharge").val(response.FreightChargePer);
+                    $("#grpLCqty").val(response.TotalGroupLCQty);
+                    $("#grplcvalue").val(response.TotalGroupLCValue);
+                    $("#grplcopeningvalue").val(response.TotalGroupLCValueManual);
+
+
+                    setTimeout(function () {
+                        $('#BuyerId').val(response.BuyerId).change();
+                        $('#concern').val(response.CommercialCompanyId).change();
+                    }, 2000);
+
+                },
+                error: function (error) {
+                    console.error("Error fetching data: " + error);
+                }
+            });
+
+        }
+        //=============edit mode ends===========
+
+
+
+
+        //duplicate bblc no error  handling
+        var currentPOLId = '@ViewBag.GroupLCID';
+        var BtnSave = document.querySelector('#BtnSave');
+        var BtnSaveAndClose = document.querySelector('#BtnSaveAndClose');
+        function getBBLC(callback) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GroupLCList", "BuyerOrder")',
+                dataType: "json",
+                success: function (data) {
+                    console.log("data::", data.data);
+                    var SizeCodeGetArray = [];
+
+                    data.forEach(function (item) {
+                        var SizeName = item.Text;
+                        var SizeIdGet = item.Value;
+                        var SizeData = {
+                            SizeName: SizeName,
+                            Id: SizeIdGet
+                        };
+                        SizeCodeGetArray.push(SizeData);
+                    });
+
+                    if (typeof callback === "function") {
+                        callback(SizeCodeGetArray);
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                }
+            });
+        }
+
+        function checkPOLExists(sizeName) {
+            getBBLC(function (data) {
+                var lowercasedSizeName = sizeName.toLowerCase();
+
+                var sizeExists = data.some(function (item) {
+                    console.log("item.Id", item.Id);
+                    //console.log("currentSizeIdd", currentSizeIdd);
+
+                    if (currentPOLId == item.Id) {
+                        return false;
+                    }
+
+                    return item.SizeName.trim().toLowerCase() === lowercasedSizeName;
+                });
+
+                console.log("sizeExists", sizeExists);
+
+                if (sizeExists) {
+                    $("#groupLCValidation").html("Already has the same Group LC Ref!");
+                    BtnSave.disabled = true;
+                    BtnSaveAndClose.disabled = true;
+                } else {
+                    $("#groupLCValidation").html("");
+                    BtnSave.disabled = false;
+                    BtnSaveAndClose.disabled = false;
+
+                }
+            });
+        }
+
+        var POLNameHandle = document.getElementById("groupLCRef");
+        POLNameHandle.addEventListener("input", function () {
+            //console.log("currentSizeId", currentSizeIdd);
+
+            var enteredSizeName = POLNameHandle.value;
+            checkPOLExists(enteredSizeName);
+        });
+        //==================dropdown populate===============
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("supplierDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#supplierID').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("itemGroupDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#itemGroup').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("concernDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#concern').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("groupLCMainDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#groupLc').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("shipModeDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#shipMode').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("concernBankDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#concernBank').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("supplierBankDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#supplierBank').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("currencyDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#currency').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("incoTermDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#incoTerms').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("paymentTermsDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#payemntTerms').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("dayListDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#days').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("dayTermDescDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi day terms er", value);
+                    $('#daysTermDesc').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("portOFLoadingDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#portOfLoading').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("destinationDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#destination').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+
+
+
+
+        //===group lc chose table data generate starts=====
+
+
+        //===group lc chose table data generate ends=======
+
+        //===supplier chose table data generate starts=====
+        function attachchRow(row) {
+            var rowData = row.getData();
+            SampleTable.deleteRow(row);
+            MainTable.addRow(rowData);
+
+
+
+            var finalExportValue = MainTable.getCalcResults().bottom.ExportLCValueManual || 0;
+            document.getElementById('grplcopeningvalue').value = finalExportValue;
+
+            var openingValue = MainTable.getCalcResults().bottom.LCValue || 0;
+            document.getElementById('grplcvalue').value = openingValue;
+
+            var totalQty = MainTable.getCalcResults().bottom.TotalLCQty || 0;
+            document.getElementById('grpLCqty').value = totalQty;
+        }
+        function detachRow(row) {
+            var rowData = row.getData();
+            MainTable.deleteRow(row);
+            SampleTable.addRow(rowData);
+
+            var finalExportValue = MainTable.getCalcResults().bottom.ExportLCValueManual || 0;
+            document.getElementById('grplcopeningvalue').value = finalExportValue;
+
+            var openingValue = MainTable.getCalcResults().bottom.LCValue || 0;
+            document.getElementById('grplcvalue').value = openingValue;
+
+            var totalQty = MainTable.getCalcResults().bottom.TotalLCQty || 0;
+            document.getElementById('grpLCqty').value = totalQty;
+        }
+
+        $("#BuyerId").on("change", function () {
+            var SupplierID = $(this).val();
+            console.log("SupplierID", SupplierID);
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("getMasterLCDataForGroupLC", "BuyerOrder")?buyerid=' + SupplierID,
+                datatype: "Json",
+                success: function (data) {
+                    console.log("data data", data.data.Table);
+
+                    SampleTable = new Tabulator("#grpLCSampleTable", {
+                        height: "auto",
+                        layout: "fitColumns",
+                        data: data.data.Table,
+                        columns: [
+                            ...localFieldsForSampleTable,
+                            {
+                                title: "",
+                                field: "Delete",
+                                movable: false,
+
+                                formatter: function (cell, formatterParams) {
+                                    return "<i id='attach-row' class='bi bi-plus-circle'></i>";
+                                },
+                                width: "6px",
+                                headerSort: false,
+                                cellClick: function (e, cell) {
+                                    var rowData = cell.getRow().getData();
+                                    var row = cell.getRow();
+                                    attachchRow(row);
+                                }
+                            }
+                        ],
+                    });
+                }
+            });
+        });
+
+
+        //===supplier chose table data generate ends=======
+
+
+
+
+        // Function to handle detaching rows
+        function handleDetachRow(e, cell) {
+            var rowData = cell.getRow().getData();
+            var row = cell.getRow();
+            alert("qqq");
+        }
+        MainTable = new Tabulator("#grpLCMainTable", {
+            height: "auto",
+            layout: "fitColumns",
+            // data: GroupLCIDSet,
+            columns: [
+                ...localFieldsForMainTable,
+                {
+                    title: "",
+                    field: "Delete",
+                    movable: false,
+
+                    formatter: function (cell, formatterParams) {
+                        return "<i id='detach-row' class='fas fa-trash-alt delete-icon'></i>";
+                    },
+                    width: "6px",
+                    headerSort: false,
+                    cellClick: function (e, cell) {
+                        var rowData = cell.getRow().getData();
+                        var row = cell.getRow();
+                        detachRow(row);
+                    }
+                }
+            ],
+
+            // Define custom functions to update input field value
+            dataFiltered: function (filters, rows) {
+                updateInputFieldValue();
+            },
+            dataLoaded: function (data) {
+                updateInputFieldValue();
+            },
+            movableRows: true,
+            movableColumns: true,
+
+            responsiveLayout: true
+
+        });
+
+        function updateInputFieldValue() {
+            var sum = MainTable.getCalcResults().bottom.ImportQty || 0; // Get the sum of "IMPORT QTY" column
+            console.log("sum", sum);
+            document.getElementById('grplcopeningvalue').value = sum; // Update the value of the input field
+        }
+
+        // $('select').select2();
+        $(function () {
+            $("#lcOpeningDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            })
+            $("#expiryDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#lastShipmentDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#udDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#lcOpeningDate").attr("autocomplete", "off");
+            $("#expiryDate").attr("autocomplete", "off");
+            $("#lastShipmentDate").attr("autocomplete", "off");
+            $("#udDate").attr("autocomplete", "off");
+        });
+
+
+
+
+        //===============================bblc functionaloties end========================
+    </script>
+}

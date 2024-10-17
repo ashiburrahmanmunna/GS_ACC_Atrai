@@ -1,0 +1,307 @@
+﻿@*@model Atrai.Model.Core.Entity.SalesModel*@
+@model int
+@{
+    ViewData["Title"] = "AddSaleStatus";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<h2 class="text-center">Sales Status</h2>
+
+
+<div class="page-wrapper">
+    <div class="container">
+        <div class="UpperSection row">
+           @* <div class="col-md-5 mt-5" id="divAutocomplete">
+                <label class="form-label fw-semibold">
+                    Search Sale Code
+                </label>
+                <div class="input-group mb-3 ">
+                    <span class="input-group-text"> <i class="fa fa-search fontshadow"></i></span>
+                    <input type="text" id="Search" class="form-control searchBox" aria-label="Amount (to the nearest dollar)">
+
+                </div>
+            </div>*@
+
+            <div class="col-md-5 col-12 mt-5">
+                <div class="form-group">
+                    <div class="input-group input-group-sm  mb-2">
+                        <div>
+                            <span class="input-group-text py-0">
+                                Ref. Invoice No :
+                            </span>
+                        </div>
+                        <input type="hidden" id="InvoiceId" name="InvoiceId" value="" />
+                        @Html.TextBox("InvoiceNo", null, new { @class = "form-control", @placeholder = "Enter Invoice No", autocomplete = "off" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-12 mt-5 ms-5" id="divStatus">
+                <div class="mb-2">
+                    <label class="form-label fw-semibold">
+                        Status
+                    </label>
+                    <select class="form-select select2me" id="StatusId" aria-label="Floating label select example">
+                        
+                    </select>
+
+                </div>
+            </div>
+
+        </div>
+       
+
+        <div class="gridSection" style="margin-top:50px;">
+
+            <div id="jsGridItems"></div>
+
+        </div>
+        <div class="footerButton" style="margin-top:5%">
+            <button class="btn btn-info btn-sm" id="BtnSave" data-voucher-Id="">Save</button>
+            @*<button class="btn btn-info btn-sm" id="btnBack" data-voucher-Id="@VoucherId">Back to List</button>*@
+            <input type="button" class="btn btn-primary btn-sm" value="Back To List" onclick="" />
+            @*            <button class="btn btn-info btn-sm" id="json">Json Data</button>
+            <button id="voucherSave" class="btn btn-primary btnVoucher btn-sm" type="button">
+            <span class="d-none spinner-border spinner-border-lg" id="voucherspinner" role="status" aria-hidden="true"></span> S
+            </button>*@
+        </div>
+
+
+
+    </div>
+   </div>
+
+
+    @section Scripts{
+        <script type="text/javascript">
+             
+            var StatusId=0;
+
+
+            $(document).ready(function () {
+
+
+                var statusVal=1;
+
+            $('#StatusId').select2({})
+                .on("select2:select", function (e) {
+                    var selectedValue = $(this).val();
+
+
+                    var selectedOption = $(this).find("option:selected");
+
+                    // Create an object with the value and text of the selected option
+                    var selectedObject = {
+                        value: selectedOption.val(),
+                        text: selectedOption.text()
+                    };
+
+                    statusVal = selectedObject.value;
+                    // Update the jsGrid field with the selected value
+                    //$("#jsGridItems").jsGrid("insertItem", { status: selectedObject.value });
+
+
+
+                    
+
+         
+                    $(this).val("");
+                });
+
+
+
+            autocompletefunctionInvoiceNo();
+            function autocompletefunctionInvoiceNo() {
+                $("#InvoiceNo").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: '../admin/SalesSearchByInvoiceNo/',
+                            dataType: "json",
+                            data: { query: $("#InvoiceNo").val() },
+                            success: function (data) {
+                                console.log(data);
+                                response($.map(data, function (item) {
+                                    return { SaleCode: item.SaleCode, CustomerName: item.CustomerName, PrimaryAddress: item.PrimaryAddress, PhoneNo: item.PhoneNo, label: item.SaleCode + ' ' + item.CustomerName + ' ' + item.PhoneNo + ' ' + item.PrimaryAddress, CustomerId: item.CustomerId, SaleId: item.SaleId };
+                                }));
+                            },
+                            error: function (xhr, status, error) {
+                                alert("Error");
+                            },
+                        });
+                    },
+                    autoFocus: true,
+                    minLength: 2,
+                    change: function (event, ui) {
+                        if (ui.item === null) {
+                            //$(this).val('');
+                            //$('#PhoneNo').val('');
+                            $('#SaleCode').val('');
+                            $('#CustomerName').val('');
+                            $('#CustomerAddress').val('');
+                            $('#InvoiceId').val('');
+                            $('#InvoiceNo').val('');
+                            $('#Customer').val(null).show();
+                            $('#PhoneNo').val('');
+                        }
+                    },
+                    select: function (event, ui) {
+
+                        console.log(ui);
+                        //$('#SearchCustomer').val(ui.item.PhoneNo);
+                        //alert(ui.item.CustomerId);
+                        $('#Customer').val(ui.item.CustomerId).change();
+                        //alert($('#Customer').val());
+
+
+                        
+
+                        $("#SaleCode").val(ui.item.SaleCode);
+                        $("#PhoneNo").val(ui.item.PhoneNo);
+                        $("#CustomerName").val(ui.item.CustomerName);
+                        $("#CustomerAddress").val(ui.item.PrimaryAddress);
+
+                        $('#InvoiceId').val(ui.item.SaleId);
+                        $('#InvoiceNo').val(ui.item.SaleCode);
+
+                       
+
+                        $("#jsGridItems").jsGrid("insertItem", {
+                            SalesId: ui.item.SaleId,
+                            SaleCode: ui.item.SaleCode,
+                            CustomerName: ui.item.CustomerName,
+                            CustomerAddress: ui.item.PrimaryAddress,
+                            PhoneNo: ui.item.PhoneNo,
+                            status:statusVal
+                        
+                        });
+                        //resetData();
+                        //getSaleInfoForReturn(ui.item.SaleId);
+
+                        //calculateSum();
+                        //alert('ok');
+
+                        return false;
+                    }
+                });
+            };
+
+            var StatusList=[];
+            $.ajax({
+                method: "get",
+                async: false,
+                url: '@Url.Action("GetDocStatusDropdown", "Admin")',
+                //data: { VoucherType: "Cash Receipt" },
+
+                success: function (data) {
+
+                    console.log(data);
+
+                    const select = document.querySelector('#StatusId');
+                    for (var i = 0; i < data.length; i++) {
+                        const option = document.createElement('option');
+                            option.value = data[i].Value;
+                              option.text = data[i].Text; 
+                            select.appendChild(option);
+                    }
+
+                    for (var i = 0; i < data.length; i++) {
+                        StatusListAll = {
+                            Value: data[i].Value,
+                            Text: data[i].Text
+                        };
+                       
+                        StatusList.push(StatusListAll);
+                    }
+                }
+            });
+
+            
+
+                ///////******** Grid Section******///////////
+
+              
+
+                $('#jsGridItems').jsGrid({
+                    width: "100%",
+                    height: 'auto',
+                    //filtering: true,
+                   // inserting: true,
+                    editing: true,
+                    autoload: true,
+                    pageSize: 5,
+                    paging: true,
+                    // controller: filterSearchDb,
+                    fields: [
+                    { name: "SalesId", title: 'Sale Id', type: "text",visible: false },
+                    { name: "SaleCode", title: 'Sale Code', type: "text" },
+                    { name: "CustomerName", title: 'Customer', type: "text" },
+                    { name: "CustomerAddress", title: 'Adderess', type: "text" },
+                    { name: "PhoneNo", title: 'Phone No', type: "text" },
+                    { name: "SalesStatusId", title: 'Status', type: "select", items: StatusList, textField: "Text", valueField: "Value" },
+                       
+                        { type: "control" }
+
+                    ],
+                    onItemInserted: function(args){
+                    args.item.SalesStatusId=statusVal;
+                     $('#jsGridItems').jsGrid('refresh');
+                   // $("#jsGridItems").jsGrid("editItem", args.item);
+                    },
+                    onItemEditing: function(args){
+                        setTimeout(function(event){
+                        $('select').select2();
+                            
+                        },500);
+                    }
+                    //onItemInserting: function(args){
+                    //args.item.status = StatusId;
+                    //}
+
+                });
+
+            $('#BtnSave').click(function(){
+                var Alldata = $('#jsGridItems').jsGrid('option', 'data');
+                console.log(Alldata);
+                var jsonData = JSON.stringify(Alldata);
+                console.log(jsonData);
+
+
+                //let gridData = [...Alldata];
+                //var Statusmodel =
+                //{
+                //    SalesId: gridData.SaleCode,
+                //    SalesStatusId: gridData.status
+                //};
+
+                $.ajax({
+                    async: false,
+                    type: "POST",
+                    url: "@Url.Action("SalesStatusUpdate", "Sales")",
+                    data: JSON.stringify(Alldata),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+
+                        console.log(response);
+                        //alert(GatePassIdabc);
+                        toastr.success(response.message, "", {
+                            "toastClass": "toast-green",
+                        });
+                        //if (response) {
+
+                        // }
+                        // else{
+                        //     toastr.success(response.msg, "", {
+                        //         "toastClass": "toast-red",
+                        //     });
+                        // }
+
+                        // Handle the response
+                    }
+                });
+
+            });
+
+
+            });
+
+        </script>
+    }

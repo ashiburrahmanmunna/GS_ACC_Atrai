@@ -1,0 +1,3344 @@
+﻿@*@model List<Atrai.Model.Core.Entity.AccountHeadModel>*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model IEnumerable<Atrai.Controllers.AccountsController.BalanceSheetModel>
+@*@model Tuple<List<Atrai.Model.Core.Entity.AccountHeadModel>, IEnumerable<Atrai.Controllers.AccountsController.BalanceSheetModel>>*@
+@{
+    ViewData["Title"] = "Voucher Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+}
+<style>
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    td {
+        padding: 3px;
+    }
+    /* Set alternating column border for the <td> elements */
+    #treegridTable ttd {
+        border: 1px solid #000;
+    }
+
+
+    #treegridTable tr td:nth-of-type(2n) {
+        border-right-color: #8080809c;
+    }
+    /*th*/
+    #treegridTable tr th:nth-of-type(2n+1) {
+        border-right-color: black;
+    }
+
+    #treegridTable tr th:nth-of-type(n) {
+        border-right-color: black;
+    }
+
+    #treegridTable tr td:nth-of-type(2n + 1) {
+        border-right-color: black;
+    }
+
+    #treegridTable tr th:last-of-type,
+    #treegridTable tr td:last-of-type {
+        border-right-color: black;
+    }
+
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+    /*    tr td:nth-child(even) {
+        line-height: 15px !important;
+    }
+
+    tr td:nth-child(odd) {
+        line-height: 15px !important;
+    }*/
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+             border-bottom-width: 0px;
+
+        }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btn:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .dropdown-menu.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+</style>
+<div class="row" id="change-checkbox">
+    <div class="col-12 col-md-12">
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row m-0 ps-4 upper-form-style pt-2">
+                    <div class="col-md-12 mb-2">
+                        <h4 class="fw-bold fs-3">
+                            Trial Balance Report
+                        </h4>
+                        <span class="report-text-style"><i class="bi bi-chevron-left"></i> Back to report list</span>
+                        @*<span class="float-end">
+                                <button type="button" class="btn customize-btn fw-bold">Customize</button>
+                                <button type="button" class="btn customization-btn fw-bold">Save Customization</button>
+                            </span>*@
+                    </div>
+                    <div class="col-md-8 col-12 mb-2">
+
+
+
+                        <div class="row">
+                            <div class="col-md-4 col-12">
+                                <div class="mb-2" id="reportrange">
+                                    <label class="form-label">Report period</label>
+                                    <select onclick="setDateRange()" id="select2" class="form-select">
+                                        @*<option selected="selected" disabled="disabled">Select an Option</option>*@
+                                        <option value="1"> All Dates</option>
+                                        <option value="2">Custom</option>
+                                        <option value="3" selected>Today</option>
+                                        <option value="4">This Week</option>
+                                        <option value="5">This Week-to-date</option>
+                                        <option value="6">This Month</option>
+                                        <option value="7">This Month-to-date</option>
+                                        <option value="8">This Quarter</option>
+                                        <option value="9">This Quater-to-date</option>
+                                        <option value="10">This Year</option>
+                                        <option value="12">This Year-to-date</option>
+                                        <option value="12">This Year-to-last-month</option>
+                                        <option value="13">Yesterday</option>
+                                        <option value="14">Recent</option>
+                                        <option value="15">Last Week</option>
+                                        <option value="16">Last Week-to-date</option>
+                                        <option value="17">Last Month</option>
+                                        <option value="18">Last Month-to-date</option>
+                                        <option value="19">Last Quarter</option>
+                                        <option value="20">Last Quarter-to-date</option>
+                                        <option value="21">Last Year</option>
+                                        <option value="22">Last Year-to-date</option>
+                                        <option value="23">Since 30 days ago</option>
+                                        <option value="24">Since 60 days ago</option>
+                                        <option value="25">Since 90 days ago</option>
+                                        <option value="26">Since 365 days ago</option>
+                                        <option value="27">Next Week</option>
+                                        <option value="28">Next 4 Weeks</option>
+                                        <option value="29">Next Month</option>
+                                        <option value="30">Next Quarter</option>
+                                        <option value="30">Next Year</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-4 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">From Date</label>
+
+                                    <input class="form-control" id="start-date" disabled="disabled" />
+
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">To Date</label>
+
+                                    <input class="form-control" id="end-date" disabled="disabled" />
+
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">Display columns by</label>
+                                    <select class="form-select" id="select-form">
+                                        <option value="0" selected>Total Only</option>
+                                        <option value="1">Months</option>
+                                        <option value="2">Between</option>
+                                    </select>
+                                </div>
+                            </div>
+                            @*<div class="col-md-4 col-12">
+                                <div class="mb-2">
+                                <label class="form-label">Show non-zero or active only</label>
+                                <select class="form-select">
+                                <option selected>Active rows/active columns</option>
+                                <option value="1">Months</option>
+                                </select>
+                                </div>
+                                </div>*@
+                            <div class="col-md-4 col-12">
+                                <label class="form-label">Show non-zero or active only</label>
+                                <div class="dropdown1 d-grid">
+                                    <button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                        Active rows/columns
+                                    </button>
+                                    <ul class="dropdown-menu" id="dropdown-menu-id" aria-labelledby="dropdownMenuButton">
+                                        <li class="fw-bold ms-3">Show rows</li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    @*<input class="form-check-input ms-3" type="checkbox" value="Months" name="flexRadioDefault" id="previous-period">*@
+                                                    <input checked id="active-id" class="form-check-input" type="radio" name="flexRadioDefault">
+                                                    <label class="custom-control-label cursor-pointer" id="active-id-label" for="active-id">Active</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input id="all-id" class="form-check-input" type="radio" name="flexRadioDefault" value="All">
+                                                    <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="all-id">All</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input id="non-zero" class="form-check-input" type="radio" name="flexRadioDefault" ">
+                                                    <label class="custom-control-label cursor-pointer" for="non-zero">Non-zero</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input id="with-group" class="form-check-input" type="radio" name="flexRadioDefault" ">
+                                                    <label class="custom-control-label cursor-pointer" for="with-group">With Group</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li class="fw-bold ms-3">Show columns</li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="column-active">
+                                                    <label class="custom-control-label cursor-pointer" id="with-group-label" for="column-active">Active</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="column-all">
+                                                    <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="column-all">All</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input id="non-zero-column" class="form-check-input" type="radio" name="flexRadioDefault">
+                                                    <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="non-zero-column">Non-zero</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">Accounting method</label>
+                                    <div class="mt-2">
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                                        <label class="form-label">Cash</label>
+                                        <input checked class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                                        <label class="form-label">Accural</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8 col-12 mb-12 d-none">
+                                <div class="input-group mb-1">
+
+                                    <span class="input-group-text ">
+                                        Voucher Transaction Group
+                                    </span>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4 col-12 mb-2 mt-5 d-flex justify-content-center">
+                        <div>
+                            <button id="run-report-btn" type="button" class="btn customize-btn fw-bold" style="" onclick="GetReport()">Run Report</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="balance-sheet" class="me-lg-auto ms-lg-auto w-50" style="border: 1px solid #e3eaf3;  margin-top:40px;">
+                    <div class="ms-3 mt-3">
+                        <a class="text-decoration-none text-black cursor-pointer" id="add-notes"><span>Add notes</span></a>
+                        <span class="float-end">
+                            @*<a type="button" id="printPdf" href="#" class="text-decoration-none text-black" data-bs-toggle="modal">
+                                Print Pdf
+                                </a>*@
+                            @*<a type="button" id="printPdf2" href="#" class="text-decoration-none text-black" data-bs-toggle="modal">
+                                Print Pdf 2
+                                </a>*@
+                            <a type="button" id="emailPdfLoaded" href="#" class="text-decoration-none text-black" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <i class="bi bi-envelope me-3 fs-5"></i>
+                            </a>
+                            <a href="#" id="printPdfLoaded" class="text-decoration-none text-black" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <i class="bi bi-printer me-3 fs-5"></i>
+                            </a>
+                            <span class="dropdown1 me-3">
+                                <a class="dropdown-toggle text-decoration-none text-black cursor-pointer" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="bi bi-upload fs-5"></i>
+                                </a>
+                                @*<button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    </button>*@
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li><a class="dropdown-item" href="#" id="export-excel-link">Export to Excel</a></li>
+                                    <li><a class="dropdown-item" href="#" id="export-pdf-link">Export to PDF</a></li>
+                                    @*<li><a class="dropdown-item" href="#">Export to Google Sheets</a></li>*@
+                                </ul>
+                            </span>
+                            <span class="dropdown1 me-3">
+                                <a class="text-decoration-none text-black cursor-pointer" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="bi bi-gear fs-5"></i>
+
+                                </a>
+                                @*<button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    </button>*@
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li class="fw-bold ms-3">Display density</li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input title-input" id="compact" value="compact">
+                                                <label class="custom-control-label cursor-pointer" id="compact-label" for="compact">Compact</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </span>
+                            @*<a href="#" class="text-decoration-none text-black">
+                                <i class="bi bi-upload me-3 fs-5"></i>
+                                </a>*@
+                            @*<a href="#" class="text-decoration-none text-black">
+                                <i class="bi bi-gear me-3 fs-5"></i>
+                                </a>*@
+                        </span>
+
+                        @*print modal*@
+                        <!-- Button trigger modal -->
+                        @*<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            Launch demo modal
+                            </button>*@
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content" style="border-radius:0px;">
+                                    <div class="d-flex mt-4 mb-3">
+                                        <h4 class="ms-3 fw-bold">Print, email, or save as PDF</h4>
+                                        <div class="ms-auto"><button type="button" class="btn-close me-2 mt-2" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                                    </div>
+                                    <div class="modal-body">
+                                        To print, right-click the preview and select <span class="fw-bold">Print</span>. Or, click the <span class="fw-bold">Print</span> icon if you see one below.
+                                        <div class="row">
+                                            @*report-print-setting-style*@
+                                            <p class="fw-bold">Report print settings</p>
+                                            <div class="col-lg-1 mt-2">
+                                                Orientation
+                                            </div>
+                                            <div class="col-lg-2">
+                                                <select class="form-select" id="orientation">
+                                                    <option value="portrait" selected>Portrait</option>
+                                                    <option value="landscape">Landscape</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <iframe id="pdf-iframe" name="pdf-iframe" style="width: 100%; height: 500px;"></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 mt-3">
+                                        <button type="button" class="btn ms-5 customize-btn fw-bolder" data-bs-dismiss="modal">Close</button>
+                                        <button id="print-pdf" type="button" class="btn float-end me-5 customization-btn fw-bolder">Print</button>
+                                        <button id="save-pdf" type="button" class="btn float-end me-2 customize-btn fw-bolder">Save as PDF</button>
+                                        @*<button type="button" class="btn float-end me-2 customize-btn fw-bolder">Email</button>*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    @*<div id="loader" class="d-none"></div>*@
+                    <div id="parentDiv">
+                        @*<div class="row">
+                            <div class="col">*@
+                        <div id="make-editable" class="text-center company-and-other-text-style" onclick="makeEditable()">
+                            <div class="form-check d-none" id="form-check-visibility">
+                                <input class="form-check-input float-md-none" type="checkbox" name="flexCheckDefaultforImage" id="flexCheckDefaultforImage">
+                                <label class="form-check-label" for="flexCheckDefaultforImage">
+                                    Show Image
+                                </label>
+                            </div>
+                            <img id="company-image" style="width:10%" class="d-none" src="~/assets/Custom-URL-Shortener.jpg" />
+                            <h3 id="company-name">@HttpContextAccessor.HttpContext.Session.GetString("CompanyName")</h3>
+                            <h6 id="primary-address">@HttpContextAccessor.HttpContext.Session.GetString("PrimaryAddress")</h6>
+                            <h6 id="trial-balance" class="text-black fw-bolder">Trial Balance</h6>
+                            <h6 id="date-month-year"></h6>
+                        </div>
+                        @*</div>
+                            </div>*@
+                    <div class="container ms-lg-auto row mt-2 me-lg-auto">
+                        
+                        <div class="table-responsive">
+                            <table class="table table-condensed table-hover tree bg-white border" data-statement-id="balancesheet" id="treegridTable">
+                                <tbody id="body">
+                                </tbody>
+                            </table>
+                            @*<div id="loader" class="d-none"></div>*@
+
+                        </div>
+                        <table class="table-borderless table-sm" id="trial-balance-table-id">
+                            <thead style="border-top: 0.5px solid #00000059; border-bottom: 0.5px solid #00000059; ">
+                                <tr id="add-th">
+                                </tr>
+                                <tr id="t-head-rows">
+                                    @*<th class="w-50" scope="col"></th>
+                    <th class="text-end p-2 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">DEBIT</th>
+                    <th class="text-end pe-3 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">CREDIT</th>*@
+                                </tr>
+                            </thead>
+                            <tbody id="t-body">
+                            </tbody>
+
+                        </table>
+                        <div id="tableContainer"></div>
+                        <div class="form-floating d-none my-4" id="add-notes-textarea">
+                            <textarea class="form-control" placeholder="Add notes or include additional info with your report" id="floatingTextarea2" style="height: 200px"></textarea>
+                            <label for="floatingTextarea2">Add notes or include additional info with your report</label>
+                            <i class="bi bi-x cursor-pointer float-end" id="close-textarea" style="position: absolute; top: -10px; right: 13px; font-size:25px; "></i>
+                            @*<button type="button" class="close" id="close-textarea">&times;</button>*@
+                        </div>
+                    </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-treegrid/0.2.0/js/jquery.treegrid.bootstrap3.js"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+<script type="text/javascript">
+            $("#run-report-btn").click(function () {
+                $("#loader").toggleClass("d-none");
+
+                setTimeout(function () {
+                    $("#loader").toggleClass("d-none");
+                }, 1800);
+            });
+
+        var TO = false;
+        var MO = false;
+        var BW = false;
+
+
+            //Try to generate pdf using html2pdf start
+
+            //Try to generate pdf using html2pdf start
+            $(document).ready(function () {
+                $('#make-editable').mouseover(function () {
+                    $('#form-check-visibility').removeClass('d-none').addClass('d-block');
+                });
+                $('#make-editable').mouseout(function () {
+                    $('#form-check-visibility').removeClass('d-block').addClass('d-none');
+                });
+            });
+
+            function makeEditable() {
+                $("#form-check-visibility").removeClass("d-none");
+                var checkbox = document.getElementById("flexCheckDefaultforImage");
+                var image = document.getElementById("company-image");
+
+                checkbox.addEventListener("change", function () {
+                    if (this.checked) {
+                        image.classList.remove("d-none");
+                    } else {
+                        image.classList.add("d-none");
+                    }
+                });
+                var companyName = document.getElementById("company-name");
+                var primaryAddress = document.getElementById("primary-address");
+                var trialBalanceName = document.getElementById("trial-balance");
+                var dateMonthYear = document.getElementById("date-month-year");
+                companyName.contentEditable = true;
+                primaryAddress.contentEditable = true;
+                trialBalanceName.contentEditable = true;
+                dateMonthYear.contentEditable = true;
+            }
+            //document.getElementById("change-checkbox").on("click", function () {
+            //    $("#form-check-visibility").toggleClass("d-none");
+            //})
+            $('#compact').change(function () {
+                if ($(this).is(':checked')) {
+                    $('#treegridTable th').addClass('pt-3 pb-3');
+                    $('.table tbody tr td').addClass('pt-3 pb-3');
+                }
+                else {
+                    $('#treegridTable th').removeClass('pt-3 pb-3');
+                    $('.table tbody tr td').removeClass('pt-3 pb-3');
+                }
+            });
+            //document.addEventListener("click", function (event) {
+            //    var visibilityDiv = document.getElementById("form-check-visibility");
+            //    var targetElement = event.target;
+            //    if (!targetElement.closest('#make-editible') && !targetElement.closest('#form-check-visibility')) {
+            //        visibilityDiv.removeClass("d-none").classList.add("d-none");
+            //    }
+            //})
+            /*function to goto the add notes text area after click*/
+            $("#add-notes").click(function () {
+                $("#add-notes-textarea").toggleClass("d-none");
+                $("#floatingTextarea2").focus();
+                $("#add-notes").text("Edit notes");
+            });
+
+            /*function to close  text area after click*/
+            $("#close-textarea").click(function () {
+                $("#add-notes-textarea").addClass("d-none");
+                $("#add-notes").text("Add notes");
+                var elem = document.getElementById("add-notes");
+                elem.scrollIntoView();
+            });
+            var totallength = "";
+
+            var ResponseForPdf = [];
+
+
+
+            //% of row, % of column,% of income functionalities starts
+            const radioButtons = document.querySelectorAll('input[type="radio"][name="flexRadioDefault"]');
+            const button = document.getElementById('dropdownMenuButton');
+
+            radioButtons.forEach((radio) => {
+                radio.addEventListener('click', () => {
+                    if (radio.checked) {
+                        button.innerText = radio.nextElementSibling.innerText;
+                    }
+                });
+            });
+            var valueofRows = "0";
+            var active = false;
+            var isViewPageReport = 1
+            var allSelectedValue = false;
+            var ajaxCondition = 1;
+            document.getElementById("active-id").addEventListener("change", function () {
+                if (this.checked) {
+                    active = true;
+                    valueofRows = '0';
+                    isViewPageReport = 1;
+                    allSelectedValue = false;
+                    ajaxCondition = 1;
+
+
+                }
+                else {
+                    active = false;
+                    valueofRows = "0";
+                }
+            });
+            document.getElementById("all-id").addEventListener("change", function () {
+                if (this.checked) {
+                    active = true;
+                    valueofRows = '1';
+                    isViewPageReport = 1;
+                    allSelectedValue = true;
+                    ajaxCondition = 1;
+
+
+                }
+                else {
+                    active = false;
+                    valueofRows = "0";
+                }
+            });
+            document.getElementById("non-zero").addEventListener("change", function () {
+                if (this.checked) {
+                    active = true;
+                    allSelectedValue = '3';
+                    isViewPageReport = 1;
+                    ajaxCondition = 1;
+
+                    valueofRows = "0";
+                }
+                else {
+                    active = false;
+                    valueofRows = "0";
+                }
+            });
+            document.getElementById("non-zero-column").addEventListener("change", function () {
+                if (this.checked) {
+                    active = true;
+                    allSelectedValue = '3';
+                    isViewPageReport = 2;
+                    ajaxCondition = 1;
+
+                    valueofRows = "0";
+                    console.log("isViewPageReport::", isViewPageReport);
+                    console.log("allSelectedValue::", allSelectedValue);
+                }
+                else {
+                    active = false;
+                    valueofRows = "1";
+                }
+            });
+            document.getElementById("with-group").addEventListener("change", function () {
+                if (this.checked) {
+                    active = true;
+                    ajaxCondition = 2;
+                    //isViewPageReport = 3;
+                    //valueofRows = '2';
+                    //isViewPageReport = 1;
+                    console.log("ajaxCondition::", ajaxCondition);
+                }
+                else {
+                    active = false;
+                    //isViewPageReport = 1;
+                    ajaxCondition = 1;
+                    //valueofRows = "0";
+                    console.log("ajaxCondition::", ajaxCondition);
+
+                }
+            });
+        //% of row, % of column,% of income functionalities ends
+            //var isViewPageReport=1
+            //var allSelectedValue=false;
+            //$("#all-id").on("change", function () {
+            //    allSelectedValue = true;
+            //    isViewPageReport = 1;
+
+            //    console.log("allSelectedValue::",allSelectedValue);
+            //});
+            //$("#active-id").on("change", function () {
+            //    allSelectedValue = false;
+            //    isViewPageReport = 1;
+
+            //    console.log("allSelectedValue::",allSelectedValue);
+            //});
+            //$("#non-zero").on("change", function () {
+            //    allSelectedValue = '3';
+            //    isViewPageReport = 1;
+            //    valueofRows = "0";
+            //    console.log("allSelectedValue::",allSelectedValue);
+            //});
+            //$("#non-zero-column").on("change", function () {
+            //    //allSelectedValue = '3';
+            //    isViewPageReport = 2;
+            //    valueofRows = "0";
+            //    console.log("allSelectedValue::",allSelectedValue);
+            //});
+            ////$("#with-group").on("change", function () {
+            ////    //allSelectedValue = '3';
+            ////    isViewPageReport = 3;
+            ////    valueofRows = "0";
+            ////    console.log("allSelectedValue::",allSelectedValue);
+            ////});
+            //console.log("allSelectedValue::", allSelectedValue);
+
+
+
+
+            //treegrid functionalities starts
+            setDateRange(3);
+            GetReport();
+            function GetReport() {
+                var amount;
+                var balanceSheet;
+                var opDebitNum = "";
+                var opCreditNum = "";
+                var clDebitNum = "";
+                var clCreditNum = "";
+                var tranDebitNum = "";
+                var tranCreditNum = "";
+                var parentDiv = document.getElementById("parentDiv");
+                parentDiv.scrollIntoView({ behavior: "smooth" });
+                $("#loader").toggleClass("d-none");
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetTrialBalance", "Accounts")'
+                }
+                if (ajaxCondition == 1) {
+                    console.log("Condition 1 executed");
+                    $("#treegridTable").hide();
+                    $("#trial-balance-table-id").show();
+                    $.ajax({
+                        //url:"https://raw.githubusercontent.com/kautuk-desai/demo-data/master/datagrid-lib.json",
+                        url: MyAppUrlSettings.MyUsefulUrl,
+                        data: { FromDate: $('#start-date').val(), ToDate: $('#end-date').val(), rpttype: "TB", criteria: $("#select2 option:selected").text(), isGroup: 0, isViewPageReport: isViewPageReport, Months: $("#select-form option:selected").text(), valueofRows: valueofRows },
+                        type: "GET",
+                        dataType: 'json',
+                        //shrinkToFit : false,
+                        scrollX: true,
+                        buttons: {
+                            dom: {
+                                button: {
+                                    className: 'btn btn-sm rounded-0'
+                                }
+                            },
+                            buttons: [
+                                //'copy', 'csv', 'excel', 'pdf', 'print'
+                                //{ "extend": 'excel', "text": 'Excel', "className": 'btn btn-sm btn-success-info fa fa-excel rouned-0' }
+
+                                {
+                                    extend: 'excel',
+                                    text: '<i class="bi bi-file-earmark-excel"></i>',
+                                    className: 'btn-success',
+                                    titleAttr: 'Export to excel'
+                                }
+
+                            ],
+                        },
+
+                        success: function (response) {
+                            //alert(selectedIsAll);
+                            //console.log(response);
+                            ResponseForPdf = [...response.data];
+                            //console.log(ResponseForPdf);
+                            //let dataAbc = JSON.parse(response.data);
+                            //console.log(dataAbc);
+                            //console.log(dataAbc.Table[0]);
+                            /*console.log(typeof (response.data[0].clDebit));*/
+                            allData = [...response.data];
+                            console.log("All Data::", allData)
+                            var tableData = "";
+                            var tableHead = "";
+                            var tableHeaders = "";
+                            $("#t-body").empty();
+                            for (var i = 0; i < allData.length; i++) {
+                                opDebitNum = parseFloat(allData[i].opDebit);
+                                opCreditNum = parseFloat(allData[i].opCredit);
+                                clDebitNum = parseFloat(allData[i].clDebit);
+                                clCreditNum = parseFloat(allData[i].clCredit);
+                                tranDebitNum = parseFloat(allData[i].TranDebit);
+                                tranCreditNum = parseFloat(allData[i].TranCredit);
+
+                                //console.log("allData[i].AccName::", allData[i].AccName);
+
+                                var selectedText = $("#select-form option:selected").text();
+
+                                if (selectedText == "Total Only" && allSelectedValue == true) {
+                                    TO = true;
+                                    var trialBalanceDate = `<span>${allData[0].Caption}</span>`;
+                                    $("#date-month-year").empty();
+                                    $("#date-month-year").append(trialBalanceDate);
+                                    if (clDebitNum + clCreditNum > 0 || clDebitNum + clCreditNum == 0 || clDebitNum + clCreditNum < 0) {
+                                        $("#balance-sheet").removeClass("w-100").addClass("w-50");
+                                        tableData += `
+                            <tr>
+                                <td ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${allData[i].AccName}</td>
+                                <td class="text-end pe-2" ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${(clCreditNum == 0 && clDebitNum == 0) ? '0' : clDebitNum == 0 ? '-' : clDebitNum.toLocaleString('en-BD', {
+                                            style: 'currency',
+                                            currency: 'BDT',
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}</td>
+
+                            <td class="text-end pe-3" ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${(clCreditNum == 0 && clDebitNum == 0) ? '0' : clCreditNum == 0 ? '-' : clCreditNum.toLocaleString('en-BD', {
+                                            style: 'currency',
+                                            currency: 'BDT',
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}</td>
+                        </tr>
+                        `;
+                                    }
+                                    tableHead = `<th class="w-50" scope="col"></th>
+                        <th class="text-end p-2 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">DEBIT</th>
+                        <th class="text-end pe-3 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">CREDIT</th>`;
+                                    $("#tableContainer").empty();
+
+                                }
+
+
+
+                                if (selectedText == "Total Only" && allSelectedValue == false) {
+                                    TO = true;
+                                    var trialBalanceDate = `<span>${allData[0].Caption}</span>`;
+                                    $("#date-month-year").empty();
+                                    $("#date-month-year").append(trialBalanceDate);
+                                    if (clDebitNum + clCreditNum > 0) {
+                                        $("#balance-sheet").removeClass("w-100").addClass("w-50");
+                                        tableData += `
+                            <tr>
+                                <td ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${allData[i].AccName}</td>
+                                <td class="text-end pe-2" ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${clDebitNum == 0 ? '-' : clDebitNum.toLocaleString('en-BD', {
+                                            style: 'currency',
+                                            currency: 'BDT',
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}</td>
+
+                            <td class="text-end pe-3" ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${clCreditNum == 0 ? '-' : clCreditNum.toLocaleString('en-BD', {
+                                            style: 'currency',
+                                            currency: 'BDT',
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}</td>
+                        </tr>
+                        `;
+                                    }
+                                    tableHead = `<th class="w-50" scope="col"></th>
+                        <th class="text-end p-2 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">DEBIT</th>
+                        <th class="text-end pe-3 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">CREDIT</th>`;
+                                    $("#tableContainer").empty();
+
+                                }
+
+
+                                if (selectedText == "Total Only" && allSelectedValue == "3") {
+                                    TO = true;
+                                    var trialBalanceDate = `<span>${allData[0].Caption}</span>`;
+                                    $("#date-month-year").empty();
+                                    $("#date-month-year").append(trialBalanceDate);
+                                    if (clDebitNum + clCreditNum !== 0) {
+                                        $("#balance-sheet").removeClass("w-100").addClass("w-50");
+                                        tableData += `
+                            <tr>
+                                <td ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${allData[i].AccName}</td>
+                                <td class="text-end pe-2" ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${clDebitNum == 0 ? '-' : clDebitNum.toLocaleString('en-BD', {
+                                            style: 'currency',
+                                            currency: 'BDT',
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}</td>
+
+                            <td class="text-end pe-3" ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${clCreditNum == 0 ? '-' : clCreditNum.toLocaleString('en-BD', {
+                                            style: 'currency',
+                                            currency: 'BDT',
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}</td>
+                        </tr>
+                        `;
+                                    }
+                                    tableHead = `<th class="w-50" scope="col"></th>
+                        <th class="text-end p-2 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">DEBIT</th>
+                        <th class="text-end pe-3 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">CREDIT</th>`;
+                                    $("#tableContainer").empty();
+
+                                }
+
+
+
+
+                                if (selectedText == "Between") {
+                                    BW = true;
+                                    var trialBalanceDate = `<span>${allData[0].Caption}</span>`;
+                                    $("#date-month-year").empty();
+                                    $("#date-month-year").append(trialBalanceDate);
+                                    $("#balance-sheet").removeClass("w-50").addClass("w-100");
+                                    if (clDebitNum + clCreditNum > 0) {
+                                        tableData += `
+                            <tr>
+                                <td ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${allData[i].AccName}</td>
+                                <td class="text-end pe-2" ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${opDebitNum == 0 ? '-' : opDebitNum.toLocaleString('en-BD', {
+                                            style: 'currency',
+                                            currency: 'BDT',
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}</td>
+
+                            <td class="text-end pe-3" ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${opCreditNum == 0 ? '-' : opCreditNum.toLocaleString('en-BD', {
+                                            style: 'currency',
+                                            currency: 'BDT',
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}</td>
+                                <td class="text-end pe-2" ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${tranDebitNum == 0 ? '-' : tranDebitNum.toLocaleString('en-BD', {
+                                            style: 'currency',
+                                            currency: 'BDT',
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}</td>
+
+                            <td class="text-end pe-3" ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${tranCreditNum == 0 ? '-' : tranCreditNum.toLocaleString('en-BD', {
+                                            style: 'currency',
+                                            currency: 'BDT',
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}</td>
+                                <td class="text-end pe-2" ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${clDebitNum == 0 ? '-' : clDebitNum.toLocaleString('en-BD', {
+                                            style: 'currency',
+                                            currency: 'BDT',
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}</td>
+
+                            <td class="text-end pe-3" ${allData[i].AccName === 'Total :' ? ' style="font-weight:bold;border-top: 0.5px solid #00000059; border-bottom: 5px double #00000059;"' : ''}>${clCreditNum == 0 ? '-' : clCreditNum.toLocaleString('en-BD', {
+                                            style: 'currency',
+                                            currency: 'BDT',
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}</td>
+                        </tr>
+                        `;
+                                    }
+                                    tableHead = `<th class="w-50" scope="col"></th>
+                        <th class="text-end p-2 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">DEBIT</th>
+                        <th class="text-end pe-3 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">CREDIT</th>
+                        <th class="text-end p-2 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">DEBIT</th>
+                        <th class="text-end pe-3 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">CREDIT</th>
+                        <th class="text-end p-2 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">DEBIT</th>
+                        <th class="text-end pe-3 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">CREDIT</th>`;
+                                    tableHeaders = `
+                                                <th scope="col"></th>
+                                                <th id="table-headers" class="text-center text-black pt-3 pb-3" colspan="2" style="border-bottom: 0.5px solid #00000059;border-left:0.5px solid #00000059;">Opening</th>
+                                                <th id="table-headers" class="text-center text-black pt-3 pb-3" colspan="2" style="border-bottom: 0.5px solid #00000059;border-left:0.5px solid #00000059;">Transaction</th>
+                                                <th id="table-headers" class="text-center text-black pt-3 pb-3" colspan="2" style="border-bottom: 0.5px solid #00000059;border-left:0.5px solid #00000059;">Closing</th>
+                                                `;
+                                    $("#tableContainer").empty();
+                                }
+                            }
+                            if (selectedText == "Months") {
+                                MO = true;
+                                var headerAbc = [];
+                                let dataAbc = JSON.parse(response.data);
+
+                                //console.log(dataAbc);
+                                for (let i = 0; i < dataAbc.length; i++) {
+                                    const element = dataAbc[i];
+                                    const keys = Object.keys(element);
+                                    console.log("Keys for element", i, ":", keys);
+                                }
+                                let hasData = false;
+                                let tableData = dataAbc.Table;
+                                //console.log(tableData);
+                                ResponseForPdf = [...tableData];
+                                // Step 1: Extract the headers from the data
+                                let headers = Object.keys(tableData[0]);
+                                let lastheader = headers[headers.length - 1];
+                                console.log(lastheader);
+                                // Create span element with the last header name
+                                let trialBalanceDatee = `<span>${lastheader}</span>`;
+
+                                // Update the "date-month-year" element with the span
+                                $("#date-month-year").empty();
+                                $("#date-month-year").append(trialBalanceDatee);
+                                console.log('smrity length');
+                                console.log(headers[headers.length - 1]);
+                                // Step 2: Create the table structure in HTML
+                                let table = document.createElement('table');
+                                let classesToAddToTable = ['table', 'table-sm', 'table-hover', 'table-bordered', 'text-dark'];//, 'border-dark'
+                                table.classList.add(...classesToAddToTable);
+                                let thead = document.createElement('thead');
+                                let classesToAddToTableHead = ['text-center', 'bg-light', 'font-weight-bold'];
+                                thead.classList.add(...classesToAddToTableHead);
+                                let tbody = document.createElement('tbody');
+                                let tr = document.createElement('tr');
+                                let tr2 = document.createElement('tr');
+                                for (i = 0; i < headers.length; i++) {
+                                    let header = headers[i];
+                                    if (i == 0) {
+
+                                    }
+                                    else if (i == 1) {
+                                        let th = document.createElement('th');
+                                        th.setAttribute("colspan", "1");
+                                        th.innerText = "Account";
+                                        tr.appendChild(th);
+                                    }
+                                    else if (i > 1) {
+                                        let th = document.createElement('th');
+                                        th.setAttribute("colspan", "2");
+                                        th.innerText = header;
+                                        tr.appendChild(th);
+                                    }
+                                }
+
+                                thead.appendChild(tr);
+
+                                for (let header of headers) {
+                                    if (header == "AccId") {
+                                        let th = document.createElement('th');
+                                        th.setAttribute("colspan", "1");
+                                        tr2.appendChild(th);
+                                    } else if (header == "AccName") {
+                                    }
+                                    else {
+                                        let th1 = document.createElement('th');
+                                        let th2 = document.createElement('th');
+                                        th1.innerText = "Debit";
+                                        th2.innerText = "Credit";
+                                        tr2.appendChild(th1);
+                                        tr2.appendChild(th2);
+                                    }
+                                }
+                                thead.appendChild(tr2);
+
+                                table.appendChild(thead);
+                                table.appendChild(tbody);
+                                var classesToAddtoTableCelll = [];
+
+                                // Step 3: Loop through the data and populate the table
+                                for (let row of tableData) {
+                                    let tr = document.createElement('tr');
+                                    for (let header of headers) {
+                                        if (header == "AccId") {
+                                            let td = document.createElement('td');
+                                            let classesToAddToTd = ['d-none'];
+                                            td.classList.add(...classesToAddToTd);
+                                            td.innerText = row[header];
+                                            tr.appendChild(td);
+                                        } else if (header == "AccName") {
+
+                                            let td = document.createElement('td');
+                                            let classesToAddToTd = ['p-2', 'm-2', 'text-nowrap'];
+                                            td.classList.add(...classesToAddToTd);
+                                            td.innerText = row[header];
+                                            tr.appendChild(td);
+                                        } else {
+                                            amount = parseFloat(row[header]);
+                                            if (amount > 0) {
+                                                let tddebit = document.createElement('td');
+                                                let classesToAddtoTableCell = ['text-end'];
+                                                tddebit.classList.add(...classesToAddtoTableCell);
+                                                tddebit.innerText = amount.toLocaleString('en-BD');
+                                                tr.appendChild(tddebit);
+                                                let tdcredit = document.createElement('td');
+                                                tdcredit.innerText = '';
+                                                tr.appendChild(tdcredit);
+
+
+                                            }
+                                            else if (amount < 0) {
+                                                let tddebit = document.createElement('td');
+                                                tddebit.innerText = '';
+                                                tr.appendChild(tddebit);
+                                                let tdcredit = document.createElement('td');
+                                                tdcredit.innerText = Math.abs(amount).toLocaleString('en-BD');
+                                                let classesToAddtoTableCell = ['text-end'];
+                                                tdcredit.classList.add(...classesToAddtoTableCell);
+                                                tr.appendChild(tdcredit);
+                                            }
+                                            else if (amount == 0) {
+                                                let tddebit = document.createElement('td');
+                                                tddebit.innerText = '0';
+                                                tr.appendChild(tddebit);
+                                                let tdcredit = document.createElement('td');
+                                                tdcredit.innerText = '0';
+                                                classesToAddtoTableCelll = ['text-end', 'no-data'];
+                                                tddebit.classList.add(...classesToAddtoTableCelll);
+                                                tdcredit.classList.add(...classesToAddtoTableCelll);
+                                                tr.appendChild(tdcredit);
+                                            }
+                                            else {
+                                                let tddebit = document.createElement('td');
+                                                tddebit.innerText = '';
+                                                tr.appendChild(tddebit);
+                                                let tdcredit = document.createElement('td');
+                                                tdcredit.innerText = '';
+                                                classesToAddtoTableCelll = ['text-end', 'no-data'];
+                                                tddebit.classList.add(...classesToAddtoTableCelll);
+                                                tdcredit.classList.add(...classesToAddtoTableCelll);
+                                                tr.appendChild(tdcredit);
+                                            }
+                                        }
+                                        tbody.appendChild(tr);
+                                    }
+                                }
+
+                                // Create "Total" row old coce
+                                let totalRow = document.createElement('tr');
+                                totalRow.classList.add('total-accname');
+                                let totalTd = document.createElement('td');
+                                totalTd.innerText = 'Total';
+                                totalTd.classList.add('text-center', 'fw-bolder', 'text-black');
+                                totalTd.colSpan = 1;
+                                totalRow.appendChild(totalTd);
+
+                                //new code
+                                for (let header of headers) {
+                                    if (header == "AccId") {
+
+                                    } else if (header == "AccName") {
+                                    } else {
+                                        let totalDebitTd = document.createElement('td');
+                                        let totalCreditTd = document.createElement('td');
+                                        // Loop through all rows and calculate total debit and credit
+                                        let totalDebit = 0;
+                                        let totalCredit = 0;
+                                        hasData = false; // Flag to track if any data exists in the column
+
+                                        // Iterate through tableData and calculate totals
+                                        for (let row of tableData) {
+                                            let amount = parseFloat(row[header]);
+                                            if (!isNaN(amount)) {
+                                                if (amount > 0) {
+                                                    totalDebit += amount;
+                                                } else if (amount < 0) {
+                                                    totalCredit -= amount;
+                                                }
+                                                hasData = true; // Data exists in the column
+                                            }
+                                        }
+
+                                        // Set totalDebitTd and totalCreditTd based on data existence
+                                        if (hasData) {
+                                            totalDebitTd.innerText = totalDebit.toLocaleString('en-BD');
+                                            totalCreditTd.innerText = totalCredit.toLocaleString('en-BD');
+                                        } else {
+                                            let addClass = ["zero-total"]
+                                            totalDebitTd.classList.add(...addClass);
+                                            totalCreditTd.classList.add(...addClass);
+                                            totalDebitTd.innerText = '0'; // No data, set to 0
+                                            totalCreditTd.innerText = '0'; // No data, set to 0
+                                        }
+
+                                        totalDebitTd.classList.add('text-center', 'fw-bolder', 'text-black');
+                                        totalCreditTd.classList.add('text-center', 'fw-bolder', 'text-black');
+                                        totalRow.appendChild(totalDebitTd);
+                                        totalRow.appendChild(totalCreditTd);
+
+                                        // Add "Total" row to the table
+                                        tbody.appendChild(totalRow);
+                                    }
+                                }
+
+                                // Append the table to the div with id "tableContainer"
+                                var selectedText = $("#select2 option:selected").text();
+                                $("#tableContainer").empty();
+                                if (headers.length == 3) {
+                                    $("#balance-sheet").removeClass("w-100").addClass("w-50");
+                                    $("#tableContainer").attr("style", "overflow-x: hidden;");
+                                }
+                                else if (headers.length > 3) {
+                                    $("#balance-sheet").removeClass("w-50").addClass("w-100");
+                                    $("#tableContainer").attr("style", "overflow-x: scroll;");
+                                }
+                                else {
+                                    $("#balance-sheet").removeClass("w-100").addClass("w-50");
+                                    $("#balance-sheet").removeClass("w-75").addClass("w-50");
+                                    $("#tableContainer").attr("style", "overflow-x: hidden;");
+                                }
+                                document.getElementById("tableContainer").appendChild(table);
+                            }
+
+                            /*  alert(selectedText);*/
+
+                            $("#t-head-rows").empty();
+                            $("#t-head-rows").append(tableHead);
+                            $("#add-th").empty();
+                            $("#add-th").append(tableHeaders);
+                            $("#t-body").empty();
+                            $("#t-body").append(tableData);
+
+
+                            const data = response;
+                            balanceSheet = data;
+                            //console.log(balanceSheet);
+                            //treeColumnIndex: 2,
+                            //console.log("all data come");
+                            //const columns = [
+
+                            //    //  {
+                            //    //    caption: "Count",
+                            //    //    columns: [{
+                            //    //        caption: "Debit",
+                            //    //        dataField: " ",
+                            //    //        format: ""
+                            //    //    },
+                            //    //    {
+                            //    //        caption: "Credit",
+                            //    //        dataField: " ",
+                            //    //        format: " "
+                            //    //    }]
+                            //    //},
+
+                            //    "Jan",
+                            //    "Feb",
+                            //    "Mar",
+                            //    "Apr"
+                            //    //"May",
+                            //    //"June",
+                            //    //"July",
+                            //    //"Aug",
+                            //    //"Sep",
+                            //    //"Oct",
+                            //    //"Nov",
+                            //    //"Dec",
+                            //];
+                            const columns2 = [
+                                "Debit ",
+                                "Credit",
+                            ];
+
+
+                            // var defalultcolumn = 2; /// accid / accname / slno
+                            //var headercolumn = 4; // jan feb mar april // 2022 // 2023
+                            //var datacolumn = 2; //debit // credit
+
+                            /*var totallengthh = defalultcolumn + (columns * columns2);*/
+                            ///totallength = defalultcolumn + (headercolumn * datacolumn);
+
+
+                            //$('[data-statement-id="balancesheet"]').prepend(formHeaderColumns(columns, columns2));
+
+
+                            //formTable(balanceSheet, undefined, 1);
+
+                            $(".tree").treegrid({
+                                expanderExpandedClass: "bi bi-chevron-down pe-4",
+                                expanderCollapsedClass: "bi bi-chevron-right pe-4"
+                            });
+                        }
+                    });
+                }
+                if (ajaxCondition == 2) {
+                    console.log("Condition 2 executed");
+                    $("#trial-balance-table-id").hide();
+                    $("#tableContainer").hide();
+                    $("#treegridTable").show();
+                    $.ajax({
+                        //url:"https://raw.githubusercontent.com/kautuk-desai/demo-data/master/datagrid-lib.json",
+                        url: MyAppUrlSettings.MyUsefulUrl,
+                        data: { FromDate: $('#start-date').val(), ToDate: $('#end-date').val(), rpttype: "TB", criteria: $("#select2 option:selected").text(), isGroup: 0, isViewPageReport: 3, Months: $("#select-form option:selected").text() },
+                        type: "GET",
+                        dataType: 'json',
+                        //shrinkToFit : false,
+                        scrollX: true,
+                        buttons: {
+                            dom: {
+                                button: {
+                                    className: 'btn btn-sm rounded-0'
+                                }
+                            },
+                            buttons: [
+
+                                {
+                                    extend: 'excel',
+                                    text: '<i class="bi bi-file-earmark-excel"></i>',
+                                    className: 'btn-success',
+                                    titleAttr: 'Export to excel'
+                                }
+
+                            ],
+                        },
+
+                        success: function (response) {
+                            $("#balance-sheet").removeClass("w-50").addClass("w-100");
+                            // Remove existing thead element from the table
+                            $("#treegrid-thead").remove();
+                            //---Total Only---
+                            /*console.log("balance sheet respone:", response)*/
+                            const balanceSheet = response.data;
+
+                            allData = [...response.data];
+                            var trialBalanceDate = `<span>${response.data[0].MonthCaption}</span>`;
+                            $("#date-month-year").empty();
+                            $("#date-month-year").append(trialBalanceDate);
+
+                            console.log("balance sheet respone:", balanceSheet)
+                            //console.log(balanceSheet);
+
+                            const columns = [];
+                            const keys = Object.keys(response.data[0]);
+                            const keysWithoutLastElement = keys.slice(0, -1);
+
+                            for (let i = 9; i < keysWithoutLastElement.length; i++) {
+                                columns.push(keys[i]);
+                            }
+
+
+                            var selectedText = $("#select-form option:selected").text();
+                            var selectedOption = $("#select2 option:selected").text();
+                            if (selectedText == "Months" && selectedOption == "This Year") {
+                                $("#balance-sheet").removeClass("w-50").addClass("w-100")
+                            }
+                            if (selectedText == "Total Only") {
+                                $("#balance-sheet").removeClass("w-100").addClass("w-50")
+                            }
+                            //--for month wise--
+                            //const keys = Object.keys(balanceSheet.Table[0]);
+                            //console.log(keys);
+                            //const keysWithoutLastElement = keys.slice(0, -2);
+
+                            //for (let i = 8; i < keys.length; i++) {
+                            //    columns.push(keys[i]);
+                            //}
+                            // Create new thead element and add it to the table
+                            $('[data-statement-id="balancesheet"]').prepend(formHeaderColumns(columns));
+
+                            // Remove existing tbody element from the table
+                            $('#body').empty();
+
+                            // Create new tbody element and add it to the table
+                            formTable(balanceSheet, undefined, 1);
+                            $(".tree").treegrid({
+                                expanderExpandedClass: "bi bi-chevron-down pe-4",
+                                expanderCollapsedClass: "bi bi-chevron-right pe-4"
+                            });
+                            $("#loader").toggleClass("d-none");
+                        }
+
+
+                    });
+                    var tbody = $("#body");
+                    var hasTotal;
+                    var hasPercentageRow;
+                    var fromToDate;
+
+                    var formHeaderColumns = function (timeseriesprojections) {
+                        var thead = "<thead id='treegrid-thead'><tr><th rowspan='2'>Account Head</th>";
+                        hasClBalance = timeseriesprojections.includes("clBalance");
+                        console.log("hasClBalance::", hasClBalance);
+
+                        $.each(timeseriesprojections, function (i, ele) {
+                            console.log("ele::", ele)
+                            //if (ele == "clBalance" && !hasPercentageRow) {
+                            //    fromToDate = ele;
+                            //    thead += "<th>Total</th>";
+                            //}
+                            /*  else {*/
+                            if (hasClBalance == true) {
+                                thead += `<th colspan='2' class="total-class">Total</th>`;
+                            }
+                            else {
+                                if (hasClBalance == false) {
+                                    thead += "<th colspan='2' class='total-class'>" + ele + "</th>";
+                                }
+                            }
+                        });
+
+                        thead += "</tr><tr>";
+
+                        if (hasClBalance == true) {
+                            for (var i = 0; i < timeseriesprojections.length; i++) {
+                                //console.log("time projection dekhbo", timeseriesprojections);
+                                thead += `<th class="debit-th">DEBIT</th>`;
+                                thead += "<th class='credit-th'>CREDIT</th>";
+                            }
+                        }
+                        else if (hasClBalance == false) {
+                            for (var i = 0; i < timeseriesprojections.length; i++) {
+                                //console.log("time projection dekhbo", timeseriesprojections);
+                                thead += "<th>DEBIT</th>";
+                                thead += "<th>CREDIT</th>";
+                            }
+                        }
+                        // Add the "Current" and "% Row" headers for each dynamic column
+                        //$.each(timeseriesprojections, function (i, ele) {
+                        //    if (hasClBalance==true) {
+                        //        for (var i = 0; i < timeseriesprojections.length; i++) {
+                        //            //console.log("time projection dekhbo", timeseriesprojections);
+                        //            thead += "<th>DEBIT</th>";
+                        //            thead += "<th>CREDIT</th>";
+                        //        }
+                        //    }
+                        //    else if (hasClBalance == false) {
+                        //        for (var i = 0; i < timeseriesprojections.length; i++) {
+                        //            //console.log("time projection dekhbo", timeseriesprojections);
+                        //            thead += "<th>DEBIT</th>";
+                        //            thead += "<th>CREDIT</th>";
+                        //        }
+                        //    }
+                        //});
+
+                        thead += "</tr></thead>";
+                        return thead;
+                    };
+                    var formTable = function (data, ParentId, level) {
+                        var colIndex = 2;
+
+                        var currentLevel = level;
+                        //console.log("currentLevel:", currentLevel);
+                        $.each(data, function (i, ele) {
+                            //console.log("ele.datalevel:", ele.datalevel); // check value of ele.datalevel
+                            //console.log("currentLevel:", currentLevel); // check value of currentLevel
+                            //console.log("i:", i);
+                            //console.log("ele:", ele);
+                            //console.log("ele.datalevel::", ele.DataLevel)
+                            ;
+                            ele.datalevel = currentLevel;
+                            var tr = "<tr data-account-name='" + ele.AccName + "' class='";
+                            tr += "treegrid-" + ele.AccId;
+                            if (ParentId !== undefined && ele.AccId !== ParentId) {
+                                tr += " treegrid-parent-" + ParentId;
+                            }
+                            if (ele.datalevel == 1) {
+                                tr += " root-node'>";
+                            } else {
+                                tr += " node'>";
+                            }
+
+
+                            if (ele.AccType == "G") {
+                                tr += "<td class='text-left text-nowrap font-weight-bold'>" + ele.AccName + "</td>";
+                            }
+                            else {
+                                tr += "<td class='text-left'>" + ele.AccName + "</td>";
+                            }
+
+                            if (jQuery.isEmptyObject(ele)) {
+
+                            }
+                            else {
+                                let sortedData = Object.keys(ele); //.sort();
+                                /*console.log(sortedData[8]);*/
+                                let group = 0;
+                                var debit;
+                                var credit;
+                                let creditValue;
+                                let debitValue;
+                                for (let key in ele) {
+                                    let value = ele[key];
+                                    //console.log("key::", key);
+                                    //console.log("value::", value);
+
+                                    if (key === 'AccountType' && (value === 'Asset' || value === 'Expense')) {
+                                        debitValue = ele['clBalance'];
+                                        debit = true;
+                                        break;
+                                    }
+
+                                    if (key === 'AccountType' && (value === 'Income' || value === 'Liability')) {
+                                        creditValue = ele['clBalance'];
+                                        credit = true;
+                                        break;
+                                    }
+                                }
+
+                                if (debitValue === undefined) {
+                                    debitValue = 0;
+                                }
+                                if (creditValue === undefined) {
+                                    creditValue = 0;
+                                }
+                                if (debit === undefined) {
+                                    debit = false;
+                                }
+                                if (credit === undefined) {
+                                    credit = false
+                                }
+
+                                //console.log("debit see::", debit);
+                                //console.log("credit see::", credit);
+
+
+                                for (let i in sortedData) {
+                                    let value = ele[sortedData[i]];
+                                    //console.log("value::", value);
+
+                                    if (i > 8 && i < sortedData.length - 1) {
+                                        //console.log("found");
+                                        //console.log("value", value);
+                                        if (hasClBalance == true) {
+                                            if (value > 0) {
+                                                if (group == 1) {
+                                                    tr += "<td class='text-end font-weight-bold'>" + debitValue + "</td>";
+                                                    tr += "<td class=text-end percentTr>" + creditValue + "</td>";
+
+                                                }
+                                                else {
+                                                    tr += "<td class=text-end>" + debitValue + "</td>";
+                                                    tr += "<td class=text-end percentTr>" + creditValue + "</td>";
+
+                                                }
+                                            }
+                                            else if (value < 0) {
+                                                if (group == 1) {
+                                                    //console.log( key + ": " + value );
+                                                    tr += "<td class='text-end font-weight-bold'>" + debitValue + "</td>";
+                                                    tr += "<td class='text-end font-weight-bold'>" + creditValue + "</td>";
+                                                }
+                                                else {
+
+                                                    tr += "<td class='text-end'>" + debitValue + "</td>"; //balance sum
+                                                    tr += "<td class='text-end'>" + creditValue + "</td>"; //balance sum
+
+                                                }
+                                            }
+                                            else if (value == 0 || value == null) {
+                                                if (group == 1) {
+                                                    //console.log( key + ": " + value );
+                                                    tr += "<td class='text-end font-weight-bold'>0</td>";
+                                                    tr += "<td class='text-end font-weight-bold'>0</td>";
+                                                }
+                                                else {
+
+                                                    tr += "<td class='text-end'>-</td>"; //balance sum
+                                                    tr += "<td class='text-end'>-</td>"; //balance sum
+
+                                                }
+                                            }
+                                        }
+                                        if (hasClBalance == false) {
+                                            if (value > 0) {
+                                                //console.log("this value::", value);
+                                                if (group == 1) {
+                                                    tr += "<td class='text-end font-weight-bold'>" + (debit == true ? value : '-') + "</td>";
+                                                    tr += "<td class=text-end percentTr>" + (credit == true ? value : '-') + "</td>";
+
+                                                }
+                                                else {
+                                                    tr += "<td class=text-end>" + (debit == true ? value : '-') + "</td>";
+                                                    tr += "<td class=text-end percentTr>" + (credit == true ? value : '-') + "</td>";
+
+                                                }
+                                            }
+                                            else if (value < 0) {
+                                                if (group == 1) {
+                                                    //console.log( key + ": " + value );
+                                                    tr += "<td class='text-end font-weight-bold'>" + (debit == true ? value : '-') + "</td>";
+                                                    tr += "<td class='text-end font-weight-bold'>" + (credit == true ? value : '-') + "</td>";
+                                                }
+                                                else {
+
+                                                    tr += "<td class='text-end'>" + (debit == true ? value : '-') + "</td>"; //balance sum
+                                                    tr += "<td class='text-end'>" + (credit == true ? value : '-') + "</td>"; //balance sum
+
+                                                }
+                                            }
+                                            else if (value == 0 || value == null) {
+                                                if (group == 1) {
+                                                    //console.log( key + ": " + value );
+                                                    tr += "<td class='text-end font-weight-bold'>0</td>";
+                                                    tr += "<td class='text-end font-weight-bold'>0</td>";
+                                                }
+                                                else {
+
+                                                    tr += "<td class='text-end'>-</td>"; //balance sum
+                                                    tr += "<td class='text-end'>-</td>"; //balance sum
+
+                                                }
+                                            }
+                                        }
+                                    }
+                                    //else {
+                                    //    tr += "<td>-</td>";
+                                    //}
+                                    //console.log("Key: " + sortedData[i] + "   " + ele.data[sortedData[i]])
+                                }
+                            }
+
+                            if (ele.projections && ele.projections.length > 0) {
+                                tr += bindAccountValues(ele.projections);
+                            }
+
+                            tr += "</tr>";
+                            tbody.append(tr);
+                            ele.ParentId = ParentId;
+                            if (ele.hasOwnProperty("Children")) {
+                                formTable(ele.Children, ele.AccId, parseInt(currentLevel + 1));
+                            }
+                        });
+                    };
+
+                    var bindAccountValues = function (projections) {
+                        var accountValues = "";
+                        $.grep(projections, function (ele, i) {
+                            accountValues +=
+                                '<td data-account-dt="' + ele.dt + '">' + ele.value + "</td>";
+                        });
+                        return accountValues;
+                    };
+                }
+
+            };
+            //treegrid functionalities ends
+
+
+
+            $(function () {
+                $("#start-date").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                });
+                $("#end-date").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                });
+            });
+
+            //$(document).ready(function () {
+            //    GetReport();
+            //    //GetTreeReport();
+            //});
+
+
+            //var element = document.getElementById("parentDiv");
+            //html2pdf().from(element).set({
+            //    margin: [20, 20, 40, 20],
+            //    pagebreak: { avoid: 'tr' },
+            //    jsPDF: { orientation: 'portrait', unit: 'pt', format: 'letter', compressPDF: true }
+            //}).outputPdf('dataurlnewwindow');
+
+            var targetPdfUrl = '';
+            /*set ajax url globally old code end*/
+
+            //function for pdf call portrait start
+
+
+
+            // Store the references to the print button element and the current PDF document
+            var printButton = document.getElementById("print-pdf");
+            var saveButton = document.getElementById("save-pdf");
+            var currentDoc = '';
+
+
+               var excelbutton= document.getElementById("export-excel-link");
+               var pdfbutton= document.getElementById("export-pdf-link");
+
+
+        excelbutton.addEventListener("click", function () {
+
+            var selectedText = $("#select-form option:selected").text();
+
+
+
+
+
+            var csvContent = "data:text/csv;charset=utf-8,";
+
+
+
+               if(selectedText === "Total Only"){
+
+
+
+             var headers = ["Account Head", "DEBIT", "CREDIT"];
+
+
+                    var rows = [];
+                    var uniqueAccountNames = {};
+                    console.log(allData);
+
+                  for (var i = 0; i < allData.length; i++) {
+                    var account = allData[i];
+                    var accountName = formatCSVValue(account.AccName.trim());
+                    var clDebit = parseFloat(account.clDebit);
+                    var clCredit = parseFloat(account.clCredit);
+
+                    // Check if clDebit is NaN, assign 0 if true
+                    if (isDecimal(clDebit)) {
+                        clDebit = clDebit.toFixed(2);
+                    } else {
+                        clDebit = clDebit.toFixed(2);
+                    }
+
+                    // Check if clCredit is NaN, assign 0 if true
+                    if (isDecimal(clCredit)) {
+                        clCredit = clCredit.toFixed(2);
+                    } else {
+                        clCredit = clCredit.toFixed(2);
+                    }
+
+                    var formatclDebit=clDebit;
+                    var formatclCredit=clCredit;
+
+                    if(i!=(allData.length-1)){
+                        rows.push([accountName, '"' + formatclDebit + '"', '"' + formatclCredit + '"']);
+                   }
+
+                }
+
+                    csvContent += headers.join(",") + "\r\n";
+                    let sumstring = "=";
+                    let sumstring1 = "=";
+                    let ii = 2;
+
+                    // Add the data rows to the CSV content
+                   rows.forEach(function (row, index) {
+                    if (index >= 2 && index < rows.length - 1) {
+                        sumstring += 'B' + ii + '+';
+                        sumstring1 += 'C' + ii + '+';
+
+                        ii++;
+                    }
+                    csvContent += row.join(",") + "\r\n";
+                });
+
+                    sumstring = sumstring.slice(0, -1);
+                    sumstring1 = sumstring1.slice(0, -1);
+                    console.log(sumstring);
+                    csvContent += 'Total: ' + ',' + sumstring + ',' + sumstring1 + '\n';
+
+
+
+          }
+
+
+
+              else if(selectedText === "Between"){
+
+
+                 var upperheader=["","Opening","","Transaction","","Closing",""];
+                 var headers = ["Account Head", "DEBIT", "CREDIT","DEBIT", "CREDIT","DEBIT", "CREDIT",];
+
+                  var rows = [];
+                    var uniqueAccountNames = {};
+                    console.log(allData);
+
+                  for (var i = 0; i < allData.length; i++) {
+                    var account = allData[i];
+                    var accountName = formatCSVValue(account.AccName.trim());
+                     var opDebitNum = parseFloat(allData[i].opDebit).toFixed(2);
+                        var opCreditNum = parseFloat(allData[i].opCredit).toFixed(2);
+                        var tranDebitNum = parseFloat(allData[i].TranDebit).toFixed(2);
+                        var tranCreditNum = parseFloat(allData[i].TranCredit).toFixed(2);
+                        var clDebitNum = parseFloat(allData[i].clDebit).toFixed(2);
+                        var clCreditNum = parseFloat(allData[i].clCredit).toFixed(2);
+
+                   if(i!=(allData.length-1)){
+                        rows.push([accountName, opDebitNum, opCreditNum, tranDebitNum, tranCreditNum, clDebitNum, clCreditNum]);
+                   }
+
+                }
+
+
+
+
+               csvContent += upperheader.join(",") + "\r\n";
+                csvContent += headers.join(",") + "\r\n";
+
+                let sumstring = "=";
+                let sumstring1 = "=";
+                let sumstring2 = "=";
+                let sumstring3 = "=";
+                let sumstring4 = "=";
+                let sumstring5 = "=";
+                let ii = 3;
+
+                // Add the data rows to the CSV content
+                rows.forEach(function (row, index) {
+                    if (index >= 2 && index < rows.length - 1) {
+                        sumstring += 'B' + ii + '+';
+                        sumstring1 += 'C' + ii + '+';
+                        sumstring2 += 'D' + ii + '+';
+                        sumstring3 += 'E' + ii + '+';
+                        sumstring4 += 'F' + ii + '+';
+                        sumstring5 += 'G' + ii + '+';
+                        ii++;
+                    }
+                    csvContent += row.join(",") + "\r\n";
+                });
+
+                console.log(rows.length);
+                sumstring = sumstring.slice(0, -1);
+                sumstring1 = sumstring1.slice(0, -1);
+                sumstring2 = sumstring2.slice(0, -1);
+                sumstring3 = sumstring3.slice(0, -1);
+                sumstring4 = sumstring4.slice(0, -1);
+                sumstring5 = sumstring5.slice(0, -1);
+
+                csvContent += 'Total: '+',' + sumstring + ',' + sumstring1 +',' + sumstring2 + ',' + sumstring3 +',' + sumstring4 + ',' + sumstring5 + '\n';
+
+
+
+          }
+
+
+
+
+
+          else if(selectedText === "Months"){
+              var dates = [];
+                ResponseForPdf.forEach(function(item) {
+                  Object.keys(item).forEach(function(key) {
+                    if (!isNaN(Date.parse(key))) {
+                      if (!dates.includes(key)) {
+                        dates.push(key);
+                      }
+                    }
+                  });
+                });
+
+                var headers = ["Account Head"];
+                var subheaders = [""];
+
+
+                dates.forEach(function(date) {
+                  headers.push(formatCSVValue("" + date), "");
+                  subheaders.push("Debit", "Credit");
+                });
+
+                var rows = [];
+                var sum=0;
+                var sum1=0;
+                ResponseForPdf.forEach(function(data) {
+                  var row = [formatCSVValue(data.AccName.trim())];
+                  dates.forEach(function(date) {
+                    var value = data[date] || 0;
+                    if (value < 0){
+                        row.push("", formatCSVValue(value * -1));
+
+                        sum=sum+value;
+                    }
+
+                    else {
+                      row.push(formatCSVValue(value), "");
+                       sum1=sum1+value;
+                    }
+
+                  });
+                  rows.push(row);
+                });
+                var totalRow = ["Total"];
+                 let ii = 3;
+                    var sums = {};
+                        dates.forEach(function(date) {
+                            sums[date] = { debit: 0, credit: 0 };
+                        });
+
+                        ResponseForPdf.forEach(function(data) {
+                            dates.forEach(function(date) {
+                                var value = data[date] || 0;
+                                if (value < 0) {
+                                    sums[date].debit += value;
+                                } else {
+                                    sums[date].credit += value;
+                                }
+                            });
+                        });
+
+                        var index=0;
+                        var index1=0;
+                dates.forEach(function(date) {
+                    var formula = "";
+                    var formula1 = "";
+                    var columnLetter = String.fromCharCode(65 + index + 1); // A:65, B:66, C:67, ...
+                    var columnLetter1 = String.fromCharCode(65 + index1 + 2); // A:65, B:66, C:67, ...
+
+
+
+                   for (var i = 2; i < rows.length; i++) {
+                        formula += columnLetter + (i + 1) + "+";
+
+                    }
+                     for (var i = 2; i < rows.length; i++) {
+                        formula1 += columnLetter1 + (i + 1) + "+";
+
+                    }
+                    formula = formula.slice(0, -1); // Remove the trailing "+"
+                    totalRow.push("=SUM(" + formula + ")");
+                    formula1 = formula1.slice(0, -1); // Remove the trailing "+"
+                    totalRow.push("=SUM(" + formula1 + ")");
+                    index+=2;
+                    index1+=2;
+
+               });
+
+
+                rows.push(totalRow);
+                console.log(rows);
+                csvContent += headers.join(",") + "\r\n";
+                csvContent += subheaders.join(",") + "\r\n";
+                rows.forEach(function(row) {
+                  csvContent += row.join(",") + "\r\n";
+});
+
+
+          }
+            // Create a download link and click it programmatically to initiate the download
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "data.csv");
+            document.body.appendChild(link); // Required for Firefox
+            link.click();
+
+
+
+
+
+        });
+
+        pdfbutton.addEventListener("click", function () {
+            portrait();
+
+            if (currentDoc) {
+                currentDoc.save("trial-balance.pdf");
+
+            }
+        });
+
+            function isDecimal(number) {
+                return !Number.isInteger(number);
+            }
+           function formatCSVValue(value) {
+                var stringValue = String(value);
+                if (stringValue.includes(",")) {
+                    return '"' + stringValue + '"';
+                }
+                return stringValue;
+            }
+
+            // Event handler for printing the PDF
+            saveButton.addEventListener("click", function () {
+
+
+
+                if (currentDoc) {
+                    currentDoc.save("trial-balance.pdf");
+                }
+            });
+
+               printButton.addEventListener("click", function () {
+                if ($("#orientation").val() === 'portrait') {
+                    portrait();
+                } else if ($("#orientation").val() === 'landscape') {
+                    landscape();
+                }
+
+
+
+                // Auto-print the current PDF document
+
+                if (currentDoc) {
+                    currentDoc.autoPrint();
+                    currentDoc.output("dataurlnewwindow");
+                }
+            });
+
+
+
+            function portrait() {
+
+
+                var selectedText = $("#select-form option:selected").text();
+                var selectedPeriod = $("#select2 option:selected").text();
+
+                // Set the font styles
+                var fontUrl = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap';
+
+                // Load the font styles dynamically
+                var fontLink = document.createElement('link');
+                fontLink.href = fontUrl;
+                fontLink.rel = 'stylesheet';
+                document.head.appendChild(fontLink);
+
+
+
+                var element = document.getElementById("parentDiv");
+                var companyName = document.getElementById("company-name").innerText;
+                var primaryAddress = document.getElementById("primary-address").innerText;
+                var trialBalance = document.getElementById("trial-balance").innerText;
+                var dateMonthYear = document.getElementById("date-month-year").innerText;
+
+                // Set the PDF dimensions and margins for A4 size (in points) for portrait mode
+                //var pdfWidth = 850; // A4 width in points
+                //var pdfHeight = 841.89; // A4 height in points
+                var pdfWidth = 595.28; // A4 width in points
+                var pdfHeight = 841.89;
+                // var margin = 40; // Margin size in points
+
+
+                var jsPDF = window.jspdf.jsPDF;
+                if (selectedText === "Months") {
+
+                    if (selectedPeriod === "This Year") {
+
+                        var doc = new jsPDF({
+                            orientation: "landsacape",
+                            unit: "pt",
+                            format: "a4"
+                        });
+
+                    }
+                    else {
+                        var doc = new jsPDF({
+                            orientation: "portrait",
+                            unit: "pt",
+                            format: "a4"
+                        });
+
+                    }
+
+                }
+                else {
+
+                    var doc = new jsPDF({
+                        orientation: "portrait",
+                        unit: "pt",
+                        format: "a4"
+                    });
+
+                }
+
+                if (selectedText === "Months" && selectedPeriod === "This Year") {
+
+                    var startX = 40;
+
+                    // Calculate the x-coordinate for each text element
+                    var companyNameX = startX ;
+                    var primaryAddressX = startX;
+                    var trialBalanceX = startX + 345;
+                    var dateMonthYearX = startX + 345;
+
+                    // Add the content to the PDF
+                    doc.setFont('Montserrat', 'sans-serif');
+                    doc.setTextColor(76, 82, 88);
+                    doc.setFontSize(28);
+                    doc.text(companyName, startX, 40);
+
+                    doc.setFont('Montserrat', 'sans-serif');
+                    doc.setFontSize(16);
+                    doc.setTextColor(76, 82, 88);
+                    doc.text(primaryAddress, startX, 40 + 20);
+
+                    doc.setFont('Montserrat', 'sans-serif');
+                    doc.setFontSize(16);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(trialBalance, startX, 40 + 40);
+
+                    doc.setFont('Montserrat', 'sans-serif');
+                    doc.setFontSize(16);
+                    doc.setTextColor(76, 82, 88);
+                doc.text(dateMonthYear, startX, 40 + 60);
+
+
+                }
+
+                else {
+                    var centerX = pdfWidth / 2;
+
+                    // Add the content to the PDF
+                    doc.setFont('Montserrat', 'sans-serif');
+                    doc.setTextColor(76, 82, 88);
+                    doc.setFontSize(20);
+                    var textWidth = doc.getStringUnitWidth(companyName) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                    doc.text(companyName, centerX - textWidth / 2, 40);
+
+                    doc.setFontSize(12);
+                    doc.setFont('Montserrat', 'sans-serif');
+                    doc.setTextColor(76, 82, 88);
+                    var textWidth = doc.getStringUnitWidth(primaryAddress) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                    doc.text(primaryAddress, centerX - textWidth / 2, 40 + 20);
+
+                    doc.setFontSize(12);
+                    doc.setFont('Montserrat', 'sans-serif');
+                    doc.setTextColor(0, 0, 0);
+                    var textWidth = doc.getStringUnitWidth(trialBalance) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                    doc.text(trialBalance, centerX - textWidth / 2, 40 + 40);
+
+                    doc.setFontSize(12);
+                    doc.setFont('Montserrat', 'sans-serif');
+                    doc.setTextColor(76, 82, 88);
+                    var textWidth = doc.getStringUnitWidth(dateMonthYear) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                    doc.text(dateMonthYear, centerX - textWidth / 2, 40 + 60);
+
+
+                }
+
+
+                var tableData = [];
+                var uniqueAccountNames = {};
+
+                // Check the selected text
+
+                if (selectedText === "Total Only") {
+
+                    var headers = ["", "Debit", "Credit"];
+
+                    // Iterate over the data and populate the tableData array
+                    for (var i = 0; i < allData.length; i++) {
+                        var clDebitNum = parseFloat(allData[i].clDebit);
+                        var clCreditNum = parseFloat(allData[i].clCredit);
+                        var accountName = allData[i].AccName.trim();
+
+                        if (!uniqueAccountNames[accountName]) {
+                            uniqueAccountNames[accountName] = true;
+                            var rowData = [
+                                accountName,
+                                clDebitNum !== 0 ? clDebitNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-',
+                                clCreditNum !== 0 ? clCreditNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'
+                            ];
+                            tableData.push(rowData);
+                        }
+                    }
+
+                    // Set the table options
+                    var tableOptions = {
+                        startY: 120,
+                        head: [headers],
+                        body: tableData,
+                        headStyles: {
+                            fillColor: [255, 255, 255],
+                            textColor: [0, 0, 0], // Set text color to black
+                            fontSize: 12,
+                            fontStyle: 'bold',
+                            halign: 'right',
+                            font: 'Montserrat'
+                        },
+                        // startX: (pdfWidth - 20 * 2) / 2,
+                        didDrawCell: function (data) {
+                            var isLastRow = (data.row.index === tableData.length - 1);
+                            console.log(tableData.length);
+                            console.log(data.row);
+                            if (data.section === 'head') {
+                                doc.setFillColor(255, 255, 255); // Set the desired light color
+                                doc.setTextColor(0, 0, 0); // Set text color to black
+                                doc.setFont('Montserrat', 'bold'); // Set font style to bold
+                                doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S'); // Draw border around header cells
+                            }
+                            if (data.section === 'body') {
+                                if (isLastRow) {
+                                    // Draw top border and two bottom borders for the last row
+                                    doc.setDrawColor(0); // Set border color to black
+                                    doc.setLineWidth(0.2); // Set border width to thin
+
+                                    // Draw top border
+                                    doc.line(data.cell.x, data.cell.y, data.cell.x + data.cell.width, data.cell.y);
+
+                                    // Draw first bottom border
+                                    doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+
+                                    // Draw second bottom border
+                                    doc.line(data.cell.x, data.cell.y + data.cell.height + 2, data.cell.x + data.cell.width, data.cell.y + data.cell.height + 2);
+                                } else if (data.row.index % 2 === 0) {
+                                    // Remove the background color of alternate rows
+                                    data.cell.styles.fillColor = [255, 255, 255]; // Set the background color to white
+                                }
+                            }
+
+
+
+
+
+
+                        },
+                        didParseCell: function (data) {
+                            if (data.section === 'head') {
+                                //doc.setDrawColor(0); // Set border color to black
+                                // doc.setLineWidth(0.2); // Set border width to thin
+                                // doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+                                data.cell.styles.fillColor = [255, 255, 255];
+                                data.cell.styles.textColor = [0, 0, 0];
+                                // Increase the font size of the header
+                                data.cell.styles.fontSize = 9.5;
+                                data.cell.styles.fontStyle = 'bold';
+                                data.cell.styles.halign = 'right';
+
+                            }
+                            if (data.section === 'body') {
+                                data.cell.styles.fillColor = [255, 255, 255];
+                                if (data.row.index === tableData.length - 1) {
+                                    data.cell.styles.fontStyle = 'bold';
+                                }
+
+
+                            }
+
+                            doc.setDrawColor(200); // Set border color
+                            doc.setLineWidth(0.2); // Set border width
+                            doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S');
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 250, halign: 'left', font: 'Montserrat' },
+                            1: { cellWidth: 120, halign: 'right', font: 'Montserrat' },
+                            2: { cellWidth: 120, halign: 'right', font: 'Montserrat' }
+                        }
+                    };
+
+                    // Generate the table
+                    doc.autoTable(tableOptions);
+
+
+
+
+
+                    // Save the PDF
+                    //  doc.save("table.pdf");
+                    //var pdfDataUrl = doc.output("datauristring");
+                    //         var pdfIframe = document.getElementById("pdf-iframe");
+                    //         pdfIframe.src = pdfDataUrl;
+                    //         //currentDoc = doc;
+                    //         //// Event handler for printing the PDF }
+                    //         document.getElementById("print-pdf").addEventListener("click", function () {
+
+                    //             doc.autoPrint();
+                    //             doc.output("dataurlnewwindow");
+                    //         });
+
+
+                }
+
+
+                else if (selectedText === "Between") {
+
+
+                    // Set the table headers for "Between"
+                    var headers = [
+                        [{ content: " ", rowSpan: 2 }, { content: "Opening", colSpan: 2 }, { content: "Transaction", colSpan: 2 }, { content: "Closing", colSpan: 2 }],
+                        ["Debit", "Credit", "Debit", "Credit", "Debit", "Credit"]
+                    ];
+
+
+                    // Iterate over the data and populate the tableData array
+                    for (var i = 0; i < allData.length; i++) {
+                        var opDebitNum = parseFloat(allData[i].opDebit);
+                        var opCreditNum = parseFloat(allData[i].opCredit);
+                        var tranDebitNum = parseFloat(allData[i].TranDebit);
+                        var tranCreditNum = parseFloat(allData[i].TranCredit);
+                        var clDebitNum = parseFloat(allData[i].clDebit);
+                        var clCreditNum = parseFloat(allData[i].clCredit);
+                        var accountName = allData[i].AccName.trim();
+
+                        if (!uniqueAccountNames[accountName]) {
+                            uniqueAccountNames[accountName] = true;
+                            var rowData = [
+                                accountName,
+                                opDebitNum !== 0 ? opDebitNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-',
+                                opCreditNum !== 0 ? opCreditNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-',
+                                tranDebitNum !== 0 ? tranDebitNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-',
+                                tranCreditNum !== 0 ? tranCreditNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-',
+                                clDebitNum !== 0 ? clDebitNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-',
+                                clCreditNum !== 0 ? clCreditNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'
+                            ];
+                            tableData.push(rowData);
+                        }
+                    }
+
+
+
+                    // Set the table options
+                    var tableOptions = {
+                        startY: 120,
+                        head: headers,
+                        body: tableData,
+                        didParseCell: function (data) {
+                            if (data.section === 'head') {
+                                //doc.setDrawColor(0); // Set border color to black
+                                // doc.setLineWidth(0.2); // Set border width to thin
+                                // doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+                                data.cell.styles.fillColor = [255, 255, 255];
+                                data.cell.styles.textColor = [0, 0, 0];
+                                // Increase the font size of the header
+                                data.cell.styles.fontSize = 9.5;
+                                data.cell.styles.fontStyle = 'bold';
+                                if (data.row.index === 0) {
+                                    // Center align the "Opening," "Transaction," and "Closing" headers
+                                    data.cell.styles.halign = 'center';
+                                } else {
+                                    // Right align the "Debit" and "Credit" headers
+                                    data.cell.styles.halign = 'right';
+                                }
+                            }
+                            if (data.section === 'body' && data.row.index === tableData.length - 1) {
+
+                                data.cell.styles.fillColor = [255, 255, 255];
+                                data.cell.styles.fontStyle = 'bold';
+
+
+
+                            }
+                            else if (data.section === 'body' && data.row.index % 2 === 0) {
+                                // Remove the background color of alternate rows
+                                data.cell.styles.fillColor = [255, 255, 255]; // Set the background color to white
+                            }
+                            doc.setDrawColor(200); // Set border color
+                            doc.setLineWidth(0.2); // Set border width
+                            doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S');
+                        },
+                        didDrawPage: function (data) {
+                            // Draw the bottom border for header cells on every page
+                            var headerCells = data.table.head[0];
+                            if (Array.isArray(headerCells)) {
+                                headerCells.forEach(function (headerCell) {
+                                    doc.setDrawColor(0); // Set border color to black
+                                    doc.setLineWidth(0.2); // Set border width to thin
+                                    doc.rect(headerCell.x, headerCell.y, headerCell.width, headerCell.height, 'S');
+                                });
+                            }
+                        },
+                        didDrawCell: function (data) {
+                            var isLastRow = (data.row.index === tableData.length - 1);
+                            console.log(tableData.length);
+                            console.log(data.row);
+                            if (data.section === 'head') {
+                                doc.setFillColor(255, 255, 255); // Set the desired light color
+                                doc.setTextColor(0, 0, 0); // Set text color to black
+                                doc.setFont('Montserrat', 'bold'); // Set font style to bold
+                                doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S'); // Draw border around header cells
+                            }
+                            if (data.section === 'body') {
+                                if (isLastRow) {
+                                    // Draw top border and two bottom borders for the last row
+                                    doc.setDrawColor(0); // Set border color to black
+                                    doc.setLineWidth(0.2); // Set border width to thin
+
+                                    // Draw top border
+                                    doc.line(data.cell.x, data.cell.y, data.cell.x + data.cell.width, data.cell.y);
+
+                                    // Draw first bottom border
+                                    doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+
+                                    // Draw second bottom border
+                                    doc.line(data.cell.x, data.cell.y + data.cell.height + 2, data.cell.x + data.cell.width, data.cell.y + data.cell.height + 2);
+                                } else if (data.row.index % 2 === 0) {
+                                    // Remove the background color of alternate rows
+                                    data.cell.styles.fillColor = [255, 255, 255]; // Set the background color to white
+                                }
+                            }
+
+
+
+
+
+
+                        },
+                        styles: {
+                            head: {
+                                fontStyle: 'bold',
+                                halign: 'right',
+                                font: 'Montserrat'// Align the header cells to the right
+                            }
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 120, halign: 'left', font: 'Montserrat' },
+                            1: { halign: 'right', font: 'Montserrat' },
+                            2: { halign: 'right', font: 'Montserrat' },
+                            3: { halign: 'right', font: 'Montserrat' },
+                            4: { halign: 'right', font: 'Montserrat' },
+                            5: { halign: 'right', font: 'Montserrat' },
+                            6: { halign: 'right', font: 'Montserrat' }
+                        }
+                    };
+                    // Generate the table
+                    doc.autoTable(tableOptions);
+
+
+
+
+
+                }
+                else if (selectedText === "Months") {
+
+
+                    var dates = [];
+                    ResponseForPdf.forEach(function (data) {
+                        for (var key in data) {
+                            if (key !== "AccId" && key !== "AccName") {
+                                if (!dates.includes(key)) {
+                                    dates.push(key);
+                                }
+                            }
+                        }
+                    });
+
+                    // Sort the dates in ascending order
+                    dates.sort(function (a, b) {
+                        var dateA = new Date(a);
+                        var dateB = new Date(b);
+                        return dateA - dateB;
+                    });
+
+                    var headers = ["Account"];
+                    var subHeaders = [""];
+                    var debitTotal = 0;
+                    var creditTotal = 0;
+
+                    dates.forEach(function (date) {
+                        headers.push({ content: date, colSpan: 2, styles: { halign: "center" } });
+                        subHeaders.push("Debit", "Credit");
+                    });
+
+                    // Set the table rows
+                    var rows = [];
+                    ResponseForPdf.forEach(function (data) {
+                        var row = [data.AccName.trim()];
+                        var debitRowTotal = 0;
+                        var creditRowTotal = 0;
+                        dates.forEach(function (date) {
+                            var value = data[date] || 0;
+                            if (value < 0) {
+                                row.push("");
+                                row.push(Math.abs(value));
+                                creditRowTotal += Math.abs(value);
+                            } else {
+                                row.push(value);
+                                row.push("");
+                                debitRowTotal += value;
+                            }
+                        });
+                        rows.push(row);
+                        debitTotal += debitRowTotal;
+                        creditTotal += creditRowTotal;
+                    });
+
+                    // Add the total row
+                    var totalRow = [{ content: 'Total:', styles: { fontStyle: "bold", font: 'Montserrat', halign: "center" } }];
+
+                    dates.forEach(function () {
+                        totalRow.push({ content: debitTotal, styles: { fontStyle: "bold", font: 'Montserrat', halign: "center" } });
+                        totalRow.push({ content: creditTotal, styles: { fontStyle: "bold", font: 'Montserrat', halign: "center" } });
+                    });
+                    rows.push(totalRow);
+
+                    // Create a wrapper div for the table with a scrollbar
+                    var tableContainer = document.createElement("div");
+                    tableContainer.style.overflow = "auto";
+                    tableContainer.style.maxHeight = "300px";
+
+
+                    // Create the table element
+                    var table = document.createElement("table");
+
+
+
+                    tableContainer.appendChild(table);
+                    document.body.appendChild(tableContainer);
+                    var tableX = 40;
+                    var tableY = 120;
+                    var tableWidth = pdfWidth - 2 * tableX;
+                    var tableHeight = pdfHeight - tableY - 40;
+
+
+
+                    doc.autoTable({
+
+                        didDrawCell: function (data) {
+                            // Apply borders to all cells
+                            var lineWidth = 0.2; // Adjust the border width
+                            doc.setDrawColor(200); // Set border color to a lighter shade
+                            doc.setLineWidth(lineWidth);
+
+                            if (data.cell.section === "body" && data.cell.index % 2 === 0) {
+                                // Apply thicker bottom border to debit cells in the body section
+                                doc.rect(
+                                    data.cell.x,
+                                    data.cell.y + data.cell.height - lineWidth,
+                                    data.cell.width,
+                                    lineWidth,
+                                    "S"
+                                );
+                            } else if (
+                                data.cell.section === "body" &&
+                                data.row.index === rows.length - 1
+                            ) {
+                                // Apply double bottom border to the total row in the body section
+                                var doubleLineWidth = 0.1; // Adjust the double border width
+                                var yOffset = doubleLineWidth / 2; // Offset to prevent overlapping
+                                var space = -3; // Adjust the space value as needed
+
+                                doc.setLineWidth(doubleLineWidth);
+                                doc.setDrawColor(0);
+
+                                // Draw the second line
+                                doc.line(
+                                    data.cell.x,
+                                    data.cell.y + data.cell.height - doubleLineWidth - yOffset - space,
+                                    data.cell.x + data.cell.width,
+                                    data.cell.y + data.cell.height - doubleLineWidth - yOffset - space
+                                );
+
+                                // Draw the first line
+                                doc.line(
+                                    data.cell.x,
+                                    data.cell.y + data.cell.height - doubleLineWidth - yOffset,
+                                    data.cell.x + data.cell.width,
+                                    data.cell.y + data.cell.height - doubleLineWidth - yOffset
+                                );
+                            } else {
+                                // Apply regular borders to all other cells
+                                doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, "S");
+                            }
+                        },
+
+
+
+                        didParseCell: function (data) {
+                            console.log(data.table.width);
+                            console.log('width');
+                            if (selectedPeriod == "This Year") {
+                                data.cell.styles.fontSize = 6;
+                                tableWidth = 1200;
+                            }
+                            else {
+                                data.cell.styles.fontSize = 10;
+                            }
+
+                            console.log(tableWidth);
+                            // Align debit and credit values to the right, account name to the left
+                            if (data.cell.section === 'body') {
+                                if (data.column.index > 0 && data.row.index != 16) {
+                                    data.cell.styles.halign = 'right';
+                                }
+                                else if (data.row.index == 16) {
+                                    data.cell.styles.halign = 'center';
+                                }
+                                else {
+                                    data.cell.styles.halign = 'left';
+                                }
+                            }
+                        },
+
+
+                        head: [headers, subHeaders], // Set the header rows
+                        body: rows,
+                        startY: tableY,
+
+                        tableWidth: tableWidth,
+                        tableHeight: tableHeight,
+                        theme: "grid",
+                        headerStyles: {
+                            fillColor: [248, 249, 250],
+                            fontStyle: "bold",
+                            textColor: 0,
+                            fontSize: 8,
+                            font: 'Montserrat',
+                            halign: "center", // Align header cells to the center
+                        },
+                        bodyStyles: {
+                            textColor: [33, 37, 41],
+                            fontStyle: "normal",
+                            font: 'Montserrat',
+                            fontSize: 8,
+                            cellPadding: 3,
+                            cellStyles: {
+                                0: { halign: "left" }, // Align account name column to the left
+                            },
+                        },
+                        margin: { top: 120 },
+                        tableWidth: "auto",
+                        columnWidth: "auto",
+                    });
+
+
+
+
+                    //var pdfDataUrl = doc.output("datauristring");
+                    //var pdfIframe = document.getElementById("pdf-iframe");
+                    //pdfIframe.src = pdfDataUrl;
+
+                    //document.getElementById("print-pdf").addEventListener("click", function () {
+                    //    doc.autoPrint();
+                    //    doc.output("dataurlnewwindow");
+                    //});
+
+
+                }
+
+
+
+
+
+
+
+
+                var pdfDataUrl = doc.output("datauristring");
+                var pdfIframe = document.getElementById("pdf-iframe");
+                pdfIframe.src = pdfDataUrl;
+                currentDoc = doc;
+                //// Event handler for printing the PDF }
+                // document.getElementById("print-pdf").addEventListener("click", function () {
+
+                //    doc.autoPrint();
+                //     doc.output("dataurlnewwindow");
+                //});
+
+                // doc='';
+            }
+
+
+
+
+
+
+
+            function landscape() {
+
+                var element = document.getElementById("parentDiv");
+                var companyName = document.getElementById("company-name").innerText;
+                var primaryAddress = document.getElementById("primary-address").innerText;
+                var trialBalance = document.getElementById("trial-balance").innerText;
+                var dateMonthYear = document.getElementById("date-month-year").innerText;
+
+                // Set the PDF dimensions and margins for A4 size (in points) for portrait mode
+                var pdfWidth = 850; // A4 width in points
+                var pdfHeight = 841.89; // A4 height in points
+                var margin = 40; // Margin size in points
+
+                window.jsPDF = window.jspdf.jsPDF;
+                // Create a new jsPDF instance
+                var doc = new jsPDF({
+                    orientation: "landscape",
+                    unit: "pt",
+                format: "a4"
+                });
+
+                // Calculate the center coordinates
+
+
+
+
+                        //var centerX = pdfWidth / 2;
+
+                        //// Add the content to the PDF
+                        //doc.setFontSize(16);
+                        //var textWidth = doc.getStringUnitWidth(companyName) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                        //doc.text(companyName, centerX - textWidth / 2, margin);
+
+                        //doc.setFontSize(12);
+                        //var textWidth = doc.getStringUnitWidth(primaryAddress) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                        //doc.text(primaryAddress, centerX - textWidth / 2, margin + 20);
+
+                        //doc.setFontSize(14);
+                        //var textWidth = doc.getStringUnitWidth(trialBalance) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                        //doc.text(trialBalance, centerX - textWidth / 2, margin + 40);
+
+                        //doc.setFontSize(12);
+                        //var textWidth = doc.getStringUnitWidth(dateMonthYear) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                        //doc.text(dateMonthYear, centerX - textWidth / 2, margin + 60);
+
+            var centerX = pdfWidth / 2;
+
+            // Add the content to the PDF
+            doc.setFont('Montserrat', 'sans-serif');
+            doc.setTextColor(76, 82, 88);
+            doc.setFontSize(20);
+            var textWidth = doc.getStringUnitWidth(companyName) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(companyName, 40, 40);
+
+            doc.setFontSize(12);
+            doc.setFont('Montserrat', 'sans-serif');
+            doc.setTextColor(76, 82, 88);
+            var textWidth = doc.getStringUnitWidth(primaryAddress) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(primaryAddress, 40, 40 + 20);
+
+            doc.setFontSize(12);
+            doc.setFont('Montserrat', 'sans-serif');
+            doc.setTextColor(0, 0, 0);
+            var textWidth = doc.getStringUnitWidth(trialBalance) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(trialBalance, 40, 40 + 40);
+
+            doc.setFontSize(12);
+            doc.setFont('Montserrat', 'sans-serif');
+            doc.setTextColor(76, 82, 88);
+            var textWidth = doc.getStringUnitWidth(dateMonthYear) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(dateMonthYear, 40, 40 + 60);
+
+
+
+
+
+                var tableData = [];
+                var uniqueAccountNames = {};
+
+                // Check the selected text
+                var selectedText = $("#select-form option:selected").text();
+
+                if (selectedText === "Total Only") {
+
+                    var headers = ["", "Debit", "Credit"];
+
+                    // Iterate over the data and populate the tableData array
+                    for (var i = 0; i < allData.length; i++) {
+                        var clDebitNum = parseFloat(allData[i].clDebit);
+                        var clCreditNum = parseFloat(allData[i].clCredit);
+                        var accountName = allData[i].AccName.trim();
+
+                        if (!uniqueAccountNames[accountName]) {
+                            uniqueAccountNames[accountName] = true;
+                            var rowData = [
+                                accountName,
+                                clDebitNum !== 0 ? clDebitNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-',
+                                clCreditNum !== 0 ? clCreditNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'
+                            ];
+                            tableData.push(rowData);
+                        }
+                    }
+
+                    // Set the table options
+                    var tableOptions = {
+                        startY: 120,
+                        startX: 50,
+                        head: [headers],
+                        body: tableData,
+                        headStyles: {
+                            fillColor: [255, 255, 255],
+                            textColor: [0, 0, 0], // Set text color to black
+                            fontSize: 12,
+                            fontStyle: 'bold',
+                            halign: 'right',
+                            font: 'Montserrat'
+                        },
+                        // startX: (pdfWidth - 20 * 2) / 2,
+                        didDrawCell: function (data) {
+                            var isLastRow = (data.row.index === tableData.length - 1);
+                            console.log(tableData.length);
+                            console.log(data.row);
+                            if (data.section === 'head') {
+                                doc.setFillColor(255, 255, 255); // Set the desired light color
+                                doc.setTextColor(0, 0, 0); // Set text color to black
+                                doc.setFont('Montserrat', 'bold'); // Set font style to bold
+                                doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S'); // Draw border around header cells
+                            }
+                            if (data.section === 'body') {
+                                if (isLastRow) {
+                                    // Draw top border and two bottom borders for the last row
+                                    doc.setDrawColor(0); // Set border color to black
+                                    doc.setLineWidth(0.2); // Set border width to thin
+
+                                    // Draw top border
+                                    doc.line(data.cell.x, data.cell.y, data.cell.x + data.cell.width, data.cell.y);
+
+                                    // Draw first bottom border
+                                    doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+
+                                    // Draw second bottom border
+                                    doc.line(data.cell.x, data.cell.y + data.cell.height + 2, data.cell.x + data.cell.width, data.cell.y + data.cell.height + 2);
+                                } else if (data.row.index % 2 === 0) {
+                                    // Remove the background color of alternate rows
+                                    data.cell.styles.fillColor = [255, 255, 255]; // Set the background color to white
+                                }
+                            }
+
+
+
+
+
+
+                        },
+                        didParseCell: function (data) {
+                            if (data.section === 'head') {
+                                //doc.setDrawColor(0); // Set border color to black
+                                // doc.setLineWidth(0.2); // Set border width to thin
+                                // doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+                                data.cell.styles.fillColor = [255, 255, 255];
+                                data.cell.styles.textColor = [0, 0, 0];
+                                // Increase the font size of the header
+                                data.cell.styles.fontSize = 9.5;
+                                data.cell.styles.fontStyle = 'bold';
+                                data.cell.styles.halign = 'right';
+
+                            }
+                            if (data.section === 'body') {
+                                data.cell.styles.fillColor = [255, 255, 255];
+                                if (data.row.index === tableData.length - 1) {
+                                    data.cell.styles.fontStyle = 'bold';
+                                }
+
+
+                            }
+
+                            doc.setDrawColor(200); // Set border color
+                            doc.setLineWidth(0.2); // Set border width
+                            doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S');
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 180, halign: 'left', font: 'Montserrat' },
+                            1: { cellWidth: 180, halign: 'right', font: 'Montserrat' },
+                            2: { cellWidth: 180, halign: 'right', font: 'Montserrat' }
+                        }
+                    };
+
+                    // Generate the table
+                    doc.autoTable(tableOptions);
+
+
+
+
+
+                    // Save the PDF
+                    //  doc.save("table.pdf");
+                    //var pdfDataUrl = doc.output("datauristring");
+                    //         var pdfIframe = document.getElementById("pdf-iframe");
+                    //         pdfIframe.src = pdfDataUrl;
+                    //         //currentDoc = doc;
+                    //         //// Event handler for printing the PDF }
+                    //         document.getElementById("print-pdf").addEventListener("click", function () {
+
+                    //             doc.autoPrint();
+                    //             doc.output("dataurlnewwindow");
+                    //         });
+
+
+                }
+
+
+                else if (selectedText === "Between") {
+
+
+                    // Set the table headers for "Between"
+                    var headers = [
+                        [{ content: " ", rowSpan: 2 }, { content: "Opening", colSpan: 2 }, { content: "Transaction", colSpan: 2 }, { content: "Closing", colSpan: 2 }],
+                        ["Debit", "Credit", "Debit", "Credit", "Debit", "Credit"]
+                    ];
+
+
+                    // Iterate over the data and populate the tableData array
+                    for (var i = 0; i < allData.length; i++) {
+                        var opDebitNum = parseFloat(allData[i].opDebit);
+                        var opCreditNum = parseFloat(allData[i].opCredit);
+                        var tranDebitNum = parseFloat(allData[i].TranDebit);
+                        var tranCreditNum = parseFloat(allData[i].TranCredit);
+                        var clDebitNum = parseFloat(allData[i].clDebit);
+                        var clCreditNum = parseFloat(allData[i].clCredit);
+                        var accountName = allData[i].AccName.trim();
+
+                        if (!uniqueAccountNames[accountName]) {
+                            uniqueAccountNames[accountName] = true;
+                            var rowData = [
+                                accountName,
+                                opDebitNum !== 0 ? opDebitNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-',
+                                opCreditNum !== 0 ? opCreditNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-',
+                                tranDebitNum !== 0 ? tranDebitNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-',
+                                tranCreditNum !== 0 ? tranCreditNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-',
+                                clDebitNum !== 0 ? clDebitNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-',
+                                clCreditNum !== 0 ? clCreditNum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'
+                            ];
+                            tableData.push(rowData);
+                        }
+                    }
+
+
+
+                    // Set the table options
+                    var tableOptions = {
+                        startY: 120,
+                        head: headers,
+                        body: tableData,
+                        didParseCell: function (data) {
+                            if (data.section === 'head') {
+                                //doc.setDrawColor(0); // Set border color to black
+                                // doc.setLineWidth(0.2); // Set border width to thin
+                                // doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+                                data.cell.styles.fillColor = [255, 255, 255];
+                                data.cell.styles.textColor = [0, 0, 0];
+                                // Increase the font size of the header
+                                data.cell.styles.fontSize = 9.5;
+                                data.cell.styles.fontStyle = 'bold';
+                                if (data.row.index === 0) {
+                                    // Center align the "Opening," "Transaction," and "Closing" headers
+                                    data.cell.styles.halign = 'center';
+                                } else {
+                                    // Right align the "Debit" and "Credit" headers
+                                    data.cell.styles.halign = 'right';
+                                }
+                            }
+                            if (data.section === 'body' && data.row.index === tableData.length - 1) {
+
+                                data.cell.styles.fillColor = [255, 255, 255];
+                                data.cell.styles.fontStyle = 'bold';
+
+
+
+                            }
+                            else if (data.section === 'body' && data.row.index % 2 === 0) {
+                                // Remove the background color of alternate rows
+                                data.cell.styles.fillColor = [255, 255, 255]; // Set the background color to white
+                            }
+                            doc.setDrawColor(200); // Set border color
+                            doc.setLineWidth(0.2); // Set border width
+                            doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S');
+                        },
+                        didDrawPage: function (data) {
+                            // Draw the bottom border for header cells on every page
+                            var headerCells = data.table.head[0];
+                            if (Array.isArray(headerCells)) {
+                                headerCells.forEach(function (headerCell) {
+                                    doc.setDrawColor(0); // Set border color to black
+                                    doc.setLineWidth(0.2); // Set border width to thin
+                                    doc.rect(headerCell.x, headerCell.y, headerCell.width, headerCell.height, 'S');
+                                });
+                            }
+                        },
+                        didDrawCell: function (data) {
+                            var isLastRow = (data.row.index === tableData.length - 1);
+                            console.log(tableData.length);
+                            console.log(data.row);
+                            if (data.section === 'head') {
+                                doc.setFillColor(255, 255, 255); // Set the desired light color
+                                doc.setTextColor(0, 0, 0); // Set text color to black
+                                doc.setFont('Montserrat', 'bold'); // Set font style to bold
+                                doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S'); // Draw border around header cells
+                            }
+                            if (data.section === 'body') {
+                                if (isLastRow) {
+                                    // Draw top border and two bottom borders for the last row
+                                    doc.setDrawColor(0); // Set border color to black
+                                    doc.setLineWidth(0.2); // Set border width to thin
+
+                                    // Draw top border
+                                    doc.line(data.cell.x, data.cell.y, data.cell.x + data.cell.width, data.cell.y);
+
+                                    // Draw first bottom border
+                                    doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+
+                                    // Draw second bottom border
+                                    doc.line(data.cell.x, data.cell.y + data.cell.height + 2, data.cell.x + data.cell.width, data.cell.y + data.cell.height + 2);
+                                } else if (data.row.index % 2 === 0) {
+                                    // Remove the background color of alternate rows
+                                    data.cell.styles.fillColor = [255, 255, 255]; // Set the background color to white
+                                }
+                            }
+
+
+
+
+
+
+                        },
+                        styles: {
+                            head: {
+                                fontStyle: 'bold',
+                                halign: 'right',
+                                font: 'Montserrat'// Align the header cells to the right
+                            }
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 120, halign: 'left', font: 'Montserrat' },
+                            1: { halign: 'right', font: 'Montserrat' },
+                            2: { halign: 'right', font: 'Montserrat' },
+                            3: { halign: 'right', font: 'Montserrat' },
+                            4: { halign: 'right', font: 'Montserrat' },
+                            5: { halign: 'right', font: 'Montserrat' },
+                            6: { halign: 'right', font: 'Montserrat' }
+                        }
+                    };
+                    // Generate the table
+                    doc.autoTable(tableOptions);
+
+
+
+
+
+                }
+                else if (selectedText === "Months") {
+
+
+                    var dates = [];
+                    ResponseForPdf.forEach(function (data) {
+                        for (var key in data) {
+                            if (key !== "AccId" && key !== "AccName") {
+                                if (!dates.includes(key)) {
+                                    dates.push(key);
+                                }
+                            }
+                        }
+                    });
+
+                    // Sort the dates in ascending order
+                    dates.sort(function (a, b) {
+                        var dateA = new Date(a);
+                        var dateB = new Date(b);
+                        return dateA - dateB;
+                    });
+
+                    var headers = ["Account"];
+                    var subHeaders = [""];
+                    var debitTotal = 0;
+                    var creditTotal = 0;
+
+                    dates.forEach(function (date) {
+                        headers.push({ content: date, colSpan: 2, styles: { halign: "center" } });
+                        subHeaders.push("Debit", "Credit");
+                    });
+
+                    // Set the table rows
+                    var rows = [];
+                    ResponseForPdf.forEach(function (data) {
+                        var row = [data.AccName.trim()];
+                        var debitRowTotal = 0;
+                        var creditRowTotal = 0;
+                        dates.forEach(function (date) {
+                            var value = data[date] || 0;
+                            if (value < 0) {
+                                row.push("");
+                                row.push(Math.abs(value));
+                                creditRowTotal += Math.abs(value);
+                            } else {
+                                row.push(value);
+                                row.push("");
+                                debitRowTotal += value;
+                            }
+                        });
+                        rows.push(row);
+                        debitTotal += debitRowTotal;
+                        creditTotal += creditRowTotal;
+                    });
+
+                    // Add the total row
+                    var totalRow = [{ content: 'Total:', styles: { fontStyle: "bold", font: 'Montserrat', halign: "center" } }];
+
+                    dates.forEach(function () {
+                        totalRow.push({ content: debitTotal, styles: { fontStyle: "bold", font: 'Montserrat', halign: "center" } });
+                        totalRow.push({ content: creditTotal, styles: { fontStyle: "bold", font: 'Montserrat', halign: "center" } });
+                    });
+                    rows.push(totalRow);
+
+                    // Create a wrapper div for the table with a scrollbar
+                    var tableContainer = document.createElement("div");
+                    tableContainer.style.overflow = "auto";
+                    tableContainer.style.maxHeight = "300px";
+
+
+                    // Create the table element
+                    var table = document.createElement("table");
+
+
+
+                    tableContainer.appendChild(table);
+                    document.body.appendChild(tableContainer);
+                    var tableX = 40;
+                    var tableY = 120;
+                    var tableWidth = pdfWidth - 2 * tableX;
+                    var tableHeight = pdfHeight - tableY - 40;
+
+
+
+                    doc.autoTable({
+
+                        didDrawCell: function (data) {
+                            // Apply borders to all cells
+                            var lineWidth = 0.2; // Adjust the border width
+                            doc.setDrawColor(200); // Set border color to a lighter shade
+                            doc.setLineWidth(lineWidth);
+
+                            if (data.cell.section === "body" && data.cell.index % 2 === 0) {
+                                // Apply thicker bottom border to debit cells in the body section
+                                doc.rect(
+                                    data.cell.x,
+                                    data.cell.y + data.cell.height - lineWidth,
+                                    data.cell.width,
+                                    lineWidth,
+                                    "S"
+                                );
+                            } else if (
+                                data.cell.section === "body" &&
+                                data.row.index === rows.length - 1
+                            ) {
+                                // Apply double bottom border to the total row in the body section
+                                var doubleLineWidth = 0.1; // Adjust the double border width
+                                var yOffset = doubleLineWidth / 2; // Offset to prevent overlapping
+                                var space = -3; // Adjust the space value as needed
+
+                                doc.setLineWidth(doubleLineWidth);
+                                doc.setDrawColor(0);
+
+                                // Draw the second line
+                                doc.line(
+                                    data.cell.x,
+                                    data.cell.y + data.cell.height - doubleLineWidth - yOffset - space,
+                                    data.cell.x + data.cell.width,
+                                    data.cell.y + data.cell.height - doubleLineWidth - yOffset - space
+                                );
+
+                                // Draw the first line
+                                doc.line(
+                                    data.cell.x,
+                                    data.cell.y + data.cell.height - doubleLineWidth - yOffset,
+                                    data.cell.x + data.cell.width,
+                                    data.cell.y + data.cell.height - doubleLineWidth - yOffset
+                                );
+                            } else {
+                                // Apply regular borders to all other cells
+                                doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, "S");
+                            }
+                        },
+
+
+
+                        didParseCell: function (data) {
+
+
+                            // Align debit and credit values to the right, account name to the left
+                            if (data.cell.section === 'body') {
+                                if (data.column.index > 0 && data.row.index != 16) {
+                                    data.cell.styles.halign = 'right';
+                                }
+                                else if (data.row.index == 16) {
+                                    data.cell.styles.halign = 'center';
+                                }
+                                else {
+                                    data.cell.styles.halign = 'left';
+                                }
+                            }
+                        },
+
+
+                        head: [headers, subHeaders], // Set the header rows
+                        body: rows,
+                        startY: tableY,
+
+                        tableWidth: tableWidth,
+                        tableHeight: tableHeight,
+                        theme: "grid",
+                        headerStyles: {
+                            fillColor: [248, 249, 250],
+                            fontStyle: "bold",
+                            textColor: 0,
+                            fontSize: 8,
+                            font: 'Montserrat',
+                            halign: "center", // Align header cells to the center
+                        },
+                        bodyStyles: {
+                            textColor: [33, 37, 41],
+                            fontStyle: "normal",
+                            font: 'Montserrat',
+                            fontSize: 8,
+                            cellPadding: 3,
+                            cellStyles: {
+                                0: { halign: "left" }, // Align account name column to the left
+                            },
+                        },
+                        margin: { top: 120 },
+                        tableWidth: "auto",
+                        columnWidth: "auto",
+                    });
+
+
+
+
+                    //var pdfDataUrl = doc.output("datauristring");
+                    //var pdfIframe = document.getElementById("pdf-iframe");
+                    //pdfIframe.src = pdfDataUrl;
+
+                    //document.getElementById("print-pdf").addEventListener("click", function () {
+                    //    doc.autoPrint();
+                    //    doc.output("dataurlnewwindow");
+                    //});
+
+
+                }
+
+
+
+
+
+
+
+
+                var pdfDataUrl = doc.output("datauristring");
+                var pdfIframe = document.getElementById("pdf-iframe");
+                pdfIframe.src = pdfDataUrl;
+                currentDoc = doc;
+
+            }
+
+            //function portrait() {
+            //    var element = document.getElementById("parentDiv");
+
+            //    // Check if the element exists
+            //    if (!element) {
+            //        console.error("Element not found!");
+            //        return;
+            //    }
+
+            //    // Get the width and height of the parentDiv
+            //    var parentWidth = element.offsetWidth;
+            //    var parentHeight = element.offsetHeight;
+
+            //    // Set the PDF dimensions as a percentage of the parentDiv's width and height
+            //    var pdfWidth = parentWidth;
+            //    var pdfHeight = parentHeight;
+
+            //    html2canvas(element)
+            //        .then(function (canvas) {
+            //            // Convert the canvas to a data URL
+            //            var dataURL = canvas.toDataURL();
+            //            alert(dataURL);
+            //            // Create a new PDFMake document
+            //            var docDefinition = {
+            //                content: [
+            //                    {
+            //                        image: dataURL,
+            //                        width: 500
+            //                    }
+            //                ],
+            //                pageOrientation: "portrait"
+            //            };
+
+            //            // Generate the PDF
+            //            var pdf = pdfMake.createPdf(docDefinition);
+
+            //            // Get the data URL of the PDF
+            //            pdf.getDataUrl(function (dataUrl) {
+            //                var pdfIframe = document.getElementById("pdf-iframe");
+
+            //                // Set the source of the iframe to the PDF data URL
+            //                pdfIframe.src = dataUrl;
+            //            });
+
+            //            // Event handler for printing the PDF
+            //            document.getElementById("print-pdf").addEventListener("click", function () {
+            //                var GeneratedPdf = document.getElementById("pdf-iframe");
+            //                pdf.print();
+            //            });
+            //        })
+            //        .catch(function (error) {
+            //            console.error("Error occurred while generating PDF:", error);
+            //        });
+            //}
+
+
+
+
+
+
+
+
+        @*function portrait() {
+        var element = document.getElementById("parentDiv");
+
+        // Get the width and height of the parentDiv
+        var parentWidth = element.offsetWidth;
+        var parentHeight = element.offsetHeight;
+
+        // Set the PDF dimensions as a percentage of the parentDiv's width and height
+        var pdfWidth = parentWidth;
+        var pdfHeight = parentHeight;
+
+        var containerElement = document.createElement("div");
+        containerElement.style.width = parentWidth + "px";
+        containerElement.style.height = parentHeight + "px";
+        containerElement.appendChild(element.cloneNode(true));
+
+        html2pdf().from(containerElement).set({
+        margin: [20, 20, 40, 20],
+        pagebreak: { avoid: 'tr' },
+        filename:`Trial Balanace of @HttpContextAccessor.HttpContext.Session.GetString("CompanyName")`,
+        jsPDF: { orientation: 'portrait', unit: 'pt', format: [pdfWidth, pdfHeight], compressPDF: true }
+        }).toPdf().output('dataurl').then(function (pdfDataUrl) {
+        var pdfIframe = document.getElementById("pdf-iframe");
+        pdfIframe.src = pdfDataUrl;
+        });
+        $("#print-pdf").click(function () {
+        alert('ss');
+        let objFra = document.getElementById('pdf-iframe');
+        objFra.contentWindow.focus();
+        objFra.contentWindow.print();
+        })
+
+        }*@
+                /*set ajax url globally new code start*/
+                //$("#print-pdf").click(function () {
+                //    var pdfIframe = document.getElementById("pdf-iframe");
+                //    pdfIframe.onload = function () {
+                //        setTimeout(function () {
+                //            pdfIframe.contentWindow.print();
+                //        }, 2000);
+                //    };
+                //   var pdfDataUrl = pdfIframe.src;
+                //    var printWindow = window.open(pdfDataUrl);
+                //    printWindow.print();
+                //    printWindow.close();
+                //});
+
+
+
+                $('#emailPdfLoaded').on('click', function () {
+                    portrait();
+                })
+                 $('#printPdfLoaded').on('click', function () {
+                    portrait();
+                })
+            /*set ajax url globally new code end*/
+
+            //new pdf portrait landscape code start
+            $("#orientation").change(function () {
+                if ($(this).val() === 'portrait') {
+                    portrait();
+                }
+                else if ($(this).val() === 'landscape') {
+                    landscape();
+                }
+            });
+                   //new pdf portrait landscape code end
+
+</script>
+}

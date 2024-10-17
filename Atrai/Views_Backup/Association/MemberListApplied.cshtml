@@ -1,0 +1,148 @@
+﻿@*@model IEnumerable<Atrai.Core.Entity.MemberModel>*@
+@{
+    ViewData["Title"] = "Applied List Approval";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="row mb-2">
+                            <div class="col-md-2 col-12 m-t-8">
+                                <h4 class="card-header" style="color: #1976d2;">Member List [Applied]</h4>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive m-t-10">
+                            <table id="tbllist" class="display nowrap table table-hover  table-bordered" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr></tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr></tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+            </div>
+                </div>
+                <!-- End PAge Content -->
+            </div>
+        </div>
+
+
+
+
+
+        @section Scripts{
+
+            <script type="text/javascript">
+                $(function () {
+
+                    function getDateString(dateObj) {
+
+
+                        if (dateObj == null) { return ''; };
+
+                        var date = new Date(parseInt(dateObj.substr(6)));
+                        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                            "Aug", "Sep", "Oct", "Nov", "Dec"];
+                        //var month = dateObj.getMonth() + 1;
+                        //var day = dateObj.getDate();
+                        //var year = dateObj.getFullYear();
+                        //var date = day + "/" + month + "/" + year;
+
+                        var formatdate = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear();
+
+                        //alert(val);
+
+
+                        return formatdate;
+
+                        //return dateObj.toDateString();
+                    }
+
+                    var peopleList = $('#tbllist').DataTable({
+
+                        serverSide: true,  "scrollX": true,
+                        processing: true,
+
+                        ajax: {
+                           url: '@Url.Action("GetMemberList", "Association")',
+                            data: {filter: 'Applied'},
+                            type: "POST",
+                            dataType: 'json',
+                        },
+                        rowId: 'Id',
+                        "iDisplayLength": 5,
+                        "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+                        columns: [
+                            { "title": "Member Id", "data": "Id", "searchable": false, "visible": false },
+                            { "title": "Member Id", "data": "MemberAccessId", "searchable": true },
+                            { "title": "Member Type", "data": "MemberType", "searchable": true },
+
+                            { "title": "Members Name English", "data": "MembersNameEng", "searchable": true },
+                            { "title": "Members Name Bangla", "data": "MembersNameBng", "searchable": true },
+
+                            { "title": "Fathers Name English", "data": "FathersNameEng", "searchable": true },
+                            { "title": "Fathers Name Bangla", "data": "FathersNameBng", "searchable": true },
+
+                            { "title": "Shop Name English", "data": "ShopNameEng", "searchable": true },
+                            { "title": "Shop Name Bangla", "data": "ShopNameBng", "searchable": true },
+
+                            {
+                                "type": 'datetime',
+                                "def": function () { return new Date(); },
+                                "format": 'M/D/YYYY',
+                                "fieldInfo": 'US style m/d/y format', "data": "DOB", "title": "DOB", "searchable": false
+                            },
+
+                            { "title": "BloodGroup", "data": "BloodGroup", "searchable": true },
+
+                            { "title": "Mobile", "data": "Mobile", "searchable": true },
+                            { "title": "Market Name", "data": "MarketName", "searchable": true },
+                            { "title": "Business Address", "data": "BusinessAddressBng", "searchable": true },
+                            {
+                                "title": "Image", "data": "ImagePath", "searchable": false, "render": function (data) {
+                                    //console.log(data);
+                                    //return '<img src="..' + data + '" class="img-thumbnail" width="80px">';
+                                    console.log(data);
+                                    return '<img src="..' + data + '" class="img-thumbnail" width="80px" onerror=this.onerror=null;this.src="../Content/MemberImages/0.png">';
+
+                                }
+                            },
+
+                            {
+                                "title": "Action",
+                                "data": "Id",
+                                "render": function (data, type, row) {
+                                    var myUrlApplied = '@Url.Action("MemberApplied", "Association")?MemberId=' + data;
+                                    var myUrlapprove = '@Url.Action("MemberAppliedApprove", "Association")?MemberId=' + data;
+                                    var message = `return confirm('Are you sure you want to Approve this Member ?')`;
+
+                                    return '<span data-toggle="tooltip" title="Cancel"> <a href=\"' + myUrlApplied + '\" class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Approve">  <a href=\"' + myUrlapprove + '\" onclick = \"' + message + '\"  class=\"btn btn-icon btn-info btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-check"></i></a></span>';
+
+
+                                }
+
+
+                            }
+                        ]
+                    });
+
+
+                });
+            </script>
+        }

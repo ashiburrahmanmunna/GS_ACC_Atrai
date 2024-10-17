@@ -1,0 +1,147 @@
+﻿@model Invoice.Core.Entity.UserAccountModel
+@{
+    ViewBag.Title = "Edit User Account";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card">
+                    <br />
+                    <div class="card-title p-3">
+                        <h4>Edit User</h4>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            @using (Html.BeginForm("EditUserAccount", "Admin", FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                @Html.HiddenFor(model => model.Id)
+                                @Html.HiddenFor(model => model.IsBaseUser)
+
+                                @Html.HiddenFor(model => model.IsEmailVerified)
+                                @Html.HiddenFor(model => model.IsPhoneVerified)
+                                
+
+
+
+                            <div class="form-group row">
+                                <div class="col-md-6 col-12">
+                                    <label for="Name">Name</label>
+                                    @Html.TextBox("Name", null, new { @class = "form-control", @placeholder = "Enter Account Name " })
+                                    @Html.ValidationMessage("Name", "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-6 col-12">
+                                    <label for="Password">Phone</label>
+                                    @Html.TextBox("PhoneNumber", null, new { @class = "form-control", @placeholder = "Phone Number" })
+                                    @Html.ValidationMessage("PhoneNumber", "", new { @class = "text-danger" })
+                                </div>
+
+                            </div>
+
+                                <div class="form-group row">
+                                    <div class="col-md-6 col-12">
+                                        <label for="Email">Email / Login Id</label>
+                                        @Html.TextBox("Email", null, new { @class = "form-control", @placeholder = "Email" })
+                                        @Html.ValidationMessage("Email", "", new { @class = "text-danger" })
+                                    </div>
+
+                                    <div class="col-md-6 col-12">
+                                        <label for="Password">Password</label>
+                                        @Html.TextBox("Password", null, new { @class = "form-control", @placeholder = "Password" })
+                                        @Html.ValidationMessage("Password", "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+
+
+                                <div class="form-group row">
+
+
+                                    <div class="col-md-6 col-12">
+                                        <label for="Role"> Employee : </label>
+                                        @Html.DropDownList("EmployeeId", new SelectList((IEnumerable<SelectListItem>)ViewBag.Employee, "Value", "Text"), "Select Employee",
+                                                                                                              htmlAttributes: new { @class = "form-control", id = "EmployeeId" })
+                                    </div>
+
+                                    <div class="col-md-6 col-12">
+                                        @Html.LabelFor(x => x.UserRoleId)
+                                        @Html.DropDownListFor(x => x.UserRoleId,
+                                                                                      new SelectList((IEnumerable<SelectListItem>)ViewBag.Role, "Value", "Text"), "Select User Role",
+                                                                                      htmlAttributes: new { @class = "form-control", id = "UserRoleId" })
+                                        @Html.ValidationMessageFor(x => x.UserRoleId, "", new { @class = "text-danger" })
+                                    </div>
+
+
+
+
+                                </div>
+
+
+                                    @*<div class="form-group">
+            <label for="Role"> Warehouse : </label>
+            @Html.DropDownList("WarehouseId", new SelectList((IEnumerable<SelectListItem>)ViewBag.Warehouse, "Value", "Text"), "Select Warehouse",
+                 htmlAttributes: new { @class = "form-control", id = "WarehouseId" })
+            <small id="error_Warehouse" class="form-text error_msg">Select Warehouse</small>
+        </div>*@
+
+
+                                    @*<div class="form-group">
+            <label for="Role"> Role : </label>
+            @Html.DropDownList("Role", new List<SelectListItem>
+                {
+                  new SelectListItem() {Text = "Admin", Value="Admin"},
+                    new SelectListItem() {Text = "User", Value="User"},
+                    new SelectListItem() {Text = "President / Secretary", Value="President"},
+                    new SelectListItem() {Text = "Organizing Secretary", Value="Organizing"},
+                    new SelectListItem() {Text = "Financial Secretary", Value="Financial"},
+                    new SelectListItem() {Text = "Office Secretary", Value="Office"},
+                    new SelectListItem() {Text = "Member", Value="Member"},
+                    new SelectListItem() {Text = "Guest", Value="Guest"},
+                }, "Select Role", new { @class = "form-control" })
+            <small id="error_Role" class="form-text error_msg">Select Role</small>
+        </div>*@
+
+
+
+                        <div class="form-group row">
+
+                            <div class="col-md-6 col-12 text-center">
+                                <label asp-for="IsInacitve"></label>
+                                <input asp-for="IsInacitve" class="form-control" type="checkbox">
+                                <span asp-validation-for="IsInacitve" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 col-12 text-center">
+
+                                @if (ViewBag.ActionType == "Create")
+                                {
+                            <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" /> }
+                        else if (ViewBag.ActionType == "Edit")
+                        {
+                            <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" /> }
+                        else if (ViewBag.ActionType == "Delete")
+                        {
+                            <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>}
+
+                                <a href="@Url.Action("UserAccount", "Admin")" class="btn btn-primary rounded-0">Back To List </a>
+                            </div>
+
+                        </div>
+                            }
+                        </div><!-- panel-body -->
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+
+
+    </div>
+</div>

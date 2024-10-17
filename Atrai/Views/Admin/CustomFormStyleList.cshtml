@@ -1,0 +1,679 @@
+﻿@{
+    ViewData["Title"] = "Voucher Created Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var ListType = ViewBag.ListType as string;
+}
+
+
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<style>
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+             border-bottom-width: 0px;
+
+        }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    .tabulator-table .tabulator-row {
+        background-color: white;
+    }
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customize-btn-another {
+        background: #2CA01C;
+        border: 1px solid black;
+        border-radius: 20px;
+        color: #FFFFFF;
+        border: 1px solid #2CA01C;
+    }
+
+        .customize-btn-another:hover {
+            background: #2CA01C;
+            border: 1px solid black;
+            border-radius: 20px;
+            color: #FFFFFF;
+            border: 1px solid #2CA01C;
+        }
+
+    .customize-btn:hover {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .gear-dropdown.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+        margin-top: 7px;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        height: 50px;
+        border-bottom: 1px solid #aaaaaa38;
+        border-right: 1px solid #aaaaaa38;
+        /*border-left: 1px solid #aaaaaa38;*/
+        /* padding-left: 2px;*/
+    }
+    /*    .tabulator-row .tabulator-cell, .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: none;
+        border-left: none;
+    }*/
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: none;
+        border-left: none;
+        padding-left: 10px;
+        border: 1px solid #aaaaaa29;
+        padding-top: 16px;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        /*margin-top: 27px;*/
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+        /* Add any other styles you need for the active cell */
+    }
+
+    .tabulator-row {
+        /*   border: 1px solid #aaaaaa38;*/
+        border-left: none;
+        border-right: none;
+    }
+
+    input[type="checkbox"] {
+        width: 20px; /* Set the width */
+        height: 20px; /* Set the height */
+    }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom: 4px solid green;
+    }
+
+        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active:hover {
+            background-color: #F8F8F8;
+            border-top-color: transparent !important;
+            border-left-color: transparent !important;
+            border-right-color: transparent !important;
+        }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link:hover {
+        background-color: #F8F8F8;
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+    }
+
+    .customize-btnew {
+        background: transparent;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btnew:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .tabulator-row .tabulator-cell.tabulator-editing {
+        border: 1px solid #404c5d;
+        outline: none;
+        padding: 0;
+    }
+
+    .tabulator-cell.tabulator-editable[tabulator-field="AccName"] {
+        border: 1px solid #0003;
+        margin-bottom: 10px;
+    }
+
+    .filter-dropdown > .filter-dropdown-class.show {
+        width: 580px;
+    }
+
+    p {
+        margin: 1em 0;
+    }
+
+    .button {
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        position: relative;
+        background: #aa0000;
+        padding: 10px 15px;
+        color: white;
+        box-shadow: 0 2px black;
+        text-decoration: none;
+        border-radius: 5px;
+        /*text-shadow: 0 1px 1px black;*/
+    }
+
+        .button:hover {
+            top: -2px;
+            box-shadow: 0 7px #000000b8;
+        }
+
+        .button:active {
+            top: 1px;
+            box-shadow: 0 7px #000000b8;
+        }
+
+    .unbilledbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000b8;
+    }
+
+    .overduebtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000b8;
+    }
+
+    .openbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000b8;
+    }
+
+    .paidbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000b8;
+    }
+
+    .scrollable-offcanvas {
+        /* max-height: 80vh;*/ /* Adjust the maximum height as needed */
+        overflow-y: auto;
+    }
+</style>
+<div class="row">
+    <div class="col-lg-11">
+        <h3 class="fw-bold">Custom form styles</h3>
+    </div>
+    <div class="col-lg-1">
+        <div class="dropdown">
+            <button class="btn btn-success dropdown-toggle fw-bold ms-3 h-100 radius-30" type="button" data-bs-toggle="dropdown">
+                New style
+            </button>
+            <ul class="dropdown-menu" id="ul-id-for-expenses">
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<br />
+<div id="tableContainer" class="mt-4">
+    <div id="customFormStyleTable"></div>
+</div>
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content mx-auto w-50">
+            <div>
+                <button onclick="modalClear()" type="button" class="btn-close float-lg-end me-2 mt-2" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div>
+                <h5 class="modal-title ms-5 fw-bold text-dark" id="exampleModalLabel">New Term</h5>
+            </div>
+            <div class="modal-body px-5">
+                <!-- Inside the modal-body -->
+                <form id="termForm">
+                    <input type="hidden" id="RenameId" />
+                    <input type="hidden" id="DocTypeId" />
+
+                    <div class="mb-3">
+                        <label for="termName" class="form-label fw-bold"><span class="text-danger">*</span>Rename your template</label>
+                        <input type="text" class="form-control w-50" id="termName" name="TermName" style="border-radius:0px;">
+                    </div>
+                </form>
+
+            </div>
+            <!-- At the bottom of the modal content, before the closing </div> -->
+            <hr class="w-75 mx-auto" />
+            <div class="d-flex justify-content-around mb-4">
+                <button onclick="modalClear()" type="button" class="btn customize-btn fw-bold" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn customize-btn-another fw-bold" id="saveTermButton">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript">
+        var msg = '@ViewBag.msg';
+        console.log("sasasasasasasasas", msg);
+        //alert(msg);
+        if (msg == '') {
+
+        }
+        else {
+
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: `${msg}`,
+            });
+        }
+        function getTermsDropdown() {
+        $.ajax({
+            //url: '@Url.Action("GetDoctypeListForCustomFormStyle", "Admin")',
+            url: '@Url.Action("GetAllDoctypeListForCustomFormStyle", "Admin")',
+            success: function (data) {
+                console.log("GetDoctypeListForCustomFormStyle ajax data::", data);
+                const ul = document.querySelector('#ul-id');
+                const ulForExpenses = document.querySelector('#ul-id-for-expenses');
+                for (var i = 0; i < data.length; i++) {
+                    const li = document.createElement('li');
+                    li.className = 'dropdown-item';
+                    const Type = data[i].Text;
+                    const DocType = data[i].DocType;
+                    const a = document.createElement('a');
+                    let linkUrl = '';
+                    a.href = '@Url.Action("CustomFormStyle", "Admin")' + '?Type=' + encodeURIComponent(Type) + '&Id=0';
+                    console.log(linkUrl);
+                    a.className = 'dropdown-link';
+                    a.style.color = 'black';
+                    a.setAttribute('data-id', data[i].Id);
+
+                    a.textContent = data[i].Text;
+
+                    li.addEventListener('click', function () {
+                        window.location.href = linkUrl;
+                    });
+
+                    li.appendChild(a);
+                    ulForExpenses.appendChild(li);
+                }
+
+            }
+        });
+        }
+        getTermsDropdown();
+
+
+        CustomFormStyleList();
+        function CustomFormStyleList() {
+            $.ajax({
+            type: "get",
+            url: '@Url.Action("GetCustomFormStyleList", "Admin")',
+            success: function (response) {
+                var Data = response;
+                console.log("see Data", Data);
+
+                var customFormStyle = new Tabulator("#customFormStyleTable", {
+                    data: Data,
+                    layout: "fitColumns",
+                    height:"600px",
+                    columns: [
+                        { title: "NAME", headerHozAlign: "left", field: "Name", hozAlign: "left", visible: true, },
+                        { title: "FORM TYPE", headerHozAlign: "left", field: "DocType", hozAlign: "left", visible: true, },
+                        {
+                            title: "LAST EDITED",
+                            headerHozAlign: "left",
+                            field: "UpdateDate",
+                            hozAlign: "left",
+                            formatter: function (cell, formatterParams, onRendered) {
+                                const originalDate = cell.getValue();
+                                //console.log("originalDate", originalDate);
+
+                                // Check if originalDate is a string and can be converted to a Date
+                                const dateObject = new Date(originalDate);
+                                if (dateObject instanceof Date && !isNaN(dateObject)) {
+                                    const formattedDate = dateObject.toISOString().split('T')[0];
+                                    return formattedDate;
+                                } else {
+                                    return originalDate;
+                                }
+                            }
+                        },
+
+                        {
+                            title: "ACTIONS", field: "button", headerHozAlign: "left", headerSort: false, hozAlign: "left", resizable: false, formatter: function (cell, formatterParams, onRendered) {
+                                var data = cell.getData();
+                                //console.log("see data::", data);
+                                //var myUrlGet = `editAccountHead(${data.Id})`;
+                                var myUrlGet = `@Url.Action("CustomFormStyle", "Admin")?Type=${data.DocType}&Id=${data.Id}`; //&IsDefault=${data.IsDefault}
+
+
+                                var copyBill = '/Accounts/AddBillByType?Type=Purchase Order' + '&PurchaseId=' + data.Id + '&CopyBill=1';
+                                var inActive = `setInactiveUrl(${data.Id}) `
+                                var rename = `renameData(${data.Id}, ${data.DocTypeId}, ${JSON.stringify(data.Name)})`;
+                                var makeDefault = `makeDefaultUrl(${data.Id}) `
+                                var active = `setActiveUrl(${data.Id}) ` //&ReportType=Purchase Invoice
+                                var viewReport = `
+                                        <a href='@Url.Action("PurchaseInvoiceViewReport", "Purchase")?PurchaseId=${data.Id}' target="_blank" class='text-decoration-none text-black ms-3 mt-1'>
+                                           <i class='bi bi-pencil-square pe-1'></i> <span>Preview PDF</span>
+                                       </a>
+                                               <div class='dropdown-divider m-0'></div>
+                                   `;
+
+                                var printHtml = `
+                                        <a  onclick='${rename}' target="_blank" class='text-decoration-none text-black ms-3 mt-1'>
+                                           <i class='bi bi-pencil-square pe-1'></i> <span>Rename</span>
+                                       </a>
+                                               <div class='dropdown-divider m-0'></div>
+                                   `;
+                                var deleteHtml = `
+                        <a onclick='${inActive}' class='text-decoration-none text-black ms-3 mt-1' href='#' id='InActive'>
+                            <i class="bi bi-trash3"></i><span class='ms-1 mt-2'>Delete</span>
+                        </a>
+                                <div class='dropdown-divider m-0'></div>
+                    `;
+                                var voidHtml;
+                                if (data.IsDefault === true) {
+                                    voidHtml = `
+                                       <a onclick='${makeDefault}'  href='#' class='text-decoration-none text-black ms-3 mt-1'>
+                                           <i class='bi bi-pencil-square pe-1'></i> <span>clear default</span>
+                                       </a>
+
+                                   `;
+                                };
+                                if (data.IsDefault === false) {
+                                    voidHtml = `
+                                       <a onclick='${makeDefault}'  href='#' class='text-decoration-none text-black ms-3 mt-1'>
+                                           <i class='bi bi-pencil-square pe-1'></i> <span>Make default</span>
+                                       </a>
+
+                                   `;
+                                };
+
+
+                                var edit = `
+                                       <a href='${myUrlGet}'  target='_blank' class='text-decoration-none text-black ms-3 mt-1'>
+                            <i class='bi bi-pencil-square pe-1'></i><span class='ms-1 mt-2'>Edit</span>
+                        </a>
+                                <div class='dropdown-divider m-0'></div>
+                                  `;
+
+                                //var statusDependentHtml = data.isPosted ? viewHtml + deleteHtml : editHtml + deleteHtml;
+                                var statusDependentHtml = data.isPosted ? viewHtml : viewReport + printHtml  + deleteHtml + voidHtml;
+                                var html = `
+                                      <div class='dropdown ms-1'>
+                                          <a href='${myUrlGet}' target='_blank' class='fw-bolder mt-2'>Edit</a>
+                                          <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                         <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton1' style="width: 57%;">
+                                              ${statusDependentHtml}
+
+                                          </ul>
+                                      </div>
+                                  `;
+
+                                if (data.ComId != 0) {
+                                    return html;
+                                }    
+                            },
+                            visible: true, cellClick: function (e, cell) {
+                                // Add a custom class to the cell when it's clicked
+                                cell.getElement().classList.add('active-cell');
+                            },
+                        },
+                    ],
+                    rowFormatter: function (row) {
+                        var rowData = row.getData();
+                        if (rowData.IsDefault === true) {
+                            row.getElement().style.backgroundColor = "rgb(188 235 198 / 22%)";
+                            row.getElement().style.color = "black";
+                        }
+                    }
+
+
+                });
+            }
+        });
+        }
+
+        //rename custom form starts----
+
+        function Saveproductinfo() {
+            var TermName = $("#termName").val();
+            var AccountHead = {
+                ComId: '@ViewBag.ComId',
+                DocTypeId: $("#DocTypeId").val(),
+                Id: $("#RenameId").val(),
+                Name: TermName
+                    }
+                    console.log("abc",AccountHead);
+                    $.ajax({
+                        url: '@Url.Action("RenameCustomForm", "Admin")',
+                        data: { model: AccountHead },
+                        type: 'POST',
+                        async: true,
+                        //contentType: 'application/json;',
+                        dataType: 'json',
+                        success: function (result) {
+                            if (result.success == "1") {
+                                $('#exampleModal').modal('hide');
+                                /*$('#terms').val("0");*/
+                                CustomFormStyleList();
+                            }
+                        },
+                        error: function () {
+                            alert("Failed");
+
+                        }
+                    });
+        }
+        function modalClear() {
+            $("#termName").val('');
+        }
+        var RenameId;
+        function renameData(Id, DocTypeId, Name) {
+            $("#RenameId").val(Id);
+            $("#DocTypeId").val(DocTypeId);
+            $("#termName").val(Name);
+            $("#exampleModal").modal("show");
+        }
+        $("#saveTermButton").click(function () {
+            //alert("sas");
+            Saveproductinfo();
+            modalClear();
+        });
+        //rename custom form ends--
+
+
+
+        function setInactiveUrl(data) {
+               Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("InactiveCustomFormStyle", "Admin")',
+                            type: "get",
+                            data: { id: data },
+                            traditional: true,
+                            success: function (response) {
+                                if (response.success == "1") {
+                                    toastr.success(response.msg, "", {
+                                        "toastClass": "toast-green",
+                                    });
+                                    CustomFormStyleList();
+                                }
+                                else if (response.success == "0") {
+                                    //alert()
+                                    toastr.success(response.msg, "", {
+                                        "toastClass": "toast-red",
+                                    });
+                                    CustomFormStyleList();
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                console.error(xhr.responseText);
+                                toastr.error("Error during delete.", "", { "toastClass": "toast-red" });
+                            }
+                        });
+                    }
+                });
+        };
+        function makeDefaultUrl(data) {
+               Swal.fire({
+                    title: "Are you sure?",
+                   /* text: "You won't be able to revert this!",*/
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("MakeDefaultCustomFormStyle", "Admin")',
+                            type: "get",
+                            data: { id: data },
+                            traditional: true,
+                            success: function (response) {
+                                if (response.success == "1") {
+                                    toastr.success(response.msg, "", {
+                                        "toastClass": "toast-green",
+                                    });
+                                    CustomFormStyleList();
+                                }
+                                else if (response.success == "0") {
+                                    //alert()
+                                    toastr.success(response.msg, "", {
+                                        "toastClass": "toast-red",
+                                    });
+                                    CustomFormStyleList();
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                console.error(xhr.responseText);
+                                toastr.error("Error during delete.", "", { "toastClass": "toast-red" });
+                            }
+                        });
+                    }
+                });
+        };
+    </script>
+
+}

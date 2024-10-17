@@ -1,0 +1,591 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Recurring List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+    /*    .tabulator-row .tabulator-cell, .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+                border-right: none;
+                border-left: none;
+            }*/
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+        /* Add any other styles you need for the active cell */
+    }
+
+    /*  .tabulator-table .tabulator-row {
+            background-color: white;
+        } */
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: 1px solid #aaaaaa38;
+    }
+    #modal-content2 {
+        background-color: #fefefe;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 30%;
+    } 
+</style>
+<div>
+    <h3>Recurring List</h3>
+</div>
+<div style="margin-left: 20px; margin-right: 20px;">
+    <div id="example-table"></div>
+</div>
+
+<div class="col-md-2  col-2">
+    <div id="customModal" class="modal">
+        <div class="modal-content" id="modal-content2">
+            <p>Are you sure you want to delete?</p>
+            <div class="row">
+                <div class="col-md-6 col-6">
+                    <button id="confirmBtn" class="btn btn-success" style="width: 100px">OK</button>
+                </div>
+                <div class="col-md-6 col-6 d-flex justify-content-end">
+                    <button id="cancelBtn" class="btn btn-danger" style="width: 100px">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function () {
+            initTabulator();
+        });
+        function customCheckBoxFormatter(cell, formatterParams, onRendered) {
+            return '<input type="checkbox" class="custom-checkbox">';
+        }
+        function setInactiveUrlForSales(data) {
+            var myUrlInactive = '@Url.Action("InactiveInvoice", "Sales")';
+
+            // Display the custom modal
+            var modal = document.getElementById("customModal");
+            modal.style.display = "block";
+
+            // Handle confirm button click
+            document.getElementById("confirmBtn").onclick = function () {
+                $.ajax({
+                    type: "get",
+                    data: { InvoiceId: data },
+                    url: myUrlInactive,
+                    success: function (response) {
+                        if (response.success == "1") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-green",
+                            });
+                            initTabulator();
+                        }
+                        else if (response.success == "0") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-red",
+                            });
+                            GetReport();
+                        }
+                    }
+                });
+                modal.style.display = "none";
+            };
+
+            // Handle cancel button click
+            document.getElementById("cancelBtn").onclick = function () {
+                modal.style.display = "none";
+            };
+        }
+        function setInactiveUrlForExpense(data) {
+            var myUrlInactive = '@Url.Action("InactiveBill", "Admin")';
+
+            // Display the custom modal
+            var modal = document.getElementById("customModal");
+            modal.style.display = "block";
+
+            // Handle confirm button click
+            document.getElementById("confirmBtn").onclick = function () {
+                $.ajax({
+                    type: "get",
+                    data: { BillId: data },
+                    url: myUrlInactive,
+                    success: function (response) {
+                        if (response.success == "1") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-green",
+                            });
+                            initTabulator();
+                        }
+                        else if (response.success == "0") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-red",
+                            });
+                            GetReport();
+                        }
+                    }
+                });
+                modal.style.display = "none";
+            };
+
+            // Handle cancel button click
+            document.getElementById("cancelBtn").onclick = function () {
+                modal.style.display = "none";
+            };
+        }
+        function initTabulator() {
+            var statusValue = $("#Status").val();
+            var durationValue = $("#Duration").val();
+            var customerId = $("#Customers").val();
+
+            function fetchDataFromServer() {
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetRecurringList", "Sales")'
+                };
+                return $.ajax({
+                    url: MyAppUrlSettings.MyUsefulUrl,
+                    dataType: "json",
+                });
+            }
+
+            fetchDataFromServer().done(function (response) {
+
+                console.log("notrmal response:", response.data);
+                var dataTable = response.data;
+                console.log("data table:", dataTable);// Define columns to be excluded
+                var columnsToExclude = ["MonthCaption", "FontSignal"]; // Define columns to be excluded
+
+
+
+                var table = new Tabulator("#example-table", {
+                    data: dataTable,
+                    layout: "fitColumns",
+                    minHeight: 400,
+                    pagination: true,
+                    movableColumns: true,
+                    paginationSize: 10,
+                    paginationSizeSelector: [10, 25, 50, 100],
+                    paginationCounter: "rows",
+                    columns: [
+                        { title: "", field: "CheckBox", headerHozAlign: "left", headerSort: false, formatter: customCheckBoxFormatter, visible: true, width: 50 },
+                        { title: "Template Name", field: "TemplateName", hozAlign: "left", vertAlign: "middle", },
+                        { title: "Type", field: "TemplateType", hozAlign: "left", vertAlign: "middle", },
+                        { title: "TXN Type", field: "DocType", hozAlign: "left", vertAlign: "middle", },
+                        { title: "Interval", field: "Interval", hozAlign: "left", vertAlign: "middle", },
+                        {
+                            title: "Previous date",
+                            field: "PreviousDate",
+                            vertAlign: "middle",
+                            width: "10%", cssClass: "text-center",
+                            formatter: function (cell, formatterParams, onRendered) {
+                                if (cell.getValue() === null) {
+                                    return ""; 
+                                }
+                                var date = new Date(cell.getValue());
+                                var day = date.getDate();
+                                var monthNames = [
+                                    "Jan", "Feb", "Mar",
+                                    "Apr", "May", "Jun",
+                                    "Jul", "Aug", "Sep",
+                                    "Oct", "Nov", "Dec"
+                                ];
+                                var monthIndex = date.getMonth();
+                                var year = date.getFullYear().toString().substr(-2); // Extract last 2 digits of year
+
+                                return day + '-' + monthNames[monthIndex] + '-' + year;
+                            },
+                            cellClick: function (e, cell) {
+                                openOffcanvas(cell.getRow().getData());
+                            }
+                        },
+                        {
+                            title: "Next date",
+                            field: "NextDate",
+                            vertAlign: "middle",
+                            width: "10%", cssClass: "text-center",
+                            formatter: function (cell, formatterParams, onRendered) {
+                                if (cell.getValue() === null) {
+                                    return ""; 
+                                }
+                                var date = new Date(cell.getValue());
+                                var day = date.getDate();
+                                var monthNames = [
+                                    "Jan", "Feb", "Mar",
+                                    "Apr", "May", "Jun",
+                                    "Jul", "Aug", "Sep",
+                                    "Oct", "Nov", "Dec"
+                                ];
+                                var monthIndex = date.getMonth();
+                                var year = date.getFullYear().toString().substr(-2); // Extract last 2 digits of year
+
+                                return day + '-' + monthNames[monthIndex] + '-' + year;
+                            },
+                            cellClick: function (e, cell) {
+                                openOffcanvas(cell.getRow().getData());
+                            }
+                        },
+                        { title: "Customer/Supplier", field: "CustomerOrSupplier", hozAlign: "left", vertAlign: "middle", },
+                        { 
+                            title: "Amount", field: "NetAmount", hozAlign: "right", vertAlign: "middle", width: 130,
+                            formatter: function (cell, formatterParams, onRendered) {
+                                var formattedNumber = cell.getValue().toLocaleString();
+                                return "<div style='text-align:right'>" + formattedNumber + "</div>";
+                            },
+                            
+                        },
+                        {
+                            title: "Actions", field: "button", headerHozAlign: "center", vertAlign: "middle", headerSort: false, hozAlign: "right", resizable: false, formatter: function (cell, formatterParams, onRendered) {
+                                var data = cell.getData();
+                                var docType = data.DocType || '';
+                                console.log("see data::", data);
+                                var myUrlGetforInvoice = `@Url.Action("EditInvoice", "Sales")?id=${data.SalesId}&type=${docType}`;
+                                var myUrlGetforCreditNote = myUrlGetforInvoice;
+                                var myUrlGetforEstimate = myUrlGetforInvoice;
+                                var myUrlGetforSalesOrder = myUrlGetforInvoice;
+                                var myUrlGetforSalesReceipt = myUrlGetforInvoice;
+                                var myUrlGetforDelayedCharge = myUrlGetforInvoice;
+                                var myUrlGetForExpense = `@Url.Action("AddBillByType", "Accounts")?Type=${data.DocType}&PurchaseId=${data.PurchaseId}`;
+                                var inActiveForSales = `setInactiveUrlForSales(${data.SalesId}) `;
+                                var inActiveForExpense = `setInactiveUrlForExpense(${data.PurchaseId}) `;
+                                var active = `setActiveUrl(${data.SalesId}) `;
+                                var copySales = `@Url.Action("CopySalesForm", "Sales")?id=${data.SalesId}&type=${data.DocType}`;
+                                var copyExpense = `@Url.Action("AddBillByType", "Accounts")?Type=${data.DocType}&PurchaseId=${data.PurchaseId}&CopyBill=1&IsRecurring=1`;
+                                var transactionEditUrl = '@Url.Action("EditTransaction", "Admin")?TransactionId=' + data.TransactionId;
+                                var transactionCopyUrl = '@Url.Action("EditTransaction", "Admin")?TransactionId=' + data.TransactionId + '&IsCopy=1';
+                                var transactionDeleteUrl = '@Url.Action("DeleteTransaction", "Admin")?TransactionId=' + data.TransactionId;
+                                var editHtml;
+
+                                if (data.DocType == 'Invoice' || data.DocType == 'Sales') {
+                                    editHtml = `
+                                                <a href='${myUrlGetforInvoice}' class='text-decoration-none text-black ms-3 mt-1'>
+                                                    <i class='bi bi-pencil-square pe-1'></i> <span>Edit</span>  <br />
+                                                </a>
+                                                <div class='dropdown-divider m-0'></div>
+                                                                                                   `;
+                                }
+                                if (data.DocType == 'Credit Note') {
+                                    editHtml = `
+                                                <a href='${myUrlGetforCreditNote}' class='text-decoration-none text-black ms-3 mt-1'>
+                                                    <i class='bi bi-pencil-square pe-1'></i> <span>Edit</span>  <br />
+                                                </a>
+                                                <div class='dropdown-divider m-0'></div>
+                                                                                                    `;
+                                }
+                                if (data.DocType == 'Estimate') {
+                                    editHtml = `
+                                                <a href='${myUrlGetforEstimate}' class='text-decoration-none text-black ms-3 mt-1'>
+                                                    <i class='bi bi-pencil-square pe-1'></i> <span>Edit</span>  <br />
+                                                </a>
+                                                <div class='dropdown-divider m-0'></div>
+                                                                                                      `;
+                                }
+                                if (data.DocType == 'Sales order') {
+                                    editHtml = `
+                                                <a href='${myUrlGetforSalesOrder}' class='text-decoration-none text-black ms-3 mt-1'>
+                                                    <i class='bi bi-pencil-square pe-1'></i> <span>Edit</span>  <br />
+                                                </a>
+                                                <div class='dropdown-divider m-0'></div>
+                                                                                                        `;
+                                }
+                                if (data.DocType == 'Sales receipt') {
+                                    editHtml = `
+                                                <a href='${myUrlGetforSalesReceipt}' class='text-decoration-none text-black ms-3 mt-1'>
+                                                    <i class='bi bi-pencil-square pe-1'></i> <span>Edit</span>  <br />
+                                                </a>
+                                                <div class='dropdown-divider m-0'></div>
+                                                                                                          `;
+                                }
+                                if (data.DocType == 'Delayed Charge') {
+                                    editHtml = `
+                                                <a href='${myUrlGetforDelayedCharge}' class='text-decoration-none text-black ms-3 mt-1'>
+                                                    <i class='bi bi-pencil-square pe-1'></i> <span>Edit</span>  <br />
+                                                </a>
+                                                <div class='dropdown-divider m-0'></div>
+                                                                                                            `;
+                                }
+
+                                var viewHtml = `
+                                                <a href='' target='_blank' class='text-decoration-none text-black ms-3 mt-1'>
+                                                    <i class='bi bi-eye pe-1'></i> <span>View</span>  <br />
+                                                </a>
+
+                                                                                           `;
+                                var copyHtml = `
+                                                <a href='${copySales}' class='text-decoration-none text-black ms-3 mt-1'>
+                                                    <i class='bi bi-pencil-square pe-1'></i> <span>Use</span>  <br />
+                                                </a>
+
+                                                                                           `;
+                                var copyHtmlForExpense = `
+                                                <a href='${copyExpense}' class='text-decoration-none text-black ms-3 mt-1'>
+                                                    <i class='bi bi-pencil-square pe-1'></i> <span>Use</span>  <br />
+                                                </a>
+
+                                                                                           `;
+                                var copyHtmlFortransaction = `
+                                                                <a href='${transactionCopyUrl}' class='text-decoration-none text-black ms-3 mt-1'>
+                                                            <i class='bi bi-pencil-square pe-1'></i> <span>Use</span>  <br />
+                                                        </a>
+
+                                                                                                   `;
+
+
+
+                                var deleteHtmlForSales;
+                                if (data.IsDelete == 0) {
+                                    deleteHtmlForSales = `
+                                                <a onclick='${inActiveForSales}' class='text-decoration-none text-black ms-3 mt-1' href='#' id='InActive'>
+                                                    <i class="bi bi-trash3"></i><span class='ms-1 mt-2'>Delete</span><br />
+                                                </a>
+                                                                            `;
+                                }
+                                var deleteHtmlForExpense;
+                                var deleteHtmlForTrxn;
+                                if (data.IsDelete == 0) {
+                                    deleteHtmlForExpense = `
+                                                <a onclick='${inActiveForExpense}' class='text-decoration-none text-black ms-3 mt-1' href='#' id='InActive'>
+                                                    <i class="bi bi-trash3"></i><span class='ms-1 mt-2'>Delete</span><br />
+                                                </a>
+                                                                            `;
+                                    deleteHtmlForTrxn = `
+                                                                <a onclick='${transactionDeleteUrl}' class='text-decoration-none text-black ms-3 mt-1' href='#' id='InActive'>
+                                                            <i class="bi bi-trash3"></i><span class='ms-1 mt-2'>Delete</span><br />
+                                                        </a>
+                                                                                    `;
+                                }
+                                 var editForExpense = `
+                                                                           <a href='${myUrlGetForExpense}'  target='_blank' class='text-decoration-none text-black ms-3 mt-1'>
+                                                                <i class='bi bi-pencil-square pe-1'></i><span class='ms-1 mt-2'>Edit</span>
+                                                            </a>
+                                                                    <div class='dropdown-divider m-0'></div>
+                                                                      `;
+                                var editFortransaction = `
+                                                                                           <a href='${transactionEditUrl}'  target='_blank' class='text-decoration-none text-black ms-3 mt-1'>
+                                                                        <i class='bi bi-pencil-square pe-1'></i><span class='ms-1 mt-2'>Edit</span>
+                                                                    </a>
+                                                                            <div class='dropdown-divider m-0'></div>
+                                                                              `;
+                                if (data.SalesId !== null) {
+
+                                    var statusDependentHtml = data.isPosted ? viewHtml : editHtml + copyHtml + deleteHtmlForSales;
+                                }
+                                else
+                                if (data.PurchaseId !== null)
+                                {
+                                        var statusDependentHtml = data.isPosted ? viewHtml : editForExpense + copyHtmlForExpense + deleteHtmlForExpense;
+                                }
+                                else 
+                                {
+                                        var statusDependentHtml = data.isPosted ? viewHtml : editFortransaction + copyHtmlFortransaction + deleteHtmlForTrxn;
+                                }
+                                
+                                var paymentGet = `@Url.Action("ReceivePaymentQB", "Sales")?id=${data.SalesId}`;
+                                if (data.DocType == 'Invoice' || data.DocType == 'Sales') {
+                                    var html = `
+                                            <div class='dropdown ms-1'>
+
+                                                        <a href='${myUrlGetforInvoice}' class='text-decoration-none  ms-3 mt-1'>
+                                                    Edit
+                                                </a>
+                                                <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                <ul class='dropdown-menu item-menu' aria-labelledby='dropdownMenuButton1'>
+                                                    ${statusDependentHtml}
+
+                                                </ul>
+                                            </div>
+                                                                                              `;
+
+                                    return html;
+                                }
+                                else {
+                                    if (data.DocType == 'Credit Note') {
+                                        var html = `
+                                                    <div class='dropdown ms-1'>
+
+                                                        <a href='${myUrlGetforCreditNote}' class='text-decoration-none  ms-3 mt-1'>
+                                                            Edit
+                                                        </a>
+                                                        <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                        <ul class='dropdown-menu item-menu' aria-labelledby='dropdownMenuButton1'>
+                                                            ${statusDependentHtml}
+
+                                                        </ul>
+                                                    </div>
+                                                                                                 `;
+
+                                        return html;
+                                    }
+                                    else {
+                                        if (data.DocType == 'Estimate') {
+                                            var html = `
+                                                        <div class='dropdown ms-1'>
+
+                                                            <a href='${myUrlGetforEstimate}' class='text-decoration-none  ms-3 mt-1'>
+                                                                Edit
+                                                            </a>
+                                                            <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                            <ul class='dropdown-menu item-menu' aria-labelledby='dropdownMenuButton1'>
+                                                                ${statusDependentHtml}
+
+                                                            </ul>
+                                                        </div>
+                                                                              `;
+
+                                            return html;
+                                        }
+                                        if (data.DocType == 'Sales order') {
+                                            var html = `
+                                                        <div class='dropdown ms-1'>
+
+                                                            <a href='${myUrlGetforSalesOrder}' class='text-decoration-none  ms-3 mt-1'>
+                                                                Edit
+                                                            </a>
+                                                            <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                            <ul class='dropdown-menu item-menu' aria-labelledby='dropdownMenuButton1'>
+                                                                ${statusDependentHtml}
+
+                                                            </ul>
+                                                        </div>
+                                                                                      `;
+
+                                            return html;
+                                        }
+                                        if (data.DocType == 'Sales receipt') {
+                                            var html = `
+                                                        <div class='dropdown ms-1'>
+
+                                                            <a href='${myUrlGetforSalesReceipt}' class='text-decoration-none  ms-3 mt-1'>
+                                                                Edit
+                                                            </a>
+                                                            <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                            <ul class='dropdown-menu item-menu' aria-labelledby='dropdownMenuButton1'>
+                                                                ${statusDependentHtml}
+
+                                                            </ul>
+                                                        </div>
+                                                                                              `;
+
+                                            return html;
+                                        }
+                                        if (data.DocType == 'Delayed Charge') {
+                                            var html = `
+                                                        <div class='dropdown ms-1'>
+
+                                                            <a href='${myUrlGetforDelayedCharge}' class='text-decoration-none  ms-3 mt-1'>
+                                                                Edit
+                                                            </a>
+                                                            <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                            <ul class='dropdown-menu item-menu' aria-labelledby='dropdownMenuButton1'>
+                                                                ${statusDependentHtml}
+
+                                                            </ul>
+                                                        </div>
+                                                                                                  `;
+
+                                            return html;
+                                        }
+                                        else
+                                            if (data.CustomerOrSupplier !== "") {
+                                            var html = `
+                                                        <div class='dropdown ms-1'>
+
+                                                            <a href='${myUrlGetForExpense}' class='text-decoration-none  ms-3 mt-1'>
+                                                                Edit
+                                                            </a>
+                                                            <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                            <ul class='dropdown-menu item-menu' aria-labelledby='dropdownMenuButton1'>
+                                                                ${statusDependentHtml}
+
+                                                            </ul>
+                                                        </div>
+                                                                                                  `;
+
+                                            return html;
+                                        }
+                                        else
+                                        {
+                                            var html = `
+                                                                            <div class='dropdown ms-1'>
+
+                                                                                        <a href='${transactionEditUrl}' class='text-decoration-none  ms-3 mt-1'>
+                                                                                    Edit
+                                                                                </a>
+                                                                                <button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>
+                                                                                <ul class='dropdown-menu item-menu' aria-labelledby='dropdownMenuButton1'>
+                                                                                    ${statusDependentHtml}
+
+                                                                                </ul>
+                                                                            </div>
+                                                                                                                      `;
+
+                                            return html;
+                                        }
+
+                                    }
+
+                                }
+                            },
+                            visible: true, cellClick: function (e, cell) {
+                                // Add a custom class to the cell when it's clicked
+                                cell.getElement().classList.add('active-cell');
+                            },
+                        },
+
+                    ],
+
+                });
+                // document.getElementById("print-pdf").addEventListener("click", function () {
+                //     table.print(false, true);
+                // });
+                // document.getElementById("print-excel").addEventListener("click", function () {
+                //     table.download("xlsx", "table.xlsx", { sheetName: "Table Data" });
+                // });
+            });
+
+
+        }
+    </script>
+    
+}

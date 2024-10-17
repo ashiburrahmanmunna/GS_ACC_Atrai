@@ -1,0 +1,979 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Daily Production";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+    List<SelectListItem> insertionTypeList = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "Entry", Value = "Entry" },
+        new SelectListItem { Text = "Transfer", Value = "Transfer" },
+    };
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        /* border-right: 1px solid #dee2e6; */
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    .tabulator-cell{
+        font-family: Arial, sans-serif; 
+        font-size: 12px; 
+        color: #000; 
+    }
+
+    .tabulator-col-title {
+        font-size: 14px;
+        color: #000;
+    }
+    #example-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+    .column-color1 {
+        background-color: #FFC0CB; /* Light Pink */
+    }
+
+    .column-color2 {
+        background-color: #ADD8E6; /* Light Blue */
+    }
+
+    .column-color3 {
+        background-color: #98FB98; /* Pale Green */
+    }
+    .column-color4 {
+        background-color: #FA8870; /* Pale Green */
+    }
+    .column-color5 {
+        background-color: #DAF7A6 ;/* Pale Green */
+    }
+
+    #modal-content2 {
+        background-color: #fefefe;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 30%;
+    }
+
+    #modal-content3 {
+        background-color: #fefefe;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 60%;
+    }
+
+    .icon-style {
+        color: green;
+        font-size: 30px;
+    }
+</style>
+
+<div >
+    <h3 style="border-bottom: 1px solid gray">Daily Production</h3>
+    <div class="d-flex mb-3">
+        <div>
+            <input type="text" id="Id" class="form-control d-none" value="0">
+            <label><strong>Style</strong></label>
+            <input type="text" placeholder="Search Style" id="style-name" class="form-control" style="padding:1px;">
+            <input type="text" placeholder="Search Style" id="style-id" class="form-control d-none">
+            <span class="text-danger" id="DeptId-validation"></span>
+        </div>
+        <div class="ms-4">
+            <label><strong>Lot</strong></label>
+            <select id="buyer_po" class="form-control"  onchange="loadButtonDisable()">
+                <option value="">Select Buyer PO</option>
+            </select>
+        </div>
+        <div class="ms-4">
+            <label><strong>Color</strong></label>
+            <input type="text" id="Color" class="form-control" style="padding:1px;">
+        </div>
+        <div class="ms-4">
+            <label><strong>Size</strong></label>
+            <input type="text" id="Size" class="form-control" style="padding:1px;">
+        </div>
+        <div class="ms-4">
+            <label><strong>Status</strong></label>
+            <select id="DeptId" class="form-control" onchange="checkValidation()">
+                <option value="">Select Department</option>
+            </select>
+            <span class="text-danger" id="DeptId-validation"></span>
+        </div>
+        <div class="ms-4 d-flex">
+            <div>
+                <label><strong>Type</strong></label>
+                @Html.DropDownList("insertionTypeList", insertionTypeList as List<SelectListItem>, new { id = "insertionTypeId", @class = "wide-dropdown form-select form-select-sm", onchange = "loadButtonDisable()" })
+            </div>
+            <div class="mt-2 d-none" id="plusicon">
+                <i class="bi bi-file-plus-fill icon-style" onclick="insertionTypeCriteria()"></i>
+            </div>
+            
+        </div>
+        <div class="ms-4">
+            <label><strong>Company</strong></label>
+            <select id="Company" class="form-control">
+                <option value="">Select Company</option>
+            </select>
+        </div>
+        <div class="ms-4">
+            <label><strong>Date</strong></label>
+            <input class="form-control custom-height" id="start-date" autocomplete="off" style="height: 28px;"/>
+        </div>
+        <button type="button" class="btn btn-primary mt-3 ms-4" id="loadButton" onclick="loadData()" @(ViewBag.ActionType == "Edit" ? "disabled" : "")>Load</button>
+    </div>
+    <div class="d-flex justify-content-end">
+        <button title="Print" class="btn btn-white border-0" type="button" id="salesPrint-pdf" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-printer fs-5" style=" margin-right: 0px; "></i>
+        </button>
+        <button title="Export to excel" class="btn btn-white border-0" type="button" id="salesPrint-excel" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-file-earmark-excel fs-5" style=" margin-right: 0px; "></i>
+        </button>
+        <div title="Settings" class="dropdown1  custom-grid" style="display:inline-block;margin-left: 10px;">
+            @*<button class="btn btn-white border-0" type="button">
+            <i class="bi bi-gear fs-5"></i>
+            </button>*@
+            <a href="#" class="text-decoration-none text-black" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+               aria-expanded="false">
+                <i class="bi bi-gear fs-5"></i>
+            </a>
+            <div class="dropdown-menu gear-dropdown" aria-labelledby="dropdownMenuButton-sales">
+                <div class="row p-4 main-dropdown-size" style="overflow:hidden;">
+                    <div class="col">
+                        <span class="fw-bold ms-3">Columns</span>
+                        <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                        <ul class="list-unstyled">
+                            <li>
+                                <div id="salesColumnList" class="custom-grid">
+                                </div>
+                            </li>
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+    <div >
+        <div id="example-table"></div>
+    </div>
+
+    <div style="padding-bottom: 100px;">
+
+        @if (ViewBag.ActionType == "Edit")
+        {
+            <button class="btn btn-success" id="BtnSave" style="float:right;">Update</button>
+        }
+        else if (ViewBag.ActionType == "Create")
+        {
+            <button class="btn btn-success" id="BtnSave" style="float:right;">Save</button>
+        }
+        <button class="btn btn-warning" onclick="gotoInvoiceList()" style="float: right; margin-right: 10px;"><span style="color: white">Back to List</span></button>
+    </div>
+</div>
+
+<div class="col-md-2  col-2">
+    <div id="customModal" class="modal">
+        <div class="modal-content" id="modal-content2">
+            <strong><p style="color: black">Total quantity should be greater than 0</p></strong>
+            <div class="row">
+                
+                <div class="col-md-12 col-12 d-flex justify-content-end">
+                    <button id="cancelBtn" class="btn btn-danger" style="width: 100px">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-2  col-2">
+    <div id="transferModal" class="modal">
+        <div class="modal-content" id="modal-content3">
+            <h6 style="text-align:center;"><strong><u>Daily Production List</u></strong></h6>
+            <div id="dailyProductionList"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+
+    <script>
+        $('#buyer_po').select2();
+        $('#Company').select2();
+        $('#DeptId').select2();
+        $('#insertionTypeId').select2();
+
+        var modal = document.getElementById("customModal");
+        document.getElementById("cancelBtn").onclick = function () {
+            modal.style.display = "none";
+        };
+
+        function gotoInvoiceList() {
+            window.location.href = '@Url.Action("BuyerPOList", "BuyerOrder", new { Type = "DeptWise_Daily_Production" })';
+        }
+
+        $(function () {
+
+            $("#start-date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy",
+                onSelect: function (dateText, inst) {
+                    //getverifyFiscalMonth(dateText);
+                }
+            }).attr('readonly', 'readonly');
+
+            $("#style-name").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "@Url.Action("SearchStyle", "BuyerOrder")",
+                        dataType: "json",
+                        data: {
+                            term: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 1,
+                focus: function (event, ui) {
+                    event.preventDefault();
+                    $("#style-name").val(ui.item.label);
+                },
+                select: function (event, ui) {
+
+                    $("#style-name").val(ui.item.label);
+                    $("#style-id").val(ui.item.value);
+
+                    handleSelectedStyle(ui.item.value);
+                    return false;
+                }
+            });
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetComercialCompany", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#Company').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetDepartments", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#DeptId').append('<option value="' + value.Id + '" >' + value.DeptName + '</option>');
+                });
+            }
+        });
+
+        function handleSelectedStyle(styleId) 
+        {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetBuyersPOStyleWise", "BuyerOrder")',
+                data: {styleId: styleId},
+                datatype: "Json",
+                success: function (data) {
+                    $('#buyer_po').empty();
+                    $('#buyer_po').append('<option value="">Select Buyer PO</option>');
+                    $.each(data, function (index, value) {
+                        $('#buyer_po').append('<option value="' + value.Id + '" >' + value.BuyerPO + '</option>');
+                    });
+                }
+            });
+        }
+    </script>
+
+    <script>
+        var columns = [
+            { title: "SL.", field: "SLNo", headerSort: false, frozen: true, width: '2px', bottomCalc: "count", hozAlign: "right" },
+            { title: "Id", field: "Id", visible: false },
+            { title: "StyleId", field: "StyleId", visible: false },
+            { title: "Style", field: "Style", vertAlign: "middle", },
+            { title: "BuyerPOId", field: "BuyerPOId", visible: false },
+            { title: "BuyerPOId", field: "ParentBuyerPOId", visible: false },
+            { title: "LotNo", field: "BuyerPO", vertAlign: "middle", },
+            { title: "ColorId", field: "ColorId", searchable: true, visible: false },
+            { title: "Color", field: "Color", searchable: true, visible: true, headerFilter: true },
+            { title: "SizeId", field: "SizeId", searchable: true, visible: false },
+            { title: "Size", field: "Size", searchable: true, vertAlign: "middle", headerFilter: true },
+            { title: "T.Qty", field: "TQty", vertAlign: "middle", searchable: true, bottomCalc: "sum", cssClass: "column-color1", hozAlign: "center" },
+            { title: "C.Qty", field: "CQty", vertAlign: "middle", searchable: true, bottomCalc: "sum", cssClass: "column-color2", hozAlign: "center" },
+            { title: "SW.Qty", field: "SWQty", searchable: true, visible: false, bottomCalc: "sum", cssClass: "column-color3", hozAlign: "center" },
+            { title: "W.Qty", field: "WQty", searchable: true, visible: true, bottomCalc: "sum", cssClass: "column-color4", hozAlign: "center" },
+            { title: "Grade A Qty", field: "GradeAQty", visible: false, searchable: true, editor: "input", bottomCalc: "sum", hozAlign: "center" },
+            { title: "Grade B Qty", field: "GradeBQty", visible: false, searchable: true, editor: "input", bottomCalc: "sum", hozAlign: "center" },
+            { title: "Grade C Qty", field: "GradeCQty", visible: false, searchable: true, editor: "input", bottomCalc: "sum", hozAlign: "center" },
+            {
+                title: "DATE",
+                field: "ProductionDate",
+                editor: "input",
+                editorParams: {
+                    dateFormat: "d-M-y", 
+                },
+                cellEdited: function (cell) {
+                    cell.getRow().update({ "ProductionDate": cell.getValue() });
+                },
+                editor: function (cell, onRendered, success, cancel, editorParams) {
+                    var input = document.createElement("input");
+                    input.type = "text";
+                    input.style.width = "100%";
+                    input.value = cell.getValue() || "";
+
+                    var flatpickrInstance = flatpickr(input, editorParams);
+
+                    flatpickrInstance.config.onClose.push(function (selectedDates, dateStr) {
+                        cell.setValue(dateStr);
+                        success(dateStr);
+                    });
+
+                    onRendered(function () {
+                        input.focus();
+                    });
+
+                    return input;
+                },
+            },
+            { title: "LayNo", field: "LayNo", visible: true, searchable: true, editor: "input" },
+            { title: "Utilization", field: "Utilization", visible: true, searchable: true, editor: "input" },
+            { title: "Width", field: "Width", visible: true, searchable: true, editor: "input" },
+            { title: "W.No", field: "WNo", visible: false, searchable: true, editor: "input" },
+            { title: "S.No", field: "SNo", visible: false, searchable: true, editor: "input" },
+            { title: "C.No", field: "CNo", visible: true, searchable: true, editor: "input" },
+            { title: "F.No", field: "FNo", visible: false, searchable: true, editor: "input" },
+
+            { title: "Qty", field: "TQty2", visible: true, searchable: true, editor: "input", bottomCalc: "sum", hozAlign: "center" },
+
+
+            { title: "W.SlipNo", field: "WSlipNo", visible: false, searchable: true, editor: "input" },
+
+
+            { title: "S.SlipNo", field: "SSlipNo", visible: false, searchable: true, editor: "input" },
+
+            
+            { title: "C.SlipNo", field: "CSlipNo", visible: true, searchable: true, editor: "input" },
+
+
+            { title: "Qty(B)", field: "QtyB", visible: false, searchable: true, editor: "input", bottomCalc: "sum", hozAlign: "center" },
+            { title: "Qty(C)", field: "QtyC", visible: false, searchable: true, editor: "input", bottomCalc: "sum", hozAlign: "center" }
+        ];
+
+        var deleteColumn = {
+            title: "",
+            field: "Delete",
+            movable: false,
+            formatter: function (cell, formatterParams) {
+                return "<i class='fas fa-trash-alt delete-icon'></i>";
+            },
+            width: 30,
+            headerSort: false,
+            cellClick: function (e, cell) {
+                var rowData = cell.getRow().getData();
+                var row = cell.getRow();
+                deleteRow(row);
+            }
+        };
+
+        columns.push(deleteColumn);
+
+        var table = new Tabulator("#example-table", {
+            layout: "fitColumns",
+            columns: columns,
+            pagination: true, // Enable pagination
+            paginationMode: "local", // Set pagination mode to local (client-side)
+            paginationSize: 10, // Number of rows per page
+            paginationInitialPage: 1, // Optional: Specify the initial page
+            paginationSizeSelector: [5, 10, 25, 50, 100, 500, 1000],
+
+        });
+
+        var columnListSales = $("#salesColumnList");
+        $.each(columns, function (index, field) {
+            ////console.log("GLOBAL 2::",field);
+            var title = field.title;
+            var name = field.field;
+            var visible = true;
+            if (field.visible == false) {
+                visible = false;
+            }
+            titles = `<li>
+                                     <a class="dropdown-item" href="#">
+                                     <div class="custom-control custom-checkboxs" >
+                                     <input type="checkbox" class="custom-control-input title-input" id="${name}" value="${name}">
+                                             <label class="custom-control-label w-100 cursor-pointer" id="${name}" for="${name}">${title}</label>
+                                     </div>
+                                     </a>
+                                     </li>`;
+            columnListSales.append(titles);
+
+            document.querySelector(`#${name}`).addEventListener('click', function (event) {
+                var checkbox = event.target;
+                var isChecked = checkbox.checked;
+
+                if (isChecked) {
+                    table.showColumn(name);
+                } else {
+                    table.hideColumn(name);
+                }
+            });
+
+
+            $(`${'#' + name}`).prop('checked', visible);
+
+
+            $('.custom-control-label').on('click', function (e) {
+                e.stopPropagation();
+            });
+            $('#dropdown-titles').on('click', function (e) {
+                e.stopPropagation();
+            });
+
+            
+
+        });
+
+        document.getElementById("salesPrint-pdf").addEventListener("click", function () {
+            table.print(false, true);
+        });
+        document.getElementById("salesPrint-excel").addEventListener("click", function () {
+            table.download("xlsx", "table.xlsx", { sheetName: "Table Data" });
+        });
+
+        function deleteRow(row) {
+            if (confirm("Are you sure you want to delete this row?")) {
+                table.deleteRow(row);
+                renumberRows();
+            }
+
+        }
+
+        function renumberRows() {
+            var rows = table.getRows();
+            //console.log(rows);
+            rows.forEach(function (row, index) {
+                row.update({ SLNo: index + 1 });
+            });
+        }
+
+        function hideColumnsByDept(deptText) {
+            var allColumns = table.getColumns();
+
+            allColumns.forEach(function (column) {
+                var field = column.getField();
+                if (field === 'SLNo' || field === 'Style' || field === 'BuyerPO' || field === 'Size' || field === 'Color' || field === 'TQty' || field === 'CQty'  || field === 'Delete' ) {
+                    column.show(); 
+                } else {
+                    if (deptText === 'Washing' && (field === 'ProductionDate' || field === 'WNo' || field === 'WSlipNo' || field === 'TQty2' || field === 'SWQty' || field === 'WQty')) {
+                        column.show();
+                    }
+                    else if (deptText === 'Cutting' && (field === 'ProductionDate' || field === 'CNo' || field === 'CSlipNo' || field === 'TQty2' || field === 'LayNo' || field === 'Utilization' || field === 'Width')) {
+                        column.show();
+                    }
+                    else if (deptText === 'Sewing' && (field === 'ProductionDate' || field === 'SNo' || field === 'SSlipNo' || field === 'TQty2' || field === 'SWQty')) {
+                        column.show();
+                    }
+                    else if (deptText === 'Finishing' && (field === 'GradeAQty' || field === 'GradeBQty' || field === 'GradeCQty' || field === 'ProductionDate' || field === 'FNo' || field === 'TQty2' || field === 'QtyB' || field === 'QtyC' || field === 'SWQty' || field === 'WQty')) {
+                        column.show();
+                    } 
+                    else {
+                        column.hide();
+                    }
+                }
+            });
+
+            
+            table.redraw();
+        }
+
+
+        $('#DeptId').on('change', function () {
+            var selectedDeptText = $(this).find('option:selected').text();
+            hideColumnsByDept(selectedDeptText);
+        });
+
+        function initializeTabulator(data) {
+            if (table) {
+                data.forEach(function (row, index) {
+                    var dateObj = new Date(row.ProductionDate);
+
+                    row.ProductionDate = dateObj.getDate() + '-' +
+                        new Intl.DateTimeFormat('en-us', { month: 'short' }).format(dateObj) + '-' +
+                        (dateObj.getFullYear() + '').slice(-2);
+
+                    row.SLNo = index + 1;
+                });
+                table.setData(data);
+            } else {
+                table = new Tabulator("#example-table", {
+                    height: "311px",
+                    layout: "fitColumns",
+                    addRowPos: "bottom",
+                    columns: columns,
+                    data: data,
+                });
+            }
+        }
+
+        function loadData()
+        {
+            var styleId = $("#style-id").val();
+            var color = $("#Color").val();
+            var size = $("#Size").val();
+            var date = $("#start-date").val();
+            var buyerPOId = $("#buyer_po").val() == null ? 0 : $("#buyer_po").val();
+            $.ajax({
+
+                url: '@Url.Action("PopulateDeptWiseTable", "BuyerOrder")',
+                type: 'Get',
+                data: { styleId: styleId, color: color, size: size, buyerPOId: buyerPOId, defaultDate: date },
+                async: false,
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (response) {
+                    initializeTabulator(response.data);
+                },
+                error: function (error) {
+                    console.log("Error");
+                }
+            });
+        }
+
+        function checkValidation() {
+            $("#DeptId-validation").html("");
+            loadButtonDisable();
+
+        }
+
+        function gatherData() {
+
+            var rows = table.getData();
+
+            var dataList = [];
+
+            var totalAmount = 0;
+
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+
+            rows.forEach(function (row) {
+
+                var quantityValue = parseInt(row["TQty2"]) || 0;
+                var quantityBValue = parseInt(row["QtyB"]) || 0;
+                var quantityCValue = parseInt(row["QtyC"]) || 0;
+
+                totalAmount += (quantityValue + quantityBValue + quantityCValue);
+
+                var rowData = {
+                    "Id": row["Id"],
+                    "StyleId": row["StyleId"],
+                    "BuyerPOId": row.BuyerPOId,
+                    "ParentBuyerPOId": row.ParentBuyerPOId,
+                    "ColorId": row.ColorId,
+                    "SizeId": row.SizeId,
+                    "TQty": row.TQty,
+                    "LayNo": row.LayNo,
+                    "Utilization": parseFloat(row.Utilization) ,
+                    "Width": parseFloat(row.Width) ,
+                    "TQty2": parseInt(row["TQty2"]) || 0,
+                    "ProductionDate": row.ProductionDate,
+                    "WNo": row.WNo,
+                    "WSlipNo": row.WSlipNo,
+                    "SNo": row.SNo,
+                    "SSlipNo": row.SSlipNo,
+                    "CNo": row.CNo ,
+                    "CSlipNo": row.CSlipNo,
+                    "FNo": row.FNo,
+                    "QtyB": row.QtyB,
+                    "QtyC": row.QtyC,
+                    "GradeAQty": row.GradeAQty,
+                    "GradeBQty": row.GradeBQty,
+                    "GradeCQty": row.GradeCQty,
+                    "DepartmentId": $("#DeptId").val(),
+                    "ComId": ComId,
+                    "LuserId": UserId
+                };
+
+                dataList.push(rowData);
+            });
+
+
+            var orderData = {
+                Id: $("#Id").val(),
+                StyleId: $("#style-id").val(),
+                BuyerPOId: $("#buyer_po").val(),
+                DepartmentId: $("#DeptId").val(),
+                TotalQuantity: totalAmount,
+                DailyProduction_Details: dataList,
+                Type: $("#insertionTypeId").val()
+            };
+            return orderData;
+        }
+
+        function sendDataToServer() {
+            var orderData = gatherData();
+            if (orderData.TotalQuantity == 0 && orderData.Type == "Entry") {
+                var modal = document.getElementById("customModal");
+                modal.style.display = "block";
+            }
+            else {
+                var data = JSON.stringify(orderData);
+                $("#DeptId-validation").html("");
+
+                $.ajax({
+
+                    url: '@Url.Action("DeptWiseDailyProductionCreation", "BuyerOrder")',
+                    type: 'POST',
+                    data: data,
+                    async: false,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (response) {
+                        toastr.success(response.message, "", {
+                            "toastClass": "toast-green",
+                        });
+                        setTimeout(function () {
+
+                            var Type = "DeptWise_Daily_Production";
+
+                            window.location.href = '@Url.Action("BuyerPOList", "BuyerOrder")' + '?Type=' + encodeURIComponent(Type);
+
+                        }, 1000);
+                    },
+                    error: function (error) {
+                        console.log("Error");
+                    }
+                });
+            }
+            
+        }
+        var saveButton = document.getElementById('BtnSave');
+        saveButton.addEventListener('click', function () {
+            if ($("#DeptId").val() == "") {
+                $("#DeptId-validation").html("Choose a Department");
+            }
+            else {
+                sendDataToServer();
+            }
+        });
+
+        function handleSelectedStyleForEdit(styleId, buyerPOId) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetBuyersPOStyleWise", "BuyerOrder")',
+                data: { styleId: styleId },
+                dataType: "json",
+                success: function (data) {
+                    $('#buyer_po').empty(); // Clear existing options
+                    $('#buyer_po').append('<option value="">Select Buyer PO</option>'); // Add default option
+                    $.each(data, function (index, value) {
+                        $('#buyer_po').append('<option value="' + value.Id + '">' + value.BuyerPO + '</option>'); // Add BuyerPO options
+                    });
+                    
+                    if (buyerPOId) {
+                        $('#buyer_po').val(buyerPOId).trigger('change');
+                    }
+                },
+                error: function (error) {
+                    console.log("Error fetching BuyerPOs:", error);
+                }
+            });
+        }
+
+
+        $(document).ready(function () {
+
+            var modal = document.getElementById('transferModal');
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+            if ('@actiontype' === "Edit") {
+
+                OrderDetails();
+
+
+                function OrderDetails() {
+
+
+                    function fetchColumnsData() {
+                        var id = @ViewBag.Id;
+                        return $.ajax({
+                            url: '@Url.Action("GetDeptWiseDailyProductionDetails", "BuyerOrder")',
+                            data: { id: id },
+                            method: 'GET',
+                            dataType: 'json',
+                        });
+                    }
+
+                    fetchColumnsData()
+                        .done(function (response) {
+                            if (response.Success == 1) {
+                                var model = response.masterdata;
+                                handleSelectedStyleForEdit(model.StyleId, model.BuyerPOId);
+                                $("#buyer_po").val(model.BuyerPOId).trigger('change');
+                                $("#DeptId").val(model.DepartmentId).trigger('change');
+                                $("#style-id").val(model.StyleId);
+                                $("#Id").val(model.Id);
+                                $("#style-name").val(model.Style.StyleNo);
+                                $("#insertionTypeId").val(model.Type).trigger('change');
+                                //console.log(response.dataTable1);
+
+                                var data = response.data;
+                                initializeTabulator(data);
+
+                            }
+                        })
+                        .fail(function (error) {
+                            console.error('Error fetching column data:', error);
+                        });
+
+                }
+
+
+            }
+        });
+
+
+        function insertionTypeCriteria() {
+            var insertionTypeId = $("#insertionTypeId").val();
+            var modal = document.getElementById("transferModal");
+            var button = document.getElementById('loadButton');
+
+            var styleId = $("#style-id").val();
+            var buyerPOId = $("#buyer_po").val() == null ? 0 : $("#buyer_po").val();
+
+            if (insertionTypeId == 'Transfer' && styleId !== '' && buyerPOId !== '') {
+
+                modal.style.display = "block";
+                button.disabled = true;
+
+                $.ajax({
+                    type: "get",
+                    url: '@Url.Action("GetDailyProductionStyleBuyerPOWise", "BuyerOrder")',
+                    data: { styleNo: styleId, buyerPOId: buyerPOId },
+                    success: function (response) {
+                        var model = response.data;
+
+                        var tableData = modalTable.getData();
+                        if (tableData.length === 0) {
+                            modalTable.setData(model);
+                        } 
+                        else {
+                            var firstRow = tableData[0];
+                            if (firstRow.StyleId != styleId ) {
+
+                                modalTable.setData(model);
+                            } else {
+                                console.log("Data already matches the current criteria, not updating the table.");
+                            }
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Error fetching data:", error);
+                    }
+                });
+
+            } else {
+                modal.style.display = "none";
+                button.disabled = false;
+            }
+        }
+
+
+        function loadButtonDisable()
+        {
+            var button = document.getElementById('loadButton');
+            var insertionTypeId = $("#insertionTypeId").val();
+
+            var styleId = $("#style-id").val();
+            var buyerPOId = $("#buyer_po").val() == null ? 0 : $("#buyer_po").val();
+
+            var DeptId = $('#DeptId option:selected').text();
+
+
+            if (insertionTypeId == 'Transfer' && styleId !== '' && buyerPOId !== '' && DeptId == 'Finishing') {
+
+                button.disabled = true;
+                $("#plusicon").removeClass('d-none');
+            }
+            else {
+                button.disabled = false;
+                $("#plusicon").addClass('d-none');
+            }
+        }
+        var modalcolumns = [
+            {
+                title: "Add",
+                field: "Add",
+                movable: false,
+                hozAlign: "center",
+                formatter: function (cell, formatterParams) {
+                    return "<i class='bi bi-plus-square-fill' style='color: green; font-size: 20px;'></i>";
+                },
+                headerSort: false,
+                cellClick: function (e, cell) {
+                    var rowData = cell.getRow().getData();
+                    var row = cell.getRow();
+                    var selectedOptionText = $("#buyer_po").find(":selected").text();
+                    var selectedOptionval = $("#buyer_po").val();
+
+                    rowData.ProductionDate = moment().format('DD-MMM-YY');
+                    rowData.BuyerPO = selectedOptionText;
+                    rowData.ParentBuyerPOId = rowData.BuyerPOId;
+                    rowData.BuyerPOId = selectedOptionval;
+                    // Add row to the main table
+                    table.addRow(rowData);
+
+                    // Remove row from the modal table
+                    modalTable.deleteRow(row);
+                }
+            },
+            { title: "Id", field: "Id", visible: false },
+            { title: "StyleId", field: "StyleId", visible: false },
+            { title: "Style", field: "Style", vertAlign: "middle", },
+            { title: "BuyerPOId", field: "BuyerPOId", visible: false },
+            { title: "LotNo", field: "BuyerPO", vertAlign: "middle",headerFilter: true},
+            { title: "ColorId", field: "ColorId", searchable: true, visible: false },
+            { title: "Color", field: "Color", searchable: true, visible: true, headerFilter: true },
+            { title: "SizeId", field: "SizeId", searchable: true, visible: false },
+            { title: "Size", field: "Size", searchable: true, vertAlign: "middle", headerFilter: true },
+            { title: "T.Qty", field: "TQty", vertAlign: "middle", searchable: true, bottomCalc: "sum", cssClass: "column-color5", hozAlign: "center" },
+            { title: "C.Qty", field: "CQty", vertAlign: "middle", searchable: true, bottomCalc: "sum", cssClass: "column-color2", hozAlign: "center", visible: false},
+            { title: "SW.Qty", field: "SWQty", searchable: true, visible: false, bottomCalc: "sum", cssClass: "column-color3", hozAlign: "center", visible: false },
+            { title: "W.Qty", field: "WQty", searchable: true, visible: true, bottomCalc: "sum", cssClass: "column-color4", hozAlign: "center", visible: false },
+            { title: "Grade A Qty", field: "GradeAQty", visible: false, searchable: true, editor: "input", bottomCalc: "sum", hozAlign: "center", visible: false },
+            { title: "Grade B Qty", field: "GradeBQty", visible: true, searchable: true, editor: "input", bottomCalc: "sum", hozAlign: "center" },
+            { title: "Grade C Qty", field: "GradeCQty", visible: true, searchable: true, editor: "input", bottomCalc: "sum", hozAlign: "center" },
+            {
+                title: "DATE",
+                field: "ProductionDate",
+                editor: "input", visible: false,
+                editorParams: {
+                    dateFormat: "d-M-y",
+                },
+                cellEdited: function (cell) {
+                    cell.getRow().update({ "ProductionDate": cell.getValue() });
+                },
+                editor: function (cell, onRendered, success, cancel, editorParams) {
+                    var input = document.createElement("input");
+                    input.type = "text";
+                    input.style.width = "100%";
+                    input.value = cell.getValue() || "";
+
+                    var flatpickrInstance = flatpickr(input, editorParams);
+
+                    flatpickrInstance.config.onClose.push(function (selectedDates, dateStr) {
+                        cell.setValue(dateStr);
+                        success(dateStr);
+                    });
+
+                    onRendered(function () {
+                        input.focus();
+                    });
+
+                    return input;
+                },
+            },
+            { title: "LayNo", field: "LayNo", visible: false, searchable: true, editor: "input" },
+            { title: "Utilization", field: "Utilization", visible: false, searchable: true, editor: "input" },
+            { title: "Width", field: "Width", visible: false, searchable: true, editor: "input" },
+            { title: "W.No", field: "WNo", visible: false, searchable: true, editor: "input" },
+            { title: "S.No", field: "SNo", visible: false, searchable: true, editor: "input" },
+            { title: "C.No", field: "CNo", visible: false, searchable: true, editor: "input" },
+            { title: "F.No", field: "FNo", visible: false, searchable: true, editor: "input" },
+
+            { title: "Qty", field: "TQty2", visible: false, searchable: true, editor: "input", bottomCalc: "sum", hozAlign: "center" },
+
+
+            { title: "W.SlipNo", field: "WSlipNo", visible: false, searchable: true, editor: "input" },
+
+
+            { title: "S.SlipNo", field: "SSlipNo", visible: false, searchable: true, editor: "input" },
+
+
+            { title: "C.SlipNo", field: "CSlipNo", visible: false, searchable: true, editor: "input" },
+
+
+            { title: "Qty(B)", field: "QtyB", visible: false, searchable: true, editor: "input", bottomCalc: "sum", hozAlign: "center" },
+            { title: "Qty(C)", field: "QtyC", visible: false, searchable: true, editor: "input", bottomCalc: "sum", hozAlign: "center" }
+        ];
+
+
+        var modalTable = new Tabulator("#dailyProductionList", {
+            layout: "fitColumns",
+            addRowPos: "bottom",
+            columns: modalcolumns,
+            pagination: true,  
+            paginationMode: "local",  
+            paginationSize: 10,  
+            paginationInitialPage: 1,  
+            paginationSizeSelector: [5, 10, 25, 50, 100, 500, 1000],
+        });
+    </script>
+}

@@ -1,0 +1,324 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Approval Settings";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    .form-control {
+        border: 1px solid #adb5bd !important;
+    }
+
+    #example-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #393a3d;
+        color: #fff;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+</style>
+
+<div style="display: flex; justify-content: center; ">
+    <div style="background: #F4F4F4; padding: 20px; width:40%" class="row">
+        <div class="col-md-12 col-12 mb-3" style="display: flex; justify-content: center; ">
+            <h4><strong>Approval Settings</strong></h4>
+            <input id="Id" value="0" class="d-none" />
+        </div>
+        <div class="col-md-6 col-6 mb-3">
+            <label><strong>Doc Type</strong></label>
+            <select id="DocTypeId" class="form-control">
+                <option value="">Select Doctype</option>
+            </select>
+        </div>
+        <div class="col-md-6 col-6">
+            <label><strong>Approval Type</strong></label>
+            <select id="ApprovalTypeId" class="form-control" >
+                <option value="">Select Doctype</option>
+            </select>
+        </div>
+
+        <div class="col-md-6 col-6 mb-3">
+            <label><strong>Entry User</strong></label>
+            <select id="LuserIdEntry" class="form-control">
+                <option value="">Select User</option>
+            </select>
+        </div>
+        <div class="col-md-1 col-1"></div>
+
+        <div class="col-md-6 col-6 mb-3" id="checkUser">
+            <label><strong>Check User</strong></label>
+            <select id="LuserIdCheck" class="form-control">
+                <option value="">Select User</option>
+            </select>
+        </div>
+        <div class="col-md-1 col-1"></div>
+
+        <div class="col-md-6 col-6 mb-3" id="verifyUser">
+            <label><strong>Verify User</strong></label>
+            <select id="LuserIdVerify" class="form-control">
+                <option value="">Select User</option>
+            </select>
+        </div>
+        <div class="col-md-1 col-1"></div>
+
+        <div class="col-md-6 col-6 mb-3">
+            <label><strong>Apporval User</strong></label>
+            <select id="LuserIdApprove" class="form-control">
+                <option value="">Select User</option>
+            </select>
+        </div>
+        <div class="col-md-1 col-1"></div>
+        <div class="col-md-7"></div>
+        <div class="col-md-5">
+            @if (ViewBag.ActionType == "Edit")
+            {
+                <button class="btn btn-success" id="BtnSave" style="float:right;">Update</button>
+            }
+            else if (ViewBag.ActionType == "Create")
+            {
+                <button class="btn btn-success" id="BtnSave" style="float:right;">Save</button>
+            }
+            <button class="btn btn-warning" onclick="gotoInvoiceList()" style="float: right; margin-right: 10px;"><span style="color: white">Back to List</span></button>
+        </div>
+        
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+    <script>
+        $('select').select2();
+
+        function gotoInvoiceList() {
+            var editUrl = '@Url.Action("ApprovalSettings", "Admin")';
+            window.location.href = editUrl;
+        }
+
+        // Add event listener to the select element
+        $('#ApprovalTypeId').on('change', function () {
+            // Get the selected option
+            var selectedOption = $(this).find('option:selected');
+
+            // Get the value of the data-date attribute
+            var date = selectedOption.data('stage');
+
+            if (date == 1) {
+                $("#checkUser").addClass("d-none");
+                $("#verifyUser").addClass("d-none");
+            }
+            else if (date == 2) {
+                $("#checkUser").removeClass("d-none");
+                $("#verifyUser").addClass("d-none");
+            }
+            else 
+            {
+                $("#checkUser").removeClass("d-none");
+                $("#verifyUser").removeClass("d-none");
+            }
+        });
+
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetDocType", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+                //$('#doc_type').append('<option value="">Select Doc Type</option>');
+                $.each(data, function (index, value) {
+                    $('#DocTypeId').append('<option value="' + value.Id + '" >' + value.DocType + '</option>');
+                });
+            }
+        });
+        
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetApprovalType", "Admin")',
+            datatype: "Json",
+            success: function (data) {
+                //$('#doc_type').append('<option value="">Select Doc Type</option>');
+                $.each(data, function (index, value) {
+                    $('#ApprovalTypeId').append('<option value="' + value.Id + '" data-stage="' + value.ApprovalStage + '" >' + value.ApprovalType + '</option>');
+                });
+            }
+        });
+        
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetUser", "Admin")',
+            datatype: "Json",
+            success: function (data) {
+                //$('#doc_type').append('<option value="">Select Doc Type</option>');
+                $.each(data, function (index, value) {
+                    $('#LuserIdEntry').append('<option value="' + value.Id + '" >' + value.Name + '</option>');
+                    $('#LuserIdCheck').append('<option value="' + value.Id + '" >' + value.Name + '</option>');
+                    $('#LuserIdVerify').append('<option value="' + value.Id + '" >' + value.Name + '</option>');
+                    $('#LuserIdApprove').append('<option value="' + value.Id + '" >' + value.Name + '</option>');
+                });
+            }
+        });
+
+        function gatherData() {
+            var object = {
+                Id: $("#Id").val(),
+                DocTypeId: $("#DocTypeId").val(),
+                ApprovalTypeId: $("#ApprovalTypeId").val(),
+                LuserIdEntry: $("#LuserIdEntry").val(),
+                LuserIdCheck: $("#LuserIdCheck").val(),
+                LuserIdVerify: $('#LuserIdVerify').val(),
+                LuserIdApprove: $('#LuserIdApprove').val()
+            };
+
+            return object;
+        }
+
+
+        function sendDataToServer() {
+            var objData = gatherData();
+
+            var data = JSON.stringify(objData);
+
+            $.ajax({
+
+                url: '@Url.Action("ApprovalSettingsCreation", "Admin")',
+                type: 'POST',
+                data: data,
+                async: false,
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (response) {
+                    toastr.success(response.message, "", {
+                        "toastClass": "toast-green",
+                    });
+                    setTimeout(function () {
+
+                        window.location.href = '@Url.Action("ApprovalSettings", "Admin")';
+
+                    }, 1000);
+                },
+                error: function (error) {
+                    console.log("Error");
+                }
+            });
+        }
+
+        var saveButton = document.getElementById('BtnSave');
+        saveButton.addEventListener('click', function () {
+            sendDataToServer();
+        });
+
+        $(document).ready(function () {
+            
+            if ('@actiontype' === "Edit") {
+
+                docPrefixDetails();
+
+
+                function docPrefixDetails() {
+
+
+                    function fetchColumnsData() {
+                        var id = @ViewBag.Id;
+                        return $.ajax({
+                            url: '@Url.Action("GetDocApprovalSettingsDetails", "Admin")',
+                            data: { id: id },
+                            method: 'GET',
+                            dataType: 'json',
+                        });
+                    }
+
+                    fetchColumnsData({
+                        timeout: 1500
+                    })
+                        .done(function (response) {
+                            if (response.Success == 1) {
+                                var model = response.data;
+                                $("#Id").val(model.Id);
+                                $("#DocTypeId").val(model.DocTypeId).trigger('change');
+                                $("#LuserIdEntry").val(model.LuserIdEntry).trigger('change');
+                                $("#LuserIdApprove").val(model.LuserIdApprove).trigger('change');
+                                $("#LuserIdVerify").val(model.LuserIdVerify).trigger('change');
+                                $("#LuserIdCheck").val(model.LuserIdCheck).trigger('change');
+                                $("#ApprovalTypeId").val(model.ApprovalTypeId).trigger('change');
+                                
+                            }
+                        })
+                        .fail(function (error) {
+                            console.error('Error fetching column data:', error);
+                        });
+
+                }
+
+
+            }
+        });
+    </script>
+}

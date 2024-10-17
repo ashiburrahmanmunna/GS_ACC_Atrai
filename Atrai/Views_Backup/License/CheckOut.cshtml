@@ -1,0 +1,561 @@
+﻿
+
+@model Atrai.Core.Entity.SoftwarePackageModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Checkout";
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+    //var weburl = @HttpContextAccessor.HttpContext.Session.GetString("weburl").ToLower();
+
+    var CallBackUrlLink = @HttpContextAccessor.HttpContext.Session.GetString("CallBackUrlLink").ToLower();
+    var ComId = @HttpContextAccessor.HttpContext.Session.GetInt32("ComId");
+    var UserId = @HttpContextAccessor.HttpContext.Session.GetInt32("UserId");
+}   
+
+
+
+<style>
+
+
+    #bodyContent {
+        display: none;
+        height: 100%;
+        /*font-family: 'Roboto', sans-serif;*/
+        letter-spacing: 1px;
+    }
+
+    .card_title {
+        font-weight: 700;
+        font-size: 40px;
+    }
+
+    .pay_img {
+        width: 100px;
+        height: 50px;
+        cursor: pointer;
+    }
+
+    .card {
+        /*border-radius: 20px;*/
+        /*background-color: #99D4D3;*/
+        background-color: #6BB885;
+        box-shadow: 6px 6px 17px #d5d5d5, -6px -6px 17px #fff;
+        border: none;
+        /*color: #EFF4E0;*/
+        color: #fff;
+        /*        width: 354px;*/
+    }
+
+    .description_style {
+        background-color: #fff;
+    }
+
+    .card-text {
+        /*color: #05396B;*/
+        background-color: #F9E65D;
+        color: #1B4E8C;
+        font-weight: bold;
+        font-size: 30px;
+        padding: 8px 0;
+    }
+
+    .pay_box {
+        background-color: #EFF4E0;
+        padding-top: 5px;
+        margin: 0 5px;
+        border-radius: 10px;
+    }
+
+    hr {
+        background-color: white;
+    }
+
+    .card-title {
+        font-weight: 400;
+    }
+
+    .description_style {
+        background-color: #fff;
+    }
+
+    .bkashactive {
+        /*height: 0px;*/
+        /*position: fixed;
+        overflow-y: scroll;
+        z-index: 50000;
+        inset: 0px;*/
+        position: fixed;
+        overflow-y: scroll;
+        z-index: 50000;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        top: 0px;
+    }
+
+    .modal-header {
+        border-bottom: 0;
+    }
+
+    h2, h3, h6, h5 {
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        font-weight: 400 !important;
+    }
+</style>
+<div class="row justify-content-center text-center mx-auto">
+
+    <div class="col-md-4 col-12  box p-2 mx-auto" style="margin: 50px;">
+        <div class="card">
+            <div class="card-body text-center m-3">
+                <h3 class="card_title mt-2 mb-2">@Model.Name</h3>
+                <input id="ttlSumAmt" name="ttlSumAmt" type="hidden" value=@Model.PackagePrice />
+                @*<input id="InvoiceNo" name="InvoiceNo" value=@Model.InvoiceNo readonly />*@
+                @*<label id="InvoiceNo">@Model.InvoiceNo</label>*@
+                <div id="InvoiceNoData" value="@Model.InvoiceNo">
+                    @Model.InvoiceNo
+                </div>
+                <h5 class="card-title mb-3">@Html.Raw(@Model.SoftwarePackageDescription)</h5>
+
+                <h2 class="card-text">@Model.Country.CurrencyShortName @Model.PackagePrice </h2>
+
+
+                @if (ViewBag.IsAuto == 0)
+                {
+                    <div class="text-left">
+                        @Html.ActionLink("Back", "PurchasePackage", "License", null, new { @class = "btn btn-sm btn-warning rounded-0", @id = "btnBack" })
+                    </div>
+
+                }
+                else
+                {
+                    <div class="text-left">
+                        <a href=@CallBackUrlLink class="btn btn-sm btn-warning rounded-0" id="btnBack">
+                            Cancel
+                        </a>
+                    </div>
+                }
+
+                @*<p class="mb-4 bill_details">
+            Billed Annually
+        </p>*@
+
+
+
+                <hr />
+                <div>
+                    <p>Choose Payment Option</p>
+                    <hr />
+                    <div class="row justify-content-center">
+                        @if (ViewBag.IsBkash == 1)
+                        {
+                            @*<div class="col pay_box">*@
+                            <div class="col">
+                                <div id="bKash_button" class="btn mb-3"><img class="pay_img" src="~/images/bkash.svg" alt="bkash payment" /></div>
+                                @*<a href="" class="btn m-3"><img class="pay_img" src="~/images/bkash.svg" alt="bkash payment" /></a>*@
+                            </div>
+                        }
+                        else if (ViewBag.IsBkash == 1)
+                        {
+                            <div class="col">
+                                <div id="nagad_button" class="btn mb-3"><img class="pay_img" src="~/images/nagad.svg" alt="nagad payment" /></div>
+                                <a asp-controller="Nagad" asp-action="PayWithNagad" asp-route-invno="@Model.InvoiceNo" asp-route-invamount="@Model.PackagePrice" class="btn mb-3">Buy Package</a>
+
+                                @*<a href="" class="btn m-3"><img class="pay_img" src="~/images/nagad.svg" alt="nagad payment" /></a>*@
+                            </div>
+                        }
+                        else if (ViewBag.IsAuto == 0)
+                        {
+                            if (@Model.Country.CurrencyShortName == "USD")
+                            { 
+                                 <div class="col">
+                                    <div id="bKash_button" title="Pay With Bkash" class="btn mb-3"><img class="pay_img" src="~/images/bkash.svg" alt="bkash payment" /></div>
+                                    @*<a href="" class="btn m-3"><img class="pay_img" src="~/images/bkash.svg" alt="bkash payment" /></a>*@
+                                </div>
+
+                            
+                            }
+
+                            else if (@Model.Country.CurrencyShortName == "BDT")
+                            {
+                                <div class="col">
+                                    <div id="bKash_button" title="Pay With Bkash" class="btn mb-3"><img class="pay_img" src="~/images/bkash.svg" alt="bkash payment" /></div>
+                                    @*<a href="" class="btn m-3"><img class="pay_img" src="~/images/bkash.svg" alt="bkash payment" /></a>*@
+                                </div>
+
+                                <div class="col">
+                                    @*<div id="nagad_button" class="btn mb-3"></div>*@
+
+                                    <a asp-controller="Nagad" title="Pay With Nagad" asp-action="PayWithNagad" asp-route-invno="@Model.InvoiceNo" asp-route-invamount="@Model.PackagePrice" class="btn mb-3"><img class="pay_img" src="~/images/nagad.svg" alt="nagad payment" /></a>
+
+                                    @*<a href="" class="btn m-3"><img class="pay_img" src="~/images/nagad.svg" alt="nagad payment" /></a>*@
+                                </div>
+                            }
+
+
+         
+
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $('#bodyContent').slideDown();
+        });
+    </script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            //$('#paymentFail').modal('show');
+            $("#btnModal").hide();
+            //$("#invoicetitle").hide();
+
+            //$("#btnModal").click();
+            $('#bKash_button').click(function () {
+
+                //toastr.success('Proceed for Payment Via Bkash');
+
+                if (!$('#bKashFrameWrapper').hasClass('bkashactive')) {
+                    $('#bKashFrameWrapper').addClass('bkashactive')
+                        //.siblings('.menu')
+                        //.removeClass('active');
+                }
+            });
+            //alert(@ViewBag.IsAuto);
+
+            @*if (@ViewBag.IsAuto == "1") {
+                alert('bkash auto found');
+                $('#bKash_button').trigger('Click');
+            }*@
+
+            $('#nagad_button').click(function () {
+
+                //toastr.success('Proceed for Payment Via Bkash');
+
+                if (!$('#bKashFrameWrapper').hasClass('bkashactive')) {
+                    $('#bKashFrameWrapper').addClass('bkashactive')
+                    //.siblings('.menu')
+                    //.removeClass('active');
+                }
+            });
+
+
+
+        });
+
+                $("#dialog").hide();
+
+
+        //$.getScript("https://scripts.sandbox.bka.sh/versions/1.2.0-beta/checkout/bKash-checkout-sandbox.js")
+        $.getScript("https://scripts.pay.bka.sh/versions/1.2.0-beta/checkout/bKash-checkout.js")
+
+
+
+
+       .done(function (script) {
+
+
+        //finished loading the script
+
+        //call the bkash init function
+        bKash.init({
+
+
+        //options -
+        //1) 'checkout' : Performs a single checkout.
+        paymentMode: 'checkout',
+
+
+        //paymentRequest format : { amount: _AMOUNT, intent: _INTENT };
+        //intent : sale - immediate trx
+        //intent : authorization - needs an additional 'Capture' call for trx
+        //max two decimal points allowed in amount value.
+        //paymentRequest will be ignored for paymentMode 'addWalletOnly'. Just keep it as blank object (paymentRequest:{})
+            paymentRequest: { amount: $("#ttlSumAmt").val(), intent: "sale" },
+
+
+            createRequest: function (request) {
+
+                var createResponseData = createpayment();
+
+        //alert(createResponseData);
+
+        //CALL YOUR BACKEND'S CREATE METHOD HERE
+        //IF THE CALL IS SUCCESSFUL, SEND THE CREATE RESPONSE DATA IN bKash.create().onSuccess() METHOD
+                //alert('testiniti');
+                // $('#bKashFrameWrapper').show();
+        bKash.create().onSuccess(JSON.parse(createResponseData));
+
+        //ELSE, CALL bKash.create().onError() METHOD. bKash will run it's clean up code from there
+                bKash.create().onError();
+                //alert('asdf ');
+
+        },
+        executeRequestOnAuthorization: function () {
+
+        var createResponseData = executepayment();
+        //alert(createResponseData);
+        //CALL YOUR BACKEND'S EXECUTE METHOD HERE
+        //IF THE CALL IS SUCCESSFUL, DISPLAY YOUR SUCCESS PAGE
+            //Invoice_save();
+
+            // var xxxx = $("#InvoiceNo").val();
+
+        //window.location.href = "your_success_page.html";
+            //window.location.href = '@Url.Action("Success", "License")';
+            //window.location.href = '@Url.Action("MonthlyList", "License" , new { monthid = 0, yearid = 0 })';
+
+            @*var y = 0; var m = 0;
+            location.href = '@Url.Action("MonthlyList", "License")?yearid=' + y + '&monthid=' + m + '&stateid=0';*@
+
+        //ELSE, CALL bKash.execute().onError() METHOD. bKash will run it's clean up code from there
+        bKash.execute().onError();
+
+        },
+            onClose: function () {
+
+
+                $('#bKashFrameWrapper').removeClass('bkashactive')
+                        //.siblings('.menu')
+                        //.removeClass('active');
+
+                //$('#ttlcontainer').show();
+                //$('#bKash_button').Attr('disabled');
+                //$('#bKashFrameWrapper').hide();
+                //document.getElementById('bKashFrameWrapper').style.height = "0px";
+
+                // alert('Working');
+
+
+        //define what happens if the user closes the pop up window
+
+        //your code goes here
+            }
+        });
+
+
+        //OPTIONAL function
+        //AFTER CALLING bKash.init, you can call bKash.reconfigure method according to your needs
+
+        //    bKash.reconfigure({
+        //      paymentMode: 'newPaymentMode',
+        //        paymentRequest: 'newPaymentRequest'
+        //    });
+
+        // NOTE : VIEW PAGE SOURCE TO SEE REAL LIFE IMPLEMENTATION
+        });
+
+
+        function createpayment() {
+
+//            document.getElementById('bKashFrameWrapper').style.height = "100%"
+//            document.getElementById('bKashFrameWrapper').style.inset = "0px"
+
+                var paymentid;
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("createpayment", "License")'
+                }
+
+                        //alert('License');
+
+                $.ajax({
+                    type: 'POST',
+                    url: MyAppUrlSettings.MyUsefulUrl,
+                    data: { invno: $("#InvoiceNoData").text().replace(/\n/g, "").trim(), invamount: $("#ttlSumAmt").val() },
+                    dataType: 'json',
+                    async: false,
+                    success: function (response) {
+
+
+                        if (response.success) {
+                            paymentid = response.responseText;
+                            toastr.success('Proceed for Payment Via Bkash');
+                            //toastr.success(response.responseText);
+                        } else {
+                            // DoSomethingElse()
+                            toastr.error(response.responseText);
+                            $("#btnModal").click();
+                            //$("#errorDes").text(response.responseText);
+                            $('#bKashFrameWrapper').removeClass('bkashactive')
+                            return false;
+                        }
+
+                    },
+                    error: function (ex) {
+                        toastr.error('Failed.' + ex);
+                        $("#btnModal").click();
+                        //$("#errorDes").text(response.ex);
+                        $('#bKashFrameWrapper').removeClass('bkashactive')
+                        //alert('failed');
+
+                    }
+                });
+
+            //alert(paymentid);
+            //$('#ttlcontainer').hide();
+            return paymentid;
+
+        };
+
+        function executepayment() {
+                var paymentid;
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("executepayment", "License")'
+                }
+
+
+
+                $.ajax({
+                    type: 'POST',
+                    url: MyAppUrlSettings.MyUsefulUrl,
+                    dataType: 'json',
+                    async: false,
+                    success: function (result) {
+
+
+                        if (result.Success == "1") {
+                            toastr.options.extendedTimeOut = 5000;
+                            toastr.success('আপনার পেমেন্ট সফল্ভাবে সম্পন্ন হয়েছে ।');
+                            //Invoice_save();
+
+
+                                window.setTimeout(function () {
+
+                                    // Move to a new location or you can do something else
+                                        var y = 0; var m = 0;
+                                        //location.href = '@Url.Action("MonthlyList", "License")?yearid=' + y + '&monthid=' + m + '&stateid=0';
+                                    if (result.CallBackURL != null) {
+
+                                        location.href = result.CallBackURL;
+
+                                    }
+                                    else {
+                                        location.href = '@Url.Action("Logout", "Home")';
+
+                                    }
+
+                                }, 1000);
+
+
+                            return paymentid;
+                            //var xxxx = $("#InvoiceNo").val();
+
+                        }
+                        else
+                        {
+
+                            //alert('payment failed');
+                            toastr.options.extendedTimeOut = 10000;
+                            toastr.error(result.ex);
+                            toastr.error('আপনার পেমেন্ট ব্যর্থ হয়েছে');
+
+                            //$('#paymentFail').modal('show');
+                            //$("#paymentFail").show();
+                            $("#btnModal").click();
+                            //$("#errorDes").text(result.ex);
+                            $('#bKashFrameWrapper').removeClass('bkashactive');
+
+
+
+                                @*window.setTimeout(function () {
+
+                                    // Move to a new location or you can do something else
+                                    //window.location.href = '@Url.Action("Create", "License")';
+                                    location.href = '@Url.Action("Create", "Invoice")?packageid=2';
+
+                                }, 10000);*@
+
+                            //bKash.execute().onError();
+
+                        }
+
+                        //$("#getCode").html(Productss);
+
+                        ///$("#basicExampleModal").modal('show');
+                    },
+                    error: function (ex) {
+                        alert('Failed.' + ex);
+                    }
+                });
+
+
+
+            };
+
+
+        $('#bKash_button').removeAttr('disabled');
+        //$('#bKashFrameWrapper').hide();
+        //$('#bKashFrameWrapper').style.height("0px");
+        //alert('working');
+        //document.getElementById('bKashFrameWrapper').style.height = "0px";
+        //alert('test');
+
+
+
+    </script>
+
+
+    @*const Payment = (typeId, transactionid) => {
+
+            $.ajax({
+                type: 'GET',
+                url: '@Url.ActionLink("PaymentGateway", "Payment")',
+                data: { payTypeId: typeId, transactionid: transactionid },
+                dataType: 'json',
+                success: (result) => {
+                    if (result.success) {
+                        GetIntoMerchant(result.link);
+                        //location.href = result.link;
+                    } else {
+                        alert(result.message);
+                    }
+                },
+                error: (err) => {
+                    console.error(err);
+                }
+            });
+        };*@
+
+    @*<script>
+
+
+
+
+            const GetIntoMerchant = (mrUrl) => {
+                $.ajax({
+                    type: 'GET',
+                    url: '@Url.ActionLink("PayWithNagad", "Nagad")',
+                    data: { payTypeId: typeId, transactionid: transactionid },
+                    data: { invno: $("#InvoiceNo").text().replace(/\n/g, "").trim(), invamount: $("#ttlSumAmt").val(), isSandBox:false },
+
+                    dataType: 'json',
+                    success: (result) => {
+                        if (result.success) {
+                            location.href = result.callbackurl;
+                        } else {
+                            alert(result.message);
+                        }
+                    },
+                    error: (err) => {
+                        console.error(err);
+                    }
+                });
+            }
+        </script>
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}*@
+
+
+
+}
+

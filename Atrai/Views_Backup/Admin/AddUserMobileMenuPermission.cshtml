@@ -1,0 +1,972 @@
+﻿@model Atrai.Core.Entity.AndroidMenuPermission_MasterModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{ ViewData["Title"] = "Mobile Menu Permission";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+<style>
+
+    .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+        background: linear-gradient(0deg, rgba(192,196,196,0.6224556717218137) 1%, rgba(255,255,255,0.6224556717218137) 65%, rgba(151,149,162,0.2527077725621498) 100%);
+    }
+
+    table.dataTable tbody tr.selected, table.dataTable tbody th.selected, table.dataTable tbody td.selected {
+        color: green;
+    }
+</style>
+@*<link href="~/AdminEla/Assets/css/lib/select/select.dataTables.min.css" rel="stylesheet" />*@
+<div class="page-wrapper">
+    @Html.AntiForgeryToken()
+    <div class="container-fluid">
+
+
+
+        <h2 id="styletext" class="text-center">Mobile Menu Permission @ViewBag.ActionType</h2>
+        @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "myform" }))
+        {
+
+<div class="needs-validation" novalidate>
+    @*@Html.AntiForgeryToken()*@
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+
+    @if (Model != null)
+    {
+
+<input type="hidden" id="AndroidMenuPermissionId" name="AndroidMenuPermissionId" value="@Model.Id" /> @*<input type="hidden" id="LuserIdUpdate" name="LuserIdUpdate" value="@Model.LuserIdUpdate" />
+    <input type="hidden" id="UpdateDate" name="UpdateDate" value="@Model.UpdateDate" />*@
+
+                    <input type="hidden" id="CreateDate" name="CreateDate" value="@Model.CreateDate" />
+                                        <input type="hidden" id="LuserId" name="LuserId" value="@Model.LuserId" /> } @*style="min-width: 1300px;"*@
+    <div class="container-fluid">
+        <div id="modalbodyfahad" class="row">
+            <div class="col-md-12 order-md-1 mb-2">
+                <div class="card p-3">
+                    <div class="row">
+                        <div class="col-md-3 col-12" id="divSupplier">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        Company
+                                    </span>
+                                </div>
+
+                                @*@Html.DropDownListFor(m => m.ComId, ViewBag.CompanyList as List<SelectListItem>, "--Select--", new { @class = "form-control form-control-sm " })*@
+                                @Html.DropDownList("ComId", new SelectList((IEnumerable<SelectListItem>)ViewBag.CompanyList, "Value", "Text"), "Select Company",
+                                                                 htmlAttributes: new { @class = "form-control", id = "ComId" })
+                               @* @Html.ValidationMessageFor(model => model.ComId)*@
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-12" id="divItemGroup">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        User
+                                    </span>
+                                </div>
+                                @*@Html.DropDownListFor(m => m.LUserIdPermission, ViewBag.LUserIdPermission as List<SelectListItem>, "--Select--", new { id = "LUserIdPermission", @class = "form-control form-control-sm " })*@
+                                @*@Html.DropDownList("LUserIdPermission", new SelectList((IEnumerable<SelectListItem>)ViewBag.useridPermission, "Value", "Text"), "Select User", htmlAttributes: new { @class = "form-control", id = "useridPermission" })*@
+
+                                @Html.DropDownListFor(x => x.LUserIdPermission, new SelectList((IEnumerable<SelectListItem>)ViewBag.useridPermission, "Value", "Text"), @*"Select User",*@
+                               htmlAttributes: new { @class = "form-control", id = "LUserIdPermission" })
+
+                                @*<span class="input-group-append">
+                                    <button id="btngrouplcid" class="btn btn-danger" type="button" style="font-size: 0.5rem;" onclick="MenuPermissionLoad()">Load</button>
+                                </span>*@
+                                @*<select  id="LUserIdPermission"
+                                            class="form-control form-control-sm"
+                                            asp-items="@ViewBag.LUserIdPermission">
+                                        <option value="">--Select--</option>
+                                    </select>*@
+                                @Html.ValidationMessageFor(model => model.LUserIdPermission)
+                            </div>
+                        </div>
+                        <div class="col-md-5 col-12" id="divItemGroup">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        New User
+                                    </span>
+                                </div>
+                                @*@Html.DropDownListFor(m => m.useridPermission, ViewBag.useridPermission as List<SelectListItem>, "--Select--", new { id = "newuseridPermission", @class = "form-control form-control-sm " })*@
+                                @*@Html.DropDownList("newUserPermission", ViewBag.newUserPermission as List<SelectListItem>, "--Select--", new { id = "newuseridPermission", @class = "form-control form-control-sm " })*@
+
+                                <select id="newLUserIdPermission"
+                                        class="form-control"
+                                        asp-items="@ViewBag.newUserPermission ">
+                                    <option value="">--Select--</option>
+                                </select>
+                                @*@Html.DropDownList("newUserPermission", ViewBag.newUserPermission as List<SelectListItem>, "--Select--", new { id = "newLUserIdPermission", @class = "form-control form-control-sm" })*@
+                                <span class="input-group-append">
+                                    <button id="btnNewPermission" class="btn btn-danger" type="button" style="font-size: 1rem;" onclick="NewPermission()">Transfer</button>
+                                </span>
+                            </div>
+                        </div>
+                        @*<div class="col-md-3 col-12" id="divItemGroup">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        Default Module
+                                    </span>
+                                </div>
+                                <select id="DefaultModule"
+                                        class="form-control"
+                                        asp-items="@ViewBag.ModuleList ">
+                                    <option value="">--Select--</option>
+                                </select>
+                            </div>
+                        </div>*@
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        <br />
+
+        @*<div id="divGroupLc" class="row">
+
+            </div>*@
+
+        <div id="divPIDetails" class="row">
+            <div class="col-md-6 order-md-1 mb-2">
+                <div class="card p-1">
+                    <div class="table-responsive text-nowrap">
+                        <input type="button" id="selectAll" class="btn btn-primary float-right rounded-0" value="Select All" />
+                        <disv class="responsive">
+
+                            <table id="UserMenuList" class="tbl display responsive nowrap table-bordered table-sm table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Menu Id</th>
+                                        @*<th>Parent Menu</th>*@
+                                        <th>Menu Name</th>
+                                        @*<th>Action</th>
+                                        <th>Controller</th>*@
+                                        <th>Id</th>
+                                        <th>AndroidMenuPermissionId</th>
+                                        @*<th>Create</th>
+                                        <th>Edit</th>
+                                        <th>Delete</th>
+                                        <th>View</th>
+                                        <th>Report</th>*@
+                                        <th>Default</th>
+                                        <th>SLNo</th>
+
+
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (ViewBag.MobileMenuList != null)
+                                    {
+                                        foreach (var item in ViewBag.MobileMenuList)
+                                        {
+                    <tr class="txtMultpidetails">
+                        <td>
+                            @item.ModuleMenuId
+                        </td>
+                        @*<td>
+                            @if (item.ParentMenuName != null)
+                            {
+    @item.ParentMenuName}
+                        </td>*@
+                        <td>
+                            @item.ModuleMenuName
+                        </td>
+                        @*<td>
+                
+                            @item.ActionName
+                        </td>
+                        <td>
+                            @item.ControllerName
+                        </td>*@
+                        <td></td>
+                        <td></td>
+
+                        @*<td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>*@
+
+                        <td>
+                            @item.IsDefault
+                        </td>
+                        <td>
+                            @item.SLNO
+                        </td>
+
+                        <td></td>
+                    </tr>
+}
+            }
+
+                                </tbody>
+                            </table>
+                        </disv>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 order-md-2 mb-2">
+                <div class="card p-1">
+                    <div class="table-responsive text-nowrap">
+                        <input type="button" id="selectAllMP" class="btn btn-primary float-right rounded-0" value="Select All" />
+
+                        <table id="MenuPermissionDetails" class="tbl display responsive nowrap table-bordered table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    @*<th>Parent Menu</th>*@
+                                    <th>Menu Name</th>
+                                    @*<th>Action</th>
+                                    <th>Controller</th>*@
+                                    <th>PermissionDetailsId</th>
+                                    <th>PermissionId</th>
+                                    @*<th>Create</th>
+                                    <th>Edit</th>
+                                    <th>Delete</th>
+                                    <th>View</th>
+                                    <th>Report</th>*@
+                                    <th>Default</th>
+                                    <th>SLNo</th>
+
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null)
+                                {
+                                    if (Model.AndroidMenuPermission_Details != null)
+                                    {
+
+
+                    foreach (var item in Model.AndroidMenuPermission_Details.OrderBy(x => x.SLNo))
+                    {
+                <tr class="txtMultMachinaryLC">
+                    <td>
+                        @Html.DisplayTextFor(i => item.MenuId)
+                    </td>
+
+                    @*<td>
+                        @Html.DisplayTextFor(i => item.AndroidMenus.ParentMenu.MenuName)
+                    </td>*@
+                    <td>
+                        @Html.DisplayTextFor(i => item.AndroidMenus.MenuName)
+                    </td>
+                    @*<td>
+                        @Html.DisplayTextFor(i => item.AndroidMenus.ActionName)
+                    </td>
+                    <td>
+                        @Html.DisplayTextFor(i => item.AndroidMenus.ControllerName)
+                    </td>*@
+
+
+                    <td>
+                        @Html.DisplayTextFor(i => item.Id)
+                    </td>
+                    <td>
+                        @Html.DisplayTextFor(i => item.AndroidMenuPermissionId)
+                    </td>
+
+                    @*<td>
+                        @Html.CheckBoxFor(i => item.IsCreate)
+
+                    <td>
+                        @Html.CheckBoxFor(i => item.IsEdit)
+                    </td>
+                    <td>
+                        @Html.CheckBoxFor(i => item.IsDeleteP)
+                    </td>
+                    <td>
+                        @Html.CheckBoxFor(i => item.IsView)
+                    </td>
+                    <td>
+                        @Html.CheckBoxFor(i => item.IsReport)
+                    </td>*@
+                    <td>
+                        @Html.CheckBoxFor(i => item.isDefault)
+                    </td>
+                    <td>
+                        @Html.DisplayTextFor(i => item.SLNo)
+                    </td>
+
+                    <td></td>
+
+                </tr>
+}
+        }
+    }
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row text-center m-2">
+            <br />
+            <div class="col-md-3"></div>
+            @*<div class="col-md-3"><h4>Master LC Entry</h4></div>*@
+            @if (ViewBag.ActionType == "Create")
+            {
+            <div class="col-md-3 col-xs-12 d-block mx-auto">
+                @if (ViewData.ModelState.IsValid)
+                {
+            <button class="btn btn-success mb-2 btn-block" type="button" onclick="MachinaryLC_save()">Save</button>}
+
+            </div> }
+            else if (ViewBag.ActionType == "Edit")
+            {
+            <div class="col-md-3 col-xs-12 d-block mx-auto">
+                <button class="btn btn-warning mb-2 btn-block" type="button" onclick="MachinaryLC_save()">Update</button>
+            </div> }
+            else if (ViewBag.ActionType == "Delete")
+            {
+            <div class="col-md-3 col-xs-12 d-block mx-auto">
+
+                <button class="btn btn-danger mb-2 btn-block" type="button" onclick="MenuPermission_delete()">Delete</button>
+
+            </div>}
+            <div class="col-md-3 col-xs-12 d-block mx-auto">
+                @Html.ActionLink("Back", "UserMobileMenuPermissionList", null, null, new { @class = "btn btn-info btn-block", @id = "btnBack" })
+
+            </div>
+            <div class="col-md-3"></div>
+
+        </div>
+    </div>
+</div>      }
+
+    </div>
+
+</div>
+
+
+@section Scripts{
+    <script src="~/AdminEla/Assets/js/lib/datatables/select/dataTables.select.min.js"></script>
+    <script type="text/javascript">
+    //$("#comid").select2();
+        var antiForgeryToken;
+        //$("#LUserIdPermission").select2();
+        //$("#newUserIdPermission").select2();
+
+        //LUserIdPermission
+        //newLUserIdPermission
+
+        function MenuPermission_delete() {
+            var AndroidMenuPermissionId = $("#AndroidMenuPermissionId").val();
+            //alert(AndroidMenuPermissionId);
+
+            @*$.ajax({
+
+                url: '@Url.Action("DeleteUserMenuPermission", "Admin")',
+                //url: '@Url.Action("DeleteUserMenuPermission")',
+                data: JSON.stringify({ id: AndroidMenuPermissionId }), //use id here
+                //data: JSON.stringify(salesmain),
+                type: 'POST',
+                contentType: 'application/json;',
+                dataType: 'json',
+                success: function (result) {
+                if (result.Success == "1") {
+                    customFile('3', result.ex);
+                    window.setTimeout(function () {
+                        // Move to a new location or you can do something else
+                        window.location.href = '@Url.Action("UserMobileMenuPermissionList", "Admin")';
+                    }, 500);
+                }
+                else {
+                    toastr.error(result.ex);
+                }
+            }
+            });*@
+
+             
+            var options = {};
+            options.url = '@Url.Action("DeleteUserMenuPermission", "Admin")';
+
+            options.Type = "POST";
+            options.headers= { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken };
+            options.dataType = "json";
+            options.async = false;
+            options.data = { id: AndroidMenuPermissionId };
+
+            //alert('nit');
+            options.success = function (result) {
+
+                if (result.Success == "1") {
+                    window.location.href = '@Url.Action("UserMobileMenuPermissionList", "Admin")';
+                }
+                else
+                {
+                    //alert(result.ex);
+                    if (!result.success) {
+                        for (var error in result.errors) {
+                            $('#errorMessages').append(error + '<br />');
+                        }
+                    }
+
+                };
+
+            }
+                $.ajax(options);
+
+        }
+
+
+        $("#LUserIdPermission").change(function () {
+            MenuPermissionLoad();
+        });
+
+        $("#ComId").change(function () {
+            MenuPermissionLoad();
+        });
+
+    function MenuPermissionLoad() {
+        var comid = $("#ComId").val();
+        var LuserId = $("#LUserIdPermission").val();
+        //alert(LuserId);
+
+            var y = "@ViewBag.ActionType";
+            if (y == "Create") {
+                window.location.href = "AddUserMobileMenuPermission?ComId=" + comid + "&UserId=" + LuserId;
+            }
+            else {
+                window.location.href = "AddUserMobileMenuPermission?ComId=" + comid + "&UserId=" + LuserId;
+            }
+
+    };
+
+        function NewPermission() {
+            toastr.success('New permission Transfer Processing');
+        var menuPermissionId = $("#AndroidMenuPermissionId").val();
+        var LUserIdPermission = $("#newLUserIdPermission").val();
+
+            //alert(menuPermissionId);
+
+        var comId = $("#ComId").val();
+        //console.log(AndroidMenuPermissionId + " " + LUserIdPermission + " " + comId);
+
+            var y = "@ViewBag.ActionType";
+            if (y == "Edit") {
+                window.location.href = "UserMobileMenuPermissionTransfer?MobileMenuPermissionId=" + menuPermissionId +"&UserId="+LUserIdPermission+"&ComId="+comId;
+            }
+            else {
+                window.location.href = "?MobileMenuPermissionId=" + menuPermissionId +"&UserId="+LUserIdPermission+"&ComId="+comId ;
+            }
+    };
+
+
+        let date_ob = new Date();
+
+        // adjust 0 before single digit date
+        let date = ("0" + date_ob.getDate()).slice(-2);
+
+        // current month
+        let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+
+        // current year
+        let year = date_ob.getFullYear();
+
+        // current hours
+        let hours = date_ob.getHours();
+
+        // current minutes
+        let minutes = date_ob.getMinutes();
+
+        // current seconds
+        let seconds = date_ob.getSeconds();
+
+        // prints date & time in YYYY-MM-DD HH:MM:SS format
+        let finalcurrentdate = year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds;
+
+
+        function MachinaryLC_save() {
+            // Step 1: Read View Data and Create JSON Object
+
+
+
+
+            antiForgeryToken = $("input[name='Dominate_ANTIFORZERY']").val();
+
+
+            if (!$("#myform").valid()) {
+
+                alert('Please Fill Up All Necessary Information Correctly.');
+                return false;
+            }
+
+
+            // Creating Detail Json Object
+            var AndroidMenuPermission_Details = {
+                "Id": "", "AndroidMenuPermissionId": "",
+                "MenuId": "",
+                //"IsCreate": "",
+                //"IsEdit": "", "IsDeleteP": "", "IsView": "", "IsReport": "",
+                "IsDefault": "", "SLNo": ""
+            };
+
+            var menuPermission_Master = {
+                "LuserId": "", "CreateDate": "",
+                //"DefaultModuleId":0,
+                "AndroidMenuPermissionId": "", "LUserIdPermission": "", "ComId": "", "AndroidMenuPermission_Details": []
+            };
+
+
+            menuPermission_Master.LuserId = $("#LuserId").val() || 0;
+            //menuPermission_Master.DefaultModuleId = $("#DefaultModule").val() || 0;
+            //menuPermission_Master.LUserIdUpdate = $("#LuserIdUpdate").val() || 0;
+            menuPermission_Master.CreateDate = $("#CreateDate").val();
+            //menuPermission_Master.UpdateDate = $("#UpdateDate").val();
+
+            // Creating Masters Json Object
+
+            // Set Invoice Main Value
+            menuPermission_Master.Id = $("#AndroidMenuPermissionId").val() || 0;
+            menuPermission_Master.LUserIdPermission = $("#LUserIdPermission").val();
+
+            menuPermission_Master.ComId = $("#ComId").val();
+
+
+            ////Invoice subs data
+            var oTable = $('#MenuPermissionDetails').dataTable().fnGetData();
+            var nTable = $('#MenuPermissionDetails').dataTable().fnGetNodes();
+            //console.log(nTable);
+            //alert('wait');
+
+
+            for (var i = 0; i < oTable.length; i++) {
+
+                //if ($('h2').text() == "Menu Permission Edit")
+
+
+                if ($('#styletext').text() == "Mobile Menu Permission Edit") {
+                    AndroidMenuPermission_Details.AndroidMenuPermissionId = $('#AndroidMenuPermissionId').val();
+                }
+                else {
+                    AndroidMenuPermission_Details.AndroidMenuPermissionId = 0;
+                }
+
+                AndroidMenuPermission_Details.Id = 0;
+                //AndroidMenuPermission_Details.Id = oTable[i][5] || 0;
+
+
+
+
+                AndroidMenuPermission_Details.MenuId = oTable[i][0];
+
+
+                //console.log($(nTable[i].cells[9].children[0]).prop('checked'));     // checkbox is check or uncheck
+                //AndroidMenuPermission_Details.IsCreate = $(nTable[i].cells[2].children[0]).prop('checked');
+                //AndroidMenuPermission_Details.IsEdit = $(nTable[i].cells[3].children[0]).prop('checked');   //oTable[i][0];
+                //AndroidMenuPermission_Details.IsDeleteP = $(nTable[i].cells[4].children[0]).prop('checked'); //oTable[i][0];
+                //AndroidMenuPermission_Details.IsView = $(nTable[i].cells[5].children[0]).prop('checked');   //oTable[i][0];
+                //AndroidMenuPermission_Details.IsReport = $(nTable[i].cells[6].children[0]).prop('checked'); //oTable[i][0];
+
+                AndroidMenuPermission_Details.IsDefault = false;// $(nTable[i].cells[7].children[0]).prop('checked'); //oTable[i][0];
+                AndroidMenuPermission_Details.CreateDate = finalcurrentdate;
+                AndroidMenuPermission_Details.UpdateDate = finalcurrentdate;
+
+
+
+
+                AndroidMenuPermission_Details.SLNo = nTable[i].cells[1].children[0].value || 0; //$(nTable[i].cells[13].children[0]).value || 0; //oTable[i][0];
+
+
+                //rows[i].cells[7].children[0].value || 0;
+
+                console.log(AndroidMenuPermission_Details);
+
+                menuPermission_Master.AndroidMenuPermission_Details.push(AndroidMenuPermission_Details);
+
+
+                AndroidMenuPermission_Details = {
+                    "Id": "", "AndroidMenuPermissionId": "", "MenuId": "",
+                    //"IsCreate": "", "IsEdit": "", "IsDeleteP": "", "IsView": "", "IsReport": "",
+                    "IsDefault": "", "SLNo": ""
+                };
+
+            }
+
+            // Step 1: Ends Here
+            // alert('4');
+            var n = $(menuPermission_Master).length;
+            toastr.warning('Data is Generated for Saving...please Wait for the next alert.');
+            //console.log(menuPermission_Master);
+
+
+            //console.log(AndroidMenuPermission_Details);
+
+
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("AddUserMobileMenuPermission", "Admin")',
+                dataType: 'json',
+                async: 'false',
+                headers: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                data: { menuPermission_Master: menuPermission_Master },
+                success: function (result) {
+                    if (result.Success == "1") {
+                        toastr.success(result.ex);
+                            var urllinknew = '@Url.Action("UserMobileMenuPermissionList", "Admin")';
+                        window.open(urllinknew, "_self");
+                        //ClearData();
+                        //var InvoiceBillsidprint = result.Id;
+                        //alert(result.Id)
+                        //var urllink = '@Url.Action("InvoiceBillPrint", "Admin", new { InvoiceBillId = "xxxx" })'.replace("xxxx", InvoiceBillsidprint);
+
+                        //window.open(urllink, '_blank');
+                        @*setTimeout(
+                            function () {
+                                if ($('#Update').length) {
+
+                                    var urllinknew = '@Url.Action("UserMobileMenuPermissionList", "Admin")';
+                                    window.open(urllinknew, "_self");
+                                }
+                                else {
+                                    $("#Create").prop("disabled", false);
+                                    var urllinknew = '@Url.Action("UserMobileMenuPermissionList", "Admin")';
+                                    window.open(urllinknew, "_self");
+                                    //ClearData();
+                                }
+                            }, 1000);*@
+                    }
+                    else {
+                        alert(result.ex);
+                    }
+                },
+                error: function (ex) {
+                    alert('error');
+                }
+            });
+
+            @*var options = {};
+            options.url = '@Url.Action("AddUserMobileMenuPermission", "Admin")';
+
+            options.Type = "POST";
+            //options.headers = { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken };
+
+            options.dataType = "json";
+            options.data = { menuPermission_Master };
+            options.success = function (result) {
+
+                alert('Data Save Successfully');
+
+                if (result.Success == "1") {
+                    //window.location.href = "/Invoice/UserMobileMenuPermissionList";
+
+                    window.setTimeout(function () {
+
+                        // Move to a new location or you can do something else
+                        window.location.href = '@Url.Action("UserMobileMenuPermissionList", "Admin")';
+                    }, 500);
+
+
+                }
+                else {
+                    alert(result.ex);
+                }
+            };
+            $.ajax(options);*@
+        }
+
+    $(document).ready(function () {
+
+
+        $('#selectAll').click(function () {
+            $('#UserMenuList tbody tr').removeClass('selected');
+            $('#UserMenuList tbody tr').addClass('selected');
+        });
+
+        $('#selectAllMP').click(function () {
+            $('#MenuPermissionDetails tbody tr').removeClass('selected');
+            $('#MenuPermissionDetails tbody tr').addClass('selected');
+        });
+
+        ///problem
+        var MenuPermissionDetails = $('#MenuPermissionDetails').dataTable({
+
+            "aoColumns": [
+
+                { "sClass": "MenuId", "visible": false },
+                //{ "sClass": "ParentMenuName", "visible": true },
+                { "sClass": "ModuleMenuName", "visible": true },
+                //{ "sClass": "ActionName", "visible": false },
+                //{ "sClass": "ControllerName", "visible": false },
+                { "sClass": "Id", "visible": false },
+                { "sClass": "AndroidMenuPermissionId", "visible": false },
+                //{
+                //    "sClass": "IsCreate", "visible": true,
+                //    "render": function (data) {
+                //        return $(data).prop('checked') ? '<input type="checkbox" checked/>' : '<input type="checkbox"/>';
+                //    }
+                //},
+                //{
+                //    "sClass": "IsEdit", "visible": true,
+                //    "render": function (data) { return $(data).prop('checked') ? '<input type="checkbox" checked/>' : '<input type="checkbox"/>';   }
+                //},
+                //{
+                //    "sClass": "IsDeleteP", "visible": true,
+                //    "render": function (data) { return $(data).prop('checked') ? '<input type="checkbox" checked/>' : '<input type="checkbox"/>';   }
+                //},
+                //{
+                //    "sClass": "IsView", "visible": true,
+                //    "render": function (data) { return $(data).prop('checked') ? '<input type="checkbox" checked/>' : '<input type="checkbox"/>';   }
+                //},
+                //{
+                //    "sClass": "IsReport", "visible": true,
+                //    "render": function (data) { return $(data).prop('checked') ? '<input type="checkbox" checked/>' : '<input type="checkbox"/>';   }
+                //},
+                {
+                    "sClass": "IsDefault", "visible": false,
+                    "render": function (data) { return $(data).prop('checked') ? '<input type="checkbox" checked/>' : '<input type="checkbox"/>'; }
+                },
+                {
+                    'targets': 8, "visible": true,
+                    'render': function (data, type, row) {
+                        return '<input class="form-control form-control-sm txtSLNo" id="SLNo" name="SLNo" type="text" autocomplete="off"  data-val="true" style="width:60px" value=' + data + '>'
+                        //$.fn.dataTable.render.number(',', '.', 2, '')
+
+                    }
+                },
+                { "sClass": "action", "visible": false }
+
+                //{ "sClass": "IsEdit", "visible": true, render: $.fn.dataTable.render.number(',', '.', 3, '') },
+                //{ "sClass": "ImportRate", "visible": true, render: $.fn.dataTable.render.number(',', '.', 3, '') },
+                //{ "sClass": "OrderValue", "visible": true, render: $.fn.dataTable.render.number(',', '.', 3, '') },
+
+                //null,
+                //{ "sClass": "PIId", "visible": true }
+
+            ],
+
+            "dom": 'T<"clear">lfrtip',
+
+            "tableTools": {
+                "sRowSelector": "td:not(:first-child)"
+            },
+            select: {
+                //style: 'os',
+                selector: 'td:first-child'
+            },
+
+
+            "bLengthChange": false,
+            "bFilter": true,
+            "bSort": false,
+            "bInfo": true,
+            "paging": false,
+            //"scrollX": true,
+            "scrollY": "45vh",
+            language: {
+                search: '',
+                searchPlaceholder: "Search..."
+            },
+            "scrollCollapse": true,
+            //"retrieve": true,
+            rowCallback: function (row) {
+                $(row).addClass('txtMultMachinaryLC');
+            }, select: "multi",
+            columnDefs: [
+                {
+                    targets: [-1],
+                    render: function () {
+                        return "<button type='button'><=</button>"
+                    }
+                },
+                //{
+                //    targets: [7,8,9,10,11],
+                //    render: function () {
+                //        return '<input type="checkbox" checked/>'
+                //    }
+                //}
+            ],
+             dom: '<"dom_wrapper fh-fixedHeader"flB>tip',//dom: 'tBfip',
+            buttons: [{
+                extend: "selectRows",
+                className: 'btn-danger rounded-0',
+                text: 'Detach From Access List',
+                action: function (e, sourceTable, button, config) {
+
+                    var selectedRows = sourceTable.rows(".selected");
+                    var mData = selectedRows.data();
+                    // I tried making a copy of the entire data object using JSON but it
+                    // gave me a circular reference error so I am doing it row at a time.
+                    // remove the seleted rows
+                    selectedRows.remove().draw();
+                    targetTable = $("#UserMenuList").DataTable();
+                    $.each(mData, function (idx, item) {
+                        targetTable.row.add(JSON.parse(JSON.stringify(item)));
+                        //targetTable.addClass('txtMult');
+
+                    })
+                    //$this.addClass('yourClass');
+                    targetTable.draw();
+                    //$('.tblgrouplcsub tr:last').addClass('txtMult');
+                    //multInputsMachinaryLC();
+                }
+            }],
+            initComplete: function () {
+                $("#MenuPermissionDetails button").on("click", function (evt) {
+
+                    var t1 = $("#MenuPermissionDetails").DataTable();
+                    var t2 = $("#UserMenuList").DataTable();
+                    var tr = $(this).closest("tr");
+                    var row = t1.row(tr);
+                    var data = JSON.parse(JSON.stringify(row.data()));
+                    //alert(data[0]);
+
+                    ///alert('hit');
+                    row.remove().draw();
+                    t2.row.add(data).draw();
+
+                    //multInputsMachinaryLC();
+                });
+            }
+        })
+
+
+        var UserMenuList = $('#UserMenuList').dataTable({
+
+            "aoColumns": [
+
+                { "sClass": "MenuId", "visible": false },
+                //{ "sClass": "ParentMenuName", "visible": true },
+                { "sClass": "ModuleMenuName", "visible": true },
+                //{ "sClass": "ActionName", "visible": false },
+                //{ "sClass": "ControllerName", "visible": false },
+                { "sClass": "Id", "visible": false },
+                { "sClass": "AndroidMenuPermissionId", "visible": false },
+                //{
+                //    "sClass": "IsCreate", "visible": true,
+                //    "render": function () { return '<input type="checkbox" checked/>';  }
+                //},
+                //{
+                //    "sClass": "IsEdit", "visible": true,
+                //    "render": function () { return '<input type="checkbox" checked/>';  }
+                //},
+                //{
+                //    "sClass": "IsDeleteP", "visible": true,
+                //    "render": function () { return '<input type="checkbox" checked/>';  }
+                //},
+                //{
+                //    "sClass": "IsView", "visible": true,
+                //    "render": function () { return '<input type="checkbox" checked/>';  }
+                //},
+                //{
+                //    "sClass": "IsReport", "visible": true,
+                //    "render": function () { return '<input type="checkbox" checked/>';  }
+                //},
+                {
+                    "sClass": "IsDefault", "visible": false,
+                    "render": function () { return '<input type="checkbox" checked/>'; }
+                },
+                {
+                    'targets': 8, "visible": false,
+                    'render': function (data, type, row) {
+                        return '<input class="form-control form-control-sm txtSLNo" id="OSLNo" name="SLNo" type="text" autocomplete="off"  data-val="true" style="width:30px" value=' + data + '>'
+                        //$.fn.dataTable.render.number(',', '.', 2, '')
+
+                    }
+                },
+                { "sClass": "action", "visible": false }
+
+            ],
+            "bLengthChange": false,
+            "bFilter": true,
+            "bSort": false,
+            "bInfo": false,
+            "paging": false,
+            //"scrollX": true,
+            "scrollY": "45vh",
+            language: { search: '', searchPlaceholder: "Search..." },
+            "scrollCollapse": true,
+            rowCallback: function (row) {
+                $(row).addClass('txtMultpidetails');
+            }, select: "multi",
+            columnDefs: [
+                {
+                    targets: [-1],
+                    render: function () {
+                        return "<button type='button'>=></button>"
+                    }
+                },
+                //{
+                //    targets: [7,8,9,10,11,12],
+                //    render: function () {
+                //        return '<input type="checkbox" checked/>'
+                //    }
+                //}
+
+            ],
+             dom: '<"dom_wrapper fh-fixedHeader"flB>tip',
+            buttons: [{
+                extend: "selectRows",
+
+                text: 'Attach To Access List',
+                className: 'btn-primary rounded-0',
+                action: function (e, sourceTable, button, config) {
+
+
+                    //console.log(sourceTable);
+
+                    var selectedRows = sourceTable.rows(".selected");
+                    var mData = selectedRows.data();
+                    selectedRows.remove().draw();
+                    targetTable = $("#MenuPermissionDetails").DataTable();
+                    $.each(mData, function (idx, item) {
+                        //targetTable.row.add(item);
+                        targetTable.row.add([
+                            `${item[0]}`,`${item[1]}`,`${item[2]}`,`${item[3]}`,//`${item[4]}`,//`${item[5]}`,`${item[6]}`,
+                            //'<input type="checkbox" checked/>',
+                            //'<input type="checkbox" checked/>',
+                            //'<input type="checkbox" checked/>',
+                            //'<input type="checkbox" checked/>',
+                            //'<input type="checkbox" checked/>',
+                            '<input type="checkbox" checked/>',
+                            '0',
+
+                            ''
+                        ]);
+                        //targetTable.row.add(JSON.parse(JSON.stringify(item)));
+                    })
+                    targetTable.draw();
+                }
+            }],
+            initComplete: function () {
+                $("#UserMenuList button").on("click", function (evt) {
+
+                    var t1 = $("#UserMenuList").DataTable();
+                    var t2 = $("#MenuPermissionDetails").DataTable();
+                    var tr = $(this).closest("tr");
+                    var row = t1.row(tr);
+                    var data = JSON.parse(JSON.stringify(row.data()));
+                    //alert(data[0]);
+                    row.remove().draw();
+                    //console.log(data);
+                    //t2.row.add(data).draw();
+                    t2.row.add([
+                            `${data[0]}`,`${data[1]}`,`${data[2]}`,`${data[3]}`,//`${data[4]}`,//`${data[5]}`,`${data[6]}`,
+                            //'<input type="checkbox" checked/>',
+                            //'<input type="checkbox" checked/>',
+                            //'<input type="checkbox" checked/>',
+                            //'<input type="checkbox" checked/>',
+                            //'<input type="checkbox" checked/>',
+                            '<input type="checkbox" checked/>',
+                            '0',
+                            ''
+                        ]).draw();
+                });
+            }
+        }) //
+    });
+    </script>
+
+}
+
+

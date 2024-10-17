@@ -1,0 +1,226 @@
+﻿@*@using Atrai.BookStore.Enums*@
+@*@model Atrai.Core.Entity.BookModel*@
+@*@inject Atrai.BookStore.Repository.ILanguageRepository _languageRepo*@
+@model BookModel
+@{ ViewData["Title"] = "Add new book";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+<style>
+    .thumbnail {
+        background-color: black;
+        width: 250px;
+        height: 200px;
+        display: inline-block; /* makes it fit in like an <img> */
+        background-size: cover; /* or contain */
+        background-position: center center;
+        background-repeat: no-repeat;
+    }
+</style>
+
+<div class="container">
+    <h3 class="display-4">Add new book</h3>
+    <hr />
+    @if (ViewBag.IsSuccess == true)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Congratulations</strong> You have added new book successfully. <br />
+            Click <a asp-controller="Book" asp-action="GetBook" asp-route-id="@ViewBag.BookId">here</a> to view the details
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+<form method="post" enctype="multipart/form-data" asp-action="AddNewBook" asp-controller="Book">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    @*<div class="form-group">
+            <label asp-for="LanguageId" class="control-label"></label>
+            <select asp-for="LanguageId" class="form-control" asp-items="(await _languageRepo.GetLanguages()).Select(x=> new SelectListItem() { Text = x.Name, Value = x.Id.ToString()})">
+                <option value="">Please choose your language</option>
+            </select>
+            <span asp-validation-for="LanguageId" class="text-danger"></span>
+        </div>*@
+
+    <div class="form-group">
+        <label asp-for="Title" class="control-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    @*<div class="form-group">
+            <label asp-for="Author" class="control-label"></label>
+            <input asp-for="Author" class="form-control" />
+            <span asp-validation-for="Author" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Description" class="control-label"></label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="TotalPages" class="control-label"></label>
+            <input asp-for="TotalPages" class="form-control" />
+            <span asp-validation-for="TotalPages" class="text-danger"></span>
+        </div>*@
+
+    @*<div class="form-group">
+            <label asp-for="CoverPhoto" class="control-label"></label>
+            <div class="custom-file">
+                <input asp-for="CoverPhoto" class="custom-file-input" id="customFile">
+                <label class="custom-file-label" for="customFile">Choose file</label>
+            </div>
+            <span asp-validation-for="CoverPhoto" class="text-danger"></span>
+        </div>*@
+
+    <div class="form-group">
+
+
+        @*<div class="uploadButton">
+            <button type="button" class="btn btn-info"><i class="fas fa-cloud-upload-alt"></i>Upload Images</button>
+            <input type ="file" id="files" name="Imagefiles" multiple="multiple" accept="image/*"/>
+        </div>
+        <p>Total Images : <span class="uploadCount"></span> </p>*@
+
+
+        <label asp-for="GalleryFiles" class="control-label"></label>
+        <div class="custom-file" id="files">
+            <input asp-for="GalleryFiles" class="custom-file-input" id="customFile" />
+            <label class="custom-file-label" for="customFile">Choose file</label>
+        </div>
+        <span asp-validation-for="GalleryFiles" class="text-danger"></span>
+    
+    
+    </div>
+
+
+
+    <div class="form-group">
+        <input type="submit" value="Add book" class="btn btn-primary" />
+    </div>
+
+
+
+
+    @*<div class="col-lg-3 col-md-4 col-6">
+            <a href="#" class="d-block mb-4 h-100">
+                <img class="img-fluid img-thumbnail" src="https://source.unsplash.com/p2TQ-3Bh3Oo/400x300" alt="">
+            </a>
+        </div>*@
+
+    <div class="form-group">
+        <div class="preview-area row"></div>
+    </div>
+    <div id="imagesId">
+
+    </div>
+
+    @*<div class="form-group">
+            <label asp-for="BookPdf" class="control-label"></label>
+            <div class="custom-file">
+                <input asp-for="BookPdf" class="custom-file-input" id="customFile">
+                <label class="custom-file-label" for="customFile">Choose file</label>
+            </div>
+            <span asp-validation-for="BookPdf" class="text-danger"></span>
+        </div>*@
+
+</form>
+</div>
+
+
+
+
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+        
+        var fileCount = 0;
+        var showFileCount = function(){
+            $('.uploadCount').text(fileCount);
+        };
+
+        showFileCount();
+
+
+        if (window.File && window.FileList && window.FileReader)
+        {
+
+            $("#files").on("change", function (e) {
+
+
+                var files = e.target.files,
+                    filesLength = files.length;
+                showFileCount();
+
+
+                for (var i = 0; i < filesLength; i++) {
+                    var f = files[i];
+
+                    var fileReader = new FileReader();
+
+
+                    fileReader.onload = (function (e) {
+                        var file = e.target;
+                        
+                        $("<span class=\"pip\">" +
+                            "<img name = \"Product.AttachmentId\" class=\"imageThumb\" src = \"" + e.target.result + "\"/>" +
+                            "<span class = \"remove\"><i class=\"fas fa-times\"></i></span>" +
+                            "</span>").appendTo("#imagesId");
+
+                        $(".remove").off();
+                        $(".remove").click(function () {
+                            $(this).parent(".pip").remove();
+                            fileCount -= 1;
+                            showFileCount();
+                        });
+
+
+
+                    });
+                    fileReader.readAsDataURL(f);
+
+
+                }
+
+            });
+
+
+        }
+
+
+        //$("#files").on("change", "input", function (event) {
+        //    $('#files').append('<input type="file" name="file[]"/>')
+        //});
+
+
+        //$('input[type="file"]').on('change', function () { $(this).append('<input type="file" name="file[]"/>') });
+
+
+        //var inputLocalFont = document.getElementById("customFile");
+        //inputLocalFont.addEventListener("change", previewImages, false);
+
+        //function previewImages() {
+        //    var fileList = this.files;
+
+        //    var anyWindow = window.URL || window.webkitURL;
+
+        //    for (var i = 0; i < fileList.length; i++) {
+        //        var objectUrl = anyWindow.createObjectURL(fileList[i]);
+        //        $('.preview-area').append('<div class="col-lg-3 col-md-4 col-6">  <a href="#" class=""> <img  class="img-fluid img-thumbnail" src = "' + objectUrl + '"/></a>  </div>');
+        //            window.URL.revokeObjectURL(fileList[i]);
+        //    }
+
+        //    $(inputLocalFont).hide();
+        //    inputLocalFont = $('  <input type = "file" class= "dimmy" multiple/>').appendTo("#filecontainer").get(0);
+        //        inputLocalFont.addEventListener("change", previewImages, false);
+        //};
+        });
+    </script>
+}

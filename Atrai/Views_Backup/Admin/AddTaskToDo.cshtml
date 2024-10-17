@@ -1,0 +1,207 @@
+﻿@model Atrai.Core.Entity.TaskToDoModel
+@{
+    ViewData["Title"] = "AddTaskToDo";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-md-8 col-12">
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <h4>New TaskToDo</h4>
+                    </div>
+
+
+  
+
+
+                    @*@Html.HiddenFor(m => m.Id, new { @value = Model.Id })
+        @Html.HiddenFor(m => m.CreateDate, new { @value = Model.CreateDate })
+        @Html.HiddenFor(m => m.LuserId, new { @value = Model.LuserId })*@
+
+                    <div class="card-body">
+
+                        <form asp-controller="admin" asp-action="AddTaskToDo" method="post">
+                            @if (Model != null)
+                            {
+                        <input type="hidden" asp-for="Id" />
+                                        <input type="hidden" asp-for="CreateDate" />
+                                                        <input type="hidden" asp-for="LuserId" /> }
+                                                    else
+                                                    {
+                                        <input type="hidden" asp-for="Id" value="0" />}
+
+                            <div class="row">
+                                <div class="col-md-10 col-12">
+
+                                    <div class="form-group row">
+                                        <div class="col">
+                                            <label asp-for="TaskTitle"></label>
+                                            <input type="text" asp-for="TaskTitle" class="form-control" placeholder="eg Enter Task Title">
+                                            <span asp-validation-for="TaskTitle" class="text-danger"></span>
+                                        </div>
+                                        <div class="col">
+
+                                            <label asp-for="TaskDetails"></label>
+                                            <input asp-for="TaskDetails" class="form-control" placeholder="Task Details">
+                                            <span asp-validation-for="TaskDetails" class="text-danger"></span>
+                                        </div>
+
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col">
+
+                                            <label asp-for="TaskRemarks"></label>
+                                            <input asp-for="TaskRemarks" class="form-control" placeholder="Remarks">
+                                            <span asp-validation-for="TaskRemarks" class="text-danger"></span>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col">
+                                            @Html.LabelFor(x => x.TaskToDoParentId)
+                                            @Html.DropDownListFor(x => x.TaskToDoParentId,
+                                                                                                                  new SelectList((IEnumerable<SelectListItem>)ViewBag.TaskToDoGroupHead, "Value", "Text"), "Select Parent TaskToDo",
+                                                                                                                  htmlAttributes: new { @class = "form-control", id = "TaskToDoParentId" })
+                                            @Html.ValidationMessageFor(x => x.TaskToDoParentId, "", new { @class = "text-danger" })
+                                        </div>
+
+                                        <div class="col">
+                                            @Html.LabelFor(x => x.TaskColour)
+                                            @Html.DropDownListFor(x => x.TaskColour,
+                                                                                                                  new SelectList((IEnumerable<SelectListItem>)ViewBag.Color, "Value", "Text"), "Select Color",
+                                                                                                                  htmlAttributes: new { @class = "form-control", id = "TaskColorId" })
+                                            @Html.ValidationMessageFor(x => x.TaskColour, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col">
+                                            <label asp-for="AssaignToPerson"></label>
+                                            <input asp-for="AssaignToPerson" class="form-control" placeholder="Assaign To">
+                                            <span asp-validation-for="AssaignToPerson" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="col">
+                                            <label asp-for="ExpiryDate"></label>
+                                            <input asp-for="ExpiryDate" class="form-control">
+                                            <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col">
+                                            <label asp-for="TaskPercentage"></label>
+                                            <input asp-for="TaskPercentage" class="form-control" placeholder="Task Percentage">
+                                            <span asp-validation-for="TaskPercentage" class="text-danger"></span>
+                                        </div>
+                                        <div class="col">
+                                            <label asp-for="Amount"></label>
+                                            <input asp-for="Amount" class="form-control" placeholder="Task Percentage">
+                                            <span asp-validation-for="Amount" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+
+                                        <div class="col">
+                                            <label asp-for="IsComplete"></label>
+                                            <input asp-for="IsComplete" class="form-control">
+                                            <span asp-validation-for="IsComplete" class="text-danger"></span>
+                                        </div>
+                                        <div class="col">
+                                            <label asp-for="CompleteDate"></label>
+                                            <input asp-for="CompleteDate" class="form-control">
+                                            <span asp-validation-for="CompleteDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+
+
+                                        @if (ViewBag.ActionType == "Create")
+                                        {
+                            <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" /> }
+                        else if (ViewBag.ActionType == "Edit")
+                        {
+                        <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" /> }
+                    else if (ViewBag.ActionType == "Delete")
+                    {
+                        <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>}
+
+
+                                        @Html.ActionLink("Back", "TaskToDoList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                    </div>
+
+
+                                    @*<div class="form-group row m-1">
+                            <div class="col">
+                                @if (ViewBag.ActionType == "Create")
+                                {
+
+                    <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" /> }
+
+                else if (ViewBag.ActionType == "Edit")
+                {
+                    <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" /> }
+                else if (ViewBag.ActionType == "Delete")
+                {
+                    <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>}
+                            </div>
+                            <div class="col">
+                                @Html.ActionLink("Back", "TaskToDoList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+                            </div>
+
+                        </div>*@
+
+
+
+
+                                    @*<div class="row text-center m-2">
+                    <br />
+                    <div class="col-md-1"></div>
+                    <div class="col-md-4 col-xs-12 d-block mx-auto">
+
+                        @if (ViewBag.ActionType == "Create")
+                        {
+                            <input type="submit" value="Save" class="btn  btn-success btn-block  rounded-0" />
+                        }
+                        else if (ViewBag.ActionType == "Edit")
+                        {
+                            <input type="submit" value="Update" class="btn btn-warning btn-block rounded-0" />
+                        }
+                        else if (ViewBag.ActionType == "Delete")
+                        {
+                            <button class="btn btn-danger btn-block rounded-0" type="button" onclick="Bank_delete()">Delete</button>
+                        }
+
+
+                    </div>
+
+                    <div class="col-md-4 col-xs-12 d-block mx-auto">
+                        @Html.ActionLink("Back", "TaskToDoList", "Admin", null, new { @class = "btn btn-info btn-block rounded-0", @id = "btnBack" })
+
+                    </div>
+                    <div class="col-md-3"></div>
+
+                </div>*@
+                                </div>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>

@@ -1,0 +1,375 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var ListType = ViewBag.ListType as string;
+    var CompanyName = ViewBag.CompanyName as string;
+
+
+}
+<style>
+    .toast-red {
+        background-color: red !important;
+        color: white; /* Set text color as needed */
+    }
+    /* .left-box {
+                  float:left;
+                }
+                .right-box {
+
+                  overflow: hidden;
+                }*/
+    .btn-delete {
+        position: absolute;
+        left: 90%;
+        bottom: 85%;
+        margin-top: 2px;
+        cursor: pointer;
+        background: none;
+        border: none;
+    }
+
+    #title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 600;
+        line-height: 20px;
+        color: #393a3d;
+        text-transform: uppercase;
+        font-size: 14px !important;
+        float: left;
+        margin-left: 8px;
+        margin-bottom: 0px;
+    }
+
+    #title-container {
+        margin-top: 0;
+        margin-bottom: 4px;
+        line-height: 20px;
+        color: #6b6c72;
+        font-weight: 500;
+        font-size: 14px;
+        float: left;
+        margin-left: 8px;
+        margin-top: 4px;
+        margin-bottom: 0px;
+    }
+
+    #money-container {
+        margin-top: 0;
+        margin-bottom: 4px;
+        line-height: 20px;
+        color: black;
+        float: left;
+        margin-left: 8px;
+        margin-top: 8px;
+    }
+
+    .image-container {
+        position: relative; /* Make the container relative to position the check icon */
+        width: 100px; /* Adjust to match the width of your images */
+        height: 100px; /* Adjust to match the height of your images */
+    }
+
+    .compare-ul {
+        list-style: none;
+        padding: 0;
+        text-align: left;
+        display: inline-block;
+        vertical-align: top; /* Align the lists to the top */
+        margin-right: 20px;
+    }
+
+    .form-label {
+        font-weight: 400 !important;
+        font-size: 12px;
+        text-align: left;
+    }
+
+
+    .check-icon {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%; /* Make the check icon cover the entire container */
+        height: 100%; /* Make the check icon cover the entire container */
+    }
+
+    hr {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid !important;
+        border-top: 1px solid rgba(0,0,0,.1);
+    }
+
+    .chart-type-img {
+        width: 82px;
+        height: 82px;
+    }
+
+    .chart-type {
+        width: 100px;
+        float: left;
+    }
+
+    .stacked-field {
+        display: none !important;
+    }
+
+    .stacked-field-show {
+        display: block !important;
+    }
+
+    .selected-chart {
+        box-shadow: 0px 0px 5px 2px lightblue; /* Adjust the color to your preference */
+    }
+
+    .offcanvas-body .card {
+        /* background: linear-gradient(135deg, #3498db, #ecf0f1); */
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin: auto;
+        width: 70%;
+        transition: transform 0.2s, box-shadow 0.2s;
+        color: black;
+        text-align: center;
+        border: 0px solid;
+    }
+
+    .table-box {
+        border: 1px solid;
+        border-color: rgb(212, 215, 220) !important;
+        padding: 10px;
+        margin: 5px;
+        box-sizing: border-box;
+        border-radius: 10px;
+        width: 30%;
+        height: 250px;
+        float: left;
+        text-align: center;
+        position: relative;
+    }
+
+    .center-content {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+
+    .rightside {
+        padding-left: 6%;
+        overflow: hidden;
+        /*width:60%;*/
+    }
+
+    .left {
+        margin-right: 500px
+    }
+
+
+    .card p {
+        margin-bottom: 20px;
+    }
+
+    .offcanvas-header {
+        background-color: #ECEEF1;
+    }
+
+    .offcanvas-body {
+        background-color: #F4F5F8;
+    }
+
+    .scrollb {
+        overflow-y: auto;
+        height: 100vh;
+    }
+
+    .highlight {
+        border: 5px solid green;
+    }
+
+    .onsortenble {
+        border: 5px solid black;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+    .customize-btn-another {
+        background: #2CA01C;
+        border: 1px solid black;
+        border-radius: 20px;
+        color: #FFFFFF;
+        border: 1px solid #2CA01C;
+    }
+
+        .customize-btn-another:hover {
+            background: #2CA01C;
+            border: 1px solid black;
+            border-radius: 20px;
+            color: #FFFFFF;
+            border: 1px solid #2CA01C;
+        }
+
+    .customize-btn:hover {
+        background: #ffffff;
+        border: 1px solid black;
+        color: black;
+        border-radius: 20px;
+    }
+
+    .my-handle:hover {
+        font-size: 24px;
+        color: #008000bf;
+    }
+
+    .my-handle {
+        display: flex;
+        justify-content: center;
+        align-content: center;
+    }
+</style>
+<style>
+    .custom-combobox {
+        position: relative;
+        display: inline-block;
+    }
+
+    .custom-combobox-toggle {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        margin-left: -1px;
+        padding: 0;
+    }
+
+    .custom-combobox-input {
+        margin: 0;
+        padding: 5px 10px;
+    }
+</style>
+
+<div class="container">
+    <div class="row my-2">
+        <button class="btn btn-success" onclick="AddRaw()">add row</button>
+        <div id="Report_table"></div>
+
+    </div>
+    <br />
+
+
+
+</div>
+
+
+
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.5.0/js/tabulator.min.js"></script>
+    <script>
+        var table;
+        var invoicelist = [{
+            Product: "",
+            action: "",
+            Productid:0
+        }, {
+            Product: "",
+            action: "",
+            Productid: 0
+        }];
+
+        $(document).ready(function () {
+            TabulatorInitializer();
+        })
+        function AddRaw() {
+            table.addRow({}, true);
+        }
+        function TabulatorInitializer() {
+
+            table = new Tabulator("#Report_table", {
+                data: invoicelist, //set initial table data
+                layout: "fitColumns",
+                columns: CustomColumn(),
+                movableColumns: true,
+                pagination: true,
+                paginationSize: 10,
+                paginationSizeSelector: [10, 25, 50, 100, true],
+                groupStartOpen: true,
+            });
+            //table.on("dataProcessed", applyFiltering);
+        }
+        
+        function CustomColumn() {
+            return [{
+                title: "Product", field: "Product", editor: productEditor,
+            },
+            {
+                title: "Productid", field: "Productid",visible:false
+            }
+            , {
+                title: "action", field: "action"
+            }]
+        }
+        // var   colorsToAccessSelect=['aa','ab','b']
+        function productEditor(cell, onRendered, success, cancel, editorParams) {
+
+            //create and style editor
+            var editor = document.createElement("select");
+
+            editor.setAttribute("class", "select2");
+            //editor.setAttribute("name", "favcolor[]");
+            //editor.setAttribute("onchange", "successFunc()");
+            editor.setAttribute("id", "p-"+cell.getRow().getPosition());
+
+            //create and style input
+            editor.style.width = "100%";
+
+            onRendered(function () {
+                $(editor).select2({
+                    closeOnSelect: true,
+                    // data: colorsToAccessSelect,
+                    ajax: {
+                        delay: 500,
+                        url: '@Url.Action("ProductSearch", "Accounts")',
+                        dataType: 'json',
+                        processResults: function (data) {
+                           
+                            return {
+                                results: data
+                            };
+                        },
+                        cache: false
+                    },
+
+
+                });
+                //editor.focus();
+                editor.style.css = "100%";
+                $(editor).select2('open');
+
+            });
+            function successFunc() {
+                success(editor.textContent);
+                cell.getRow().update({ "Productid": editor.value });
+                console.log(table.getData());
+            }
+            $(editor).on("change", successFunc);
+            $(editor).on("select2:close", DestroyFunc);
+           
+            function DestroyFunc() {
+                cancel();
+            }
+            return editor;
+        }
+
+    </script>
+   
+}

@@ -1,0 +1,1389 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Order Allocation";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    #example-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+    #modal-content2 {
+        background-color: #fefefe;
+        margin: 10px auto;
+        padding: 20px;
+        border: 3px solid #888;
+        width: 40%;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .custom-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 180px);
+       
+    }
+</style>
+
+
+<div class="container-fluid">
+    <h3 style="border-bottom: 1px solid gray; color:black;">Bill of Material</h3>
+    <div class="d-flex mb-3">
+        <div class="ms-4">
+            <label><strong>BOM Code</strong></label>
+            <input type="text" id="bom_code" class="form-control" style="padding:1px;">
+        </div>
+        <div class="ms-4">
+            <input type="text" placeholder="Search Style" id="Id" class="form-control d-none" value="0">
+            <input type="text" class ="d-none" id="Revision" value="0">
+            <label><strong>Style</strong></label>
+            <input type="text" placeholder="Search Style" id="style-name" class="form-control" style="padding:1px;">
+            <input type="text" placeholder="Search Style" id="style-id" class="form-control d-none">
+
+        </div>
+        <div class="ms-4">
+            <label><strong>Color</strong></label>
+            <select id="Color" class="form-control">
+                <option value="">Select Color</option>
+            </select>
+        </div>
+        <div class="ms-4 d-none">
+            <label><strong>Size</strong></label>
+            <select id="Size" class="form-control">
+                <option value="">Select Size</option>
+            </select>
+        </div>
+        <div class="form-check form-switch ms-auto mt-2">
+            <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked>
+            <label class="form-check-label" for="flexSwitchCheckChecked">Show Products</label>
+        </div>
+    </div>
+    <div style="padding:20px;">
+        <div class="row mt-3 d-none">
+
+            <div class="col-md col-6">
+                <div class="input-group  mb-1" style="margin-left: 5px;">
+
+                    @Html.DropDownList("CategoryId", null, "Category", htmlAttributes: new { @id = "CategoryId", @class = "form-control" })
+                </div>
+            </div>
+
+            <div class="col-md col-6">
+                <div class="input-group  mb-1">
+
+                    @Html.DropDownList("BrandId", null, "Brand", htmlAttributes: new { @id = "BrandId", @class = "form-control" })
+                </div>
+            </div>
+
+            <div class="col-md col-6">
+                <div class="input-group  mb-1">
+
+                    @Html.DropDownList("ModelId", null, "Model", htmlAttributes: new { @id = "ModelId", @class = "form-control" })
+                </div>
+            </div>
+            <div class="col-md col-6">
+                <div class="input-group  mb-1">
+
+                    @Html.DropDownList("WarehouseId", null, htmlAttributes: new { @class = "form-control" })
+                </div>
+            </div>
+
+
+
+            <div class="col-md col-4" style="margin-right: 30px;">
+                @Html.DropDownList("ROL", new List<SelectListItem>
+                {
+                new SelectListItem() {Text = "-Select Criteria-", Value="All"},
+                new SelectListItem() {Text = "Corss First Reorder Level", Value="ROL1"},
+                new SelectListItem() {Text = "Corss Secound Reorder Level", Value="ROL2"},
+                new SelectListItem() {Text = "Corss Third Reorder Level", Value="ROL3"},
+                new SelectListItem() {Text = "Only Corss First ROL", Value="OnlyROL1"},
+                new SelectListItem() {Text = "Only Corss Secound ROL", Value="OnlyROL2"},
+                new SelectListItem() {Text = "Only Corss Third ROL", Value="OnlyROL3"},
+
+                }, new { @class = "form-control" })
+            </div>
+
+        </div>
+        @* <input type="text" class="textbox search_box mb-4" id="searchInput" name="keywords" autocomplete="off" placeholder="Search" style="width: 350px; border: 1px solid #8080807d;height: 40px; border-radius: 25px;padding-left: 15px;" /> *@
+        <div id="product-table" class="mb-3"></div>
+
+
+        <div class="row" style="margin-top: 25px;">
+            <div class="col">
+        <h5 style="color:black;">Selected Materials</h5>
+            </div>
+        <div class="col d-flex justify-content-end">
+            <button title="Print" class="btn btn-white border-0" type="button" id="bomPrint-pdf" style="padding: 0px;padding-bottom: 10px;"
+                    aria-expanded="false">
+                <i class="bi bi-printer fs-5" style=" margin-right: 0px; "></i>
+            </button>
+            <button title="Export to excel" class="btn btn-white border-0" type="button" id="bomPrint-excel" style="padding: 0px;padding-bottom: 10px;"
+                    aria-expanded="false">
+                <i class="bi bi-file-earmark-excel fs-5" style=" margin-right: 0px; "></i>
+            </button>
+            <div title="Settings" class="dropdown1  custom-grid" style="display:inline-block;margin-left: 10px;">
+                @*<button class="btn btn-white border-0" type="button">
+                <i class="bi bi-gear fs-5"></i>
+                </button>*@
+                <a href="#" class="text-decoration-none text-black" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                   aria-expanded="false">
+                    <i class="bi bi-gear fs-5"></i>
+                </a>
+                <div class="dropdown-menu gear-dropdown" aria-labelledby="dropdownMenuButton-bom">
+                    <div class="row p-4 main-dropdown-size" style="overflow:hidden;">
+                        <div class="col">
+                            <span class="fw-bold ms-3">Columns</span>
+                            <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                            <ul class="list-unstyled">
+                                <li>
+                                    <div id="bomColumnList" class="custom-grid">
+                                    </div>
+                                </li>
+                            </ul>
+
+                        </div>
+
+                        <div class="ms-3">
+                            <label>Rows</label> <br />
+                            <select name="rows" id="bom-rows" class="cursor-pointer" style="padding: 10px 0 10px 5px; width: 70px;">
+                                <option value="0" disabled selected>Rows</option>
+                                <option value="5" selected>5</option>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="1000">1000</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+        </div>
+
+        <div id="example-table" style="margin-top: 15px;"></div>
+    </div>
+    <div class="d-flex justify-content-end">
+        <div class="mb-3 me-2">
+            <p style="font-weight: bold; font-size: 16px; text-align: right;">Total UnitCost</p>
+        </div>
+        <div class="mb-3 me-4">
+            <p id="totalUnitCost" style="font-size: 14px;">0.00</p>
+        </div>
+        <div class="mb-3 me-2">
+            <p style="font-weight: bold; font-size: 16px; text-align: right;">Total Amount</p>
+        </div>
+        <div class="mb-3">
+            <p id="totalAmount" style="font-size: 14px;">0.00</p>
+        </div>
+    </div>
+    <div style="padding-bottom: 100px;">
+
+        @if (ViewBag.ActionType == "Edit")
+        {
+            <button class="btn btn-success" id="BtnSave" style="float:right;">Update</button>
+        }
+        else if (ViewBag.ActionType == "Create")
+        {
+            <button class="btn btn-success" id="BtnSave" style="float:right;">Save</button>
+        }
+        else if (ViewBag.ActionType == "Copy" || ViewBag.ActionType == "Revision")
+        {
+            <button class="btn btn-success" id="BtnSave" style="float:right;">Save</button>
+        }
+        <button class="btn btn-warning" onclick="gotoInvoiceList()" style="float: right; margin-right: 10px;"><span style="color: white">Cancel</span></button>
+    </div>
+
+</div>
+
+<div class="col-md-2  col-2">
+    <div id="childModal" class="modal">
+        <div class="modal-content" id="modal-content2">
+            <div class="row" style="border-bottom: 1px solid #dee2e6 ">
+                <div class="col-md-11 col-11">
+                    <h6>Size Allocation</h6>
+                </div>
+                <div class="col-md-1 col-1">
+                    <i class="bi bi-x-square-fill" style="color: red; font-size: 20px;" id="closechildModal"></i>
+                </div>
+            </div>
+
+            <div id="sizewiseqty"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+
+    <script>
+
+        $('#Color').select2();
+        $('#Size').select2();
+
+        var selectColor = [];
+
+        var selectedSize = [];
+
+        function gotoInvoiceList() {
+            window.location.href = '@Url.Action("BuyerPOList", "BuyerOrder")?Type=BOM';
+        }
+
+        function GetColor(styleId) {
+
+            $('#Color').empty();
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetColorBOM", "BuyerOrder")',
+                datatype: "Json",
+                data: {
+                    style: styleId
+                },
+                success: function (data) {
+                    selectColor = [{ Value: "", Text: "=N/A=" }].concat(data);
+                    $('#Color').append('<option value="">Select Color</option>');
+
+                    $.each(data, function (index, value) {
+                        $('#Color').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                    });
+                    updateTableColumns();
+                }
+            });
+        }
+
+        function GetSize(styleId) {
+
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetSizeBOM", "BuyerOrder")',
+                datatype: "Json",
+                data: {
+                    style: styleId
+                },
+                success: function (data) {
+                    selectedSize = [{ Value: "", Text: "=N/A=" }].concat(data);
+                    
+                    updateTableColumns();
+                }
+            });
+        }
+
+        $(function () {
+            $("#style-name").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "@Url.Action("SearchStyle", "BuyerOrder")",
+                        dataType: "json",
+                        data: {
+                            term: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 1,
+                select: function (event, ui) {
+                    $("#style-name").val(ui.item.label);
+                    $("#style-id").val(ui.item.value);
+                    GetColor(ui.item.value);
+                    GetSize(ui.item.value);
+                    //handleSelectedStyle(ui.item.value);
+                    return false;
+                }
+            });
+        });
+
+        function updateTableColumns() {
+            var updatedColumns = columns.map(function (col) {
+                if (col.field === "ColorName") {
+                    return {
+                        ...col,
+                        editorParams: {
+                            values: selectColor.map(option => option.Text)
+                        }
+                    };
+                }
+                if (col.field === "SizeName") {
+                    return {
+                        ...col,
+                        editorParams: {
+                            values: selectedSize.map(option => option.Text)
+                        }
+                    };
+                }
+                return col;
+            });
+
+            table.setColumns(updatedColumns);
+        }
+        
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetSize", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#Size').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        }); 
+
+        function formatCurrency(value) {
+
+            if (value === undefined) {
+                return '0.00';
+            }
+            return parseFloat(value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+
+        var sizeqtycolumns = [
+            {
+                title: "",
+                field: "CheckBox",
+                headerHozAlign: "left",
+                width: "9px",
+                headerSort: false,
+                hozAlign: "left",
+                formatter: function (cell, formatterParams, onRendered) {
+                    var isChecked = cell.getValue() === true;
+
+                    var checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.checked = isChecked;
+
+                    checkbox.addEventListener("click", function (event) {
+                        var newValue = event.target.checked;
+                        cell.setValue(newValue);
+                    });
+
+                    return checkbox;
+                },
+                visible: true,
+                width: 50
+            },
+            { title: "Id", field: "Id", movable: false, visible: false },
+            { title: "UniqueId", field: "UniqueId", visible: false},
+            { title: "Size", field: "SizeName", movable: false },
+            { title: "Size", field: "SizeId", movable: false, visible: false },
+            { title: "Quantity", field: "Quantity", movable: false, editor: "input", bottomCalc: "sum" },
+        ];
+
+        var sizeqtytable = new Tabulator("#sizewiseqty", {
+            
+            layout: "fitColumns",
+            addRowPos: "bottom",
+            columns: sizeqtycolumns,
+        });
+
+        document.getElementById("closechildModal").addEventListener("click", function () {
+
+            
+            var modal = document.getElementById("childModal");
+            modal.style.display = "none";
+        });
+
+        function showsizewiseqtyModal(data) {
+            var modal = document.getElementById("childModal");
+            modal.style.display = "block";
+
+            // var packingrows = sizeqtytable.getData();
+            sizeqtytable.setFilter("UniqueId", "=", data.UniqueId);
+
+            var existingSizes = {};
+            var existingRows = sizeqtytable.getData();
+
+            existingRows.forEach(function (row) {
+                if (!existingSizes[row.UniqueId]) {
+                    existingSizes[row.UniqueId] = [];
+                }
+                existingSizes[row.UniqueId].push(parseInt(row.SizeId));
+            });
+
+            var sizeList = selectedSize; // Convert ViewBag.SizeList to JavaScript array
+
+            var existingSizesForCurrentUniqueId = existingSizes[data.UniqueId] || [];
+
+            sizeList.forEach(function (size) {
+                if (!existingSizesForCurrentUniqueId.includes(parseInt(size.Value))) {
+                    sizeqtytable.addRow({
+                        SizeId: size.Value,
+                        SizeName: size.Text,
+                        UniqueId: data.UniqueId,
+                        Quantity: 0,
+                    });
+                }
+            });
+        }
+
+        var table;
+
+        function updateTotals() {
+            let totalAmount = 0;
+            let totalUnitCost = 0;
+
+            table.getData().forEach(function (row) {
+                if (row.IsCost) {
+                    totalAmount += row.Amount || 0;
+                    totalUnitCost += parseFloat(row.Price);
+                }
+            });
+
+            document.getElementById("totalUnitCost").innerText = totalUnitCost.toFixed(2);
+            document.getElementById("totalAmount").innerText = totalAmount.toFixed(2);
+        }
+
+        var bomCategory = [{ Value: "", Text: "=N/A=" }].concat(@Html.Raw(Json.Serialize(ViewBag.BOMAllocationCat)));
+        var costCategory = [{ Value: "", Text: "=N/A=" }].concat(@Html.Raw(Json.Serialize(ViewBag.CostAllocationCat)));
+
+
+        console.log(selectColor);
+        var columns = [
+            {
+                title: "",
+                headerSort: false,
+                field: "drag",
+                frozen: true,
+                formatter: function (cell, formatterParams) {
+                    return "<i class='fas fa-bars drag-icon'></i>";
+                },
+                width: 30,
+                headerSort: false,
+                frozen: true,
+                rowHandle: true,
+            },
+            { title: "SL.", field: "SLNo", headerSort: false, width: 4, visible: true, bottomCalc: "count", hozAlign: "center" },
+            { title: "Id", field: "Id", visible: false },
+            { title: "ProductId", field: "ProductId", visible: false },
+            {
+                title: "Name", field: "Name", vertAlign: "middle", visible: true,
+                formatter: function (cell, formatterParams, onRendered) {
+                    return "<span style='font-weight: bold; color: blue;'>" + cell.getValue() + "</span>";
+                },
+                cellClick: function (e, cell) {
+                    showsizewiseqtyModal(cell.getRow().getData());
+                }
+            },
+            { title: "UniqueId", field: "UniqueId", visible: false },
+            { title: "PCategoryId", field: "PCategoryId", visible: false },
+            { title: "Product Category", field: "PCategoryName", vertAlign: "middle", visible: true, },
+            { title: "Item Color", field: "ProductColor", vertAlign: "middle", visible: true, },
+            { title: "Item Size", field: "ProductSize", vertAlign: "middle", visible: true, },
+            {
+                title: "BOM Category", field: "BOMAllocationCategoryName", searchable: true, visible: true, editor: "select",
+                editorParams: {
+                    values: bomCategory.map(option => option.Text),
+                },
+                cellEdited: function (cell) {
+
+                    var selectedText = cell.getValue();
+                    var selectedValue = bomCategory.find(option => option.Text === selectedText);
+                    if (selectedValue) {
+                        cell.getRow().update({ BOMAllocationCategoryId: selectedValue.Value });
+                    }
+                },
+            },
+            { title: "", field: "BOMAllocationCategoryId", searchable: true, visible: false },
+            {
+                title: "Cost Category", field: "CostAllocationCategoryName", searchable: true, visible: true, editor: "select",
+                editorParams: {
+                    values: costCategory.map(option => option.Text),
+                },
+                cellEdited: function (cell) {
+
+                    var selectedText = cell.getValue();
+                    var selectedValue = costCategory.find(option => option.Text === selectedText);
+                    if (selectedValue) {
+                        cell.getRow().update({ CostCategoryId: selectedValue.Value });
+                    }
+                },
+            },
+            { title: "", field: "CostCategoryId", searchable: true, visible: false },
+            { title: "Remarks 1", field: "Remarks1", vertAlign: "middle", searchable: true, visible: true, editor: "input" },
+            { title: "Remarks 2", field: "Remarks2", vertAlign: "middle", searchable: true, visible: true, editor: "input" },
+            {
+                title: "Style Color", field: "ColorName", searchable: true, visible: true, editor: "select",
+                editorParams: {
+                    values: selectColor.map(option => option.Text),
+                },
+                cellEdited: function (cell) {
+                    
+                    var selectedText = cell.getValue();
+                    var selectedValue = selectColor.find(option => option.Text === selectedText);
+                    if (selectedValue) {
+                        cell.getRow().update({ ColorId: selectedValue.Value });
+                    }
+                },
+            },
+            { title: "", field: "ColorId", searchable: true, visible: false },
+            {
+                title: "Style Size", field: "SizeName", visible: true, searchable: true, editor: "select",
+                editorParams: {
+                    values: selectedSize.map(option => option.Text),
+                },
+                cellEdited: function (cell) {
+
+                    var selectedText = cell.getValue();
+                    var selectedValue = selectedSize.find(option => option.Text === selectedText);
+                    if (selectedValue) {
+                        cell.getRow().update({ SizeId: selectedValue.Value });
+                    }
+                },
+            },
+            { title: "", field: "SizeId", visible: false, searchable: true },
+            { title: "Unit", field: "UnitName", visible: true, searchable: true },
+            { title: "", field: "UnitId", visible: false, searchable: true },
+            {
+                title: "Quantity", field: "RunTimeLiveStock", searchable: true, hozAlign: "right", vertAlign: "middle", visible: true, editor: "input", 
+                cellEdited: function (cell) {
+                    var rowData = cell.getRow().getData();
+                    var qty = parseFloat(rowData.RunTimeLiveStock) || 0;
+                    var rate = parseFloat(rowData.Price) || 0;
+                    var amount = qty * rate;
+                    cell.getRow().update({ Amount: amount });
+                },
+            },
+            {
+                title: "Price", field: "Price", hozAlign: "right", searchable: true, visible: true, editor: "input", vertAlign: "middle",
+                formatter: function (cell, formatterParams, onRendered) {                   
+                    var value = cell.getValue();
+                    var formattedNumber = formatNumber(value);
+                    return "<div style='text-align:right'>" + formattedNumber + "</div>";
+                },
+                cellEdited: function (cell) {
+                    var rowData = cell.getRow().getData();
+                    var qty = parseFloat(rowData.RunTimeLiveStock) || 0;
+                    var rate = parseFloat(rowData.Price) || 0;
+                    var amount = qty * rate;
+                    cell.getRow().update({ Amount: amount });
+                    updateTotals();
+                },
+            },
+            {
+                title: "AMOUNT",
+                field: "Amount",
+                headerHozAlign: "center", 
+                bottomCalc: "sum",
+                visible: true,
+                hozAlign: "center",
+                sorter: "date",
+                formatter: function (cell, formatterParams) {
+                    var rowData = cell.getRow().getData();
+                    var qty = parseFloat(rowData.RunTimeLiveStock) || 0;
+                    var rate = parseFloat(rowData.Price) || 0;
+                    var amount = qty * rate;
+                    return formatCurrency(amount);
+                },
+            },
+            {
+                title: "IsCost", field: "IsCost", formatter: "tickCross", hozAlign: "center", editor: true, formatterParams: { allowEmpty: true }, cellClick: function (e, cell) {
+                    cell.setValue(!cell.getValue());
+                    updateTotals(); // toggle value on cell click
+                }
+            },
+        ];
+        var copypackingColumn = {
+            title: "Copy",
+            field: "Copy",
+            movable: false,
+            frozen: true,
+            formatter: function (cell, formatterParams) {
+                return "<i class='bi bi-c-circle-fill'></i>";
+            }, hozAlign: "center",
+            width: 30,
+            headerSort: false,
+            cellClick: function (e, cell) {
+                var rowData = cell.getRow().getData();
+                var currentDate = new Date();
+                var uniqueId = currentDate.getTime().toString().slice(-6);
+
+                var newData = {
+                    ProductId: rowData.ProductId,
+                    Name: rowData.Name,
+                    PCategoryId: rowData.PCategoryId,
+                    PCategoryName: rowData.PCategoryName,
+                    ProductColor: rowData.ProductColor,
+                    ProductSize: rowData.ProductSize,
+                    Remarks1: rowData.Remarks1,
+                    Remarks2: "",
+                    ColorName: "",
+                    ColorId: "",
+                    SizeName: "",
+                    SizeId: "",
+                    UnitName: rowData.UnitName,
+                    UnitId: rowData.UnitId,
+                    RunTimeLiveStock: 1,
+                    Price: rowData.Price,
+                    Amount: rowData.Amount,
+                    UniqueId: uniqueId,
+                    IsCost: true
+                };
+
+                // Add the new data to the table
+                table.addData(newData);
+                renumberRows();
+            }
+        };
+
+        columns.push(copypackingColumn);
+
+
+        var deleteColumn = {
+            title: "Delete",
+            field: "Delete",
+            movable: false, hozAlign: "center",
+            formatter: function (cell, formatterParams) {
+                return "<i class='fas fa-trash-alt delete-icon'></i>";
+            },
+            width: 30,
+            headerSort: false,
+            cellClick: function (e, cell) {
+                var rowData = cell.getRow().getData();
+                var row = cell.getRow();
+                table.deleteRow(row);
+                renumberRows();
+            }
+        };
+
+        columns.push(deleteColumn);
+
+        
+
+        function formatNumber(number) {
+            
+            // Round to two decimal places
+            var roundedNumber = Math.round(number * 100) / 100;
+
+            // Convert to string
+            var strNumber = roundedNumber.toString();
+
+            // Split the string by decimal point
+            var parts = strNumber.split(".");
+
+            // Add commas for thousands separator
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+            // If there is a decimal part, add it back
+            if (parts.length > 1) {
+                return parts.join(".");
+            } else {
+                return parts[0];
+            }
+        }
+
+        var columnListSales = $("#bomColumnList");
+        $.each(columns, function (index, field) {
+            ////console.log("GLOBAL 2::",field);
+            var title = field.title;
+            var name = field.field;
+            var visible = true;
+            if (field.visible == false) {
+                visible = false;
+            }
+            titles = `<li>
+                        <a class="dropdown-item" href="#">
+                        <div class="custom-control custom-checkboxs" >
+                        <input type="checkbox" class="custom-control-input title-input" id="${name}" value="${name}">
+                                <label class="custom-control-label w-100 cursor-pointer" id="${name}" for="${name}">${title}</label>
+                        </div>
+                        </a>
+                      </li>`;
+            columnListSales.append(titles);
+
+            document.querySelector(`#${name}`).addEventListener('click', function (event) {
+                var checkbox = event.target;
+                var isChecked = checkbox.checked;
+
+                if (isChecked) {
+                    table.showColumn(name);
+                } else {
+                    table.hideColumn(name);
+                }
+            });
+
+
+            $(`${'#' + name}`).prop('checked', visible);
+
+
+            $('.custom-control-label').on('click', function (e) {
+                e.stopPropagation();
+            });
+            $('#dropdown-titles').on('click', function (e) {
+                e.stopPropagation();
+            });
+
+            //Add event listener to the rows select input
+            $("#bom-rows").on("change", function () {
+                var selectedRows = $(this).val();
+                if (selectedRows !== null) {
+                    // Convert the selected value to an integer
+                    var pageSize = parseInt(selectedRows);
+                    if (!isNaN(pageSize)) {
+                        // Set the page size for the parentTable
+                        table.setPageSize(pageSize);
+
+                        //// You may also want to update the parent table height
+                        //updateParentTableHeight();
+                    }
+                }
+            });
+
+        });
+
+        table = new Tabulator("#example-table", {
+            height: "311px",
+            layout: "fitColumns",
+            addRowPos: "bottom",
+            movableRows: true,
+            columns: columns,
+        });
+
+        table.on("rowMoved", function (cell) {
+            renumberRows();
+        });
+
+        function renumberRows() {
+            var rows = table.getRows();
+            rows.forEach(function (row, index) {
+                row.update({ SLNo: index + 1 });
+            });
+        }
+
+        document.getElementById("bomPrint-pdf").addEventListener("click", function () {
+            table.print(false, true);
+        });
+        document.getElementById("bomPrint-excel").addEventListener("click", function () {
+            table.download("xlsx", "data.xlsx", { sheetName: "Table Data" });
+        });
+
+        var globalFields = [
+            { title: "SLNo", field: "Id", vertAlign: "middle", visible: false },
+            { title: "ProductId", field: "Id", visible: false, headerFilterLiveFilter: false },
+            { title: "Name", field: "Name", vertAlign: "middle", width: 300, headerFilter: "input", headerFilterLiveFilter: false },
+
+            { title: "Local Name", field: "LocalName", visible: false, searchable: true, headerFilterLiveFilter: false },
+            { title: "Code", field: "Code", hozAlign: "left", width: 100, vertAlign: "middle", headerFilter: "input", headerFilterLiveFilter: false },
+            { title: "Model", field: "ModelName", visible: false, searchable: true, headerFilterLiveFilter: false },
+
+
+            { title: "Category", field: "CategoryName", vertAlign: "middle", width: 110, headerFilter: "input", headerFilterLiveFilter: false },
+            { title: "Category", field: "CategoryId", vertAlign: "middle", visible: false, headerFilterLiveFilter: false },
+            { title: "Descp", field: "Description", vertAlign: "middle", searchable: true, width: 80, headerFilter: "input", headerFilterLiveFilter: false },
+            { title: "Color", field: "ColorName", searchable: true, visible: true,width: 80, headerFilter: "input", headerFilterLiveFilter: false }, //, "visible":IsColorName
+            { title: "Size", field: "SizeName", visible: true, searchable: true, width: 70, headerFilter: "input", headerFilterLiveFilter: false },
+            { title: "Unit", field: "UnitName", visible: true, searchable: true, width: 70, headerFilter: "input", headerFilterLiveFilter: false },
+            { title: "Unit", field: "UnitId", visible: false, searchable: true, headerFilterLiveFilter: false },
+            { title: "Brand", field: "BrandName", searchable: true, visible: false, headerFilterLiveFilter: false },   //  headerFilter: "input"
+            {
+                title: "Avg. Cost", field: "AvgCost", visible: false, headerFilterLiveFilter: false, formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    if (data != null) {
+                        var output = "";
+                        var totalstock = 0;
+                        var totalcostingvalue = 0;
+                        var totalsalesvalue = 0;
+
+                        for (var i = 0; i < data.length; i++) {
+                            totalstock += data[i].CurrentStock;
+                            totalcostingvalue += data[i].CostingValue;
+                            totalsalesvalue += data[i].SalesValue;
+                        }
+
+                        if (totalstock > 0) {
+                            output = (totalcostingvalue / totalstock).toFixed(2);
+                        }
+
+                        return output;
+                    }
+                    return null;
+                }
+            },
+            { title: "Supplier", field: "SupplierName", visible: true, searchable: true, width: 120, headerFilter: "input", headerFilterLiveFilter: false },
+            {
+                title: "Cost Price", field: "CostPrice", hozAlign: "right", searchable: true, width: 120, vertAlign: "middle", headerFilterLiveFilter: false, visible: true, headerFilter: "input",
+                formatter: function (cell, formatterParams, onRendered) {
+                    var formattedNumber = cell.getValue().toLocaleString();
+                    return "<div style='text-align:right'>" + formattedNumber + "</div>";
+                },
+            },
+            {
+                title: "Price", field: "Price", hozAlign: "right", searchable: true, vertAlign: "middle", visible: false, headerFilterLiveFilter: false,
+                formatter: function (cell, formatterParams, onRendered) {
+                    var formattedNumber = cell.getValue().toLocaleString();
+                    return "<div style='text-align:right'>" + formattedNumber + "</div>";
+                },
+            },
+            { title: "Quantity", field: "RunTimeLiveStock", searchable: true, width: 110, hozAlign: "right", vertAlign: "middle", visible: true, headerFilterLiveFilter: false, headerFilter: "input", },
+            {
+                title: "Stock", field: "WarehouseList", hozAlign: "right", visible: false, headerFilterLiveFilter: false, formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    if (data != null) {
+                        var totalstock = 0;
+
+                        for (var i = 0; i < data.length; i++) {
+                            totalstock += data[i].CurrentStock;
+                        }
+
+                        return totalstock;
+                    }
+                    return null;
+                }
+            },
+            {
+                title: "CostingValue", field: "CostingValue", visible: false, headerFilterLiveFilter: false, formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    if (data != null) {
+                        var totalcostingvalue = 0;
+
+                        for (var i = 0; i < data.length; i++) {
+                            totalcostingvalue += data[i].CostingValue;
+                        }
+
+                        return totalcostingvalue;
+                    }
+                    return null;
+                }
+            },
+            {
+                title: "SalesValue", field: "SalesValue", visible: false, headerFilterLiveFilter: false, formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    if (data != null) {
+                        var totalsalesvalue = 0;
+
+                        for (var i = 0; i < data.length; i++) {
+                            totalsalesvalue += data[i].SalesValue;
+                        }
+
+                        return totalsalesvalue;
+                    }
+                    return null;
+                }
+            },
+            {
+                title: "Curr. Stock Value", field: "CurrentStock", visible: false, formatter: function (cell, formatterParams, onRendered) {   //Curr. Stock With Cost & Sales Value
+                    var data = cell.getData();
+                    if (data != null) {
+                        var output = "";
+                        var totalstock = 0;
+                        var totalcostingvalue = 0;
+                        var totalsalesvalue = 0;
+
+                        for (var i = 0; i < data.length; i++) {
+                            output += data[i].WhShortName + ' : ' + data[i].CurrentStock + ' : ' + data[i].CostingValue.toFixed(2) + ' : ' + data[i].SalesValue;
+                            totalstock += parseFloat(data[i].CurrentStock.toFixed(2));
+                            totalcostingvalue += parseFloat(data[i].CostingValue.toFixed(2));
+                            totalsalesvalue += parseFloat(data[i].SalesValue.toFixed(2));
+
+                            if (i < data.length - 1) {
+                                output += "  ";
+                            }
+                        }
+
+                        if (totalstock > 0) {
+                            if (data.length > 1) {
+                                output += '<hr class="solid"> <p style="font-weight: bold;"> TOTAL : ' + totalstock + '  : ' + totalcostingvalue + '  : ' + totalsalesvalue + ' </p>';
+                            }
+                        }
+
+                        return output;
+                    }
+                    return null;
+                }
+            },
+            {
+                title: "ROL 1 / 2 / 3", field: "ROL123", visible: false, formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    if (data != null) {
+                        var output = "";
+                        var totalstock = 0.00;
+
+                        for (var i = 0; i < data.length; i++) {
+                            totalstock += parseFloat(data[i].CurrentStock.toFixed(2));
+                        }
+
+                        if (data.ROL > 0) {
+                            if (totalstock < data.ROL) {
+                                output += '<p style="font-weight: bold; color:red"> Crossed ROL : ' + data.ROL + '</p>';
+                            } else {
+                                output += '<p style="font-weight: bold; color:green">Not Crossed ROL : ' + data.ROL + '</p>';
+                            }
+                        }
+
+                        if (data.ROLTwo > 0) {
+                            if (totalstock < data.ROLTwo) {
+                                output += '<hr class="solid"> <p style="font-weight: bold; color:#ff5400"> Crossed ROL 2 : ' + data.ROLTwo + '</p>';
+                            } else {
+                                output += '<hr class="solid"> <p style="font-weight: bold; color:green">Not Crossed ROL 2: ' + data.ROLTwo + '</p>';
+                            }
+                        }
+
+                        if (data.ROLThree > 0) {
+                            if (totalstock < data.ROLThree) {
+                                output += '<hr class="solid"> <p style="font-weight: bold;"> Crossed ROL 3 : ' + data.ROLThree + '</p>';
+                            } else {
+                                output += '<hr class="solid"> <p style="font-weight: bold; color:green"> Not Crossed ROL 3: ' + data.ROLThree + '</p>';
+                            }
+
+                        }
+                        return output;
+                    }
+                    return null;
+                }
+            },
+            {
+                title: "Pur. / Rcvd. Qty", visible: false, formatter: function (cell, formatterParams, onRendered) {   //Total Pur. / Rcvd. Qty
+                    var data = cell.getData();
+                    var buttons = "";
+                    if (data.TotalPurchase > 0) {
+                        buttons += 'Qty : ' + (data.TotalPurchase - data.TotalPurchaseReturn) + ' ' + data.UnitName + '<br>';
+                        buttons += data.LastPurchaseDate + '<br>';
+                        buttons += data.LastPurchaseSupplier;
+                    }
+                    return buttons;
+                }
+            },
+            {
+                title: "Sales / Issue Qty", visible: false, formatter: function (cell, formatterParams, onRendered) {  //Total Sales / Issue Qty
+                    var data = cell.getData();
+                    var buttons = "";
+                    if (data.TotalSales > 0 || data.TotalIssue > 0) {
+                        buttons += 'Qty : ' + (data.TotalSales + data.TotalIssue + data.TotalDamage - data.TotalSalesReturn) + ' ' + data.UnitName + '<br>';
+                        buttons += data.LastSalesDate + ' ' + data.LastIssueDate + '<br>';
+                        buttons += data.LastSalesCustomer;
+                    }
+                    return buttons;
+                }
+            },
+            {
+                title: "Image", field: "ImagePath", visible: false, formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    return '<img src="..' + data + '" class="img-thumbnail" width="80px" onerror=this.onerror=null;this.src="../Content/MemberImages/0.png">';
+                }
+            },
+            {
+                title: "Action", field: "Action", visible: true, hozAlign: "center", headerSort: false,
+                formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    var myUrledit = '@Url.Action("EditProduct", "Admin")?productId=' + data.Id;
+
+                    var editButton = document.createElement('button');
+                    editButton.className = 'btn btn-sm';
+                    editButton.innerHTML = '<i class="bi bi-plus-cirsizeqtytable-fill"  style="color: green;"></i> Add';
+
+                    
+
+                    var buttonGroup = document.createElement('div');
+                    buttonGroup.className = 'btn-group';
+                    buttonGroup.appendChild(editButton);
+
+                    return buttonGroup;
+                },
+
+                visible: true, cellClick: function (e, cell) {
+                    cell.getElement().classList.add('active-cell');
+                },
+            }
+        ];
+
+        //  $('#searchInput').on('input', function() {
+        //     var inputValue = $(this).val();
+        //     var url = '@Url.Action("GetProductList", "Admin")' + '?searchquery=' + inputValue;
+        //     parentTable.setData(url);
+
+        // });
+
+        function initTabulatorForProduct() {
+
+            var CategoryId = $("#CategoryId").val();
+            var ROL = $("#ROL").val();
+            var WarehouseId = $('#WarehouseId').val();
+            var BrandId = $('#BrandId').val();
+            var ModelId = $("#ModelId option:selected").text() || "";
+
+            // Define the Tabulator table instance
+            parentTable = new Tabulator("#product-table", {
+
+                layout: "fitColumns",
+                height: "fitDataFill",
+                selectable: 1,
+                pagination: true,
+                scrollHorizontal: true,
+                paginationMode: "remote",
+                filterMode: "remote",
+                paginationSize: 5,
+                paginationInitialPage: 1,
+                paginationSizeSelector: [5, 10, 25, 50, 100, true],
+                paginationCounter: "rows",
+                //paginationCounter: "pages",
+
+                columnDefaults: {
+                    resizable: true,
+                },
+
+                ajaxURL: '@Url.Action("GetProductListBOM", "Admin")' + '?CategoryId=' + CategoryId + '&ROL=' + ROL + '&WarehouseId=' + WarehouseId + '&BrandId=' + BrandId + '&ModelId=' + ModelId,
+                ajaxConfig: "get",
+                ajaxContentType: "json",
+
+                ajaxResponse: function (url, params, response) {
+                    parentTable.setMaxPage(response.last_page);
+                    console.log("response.last_page", response.last_page);
+
+                    dataLoad = response.data;
+                    console.log("load:", dataLoad);
+                    console.log("total:", response.total);
+                    totalValue = response.total;
+                    return {
+
+                        data: response.data,
+                        last_page: response.last_page,
+                        total: response.total
+                    };
+                },
+               columns: globalFields,
+                ajaxURLGenerator: function (url, config, params) {                   
+                    //return request url
+                    return url + "&searchquery=" + JSON.stringify(params); //encode parameters as a json object
+                },
+                
+            });
+
+            parentTable.on("rowDblClick", function (e, row) {
+
+                var currentDate = new Date();
+                var uniqueId = currentDate.getTime().toString().slice(-6);
+
+                var rowData = row.getData();
+
+                var newData = {
+                    ProductId: rowData.Id,
+                    Name: rowData.Name,
+                    PCategoryId: rowData.CategoryId,
+                    PCategoryName: rowData.CategoryName,
+                    ProductColor: rowData.ColorName,
+                    ProductSize: rowData.SizeName,
+                    Remarks1: rowData.Description,
+                    Remarks2: "",
+                    ColorName: "",
+                    ColorId: "",
+                    SizeName: "",
+                    SizeId: "",
+                    UnitName: rowData.UnitName,
+                    UnitId: rowData.UnitId,
+                    RunTimeLiveStock: 1,
+                    Price: rowData.CostPrice,
+                    Amount: rowData.Amount,
+                    UniqueId: uniqueId,
+                    IsCost: true
+                };
+
+                // Add the new data to the table
+                table.addData(newData);
+                updateTotals();
+
+                renumberRows();
+            });
+
+            parentTable.on("cellClick", function (e, cell) {
+                var columnDefinition = cell.getColumn().getDefinition();
+
+                var currentDate = new Date();
+                var uniqueId = currentDate.getTime().toString().slice(-6);
+
+                if (columnDefinition.title === "Action") {
+                    var rowData = cell.getRow().getData();
+                    var newData = {
+                        ProductId: rowData.Id,
+                        Name: rowData.Name,
+                        PCategoryId: rowData.CategoryId,
+                        PCategoryName: rowData.CategoryName,
+                        ProductColor: rowData.ColorName,
+                        ProductSize: rowData.SizeName,
+                        Remarks1: rowData.Description,
+                        Remarks2: "",
+                        ColorName: "",
+                        ColorId: "",
+                        SizeName: "",
+                        SizeId: "",
+                        UnitName: rowData.UnitName,
+                        UnitId: rowData.UnitId,
+                        RunTimeLiveStock: 1,
+                        Price: rowData.CostPrice,
+                        Amount: rowData.Amount,
+                        UniqueId: uniqueId,
+                        IsCost: true
+                    };
+                    table.addData(newData);
+                    updateTotals();
+                    renumberRows();
+                }
+            });
+            
+
+        }
+
+        initTabulatorForProduct();
+
+        function gatherData() {
+
+            var rows = table.getData();
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            var userid = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var formattedData = [];
+
+            var sizeallocation = [];
+            var sizeqtyrows = sizeqtytable.getData();
+
+            sizeqtyrows.forEach(function (row) {
+                if (row.CheckBox === true)
+                {
+                    var rowData = {
+                        "Id": 0,
+                        "UniqueId": parseFloat(row.UniqueId),
+                        "SizeId": parseInt(row.SizeId),
+                        "Quantity": parseFloat(row.Quantity),
+                        "ComId": ComId,
+                        "LuserId": userid,
+                        //"BOMDetailsId" : 0
+                    };
+                    sizeallocation.push(rowData);
+                }
+            });
+
+            var groupedsizeAllocationRows = {};
+            sizeallocation.forEach(function (packingRow) {
+                var UniqueId = packingRow.UniqueId;
+                if (!groupedsizeAllocationRows[UniqueId]) {
+                    groupedsizeAllocationRows[UniqueId] = [];
+                }
+                groupedsizeAllocationRows[UniqueId].push(packingRow);
+            });
+
+            rows.forEach(function (row) {
+
+                var uniqueId = row.UniqueId;
+                var bomQuantitySizeWise = groupedsizeAllocationRows[uniqueId] || [];
+                var id = '@actiontype' === "Copy" ? 0 : row["Id"];
+                id = '@actiontype' === "Revision" ? 0 : row["Id"];
+
+
+                var rowData = {
+                    "Id": id,
+                    "Remarks1": row["Remarks1"],
+                    "Remarks2": row.Remarks2,
+                    "ProductId": row.ProductId,
+                    "ColorId": row.ColorId,
+                    "SizeId": row.SizeId,
+                    "Quantity": row.RunTimeLiveStock,
+                    "Price": row.Price,
+                    "Amount": parseFloat(row.RunTimeLiveStock) * parseFloat(row.Price),
+                    "UniqueId": parseFloat(row.UniqueId),
+                    "BOMAllocationCategoryId": row.BOMAllocationCategoryId,
+                    "CostCategoryId": row.CostCategoryId,
+                    "BOMQuantitySizeWise": bomQuantitySizeWise,
+                    "ComId": ComId,
+                    "IsCost": row.IsCost
+                };
+
+                formattedData.push(rowData);
+            });
+
+            var revsn = $("#Revision").val();
+
+            if ('@actiontype' === "Revision")
+            {
+                var orderData = {
+                    Id: 0,
+                    ParentId: $("#Id").val(),
+                    BOMCode: $("#bom_code").val(),
+                    StyleId: $("#style-id").val(),
+                    ColorId: $("#Color").val(),
+                    SizeId: $("#Size").val(),
+                    Revision: revsn,
+                    BOMDetails: formattedData
+                };
+            }
+            else
+            {
+                var orderData = {
+                    Id: $("#Id").val(),
+                    BOMCode: $("#bom_code").val(),
+                    StyleId: $("#style-id").val(),
+                    ColorId: $("#Color").val(),
+                    SizeId: $("#Size").val(),
+                    Revision: revsn,
+                    BOMDetails: formattedData
+                };
+            }
+
+            if ('@actiontype' === "Copy")
+            {
+                orderData.Id = 0;
+            }
+            return orderData;
+        }
+
+        function sendDataToServer() {
+            var orderData = gatherData();
+
+            var data = JSON.stringify(orderData);
+
+            $.ajax({
+
+                url: '@Url.Action("BOMCreation", "BuyerOrder")',
+                type: 'POST',
+                data: data,
+                async: false,
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (response) {
+                    toastr.success(response.message, "", {
+                        "toastClass": "toast-green",
+                    });
+                    setTimeout(function () {
+
+                        window.location.href = '@Url.Action("BuyerPOList", "BuyerOrder")?Type=BOM';
+
+                    }, 1000);
+                },
+                error: function (error) {
+                    console.log("Error");
+                }
+            });
+        }
+
+        var saveButton = document.getElementById('BtnSave');
+        saveButton.addEventListener('click', function () {
+            sendDataToServer();
+        });
+
+        $(document).ready(function () {
+
+            toggleProductTable();
+
+            // Add change event listener to the checkbox
+            $('#flexSwitchCheckChecked').change(function () {
+                toggleProductTable();
+            });
+
+            function toggleProductTable() {
+                if ($('#flexSwitchCheckChecked').is(':checked')) {
+                    $('#product-table').removeClass('d-none');
+                } else {
+                    $('#product-table').addClass('d-none');
+                }
+            }
+
+            if ('@actiontype' === "Edit" || '@actiontype' === "Copy" || '@actiontype' === "Revision") {
+                GetBOM();
+
+                function GetBOM() {
+                    var id = @ViewBag.Id;
+                    $.ajax({
+                        type: "GET",
+                        url: '@Url.Action("GetBOMDetails", "BuyerOrder")',
+                        data: { id: id },
+                        dataType: "json",
+                        success: function (response) {
+                            if (response.success === '1') {
+                                console.log(response.data);
+                                var model = response.data;
+                                GetColor(model.StyleId);
+                                model.BOMCode = model.BOMCode.split('_')[0];
+                                var revsn = '@actiontype' === "Revision" ? model.Revision + 1 : model.Revision;
+                                var code = '@actiontype' === "Copy" ? model.BOMCode + '-Copy' : '@actiontype' === "Revision" ? model.BOMCode + '_Revised-' + revsn: model.BOMCode;
+                                $("#Id").val(model.Id);
+                                $("#bom_code").val(code);
+                                $("#style-id").val(model.StyleId);                              
+                                $("#style-name").val(model.StyleNo);
+
+                                GetColor(model.StyleId);
+                                GetSize(model.StyleId);
+                                
+                                $("#Revision").val(revsn);
+                                setTimeout(function () {
+                                    $("#Color").val(model.ColorId).trigger('change');
+                                }, 500);
+                                $("#Size").val(model.SizeId).trigger('change');
+                                table.setData(model.BOMDetails);
+                                renumberRows();
+                                sizeqtytable.setData(response.sizeAllocation);
+                                updateTotals();
+                            }
+                        },
+                        error: function (error) {
+                            console.error("Error fetching data: " + error);
+                        }
+                    });
+                }
+
+            }
+        });
+    </script>
+
+}

@@ -1,0 +1,145 @@
+﻿@*@model IEnumerable<Atrai.Core.Entity.ShopModel>*@
+@{
+    ViewData["Title"] = "Shop List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="row mb-2">
+                            <div class="col-md-2 col-12">
+                                @Html.ActionLink("Create Shop", "AddShop", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md-2 col-12 mt-1">
+                                <h4 style="color: #1976d2;">Shop List</h4>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive m-t-10">
+                            <table id="tbllist" class="display nowrap table table-hover  table-bordered" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr></tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr></tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+            </div>
+                </div>
+                <!-- End PAge Content -->
+            </div>
+        </div>
+
+
+
+
+
+        @section Scripts{
+
+            <script type="text/javascript">
+                $(function () {
+
+                    function getDateString(dateObj) {
+
+
+                        if (dateObj == null) { return ''; };
+
+                        var date = new Date(parseInt(dateObj.substr(6)));
+                        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                            "Aug", "Sep", "Oct", "Nov", "Dec"];
+                        //var month = dateObj.getMonth() + 1;
+                        //var day = dateObj.getDate();
+                        //var year = dateObj.getFullYear();
+                        //var date = day + "/" + month + "/" + year;
+
+                        var formatdate = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear();
+
+                        //alert(val);
+
+
+                        return formatdate;
+
+                        //return dateObj.toDateString();
+                    }
+
+                    var peopleList = $('#tbllist').DataTable({
+
+                        serverSide: true,  "scrollX": true,
+                        processing: true,
+
+                        ajax: {
+                            url: '@Url.Action("GetShopList", "Association")',
+                            type: "POST"
+                        },
+                        dom: 'Blfrtip',
+                        buttons: [
+                            'copy', 'csv', 'excel'
+                        ],
+                        rowId: 'Id',
+                        "iDisplayLength": 5,
+                        "lengthMenu": [[5, 10, 25, 50, 500], [5, 10, 25, 50, "All"]],
+                        columns: [
+                            { "title": "Shop Id", "data": "Id", "searchable": false, "visible": true },
+                            //{ "title": "Shop Code", "data": "ShopCode", "searchable": false },
+                            { "title": "Shop Name Bangla", "data": "ShopNameBng", "searchable": true },
+                            { "title": "Shop Name English", "data": "ShopNameEng", "searchable": true },
+
+                            { "title": "Business Address Bangla", "data": "ShopBusinessAddressBng", "searchable": true },
+                            //{ "title": "Holding No Bangla", "data": "HoldingNoBng", "searchable": true },
+
+                            { "title": "Business Address English", "data": "ShopBusinessAddressEng", "searchable": true },
+                            //{ "title": "Holding No English", "data": "HoldingNoEng", "searchable": true },
+
+
+                            { "title": "Owner Name Eng", "data": "ShopOwnerEng", "searchable": true },
+                            { "title": "Owner Name Bng", "data": "ShopOwnerBng", "searchable": true },
+
+                            { "title": "Contact No", "data": "ShopMobile", "searchable": true },
+
+
+                            { "title": "Items / Product", "data": "ItemsProduct", "searchable": true },
+
+                            { "title": "Market Name", "data": "MarketName", "searchable": true },
+
+                            {
+                                "title": "Visiting Card / Image", "data": "ShopImagePath", "searchable": false, "render": function (data) {
+                                    console.log(data);
+                                    return '<img src="..' + data + '" class="img-thumbnail" width="80px" onerror=this.onerror=null;this.src="../Content/ShopImages/0.png">';
+                                }
+                            },
+
+                            {
+                                "title": "Action",
+                                "data": "Id",
+                                "render": function (data, type, row) {
+                                    var myUrledit = '@Url.Action("EditShop", "Association")?ShopId=' + data;
+                                    var myUrldelete = '@Url.Action("DeleteShop", "Association")?ShopId=' + data;
+                                    var message = `return confirm('Are you sure you want to Remove this Shop ?')`;
+
+                                    return '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\"  onclick = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-remove"></i></a></span>';
+
+                                }
+
+                            }
+                        ]
+                    });
+
+
+                });
+            </script>
+        }

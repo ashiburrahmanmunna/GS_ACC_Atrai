@@ -1,0 +1,457 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Fiscal Month Activation";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    .form-control {
+        border: 1px solid #adb5bd !important;
+    }
+
+    #example-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+    
+</style>
+
+<div>
+    <h5>Fiscal Month Activation</h5>
+    <div style="background: #F4F4F4; padding: 20px;">
+        <div id="example-table" style="margin-top: 10px;"></div>
+    </div>
+
+    <div style="background: #F4F4F4; padding: 10px;" class="mt-2">
+        <div id="month-table" style="margin-top: 10px;"></div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+
+    <script>
+
+        let fyId = 0;
+        function setInactiveUrl(id) {
+            var myUrlInactive = '@Url.Action("InactiveFiscalMonth", "Accounts")';
+
+            $.ajax({
+                type: "get",
+                data: { Id: id },
+                url: myUrlInactive,
+                success: function (response) {
+                    if (response.Success == 1) {
+                        
+                        getFiscalMonth(fyId);
+                    }
+                    else if (response.Success == 2) {
+                        toastr.success(response.msg, "", {
+                            "toastClass": "toast-red",
+                        });
+                    }
+                }
+            });
+        }
+
+        function setmakeActiveUrl(id) {
+            var myUrlInactive = '@Url.Action("makeActiveFiscalMonth", "Accounts")';
+
+            $.ajax({
+                type: "get",
+                data: { Id: id },
+                url: myUrlInactive,
+                success: function (response) {
+                    if (response.Success == 1) {
+                        
+                        getFiscalMonth(fyId);
+                    }
+                    else if (response.Success == 2) {
+                        toastr.success(response.msg, "", {
+                            "toastClass": "toast-red",
+                        });
+                    }
+                }
+            });
+        }
+
+        var monthcolumns = [
+            {
+                headerSort: false,
+                field: "drag",
+                frozen: true,
+                formatter: function (cell, formatterParams) {
+                    return "<i class='fas fa-bars drag-icon'></i>";
+                },
+                width: 30,
+                headerSort: false,
+                rowHandle: true,
+
+
+            },
+            { title: "Id", field: "Id", movable: false, headerSort: false, visible: false },
+            { title: "SL.", field: "SLNo", headerSort: false, frozen: true, width: 5, bottomCalc: "count", hozAlign: "right" },
+            { title: "MonthName", field: "MonthName", movable: false, headerSort: false },
+            { title: "MonthName Bangla", field: "MonthNameBangla", headerSort: false, visible: false },
+
+            {
+                title: "Opening Date", field: "OpeningdtFrom", 
+                editorParams: {
+                    dateFormat: "d-M-Y",
+                },
+                // cellEdited: function (cell) {
+                //     cell.getRow().update({ "OpeningdtFrom": cell.getValue() });
+                // },
+                // editor: function (cell, onRendered, success, cancel, editorParams) {
+                //     var input = document.createElement("input");
+                //     input.type = "text";
+                //     input.style.width = "100%";
+                //     input.value = cell.getValue() || "";
+
+                //     var flatpickrInstance = flatpickr(input, editorParams);
+
+                //     flatpickrInstance.config.onClose.push(function (selectedDates, dateStr) {
+                //         cell.setValue(dateStr);
+                //         success(dateStr);
+                //     });
+
+                //     onRendered(function () {
+                //         input.focus();
+                //     });
+
+                //     return input;
+                // },
+            },
+            {
+                title: "Closing Date", field: "ClosingdtTo", 
+                editorParams: {
+                    dateFormat: "d-M-Y",
+                },
+                // cellEdited: function (cell) {
+                //     cell.getRow().update({ "ClosingdtTo": cell.getValue() });
+                // },
+                // editor: function (cell, onRendered, success, cancel, editorParams) {
+                //     var input = document.createElement("input");
+                //     input.type = "text";
+                //     input.style.width = "100%";
+                //     input.value = cell.getValue() || "";
+
+                //     var flatpickrInstance = flatpickr(input, editorParams);
+
+                //     flatpickrInstance.config.onClose.push(function (selectedDates, dateStr) {
+                //         cell.setValue(dateStr);
+                //         success(dateStr);
+                //     });
+
+                //     onRendered(function () {
+                //         input.focus();
+                //     });
+
+                //     return input;
+                // },
+            },
+            { title: "Status", field: "Status", headerSort: false, hozAlign: "center" },
+            {
+                title: "Actions", field: "button", headerHozAlign: "center", vertAlign: "middle", headerSort: false, hozAlign: "center",width: "5%", 
+                formatter: function (cell, formatterParams, onRendered) {
+                    var data = cell.getData();
+                    console.log("see data::", data);
+                    var myUrlGetforInvoice = `@Url.Action("MasterLC", "BuyerOrder")?id=${data.Id}`;
+
+                    var makeinActive = `setInactiveUrl(${data.Id}) `;
+                    var makeActive = `setmakeActiveUrl(${data.Id}) `;
+
+
+
+                    var makeActiveHtml;
+                    makeActiveHtml = `<button onclick='${makeActive}' class='btn btn-secondary btn-sm' type='button'>Open</button>`;
+
+                    var inActiveHtml;
+                    inActiveHtml = `<button onclick='${makeinActive}' class='btn btn-danger btn-sm' type='button'>Close</button>`;
+
+
+
+                    var html = data.isLocked == true ? makeActiveHtml : inActiveHtml;
+
+                    if (data.isLocked == true) {
+                        var cells = cell.getRow().getCells();
+                        cells.forEach(function (cell) {
+                            cell.getElement().style.backgroundColor = "#CACACA";
+                        });
+                    }
+                    else {
+                        var cells = cell.getRow().getCells();
+                        cells.forEach(function (cell) {
+                            cell.getElement().style.backgroundColor = "#A9CA9A";
+                        });
+                    }
+
+
+
+                    return html;
+                },
+                visible: true, cellClick: function (e, cell) {
+                    cell.getElement().classList.add('active-cell');
+                },
+            },
+        ];
+
+        var monthtable = new Tabulator("#month-table", {
+            layout: "fitColumns",
+            addRowPos: "bottom",
+            columns: monthcolumns,
+        });
+
+        function initializeMonthTable(data) {
+            if (monthtable) {
+                data.forEach(function (row, index) {
+                    var dateObj = new Date(row.OpeningdtFrom);
+                    var dateObj1 = new Date(row.ClosingdtTo);
+
+                    row.OpeningdtFrom = dateObj.getDate() + '-' +
+                        new Intl.DateTimeFormat('en-us', { month: 'short' }).format(dateObj) + '-' +
+                        dateObj.getFullYear();
+
+                    row.ClosingdtTo = dateObj1.getDate() + '-' +
+                        new Intl.DateTimeFormat('en-us', { month: 'short' }).format(dateObj1) + '-' +
+                        dateObj1.getFullYear();
+
+                    row.SLNo = index + 1;
+                });
+                monthtable.setData(data);
+            } else {
+                monthtable = new Tabulator("#month-table", {
+                    layout: "fitColumns",
+                    addRowPos: "bottom",
+                    columns: columns,
+                    data: data,
+                });
+            }
+        }
+
+        
+        function getFiscalMonth(id)
+        {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetFiscalMonth", "Accounts")',
+                data: { Id: id },
+                datatype: "Json",
+                success: function (response) {
+                    monthtable.clearData();
+                    initializeMonthTable(response.data);
+                }
+            });
+        }
+        var columns = [
+            {
+                headerSort: false,
+                field: "drag",
+                frozen: true,
+                formatter: function (cell, formatterParams) {
+                    return "<i class='fas fa-bars drag-icon'></i>";
+                },
+                width: 30,
+                headerSort: false,
+                rowHandle: true,
+
+
+            },
+            { title: "Id", field: "Id", movable: false, headerSort: false, visible: false },
+            { title: "SL.", field: "SLNo", headerSort: false, frozen: true, width: 5, bottomCalc: "count", hozAlign: "right" },
+            { title: "FYName", field: "FYName", movable: false, headerSort: false },
+            { title: "FYName Bangla", field: "FYNameBangla", headerSort: false, visible: false },
+            
+            {
+                title: "Opening Date", field: "OpeningDate",
+                editorParams: {
+                    dateFormat: "d-M-Y",
+                },
+                // cellEdited: function (cell) {
+                //     cell.getRow().update({ "OpeningDate": cell.getValue() });
+                // },
+                // editor: function (cell, onRendered, success, cancel, editorParams) {
+                //     var input = document.createElement("input");
+                //     input.type = "text";
+                //     input.style.width = "100%";
+                //     input.value = cell.getValue() || "";
+
+                //     var flatpickrInstance = flatpickr(input, editorParams);
+
+                //     flatpickrInstance.config.onClose.push(function (selectedDates, dateStr) {
+                //         cell.setValue(dateStr);
+                //         success(dateStr);
+                //     });
+
+                //     onRendered(function () {
+                //         input.focus();
+                //     });
+
+                //     return input;
+                // },
+            },
+            {
+                title: "Closing Date", field: "ClosingDate", 
+                editorParams: {
+                    dateFormat: "d-M-Y",
+                },
+                // cellEdited: function (cell) {
+                //     cell.getRow().update({ "ClosingDate": cell.getValue() });
+                // },
+                // editor: function (cell, onRendered, success, cancel, editorParams) {
+                //     var input = document.createElement("input");
+                //     input.type = "text";
+                //     input.style.width = "100%";
+                //     input.value = cell.getValue() || "";
+
+                //     var flatpickrInstance = flatpickr(input, editorParams);
+
+                //     flatpickrInstance.config.onClose.push(function (selectedDates, dateStr) {
+                //         cell.setValue(dateStr);
+                //         success(dateStr);
+                //     });
+
+                //     onRendered(function () {
+                //         input.focus();
+                //     });
+
+                //     return input;
+                // },
+            },
+        ];
+
+        var table = new Tabulator("#example-table", {
+            height: "311px",
+            layout: "fitColumns",
+            movableRows: true,
+            addRowPos: "bottom",
+            columns: columns
+        });
+
+        table.on("rowDblClick", function (e, row) {
+
+            var currentDate = new Date();
+            var uniqueId = currentDate.getTime().toString().slice(-6);
+
+            var rowData = row.getData();
+
+            fyId = rowData.Id;
+
+            getFiscalMonth(rowData.Id);
+
+            table.getRows().forEach(function (r) {
+                var cells = r.getCells();
+                cells.forEach(function (cell) {
+                    cell.getElement().style.backgroundColor = "white";
+                });
+            });
+
+
+            var cells = row.getCells();
+            cells.forEach(function (cell) {
+                cell.getElement().style.backgroundColor = "#A9CA9A";
+            });
+            
+        });
+
+        function initializeTabulator(data) {
+            if (table) {
+                data.forEach(function (row, index) {
+                    var dateObj = new Date(row.OpeningDate);
+                    var dateObj1 = new Date(row.ClosingDate);
+
+                    row.OpeningDate = dateObj.getDate() + '-' +
+                        new Intl.DateTimeFormat('en-us', { month: 'short' }).format(dateObj) + '-' +
+                        dateObj.getFullYear();
+
+                    row.ClosingDate = dateObj1.getDate() + '-' +
+                        new Intl.DateTimeFormat('en-us', { month: 'short' }).format(dateObj1) + '-' +
+                        dateObj1.getFullYear();
+
+                    row.SLNo = index + 1;
+                });
+                table.setData(data);
+            } else {
+                table = new Tabulator("#example-table", {
+                    height: "311px",
+                    layout: "fitColumns",
+                    addRowPos: "bottom",
+                    columns: columns,
+                    data: data,
+                });
+            }
+        }
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetFiscalYears", "Accounts")',
+            datatype: "Json",
+            success: function (response) {
+               setTimeout(function () {
+                 initializeTabulator(response.data);
+              }, 1000);
+            }
+        });
+
+
+    </script>
+}

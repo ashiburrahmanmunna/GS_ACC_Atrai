@@ -1,0 +1,1176 @@
+﻿@model Atrai.Model.Core.Entity.Acc_VoucherTypeModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Voucher Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var AccountHeadExist = @HttpContextAccessor.HttpContext.Session.GetInt32("AccountHeadExist");
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="~/admin_theme_gtr/assets/css/multistep-custom.css" rel="stylesheet" />
+
+<div class="mt-5 card">
+    <div class="card-body">
+        <div class="row d-flex justify-content-center align-items-center">
+            <div class="col-md-10 offse-md-1">
+
+                <form action="#" class="form" id="forms" onsubmit="event.preventDefault()">
+                    <div class="progressbar">
+                        <div class="progress" id="progress"></div>
+
+                        <div class="progress-step progress-step-active" data-title="Guidlines"></div>
+                        <div class="progress-step progress-step" data-title="Upload"></div>
+                        <div class="progress-step" data-title="Map Data"></div>
+                        <div class="progress-step" data-title="Import"></div>
+                        <div class="progress-step" data-title="Final ShowDown"></div>
+                    </div>
+                    
+                    <div class="step-forms step-forms-active">
+                        <div class="card">
+                            <div class="card-body">
+                                
+                                <p>
+                                    <ul style="font-size:20px;">
+                                       
+                                       
+                                        <!-- Button trigger modal -->
+                                        <button type="button" id="modalButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                            Important Guidlines to show
+                                        </button>
+
+                                        @if (AccountHeadExist == 0)
+                                        {
+                                            <a onclick="autoInsertAccounts()" @*asp-controller="Accounts" asp-action="AImportXml"*@ id="autoInsert" class="btn btn-success" style="float: right;">
+                                                Chart of Account Auto Insert
+                                            </a>
+                                        }
+
+                                        @if (AccountHeadExist != 0)
+                                        {
+                                            <a onclick="autoInsertAccounts()" @*asp-controller="Accounts" asp-action="AImportXml"*@ id="autoInsert" class="btn btn-success" style="float: right;">
+                                                Chart of Account Auto Insert
+                                            </a>
+                                        }
+                                                                              
+
+                                        <!-- Modal -->
+                                        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="staticBackdropLabel">Guidlines to use Import</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <h4>First time importing your Chart of Accounts?</h4>
+                                                        <ul style="font-size:18px;">
+                                                            <li>If you want to import from a Tally Xml file then remember that Your existing Chart of Account list will be deleted and also your Transaction voucher list will also be deleted.</li>
+                                                            <li>If you don't want to import from other software, and use our standard Chart of Accounts then click into the Auto Insert button.'</li>
+                                                            
+                                                            
+                                                        </ul>
+                                                    </div>
+                                                    @*<div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        <button type="button" class="btn btn-primary">Understood</button>
+                                                    </div>*@
+                                                </div>
+                                            </div>
+                                        </div>
+                          
+                                    </ul>
+                                </p>
+                            </div>
+                        </div>
+                        
+
+                        <div class="row">
+                            <div class="col-md-9">
+                            </div>
+                            <div class="col-md-1 mt-5 pt-5">
+                                <a href="/Admin/AccountHeadList" class="btn btn-danger" style="padding: 2px 20px;">Decline</a>
+                            </div>
+                            <div class="col-md-1 mt-5 pt-5" style="margin-left: 30px;">
+                                <a href="#" class="btn btn-primary" id="btn-guidline" style="padding: 2px 20px;">Accept</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-forms">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 mt-5">
+                                        <div class="bg-style">
+                                            <img src="~/assets/excel 1.png" alt="" style="float:left; margin-right: 15px;"><h6>Import from Manual Excel</h6>
+                                            @*<p>Some guidlines are given... <i><a href="https://docs.google.com/document/d/19buokOuLAoNixMlynNyGP2Z2tDS3xdDV/edit?usp=share_link&ouid=116160212043922713437&rtpof=true&sd=true">Read more</a></i></p>*@
+                                            <p>
+
+                                                <div class="input-group my-4">
+
+                                                    <input type="file" id="excel-file">
+
+                                                </div>
+
+                                            </p>
+
+
+                                            <a href="https://docs.google.com/spreadsheets/d/1c7cqc2K2m6J7Kw3WRIo52edWU7zeP0-r/edit?usp=share_link&ouid=116160212043922713437&rtpof=true&sd=true">Download a sample file</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 mt-5">
+                                        <div class=" bg-style">
+                                            <img src="~/assets/tally_logo.png" alt="tally" style="float:left; margin-right: 15px; height: 30px; width: 30px;"><h6>Import XML file from Tally</h6>
+                                            @*  <p>Some guidlines are given...<i><a href="https://docs.google.com/document/d/19buokOuLAoNixMlynNyGP2Z2tDS3xdDV/edit?usp=share_link&ouid=116160212043922713437&rtpof=true&sd=true">Read more</a></i></p>*@
+                                            <div class="input-group my-4">
+                                                <input type="file" id="xml-file">
+
+                                            </div>
+
+
+                                            <a href="#">Preview a sample</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 mt-5">
+                                        <div class="bg-style">
+                                            <img src="~/assets/quickbooks-online-logo-clipart.png" alt="quickbooks-online" style="float:left; margin-right: 15px; height: 30px; width: 30px;"><h6>Import Excel file from Quickbook</h6>
+                                            @* <p>Some guidlines are given...<i><a href="https://docs.google.com/document/d/19buokOuLAoNixMlynNyGP2Z2tDS3xdDV/edit?usp=share_link&ouid=116160212043922713437&rtpof=true&sd=true">Read more</a></i></p>*@
+                                            <p>
+
+                                                <div class="input-group my-4">
+
+                                                    <input type="file" id="quickbook-file">
+
+                                                </div>
+
+                                            </p>
+
+
+                                            <a href="https://docs.google.com/spreadsheets/d/1c7cqc2K2m6J7Kw3WRIo52edWU7zeP0-r/edit?usp=share_link&ouid=116160212043922713437&rtpof=true&sd=true">Download a sample file</a>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <div class="row">
+                            <div class="col-md-11">
+                            </div>
+                            <div class="col-md-1 mt-5 pt-5">
+                                <a href="#" class="btn btn-primary" id="btn-next-upload">Next</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-forms">
+                        <h6>Map your fields to Atrai fields</h6>
+                        <div class="row">
+                            <div id="jsGridExcel">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-11  mt-5 pt-5">
+                                <a href="#" class="btn btn-primary" id="btn-prev">Previous</a>
+                            </div>
+                            <div class="col-md-1 mt-5 pt-5">
+                                <a href="#" class="btn btn-next-last btn-primary">Next</a>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="step-forms">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="jsGridImportData">
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <div class="row ">
+                            <div class="col-md-11  mt-5 pt-5">
+                                <a href="#" class="btn btn-primary" id="btn-prev">Previous</a>
+                            </div>
+                            <div class="col-md-1 mt-5 pt-5">
+                                <a href="#" class="btn btn-primary" id="next-form">Next</a>
+                                
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="step-forms">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="jsGridFinalShowdown">
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <div class="row ">
+                            <div class="col-md-11  mt-5 pt-5">
+                                <input type="button" class="btn btn-primary btn-sm" value="Back To List" onclick="@("window.location.href='" + @Url.Action("AccountHeadList", "Admin") + "'");" />
+                            </div>
+                            <div class="col-md-1 mt-5 pt-5">
+                                @*<input type="submit" value="Save the List" id="submit-form" class="btn btn-primary" />*@
+                                <button id="submit-form" class="btn btn-primary">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+
+    <script type="text/javascript">
+        const prevBtns = document.querySelectorAll(".btn-prev");
+        const lastBtn = document.querySelectorAll("#next-form");
+        //const nextBtns = document.querySelectorAll(".btn-next");
+        const nextBtnsLast = document.querySelectorAll(".btn-next-last");
+        const nextBtnsuploader = document.querySelectorAll("#btn-next-upload");
+        const progress = document.getElementById("progress");
+        const formSteps = document.querySelectorAll(".step-forms");
+        const progressSteps = document.querySelectorAll(".progress-step");
+        const guidlineBtn = document.querySelectorAll("#btn-guidline")
+
+        //datatable
+
+        $(document).ready(function () {
+
+
+
+          
+           
+            var ResponseData;
+            var ResponseDataXml;
+            var CategoryList = [];
+            $.ajax({
+                method: "get",
+                async: false,
+                url: '@Url.Action("GetAccountCategoryDropdown", "Admin")',
+                //  data: { VoucherType: "Cash Payment" },
+
+                success: function (data) {
+
+
+                    console.log(data);
+                    for (var i = 0; i < data.length; i++) {
+                        ListAll = {
+                            Text: data[i].Text,
+                            Value: parseInt(data[i].Value)
+                        };
+
+                        CategoryList.push(ListAll);
+                    }
+                }
+            });
+
+            var ParentGroupList = [];
+            $.ajax({
+                method: "get",
+                async: false,
+                url: '@Url.Action("GetAccountParentDropdown", "Admin")',
+                //  data: { VoucherType: "Cash Payment" },
+
+                success: function (data) {
+                    console.log(data);
+                    for (var i = 0; i < data.length; i++) {
+                        ListAll = {
+                            Text: data[i].Text,
+                            Value: parseInt(data[i].Value)
+                        };
+
+                        ParentGroupList.push(ListAll);
+                    }
+                }
+            });
+
+
+            var AccountTypeList = [
+
+                { Text: 'Ledger', Value: 'L' },
+                { Text: 'Group', Value: 'G' }
+            ]
+
+
+            var ExtractHeader = [];
+
+            
+            
+            let formStepsNum = 0;
+            prevBtns.forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    // Decrement formStepsNum
+                    formStepsNum--;
+                    // Update the form steps and progress bar
+                    updateFormSteps(formStepsNum);
+                    updateProgressbar();
+                });
+            });
+
+
+            var inputFile = $('#excel-file')[0];
+            var quickbook = $('#quickbook-file')[0];
+            var inputXmlFile = $('#xml-file')[0];
+            nextBtnsuploader.forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    if (quickbook.files.length > 0 && quickbook.files[0].size > 0) {
+                        formStepsNum++;
+                        updateFormSteps(formStepsNum);
+                        updateProgressbar();
+                        var quickbookFile = $('#quickbook-file')[0].files[0];
+
+                        var formData = new FormData();
+                        formData.append('file', quickbookFile);
+
+                        $.ajax({
+                            url: '@Url.Action("ImportQuickbook", "Accounts")',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            success: function (data) {
+                                console.log(data);
+                                for (var i = 0; i < data.length; i++) {
+                                    imeiListAll = {
+                                        Text: data[i].Text,
+                                        Value: parseInt(data[i].Value)
+                                    };
+
+                                    ExtractHeader.push(imeiListAll);
+                                }
+
+
+                                var length = 0;
+                                $('#jsGridExcel').jsGrid({
+                                    width: "100%",
+                                    height: "auto",
+
+                                    editing: true,
+                                    autoload: true,
+                                    pageSize: 3,
+                                    pageLoading: true,
+                                    pageIndex: 1,
+                                    paging: true,
+                                    controller: {
+                                        loadData: function (filter) {
+                                            console.log(filter);
+                                            var d = $.Deferred();
+                                            $.ajax({
+                                                type: "GET",
+                                                url: '@Url.Action("GetQuickbookList", "Accounts")',
+
+                                                contentType: "application/json; charset=utf-8",
+                                                dataType: "json"
+                                            })
+
+                                                .done(function (result) {
+                                                    console.log(result);
+                                                    d.resolve(result);
+                                                });
+                                            return d.promise().then(function (q) {
+
+                                                length = q.length;
+                                                return {
+
+                                                    data: q
+
+                                                }
+                                            });
+                                        }
+                                    },
+                                    fields: [
+                                        { name: "AtraiColumn", title: 'Atrai Column' },
+                                        { name: "ExcelColumn", title: 'Excel Column', type: "select", items: ExtractHeader, valueField: "Text", textField: "Text", width: 100, visible: true },
+                                        { name: "DefaultValues", title: 'Default Values', type: 'text' },
+                                        { type: "control", width: '80', title: 'Action' },
+
+                                    ],
+                                    onItemUpdated: function (args) {
+                                        if (args.item.ExcelColumn) {
+
+                                        }
+                                    }
+
+                                });
+
+
+
+                            }
+                        });
+                    }
+                   else if (inputXmlFile.files.length > 0 && inputXmlFile.files[0].size > 0) {
+                        formStepsNum += 2;
+                        updateFormSteps(formStepsNum);
+                        updateProgressbar();
+                        var xmlFile = $('#xml-file')[0].files[0];
+                        var formData = new FormData();
+
+                        formData.append('file', xmlFile);
+                        console.log(formData);
+                        $.ajax({
+                            url: '@Url.Action("ImportXml", "Accounts")',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            success: function (data) {
+                                ResponseDataXml = data;
+                                console.log(ResponseDataXml);
+                                $('#jsGridImportData').jsGrid({
+                                    width: "100%",
+                                    height: "auto",
+                                    data: ResponseDataXml,
+                                    editing: true,
+                                    inserting: true,
+                                    autoload: true,
+                                    pageSize: 3,
+                                    pageLoading: true,
+                                    pageIndex: 1,
+                                    paging: true,
+                                    pagination: true,
+                                    deleteButton: true,
+                                    confirmDeleting: true,
+                                    deleteConfirm: "Are you sure?",
+                                    controller: {
+
+                                        insertItem: function (args) {
+                                            ResponseDataXml.push(args);
+                                        },
+
+                                        deleteItem: function (args) {
+
+                                            const indexToRemove = ResponseDataXml.findIndex((item) =>
+                                                item.AccName === args.AccName &&
+                                                //item.OP_Date === args.OP_Date &&
+                                                //item.OP_Balance === args.OP_Balance &&
+                                                item.AccCategory === args.AccCategory &&
+                                                item.AccGroup === args.AccGroup &&
+                                                item.Type === args.Type
+
+                                            );
+                                            ResponseDataXml.splice(indexToRemove, 1);
+                                            $('#jsGridImportData').jsGrid('loadData');
+                                        }
+                                    },
+
+                                    fields: [
+                                        { name: "AccName", title: 'Account Head', type: 'text' },
+                                        {
+                                            name: "OP_Date",
+                                            title: 'Opening Date',
+                                            type: 'text',
+                                            width: 150,
+                                            filtering: false,
+                                            editing: true,
+                                            insertTemplate: function () {
+                                                var $result = jsGrid.fields.text.prototype.insertTemplate.call(this);
+                                                $result.datepicker({
+                                                    dateFormat: "d-mm-y"
+                                                });
+                                                return $result;
+                                            },
+                                            editTemplate: function (value) {
+                                                var $result = jsGrid.fields.text.prototype.editTemplate.call(this, value);
+                                                $result.datepicker({
+                                                    dateFormat: "d-mm-y"
+                                                });
+                                                return $result;
+                                            },
+                                            insertValue: function () {
+                                                return this.val();
+                                            }//,
+                                            //editValue: function (args) {
+                                            //    console.log(args);
+                                            //    return this.val();
+                                            //}
+                                        },
+                                        { name: "OP_Balance", title: 'Opening Balance', type: 'text' },
+                                        { name: "Guid", title: 'Guid', type: 'text' },
+                                        { name: "AccCategory", title: 'Accounts Category', type: 'label' },
+                                        { name: "AccGroup", title: 'Accounts Group', type: 'label' },
+                                        //{ name: "CategoryId", title: 'Account Category', type: 'select', items: CategoryList, valueField: "Value", textField: "Text", width: 100, visible: true },
+                                        //{ name: "ParentId", title: 'Account Group', type: 'select', items: ParentGroupList, valueField: "Value", textField: "Text", width: 100, visible: true },
+
+                                        { name: "Type", title: 'Account Type', type: 'select', items: AccountTypeList, valueField: "Value", textField: "Text", width: 100, visible: true },
+                                        { name: "Remarks", title: 'Remarks', type: 'text' },
+                                        { type: "control", width: '80', title: 'Action' }
+                                    ],
+
+                                    onItemDeleted: function (args) {
+                                        console.log(args);
+                                        $("#jsGridImportData").jsGrid("refresh");
+                                    }
+                                });
+                                //$("#jsGridImportData").jsGrid("loadData");
+
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+                                console.log(xhr.responseText);
+                            }
+                        });
+
+
+
+
+
+                    }
+
+                    else if (inputFile.files.length > 0 && inputFile.files[0].size > 0) {
+                        formStepsNum++;
+                        updateFormSteps(formStepsNum);
+                        updateProgressbar();
+                        var excelFile = $('#excel-file')[0].files[0];
+
+                        var formData = new FormData();
+                        formData.append('file', excelFile);
+
+                        $.ajax({
+                            url: '@Url.Action("ImportExcel", "Accounts")',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            success: function (data) {
+                                console.log(data);
+                                for (var i = 0; i < data.length; i++) {
+                                    imeiListAll = {
+                                        Text: data[i].Text,
+                                        Value: parseInt(data[i].Value)
+                                    };
+
+                                    ExtractHeader.push(imeiListAll);
+                                }
+
+
+                                var length = 0;
+                                $('#jsGridExcel').jsGrid({
+                                    width: "100%",
+                                    height: "auto",
+
+                                    editing: true,
+                                    autoload: true,
+                                    pageSize: 3,
+                                    pageLoading: true,
+                                    pageIndex: 1,
+                                    paging: true,
+                                    controller: {
+                                        loadData: function (filter) {
+                                            console.log(filter);
+                                            var d = $.Deferred();
+                                            $.ajax({
+                                                type: "GET",
+                                                url: '@Url.Action("GetDataMappingList", "Accounts")',
+
+                                                contentType: "application/json; charset=utf-8",
+                                                dataType: "json"
+                                            })
+
+                                                .done(function (result) {
+                                                    console.log(result);
+                                                    d.resolve(result);
+                                                });
+                                            return d.promise().then(function (q) {
+
+                                                length = q.length;
+                                                return {
+
+                                                    data: q
+
+                                                }
+                                            });
+                                        }
+                                    },
+                                    fields: [
+                                        { name: "AtraiColumn", title: 'Atrai Column' },
+                                        { name: "ExcelColumn", title: 'Excel Column', type: "select", items: ExtractHeader, valueField: "Text", textField: "Text", width: 100, visible: true },
+                                        { name: "DefaultValues", title: 'Default Values', type: 'text' },
+                                        { type: "control", width: '80', title: 'Action' },
+
+                                    ],
+                                    onItemUpdated: function (args) {
+                                        if (args.item.ExcelColumn) {
+                                            // create a model with the selected item
+
+
+                                        }
+                                    }
+
+                                });
+
+
+                                
+                            }
+                        });
+                    }
+                    else {
+                        alert('select a file first');
+                    }
+
+
+
+                });
+            });
+
+
+            
+             guidlineBtn.forEach((btn) => {
+                btn.addEventListener("click", () => {
+
+                    formStepsNum++;
+                    updateFormSteps(formStepsNum);
+                    updateProgressbar();
+                });
+             });
+
+
+            nextBtnsLast.forEach((btn) => {
+                btn.addEventListener("click", () => {
+
+                    formStepsNum++;
+                    updateFormSteps(formStepsNum);
+                    updateProgressbar();
+
+
+                    if (quickbook.files.length > 0 && quickbook.files[0].size > 0) {
+                        var itemspay = ($('#jsGridExcel').jsGrid('option', 'data'));
+                        console.log(itemspay);
+                        $.ajax({
+                            async: false,
+                            url: "@Url.Action("GetQuickBookImportData", "Accounts")",
+                            type: "POST",
+                            data: JSON.stringify(itemspay),
+                            contentType: "application/json",
+                            success: function (response) {
+
+                                ResponseData = response;
+
+                                $("#jsGridImportData").jsGrid("loadData");
+
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+                                console.log(xhr.responseText);
+                            }
+                        });
+                        $('#jsGridImportData').jsGrid({
+                            width: "100%",
+                            data: ResponseData,
+                            height: "auto",
+                            editing: true,
+                            inserting: true,
+                            autoload: true,
+                            pageSize: 3,
+                            pageLoading: true,
+                            pageIndex: 1,
+                            paging: true,
+                            deleteButton: true,
+                            confirmDeleting: true,
+                            deleteConfirm: "Are you sure?",
+                            controller: {
+
+                                insertItem: function (args) {
+                                    ResponseData.push(args);
+                                },
+
+                                deleteItem: function (args) {
+
+                                    const indexToRemove = ResponseData.findIndex((item) =>
+                                        item.AccName === args.AccName &&
+                                        item.Description === args.Description &&
+                                        item.OP_Balance === args.OP_Balance &&
+                                        item.DetailType === args.DetailType &&
+                                        item.Type === args.Type
+
+                                    );
+                                    ResponseData.splice(indexToRemove, 1);
+                                    $('#jsGridImportData').jsGrid('loadData');
+                                }
+                            },
+
+                            fields: [
+                                { name: "AccName", title: 'Account Head', type: 'text' },
+                                
+                                { name: "OP_Balance", title: 'Balance', type: 'text' },
+                                { name: "Type", title: 'Account Type', type: 'text' },
+                                { name: "Description", title: 'Description', type: 'text' },
+                                { name: "DetailType", title: 'DetailType', type: 'text' },
+                                { type: "control", width: '80', title: 'Action' }
+                            ]
+
+                            ,
+                            onItemInserted: function (args) {
+                                var s = $.isNumeric(args.item.OP_Balance);
+                                if (s == false) {
+                                    args.cancel = true;
+                                    alert('Put a valid opening balance');
+
+                                    $("#jsGridImportData").jsGrid("editItem", args.item);
+                                }
+                            },
+                            onItemUpdating: function (args) {
+                                var s = $.isNumeric(args.item.OP_Balance);
+                                if (s == false) {
+                                    args.cancel = true;
+                                    alert('Put a valid opening balance');
+
+                                    $("#jsGridImportData").jsGrid("editItem", args.item);
+                                }
+
+                            },
+                            onItemDeleted: function (args) {
+                                console.log(args);
+                                $("#jsGridImportData").jsGrid("refresh");
+                            }
+                        });
+                    }
+
+                    else if (inputFile.files.length > 0 && inputFile.files[0].size > 0) {
+                        var itemspay = ($('#jsGridExcel').jsGrid('option', 'data'));
+                        console.log(itemspay);
+                        $.ajax({
+                            async: false,
+                            url: "@Url.Action("GetImportData", "Accounts")",
+                            type: "POST",
+                            data: JSON.stringify(itemspay),
+                            contentType: "application/json",
+                            success: function (response) {
+
+                                ResponseData = response;
+
+                                $("#jsGridImportData").jsGrid("loadData");
+
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+                                console.log(xhr.responseText);
+                            }
+                        });
+
+                        $('#jsGridImportData').jsGrid({
+                            width: "100%",
+                            data: ResponseData,
+                            height: "auto",
+                            editing: true,
+                            inserting: true,
+                            autoload: true,
+                            pageSize: 3,
+                            pageLoading: true,
+                            pageIndex: 1,
+                            paging: true,
+                            deleteButton: true,
+                            confirmDeleting: true,
+                            deleteConfirm: "Are you sure?",
+                            controller: {
+
+                                insertItem: function (args) {
+                                    ResponseData.push(args);
+                                },
+
+                                deleteItem: function (args) {
+
+                                    const indexToRemove = ResponseData.findIndex((item) =>
+                                        item.AccName === args.AccName &&
+                                        item.OP_Date === args.OP_Date &&
+                                        item.OP_Balance === args.OP_Balance &&
+                                        item.AccCategory === args.AccCategory &&
+                                        item.AccGroup === args.AccGroup &&
+                                        item.Type === args.Type
+
+                                    );
+                                    ResponseData.splice(indexToRemove, 1);
+                                    $('#jsGridImportData').jsGrid('loadData');
+                                }
+                            },
+
+                            fields: [
+                                { name: "AccName", title: 'Account Head', type: 'text' },
+                                {
+                                    name: "OP_Date",
+                                    title: 'Opening Date',
+                                    type: 'text',
+                                    width: 150,
+                                    filtering: false,
+                                    editing: true,
+                                    insertTemplate: function () {
+                                        var $result = jsGrid.fields.text.prototype.insertTemplate.call(this);
+                                        $result.datepicker({
+                                            dateFormat: "d-mm-y"
+                                        });
+                                        return $result;
+                                    },
+                                    editTemplate: function (value) {
+                                        var $result = jsGrid.fields.text.prototype.editTemplate.call(this, value);
+                                        $result.datepicker({
+                                            dateFormat: "d-mm-y"
+                                        });
+                                        return $result;
+                                    },
+                                    insertValue: function () {
+                                        return this.val();
+                                    }//,
+                                    //editValue: function (args) {
+                                    //    console.log(args);
+                                    //    return this.val();
+                                    //}
+                                },
+                                { name: "OP_Balance", title: 'Opening Balance', type: 'text' },
+                                { name: "AccCategory", title: 'Account Category[Excel]', type: 'label' },
+                                { name: "AccGroup", title: 'Account Group[Excel]', type: 'label' },
+                                { name: "CategoryId", title: 'Account Category', type: 'select', items: CategoryList, valueField: "Value", textField: "Text", width: 100, visible: true },
+                                { name: "ParentId", title: 'Account Group', type: 'select', items: ParentGroupList, valueField: "Value", textField: "Text", width: 100, visible: true },
+                                { name: "Type", title: 'Account Type', type: 'select', items: AccountTypeList, valueField: "Value", textField: "Text", width: 100, visible: true },
+                                { type: "control", width: '80', title: 'Action' }
+                            ]
+
+                            ,
+                            onItemInserted: function (args) {
+                                var s = $.isNumeric(args.item.OP_Balance);
+                                if (s == false) {
+                                    args.cancel = true;
+                                    alert('Put a valid opening balance');
+
+                                    $("#jsGridImportData").jsGrid("editItem", args.item);
+                                }
+                            },
+                            onItemUpdating: function (args) {
+                                var s = $.isNumeric(args.item.OP_Balance);
+                                if (s == false) {
+                                    args.cancel = true;
+                                    alert('Put a valid opening balance');
+
+                                    $("#jsGridImportData").jsGrid("editItem", args.item);
+                                }
+
+                            },
+                            onItemDeleted: function (args) {
+                                console.log(args);
+                                $("#jsGridImportData").jsGrid("refresh");
+                            }
+                        });
+                    
+                    }
+                    
+                  
+
+                });
+            });
+
+            lastBtn.forEach((btn) => {
+                btn.addEventListener("click", () => {
+
+                    formStepsNum++;
+                    updateFormSteps(formStepsNum);
+                    updateProgressbar();
+
+                    var importFrom = '';
+
+                    var importedData = $('#jsGridImportData').jsGrid('option', 'data');
+
+                    if (importedData.length > 0) {
+                        var JsonimportedData = JSON.stringify(importedData);
+                        console.log(importedData);
+                        console.log(JsonimportedData);
+                        var responseData=[];
+                       if (inputXmlFile.files.length > 0 && inputXmlFile.files[0].size > 0) {
+                            importFrom = 'Tally XML';
+                           }
+                       else if (quickbook.files.length > 0 && quickbook.files[0].size > 0) {
+                           importFrom='Quickbook Excel';
+                        
+                           }
+                        else if (inputFile.files.length > 0 && inputFile.files[0].size > 0) {
+                            importFrom = 'Manual Excel';
+                        }
+                            $.ajax({
+                                async: false,
+                                url: "@Url.Action("PostImportXMLData", "Accounts")",
+                                type: "POST",
+                                data: JSON.stringify({ importedData: importedData, importFrom: importFrom }),
+                                contentType: "application/json",
+                                success: function (response) { 
+                                    responseData = response;
+                                }
+                            });
+                        
+                        //var remarksStyles = {
+                        //            "Duplicate Found": "color: red; font-weight: bold;",
+                        //            "Success": "color: green; font-weight: bold;"
+                        //        };
+                                $('#jsGridFinalShowdown').jsGrid({
+                                    width: "100%",
+                                    height: "auto",
+                                    data: responseData,
+                                    editing: true,
+                                    inserting: true,
+                                    autoload: true,
+                                    pageSize: 3,
+                                    pageLoading: true,
+                                    pageIndex: 1,
+                                    paging: true,
+                                    
+                                    fields: [
+                                        { name: "AccName", title: 'Account Head', type: 'label' },
+                                        {
+                                            name: "OP_Date",
+                                            title: 'Opening Date',
+                                            type: 'label'  
+                                        },
+                                        { name: "OP_Balance", title: 'Opening Balance', type: 'label' },
+                                        { name: "AccCategory", title: 'Account Category', type: 'label' },
+                                        { name: "AccGroup", title: 'Account Group', type: 'label' },
+                                        { name: "Type", title: 'Account Type', type: 'label' },
+                                        { name: "Description", title: 'Narration', type: 'label' },
+                                        { name: "Remarks", title: 'Status', type: 'label' },
+                                        { name: "ImportFrom", title: 'Import From', type: 'label' },
+                                    ]//,
+                                //    rowClass: function (item, itemIndex) {
+                                //        // Add a class to the remarks column based on the value of item.Remarks
+                                //        var remarksClass = "";
+                                //        if (item.Remarks in remarksStyles) {
+                                //            remarksClass = "remarks-" + item.Remarks.toLowerCase().replace(/\s/g, "-");
+                                //        }
+
+                                //        return "remarks-row " + remarksClass;
+                                //    }
+                                   
+                               });
+                                //var remarksStylesheet = document.createElement('style');
+                                //remarksStylesheet.type = 'text/css';
+                                //var remarksStylesText = "";
+                                //for (var remarksText in remarksStyles) {
+                                //    var remarksClass = "remarks-" + remarksText.toLowerCase().replace(/\s/g, "-");
+                                //    var remarksStyle = remarksStyles[remarksText];
+                                //    remarksStylesText += "." + remarksClass + " {" + remarksStyle + "}\n";
+                                //}
+                                //remarksStylesheet.innerHTML = remarksStylesText;
+                                //document.head.appendChild(remarksStylesheet);
+                                
+                        
+                    }
+                    else {
+                        alert("There is no data");
+                    }
+                    
+                  
+
+                    
+
+                });
+            });
+
+            document.getElementById("submit-form").addEventListener("click", function () {
+
+                    progressSteps.forEach((progressStep, idx) => {
+                        if (idx <= formStepsNum) {
+
+                            progressStep.classList.add("progress-step-check");
+                        } else {
+
+                            progressStep.classList.remove("progress-step-check");
+                        }
+                    });
+
+                const dataJson = JSON.stringify($('#jsGridFinalShowdown').jsGrid('option', 'data'));
+               
+
+                console.log(dataJson);
+
+                if (dataJson == '')
+                    return;
+
+                JSONToCSVConvertor(dataJson, "List Of Data", true);
+
+            });
+
+
+           
+            function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
+                //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+                var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+
+                var CSV = '';
+                //Set Report title in first row or line
+
+                CSV += ReportTitle + '\r\n\n';
+
+                //This condition will generate the Label/Header
+                if (ShowLabel) {
+                    var row = "";
+
+                    //This loop will extract the label from 1st index of on array
+                    for (var index in arrData[0]) {
+
+                        //Now convert each value to string and comma-seprated
+                        row += index + ',';
+                    }
+
+                    row = row.slice(0, -1);
+
+                    //append Label row with line break
+                    CSV += row + '\r\n';
+                }
+
+                //1st loop is to extract each row
+                for (var i = 0; i < arrData.length; i++) {
+                    var row = "";
+
+                    //2nd loop will extract each column and convert it in string comma-seprated
+                    for (var index in arrData[i]) {
+                        row += '"' + arrData[i][index] + '",';
+                    }
+
+                    row.slice(0, row.length - 1);
+
+                    //add a line break after each row
+                    CSV += row + '\r\n';
+                }
+
+                if (CSV == '') {
+                    alert("Invalid data");
+                    return;
+                }
+
+                //Generate a file name
+                var fileName = "MyReport_";
+                //this will remove the blank-spaces from the title and replace it with an underscore
+                fileName += ReportTitle.replace(/ /g, "_");
+
+                //Initialize file format you want csv or xls
+                var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+
+                // Now the little tricky part.
+                // you can use either>> window.open(uri);
+                // but this will not work in some browsers
+                // or you will not get the correct file extension
+
+                //this trick will generate a temp <a /> tag
+                var link = document.createElement("a");
+                link.href = uri;
+
+                //set the visibility hidden so it will not effect on your web-layout
+                link.style = "visibility:hidden";
+                link.download = fileName + ".csv";
+
+                //this part will append the anchor tag and remove it after automatic click
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+
+            }
+
+
+            function updateFormSteps(formStepsNum) {
+                formSteps.forEach((formStep) => {
+                    formStep.classList.contains("step-forms-active") &&
+                        formStep.classList.remove("step-forms-active");
+                });
+
+                //console.log(formStepsNum);
+                //formSteps[formStepsNum].classList.add("step-forms-active");
+                console.log(formStepsNum);
+                console.log(formSteps.length);
+
+                if (formSteps[formStepsNum]) {
+                    formSteps[formStepsNum].classList.add("step-forms-active");
+                }
+
+            }
+
+            function updateProgressbar() {
+                progressSteps.forEach((progressStep, idx) => {
+                    if (idx < formStepsNum + 1) {
+                        progressStep.classList.add("progress-step-active");
+
+                    } else {
+                        progressStep.classList.remove("progress-step-active");
+
+                    }
+                });
+
+                progressSteps.forEach((progressStep, idx) => {
+                    if (idx < formStepsNum) {
+
+                        progressStep.classList.add("progress-step-check");
+                    } else {
+
+                        progressStep.classList.remove("progress-step-check");
+                    }
+                });
+
+                const progressActive = document.querySelectorAll(".progress-step-active");
+
+                progress.style.width =
+                    ((progressActive.length - 1) / (progressSteps.length - 1)) * 100 + "%";
+            }
+
+
+
+            $('#importTable').DataTable({
+                dom: "'<'row'<'col-xs-6 float-end'><'col-xs-6'f>r>t<'row'<'col-xs-12 mt-3'i p>>",
+                "language": {
+
+                    "info": "Results: _PAGE_ - _PAGES_ of _MAX_",
+                    "infoFiltered": "(filtered from _MAX_ total records)",
+                    "searchPlaceholder": "Filter by name",
+                    "sSearch": '<i class="bi bi-funnel"></i>',
+                    "paginate": {
+                        "previous": '<i class="bi bi-chevron-left"></i>',
+                        "next": '<i class="bi bi-chevron-right"></i>'
+                    }
+                },
+            });
+        });
+
+
+        function autoInsertAccounts() {
+            var isConfirmed = confirm("Are you sure you want to proceed?");             
+
+            if (isConfirmed) {
+                $.ajax({
+                    url: '@Url.Action("AImportXml", "Accounts")',
+                    type: 'GET',
+                    success: function (response) {
+                        if (response.success) {
+                            // Display toast message
+                            toastr.success(response.message, "", {
+                                "toastClass": "toast-green",
+                                
+                            });
+
+                            // Redirect to AccountHeadList page after a delay (3 seconds in this example)
+                            setTimeout(function () {
+                                window.location.href = '@Url.Action("AccountHeadList", "Admin")';
+                            }, 3000);
+                        } else {
+                            // Handle error response
+                            toastr.error(response.error);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle error
+                        console.error(error);
+                    }
+                });
+            } else {
+                // User clicked "No" or closed the dialog
+                toastr.info("Auto insert canceled.", "", {
+                    "toastClass": "toast-red",
+                });
+            }
+        }
+
+
+        
+
+    
+    </script>
+
+}

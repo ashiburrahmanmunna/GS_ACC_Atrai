@@ -1,0 +1,516 @@
+﻿@*@model Atrai.Model.Core.Entity.FiscalyearCreationModel*@
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<style>
+    .apexcharts-legend.position-bottom.apexcharts-align-center, .apexcharts-legend.position-top.apexcharts-align-center {
+    justify-content: space-around!important;
+}
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-8 col-12">
+
+                        <div class="card">
+                            <div class="card-body">
+                                <div id="chart2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    @*@if (!string.IsNullOrEmpty(ViewBag.Message))
+                    {
+                        <div class="alert alert-success">@ViewBag.Message</div>
+                    }*@
+
+                    <div class="col-md-4 col-12">
+                        <div class="card" style="height:404px;">
+                            <div class="card-body">
+                                <h5>Bank accounts</h5>
+                                <p class="mt-5 pt-3">Account Name</p>
+                                <div class="row fw-bold pt-2"  id="accountName">
+                                   
+
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-top-0">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <a href="#">Connect account</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div id="invoice">
+                                   
+                                </div>
+                                @*<h5>Invoice</h5>
+                                <h4>Tk: 17,774</h4>
+                                <p>NOT INCOME FOR LAST 30 DAYS</p>*@
+                                <div class="progress-wrapper mb-3 mt-5 pt-5">
+                                    <div class="row">
+                                        <div class="col-md-6" id="totalDue">
+                                            @*<span class="fw-bold d-block">Tk: 1,500.50</span>*@
+                                            <span><small>OVERDUE</small></span>
+                                        </div>
+                                        <div class="col-md-6 text-end" id="due">
+                                            @*<span class="fw-bold d-block">Tk: 3,960.20</span>*@
+                                            <span><small>DUE</small></span>
+                                        </div>
+                                        <div class="col-md-12 mt-2" id="dueProgressBar">
+                                            @*<div class="progress" style="height: 27px;">
+                                                <div class="progress-bar bg-gradient-info" role="progressbar" style=""></div>
+                                            </div>*@
+                                        </div>
+                                    </div>
+                                   @* <p class="mb-2">Electronic <span class="float-end">85%</span></p>*@
+                                   
+                                </div>
+                                <div class="progress-wrapper mb-3">
+                                    <div class="row">
+                                        <div class="col-md-6" id="notDeposited">
+                                            @*<span class="fw-bold d-block">Tk: 1,525.50</span>*@
+                                            <span><small>NOT DEPOSITED</small></span>
+                                        </div>
+                                        <div class="col-md-6 text-end" id="deposited">
+                                            @*<span class="fw-bold d-block">Tk: 3,960.20</span>*@
+                                            <span><small>DEPOSITED</small></span>
+                                        </div>
+                                        <div class="col-md-12 mt-2" id="depositProgressBar">
+                                            @*<div class="progress" style="height: 27px;">
+                                                <div class="progress-bar bg-gradient-danger" role="progressbar" style="width: 65%;"></div>
+                                            </div>*@
+                                        </div>
+                                    </div>
+                                    @* <p class="mb-2">Electronic <span class="float-end">85%</span></p>*@
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div id="expenses">
+
+                                </div>
+                                @*<span class="h6 d-block">Expenses</span>
+                                <span class="h5 d-block">Tk: 2,186</span>
+                                <span class="d-block">THIS WEEK</span>*@
+                                <div id="chart9"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-12">
+                        <div class="card">
+                            <div class="card-body">                               
+                                <div id="sales">
+                                    @*<span class="h6 d-block">Sales</span>
+                                    <span class="h5 d-block">Tk: 4,500</span>
+                                    <span class="d-block">THIS WEEK</span>*@
+                                </div>
+                           
+                                <div id="chart1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+@section scripts {
+    @*<script src="~/admin_theme_gtr/assets/plugins/apexcharts-bundle/js/dashboard-custom.js"></script>*@
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            //ajax to get bank accounts
+        function GetAccountsDashboard() {
+            var myUrlGet = '@Url.Action("GetAccountsDashboard", "Accounts")';
+            $.ajax({
+            type: "GET",
+            url: myUrlGet,
+            success: function (result) {
+                //console.log(result);
+                data = JSON.parse(result.data);
+                //console.log(data);
+                //AccName = data.BankBalance[0].AccName;
+
+                //Bank accounts chart
+                let details = '';
+                //console.log(data.BankBalance);
+                for (var i = 0; i < data.BankBalance.length; i++) {
+                    var AccountName = data.BankBalance[i].AccName;
+                    var AccountBalance = data.BankBalance[i].AccountBalance.toLocaleString();
+                    details += ` <div class="col-md-6 col-12">
+                                        <p>${AccountName}</p>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <p  class="text-end">${AccountBalance}</p>
+                                    </div>`
+                    //console.log(data.BankBalance[i].AccName);
+                }
+                $("#accountName").append(details);
+
+                //deposit accounts chart
+                let deposit = '';
+                let notDeposit = '';
+                let progressBarDeposit = '';
+                //console.log(data.Deposit);
+                for (var i = 0; i < data.Deposit.length; i++) {
+                    var Deposited = data.Deposit[i].Deposited.toLocaleString();
+                    var NotDeposited = data.Deposit[i].NotDeposited.toLocaleString();
+                    var PercentageDeposit = data.Deposit[i].Percentage.toLocaleString();
+                    deposit += `<span class="fw-bold d-block">Tk: ${Deposited}</span>`
+                    notDeposit += `<span class="fw-bold d-block">Tk: ${NotDeposited}</span>`
+                    progressBarDeposit = `<div class="progress" style="height: 27px;">
+                                                <div class="progress-bar bg-gradient-info" role="progressbar" style="width: ${PercentageDeposit}%;"></div>
+                                            </div>`
+
+                }
+                $("#deposited").append(deposit);
+                $("#notDeposited").append(notDeposit);
+                $("#depositProgressBar").append(progressBarDeposit);
+
+                //dueaccounts chart
+                let due = '';
+                let overDue = '';
+                let ProgressBarDue = '';
+                //console.log(data.OverDue);
+                for (var i = 0; i < data.OverDue.length; i++) {
+                    var Overdue = data.OverDue[i].Overdue.toLocaleString();
+                    var TotalDue = data.OverDue[i].TotalDue.toLocaleString();
+                    var PercentageDue = data.OverDue[i].Percentage.toLocaleString();
+                    due += `<span class="fw-bold d-block">Tk: ${TotalDue}</span>
+`
+                    overDue += `<span class="fw-bold d-block">Tk: ${Overdue}</span>`
+                    ProgressBarDue = `<div class="progress" style="height: 27px;">
+                                                <div class="progress-bar bg-gradient-info" role="progressbar" style="width: ${PercentageDue}%;"></div>
+                                            </div>`
+                }
+                $("#due").append(due);
+                $("#totalDue").append(overDue);
+                $("#dueProgressBar").append(ProgressBarDue);
+
+                ////all chart headers
+                //invoice
+                //console.log(data.Invoice);
+                let invoice = '';
+                var invoiceName = data.Invoice[0].Name;
+                var invoiceValue = data.Invoice[0].Value.toLocaleString();
+                var invoiceCaption = data.Invoice[0].Caption;
+                invoice = `<h5>${invoiceName}</h5>
+                                <h4>Tk: ${invoiceValue}</h4>
+                                <p>${invoiceCaption}</p>`
+                $("#invoice").append(invoice);
+
+                //expenses
+                let expenses = '';
+                var expensesName = data.Invoice[1].Name;
+                var expensesValue = data.Invoice[1].Value.toLocaleString() || 0;
+                var expensesCaption = data.Invoice[1].Caption;
+                expenses = ` <span class="h6 d-block">${expensesName}</span>
+                                <span class="h5 d-block">Tk: ${expensesValue}</span>
+                                <span class="d-block">${expensesCaption}</span>`
+                $("#expenses").append(expenses);
+
+                //sales
+                let sales = '';
+                var salesName = data.Invoice[2].Name;
+                var salesValue = data.Invoice[2].Value.toLocaleString();
+                var salesCaption = data.Invoice[2].Caption;
+                sales = `<span class="h6 d-block">${salesName}</span>
+                                    <span class="h5 d-block">Tk: ${salesValue}</span>
+                                    <span class="d-block">${salesCaption}</span>`
+                $("#sales").append(sales);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+            alert("Error: " + xhr.status);
+            }
+            });
+            }
+        GetAccountsDashboard();
+
+            var GlobalData = {};
+            //Revenue expense netprofit chart global variables
+            var monthRevenue= [];
+            var MonthName = [];
+            var Revenue = [];
+            var Expenses = [];
+            var NetProfit = [];
+
+            //sales chart global variables
+            var monthSales= [];
+            var MonthSalesName = [];
+            var MonthlyTotalSales = [];
+            var MonthlyTotalCost = [];
+            var MonthlyTotalProfit = [];
+
+            //expensegorup chart
+            var Amount = [];
+            var ExpenseGroupAmount = [];
+            var ExpenseGroupHead = [];
+
+
+        function revenueChart() {
+        var myUrlGet = '@Url.Action("GetAccountsDashboard", "Accounts")';
+        $.ajax({
+            async: false,
+            type: "GET",
+            url: myUrlGet,
+            success: function (result) {
+                data = JSON.parse(result.data);
+                GlobalData = data;
+                console.log(GlobalData);
+                //console.log(GlobalData.MonthlySales[0].MonthName);
+                monthRevenue = [...GlobalData.MonthlyRevenue];
+                monthSales = [...GlobalData.MonthlySales];
+                Amount = [...GlobalData.ExpenseGroup];
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert("Error: " + xhr.status);
+            }
+        });
+            for (var i = 0; i < monthRevenue.length; i++) {
+                //console.log(monthSales[i].MonthName);
+                MonthName.push(monthRevenue[i].MonthName);
+                Revenue.push(monthRevenue[i].TotalIncome);
+                Expenses.push(monthRevenue[i].TotalExpense);
+                NetProfit.push(monthRevenue[i].TotalProfit);
+            }
+
+            for (var i = 0; i < monthSales.length; i++) {
+                //console.log(monthSales[i].MonthName);
+                MonthSalesName.push(monthSales[i].MonthName);
+                MonthlyTotalSales.push(monthSales[i].TotalSales);
+                MonthlyTotalCost.push(monthSales[i].TotalCost);
+                MonthlyTotalProfit.push(monthSales[i].TotalProfit);
+            }
+
+            for (var i = 0; i < Amount.length; i++) {
+                //console.log(monthSales[i].MonthName);
+                ExpenseGroupAmount.push(Amount[i].Amount);                                     
+                ExpenseGroupHead.push(Amount[i].AccName);
+
+            }
+            console.log(ExpenseGroupAmount);
+            //console.log(Expenses);
+
+            }
+
+        revenueChart();
+
+
+            //All charts js 
+            function allCharts() {
+                "use strict";
+                // chart 1
+                var options = {
+                    series: [{
+                        name: 'Collection',
+                        data: MonthlyTotalSales //[14, 3, 10, 9, 29, 19, 22, 9, 12, 7, 19, 5]
+                    }],
+                    chart: {
+                        foreColor: '#9ba7b2',
+                        height: 273,
+                        type: 'line',
+                        zoom: {
+                            enabled: false
+                        },
+                        toolbar: {
+                            show: true
+                        },
+                        dropShadow: {
+                            enabled: true,
+                            top: 3,
+                            left: 14,
+                            blur: 4,
+                            opacity: 0.10,
+                        }
+                    },
+                    stroke: {
+                        width: 5,
+                        curve: 'smooth'
+                    },
+                    xaxis: {
+                        //type: 'datetime',
+                        categories: MonthSalesName, //['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    },
+                    title: {
+                        text: ' ',
+                        align: 'left',
+                        style: {
+                            fontSize: "16px",
+                            color: '#666'
+                        }
+                    },
+                    fill: {
+                        type: 'gradient',
+                        gradient: {
+                            shade: 'light',
+                            gradientToColors: ['#3461ff'],
+                            shadeIntensity: 1,
+                            type: 'horizontal',
+                            opacityFrom: 1,
+                            opacityTo: 1,
+                            stops: [0, 100, 100, 100]
+                        },
+                    },
+                    markers: {
+                        size: 4,
+                        colors: ["#3461ff"],
+                        strokeColors: "#fff",
+                        strokeWidth: 2,
+                        hover: {
+                            size: 7,
+                        }
+                    },
+                    colors: ["#3461ff"],
+                    yaxis: {
+                        title: {
+                            text: 'Engagement',
+                        },
+                    }
+                };
+                var chart = new ApexCharts(document.querySelector("#chart1"), options);
+                chart.render();
+
+
+                // chart 2
+                var optionsLine = {
+                    chart: {
+                        foreColor: '#9ba7b2',
+                        height: 360,
+                        type: 'line',
+                        zoom: {
+                            enabled: false
+                        },
+                        dropShadow: {
+                            enabled: true,
+                            top: 3,
+                            left: 2,
+                            blur: 4,
+                            opacity: 0.1,
+                        }
+                    },
+                    stroke: {
+                        curve: 'smooth',
+                        width: 5
+                    },
+                    colors: ["#e72e2e", '#0c971a', '#3461ff'],
+                    //revenue,expenses,net profit chart line data
+                    series: [{
+                        name: "Revenue",
+                        data: Revenue //[1, 15, 56, 20, 33, 27, 15, 56, 20, 56]
+                    }, {
+                        name: "Expenses",
+                        data: Expenses //[30, 33, 21, 42, 30, 33, 21, 42, 19, 32]
+                    },
+                    {
+                        name: "Net Profit",
+                        data: NetProfit //[5, 10, 21, 52, 30, 10, 63, 100, 19, 32]
+                    }
+                    ],
+                    title: {
+                        text: undefined,
+                        align: 'left',
+                        offsetY: 25,
+                        offsetX: 20
+                    },
+                    subtitle: {
+                        text: 'Statistics',
+                        offsetX: 0,
+                        offsetY: 0,
+                        style: {
+                            color: 'transparent',
+                        },
+
+                    },
+                    markers: {
+                        size: 4,
+                        strokeWidth: 0,
+                        hover: {
+                            size: 7
+                        }
+                    },
+                    grid: {
+                        show: true,
+                        padding: {
+                            bottom: 0
+                        }
+                    },
+                    //labels: ['01/15/2002', '01/16/2002', '01/17/2002', '01/18/2002', '01/19/2002', '01/20/2002'],
+                    xaxis: {
+                        //type: 'datetime',
+                        categories: MonthName, //['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+                    },
+                    legend: {
+                        position: 'top',
+                        horizontalAlign: 'center',
+                        offsetY: -20,
+                        fontSize: '14px',
+                        fontWeight: 700,
+                        labels: {
+                            colors: ["#414042"],
+                        },
+
+
+
+                    }
+                }
+                var chartLine = new ApexCharts(document.querySelector('#chart2'), optionsLine);
+                chartLine.render();
+
+                // chart 9
+                var options = {
+                    series: ExpenseGroupAmount, //[44, 55, 41, 17, 15],
+                    chart: {
+                        foreColor: '#9ba7b2',
+                        height: 285,
+                        type: 'donut',
+                    },
+                    colors: ["#0d6efd", "#212529", "#17a00e", "#f41127", "#ffc107"],
+                    responsive: [{
+                        breakpoint: 480,
+                        options: {
+                            chart: {
+                                height: 320
+                            },
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }],
+                    labels: ExpenseGroupHead
+                };
+                var chart = new ApexCharts(document.querySelector("#chart9"), options);
+                chart.render();
+
+            }
+            allCharts();
+        })
+
+// $(function () {
+
+//});
+
+
+
+
+
+
+    </script>
+    }

@@ -1,0 +1,246 @@
+﻿@model Atrai.Core.Entity.UserAccountModel
+@{ ViewData["Title"] = "User Account";
+Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-8 col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>New User</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            @using (Html.BeginForm("UserAccount", "Admin", FormMethod.Post))
+                            {
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                @Html.HiddenFor(model => model.Id)
+                                @Html.HiddenFor(model => model.IsBaseUser)
+
+                                @Html.HiddenFor(model => model.IsEmailVerified)
+                                @Html.HiddenFor(model => model.IsPhoneVerified)
+
+                            @Html.AntiForgeryToken()
+                                <div class="form-group row">
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="Name" class="control-label"></label>
+                                        <input asp-for="Name" class="form-control" />
+                                        <span asp-validation-for="Name" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="PhoneNumber" class="control-label"></label>
+                                        <input asp-for="PhoneNumber" class="form-control" />
+                                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group row">
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="Email" class="control-label"></label>
+                                        <input asp-for="Email" class="form-control" />
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="Password" class="control-label"></label>
+                                        <input asp-for="Password" class="form-control" />
+                                        <span asp-validation-for="Password" class="text-danger"></span>
+                                    </div>
+
+                                </div>
+
+
+
+
+                                <div class="form-group row">
+
+
+                                    <div class="col-md-6 col-12">
+                                        @Html.LabelFor(x => x.EmployeeId)
+                                        @Html.DropDownListFor(x => x.EmployeeId,
+                                             new SelectList((IEnumerable<SelectListItem>)ViewBag.Employee, "Value", "Text"), "Select Employee",
+                                             htmlAttributes: new { @class = "form-control", id = "EmployeeId" })
+                                        @Html.ValidationMessageFor(x => x.EmployeeId, "", new { @class = "text-danger" })
+
+                                    </div>
+
+
+                                    <div class="col-md-6 col-12">
+                                        @Html.LabelFor(x => x.UserRoleId)
+                                        @Html.DropDownListFor(x => x.UserRoleId,
+                                             new SelectList((IEnumerable<SelectListItem>)ViewBag.Role, "Value", "Text"), "Select User Role",
+                                             htmlAttributes: new { @class = "form-control", id = "UserRoleId" })
+                                        @Html.ValidationMessageFor(x => x.UserRoleId, "", new { @class = "text-danger" })
+
+                                    </div>
+
+
+                                </div>
+                                <div class="form-group row">
+
+
+
+
+                                    <div class="col-md-6 col-12  text-center">
+                                        <label asp-for="IsInacitve" class="control-label"></label>
+                                        <input asp-for="IsInacitve" class="form-control" />
+                                        <span asp-validation-for="IsInacitve" class="text-danger"></span>
+                                    </div>
+
+
+                                    <div class="col-md-6 col-12 text-center mt-3">
+                                        <div>
+
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                        <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" /> }
+                                    else if (ViewBag.ActionType == "Edit")
+                                    {
+                                        <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" /> }
+                                    else if (ViewBag.ActionType == "Delete")
+                                    {
+                                        <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>}
+
+                                            <a href="@Url.Action("UserAccountList", "Admin")" class="btn btn-primary rounded-0">Back To List </a>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                                                           
+                                }
+                            </div><!-- panel-body -->
+                    </div>
+
+                </div>
+            </div>
+
+            @*<div class="col-md-6 col-12">
+                <div class="card">
+
+                    <div class="card-header">
+                        <h4>User List</h4>
+                    </div>
+                    <div class="card-body text-center">
+
+                        <div class="table-responsive">
+                            <table id="tbllist" class="table display table-hover  table-bordered" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.Name)
+
+                                        </th>
+                                        <th>
+                                            @Html.DisplayNameFor(model => model.Email) & @Html.DisplayNameFor(model => model.PhoneNumber)
+
+                                        </th>
+                                        <th>
+                                            User Role
+                                        </th>
+
+                                        <th>
+                                            Expired In & Date
+                                        </th>
+                                        <th>
+                                            InActive
+                                        </th>
+                                        <th>action</th>
+                                    </tr>
+                                </thead>
+                                @foreach (var item in Model)
+                                {
+                    <tbody style="font-size:14px">
+                        <tr class="text-center">
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Email)
+                                -
+                                @Html.DisplayFor(modelItem => item.PhoneNumber)
+
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.UserRole.RoleRemarks)
+                            </td>
+
+
+                            @{ double Validity = 0;
+                                var useractivation = item.UserActivationList.OrderByDescending(x => x.ValidityDay).FirstOrDefault();
+
+                                if (useractivation != null)
+                                {
+                                    Validity = item.UserActivationList.OrderByDescending(x => x.ValidityDay).FirstOrDefault().ValidityDay;
+
+                <td>
+                    @if (Validity < 10)
+                    {
+<div style="color:red">
+    @Validity.ToString() Days -
+    @Html.DisplayFor(modelItem => item.UserActivationList.OrderByDescending(x => x.ValidityDay).FirstOrDefault().ActiveToDate)
+</div> }
+else
+{
+<div style="color:green">
+    @Validity  Days -
+    @Html.DisplayFor(modelItem => item.UserActivationList.OrderByDescending(x => x.ValidityDay).FirstOrDefault().ActiveToDate)
+</div>}
+
+
+                </td> }
+                                else
+                                {
+                <td>
+                    No Validity Days
+                </td>
+ } }
+                            <td>
+                                @Html.DisplayFor(modelItem => item.IsInacitve)
+                            </td>
+                            <td class="text-nowrap">
+                                <a href="@Url.Action("EditUserAccount", "Admin", new {UserAccountId = item.Id})" class="btn btn-icon btn-warning btn-sm rounded-0 m-b-5">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+           
+                                @if (item.IsBaseUser == false)
+
+                                {
+                <a href="@Url.Action("DeleteUserAccount", "Admin", new { UserAccountId = item.Id })" onclick="return confirm('Are you sure you want to Remove this ?')" class="btn btn-icon btn-danger btn-sm rounded-0 mb-1 center rounded-0">
+                    <i class="fa fa-trash"></i>
+                </a>}
+                            </td>
+
+                        </tr>
+                    </tbody>}
+                            </table>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>*@
+        </div>
+    </div>
+
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+
+        //var abcdef = $('#tbllist').dataTable({
+        //    "scrollY": "400px",
+        //    //"scrollCollapse": true,
+        //    //"paging": false,
+        //    "scrollX": false,
+        //     "order": [0, "desc"],
+        //    "processing": true,
+        //});
+
+        //abcdef.draw();
+    </script>
+}

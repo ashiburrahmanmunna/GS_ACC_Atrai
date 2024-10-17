@@ -1,0 +1,261 @@
+﻿@{
+    ViewData["Title"] = "Customer Order";
+    Layout = "~/Views/Shared/_CustomerOrderLayout.cshtml";
+}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+@*<link href="~/AdminEla/Assets/css/lib/data-table/buttons.bootstrap.min.css" rel="stylesheet" />
+    <link href="~/AdminEla/Assets/css/lib/data-table/buttons.dataTables.min.css" rel="stylesheet" />*@
+
+<style>
+
+    /*
+
+                .product-description {
+                    font-size: 14px;
+                    min-height: 20px;
+                    overflow: hidden;
+                    font-family:'Arial Narrow';
+                    text-align:center;
+                    vertical-align:middle;
+                }
+
+                    .product-description:hover {
+                        color: #602069;
+                    }
+
+                .cards tbody tr:hover {
+                    border-radius: 0px;
+                    box-shadow: 3px 3px 4px #ededed, -3px -3px 4px #ededed;
+                    transition: ease-in-out .2s;
+                    transform: translateY(2px);
+                }
+
+                .cards .avatar:hover {
+                    transform: translateY(2px);
+                    transition: ease-in-out .2s;
+                }
+
+                .product-price {
+                    color: #F47E6D;
+                    font-weight: bold;
+                    margin-bottom: 8px;
+                    font-size: 16px;
+                }
+
+                .old-price {
+                    margin-left: 2px;
+                }
+
+                .money {
+                    font-size: 16px;
+                    font-weight: bold;
+                    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+                }*/
+</style>
+
+
+
+
+<div class="container">
+    <div class="card mt-5">
+
+        <div class="card-body">
+
+
+
+            <div class="row">
+
+
+
+                <div class="col-md-3 col-12  mb-2">
+                    @Html.ActionLink("Back to Dashboard", "CustomerDashboard", "Admin", null, new { @class = "btn btn-primary rounded-0", @id = "btnBack" })
+                </div>
+
+                <div class="col-md-3 col-12">
+                    <div class="input-group input-group-sm mb-2">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                Category
+                            </span>
+                        </div>
+                        @Html.DropDownList("CategoryId", null, "--Select--", htmlAttributes: new { @id = "CategoryId", @class = "form-control" })
+                    </div>
+                </div>
+                <div class="col-md-3 col-12">
+                    <div class="input-group input-group-sm mb-2">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                Brand
+                            </span>
+                        </div>
+                        @Html.DropDownList("BrandName", null, "--Select--", htmlAttributes: new { @id = "BrandName", @class = "form-control" })
+                    </div>
+                </div>
+
+
+            </div>
+
+
+            <div class="">
+                <table class="table table-sm text-center table-bordered table-striped" id="tblProductSearc" width="100%">
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    @*<script src="~/AdminEla/Assets/js/lib/datatables/datatables.min.js"></script>*@
+
+
+
+<script type="text/javascript">
+
+    var tblProductSearc;
+
+        $(document).ready(function () {
+
+
+               $(".FromDate").datepicker({
+
+                dateFormat: "dd-M-y",
+                changeMonth: true,
+                changeYear: true
+
+            });
+
+
+        $(".ToDate").datepicker({
+
+            dateFormat: "dd-M-y",
+            changeMonth: true,
+            changeYear: true
+
+        });
+
+        function CurrentDate() {
+            var date = new Date();
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+            if ($(".FromDate").val() == '') {
+                $(".FromDate").val(val);
+            }
+            if ($(".ToDate").val() == '') {
+                $(".ToDate").val(val);
+            }
+        }
+
+                function myFunction() {
+
+                    ///var oTable = $('#tblProductSearc').DataTable();   //pay attention to capital D, which is mandatory to retrieve "api" datatables' object, as //Lionel said
+                    $('#myInput').keyup(function () {
+                        tblProductSearc.search($(this).val()).draw();
+                    })
+
+
+                }
+
+
+                CategorySearch();
+                //$('.dataTables_wrapper').addClass('col-md-12'); // <-- add this line
+
+                $("#CategoryId").change(function () {
+                    //tblProductSearc.destroy();
+
+                    CategorySearch();
+                });
+
+                $("#BrandName").change(function () {
+                    //tblProductSearc.destroy();
+                    CategorySearch();
+                });
+
+
+
+            //$('.add-to-cart-table').click(function (event) {
+            //    event.preventDefault();
+            //    var id = $(this).data('ProductId');
+            //    var name = $(this).data('ProductName');
+            //    var price = Number($(this).data('SalesPrice'));
+            //    shoppingCart.addItemToCart(id, name, price, 1);
+            //    displayCart();
+            //});
+
+
+            $('#tblProductSearc tbody').on('click', '.add-to-cart', function () {
+                var table = $('#tblProductSearc').DataTable();
+
+                var data = table.row($(this).parents('tr')).data();
+                //console.log(data);
+                //console.log(data.ProductId);
+                //console.log(data.ProductName);
+                //console.log(data.SalesPrice);
+
+                shoppingCart.addItemToCart(data.ProductId, data.ProductName, data.SalesPrice, 1, data.ColorName, data.BrandName, data.SizeName);
+
+                //alert('hit');
+
+               
+
+                displayCart();
+
+
+
+                if (localStorage.getItem("shoppingCart") != null) {
+                   cart = JSON.parse(localStorage.getItem('shoppingCart'));
+                    //console.log(cart);
+                    
+                        for (var item in cart) {
+                        if (cart[item].id === data.ProductId) {
+                            
+                            //alert(cart[item].count);
+                             $(this).text("Added [ " + cart[item].count + " ]");
+                            return;
+                        }
+                    }
+
+                }
+
+                
+
+
+
+                $('html, body').animate({
+                    'scrollTop': $(".cart_anchor").position().top
+                });
+                //Select item image and pass to the function
+                //console.log($(this).parent('td').parent('tr').find('img'));
+
+                var itemImg = $(this).parent('td').parent('tr').find('img').eq(0);
+                flyToElement($(itemImg), $('.cart_anchor'));
+
+                //alert(data[0] + "'s salary is: " + data[3]);
+
+                //table.row($(this).parents('tr')).remove().draw();
+                //var x = "1300.00";
+                //var y = $('#tblpayments').height();
+                //var z = parseFloat(x) + parseFloat(y);
+
+                //$("html, body").animate({ scrollTop: z }, 1300);
+
+
+                //calculateSum();
+
+            });
+
+
+            //$('#tblProductSearc tbody').on('click', '.btn', function () {
+            //    var table = $('#tblpayments').DataTable();
+            //        var data = tblProductSearc.row($(this).parents('tr')).data();
+            //        alert(data[0] + "'s salary is: " + data[3]);
+            //    });
+
+            });
+
+
+
+
+</script>
+    }

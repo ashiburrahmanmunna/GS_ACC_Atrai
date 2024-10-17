@@ -1,0 +1,1996 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@using Atrai.Model.Core.Entity;
+@using Atrai.Model.Core.Common;
+@model List<VariableModel>
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var ListType = ViewBag.ListType as string;
+    var CompanyName = ViewBag.CompanyName as string;
+    //await Html.RenderPartialAsync("~/Views/Shared/_Dashboardtabed.cshtml");
+
+}
+<link href="~/css/custom_QBstyle.css" rel="stylesheet" />
+<style>
+    .toast-red {
+        background-color: red !important;
+        color: white; /* Set text color as needed */
+    }
+    /* .left-box {
+          float:left;
+        }
+        .right-box {
+
+          overflow: hidden;
+        }*/
+    .btn-delete {
+        position: absolute;
+        left: 90%;
+        bottom: 85%;
+        margin-top: 2px;
+        cursor: pointer;
+        background: none;
+        border: none;
+    }
+
+    #title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 600;
+        line-height: 20px;
+        color: #393a3d;
+        text-transform: uppercase;
+        font-size: 14px !important;
+        float: left;
+        margin-left: 8px;
+        margin-bottom: 0px;
+    }
+
+    #title-container {
+        margin-top: 0;
+        margin-bottom: 4px;
+        line-height: 20px;
+        color: #6b6c72;
+        font-weight: 500;
+        font-size: 14px;
+        float: left;
+        margin-left: 8px;
+        margin-top: 4px;
+        margin-bottom: 0px;
+    }
+
+    #money-container {
+        margin-top: 0;
+        margin-bottom: 4px;
+        line-height: 20px;
+        color: black;
+        float: left;
+        margin-left: 8px;
+        margin-top: 8px;
+    }
+
+    .image-container {
+        position: relative; /* Make the container relative to position the check icon */
+        width: 100px; /* Adjust to match the width of your images */
+        height: 100px; /* Adjust to match the height of your images */
+    }
+
+    .compare-ul {
+        list-style: none;
+        padding: 0;
+        text-align: left;
+        display: inline-block;
+        vertical-align: top; /* Align the lists to the top */
+        margin-right: 20px;
+    }
+
+    .form-label {
+        font-weight: 400 !important;
+        font-size: 12px;
+        text-align: left;
+    }
+
+
+    .check-icon {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%; /* Make the check icon cover the entire container */
+        height: 100%; /* Make the check icon cover the entire container */
+    }
+
+    hr {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid !important;
+        border-top: 1px solid rgba(0,0,0,.1);
+    }
+
+    .chart-type-img {
+        width: 82px;
+        height: 82px;
+    }
+
+    .chart-type {
+        width: 100px;
+        float: left;
+    }
+
+    .stacked-field {
+        display: none !important;
+    }
+
+    .stacked-field-show {
+        display: block !important;
+    }
+
+    .selected-chart {
+        box-shadow: 0px 0px 5px 2px lightblue; /* Adjust the color to your preference */
+    }
+
+    .offcanvas-body .card {
+        /* background: linear-gradient(135deg, #3498db, #ecf0f1); */
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin: auto;
+        width: 70%;
+        transition: transform 0.2s, box-shadow 0.2s;
+        color: black;
+        text-align: center;
+        border: 0px solid;
+    }
+
+    .table-box {
+        border: 1px solid;
+        border-color: rgb(212, 215, 220) !important;
+        padding: 10px;
+        margin: 5px;
+        box-sizing: border-box;
+        border-radius: 10px;
+        width: 30%;
+        height: 250px;
+        float: left;
+        text-align: center;
+        position: relative;
+    }
+
+    .center-content {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+
+    .rightside {
+        padding-left: 6%;
+        overflow: hidden;
+        /*width:60%;*/
+    }
+
+    .left {
+        margin-right: 500px
+    }
+
+
+    .card p {
+        margin-bottom: 20px;
+    }
+
+    .offcanvas-header {
+        background-color: #ECEEF1;
+    }
+
+    .offcanvas-body {
+        background-color: #F4F5F8;
+    }
+
+    .scrollb {
+        overflow-y: auto;
+        height: 100vh;
+    }
+
+    .highlight {
+        border: 5px solid green;
+    }
+
+    .onsortenble {
+        border: 5px solid black;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+    .customize-btn-another {
+        background: #2CA01C;
+        border: 1px solid black;
+        border-radius: 20px;
+        color: #FFFFFF;
+        border: 1px solid #2CA01C;
+    }
+
+        .customize-btn-another:hover {
+            background: #2CA01C;
+            border: 1px solid black;
+            border-radius: 20px;
+            color: #FFFFFF;
+            border: 1px solid #2CA01C;
+        }
+
+    .customize-btn:hover {
+        background: #ffffff;
+        border: 1px solid black;
+        color: black;
+        border-radius: 20px;
+    }
+
+    .my-handle:hover {
+        font-size: 24px;
+        color: #008000bf;
+    }
+
+    .my-handle {
+        display: flex;
+        justify-content: center;
+        align-content: center;
+    }
+
+    /* Initially hide the icons */
+    .action-icons i {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    /* Show the icons when the user hovers over the .action-icons container */
+    /* .action-icons:hover i {
+        opacity: 1;
+        pointer-events: auto;
+    } */
+
+    .card:hover .action-icons i {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        transition: box-shadow 0.3s ease;
+    }
+
+</style>
+
+<ul class="nav nav-tabs mt-5">
+@{
+    var AllChildMenu = HttpContextAccessor.HttpContext.Session.GetObject<List<UserMenuPermissionViewModel>>("UserChildMenu");
+            
+    var filterparentmenu = AllChildMenu.Where(x => x.ControllerName == "Accounts" && x.ActionName == "Business" && x.IsView == true).ToList();
+    var i = 0;
+    foreach (var childitem in filterparentmenu)
+    {
+
+        if (childitem.FirstParameter != null)
+        {
+
+            if (i == 0)
+            {
+                <li class="nav-item">
+                    <a class="nav-link  fw-semibold active" href="#" id=@childitem.FirstValue>@childitem.MenuName</a>
+                </li>
+
+            }
+            else
+            {
+                <li class="nav-item">
+                    <a class="nav-link  fw-semibold" href="#" id=@childitem.FirstValue>@childitem.MenuName</a>
+                </li>
+
+            }
+
+
+        }
+
+        i++;
+    }
+}
+</ul>
+
+<h4>@ViewBag.CompanyName</h4>
+
+<div class="container">
+    <div class="row my-2">
+        <div class="col-9"></div>
+        <div class="d-flex justify-content-end">
+            <span class="cursor-pointer pg-title" onclick="enableSorting()"><i class="bi bi-sliders2-vertical pe-2"></i><span id="sortbtntext">Customise Layout</span></span>
+            <div class="vr mx-2"></div>
+            <span class="cursor-pointer pg-title-green me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasTop" aria-controls="offcanvasTop" id="add-new-chart"><i class="bi bi-plus-lg pe-2"></i>Add New Chart</span>
+        </div>
+    </div>
+    <br />
+    <div id="combinedview">
+        <div class="row addingcolumn" id="addingcolumnwidget">
+        </div>
+    </div>
+</div>
+
+ 
+
+<div class="offcanvas offcanvas-top" tabindex="-1" id="offcanvasTop" aria-labelledby="offcanvasTopLabel">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasTopLabel">Add New Chart</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body scrollb">
+        <div class="card" style=" height: 740px; ">
+            <div class="card-body">
+                <h2>What do you want to track?</h2>
+                <p>You can customize a chart and filter it to your needs. You can also compare business performance details.</p>
+
+                <div class="form-group">
+                    <div id="tableList">
+                        @foreach (var table in Model)
+                        {
+                            <div class="table-box" onclick="OpenChartBuilder('@table.VariableName')">
+                                <div class="center-content">
+                                    <div class="image-container" style="cursor:pointer">
+                                        <img src="@table.ClassName" alt="Table Image" />
+
+                                    </div>
+                                    @table.VariableName
+                                </div>
+                            </div>
+
+
+                        }
+                    </div>
+                </div>
+
+                
+
+
+            </div>
+        </div>
+        @* <button type="button" style="margin-left:15%;margin-top:2%;" class="btn cancel-btn cancel-text btn-outline-dark" data-bs-dismiss="offcanvas">Cancel</button>
+        <button type="button" style="margin-left:58%;margin-top:2%;" id="continueButton" class="btn btn-success" disabled data-bs-toggle="offcanvas" data-bs-target="#offcanvasnext" aria-controls="offcanvasnext">Continue</button> *@
+
+    </div>
+
+</div>
+
+<div class="offcanvas offcanvas-end" style="width: 100%;" tabindex="-1" id="offcanvasnext" aria-labelledby="offcanvasnextLabel">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasnextLabel">Add New Chart</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body scrollb">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4" style="max-height: 400px; overflow-y: auto;">
+                        <h3>Create Your Chart</h3>
+                        <p><i>* indicates a required field</i></p>
+                        <hr />
+                        <div class="accordion accordion-flush" id="accordionFlushExample">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="flush-headingOne">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                                        Customize
+                                    </button>
+                                </h2>
+                                <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                                    <div class="accordion-body">
+                                        <div class="mb-3">
+                                            <label for="readOnlyField" class="form-label">Name*</label>
+                                            <input type="text" class="form-control" id="readOnlyField" oninput="ChangeChartTitle()" value="">
+                                            <input type="hidden" class="form-control" id="dydashid" value="0">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="selectField1" class="form-label">Chart type</label>
+
+                                            <select class="form-select" id="Charttype" onchange="ChangeChartType(this)">
+                                                @*  <option value="bar">bar</option>
+                                                <option value="pie">pie</option>
+                                                <option value="doughnut">doughnut</option> *@
+
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="groupby" class="form-label">Group By*</label>
+                                            <select class="form-select" id="groupby" onchange="GetfilterColumnFilter()">
+                                            </select>
+                                        </div>
+                                        <div class="mb-3" id="grpdep">
+                                            <label for="groupbydependent" class="form-label">Group filter</label>
+                                            <select class="form-select" id="groupbydependent" multiple="multiple" onchange="GetpreviewData()">
+                                            </select>
+
+                                        </div>
+                                        <div class="mb-3" style="display:none" id="tpreriod">
+                                            <label for="filterby" class="form-label">Against a time period</label>
+                                            <select onchange="GetpreviewData()" id="DateRangeDropdown" class="form-select">
+                                                @*<option selected="selected" disabled="disabled">Select an Option</option>*@
+                                                <option value="1" selected> Select </option>
+                                                @* <option value="2">Custom</option> *@
+                                                <option value="3">Today</option>
+                                                <option value="4">This Week</option>
+                                                <option value="5">This Week-to-date</option>
+                                                <option value="6">This Month</option>
+                                                <option value="7">This Month-to-date</option>
+                                                <option value="8">This Quarter</option>
+                                                <option value="9">This Quarter-to-date</option>
+                                                <option value="10">This Year</option>
+                                                <option value="11">This Year-to-date</option>
+                                                <option value="12">This Year-to-last-month</option>
+                                                <option value="13">Yesterday</option>
+                                                <option value="14">Recent</option>
+                                                <option value="15">Last Week</option>
+                                                <option value="16">Last Week-to-date</option>
+                                                <option value="17">Last Month</option>
+                                                <option value="18">Last Month-to-date</option>
+                                                <option value="19">Last Quarter</option>
+                                                <option value="20">Last Quarter-to-date</option>
+                                                <option value="21">Last Year</option>
+                                                <option value="22">Last Year-to-date</option>
+                                                <option value="23">Since 30 days ago</option>
+                                                <option value="24">Since 60 days ago</option>
+                                                <option value="25">Since 90 days ago</option>
+                                                <option value="26">Since 365 days ago</option>
+                                                <option value="27">Next Week</option>
+                                                <option value="28">Next 4 Weeks</option>
+                                                <option value="29">Next Month</option>
+                                                <option value="30">Next Quarter</option>
+                                                <option value="30">Next Year</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="stackingGroup" id="label4" class="form-label d-none">Stacking Group*</label>
+                                            <select class="form-select  d-none" id="stackingGroup" required>
+                                            </select>
+
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="stackingGroupdependent" class="form-label  d-none"></label>
+                                            <select class="form-select  d-none" id="stackingGroupdependent" required multiple>
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item" id="FilterAccordion">
+                                <h2 class="accordion-header" id="flush-headingTwo">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+                                        Filter
+                                    </button>
+                                </h2>
+                                <div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" data-bs-parent="#accordionFlushExample">
+                                    <div class="accordion-body">
+
+                                        <div class="mb-3">
+                                            <label for="filterby" class="form-label">Filter By</label>
+                                            <select class="form-select" style="width:200px" id="filterby" onchange="GetAdditionalfilterData()">
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="filterbydependent" class="form-label"></label>
+                                            <select class="form-select" style="width:200px" id="filterbydependent" multiple="multiple" onchange="GetpreviewData()">
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="accordion-item" id="CompareAccordion">
+                                <h2 class="accordion-header" id="flush-headingThree">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
+                                        Compare
+                                    </button>
+                                </h2>
+                                <div id="flush-collapseThree" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" data-bs-parent="#accordionFlushExample">
+                                    <div class="accordion-body">
+                                        <div class="mb-3">
+                                            <label for="filterby" class="form-label">Against a time period</label>
+                                            <select id="DateRangeDropdown2" class="form-select">
+                                                @* onchange="LoadData()" *@
+                                                @*<option selected="selected" disabled="disabled">Select an Option</option>*@
+                                                <option value="1"> All Dates</option>
+                                                <option value="2">Custom</option>
+                                                <option value="3">Today</option>
+                                                <option value="4">This Week</option>
+                                                <option value="5">This Week-to-date</option>
+                                                <option value="6">This Month</option>
+                                                <option value="7">This Month-to-date</option>
+                                                <option value="8">This Quarter</option>
+                                                <option value="9">This Quarter-to-date</option>
+                                                <option value="10" selected>This Year</option>
+                                                <option value="11">This Year-to-date</option>
+                                                <option value="12">This Year-to-last-month</option>
+                                                <option value="13">Yesterday</option>
+                                                <option value="14">Recent</option>
+                                                <option value="15">Last Week</option>
+                                                <option value="16">Last Week-to-date</option>
+                                                <option value="17">Last Month</option>
+                                                <option value="18">Last Month-to-date</option>
+                                                <option value="19">Last Quarter</option>
+                                                <option value="20">Last Quarter-to-date</option>
+                                                <option value="21">Last Year</option>
+                                                <option value="22">Last Year-to-date</option>
+                                                <option value="23">Since 30 days ago</option>
+                                                <option value="24">Since 60 days ago</option>
+                                                <option value="25">Since 90 days ago</option>
+                                                <option value="26">Since 365 days ago</option>
+                                                <option value="27">Next Week</option>
+                                                <option value="28">Next 4 Weeks</option>
+                                                <option value="29">Next Month</option>
+                                                <option value="30">Next Quarter</option>
+                                                <option value="30">Next Year</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-md-8 px-2">
+                        <button class="btn btn-success" onclick="saveData()"> Save Changes</button>
+                        <div class="upperChrt">
+                            <h5>
+                                Preview
+                            </h5>
+
+                            <div id="chartTypesContainer">
+                            </div>
+
+
+                        </div>
+                        <div class="lowerChrt">
+                            <div style="width:100%;">
+                                <canvas id="mycanvas" style="width:100%;max-width:600px"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="offcanvas offcanvas-end" style="width: 100%;" tabindex="-1" id="StatementBuilder" aria-labelledby="offcanvasnextLabel">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasnextLabel">Add New Chart</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close" onclick="CloseOfCanvas()"></button>
+    </div>
+    <div class="offcanvas-body scrollb">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h3>Create Statement</h3>
+                        <p><i>* indicates a required field</i></p>
+                        <hr />
+                        <div class="accordion accordion-flush" id="accordionFlushExample">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="flush-headingOne">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                                        Customize
+                                    </button>
+                                </h2>
+                                <div id="flush-collapseOne" class="accordion-collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                                    <div class="accordion-body">
+                                        <div class="mb-3">
+                                            <label for="StatementTitle" class="form-label">Title</label>
+                                            <input type="text" class="form-control" id="StatementTitle">
+                                            <input type="hidden" class="form-control" id="StatementTitleId" value="0">
+                                        </div>
+                                        <div class="mb-3" id="grpdep">
+                                            <label for="AcountsGroups" class="form-label">Acounts Groups</label>
+                                            <select class="form-select" id="AcountsGroups" onchange="Getledger()">
+                                            </select>
+                                            <span id="AcountsGroupsError" class="text-danger"></span>
+                                        </div>
+                                        <div class="mb-3" id="grpdep">
+                                            <label for="AcountsLeger" class="form-label">Acounts Leger</label>
+                                            <select class="form-select" id="AcountsLeger" multiple="multiple" onchange="GetPreviewStatement()">
+                                            </select>
+                                            <span id="AcountsLegerError" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+                        </div>
+
+                    </div>
+                    <div class="col-md-7 px-4">
+                      <button class="btn btn-success"  onclick="saveStatementData()"> Save Changes</button>  
+                        <div class="upperChrt">
+                            <h5>
+                                Preview
+                            </h5>
+
+                            <div>
+                                <ul class="list-group" id="StatementListView">
+                                    @* <li class="list-group-item d-flex justify-content-between align-items-center p-4">
+                                    A list item
+                                    <span class="badge bg-primary rounded-pill">14</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center p-4">
+                                    A second list item
+                                    <span class="badge bg-primary rounded-pill">2</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center p-4">
+                                    A third list item
+                                    <span class="badge bg-primary rounded-pill">1</span>
+                                    </li> *@
+                                </ul>
+                            </div>
+
+
+                        </div>
+                        <div class="lowerChrt">
+                            <div style="width:100%;">
+                                <canvas id="mycanvas" style="width:100%;max-width:600px"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="offcanvas offcanvas-end" style="width: 100%;" tabindex="-1" id="InventoryBuilder" aria-labelledby="offcanvasnextLabel">
+    <div class="offcanvas-header">
+        <h5 id="offcanvasnextLabel">Add New Chart</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close" onclick="CloseOfCanvas()"></button>
+    </div>
+    <div class="offcanvas-body scrollb">
+        <div class="card" style=" width: 1130px; ">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h3>Create Inventory</h3>
+                        <p><i>* indicates a required field</i></p>
+                        <hr />
+                        <div class="accordion accordion-flush" id="accordionFlushExample">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="flush-headingOne">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                                        Customize
+                                    </button>
+                                </h2>
+                                <div id="flush-collapseOne" class="accordion-collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                                    <div class="accordion-body">
+                                        <div class="mb-3">
+                                            <label for="InventoryTitle" class="form-label">Title</label>
+                                            <input type="text" class="form-control" id="InventoryTitle">
+                                            <input type="hidden" class="form-control" id="InventoryTitleId" value="0">
+                                        </div>
+                                        <div class="mb-3" id="grpdep">
+                                            <label for="InvenCategory" class="form-label">Inventory Category</label>
+                                            <select class="form-select" id="InvenCategory" onchange="GetCategoryItem()">
+                                                <option value=""> Select </option>
+                                                <option value="1"> All </option>
+                                            </select>
+                                            <span id="InvenCategoryError" class="text-danger"></span>
+                                        </div>
+                                        <div class="mb-3" id="grpdep">
+                                            <label for="InventoryItem" class="form-label">Inventory Items</label>
+                                            <select class="form-select" id="InventoryItem" multiple="multiple" onchange="GetStockStatement()">
+                                            </select>
+                                            <span id="InventoryItemError" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+                        </div>
+
+                    </div>
+                    <div class="col-md-8 px-4">
+                        <div class="d-flex">
+                        <div>
+                            <label for="Caption" class="form-label">Caption</label>
+                            <select class="form-select" id="stockCaption" onchange="">
+                                <option value="Low_Stock"> Low Stock </option>
+                                <option value="Top_Selling_Item"> Top Selling Item </option>
+                                <option value="Top_Issue_Item"> Top Issue Item </option>
+                                <option value="Slow_Item"> Slow Item </option>
+                                <option value="Top_Return_Item"> Top Return Item </option>
+                                <option value="Top_Transaction_Item"> Top Transaction Item </option>
+                                <option value="Top_Profit_Item"> Top Profit Item </option>
+                                <option value="Product_Balance"> Product Balance </option>
+                            </select> 
+                        </div>
+                            <div style="margin-top: 27px; margin-left: 10px; ">                              
+                                <select id="DateRangeDropdown3" class="form-select">
+                                    <option value="This Week">This Week</option>
+                                    <option value="This Month" selected>This Month</option>
+                                    <option value="This Quarter">This Quarter</option>
+                                    <option value="This Year">This Year</option>
+                                </select>
+                            </div>                       
+                        <div style=" margin-top: 27px; margin-left: 10px; ">
+                                <select class="form-select" id="captionValue" onchange="">
+                                <option value="10"> 10 </option>
+                                <option value="20"> 20 </option>
+                                <option value="50"> 50 </option>
+                                <option value="100"> 100 </option>
+                            </select>
+                        </div>
+                            <div style=" margin-left: 10px; ">
+                                <button class="btn btn-success" style=" margin-top: 27px;" onclick="saveInventoryData()"> Save Changes</button>
+                            </div>
+                            <div style=" margin-top: 20px; margin-left: 10px; ">
+                                <button type="button" id="IsPublic" onclick="toggleIcon(this)" class="btn btn-light radius-30" data-value="true" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Public" onclick=""> <i class="bi bi-eye" style="padding-left: 2px;font-size: larger;"></i></button>
+                            </div>
+                        </div>
+                        <div class="upperChrt">
+                            <h5>
+                                Preview
+                            </h5>
+
+                            <div>
+                                <ul class="list-group" id="InventoryListView">
+                                    @* <li class="list-group-item d-flex justify-content-between align-items-center p-4">
+                                    A list item
+                                    <span class="badge bg-primary rounded-pill">14</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center p-4">
+                                    A second list item
+                                    <span class="badge bg-primary rounded-pill">2</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center p-4">
+                                    A third list item
+                                    <span class="badge bg-primary rounded-pill">1</span>
+                                    </li> *@
+                                </ul>
+                            </div>
+
+
+                        </div>
+                        <div class="lowerChrt">
+                            <div style="width:100%;">
+                                <canvas id="mycanvas" style="width:100%;max-width:600px"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+@section Scripts {   
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/admin_theme_gtr/assets/js/shortable.js"></script>
+    <script>
+
+        if ('@ListType' === "GetthingsDone") {
+                $("#GetthingsDone").addClass("active");
+                $("#Business").removeClass("active");
+                $("#cashflow").removeClass("active");
+
+                $("#GetthingsDone-view-id").removeClass("d-none");
+                $("#BusinessOverview-view-id").addClass("d-none");
+                $("#CashFlow-view-id").addClass("d-none");
+
+                GetDataForGetthingsDone();
+            }
+            if ('@ListType' === "BusinessOverview") {
+                $("#GetthingsDone").removeClass("active");
+                $("#Business").addClass("active");
+                $("#cashflow").removeClass("active");
+
+                $("#GetthingsDone-view-id").addClass("d-none");
+                $("#BusinessOverview-view-id").removeClass("d-none");
+                $("#CashFlow-view-id").addClass("d-none");
+            }
+            if ('@ListType' === "CashFlow") {
+                $("#GetthingsDone").removeClass("active");
+                $("#Business").removeClass("active");
+                $("#cashflow").addClass("active");
+
+                $("#GetthingsDone-view-id").addClass("d-none");
+                $("#BusinessOverview-view-id").addClass("d-none");
+                $("#CashFlow-view-id").removeClass("d-none");
+            }
+        
+
+        $("#GetthingsDone").on("click", function () {
+            $("#GetthingsDone").addClass("active");
+            $("#Business").removeClass("active");
+            $("#cashflow").removeClass("active");
+
+            $("#GetthingsDone-view-id").removeClass("d-none");
+            $("#BusinessOverview-view-id").addClass("d-none");
+            $("#CashFlow-view-id").addClass("d-none");
+            GetDataForGetthingsDone();
+        })
+
+        $("#Business").on("click", function () {
+            $("#GetthingsDone").removeClass("active");
+            $("#Business").addClass("active");
+            $("#cashflow").removeClass("active");
+
+            $("#GetthingsDone-view-id").addClass("d-none");
+            $("#BusinessOverview-view-id").removeClass("d-none");
+            $("#CashFlow-view-id").addClass("d-none");
+        })
+
+        $("#cashflow").on("click", function () {
+            $("#GetthingsDone").removeClass("active");
+            $("#Business").removeClass("active");
+            $("#cashflow").addClass("active");
+
+            $("#GetthingsDone-view-id").addClass("d-none");
+            $("#BusinessOverview-view-id").addClass("d-none");
+            $("#CashFlow-view-id").removeClass("d-none");
+        })
+
+        function toggleIcon(button) {
+            const icon = button.querySelector('i');
+    
+            if (icon.classList.contains('bi-eye')) {
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+                button.title = "Private";  // Optional: change the tooltip text
+                button.setAttribute('data-value', 'false');
+            } else {
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+                button.title = "Public";  // Optional: change the tooltip text
+                button.setAttribute('data-value', 'true');
+            }
+        }
+
+        var columnSelector = [];
+        var Additonalfilterbydata = [];
+        var $select;
+        var previewchart;
+        var type;
+        var EditData;
+        var DashboardlayoutOrderData;
+        //var StatementEditData;
+        $(document).ready(function () {
+            fetchChartDataAndInitializeCharts();
+            GetAllChartType();
+        })
+
+
+        function initializeChart(chartID, chartType, chartData, chartOptions) {
+            var ctx = document.getElementById(chartID).getContext('2d');
+
+            return new Chart(ctx, {
+                type: chartType,
+                data: chartData,
+                options: chartOptions
+            });
+        }
+        //munna
+        function fetchChartDataAndInitializeCharts() {
+            $.get(`@Url.Action("GetChartConfigurations", "Accounts")`, function (data) {
+                //console.log(data);
+                const { CustomViews, Charts, StatementViews, LayoutOrders } = data;
+                //let cg= $("#chartsgrid");
+                DashboardlayoutOrderData = LayoutOrders;
+                inItialSystemReport(CustomViews);
+
+                for (let i = 1; i <= Charts.length; i++) {
+
+                    var columnHtml = `<div class="col-md-6  shorteditem" dash-order="${getOrderValueByDashId(Charts[i - 1].Id)}"  dash-id="${Charts[i - 1].Id}">
+                    <div class="card">
+                        <div class="card-body">
+                              <div class="text-end action-icons">
+                                     ${!Charts[i - 1].isSystem ? `<i class="bi bi-pencil cursor-pointer text-secondary fs-5" onclick="EditView('${Charts[i - 1].Id}')"></i>
+                                    <i class="bi bi-trash3 cursor-pointer text-danger fs-5" onclick="DeleteDashBoard('${Charts[i - 1].Id}')"></i>
+                                    </div>
+
+                            ` : ''}
+                             <h5><i class="bi bi-arrows-move my-handle d-none" aria-hidden="true"></i></h5>
+                            <canvas id="${Charts[i - 1].Id}"></canvas>
+                        </div>
+                    </div>
+                </div>`;
+
+
+                    $('#combinedview .addingcolumn:last').append(columnHtml);
+                    initializeChart(Charts[i - 1].Id, Charts[i - 1].Type, Charts[i - 1].Data, Charts[i - 1].Options);
+
+
+                }
+
+                inItialStatementViewsReport(StatementViews);
+                inItialStockStatementReport(StatementViews);
+                DefaultOrdering();
+            }).fail(function (xhr, status, error) {
+                console.error("Error:", error);
+            });
+
+        }
+        function getOrderValueByDashId(dashId) {
+            const foundItem = DashboardlayoutOrderData.find(item => item.DashId === dashId);
+
+            if (foundItem) {
+                return foundItem.Order;
+            } else {
+                return DashboardlayoutOrderData.length + 1;
+            }
+        }
+        function DefaultOrdering() {
+            const container = document.getElementById('addingcolumnwidget');
+            const divsArray = Array.from(document.getElementsByClassName('shorteditem'));
+
+            divsArray.sort((a, b) => {
+                const orderA = parseInt(a.getAttribute('dash-order'));
+                const orderB = parseInt(b.getAttribute('dash-order'));
+                return orderA - orderB;
+            });
+
+
+            container.innerHTML = '';
+
+
+            divsArray.forEach(div => container.appendChild(div));
+
+        }
+        function OpenChartBuilder(Name) {
+            return new Promise((resolve, reject) => {
+                type = Name;
+                if (type == "Statement") {
+
+
+                    $.get(`@Url.Action("GetfilterColumnFilter", "Accounts")?variablefor=Accounts&type=Statement`, function (data) {
+                        // Additonalfilterbydata = data.map(m => {
+                        //     return {
+                        //         VariableValue: m.VariableName,
+                        //         VariableName: m.VariableName, 
+                        //         ColumnSelector: m.VariableValue
+                        //     };
+                        // });
+
+                        InitDropdown("#AcountsGroups", data);
+                        var StatementBuildercanvas = document.getElementById('StatementBuilder');
+                        var bsas = new bootstrap.Offcanvas(StatementBuildercanvas);
+                        bsas.show();
+                        resolve();
+                    }).fail(function (xhr, status, error) {
+                        console.error("Error:", error);
+                        reject(error);
+                    });
+
+                    //munna
+
+                } else if (type == "Inventory") {
+                    $.get(`@Url.Action("GetfilterColumnFilter", "Accounts")?variablefor=Inventory&type=Category`, function (data) {
+                        // Additonalfilterbydata = data.map(m => {
+                        //     return {
+                        //         VariableValue: m.VariableName,
+                        //         VariableName: m.VariableName,
+                        //         ColumnSelector: m.VariableValue
+                        //     };
+                        // });
+
+                        InitDropdown("#InvenCategory", data);
+                        var InventoryBuildercanvas = document.getElementById('InventoryBuilder');
+                        var bsas = new bootstrap.Offcanvas(InventoryBuildercanvas);
+                        bsas.show();
+                        resolve();
+                    }).fail(function (xhr, status, error) {
+                        console.error("Error:", error);
+                        reject(error);
+                    });
+                }else {
+                    $.get(`@Url.Action("GetColumnSelector", "Accounts")?variablefor=${Name}`, function (data) {
+                        Additonalfilterbydata = data.map(m => {
+                            return {
+                                VariableValue: m.VariableName,
+                                VariableName: m.VariableName,
+                                ColumnSelector: m.VariableValue
+                            };
+                        });
+
+                        InitDropdown("#groupby", Additonalfilterbydata);
+                        InitChart();
+                        console.log(columnSelector);
+                        var myOffcanvas = document.getElementById('offcanvasnext');
+                        var bsOffcanvas = new bootstrap.Offcanvas(myOffcanvas);
+                        bsOffcanvas.show();
+
+
+
+                        resolve(); // Resolve the promise when the operation completes
+                    }).fail(function (xhr, status, error) {
+                        console.error("Error:", error);
+                        reject(error); // Reject the promise if there's an error
+                    });
+                }
+
+            });
+
+        }
+        function Getledger() {
+            var AcountsGroupsa = $("#AcountsGroups").val();
+            $.get(`@Url.Action("GetLedger", "Accounts")?accId=${AcountsGroupsa}`, function (data) {
+
+
+                InitDropdown("#AcountsLeger", data);
+                if (EditData) {
+                    if (EditData.GroupFilterValue != null && EditData.GroupFilterValue != []) {
+                        let AcountsLeger = $("#AcountsLeger");
+                        AcountsLeger[0].selectize.setValue(JSON.parse(EditData.GroupFilterValue));
+                    }
+                }
+
+
+            }).fail(function (xhr, status, error) {
+                console.error("Error:", error);
+                reject(error);
+            });
+        }
+        //munna
+        function GetCategoryItem() {
+            var CategoryItem = $("#InvenCategory").val();            
+            $.get(`@Url.Action("GetCategorywiseItem", "Accounts")?CategoryId=${CategoryItem}`, function (data) {
+
+
+                InitDropdown("#InventoryItem", data);
+                if (EditData) {
+                    if (EditData.GroupFilterValue != null && EditData.GroupFilterValue != []) {
+                        let InventoryItem = $("#InventoryItem");
+                        InventoryItem[0].selectize.setValue(JSON.parse(EditData.GroupFilterValue));
+                    }
+                }
+            
+            GetStockStatement();
+            }).fail(function (xhr, status, error) {
+                console.error("Error:", error);
+                reject(error);
+            });
+        }
+         
+        function GetPreviewStatement() {
+            var vAcountsLeger = $("#AcountsLeger").val();
+            $.get(`@Url.Action("GetLedgerPreviewData", "Accounts")?accId=${vAcountsLeger}`, function (data) {
+                var stv = $("#StatementListView");
+                var row = JSON.parse(data).Table;
+                var list = row.map(x => {
+                    return `<li class="list-group-item d-flex justify-content-between align-items-center">
+                                                   <H6 style="margin-bottom: 0px;"> ${x.AccName}</h6>
+                                                   <span>${x.AccountCategoryName}</span>
+                                                   <span>${x.groupsName}</span>
+                                                <span class="badge bg-primary rounded-pill">${CurrencyFormat(x.AccountBalance)}</span>
+                                   </li>
+                            `
+                })
+                console.log(list);
+
+                var listHTML = list.join('');
+
+                stv.html(listHTML);
+
+            }).fail(function (xhr, status, error) {
+                console.error("Error:", error);
+            });
+        }
+        //munna
+        function GetStockStatement() {
+            var InventoryItem = $("#InventoryItem").val();
+            var stockCaption = $("#stockCaption").val();
+            var captionValue = $("#captionValue").val();
+            let Timeperiod = $("#DateRangeDropdown3 option:selected").text();
+            Timeperiod = encodeURIComponent(Timeperiod);
+            $.get(`@Url.Action("GetStockPreviewData", "Accounts")?productId=${InventoryItem}&stockCaption=${stockCaption}&captionValue=${captionValue}&Timeperiod=${Timeperiod}`, function (data) {
+                var stv = $("#InventoryListView");
+                var row = JSON.parse(data).Table;
+                var list = row.map(x => {
+                    return `<li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                <H6 style="margin-bottom: 0px;"> ${x.ProductName}</h6>
+                                                                <span>${x.CategoryName}</span>
+
+                                                        <span class="badge bg-primary rounded-pill">Qty ${x.RunTimeLiveStock}</span>
+                                                   </li>
+                                            `
+                })
+                console.log(list);
+
+                var listHTML = list.join('');
+
+                stv.html(listHTML);
+
+            }).fail(function (xhr, status, error) {
+                console.error("Error:", error);
+            });
+        }
+
+        function GetfilterColumnFilter() {
+            let groupby = $("#groupby").val();
+            $("#grpdep").show();
+            $("#tpreriod").hide();
+            if (groupby == "TimePreriod") {
+                $("#tpreriod").show();
+                $("#grpdep").hide();
+                return false;
+            }
+
+            $.get(`@Url.Action("GetfilterColumnFilter", "Accounts")?variablefor=${groupby}&type=${type}`, function (data) {
+
+
+                InitDropdown("#groupbydependent", data);
+                console.log(Additonalfilterbydata.filter((x) => x.VariableValue != groupby));
+                InitDropdown("#filterby", Additonalfilterbydata.filter((x) => x.VariableValue != groupby));
+                //console.log(data);
+                if (EditData) {
+                    let filterByval = $('#filterby');
+                    if (EditData.AdditionalFilterTitle != null && EditData.GroupFilterValue != []) {
+                        filterByval[0].selectize.setValue(EditData.AdditionalFilterTitle);
+                    }
+                    let groupFilter = $('#groupbydependent');
+                    if (EditData.GroupFilterValue != null && EditData.GroupFilterValue != []) {
+                        let gf = JSON.parse(EditData.GroupFilterValue)
+                        groupFilter[0].selectize.setValue(gf);
+                    }
+                    // let filterByDependent = $('#filterbydependent');
+                    // if (EditData.AdditionalFilterValue != null && EditData.AdditionalFilterValue != []) {
+                    //     let fd = JSON.parse(EditData.AdditionalFilterValue)
+                    //     filterByDependent[0].selectize.setValue(fd);
+                    // }
+                }
+
+                GetpreviewData();
+                //UpdateChart();
+            }).fail(function (xhr, status, error) {
+                console.error("Error:", error);
+            });
+        }
+        function GetAdditionalfilterData() {
+            let filterby = $("#filterby").val();
+            $.get(`@Url.Action("GetfilterColumnFilter", "Accounts")?variablefor=${filterby}`, function (data) {
+
+
+
+                InitDropdown("#filterbydependent", data);
+                if (EditData) {
+
+                    let filterByDependent = $('#filterbydependent');
+                    if (EditData.AdditionalFilterValue != []) {
+                        let fd = JSON.parse(EditData.AdditionalFilterValue)
+                        filterByDependent[0].selectize.setValue(fd);
+                    }
+                }
+                GetpreviewData();
+                //UpdateChart();
+                EditData = undefined;
+            }).fail(function (xhr, status, error) {
+                console.error("Error:", error);
+            });
+        }
+        function GetpreviewData() {
+            let groupby = $("#groupby").val();
+            let filterby = $("#filterby").val();
+            let groupbydependent = $("#groupbydependent").val();
+            let filterbydependent = $("#filterbydependent").val();
+            let Timepreriod = $("#DateRangeDropdown option:selected").text();
+            //alert(groupbydependent);
+            let c = $("#groupby")[0].selectize.options[groupby].ColumnSelector;
+            let f = '';
+            if (filterby != '' && filterby != null) {
+                f = $("#filterby")[0].selectize.options[filterby].ColumnSelector;
+            }
+
+            $.get(`@Url.Action("GetpreviewData", "Accounts")?Type=${type}
+                                    &selectColums=${c}
+                                    &groupfilterid=${groupbydependent}
+                                    &additionalfilter=${f}
+                                    &additionalfilterdata=${filterbydependent}
+                                                    &Timepreriod=${Timepreriod}
+                                    `, function (data) {
+
+                //console.log(data);
+                if (data == "null") {
+                    UpdateChart([], []);
+
+                } else {
+                    var Pdata = JSON.parse(data);
+
+                    let labels = Pdata.Table.map(l => l.Labels);
+                    let datas = Pdata.Table.map(l => l.Data);
+                    UpdateChart(labels, datas);
+                }
+
+                // InitChart();
+            }).fail(function (xhr, status, error) {
+                console.error("Error:", error);
+            });
+        }
+    
+        function InitChart() {
+            console.log("preview chart", previewchart);
+            if (previewchart) {
+                previewchart.destroy();
+            }
+            var yourChartData1 = {
+                labels: ["Items", "Items2", "Items3", "Items4", "Items5", "Items6", "Items7", "Items8", "Items9"],
+                datasets: [{
+                    label: 'vendor',
+                    data: [0, 1, 323, 324, 2311, 3, 23, 13, 43],
+                    backgroundColor: function (context) {
+                        return generateRandomColors();
+                    },
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            };
+            var ctx = document.getElementById("mycanvas").getContext('2d');
+            var chartType = $("#Charttype").val();
+            previewchart = new Chart(ctx, {
+                type: chartType,
+                data: yourChartData1,
+                options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: $("#readOnlyField").val(),
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateRandomColors() {
+            const predefinedColors =
+                [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ];
+            const randomIndex = Math.floor(Math.random() * predefinedColors.length);
+            return predefinedColors[randomIndex];
+        }
+        function ChangeChartTitle() {
+
+            previewchart.options.plugins.title.text = $("#readOnlyField").val();
+            console.log(previewchart.options.plugins.title.text);
+            previewchart.update();
+        }
+        function ChangeChartType(selector) {
+
+            InitChart();
+        }
+        function UpdateChart(label, newdata) {
+            // let label=["new","new2","new3","new4","new5","new6"];
+            // newData=[0,1,70,34,50,3];
+            let groupby = $("#groupby").val();
+            previewchart.data.labels = label;
+            previewchart.data.datasets.forEach((dataset) => {
+                dataset.data = newdata;
+                dataset.label = groupby;
+            });
+            previewchart.options.plugins.title.text = $("#readOnlyField").val();
+            previewchart.update();
+        }
+        function InitDropdown(selector, newOptions) {
+            var d = $(selector);
+
+            if (typeof d[0].selectize !== 'undefined') {
+
+                d[0].selectize.clearOptions();
+
+                d[0].selectize.addOption(newOptions);
+
+                d[0].selectize.refreshOptions();
+            } else {
+
+                d.selectize({
+                    persist: false,
+                    plugins: ["drag_drop", "clear_button"],
+                    valueField: 'VariableValue',
+                    labelField: 'VariableName',
+                });
+
+                d[0].selectize.addOption(newOptions);
+
+                d[0].selectize.refreshOptions();
+                //d[0].selectize.setValue([newOptions[0].VariableValue])
+            }
+
+        }
+
+        function saveStatementData() {
+
+            var name = $('#StatementTitle').val();
+            let dydashid = $('#StatementTitleId').val();
+            var AcountsGroups = $('#AcountsGroups').val();
+            var AcountsLeger = $('#AcountsLeger').val();
+
+            $('#AcountsGroupsError').text('');
+            $('#AcountsLegerError').text('');
+            
+            var isValid = true;
+            if (!AcountsGroups || AcountsGroups.length === 0) {
+                $('#AcountsGroupsError').text('Please select the field');
+                isValid = false;
+            }
+            if (!AcountsLeger || AcountsLeger.length === 0) {
+                $('#AcountsLegerError').text('Please select the field');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                return; 
+            }
+
+            var data = {
+                Id: dydashid,
+                Type: "Statement",
+                ChartTitle: name,
+                ChartType: "",
+                Grouptitle: "",
+                GroupBy: AcountsGroups,
+                GroupFilterValue: JSON.stringify(AcountsLeger),
+            };
+
+            console.log(data);
+            $.post('@Url.Action("SaveStatementData", "Accounts")', data)
+                .done(function (response) {
+                    window.location.reload();
+                })
+                .fail(function (error) {
+
+                    console.error('Error saving data:', error);
+                });
+        }
+        //munna
+        function saveInventoryData() {
+
+            var name = $('#InventoryTitle').val();
+            let dydashid = $('#InventoryTitleId').val();
+            var InvenCategory = $('#InvenCategory').val();
+            var InventoryItem = $('#InventoryItem').val();
+            var stockCaption = $("#stockCaption").val();
+            var captionValue = $("#captionValue").val();
+            var IsPublic = $("#IsPublic").attr('data-value');
+            let Timeperiod = $("#DateRangeDropdown3 option:selected").text();
+
+            // var FromDate = $(".FromDate").val();
+            // var ToDate = $(".ToDate").val();
+
+            $('#InvenCategoryError').text('');
+            $('#InventoryItemError').text('');
+
+            var isValid = true;
+            if (!InvenCategory || InvenCategory.length === 0) {
+                $('#InvenCategoryError').text('Please select the field');
+                isValid = false;
+            }
+            // if (!InventoryItem || InventoryItem.length === 0) {
+            //     $('#InventoryItemError').text('Please select the field');
+            //     isValid = false;
+            // }
+
+            if (!isValid) {
+                return;
+            }
+
+            var data = {
+                Id: dydashid,
+                Type: "Inventory",
+                ChartTitle: name,
+                ChartType: "",
+                Grouptitle: "",
+                GroupBy: InvenCategory,
+                StockCaption: stockCaption,
+                CaptionValue: captionValue,
+                IsPublic: IsPublic,
+                TimePriod: $("#DateRangeDropdown3 option:selected").text(),
+                // FromDateValue: FromDate,
+                // ToDateValue: ToDate,
+                GroupFilterValue: JSON.stringify(InventoryItem),
+            };
+
+            console.log(data);
+            $.post('@Url.Action("SaveStockStatement", "Accounts")', data)
+                .done(function (response) {
+                    window.location.reload();
+                })
+                .fail(function (error) {
+
+                    console.error('Error saving data:', error);
+                });
+        }
+
+        function saveData() {
+
+            var name = $('#readOnlyField').val();
+            let dydashid = $('#dydashid').val();
+            var chartType = $('#Charttype').val();
+            var groupByval = $('#groupby').val();
+            var groupFilter = $('#groupbydependent').val();
+            //var stackingGroup = $('#stackingGroup').val();
+            //var stackingGroupDependent = $('#stackingGroupdependent').val();
+            var filterByval = $('#filterby').val();
+            var filterByDependent = $('#filterbydependent').val();
+            let c = '';
+            if (filterby != '') {
+
+                c = $("#groupby")[0].selectize.options[groupByval].ColumnSelector;
+            }
+            let f = '';
+            if (filterByval != '' && filterByval != null) {
+                f = $("#filterby")[0].selectize.options[filterByval].ColumnSelector;
+            }
+            //var compareValue = $('input[name="list1"]:checked').val();
+
+
+            var data = {
+                Id: dydashid,
+                Type: type,
+                ChartTitle: name,
+                ChartType: chartType,
+                Grouptitle: groupByval,
+                GroupBy: c,
+                GroupFilterValue: JSON.stringify(groupFilter),
+                //stackingGroup: stackingGroup,
+                //stackingGroupDependent: stackingGroupDependent,
+                AdditionalFilterTitle: filterByval,
+                AdditionalFilter: f,
+                AdditionalFilterValue: JSON.stringify(filterByDependent),
+                TimePriod: $("#DateRangeDropdown option:selected").text(),
+                // compareValue: compareValue
+            };
+
+            console.log(data);
+            $.post('@Url.Action("SaveDashBoardData", "Accounts")', data)
+                .done(function (response) {
+                    window.location.reload();
+                })
+                .fail(function (error) {
+
+                    console.error('Error saving data:', error);
+                });
+        }
+
+        function EditView(Id) {
+            $.get(`@Url.Action("GetDyDataById", "Accounts")?Id=${Id}`, function (data) {
+                console.log(data);
+                $('#readOnlyField').val(data.ChartTitle);
+                $('#Charttype').val(data.ChartType);
+                OpenChartBuilder(data.Type).then(() => {
+                    // $('#readOnlyField').val(data.ChartTitle);
+                    // $('#Charttype').val(data.ChartType);
+                    EditData = data;
+                    if (data.Type == "Statement") {
+                        $("#StatementTitle").val(data.ChartTitle);
+                        $("#StatementTitleId").val(data.Id);
+
+                        let AcountsGroups = $("#AcountsGroups");
+                        AcountsGroups[0].selectize.setValue(data.GroupBy);
+
+
+                    } else {
+                        $('#dydashid').val(data.Id);
+                        let groupByval = $('#groupby');
+                        groupByval[0].selectize.setValue(data.Grouptitle);
+
+                    }
+
+
+
+                });
+
+            }).fail(function (xhr, status, error) {
+                console.error("Error:", error);
+            });
+        }
+         //munna
+        function EditStock(Id) {
+            $.get(`@Url.Action("GetDyDataById", "Accounts")?Id=${Id}`, function (data) {
+                console.log(data);
+                $('#readOnlyField').val(data.ChartTitle);
+                $('#Charttype').val(data.ChartType);
+                OpenChartBuilder(data.Type).then(() => {
+                    // $('#readOnlyField').val(data.ChartTitle);
+                    // $('#Charttype').val(data.ChartType);
+                    EditData = data;
+                    if (data.Type == "Inventory") {
+                        $("#InventoryTitle").val(data.ChartTitle);
+                        $("#InventoryTitleId").val(data.Id);
+                        $("#stockCaption").val(data.StockCaption);
+                        $("#captionValue").val(data.CaptionValue);
+                        $("#DateRangeDropdown3").val(data.TimePriod);
+
+                        let InvenCategory = $("#InvenCategory");
+                        InvenCategory[0].selectize.setValue(data.GroupBy);
+
+
+                    } else {
+                        $('#dydashid').val(data.Id);
+                        let groupByval = $('#groupby');
+                        groupByval[0].selectize.setValue(data.Grouptitle);
+
+                    }
+
+
+
+                });
+
+            }).fail(function (xhr, status, error) {
+                console.error("Error:", error);
+            });
+        }
+
+        function GetAllChartType() {
+            $.get(`@Url.Action("GetChartType", "Accounts")`, function (data) {
+                let option = data.map(x => {
+                    return `<option value="${x.VariableValue}">${x.VariableName}</option>`;
+                })
+                $("#Charttype").html(option);
+                console.log(data);
+
+            }).fail(function (xhr, status, error) {
+                console.error("Error:", error);
+            });
+        }
+        var v = document.getElementById('offcanvasnext');
+        v.addEventListener('hidden.bs.offcanvas', CloseOfCanvas);
+
+        function CloseOfCanvas() {
+
+            if (previewchart) {
+                previewchart.destroy();
+            }
+            $('#readOnlyField').val("");
+            $('#dydashid').val("");
+            //$('#Charttype').val("");
+            $('#groupby').val("");
+            $('#groupbydependent').val("");
+            //var stackingGroup = $('#stackingGroup').val();
+            //var stackingGroupDependent = $('#stackingGroupdependent').val();
+            $('#filterby').val("");
+            $('#filterbydependent').val("");
+
+            $('#InventoryTitle').val("");
+            $('#InvenCategory').val("");
+            $('#InventoryItem').val("");
+            $('#InventoryListView').empty();
+            $('#StatementTitle').val("");
+            $('#AcountsGroups').val("");
+            $('#AcountsLeger').val("");
+            $('#StatementListView').empty();
+            EditData = "";
+
+        }
+
+        function inItialSystemReport(customdata) {
+            //var crv= $("#customreportView");
+            var design = '';
+            for (let i in customdata) {
+                const rp = customdata[i];
+                var rdata = JSON.parse(rp.Data);
+                if (Object.keys(rdata).length != 0) {
+                    if (rp.Title == "Profit & Loss") {
+                        rdata = rdata.Table[0];
+                        //console.log(rdata);
+                        design += `  <div class="col-md-6 shorteditem" dash-order="${getOrderValueByDashId(rp.Id)}" dash-id="${rp.Id}">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div id="invoice">
+                                      <h5><i class="bi bi-arrows-move my-handle d-none" aria-hidden="true"></i></h5>
+                                        <h3 class="pl-text"> ${rp.Title}</h3>
+                                                         <h5 class="pl-text-sub">${rp.Title}</h5>
+                                    </div>
+                                    <div class="progress-wrapper pt-1" id="totalDue">
+                                      <h2 class="pf-acc mt-2">${CurrencyFormat(rdata.Profit)}</h2>
+                                                <div class="row my-3">
+                                            <div class="col-md-4">
+                                                <h6 class="prgs-title">${CurrencyFormat(rdata.Income)}</h6>
+                                                <span class="prgs-sub"><small>INCOME</small></span>
+                                            </div>
+
+                                            <div class="col-md-8" >
+
+                                                        <div class="progress mt-3" role="progressbar" style="height: 24px" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                                            <div class="progress-bar progress-bar-striped bg-success" style="width: ${rdata.ProfitPercent}%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                            <div class="row">
+                                                    <div class="col-md-4">
+                                                        <h6 class="prgs-title">${CurrencyFormat(rdata.Expense)}</h6>
+                                                        <span class="prgs-sub"><small>EXPENSE</small></span>
+                                                    </div>
+
+                                                    <div class="col-md-8" >
+                                                        <div class="progress mt-3" role="progressbar" style="height: 24px" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                                                    <div class="progress-bar progress-bar-striped bg-danger" style="width: ${rdata.ExpensePercent}%"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>         `
+                    }
+                    if (rp.Title == "Invoice") {
+                        let r1 = rdata.Table[0];
+                        let r2 = rdata.Table[1];
+                        let r3 = rdata.Table[2];
+                        //console.log(rdata);
+                        design += `<div class="col-md-6 shorteditem" dash-order="${getOrderValueByDashId(rp.Id)}" dash-id="${rp.Id}">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5><i class="bi bi-arrows-move my-handle d-none" aria-hidden="true"></i></h5>
+                                            <div id="invoice">
+                                                  <h3 class="pl-text"> ${r1.Name}</h3>
+                                                  <h5 class="pl-text-sub"> ${r1.Caption}</h5>
+                                            </div>
+                                            <div class="progress-wrapper  pt-1" id="totalDue">
+                                                     <h2 class="pf-acc mt-2">${CurrencyFormat(r1.Value)}</h2>
+                                                 <div class="row my-3">
+                                                    <div class="col-md-4">
+                                                   <h6 class="prgs-title">${CurrencyFormat(r2.Value)}</h6>
+                                                    <span class="prgs-sub"><small>${r2.Caption}</small></span>
+                                                 </div>
+
+                                                    <div class="col-md-8" >
+                                                        <div class="progress mt-3" role="progressbar" style="height: 24px" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                                            <div class="progress-bar progress-bar-striped bg-success" style="width: ${(r1.Value / r3.Value) * 100}%"></div>
+                                                        </div>
+                                                    </div>
+                                                    </div>
+                                                    <div class="row">
+                                                            <div class="col-md-4" >
+                                                           <h6 class="prgs-title">${CurrencyFormat(r3.Value)}</h6>
+                                                           <span class="prgs-sub"><small>${r3.Caption}</small></span>
+                                                            </div>
+
+                                                            <div class="col-md-8">
+                                                                <div class="progress mt-3" role="progressbar" style="height: 24px" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                                                    <div class="progress-bar progress-bar-striped bg-danger" style="width: ${(r1.Value / r3.Value) * 100}%"></div>
+                                                                </div>
+                                                            </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>         `
+                    }
+                }
+            }
+            $('#combinedview .addingcolumn:last').append(design);
+        }
+
+
+        function inItialStatementViewsReport(StatementViewsdata) {
+            // var crv = $("#StatementViews");
+            console.log('StatementViewsdata ::',StatementViewsdata);
+            var design = '';            
+            for (let i in StatementViewsdata) {
+                if (StatementViewsdata[i].Type == "Statement") {
+                    //         ${
+                    //     !Charts[i - 1].isSystem ? `<i class="bi bi-pencil-fill cursor-pointer text-info" onclick="EditView('${Charts[i - 1].Id}')"></i>
+                    //                             <i class="bi bi-trash cursor-pointer text-danger" onclick="DeleteDashBoard('${Charts[i - 1].Id}')"></i>
+
+                    //                     ` : ''
+                    // }
+                    // if ((i - 1) % 2 === 0 || i === 0) {
+                    //     crv.append('<div class="row row-cols-2"></div>');
+                    // }
+                    const rp = StatementViewsdata[i];
+                    var rdata = JSON.parse(rp.Data);
+                    design += `<div class="col-lg-6 shorteditem" dash-order="${getOrderValueByDashId(rp.Id)}" dash-id="${rp.Id}">
+                                     <div class="card border border-secondary-subtle p-0">
+                                       <div class="card-header d-flex justify-content-between py-1">
+                                    <div>
+                                    <h5 style="padding-top: 5px;" class="m-0">${rp.Title}</h5>
+                                    </div>
+                                      <div class="text-end action-icons" style=" cursor: pointer; ">
+                                                <i class="bi bi-pencil cursor-pointer text-secondary fs-5" onclick="EditView(${rp.Id})"></i>
+                                                <i class="bi bi-trash3 cursor-pointer text-danger fs-5" onclick="DeleteDashBoard('${rp.Id}')"></i>
+                                        </div>
+                                     </div>
+                                            <div class="card-body overflow-y-auto py-0" style="height:323px">
+                                            
+                                                        <h5><i class="bi bi-arrows-move my-handle d-none" aria-hidden="true"></i></h5>
+                                        <ul class="list-group">`;
+                    if (Object.keys(rdata).length != 0) {
+                        console.log(rdata.Table)
+                        let stmlist = rdata.Table;
+                        for (let i in stmlist) {
+                            let stmData = stmlist[i];
+                            design += `
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-4 py-2">
+                                             <span style=" font-weight: 500; "> ${stmData.AccName}</span><br>
+                                                        <span>${stmData.groupsName}</span><br>
+                                                        <span style=" margin-right: 7px; ">${stmData.AccountCategoryName}</span><br>
+                                                        <span class="badge bg-primary rounded-pill">${CurrencyFormat(stmData.AccountBalance)}</span>
+                                    </li>`
+                        }
+                        design += `</ul></div></div></div></div>`
+                        $('#combinedview .addingcolumn:last').append(design);
+                        // $('#StatementViews .row.row-cols-2:last').append(design);
+                        design = '';
+                    }
+                    // crv.append(design);
+                }
+            }
+            
+
+        }
+        //munna  
+        function inItialStockStatementReport(StatementViewsdata) {
+            // var crv = $("#StatementViews");
+            var design = '';                       
+            for (let i in StatementViewsdata) {
+                if (StatementViewsdata[i].Type == "Inventory") {
+                    //         ${
+                    //     !Charts[i - 1].isSystem ? `<i class="bi bi-pencil-fill cursor-pointer text-info" onclick="EditView('${Charts[i - 1].Id}')"></i>
+                    //                             <i class="bi bi-trash cursor-pointer text-danger" onclick="DeleteDashBoard('${Charts[i - 1].Id}')"></i>
+
+                    //                     ` : ''
+                    // }
+                    // if ((i - 1) % 2 === 0 || i === 0) {
+                    //     crv.append('<div class="row row-cols-2"></div>');
+                    // }
+                    const rp = StatementViewsdata[i];
+                    var rdata = JSON.parse(rp.Data);
+                    design += `<div class="col-lg-6 shorteditem" dash-order="${getOrderValueByDashId(rp.Id)}" dash-id="${rp.Id}">
+                                                     <div class="card border border-secondary-subtle p-0">
+                                                     <div class="card-header d-flex justify-content-between py-1">
+                                                    <div>
+                                                    <h5 style="padding-top: 5px;" class="m-0" >${rp.Title} <span style="font-size: small;font-weight: 300;margin-left: 35px;">Top-${rp.CaptionValue}</span></h5>
+                                                    </div>
+                                                              <div class="text-end ms-auto action-icons" style=" cursor: pointer; ">
+                                                                    <i class="bi bi-pencil cursor-pointer text-secondary fs-5" onclick="EditStock(${rp.Id})"></i>
+                                                                    <i class="bi bi-trash3 cursor-pointer text-danger fs-5" onclick="DeleteDashBoard('${rp.Id}')"></i>
+                                                            </div>
+                                                      </div>
+                                                            <div class="card-body overflow-y-auto py-0" style="height:350px">
+                                                            
+                                                                    <h5><i class="bi bi-arrows-move my-handle d-none" aria-hidden="true"></i></h5>
+                                                    <ul class="list-group">`;
+                    if (Object.keys(rdata).length != 0) {
+                        console.log(rdata.Table)
+                        let stmlist = rdata.Table;
+                        for (let i in stmlist) {
+                            let stmData = stmlist[i];
+                            design += `
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center px-4 py-2">
+                                                                       <span style=" font-weight: 500; "> ${stmData.ProductName}</span>
+                                                                        <span>${stmData.CategoryName}</span>
+        
+                                                                    <span class="badge bg-primary rounded-pill">Qty ${stmData.RunTimeLiveStock}</span>
+                                                    </li>`
+                        }
+                        design += `</ul></div></div></div></div>`
+                        $('#combinedview .addingcolumn:last').append(design);
+                        // $('#StatementViews .row.row-cols-2:last').append(design);
+                        design = '';
+                    }
+                    // crv.append(design);
+                }
+            }
+            
+
+        }
+
+        function DeleteDashBoard(id) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Confirm"
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    $.get(`@Url.Action("DeleteDashBoard", "Accounts")?id=${id}`, function (data) {
+                        Swal.fire({
+                            title: "Deleted!",
+                            text: "Your dashboard item has been deleted.",
+                            icon: "success"
+                        });
+                        window.location.reload();
+
+                    }).fail(function (xhr, status, error) {
+                        console.error("Error:", error);
+                    });
+                }
+            });
+
+        }
+
+        var sortedItems = [];
+
+
+        var sort;
+        function enableSorting() {
+            $(".my-handle").toggleClass("d-none");
+            $(".shorteditem .card").toggleClass("onsortenble");
+            let btntxt = $("#sortbtntext").html();
+            if (btntxt == "Customise Layout") {
+                $("#sortbtntext").html("Apply");
+                sort = new Sortable(addingcolumnwidget, {
+                    swap: true,
+                    swapClass: 'highlight',
+                    handle: '.my-handle',
+                    animation: 150,
+                    onEnd: function (evt) {
+                        sortedItems = Array.from(addingcolumnwidget.getElementsByClassName('shorteditem')).map(item => {
+                            return {
+                                dashId: Number(item.getAttribute('dash-id')),
+                                order: Array.from(addingcolumnwidget.getElementsByClassName('shorteditem')).indexOf(item) + 1
+                            };
+                        });
+                        console.log(sortedItems);
+                    },
+                });
+            } else {
+                $("#sortbtntext").html("Customise Layout");
+                console.log("save", sortedItems);
+                $.post('@Url.Action("SaveCustomiseLayout", "Accounts")', { model: JSON.stringify(sortedItems) })
+                    .done(function (response) {
+                        console.log(response);
+                    })
+                    .fail(function (error) {
+
+                        console.error('Error saving data:', error);
+                    });
+
+            }
+
+        }
+
+
+
+
+
+        // // Example chart data for chart 1 (Replace this with your actual data)
+        // var yourChartData1 = {
+        //     labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+        //     datasets: [{
+        //         label: 'Sales',
+        //         data: [65, 59, 80, 81, 56, 55, 40],
+        //         backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        //         borderColor: 'rgba(54, 162, 235, 1)',
+        //         borderWidth: 1
+        //     }]
+        // };
+
+        // // Example chart data for chart 2 (Replace this with your actual data)
+        // var yourChartData2 = {
+        //     labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        //     datasets: [{
+        //         label: 'Data',
+        //         data: [12, 19, 3, 5, 2, 3],
+        //         backgroundColor: [
+        //             'rgba(255, 99, 132, 0.2)',
+        //             'rgba(54, 162, 235, 0.2)',
+        //             'rgba(255, 206, 86, 0.2)',
+        //             'rgba(75, 192, 192, 0.2)',
+        //             'rgba(153, 102, 255, 0.2)',
+        //             'rgba(255, 159, 64, 0.2)'
+        //         ],
+        //         borderColor: [
+        //             'rgba(255, 99, 132, 1)',
+        //             'rgba(54, 162, 235, 1)',
+        //             'rgba(255, 206, 86, 1)',
+        //             'rgba(75, 192, 192, 1)',
+        //             'rgba(153, 102, 255, 1)',
+        //             'rgba(255, 159, 64, 1)'
+        //         ],
+        //         borderWidth: 1
+        //     }]
+        // };
+
+        // // Example chart data for chart 3 (Replace this with your actual data)
+        // var yourChartData3 = {
+        //     labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple'],
+        //     datasets: [{
+        //         label: 'Data1',
+        //         data: [12, 19, 3, 5, 2],
+        //         backgroundColor: [
+        //             'rgba(255, 99, 132, 0.2)',
+        //             'rgba(54, 162, 235, 0.2)',
+        //             'rgba(255, 206, 86, 0.2)',
+        //             'rgba(75, 192, 192, 0.2)',
+        //             'rgba(153, 102, 255, 0.2)'
+        //         ],
+        //         borderColor: [
+        //             'rgba(255, 99, 132, 1)',
+        //             'rgba(54, 162, 235, 1)',
+        //             'rgba(255, 206, 86, 1)',
+        //             'rgba(75, 192, 192, 1)',
+        //             'rgba(153, 102, 255, 1)'
+        //         ],
+        //         borderWidth: 1
+        //     },
+        //     {
+        //         label: 'Data2',
+        //         data: [20, 21, 22, 3, 2],
+        //         backgroundColor: [
+        //             'rgba(255, 99, 132, 0.2)',
+        //             'rgba(54, 162, 235, 0.2)',
+        //             'rgba(255, 206, 86, 0.2)',
+        //             'rgba(75, 192, 192, 0.2)',
+        //             'rgba(153, 102, 255, 0.2)'
+        //         ],
+        //         borderColor: [
+        //             'rgba(255, 99, 132, 1)',
+        //             'rgba(54, 162, 235, 1)',
+        //             'rgba(255, 206, 86, 1)',
+        //             'rgba(75, 192, 192, 1)',
+        //             'rgba(153, 102, 255, 1)'
+        //         ],
+        //         borderWidth: 1
+        //     }]
+        // };
+
+        // // Example chart data for chart 4 (Replace this with your actual data)
+        // var yourChartData4 = {
+        //     labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+        //     datasets: [{
+        //         label: 'Data',
+        //         data: [65, 59, 80, 81, 56, 55],
+        //         backgroundColor: 'rgba(255, 206, 86, 0.2)',
+        //         borderColor: 'rgba(255, 206, 86, 1)',
+        //         borderWidth: 1
+        //     }]
+        // };
+
+        // function initializeMultipleCharts() {
+        //     var chartConfigs = [
+        //         { id: 'chart1', type: 'pie', data: yourChartData1, options: {} },
+        //         { id: 'chart2', type: 'bar', data: yourChartData3, options: {} },
+        //         { id: 'chart3', type: 'line', data: yourChartData2, options: {} },
+        //         { id: 'chart4', type: 'bar', data: yourChartData3, options: {indexAxis: 'y'}}
+        //         // Add more charts as needed
+        //     ];
+
+        //     chartConfigs.forEach(function(config) {
+        //         initializeChart(config.id, config.type, config.data, config.options);
+        //     });
+        // }
+
+        // Call the initializeMultipleCharts function when the document is ready
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     initializeMultipleCharts();
+        // });
+
+    </script>
+
+    
+
+}

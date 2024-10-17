@@ -1,0 +1,231 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+
+    string weburl = HttpContextAccessor.HttpContext.Session.GetString("weburl");// ViewBag.weburl;
+
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    @if (HttpContextAccessor.HttpContext.Session.GetString("AppsName") == null)
+    {
+        <title>Easy Invoice Generator - For small and medium business </title>
+    }
+    else
+    {
+        <title>@ViewBag.Title - @HttpContextAccessor.HttpContext.Session.GetString("AppsName")</title>
+
+    }
+
+
+    <!-- Bootstrap core CSS -->
+    @*<link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">*@
+    <link href="~/AdminEla/Assets/bootstrap-4.5.3/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/AdminEla/Assets/css/lib/datatables/1.10.19/css/dataTables.bootstrap4.css" rel="stylesheet" />
+    <link href="~/AdminEla/Assets/css/lib/data-table/buttons.dataTables.min.css" rel="stylesheet" />
+    <link href="~/AdminEla/Assets/js/lib/datatables/cdn.datatables.net/buttons/buttons.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/AdminEla/Assets/css/customStyle.css" rel="stylesheet" />
+    <!-- Custom fonts for this template -->
+    @*    <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">*@
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+      @*  <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i" rel="stylesheet">*@
+    <!-- Custom styles for this template -->
+    <link href="~/adminFront/css/one-page-wonder.css" rel="stylesheet">
+
+    <link href="~/AdminEla/Assets/toastr/toastr.min.css" rel="stylesheet" />
+    <link href="~/AdminEla/Assets/css/style.css" rel="stylesheet" />
+        <link href="~/AdminEla/Assets/css/AjaxLoader.css" rel="stylesheet">
+
+    @if (weburl.ToLower().Contains("w2u.io"))
+    {
+        <!-- for facebook -->
+        <!-- Meta Pixel Code --> 
+        <script>
+            !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () {
+            n.callMethod ?
+            n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            };
+            if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+            n.queue = []; t = b.createElement(e); t.async = !0;
+            t.src = v; s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s)
+            }(window, document, 'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '200487558922107');
+            fbq('track', 'PageView');
+        </script>
+        <noscript>
+                    <img height="1" width="1" style="display:none"
+                    src="https://www.facebook.com/tr?id=200487558922107&ev=PageView&noscript=1" />
+        </noscript> <!-- End Meta Pixel Code -->
+
+
+        <!-- for google adsense -->
+        <!-- Global site tag (gtag.js) - Google Ads: 10853655508 -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-10853655508"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'AW-10853655508');
+        </script>
+
+
+}
+</head>
+<body>
+
+        <div id="loader" class="lds-dual-ring hidden overlay"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+
+        <div class="container">
+            <a class="" href="#">
+                @if (@ViewBag.comImagePath != null)
+                {
+                    <img width="38" class="img-circle" src="..@ViewBag.comImagePath" onerror="this.style.display='none'" id="main-img"> }
+                @*~/adminFront/img/CreateURL.png*@
+                else
+                {
+                    <img width="10" class="img-circle" src="../Content/ProductImages/0.png" id="main-img">}
+            </a>
+            <a class="navbar-brand" href="@Url.Action("index")">
+
+                @if (HttpContextAccessor.HttpContext.Session.GetString("AppsName") == null)
+                {
+                    @*<span style="font-weight:600"> &nbsp;&nbsp; Easy</span> <strong>Invoice</strong>*@
+                    <span style="font-weight:600"> &nbsp;&nbsp; Easy</span> <strong>Apps</strong>
+
+                }
+                else
+                {
+                    <span style="font-weight:600"> &nbsp;&nbsp; @HttpContextAccessor.HttpContext.Session.GetString("AppsName")</span>
+                }
+            </a>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    @*<li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("DeliveryService")">Delivery Service</a>
+                        </li>*@
+
+                    @if (weburl.ToLower().Contains("w2u.io"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Login")">Log In</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("signupURL")">Sign Up</a>
+                        </li>
+                    }
+                    else
+                    {
+@*                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("CustomerLogin", "Home", new { IsMobile = "0" })">Customer Login</a>
+                        </li>*@
+@*                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("EcomIndex", "Home", new { IsMobile = "0" })">Ecommerce</a>
+                        </li>*@
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Login")">Log In</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("signup")">Sign Up</a>
+                        </li>
+                    }
+
+
+
+
+
+                </ul>
+            </div>
+        </div>
+
+
+    </nav>
+
+    <div>
+
+        @RenderBody()
+    </div>
+
+    <div>
+
+
+
+        <footer class="py-2">
+            <div class="container">
+
+                @*<p class="m-0 text-center text-white small">Copyright &copy; Dominate 2021</p>*@
+            </div>
+            <!-- /.container -->
+        </footer>
+        @*<div class="fixed-bottom animated slideInUp transition s2">
+                <div class="bg-danger text-white py-1 col-md-12 text-center">
+                    <strong>
+                        ! Your software will expire soon. Plese renew it before expire..
+                    </strong>
+                </div>
+            </div>*@
+    </div>
+
+
+    <script src="~/adminFront/vendor/jquery/jquery.js"></script>
+
+
+
+
+
+    @*<script src="~/lib/jquery/dist/jquery.js"></script>*@
+    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+    @*<script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>*@
+    <script src="~/AdminEla/Assets/bootstrap-4.5.3/js/bootstrap.min.js"></script>
+
+    <script src="~/AdminEla/Assets/css/lib/datatables/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="~/AdminEla/Assets/css/lib/datatables/1.10.19/js/dataTables.bootstrap4.js"></script>
+
+    <script src="~/js/site.min.js" asp-append-version="true"></script>
+    <script src="~/AdminEla/Assets/js/lib/select2/select2.full.min.js"></script>
+    <script src="~/AdminEla/Assets/toastr/toastr.min.js"></script>
+    <script src="~/AdminEla/Assets/toastr/toaster_custom.js"></script>
+    <script src="~/AdminEla/Assets/js/lib/toastr/toaster_custom.js"></script>
+
+
+
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>
+
+
+<script type="text/javascript">
+
+
+
+
+
+
+    $(document).ready(function () {
+        customFile(@Html.Raw(Json.Serialize(TempData["Status"])), @Html.Raw(Json.Serialize(TempData["Message"])));
+    })
+
+
+
+
+
+
+</script>

@@ -1,0 +1,806 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Order Allocation";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+    
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    #example-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+</style>
+
+<div class="container-fluid"> 
+    <h3 style="border-bottom: 1px solid gray">Order Allocation</h3>
+    <div class="d-flex mb-3">
+        <div>
+            <input type="text" placeholder="Search Style" id="Id" class="form-control d-none" value="0">
+            <label><strong>Style</strong></label>
+            <input type="text" placeholder="Search Style" id="style-name" class="form-control" style="padding:1px;">
+            <input type="text" placeholder="Search Style" id="style-id" class="form-control d-none">
+
+        </div>
+        <div class="ms-4">
+            <label><strong>Buyer</strong></label>
+            <select id="Buyer" class="form-control">
+                <option value="">Select Buyer</option>
+            </select>
+        </div>
+        <div class="ms-4">
+            <label><strong>Company</strong><span style="color:red;">*</span></label>
+            <select id="Company" class="form-control">
+                <option value="">Select Company</option>
+            </select>
+        </div>
+        <div class="ms-4">
+            <label><strong>Unit Price</strong></label>
+            <input type="text" id="unit-price" class="form-control" style="padding:1px;">
+        </div>
+        <div class="ms-4">
+            <label><strong>Buyer PO/Lot</strong></label>
+            <input type="text" id="buyer-po" class="form-control" style="padding:1px;">
+        </div>
+        
+    </div>
+
+    <div class="d-flex mb-3">
+        <div>
+            <label><strong>Goods Description</strong></label>
+            <input type="text" id="GoodsDescription" class="form-control" style="padding:1px;">
+        </div>
+        <div class="ms-4">
+            <label><strong>Fabric No</strong></label>
+            <input type="text" id="Fabric_No" class="form-control" style="padding:1px;">
+        </div>
+        <div class="ms-4">
+            <label><strong>Fabric Name</strong></label>
+            <input type="text" id="Fabric_Name" class="form-control" style="padding:1px;">
+        </div>
+        <div class="ms-4">
+            <label><strong>Order Date</strong></label>
+            <input type="text" id="Order_date" class="form-control" style="padding:1px;">
+        </div>
+        <div class="ms-4">
+            <label><strong>Shipment Date</strong></label>
+            <input type="text" id="Shipment_date" class="form-control" style="padding:1px;">
+        </div>
+    </div>
+    <div style="padding:20px;">
+        <div id="example-table"></div>
+    </div>
+    <div>
+        
+        @if (ViewBag.ActionType == "Edit")
+        {
+            <button class="btn btn-success" id="BtnSave" style="float:right;">Update</button>
+
+            <button class="btn btn-primary" id="BtnSave" style="float:right; margin-right: 10px;" onclick="showBOM()">Process</button>
+        }
+        else if (ViewBag.ActionType == "Create")
+        {
+            <button class="btn btn-success" id="BtnSave" style="float:right;">Save</button>
+        }
+        <button class="btn btn-warning" onclick="gotoInvoiceList()" style="float: right; margin-right: 10px;"><span style="color: white">Back to List</span></button>
+    </div>
+    
+</div>
+<div id="customModal" style="display: none; margin-top: 65px;">
+    <div class="modal-content mt-2" id="modal-content2">
+        <div class="row">
+            <div class="col-md-2 col-2">
+                <h6>Order Consumption</h6>
+            </div>
+            <div class="col-md-9 col-9"></div>
+            <div class="col-md-1 col-1 d-flex justify-content-end">
+                <button title="Print" class="btn btn-white border-0" type="button" id="salesPrint-pdf" style="padding: 0px;padding-bottom: 10px;"
+                        aria-expanded="false">
+                    <i class="bi bi-printer fs-5" style=" margin-right: 0px; "></i>
+                </button>
+                <button title="Export to excel" class="btn btn-white border-0" type="button" id="salesPrint-excel" style="padding: 0px;padding-bottom: 10px;"
+                        aria-expanded="false">
+                    <i class="bi bi-file-earmark-excel fs-5" style=" margin-right: 0px; "></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="modal_table"></div>
+       
+    </div>
+</div>
+
+@section Scripts
+{
+   
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+
+    <script>
+
+        $('#Buyer').select2();
+        $('#Company').select2();
+
+        function gotoInvoiceList()
+        {
+            window.location.href = '@Url.Action("BuyerPOList", "BuyerOrder")';
+        }
+
+        var today = new Date();
+        var day = today.getDate();
+        var month = today.toLocaleString('default', { month: 'short' });
+        var year = today.getFullYear();
+
+        var formattedDay = (day < 10 ? '0' : '') + day;
+
+        var formattedDate = formattedDay + '-' + month + '-' + year;
+
+        if ('@actiontype' == "Create") {
+            document.getElementById('Order_date').value = formattedDate;
+            document.getElementById('Shipment_date').value = formattedDate;
+        }
+
+
+        $(function () {
+
+            $("#Order_date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            }).attr('readonly', 'readonly');
+
+            $("#Shipment_date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            }).attr('readonly', 'readonly');
+
+            $("#style-name").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "@Url.Action("SearchStyle", "BuyerOrder")",
+                        dataType: "json",
+                        data: {
+                            term: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 1,
+                focus: function (event, ui) {
+                    event.preventDefault();
+                    $("#style-name").val(ui.item.label);
+                },
+                select: function (event, ui) {
+
+                    $("#style-name").val(ui.item.label);
+                    $("#style-id").val(ui.item.value);
+
+                    handleSelectedStyle(ui.item.value);
+                    return false;
+                }
+            });
+        });
+
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetBuyers", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#Buyer').append('<option value="' + value.Id + '" data-currency-id="' + value.CustomerCurrencyId + '" >' + value.Name + '-' + value.CurrencyShortName + '</option>');
+                });
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetComercialCompany", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#Company').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+
+        var table = new Tabulator("#example-table", {
+            layout: "fitColumns",
+            addRowPos: "bottom",
+        });
+
+        function handleSelectedStyle(styleId)
+        {
+            function calculateRowSum(rowData) {
+                return Object.keys(rowData).reduce(function (acc, key) {
+                    if (key !== 'Color' && key !== 'ColorId' && key !== 'RowSum') {
+                        acc += parseFloat(rowData[key]) || 0;
+                    }
+                    return acc;
+                }, 0);
+            }
+
+            function fetchColumnsData() {
+                return $.ajax({
+                    url: '@Url.Action("GetColumnsName", "BuyerOrder")',
+                    data: { styleId: styleId },
+                    method: 'GET',
+                    dataType: 'json',
+                });
+            }
+            function initializeTable(columns, colordata) {
+
+
+                table = new Tabulator("#example-table", {
+                    layout: "fitColumns",
+                    columns: columns,
+                    data: colordata,
+
+                });
+
+
+            }
+
+            fetchColumnsData()
+                .done(function (response) {
+                    $("#Buyer").val(response.styleModel.BuyerId).trigger('change');
+                    $("#GoodsDescription").val(response.styleModel.GoodsDescription);
+                    var dynamicColumns = [];
+                    var dynamicColor = [];
+
+                    dynamicColumns.push({
+                        title: 'Color',
+                        field: 'Color',
+                        visible: true,
+                    });
+
+                    dynamicColumns.push({
+                        title: 'ColorId',
+                        field: 'ColorId',
+                        visible: false,
+                        editor: 'input',
+                    });
+
+                    dynamicColumns = dynamicColumns.concat(response.data.map(function (column) {
+                        return {
+                            title: column.Text,
+                            field: column.Value,
+                            editor: 'input',
+                            bottomCalc: "sum",
+                            hozAlign: "right",
+                            cellEdited: async function (cell) {
+                                var selectedText = cell.getValue();
+                                var rate = await calculateRowSum(cell.getRow().getData());
+                                cell.getRow().update({ RowSum: rate });
+                            },
+                        };
+                    }));
+
+                    dynamicColor = dynamicColor.concat(response.colordata.map(function (color) {
+                        return {
+                            Color: color.Text,
+                            ColorId: color.Value,
+
+                        };
+                    }));
+
+                    dynamicColumns.push({
+                        title: 'Row Sum',
+                        field: 'RowSum',
+                        hozAlign: 'right',
+                        bottomCalc: 'sum',
+                        visible: true,
+                    });
+
+                    initializeTable(dynamicColumns, dynamicColor);
+                })
+                .fail(function (error) {
+                    console.error('Error fetching column data:', error);
+                });
+
+            
+            
+        }
+
+        function gatherData() {
+
+            var rows = table.getData();
+
+            var formattedData = [];
+
+            var totalqty = 0;
+
+            var unitprice = $("#unit-price").val();
+
+            var buyerpo = $("#buyer-po").val();
+            var company = $("#Company").val();
+
+            var goodsDescription = $("#GoodsDescription").val();
+            var orderDate = $("#Order_date").val();
+            var shipmentDate = $("#Shipment_date").val();
+            var fabricNo = $("#Fabric_No").val();
+            var fabricName = $("#Fabric_Name").val();
+
+            rows.forEach(function (row) {
+                var colorId = row.ColorId;
+                var sizes = [];
+                var rowSum = row.RowSum;
+                var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+                var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+
+                for (var key in row) {
+                    if (key !== 'ColorId' && key !== 'RowSum' && key !== 'Color') {
+
+                        var quantityValue = parseInt(row[key]) || 0;
+
+                        totalqty += quantityValue;
+
+                        formattedData.push({
+                            Id: 0,
+                            ColorId: colorId,
+                            ComId: ComId,
+                            LuserId: UserId,
+                            SizeId: key,
+                            Quantity: quantityValue
+                        });
+                    }
+                }
+
+                
+            });
+
+
+            var totalamount = totalqty * unitprice;
+
+            var orderData = {
+                Id: $("#Id").val(),
+                StyleId: $("#style-id").val(),
+                BuyerId: $("#Buyer").val(),
+                UnitPrice: unitprice,
+                BuyerPO: buyerpo,
+                GoodsDescription: goodsDescription,
+                OrderDate: orderDate,
+                ShipmentDate: shipmentDate,
+                FabricNo: fabricNo,
+                FabricName : fabricName,
+                TotalQuantity: totalqty,
+                TotalAmount: totalamount,
+                CommercialCompanyId: company,
+                BuyerPO_Details: formattedData
+            };
+            return orderData;
+        }
+
+
+        function sendDataToServer() {
+            var orderData = gatherData();
+
+            var data = JSON.stringify(orderData);
+
+            $.ajax({
+
+                url: '@Url.Action("BuyerPOCreation", "BuyerOrder")',
+                type: 'POST',
+                data: data,
+                async: false,
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (response) {
+                    toastr.success(response.message, "", {
+                        "toastClass": "toast-green",
+                    });
+                    setTimeout(function () {
+
+                        window.location.href = '@Url.Action("BuyerPOList", "BuyerOrder")';
+
+                    }, 1000);
+                },
+                error: function (error) {
+                    console.log("Error");
+                }
+            });
+        }
+
+        var saveButton = document.getElementById('BtnSave');
+        saveButton.addEventListener('click', function () {
+            sendDataToServer();
+        });
+
+        $(document).ready(function () {
+            if ('@actiontype' === "Edit")
+            {
+                
+                OrderDetails();
+               
+
+                function OrderDetails() {
+                    function calculateRowSum(rowData) {
+                        return Object.keys(rowData).reduce(function (acc, key) {
+                            if (key !== 'Color' && key !== 'ColorId' && key !== 'RowSum') {
+                                acc += parseFloat(rowData[key]) || 0;
+                            }
+                            return acc;
+                        }, 0);
+                    }
+
+                    function calculateDynamicColumnSum(rowData) {
+                        return Object.keys(rowData)
+                            .filter(key => key !== 'Color' && key !== 'ColorId')
+                            .reduce((sum, colKey) => sum + parseInt(rowData[colKey] || 0), 0);
+                    }
+
+
+                    function fetchColumnsData() {
+                        var id = @ViewBag.Id;
+                        return $.ajax({
+                            url: '@Url.Action("GetOrderDetails", "BuyerOrder")',
+                            data: { id: id },
+                            method: 'GET',
+                            dataType: 'json',
+                        });
+                    }
+                    function initializeTable(columns, colordata) {
+
+
+                        table = new Tabulator("#example-table", {
+                            layout: "fitColumns",
+                            columns: columns,
+                            data: colordata,
+
+                        });
+
+
+                    }
+
+                    fetchColumnsData()
+                        .done(function (response) {
+                            console.log(response.data);
+
+                            var masterData = response.masterdata;
+
+                            $("#Id").val(masterData.Id);
+                            $("#style-id").val(masterData.StyleId);
+                            $("#style-name").val(masterData.Style.StyleNo);
+                            $("#GoodsDescription").val(masterData.GoodsDescription);
+                            $("#unit-price").val(masterData.UnitPrice);
+                            $("#buyer-po").val(masterData.BuyerPO);
+                            $("#Fabric_No").val(masterData.FabricNo);
+                            $("#Fabric_Name").val(masterData.FabricName);
+                            $("#Order_date").val(formatDateToCustomDate(masterData.OrderDate));
+                            $("#Shipment_date").val(formatDateToCustomDate(masterData.ShipmentDate));
+                            $("#Buyer").val(masterData.BuyerId).trigger('change');
+                            $("#Company").val(masterData.CommercialCompanyId).trigger('change');
+
+                            showViewConsumption();
+
+                            var dynamicColumns = [
+                                {
+                                    title: 'Color',
+                                    field: 'Color',
+                                    visible: true,
+                                    bottomCalc: 'count',
+                                },
+                                {
+                                    title: 'ColorId',
+                                    field: 'ColorId',
+                                    visible: false,
+                                    editor: 'input',
+                                }
+                            ];
+
+                            var dynamicColor = [];
+
+                            var arrayData = response.data[0];
+
+                            if (typeof arrayData === 'object' && arrayData !== null) {
+                                dynamicColumns = dynamicColumns.concat(
+                                    Object.keys(arrayData).flatMap(function (key) {
+                                        if (key.includes('<>')) {
+                                            var [fieldName, columnTitle] = key.split('<>');
+
+                                            return {
+                                                title: columnTitle,
+                                                field: fieldName,
+                                                editor: 'input',
+                                                bottomCalc: 'sum',
+                                                hozAlign: 'right',
+                                                cellEdited: async function (cell) {
+                                                    var selectedText = cell.getValue();
+                                                    var rate = await calculateRowSum(cell.getRow().getData());
+                                                    cell.getRow().update({ RowSum: rate });
+                                                },
+                                            };
+                                        } else {
+                                            return [];
+                                        }
+                                    })
+                                );
+
+                                dynamicColumnsInitialized = true;
+                            }
+
+                            dynamicColumns.push({
+                                title: 'Row Sum',
+                                field: 'RowSum',
+                                hozAlign: 'right',
+                                bottomCalc: 'sum',
+                                visible: true,
+                            });
+
+                            dynamicColor = response.data.map(function (color) {
+                                var rowData = {};
+
+                                // Populate existing columns
+                                rowData['Color'] = color.ColorName;
+                                rowData['ColorId'] = color.ColorId;
+
+                                // Populate dynamic columns
+                                Object.keys(color).forEach(function (key) {
+                                    if (key.includes('<>')) {
+                                        var [fieldName] = key.split('<>');
+                                        rowData[fieldName] = color[key];
+                                    }
+                                });
+                                rowData['RowSum'] = calculateDynamicColumnSum(rowData);
+                                return rowData;
+                            });
+
+
+                            initializeTable(dynamicColumns, dynamicColor);
+                        })
+                        .fail(function (error) {
+                            console.error('Error fetching column data:', error);
+                        });
+
+                }
+
+                
+            }
+        });
+
+        function formatDateToCustomDate(originalDate) {
+            const months = [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            ];
+
+            const dateObj = new Date(originalDate);
+            const day = dateObj.getDate();
+            const month = months[dateObj.getMonth()];
+            const year = dateObj.getFullYear();
+
+            return `${day}-${month}-${year}`;
+        }
+
+        function formatCurrency(value) {
+
+            if (value === undefined) {
+                return '0.00';
+            }
+            return parseFloat(value).toFixed(1).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+
+        var modalcolumns = [
+            { title: "SL.", field: "SLNo", headerSort: false, frozen: true, width: '5px', bottomCalc: "count", hozAlign: "right" },
+            { title: "Id", field: "Id", visible: false },
+            { title: "ProductId", field: "ProductId", visible: false },
+            { title: "Name", field: "Name", vertAlign: "middle", },
+            { title: "PCategoryId", field: "PCategoryId", visible: false },
+            { title: "Product Category", field: "PCategoryName", vertAlign: "middle", },
+            { title: "Item Color", field: "ItemColor", vertAlign: "middle", },
+            { title: "Item Size", field: "ItemSize", vertAlign: "middle", },
+            { title: "BOM Category", field: "BOMAllocationCategoryName", searchable: true, visible: true },
+            { title: "", field: "BOMAllocationCategoryId", searchable: true, visible: false },
+            { title: "Remarks 1", field: "Remarks1", vertAlign: "middle", searchable: true, editor: "input" },
+            { title: "Remarks 2", field: "Remarks2", vertAlign: "middle", searchable: true, editor: "input" },
+            { title: "Style Color", field: "ColorName", searchable: true, visible: true },
+            { title: "", field: "ColorId", searchable: true, visible: false },
+            { title: "Style Size", field: "SizeName", visible: true, searchable: true },
+            { title: "", field: "SizeId", visible: false, searchable: true },
+            { title: "Unit", field: "UnitName", visible: true, searchable: true },
+            { title: "", field: "UnitId", visible: false, searchable: true },
+            {
+                title: "Quantity", field: "RunTimeLiveStock", searchable: true, hozAlign: "right", vertAlign: "middle", visible: true, editor: "input",
+                cellEdited: function (cell) {
+                    var rowData = cell.getRow().getData();
+                    var qty = parseFloat(rowData.RunTimeLiveStock) || 0;
+                    var rate = parseFloat(rowData.Price) || 0;
+                    var amount = qty * rate;
+                    // cell.getRow().update({ Amount: amount });
+                },
+            },
+            {
+                title: "Price", field: "Price", hozAlign: "right", searchable: true, editor: "input", vertAlign: "middle",
+                formatter: function (cell, formatterParams, onRendered) {
+                    var value = cell.getValue();
+
+                    if (typeof value === 'number' && !isNaN(value)) {
+                        var formattedNumber = value.toLocaleString();
+                        return "<div style='text-align:right'>" + formattedNumber + "</div>";
+                    } else {
+                        return "<div style='text-align:right'>" + value + "</div>";
+                    }
+                },
+                cellEdited: function (cell) {
+                    var rowData = cell.getRow().getData();
+                    var qty = parseFloat(rowData.RunTimeLiveStock) || 0;
+                    var rate = parseFloat(rowData.Price) || 0;
+                    var amount = qty * rate;
+                    //cell.getRow().update({ Amount: amount });
+                },
+            },
+            {
+                title: "AMOUNT",
+                field: "Amount",
+                headerHozAlign: "center",
+                bottomCalc: "sum",
+                hozAlign: "center",
+                sorter: "date",
+                formatter: function (cell, formatterParams) {
+                    var rowData = cell.getRow().getData();
+                    var qty = parseFloat(rowData.RunTimeLiveStock) || 0;
+                    var rate = parseFloat(rowData.Price) || 0;
+                    //var amount = qty * rate;
+                    var amount = parseFloat(rowData.Amount) || 0;
+                    return formatCurrency(amount);
+                },
+            },
+        ];
+
+        var modaldeleteColumn = {
+            title: "",
+            field: "Delete",
+            movable: false,
+            formatter: function (cell, formatterParams) {
+                return "<i class='fas fa-trash-alt delete-icon'></i>";
+            },
+            width: 30,
+            headerSort: false,
+            cellClick: function (e, cell) {
+                var rowData = cell.getRow().getData();
+                var row = cell.getRow();
+                table.deleteRow(row);
+                renumberRows();
+            }
+        };
+
+        modalcolumns.push(modaldeleteColumn);
+
+        var modaltable = new Tabulator("#modal_table", {
+            height: "auto",
+            layout: "fitColumns",
+            addRowPos: "bottom",
+            movableRows: true,
+            columns: modalcolumns,
+        });
+
+        document.getElementById("salesPrint-pdf").addEventListener("click", function () {
+            modaltable.print(false, true);
+        });
+        document.getElementById("salesPrint-excel").addEventListener("click", function () {
+            modaltable.download("xlsx", "data.xlsx", { sheetName: "Table Data" });
+        });
+
+        function renumberRows() {
+            var rows = modaltable.getRows();
+            rows.forEach(function (row, index) {
+                row.update({ SLNo: index + 1 });
+            });
+        }
+
+        
+
+        function showBOM()
+        {
+            var modal = document.getElementById("customModal");
+            modal.style.display = "block";
+            modaltable.clearData();
+            
+            var styleid = $("#style-id").val();
+
+            var id = $("#Id").val();
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetmodalBOMDetailsWithProcess", "BuyerOrder")',
+                data: { styleid: styleid, orderAllocationId: id },
+                dataType: "json",
+                success: function (response) {
+                    if (response.Success === 1) {
+                        console.log(response.data);
+                        modaltable.setData(response.data);
+                        renumberRows();
+                    }
+                },
+                error: function (error) {
+                    console.error("Error fetching data: " + error);
+                }
+            });
+        }
+
+        function showViewConsumption() {
+            var modal = document.getElementById("customModal");
+            modal.style.display = "block";
+
+
+            var styleid = $("#style-id").val();
+
+            var id = $("#Id").val();
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetmodalBOMDetails", "BuyerOrder")',
+                data: { styleid: styleid, orderAllocationId: id },
+                dataType: "json",
+                success: function (response) {
+                    if (response.Success === 1) {
+                        console.log(response.data);
+                        modaltable.setData(response.data);
+                        renumberRows();
+                    }
+                },
+                error: function (error) {
+                    console.error("Error fetching data: " + error);
+                }
+            });
+        }
+    </script>
+
+}

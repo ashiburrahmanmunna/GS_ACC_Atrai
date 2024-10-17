@@ -1,0 +1,39 @@
+﻿@{
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var criteria = ViewBag.criteria;
+    var strId = ViewBag.strId;
+    var dtFrom = ViewBag.dtFrom;
+    var dtTo = ViewBag.dtTo;
+
+}
+<div id="incomeStatementTable"></div>
+
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.3.0/js/tabulator.min.js"></script>
+
+    <script>
+        function fetchDataFromServer() {
+            return $.ajax({
+                url: '@Url.Action("IncomeStatementTabulatorReport", "Accounts")?criteria= @criteria&strId=@strId&dtFrom=@dtFrom&dtTo=@dtTo',
+                type: "GET",
+                dataType: "json",
+            });
+        }
+
+        fetchDataFromServer().done(function (dataFromServer) {
+            var dataTable = dataFromServer.dataTable;
+
+            var table = new Tabulator("#incomeStatementTable", {
+                data: dataTable, 
+                layout: "fitColumns",
+                autoColumns: true,
+                //columns: [
+                //    { title: "Particular", field: "AccName" },
+                //    { title: "Note", field: "AccCode" },
+                //    { title: "Amount", field: "Amount" },
+                    
+                //],
+            });
+        });
+    </script>
+}

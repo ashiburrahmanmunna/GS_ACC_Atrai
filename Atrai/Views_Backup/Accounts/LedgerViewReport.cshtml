@@ -1,0 +1,359 @@
+﻿@model IEnumerable<Atrai.Controllers.AccountsController.LedgerDetailsModel>
+@{
+    ViewData["Title"] = "Ledger";
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+}
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>
+    </title>
+
+    @*<link rel="shortcut icon" href="http://www.unibuildltd.com/Images/favicon.ico">
+        <script src="./ReportLedgerBook_files/jquery-2.1.3.js.download" type="text/javascript"></script>
+        <script src="./ReportLedgerBook_files/jquery-ui.js.download" type="text/javascript"></script>*@
+
+    <script type="text/javascript">
+        function ClosePrint() {
+            var print = document.getElementById("print");
+            print.style.visibility = "hidden";
+            //            print.display = false;
+
+            window.print();
+        }
+    </script>
+
+    <style media="print">
+        .showHeader thead {
+            display: table-header-group;
+            border: 1px solid #000;
+        }
+
+    </style>
+
+    <style media="print">
+
+        @@media print {
+            .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,
+            .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+                float: left;
+            }
+
+            .col-md-12 {
+                width: 100%;
+            }
+
+            .col-md-11 {
+                width: 91.66666666666666%;
+            }
+
+            .col-md-10 {
+                width: 83.33333333333334%;
+            }
+
+            .col-md-9 {
+                width: 75%;
+            }
+
+            .col-md-8 {
+                width: 66.66666666666666%;
+            }
+
+            .col-md-7 {
+                width: 58.333333333333336%;
+            }
+
+            .col-md-6 {
+                width: 50%;
+            }
+
+            .col-md-5 {
+                width: 41.66666666666667%;
+            }
+
+            .col-md-4 {
+                width: 33.33333333333333%;
+            }
+
+
+            .col-md-3 {
+                width: 25%;
+            }
+
+            .col-md-2 {
+                width: 16.666666666666666%;
+            }
+
+            .col-md-1 {
+                width: 8.33333333333333%;
+            }
+
+
+            .showHeader thead {
+                display: table-header-group;
+                border: 1px solid #000;
+            }
+        }
+
+    </style>
+
+
+    <style type="text/css">
+
+
+        .table th, .table td {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+            padding-left: 0.40rem;
+            padding-right: 0.40rem;
+        }
+
+        a {
+            color: #000;
+            text-decoration: none;
+            background-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <form method="post" id="form1">
+        <h3>
+            @{
+                System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+            }
+
+        </h3>
+        <div id="main">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 col-10">
+                        <h3 class="text-center">@Model.FirstOrDefault().ComName</h3>
+                    </div>
+                    @*<div class="col-md-2 col-2 text-right">
+                        <input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()">
+                        </div>*@
+                    <div class="col-md-12 text-center">
+                        <span>
+                            @Model.FirstOrDefault().ComAdd1
+                        </span>
+                        <span class="float-right">
+                            <input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />
+                        </span>
+                    </div>
+                    <div class="col-md-12 text-center">
+                        <h5>Ledger Details Report || @Model.FirstOrDefault().AccName [ @Model.FirstOrDefault().Currency ]</h5>
+                    </div>
+                    <div class="col-md-12">
+                        Date Range : @Model.FirstOrDefault().Caption2
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-md-4 border border-dark">
+                            GL SUB NAME
+                        </div>
+                        <div class="col-md-4 border border-dark">
+                            GL NAME
+                        </div>
+                        <div class="col-md-4 border border-dark">
+                            GL TYPE
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col-md-4 border border-dark">
+                            @Model.FirstOrDefault().ParentNameOne
+                        </div>
+                        <div class="col-md-4 border border-dark">
+                            @Model.FirstOrDefault().ParentNameTwo
+                        </div>
+                        <div class="col-md-4 border border-dark">
+                            @Model.FirstOrDefault().ParentNameThree
+                        </div>
+                    </div>
+                    <div class="row my-2 text-center">
+                        <div class="col-md-3 border border-dark">
+                            <h6>OP. Balance :  @(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.FirstOrDefault().OpBalance)))</h6>
+                        </div>
+                        <div class="col-md-3 border border-dark">
+                            <h6>Total Dr :  @(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.FirstOrDefault().ttlDebit)))</h6>
+                        </div>
+                        <div class="col-md-3 border border-dark">
+                            <h6>Total Cr :  @(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.FirstOrDefault().ttlCredit))) </h6>
+                        </div>
+                        <div class="col-md-3 border border-dark">
+                            <h6>CL. Balance : @(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(@Model.FirstOrDefault().ClBalance))) </h6>
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr class="text-nowrap">
+                            <th>Date</th>
+                            <th>Voucher No</th>
+                            <th>Particulars</th>
+                            <th>Ref.1</th>
+                            <th>Ref.2</th>
+                            <th>Ref.3</th>
+                            <th>Debit</th>
+                            <th>Credit</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            decimal abcd = 0;
+                            foreach (var item in Model)
+                            {
+
+                                abcd = abcd + Convert.ToDecimal(item.Amount);
+
+                                if ((item.intFlag == "5") || (item.intFlag == "6") || (item.IsBatch == "2"))
+                                {
+
+                                }
+                                else
+                                {
+                                    <tr style="font-family:Arial Narrow;font-size:14.5px;">
+                                        <td class="text-nowrap">@Html.DisplayFor(modelItem => item.VoucherDate)</td>
+                                        <td class="text-nowrap">
+                                            <a href="#">
+                                                @*@Html.DisplayFor(modelItem => item.VoucherNo)*@
+                                                @*@Html.ActionLink(item.VoucherNo + "", "Print" , "Accounts", new { Id = item.VoucherId, type = "pdf" }, new { @target = "_blank" })*@
+                                                @Html.ActionLink(item.VoucherNo + "", "VoucherViewReport" , new { VoucherId = item.VoucherId, type = "pdf" }, new { @target = "_blank" })
+
+                                            </a>
+
+                                        </td>
+                                        <td>
+                                          <p class="mb-0 font-weight-bold">
+                                        @Html.DisplayFor(modelItem => item.AccName1)
+                                          
+                                          </p>  
+                                        <p class="mb-0">
+                                        @Html.DisplayFor(modelItem => item.VoucherDesc)
+                                        </p>
+                                                    
+                                   
+                            
+                                        </td>
+                                        <td>@Html.DisplayFor(modelItem => item.referance)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.ReferanceTwo) </td>
+                                        <td>@Html.DisplayFor(modelItem => item.ReferanceThree) </td>
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.TKDebit1))) </td>
+                                        <td class="text-nowrap text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.TKCredit1))) </td>
+                                        <td class="text-nowrap text-right font-weight-bold">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(abcd)) )</td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                    <tfoot>
+                        @{
+                            foreach (var item in Model)
+                            {
+                                if ((item.intFlag == "5") || (item.intFlag == "6"))
+                                {
+                                    <tr class="text-right">
+                                        <td colspan="3"><h6>@Html.DisplayFor(modelItem => item.VoucherDesc)</h6></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.TKDebit1))) </td>
+                                        <td>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.TKCredit1))) </td>
+                                        <td></td>
+                                    </tr>
+
+                                }
+                            }
+                        }
+                    </tfoot>
+                </table>
+                @*<table width="100%">
+                    <tbody>
+                    <tr>
+                    <td>
+
+                    <span id="lblCompNM" style="font-family: Dodgv2; font-size: 16px">Unibuild Multipurpose Co-operative Society Ltd.</span>
+                    </td>
+                    <td style="width: 50%; font-size: 14px; text-align: right;">
+                    <input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()">
+                    </td>
+                    </tr>
+                    <tr>
+                    <td style="width: 50%; font-size: 10px; text-align: left; font-family: Calibri;">
+                    <span id="lblAddress" style="font-family: Calibri; font-size: 10px">A.B. Siddique Shopping Complex (2nd Floor), Tamakomondi Lane, 4/A, Jubilee Road, Ctg.</span>
+                    </td>
+                    <td style="width: 50%; font-size: 10px; text-align: right; font-family: Calibri;">
+                    <span id="lblTime">28-Nov-2020 10:32: AM | Mr. Nazim Uddin</span>
+                    </td>
+                    </tr>
+                    <tr>
+                    <td style="width: 50%; font-size: 14px; text-align: left; font-family: Calibri;">
+                    <strong>
+                    <span id="lblHeadNM">SOFTWARE PURCHASE</span>
+                    </strong>
+                    </td>
+                    <td style="width: 50%; font-size: 14px; text-align: right; font-family: Calibri;">
+                    <strong>LEDGER BOOK</strong>
+                    </td>
+                    </tr>
+                    <tr>
+                    <td style="width: 50%; font-size: 14px; text-align: left; font-family: Calibri;">
+                    <strong>
+                    PERIOD  &nbsp;<span id="lblFrom">01/07/2019</span>
+                    &nbsp;TO&nbsp;
+                    <span id="lblTo">28/11/2020</span>
+                    </strong>
+                    </td>
+                    <td style="width: 50%; font-size: 14px; text-align: right; font-family: Calibri;">
+                    <strong>
+                    Opening Balance (Tk.):&nbsp;&nbsp;
+                    <span id="lblOpenBal" class="style22">0.00</span>
+                    </strong>
+                    </td>
+                    </tr>
+                    <tr>
+                    <td style="width: 50%; font-size: 14px; text-align: left; font-family: Calibri;"></td>
+                    <td style="width: 50%; font-size: 14px; text-align: right; font-family: Calibri;"></td>
+                    </tr>
+                    </tbody>
+                    </table>*@
+
+                @*<div class="showHeader">
+                    <div>
+                    <table cellspacing="0" rules="all" border="1" id="GridView1" style="width:100%;border-collapse:collapse;">
+                    <thead>
+                    <tr style="font-family:Calibri;font-size:14px;">
+                    <th align="center" scope="col" style="width:10%;">Date</th>
+                    <th align="center" scope="col" style="width:10%;">Doc. No</th>
+                    <th align="center" scope="col" style="width:35%;">Particulars</th>
+                    <th align="center" scope="col" style="width:15%;">Debit (Tk.)</th>
+                    <th align="center" scope="col" style="width:15%;">Credit (Tk.)</th>
+                    <th align="center" scope="col" style="width:15%;">Balance (Tk.)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr style="font-family:Calibri;font-size:12px;">
+                    <td align="center" style="width:10%;">04/07/2019</td>
+                    <td align="center" style="width:10%;">SPV 27</td>
+                    <td align="left" style="width:35%;">&nbsp; <b>FROM CASH IN HAND </b>with domain &amp; hosting charge </td>
+                    <td align="right" style="width:15%;">44,700.00</td>
+                    <td align="right" style="width:15%;">0.00</td>
+                    <td align="right" style="width:15%;">44,700.00</td>
+                    </tr>
+                    </tbody>
+                    </table>
+                    </div>
+                    </div>*@
+
+
+            </div>
+        </div>
+    </form>
+
+
+</body>
+</html>

@@ -1,0 +1,1182 @@
+﻿@*@model IEnumerable<Atrai.Core.Entity.PurchaseModel>*@
+@{
+    ViewData["Title"] = "Purchase Details List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+    <link href="~/AdminEla/Assets/css/style_Dashboard.css" rel="stylesheet">
+
+    <style>
+        p {
+            margin-top: 0;
+            margin-bottom: 0rem!important;
+        }
+
+    </style>
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+
+                        @Html.Hidden("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+                        @Html.Hidden("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+
+                        <div class="row mb-2">
+                            <div class="col-md-4 col-12 mt-1">
+                                <h4 style="color: #1976d2;">Purchase Details List</h4>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="card-body">
+
+
+
+                        <div class="p-2 mb-1">
+                            <div class="row">
+
+
+                                                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Supplier", ViewBag.Supplier as List<SelectListItem>, "Select Supplier", new { id = "SupplierId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Users", ViewBag.Users as List<SelectListItem>, "Select Purchase User", new { id = "UserId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+
+
+
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Warehouse", ViewBag.Warehouse as List<SelectListItem>, "Select Location", new { id = "WarehouseId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-3 col-12">
+                                    @Html.DropDownList("Status", new List<SelectListItem>
+                                    {
+                                    new SelectListItem() {Text = "All Purchase", Value="All"},
+                                    new SelectListItem() {Text = "Due", Value="Due"},
+                                    new SelectListItem() {Text = "Date Wise Due", Value="Date Wise Due"},
+                                    new SelectListItem() {Text = "Cash Discount", Value="Cash Discount"},
+                                    new SelectListItem() {Text = "Date Wise Cash Discount", Value="Date Wise Discount"},
+                                    new SelectListItem() {Text = "Missing Head", Value="Missing Head"}
+                                    }, new { @class = "form-control form-control-sm" })
+                                </div>
+
+                                 <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Category", ViewBag.Category as List<SelectListItem>, "Select Category", new { id = "CategoryId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+                                                         <div class="col-md-2 col-12">
+                                    <div class="input-group mb-2">
+                                        @*<input type="text" id="myInput" class="form-control form-control-sm" onmouseover="this.focus();" placeholder="On Page Filtering / Search." title="Search Item">*@
+                                        @Html.DropDownList("DocType", ViewBag.DocType as List<SelectListItem>, "Select Type", new { id = "DocTypeId", @class = "form-control form-control-sm" })
+
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-4 col-12  mb-2">
+                                    <div class="form-inline divHiddenItems">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <div class="input-group-text">
+                                                    <i class="fa fa-calendar"></i>
+                                                </div>
+                                            </div>
+                                            <input type="text" class="form-control form-control-sm" name="date" id="daterange-btn" style="width: auto;">
+                                            <button id='btnDec' type="button" class="btn btn-danger rounded-0" title='Decrement month'><i class="fa fa-calendar-minus-o" aria-hidden="true"></i></button>
+                                            <button id='btnInc' type="button" class="btn btn-info  rounded-0" title='Increment month'><i class="fa fa-calendar-plus-o" aria-hidden="true"></i></button>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table id="Purchaselist" class="table table-bordered table-striped text-nowrap table-hover"  width="100%">
+                                <thead></thead>
+                                <tbody></tbody>
+                                <tfoot></tfoot>
+                            </table>
+                        </div>
+                        
+
+                        <div class="row row-cards-one">
+                            <div class="col-md-12 col-lg-6 col-xl-4">
+                                <div class="mycard bg1">
+                                    <div class="left">
+                                        <h5 class="title">Total Purchase! </h5>
+                                        <span id="totalPurchasevalue" class="number">00</span>
+                                        @*<a href="https://royalscripts.com/product/ecommerce/admin/orders/pending" class="link">View All</a>*@
+                                    </div>
+                                    <div class="right d-flex align-self-center">
+                                        <div class="icon">
+                                             <i class="fa fa-dollar"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+@*                            <div class="col-md-12 col-lg-6 col-xl-4">
+                                <div class="mycard bg2">
+                                    <div class="left">
+                                        <h5 class="title">Total Cost!</h5>
+                                        <span id="totalcostvalue" class="number">00</span>
+                                    </div>
+                                    <div class="right d-flex align-self-center">
+                                        <div class="icon">
+                                             <i class="fa fa-dollar"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-lg-6 col-xl-4">
+                                <div class="mycard bg3">
+                                    <div class="left">
+                                        <h5 class="title">Total Profit!</h5>
+                                        <span id="totalprofitvalue" class="number">00</span>
+                                    </div>
+                                    <div class="right d-flex align-self-center">
+                                        <div class="icon">
+                                            <i class="fa fa-dollar"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>*@
+                             
+
+                        </div>
+
+
+
+                        <div class="p-2 mb-2 animated slideInRight">
+                            <div class="row">
+                                @*<div class="col-md-3 col-12">
+                                </div>*@
+
+
+                                <div class="col-md-3 col-12">
+
+
+                                    <div id="divfullinfoone" class="card-dashboard P-15 mt-3" style="background:antiquewhite">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-user fontshadow f-s-40 color-success"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>User Wise Purchase</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfoone" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+                                    <div id="divfullinfofour" class="card-dashboard P-15 mt-3" style="background:lavender">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-money fontshadow f-s-40 color-primary"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>User Wise Commission</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfofour" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+                                    <div id="divfullinfoeight" class="card-dashboard P-15 mt-3" style="background:aliceblue">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-copy fontshadow f-s-40 font-color-7"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Post / Unpost Purchase</h5>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfoeight" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3 col-12">
+
+                                    <div id="divfullinfotwo" class="card-dashboard P-15 mt-3" style="background:beige">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-calendar fontshadow f-s-40 color-info"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Date Wise Purchase</h5>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfotwo" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+                                    <div id="divfullinfonine" class="card-dashboard P-15 mt-3" style="background:ivory">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-cubes fontshadow f-s-40 color-primary"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Top Purchase Category</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfonine" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div id="divfullinfothree" class="col">
+
+                                    <div class="card-dashboard P-15 mt-3" style="background:seashell">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-sitemap fontshadow f-s-40 color-warning"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Paid By Head</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfothree" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div id="divfullinfoseven" class="card-dashboard P-15 mt-3" style="background:honeydew">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-users fontshadow f-s-40 color-info"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Top Purchase Supplier</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfoseven" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+                                    <div id="divfullinfosix" class="card-dashboard P-15 mt-3" style="background:ivory">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd fontshadow f-s-40 color-danger"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Top Due Supplier</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfosix" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3 col-12">
+
+                                    <div id="divfullinfofive" class="card-dashboard P-15 mt-3" style="        background: lavenderblush">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd fontshadow f-s-40 color-info"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Top Purchase Item</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfofive" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+
+
+
+
+
+                                    <div id="divfullinfoten" class="card-dashboard P-15 mt-3" style="background:ivory">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd fontshadow f-s-40 color-danger"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Day Wise Purchase</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfoten" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+
+
+@section Scripts{
+
+
+    <script TransactionId="text/javascript">
+
+
+                        //$.fn.dataTable.Api.register( 'sum()', function () {
+                        //    return this.flatten().reduce( function ( a, b ) {
+                        //        return (a*1) + (b*1); // cast values in-case they are strings
+                        //    });
+                        //});
+
+        //loaddata();
+
+
+            function loaddata() {
+          
+                //alert(CategoryId, FromDate, ToDate);
+
+
+                let othersearchvalue = $("#myInput").val() || "";
+
+               var table = $('#Purchaselist').DataTable({
+                    initComplete: function() {
+
+                        //var input = $('#Purchaselist .dataTables_filter input'),//.unbind(),
+                            //self = this.api(),
+
+                            $OtherSearch = $('<input class="form-control form-control-sm text-center rounded-0 ml-2" id="myInput" name="myInput" placeholder="Search" title="Search" type="text" value="'+othersearchvalue+'">')
+
+                            $allButton = $('<button class="ml-1 btn rounded-0 btn-purple btn-sm" tabindex="0" aria-controls="Purchaselist" TransactionId="button" title="Load"><span><i class="mdi mdi-file-excel"></i></span></button>')
+                                .text('Load')
+                                .click(function() {
+                                    //input.val('');
+                                    loaddata();
+                                    loadsummarydata();
+
+
+                                })
+                        $('.dataTables_filter').append($allButton, $OtherSearch);//, $clearButton
+                        //$('.dataTables_filter').hide();
+                                        $("#myInput").on("click", function () {
+
+                            //setTimeout(function () {
+                            //    // whene transaction error then reload page
+                            //     //table.page.len(1000).draw();
+
+                            //}, 1);
+
+
+                    });
+
+                    $("#myInput").on("keyup", function () {
+                        //table.page.len(100).draw();
+                        var value = $(this).val().toLowerCase();
+                        //alert(value);
+                        $("#Purchaselist tr").filter(function () {
+                            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                            //$(this).addClass("selected");
+
+                        });
+
+
+                    });
+                    
+                    },
+                    dom: '<"dom_wrapper fh-fixedHeader"flB>t',
+                     //dom: 'lBfrtipF',
+                buttons: {
+                    dom: {
+                        button: {
+                            className: 'btn rounded-0'
+                        }
+                    },
+                    buttons: [
+                        //'copy', 'csv', 'excel', 'pdf', 'print'
+                        //{ "extend": 'excel', "text": 'Excel', "className": 'btn btn-sm btn-success-info fa fa-excel rouned-0' }
+
+                        {
+                            extend: 'excel',
+                            text: '<i class="mdi mdi-file-excel"></i>',
+                            className: 'btn-success',
+                            titleAttr: 'Export to excel'
+                        }
+
+                    ],
+                },
+                    serverSide: true, 
+                    "scrollX": true,
+                    "scrollY": true,
+
+                    "searching": true, "paging": true, "pageLength": 10000, "lengthChange": false,
+
+                    "ajax": {
+                        "url": "@Url.Action("GetPurchaseDetailsListViewReport", "Purchase")",
+                        //"data": { FromDate: $("#FromDate").val(), ToDate: $("#ToDate").val(), CategoryId: $("#CategoryId").val() , PurchaseRepId : $("#PurchaseRepId").val() },
+                        data: { FromDate: $("#FromDate").val(), ToDate: $("#ToDate").val(), SupplierId: $("#SupplierId").val(), UserId: $("#UserId").val(), WarehouseId: $("#WarehouseId").val(),  CategoryId: $("#CategoryId").val(), DocTypeId: $("#DocTypeId").val() },
+                        "type": "POST",
+                        "datatype": "json"
+                    },
+                    "columns": [
+                        { "title": "Id", "data": "Id", "visible": false },
+                        { "title": "Purchase Code", "data": "PurchaseCode", "searchable": true },
+                        { "title": "Purchase Date", "data": "PurchaseDate", "searchable": false },
+                        { "title": "Supplier Name", "data": "SupplierName", "searchable": false },
+
+
+                        { "title": "Category", "data": "CategoryName", "searchable": true },
+                        { "title": "Product Code", "data": "ProductCode", "searchable": true },
+                        { "title": "Product Name", "data": "ProductName", "searchable": true },
+                        { "title": "Model Name", "data": "ModelName", "searchable": true },
+                        { "title": "Size", "data": "SizeName", "searchable": true },
+                        { "title": "Color", "data": "ColorName", "searchable": true },
+                        { "title": "Store", "data": "WarehouseName", "searchable": true },
+
+
+
+                        { "title": "Brand Name", "data": "BrandName", "searchable": true },
+                        { "title": "Quantity", "data": "Quantity", "searchable": false },
+                        { "title": "Purchase Price", "data": "PurchasePrice", "searchable": false },
+
+
+                        {
+                                "title": "IMEI",
+                                //"data": "SalesPayments",
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "className": "text-nowrap text-center", "searchable": false,
+                                "render": function (data, type, row) {
+                                    //console.log(data);
+                                    let internaloutput = "";
+                                    if (data.PurchaseBatchItems != null)
+                                    {
+
+                                        for (var i = 0; i < data.PurchaseBatchItems.length; i++) {
+                                    
+                                            internaloutput += '<p class="lineheight>' + data.PurchaseBatchItems[i].BatchSerialNo;
+                                            //totalsalesvalue = totalsalesvalue + parseFloat(data[i].SalesValue.toFixed(2))
+
+                                            //if (i < data.PurchaseBatchItems.length - 1) {
+                                            //    output += "  </p>";
+
+                                            //    //'<p>' + this + '</p>'
+                                            //}
+                                            //    count++;
+                                            //console.log(data.PurchaseBatchItems);
+                                            };
+                                      }
+
+                            return internaloutput;
+                                    
+                                    }
+
+                        },
+
+
+                        //{ "title": "Cost Price", "data": "CostPrice", "searchable": false },
+                        //{ "title": "Ind. Discount", "data": "IndDiscountProportion", "searchable": false },
+                        //{ "title": "S.R. Name", "data": "PurchaseRepName", "searchable": true },
+                        //{ "title": "S.R. Comsn.", "data": "PurchaseRepCommission", "searchable": false },
+                        //{ "title": "Total Commission", "data": "TotalPurchaseRepCommission", "searchable": false },
+
+                        
+                        //{ "title": "Profit", "data": "Profit", "searchable": false }
+                    ],
+                    //"order": [0, "desc"],
+                    //"processing": true,
+                    "language": {
+                            "lengthMenu": "_MENU_",
+                            //"zeroRecords": "Nothing found - sorry",
+                            //"info": "Showing page _PAGE_ of _PAGES_",
+                            "infoEmpty": "No records available",
+                            //"infoFiltered": "(filtered from _MAX_ total records)",
+                            "searchPlaceholder": "Disable",
+                            "sSearch" : '<em class="fa fa-search"></em>'
+                    },
+
+                //initComplete: function (row, data, start, end, display) {
+                //    this.api().columns().every( function () {
+                        
+                //        var api = this;
+                //        var that = this;
+                //        var sumqty = 999;
+
+
+                //                                    var intVal = function(i) {
+                //                return typeof i === 'string' ?
+                //                  i.replace(/[\$,]/g, '') * 1 :
+                //                  typeof i === 'number' ?
+                //                  i : 0;
+                //              };
+
+                //                                sumProfit = api
+                //                 .column( 15 )
+                //                 .data()
+                //                 .reduce( function (a, b) {
+                //                     return intVal(a) + intVal(b);
+                //                 }, 0 );
+ 
+                //           $( api.column( 15 ).footer() ).html(sumProfit);
+
+
+                //         //$('#Purchaselist').dataTable().fnAddData([99999999, "", "", "", "", "", "", "", "Total :",0, "", "", 0, "", 0, 0]).draw();
+                //        //$(api.column(9).footer()).html('$' + sumqty + ' ( $' + sumqty + ' total)');
+                //        console.log('test abc');
+                //    } );
+                // },
+                 footerCallback: function (row, data, start, end, display) {
+                            //var api = this.api();
+                            //alert('hit');
+
+                     //console.log(row, data, start, end, display);
+
+
+                            //$("Purchaselist th").slice(-7).remove();
+                             $('#Purchaselist th:last').remove();
+                             $('#Purchaselist th:last').remove();
+                             $('#Purchaselist th:last').remove();
+                             $('#Purchaselist th:last').remove();
+                    $('#Purchaselist th:last').remove();
+
+
+                             //$('#Purchaselist th:last').remove();
+                             //$('#Purchaselist th:last').remove();
+                             //$('#Purchaselist th:last').remove();
+                             //$('#Purchaselist th:last').remove();
+                             //$('#Purchaselist th:last').remove();
+                             //$('#Purchaselist th:last').remove();
+
+
+
+
+                            //$('#Purchaselist').empty();
+
+
+                              var api = this.api(),data;
+
+                              // Remove the formatting to get integer data for summation
+                              var intVal = function(i) {
+                                return typeof i === 'string' ?
+                                  i.replace(/[\$,]/g, '') * 1 :
+                                  typeof i === 'number' ?
+                                  i : 0;
+                              };
+
+
+                              // Total over this page
+
+                                sumqty = api
+                                .column(12, {
+                                  page: 'current'
+                                })
+                                .data()
+                                .reduce(function(a, b) {
+                                  return intVal(a) + intVal(b);
+                                }, 0);
+
+
+                                
+                                totalprice = api
+                                .column(13, {
+                                  page: 'current'
+                                })
+                                .data()
+                                .reduce(function(a, b) {
+                                  return intVal(a) + intVal(b);
+                                }, 0);
+
+                                // sumIndDiscountProportion = api
+                                //.column(13, {
+                                //  page: 'current'
+                                //})
+                                //.data()
+                                //.reduce(function(a, b) {
+                                //  return intVal(a) + intVal(b);
+                                //}, 0);
+
+
+                              
+                              //sumrepcommission = api
+                              //  .column(15, {
+                              //    page: 'current'
+                              //  })
+                              //  .data()
+                              //  .reduce(function(a, b) {
+                              //    return intVal(a) + intVal(b);
+                              //  }, 0);
+
+                              //  totalsumrepcommission = api
+                              //  .column(16, {
+                              //    page: 'current'
+                              //  })
+                              //  .data()
+                              //  .reduce(function(a, b) {
+                              //    return intVal(a) + intVal(b);
+                              //  }, 0);
+
+
+
+                                //sumProfit = api
+                                //.column(15, {
+                                //  page: 'current'
+                                //})
+                                //.data()
+                                //.reduce(function(a, b) {
+                                //  return intVal(a) + intVal(b);
+                                //}, 0);
+                                
+       
+                                // sumProfit = api
+                                //      .column( 17 )
+                                //      .data()
+                                //      .reduce( function (a, b) {
+                                //          return intVal(a) + intVal(b);
+                                //      }, 0 );
+ 
+                                //$( api.column( 17 ).footer() ).html(sumProfit);
+
+
+
+                            //console.log(sumqty , sumrepcommission , sumIndDiscountProportion,totalsumrepcommission ,sumProfit);
+
+                            //$("#Purchaselist").dataTable().api().row.add([1,
+                            //       1,1,1,1,1,1,1,1,1,1,1,1,1
+                            //]);
+
+                            //table.row.add([99999999, "", "", "", "", "", "", "", "Total :",sumqty, "", "", sumIndDiscountProportion, "", sumrepcommission, sumProfit]).draw();
+                    
+                            var footer = $(this).append('<tfoot><tr></tr></tfoot>');
+ 
+                            $(footer).append('<th colspan=10></th><th class="text-center">Total:</th>');
+
+                            $(footer).append('<th class="text-center">' + sumqty.toLocaleString() + '</th>');
+                            $(footer).append('<th class="text-center">' + totalprice.toLocaleString() + '</th>');
+
+                            $(footer).append('<th class="text-center"></th>');
+
+                            //$(footer).append('<th class="text-center">' + sumIndDiscountProportion.toLocaleString() + '</th>');
+                            //$(footer).append('<th class="text-center"></th>');
+
+                            //$(footer).append('<th class="text-center">' + sumrepcommission.toLocaleString() + '</th>');
+                            //$(footer).append('<th class="text-center">' + totalsumrepcommission.toLocaleString() + '</th>');
+
+                            //$(footer).append('<th class="text-center">' + sumProfit.toLocaleString() + '</th>');
+
+                           // $(api.column(9).footer()).html('$' + sumqty + ' ( $' + sumqty + ' total)');
+
+                            //$('#Purchaselist').dataTable().fnAddData([99999999, "", "", "", "", "", "", "", "Total :",sumqty, "", "", sumIndDiscountProportion, "", sumrepcommission, sumProfit]);
+
+
+                       //console.log(table.column( 14, {page:'current'} ).data().sum() );
+                            
+                      
+                     //table.column(14, { "filter": "applied" }).data().sum();
+
+
+                        //var table = $("#Purchaselist").DataTable();
+
+                        //$("#Purchaselist").on('search.dt', function() {
+                        //    console.log(table.column( 0, {page:'current'} ).data().sum() );
+                        //});
+                      
+                      
+                            //$("#Purchaselist").on('search.dt', function() {
+                            //    console.log(table.column( 14, {page:'current'} ).data().sum() );
+                            //});
+
+
+                            //// Remove the formatting to get integer data for summation
+                            //var intVal = function (i) {
+                            //    return typeof i === 'string' ? i.replace(/[\$,]/g, '') * 1 : typeof i === 'number' ? i : 0;
+                            //};
+ 
+                            //// Total over all pages
+                            //total = api
+                            //    .column(14)
+                            //    .data()
+                            //    .reduce(function (a, b) {
+                            //        return intVal(a) + intVal(b);
+                            //    }, 0);
+ 
+                            //// Total over this page
+                            //pageTotal = api
+                            //    .column(14, { page: 'current' })
+                            //    .data()
+                            //    .reduce(function (a, b) {
+                            //        return intVal(a) + intVal(b);
+                            //    }, 0);
+ 
+                            //// Update footer
+                            //$(api.column(14).footer()).html('$' + pageTotal + ' ( $' + total + ' total)');
+                        },
+                    "destroy": true
+                });
+
+            }
+
+            //function loaddata() {
+          
+            //    loadsummarydata();
+
+            //    $.ajax({
+            //    type: 'POST',
+            //    url: '@Url.Action("GetPurchaseDetailsListViewReport", "Purchase")',
+                    
+            //    dataType: 'json',
+            //    //async: true,
+            //    async: 'false',
+            //    beforeSend: function() {
+            //        $('#loader').removeClass('hidden');
+            //        $('#btnLoad').attr('disabled');
+            //    },
+            //    complete: function(){
+            //        $('#loader').addClass('hidden');
+            //        $('#btnLoad').attr('enabled');
+            //    },
+            //    data: { FromDate: $("#FromDate").val(), ToDate: $("#ToDate").val(), SupplierId: $("#SupplierId").val(), UserId: $("#UserId").val(), WarehouseId: $("#WarehouseId").val(),  CategoryId: $("#CategoryId").val(), DocTypeId: $("#DocTypeId").val(), PurchaseRepId : $("#PurchaseRepId").val() },
+            //    success: function (result) {
+            //        //console.log(result)
+         
+            //        //for (var i = 0; i < result.length; i++) {
+            //        //    if (result != null) {
+            //        //     console.log(result[i].Id);
+
+            //        //     $('#Purchaselist').dataTable().fnAddData([result[i].Id, result[i].PurchaseCode, result[i].PurchaseDate, result[i].SupplierName, result[i].CategoryName, result[i].ProductCode, result[i].ProductName, result[i].ModelName, result[i].BrandName,result[i].Quantity, result[i].PurchasePrice, result[i].CostPrice, result[i].IndDiscountProportion, result[i].PurchaseRepName, result[i].PurchaseRepCommission, result[i].Profit]);
+                        
+            //        //    }
+            //        //};
+            //        //itemslist
+            //        //.clear()
+            //        //.draw();
+
+            //        //$("#Purchaselist tr").remove();
+            //        //$('#Purchaselist tbody').empty();
+            //        //$("#Purchaselist").clear();
+
+            //        var table = $('#Purchaselist').DataTable();
+ 
+            //        table
+            //            .clear()
+            //            //.draw();
+
+
+            //            var sumrepcommission = 0.00;
+            //            var sumqty = 0.00;
+            //            var sumIndDiscountProportion = 0.00;
+
+
+            //            //var rows = result.data;
+            //            //var html = [];
+            //            //for (var i=0; i < rows.length; i++){
+            //            //    html.push('<tr><td>' + rows[i].Id + '</td><td>' + rows[i].PurchaseCode + '</td><td>' + rows[i].PurchaseDate + '</td></tr>');
+            //            //}    
+            //            //$('#Purchaselist').html(html.join(''));
+
+
+            //        //var tableBody = $("#Purchaselist tbody");
+            //        $.each(result.data, function(i, v) {
+
+            //            //console.log(v.Id);
+            //            //console.log(v.PurchaseCode);
+         
+            //            sumrepcommission  = sumrepcommission + v.PurchaseRepCommission;
+            //            sumqty  = sumqty + v.Quantity;
+            //            sumIndDiscountProportion  = sumIndDiscountProportion + v.IndDiscountProportion;
+
+            //            //$('#Purchaselist').append('<tr><td>" + v.Id + "</td><td>" + v.PurchaseCode + "</td><td>" + v.PurchaseDate + "</td><td>" + v.SupplierName + "</td><td>" + v.CategoryName + "</td><td>" + v.ProductCode + "</td></tr>');
+            //            //let markup = "<tr><td>" + v.Id + "</td><td>" + v.PurchaseCode + "</td><td>" + v.PurchaseDate + "</td><td>" + v.SupplierName + "</td><td>" + v.CategoryName + "</td><td>" + v.ProductCode + "</td></tr>";
+                           
+            //             //tableBody.append(markup);
+
+            //            //table.row.add([v.Id, v.PurchaseCode, v.PurchaseDate, v.SupplierName, v.CategoryName, v.ProductCode, v.ProductName, v.ModelName, v.BrandName,v.Quantity, v.PurchasePrice, v.CostPrice, v.IndDiscountProportion, v.PurchaseRepName, v.PurchaseRepCommission, v.Profit]).draw(false);
+ 
+            //            //table.fnAddData([v.Id, v.PurchaseCode, v.PurchaseDate, v.SupplierName, v.CategoryName, v.ProductCode, v.ProductName, v.ModelName, v.BrandName,v.Quantity, v.PurchasePrice, v.CostPrice, v.IndDiscountProportion, v.PurchaseRepName, v.PurchaseRepCommission, v.Profit]).draw(false);
+            //            $('#Purchaselist').dataTable().fnAddData([0, v.PurchaseCode, v.PurchaseDate, v.SupplierName, v.CategoryName, v.ProductCode, v.ProductName, v.ModelName, v.BrandName,v.Quantity, v.PurchasePrice, v.CostPrice, v.IndDiscountProportion, v.PurchaseRepName, v.PurchaseRepCommission, v.Profit]);
+                    
+                        
+                    
+            //        });
+
+            //            $('#Purchaselist').dataTable().fnAddData([99999999, "", "", "", "", "", "", "", "Total :",sumqty, "", "", sumIndDiscountProportion, "", sumrepcommission, 0]);
+
+
+
+            //    },
+            //    error: function (ex) {
+            //        alert('Failed.' + ex);
+            //    }
+
+            //});
+
+
+            //}
+
+
+
+
+
+
+
+            $('[data-toggle="tooltip"]').tooltip();
+
+            var CategoryId = $("#CategoryId").val();
+            var fromdate = $("#FromDate").val();
+            var todate = $("#ToDate").val();
+
+
+            loaddata();
+            loadsummarydata();
+
+
+
+            function loadsummarydata() {
+
+                //alert($("#FromDate").val());
+
+                var x = $("#FromDate").val();
+                var y = $("#ToDate").val();
+                var SupplierId = $("#SupplierId").val();
+                var UserId = $("#UserId").val();
+                var Status = $("#Status").val();
+                var WarehouseId = $("#WarehouseId").val();
+                var CategoryId = $("#CategoryId").val();
+                var DocTypeId = $("#DocTypeId").val();
+                //var PurchaseRepId = $("#PurchaseRepId").val();
+                //alert(PurchaseRepId);
+
+                
+
+
+                //alert(x);
+                //alert(y);
+
+
+                //alert(x , y);
+                $.ajax({
+
+                    url: '@Url.Action("GetPurchaseSummaryInfo", "Purchase")',
+                    data: { FromDate: x, ToDate: y, SupplierId: SupplierId, UserId: UserId, WarehouseId: WarehouseId, CategoryId: CategoryId, DocTypeId: DocTypeId },
+                    //data: JSON.stringify(purchasesmain),
+                    //type: 'POST',
+                    //async: true,
+                    contentType: 'application/json;',
+                    dataType: 'json',
+                    success: function(result) {
+                        //console.log(result);
+                        //console.log(result.purchasebyuser);
+                        //console.log(result.purchasereceivebyhead);
+
+
+                        //var output = "";
+                        //if (result.purchasebyuser.length != 0) {
+                        //    for (var i = 0; i < result.purchasebyuser.length; i++) {
+                        //        if (result.purchasebyuser[i] != null) {
+                        //            //console.log(result.purchasebyuser[i]);
+                        //            output += '<p class=lineheight  style="color:darkslategray">' + result.purchasebyuser[i].UserName + " : " + result.purchasebyuser[i].TotalPurchaseCount + " : " + result.purchasebyuser[i].TotalPurchaseSum.toLocaleString() + ' </p>'
+                        //        }
+                        //    };
+                        //    $("#divfullinfoone").show();
+                        //    document.getElementById("fullinfoone").innerHTML = output;
+                        //}
+                        //else {
+                        //    $("#divfullinfoone").hide();
+                        //}
+
+
+
+                        //output = "";
+                        //if (result.commissionbyuser.length != 0) {
+                        //    for (var i = 0; i < result.commissionbyuser.length; i++) {
+                        //        if (result.commissionbyuser[i] != null) {
+                        //            //console.log(result.commissionbyuser[i]);
+                        //            output += '<p class=lineheight  style="color:darkslategray">' + result.commissionbyuser[i].UserName + " : " + result.commissionbyuser[i].TotalPurchaseCount + " : " + result.commissionbyuser[i].TotalCommissionAmount + ' </p>'
+                        //        }
+                        //    };
+                        //    $("#divfullinfofour").show();
+                        //    document.getElementById("fullinfofour").innerHTML = output;
+                        //}
+                        //else {
+                        //    $("#divfullinfofour").hide();
+                        //}
+
+
+
+                        output = "";
+                        if (result.totalpurchasesummary.length != 0) {
+                            for (var i = 0; i < result.totalpurchasesummary.length; i++) {
+                                if (result.totalpurchasesummary[i] != null) {
+                                    //console.log(result.totalpurchasesummary[i]);
+                                    output += '<p class=lineheight> Total Purchase :' + result.totalpurchasesummary[i].TotalPurchaseCount + ' </p>'
+                                    output += '<p class=lineheight> Total Purchase Value : ' + result.totalpurchasesummary[i].TotalPurchaseValue.toLocaleString() + ' </p>'
+                                    //output += '<p class=lineheight> Total Costing : ' + result.totalpurchasesummary[i].TotalCosting.toLocaleString() + ' </p>'
+                                    //output += '<p class=lineheight> Total Discount : ' + result.totalpurchasesummary[i].TotalDiscount.toLocaleString() + ' </p>'
+                                    //output += '</hr><p class="text-bold"> Total Profit : ' + result.totalpurchasesummary[i].TotalProfit.toLocaleString() + ' </p>'
+                                }
+                                $("#totalPurchasevalue").text(result.totalpurchasesummary[i].TotalPurchaseValue.toLocaleString());
+                                //$("#totalprofitvalue").text(result.totalpurchasesummary[i].TotalProfit.toLocaleString());
+                                //$("#totalcostvalue").text(result.totalpurchasesummary[i].TotalCosting.toLocaleString());
+
+
+
+
+                            };
+                            $("#divfullinfotwo").show();
+                            document.getElementById("fullinfotwo").innerHTML = output;
+                        }
+                        else {
+                            $("#divfullinfotwo").hide();
+                        }
+
+
+
+
+                        output = "";
+                        if (result.purchasereceivebyhead.length != 1) {
+                            for (var i = 0; i < result.purchasereceivebyhead.length; i++) {
+                                if (result.purchasereceivebyhead[i] != null) {
+                                    //console.log(result.purchasereceivebyhead[i]);
+
+
+                                    if (result.purchasereceivebyhead[i].AccName == "Due" && result.purchasereceivebyhead[i].Amount != 0) {
+                                        output += '<p class=lineheight style="color:red">Total Due  : ' + result.purchasereceivebyhead[i].Amount.toLocaleString() + '</p>';
+                                    }
+                                    else {
+                                        output += '<p class=lineheight style="color:darkslategray">' + result.purchasereceivebyhead[i].AccName + " : " + result.purchasereceivebyhead[i].Amount.toLocaleString() + ' </p>'
+                                    }
+
+                                }
+                            };
+                            $("#divfullinfothree").show();
+                            document.getElementById("fullinfothree").innerHTML = output;
+
+                        }
+                        else {
+
+                            $("#divfullinfothree").hide();
+                        }
+
+
+                        var output = "";
+                        if (result.toppurchaseitem.length != 0) {
+                            for (var i = 0; i < result.toppurchaseitem.length; i++) {
+                                if (result.toppurchaseitem[i] != null) {
+                                    //console.log(result.toppurchaseitem[i]);
+                                    output += '<p class=lineheight style="color:darkslategray">' + result.toppurchaseitem[i].ProductName + " : " + result.toppurchaseitem[i].ProductCount + ' </p>'
+                                }
+                            };
+                            $("#divfullinfofive").show();
+                            document.getElementById("fullinfofive").innerHTML = output;
+                        }
+                        else {
+
+                            $("#divfullinfofive").hide();
+                        }
+
+
+
+
+
+                        output = "";
+                        if (result.toppurchasesupplier.length != 0) {
+                            for (var i = 0; i < result.toppurchasesupplier.length; i++) {
+                                if (result.toppurchasesupplier[i] != null) {
+
+                                    if (result.toppurchasesupplier[i].SupplierName == "") {
+                                        result.toppurchasesupplier[i].SupplierName = "=N/A=";
+                                    }
+
+                                    //console.log(result.toppurchasesupplier[i]);
+                                    output += '<p class=lineheight style="color:darkslategray">' + result.toppurchasesupplier[i].SupplierName + " : " + result.toppurchasesupplier[i].PurchaseAmount.toLocaleString() + ' </p>'
+                                }
+                            };
+                            $("#divfullinfoseven").show();
+                            document.getElementById("fullinfoseven").innerHTML = output;
+                        }
+                        else {
+
+                            $("#divfullinfoseven").hide();
+                        }
+
+
+
+                        output = "";
+                        if (result.topduesupplier.length != 0) {
+                            for (var i = 0; i < result.topduesupplier.length; i++) {
+
+                                var DueAmount = result.topduesupplier[i].TotalPurchase - result.topduesupplier[i].PaiddAmount;
+
+                                if (result.topduesupplier[i].SupplierName == "") {
+                                    result.topduesupplier[i].SupplierName = "=N/A=";
+                                }
+
+
+                                if (result.topduesupplier[i] != null && DueAmount > 0) {
+                                    output += '<p class=lineheight style="color:darkslategray">' + result.topduesupplier[i].SupplierName + " : " + DueAmount.toLocaleString() + ' </p>'
+                                }
+                            };
+                            $('#divfullinfosix').show();
+                            document.getElementById("fullinfosix").innerHTML = output;
+
+                        }
+                        else {
+
+                            $("#divfullinfosix").hide();
+                        }
+
+
+                        output = "";
+                        if (result.postunpostcount.length != 0) {
+                            for (var i = 0; i < result.postunpostcount.length; i++) {
+                                if (result.postunpostcount[i] != null && result.postunpostcount[i].DocCount > 0 && result.postunpostcount[i].isPosted == false) {
+                                    output += '<p class=lineheight  style="color:darkslategray">' + "Not Posted : " + result.postunpostcount[i].DocCount + ' </p>'
+                                }
+                                else {
+                                    output += '<p class=lineheight  style="color:darkslategray">' + "Posted : " + result.postunpostcount[i].DocCount + ' </p>'
+                                }
+                            };
+                            $('#divfullinfoeight').show();
+                            document.getElementById("fullinfoeight").innerHTML = output;
+                        }
+                        else {
+                            $("#divfullinfoeight").hide();
+                        }
+
+
+                        //var categorytotalprofit = 0.00;
+                        //var categorytotalprofitavg = 0.00;
+
+                        //output = "";
+                        //if (result.purchaseitembycategory.length != 0) {
+                        //    for (var i = 0; i < result.purchaseitembycategory.length; i++) {
+                        //        if (result.purchaseitembycategory[i] != null) {
+                        //            //console.log(result.toppurchaseitem[i]);
+                        //            output += '<p class=lineheight  style="color:darkslategray">' + result.purchaseitembycategory[i].CategoryName + " (" + result.purchaseitembycategory[i].CategoryCount + ") " + result.purchaseitembycategory[i].TotalPurchase.toLocaleString() + " : Profit " + result.purchaseitembycategory[i].TotalProfit.toLocaleString() + " || " + result.purchaseitembycategory[i].TotalProfitAvgCost.toLocaleString() + ' </p>'
+                        //            categorytotalprofit += parseFloat(result.purchaseitembycategory[i].TotalProfit);
+                        //            categorytotalprofitavg += parseFloat(result.purchaseitembycategory[i].TotalProfitAvgCost);
+
+                        //        }
+                        //    };
+                        //    output += '<hr class="solid"><p class=""> Total Profit : ' + categorytotalprofit.toLocaleString() + ' || ' + categorytotalprofitavg.toLocaleString() + '(Avg.Cst) </p>'
+                        //    $('#divfullinfonine').show();
+                        //    document.getElementById("fullinfonine").innerHTML = output;
+                        //}
+                        //else {
+                        //    $("#divfullinfonine").hide();
+                        //}
+
+
+                        ///console.log(result.daywisePurchasecount);
+                        //output = "";
+                        //if (result.daywisePurchasecount.length != 0) {
+                        //    for (var i = 0; i < result.daywisePurchasecount.length; i++) {
+
+                        //        //var DueAmount = result.daywisePurchasecount[i].TotalPurchase - result.daywisePurchasecount[i].PaiddAmount;
+                        //        if (result.daywisePurchasecount[i] != null) {
+                        //            output += '<p class=lineheight style="color:darkslategray">' + result.daywisePurchasecount[i].PurchaseDate + " : " + result.daywisePurchasecount[i].TotalPurchaseCount + " : " + result.daywisePurchasecount[i].TotalPurchaseSum.toLocaleString() + ' </p>'
+                        //        }
+                        //    };
+                        //    $('#divfullinfoten').show();
+                        //    document.getElementById("fullinfoten").innerHTML = output;
+
+                        //}
+                        //else {
+
+                        //    $("#divfullinfoten").hide();
+                        //}
+
+
+
+                        //toastr.success('Purchase Summary Load Successfully.');
+                        //alert('Wait');
+                    },
+                    error: function() {
+                        toastr.error('Unable to Load');
+                        //alert('Unable to Save');
+                    }
+                });
+
+
+            };
+
+
+
+
+
+      
+
+
+       
+
+
+
+
+
+
+        function GetDate(str) {
+            var arr = str.split("-");
+            var months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+            var month = months.indexOf(arr[1].toLowerCase());
+
+            return new Date(parseInt(arr[2]), month, parseInt(arr[0]));
+        }
+
+
+
+
+    </script>
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+

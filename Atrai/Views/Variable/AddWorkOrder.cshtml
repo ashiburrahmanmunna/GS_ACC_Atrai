@@ -1,0 +1,1177 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Order management";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<style>
+    li a {
+        display: block;
+        width: 100%;
+    }
+
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+                                 border-bottom-width: 0px;
+
+                            }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    /*   .tabulator-table .tabulator-row {
+                    background-color: white;
+                } */
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customize-btn-another {
+        background: #2CA01C;
+        border: 1px solid black;
+        border-radius: 20px;
+        color: #FFFFFF;
+        border: 1px solid #2CA01C;
+    }
+
+        .customize-btn-another:hover {
+            background: #2CA01C;
+            border: 1px solid black;
+            border-radius: 20px;
+            color: #FFFFFF;
+            border: 1px solid #2CA01C;
+        }
+
+    .customize-btn:hover {
+        background: #e9ecef6b;
+        border: 1px solid black;
+    }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .gear-dropdown.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+        margin-top: 7px;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-bottom: 1px solid #aaaaaa38;
+        border-right: 1px solid #aaaaaa38;
+        /*border-left: 1px solid #aaaaaa38;*/
+        /* padding-left: 2px;*/
+    }
+    /*    .tabulator-row .tabulator-cell, .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+                            border-right: none;
+                            border-left: none;
+                        }*/
+    /*    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+                    border-right: 2px solid #aaaaaa38;
+                }*/
+
+    .tabulator-row .tabulator-cell {
+        border-right: none;
+        border-left: none;
+        padding-left: 10px;
+        border: 1px solid #aaaaaa29;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        /*margin-top: 27px;*/
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+        /* Add any other styles you need for the active cell */
+    }
+
+    .tabulator-row {
+        /*   border: 1px solid #aaaaaa38;*/
+        border-left: none;
+        border-right: none;
+    }
+
+    input[type="checkbox"] {
+        width: 20px; /* Set the width */
+        height: 20px; /* Set the height */
+    }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom: 4px solid green;
+    }
+
+        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active:hover {
+            background-color: #F8F8F8;
+            border-top-color: transparent !important;
+            border-left-color: transparent !important;
+            border-right-color: transparent !important;
+        }
+
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link:hover {
+        background-color: #F8F8F8;
+        border-top-color: transparent !important;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+    }
+
+    .customize-btnew {
+        background: transparent;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btnew:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .tabulator-row .tabulator-cell.tabulator-editing {
+        border: 1px solid #404c5d;
+        outline: none;
+        padding: 0;
+    }
+
+    .tabulator-cell.tabulator-editable[tabulator-field="AccName"] {
+        border: 1px solid #0003;
+        margin-bottom: 10px;
+    }
+
+    .filter-dropdown > .filter-dropdown-class.show {
+        width: 580px;
+    }
+
+    p {
+        margin: 1em 0;
+    }
+
+    .button {
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        position: relative;
+        background: #aa0000;
+        padding: 10px 15px;
+        color: white;
+        box-shadow: 0 2px black;
+        text-decoration: none;
+        border-radius: 5px;
+        /*text-shadow: 0 1px 1px black;*/
+    }
+
+        .button:hover {
+            top: -2px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+        .button:active {
+            top: 1px;
+            box-shadow: 0 7px #000000a3;
+        }
+
+    .unbilledbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .overduebtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .openbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .paidbtn.clicked {
+        top: -2px;
+        box-shadow: 0 7px #000000a3;
+    }
+
+    .scrollable-offcanvas {
+        /* max-height: 80vh;*/ /* Adjust the maximum height as needed */
+        overflow-y: auto;
+    }
+
+    .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:hover {
+        background-color: deepskyblue;
+    }
+
+    .tabulator .tabulator-footer {
+        background-color: #fff;
+        color: black;
+    }
+
+        .tabulator .tabulator-footer .tabulator-calcs-holder .tabulator-row {
+            background: white !important;
+        }
+
+
+    .offcanvas {
+        /* Add position relative to its parent */
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* Ensure offcanvas takes full viewport height */
+    }
+
+    .offcanvas-footer {
+        margin-top: auto; /* Push footer to the bottom */
+        width: 100%; /* Occupy full width */
+    }
+
+    .modal-footer {
+        width: 100%; /* Ensure buttons occupy full width */
+        padding: 10px; /* Add padding for better appearance */
+    }
+
+    .w-15 {
+        width: fit-content !important;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+    }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #999;
+        }
+
+        .separator:not(:empty)::before {
+            margin-right: .25em;
+        }
+
+        .separator:not(:empty)::after {
+            margin-left: .25em;
+        }
+
+    .tabulator-row.tabulator-selected {
+        background-color: #9abcea !important;
+    }
+
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 24px;
+        }
+
+            .rating label:before {
+                content: '\2605'; /* Unicode star character */
+            }
+
+        .rating input:checked ~ label:before {
+            color: gold; /* Change color of selected stars */
+        }
+
+    .child-table-hidden {
+        display: none;
+    }
+
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-calcs {
+        background: #fff !important;
+    }
+
+    .tabulator .tabulator-footer {
+        border-top: 1px solid #fff;
+    }
+
+    #file-drop-area {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    #image-uploadify {
+        display: none;
+    }
+
+    .footerButton {
+        margin-top: 40px;
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 99%;
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+
+    .bottom-bar-css:hover {
+        background: #212529;
+    }
+
+    .bottom-bar-css-s-n-c:hover {
+        background: #007611d6;
+    }
+
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        height: 40px;
+    }
+
+    .select2-container--default .select2-selection--multiple {
+        height: 40px;
+    }
+
+    .select2-container {
+        font-size: 16px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #aaaaaa94;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 23px;
+        }
+    /* Customize the Select2 selection box */
+    .select2-selection {
+        background-color: #f2f2f2;
+        border-radius: 5px;
+        height: 30px;
+        padding-bottom: 37px;
+        border: 1px solid #ced4da
+    }
+
+    .select2-selection__rendered, .select2-selection__arrow {
+        margin-top: 8px;
+    }
+
+</style>
+
+<input type="hidden" id="Id" name="Id" value="" />
+<div style="width: 100%; display: flex; justify-content: center;">
+    <div style="width: 60%;" class="shadow p-3 mb-3 bg-body rounded">
+        <h3 style="text-align: center;"><strong>Work Order</strong></h3>
+    </div>
+</div>
+
+<div style="width: 100%; display: flex; justify-content: center;">
+
+  <div style="width: 60%;" class="shadow p-3 mb-5 bg-body rounded">
+
+    <div class="row mt-3">
+    <div class="col-lg">
+        <label class="fw-bold">From Company</label>
+        <select id="toCompanyId" class="form-control select2">
+            <option value="">Select From List</option>
+        </select>
+        </div>
+        <div class="col-lg">
+        <label class="fw-bold">WorkOrder No</label>
+            <input id="workOrderNo" class="form-control" />
+        <span class="text-danger" id="workOrderNoValidation"></span>
+        </div>
+    </div>
+<div class="row mt-3">
+    <div class="col-lg">
+        <label class="fw-bold">WO.Date</label>
+        <input id="woDate" class="form-control" />
+    </div>
+    <div class="col-lg">
+        <label class="fw-bold">To Company</label>
+        <select id="SupplierId" class="form-control select2">
+            <option value="">Select From List</option>
+        </select>
+    </div>
+    <div class="col-lg-4">
+        <label class="fw-bold">To Person</label>
+        <input id="toPerson" class="form-control" />
+    </div>
+    </div>
+<div class="row mt-3">
+    <div class="col-lg">
+        <label class="fw-bold">Service Start</label>
+        <input id="serviceStart" class="form-control" />
+    </div>
+    <div class="col-lg">
+        <label class="fw-bold">Service End</label>
+        <input id="serviceEnd" class="form-control" />
+    </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-lg">
+        <label class="fw-bold">Currency</label>
+            <select id="Currency" class="form-control select2">
+            </select>
+        </div>
+        <div class="col-lg">
+        <label class="fw-bold">Conv. Rate</label>
+           <input id="ConvRate" class="form-control" value="1" />
+        </div>
+        <div class="col-lg">
+        <label class="fw-bold">Workorder Type</label>
+            <input id="workOrederType" class="form-control" />
+        </div>
+    </div>
+
+<div class="row mt-3">
+    <div class="col-lg">
+        <label class="fw-bold">Agreement Date</label>
+        <input id="agreementDate" class="form-control" />
+    </div>
+    <div class="col-lg">
+        <label class="fw-bold">Delivery Date</label>
+        <input id="deliveryDate" class="form-control" />
+    </div>
+</div>
+    <div class="row mt-3">
+    <div class="col-lg">
+        <label class="fw-bold">WO Details</label>
+        <input id="subject" class="form-control" />
+        </div>
+    <div class="col-lg">
+        <label class="fw-bold">Pay. Terms</label>
+        <input id="payTerms" class="form-control" />
+        </div>
+    </div>
+    <div class="row mt-3">
+    <div class="col-lg">
+        <label class="fw-bold">Ship To</label>
+        <input id="shipTo" class="form-control" />
+        </div>
+    <div class="col-lg">
+        <label class="fw-bold">Others Terms</label>
+        <input id="otherTerms" class="form-control" />
+        </div>
+    </div>
+    <div class="row mt-3">
+    <div class="col-lg">
+        <label class="fw-bold">Total Amount</label>
+        <input id="totalAmount" class="form-control" />
+        </div>
+    <div class="col-lg">
+        <label class="fw-bold">Recommened By</label>
+        <select id="recommendedBy" class="form-control select2">
+            <option value="">Select From List</option>
+        </select>
+    </div>
+    </div>
+    <div class="row mt-3">
+    <div class="col-lg">
+            <label class="fw-bold">Sales Tax</label>
+        <input id="salesTax" class="form-control" />
+        </div>
+    <div class="col-lg">
+            <label class="fw-bold">Approved By</label>
+            <select id="ApprovedBy" class="form-control select2">
+                <option value="">Select From List</option>
+        </select>
+    </div>
+    </div>
+    <div class="row mt-3 mb-5">
+        <div class="col-lg">
+                <label class="fw-bold">Shipping</label>
+                <input id="Shipping" class="form-control" oninput="calculateTotal()" />
+        </div>
+        <div class="col-lg">
+                <label class="fw-bold">Other Exp</label>
+                <input id="OtherExp" class="form-control" oninput="calculateTotal()" />
+        </div>
+        <div class="col-lg">
+                <label class="fw-bold">Total</label>
+                <input id="Total" class="form-control" />
+                <span class="text-danger" id="total-validation"></span>
+        </div>
+        <div class="col-lg">
+                <label class="fw-bold">Advance Pay</label>
+                <input id="AdvancePay" class="form-control" oninput="calculateNetPayable()" />
+        </div>
+        <div class="col-lg">
+                <label class="fw-bold">Net Payable</label>
+                <input id="NetPayable" class="form-control" />
+        </div>
+    </div>
+
+@if (ViewBag.ActionType == "Edit")
+{
+    <div class="bottom-bar">
+        <div>
+            <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("Import", "Variable", new { Type = "WorkOrder" })';">Cancel</button>
+        </div>
+        <div>
+        </div>
+        <div class="dropdown">
+            <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Update</button>
+
+            <button id="BtnSaveAndClose" class="btn-success  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="" data-purchase-Id="@Model">
+                Update and close
+            </button>
+            <ul class="dropdown-menu" id="ul-id-for-expenses">
+                <li class="dropdown-item">
+                    <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+else if (ViewBag.ActionType == "Create")
+{
+    <div class="bottom-bar">
+        <div>
+           <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("Import", "Variable", new { Type = "WorkOrder" })';">Cancel</button>
+        </div>
+        <div class="d-flex">
+            <div>
+            </div>
+            <div id="makeRecurringDiv" style="padding-top: 5px; border-left: 3px solid white;">
+                <div style="margin-left: 5px;">
+                </div>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Save</button>
+
+            <button id="BtnSaveAndClose" class="btn-success  fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="" data-purchase-Id="@Model">
+                Save and close
+            </button>
+            <ul class="dropdown-menu" id="ul-id-for-expenses">
+                <li class="dropdown-item">
+                    <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+<br />
+   </div>
+</div>
+@section scripts {
+    <script type="text/javascript">
+        //===========================work order functionalities starts=====================
+
+        function calculateTotal() {
+            // Get values from input fields
+            var shippingValue = parseFloat(document.getElementById("Shipping").value) || 0;
+            var otherExpValue = parseFloat(document.getElementById("OtherExp").value) || 0;
+
+            // Calculate total
+            var total = shippingValue + otherExpValue;
+
+            // Update Total input field
+            document.getElementById("Total").value = total.toFixed(2);
+
+            // Calculate Net Payable again when total changes
+            calculateNetPayable();
+        }
+
+        function calculateNetPayable() {
+            // Get values from input fields
+            var totalValue = parseFloat(document.getElementById("Total").value) || 0;
+            var advancePayValue = parseFloat(document.getElementById("AdvancePay").value) || 0;
+
+            // Calculate net payable
+            var netPayable = totalValue - advancePayValue;
+
+            // Update Net Payable input field
+            document.getElementById("NetPayable").value = netPayable.toFixed(2);
+        }
+
+        let currentActiveInput = null;
+
+        // $("#Total").on("input", function () {
+        //     $("#total-validation").html("");
+        // });
+
+        $('#BtnSave').click(function () {
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            $("#ComId").val(ComId);
+            $("#LuserId").val(UserId);
+
+            var GroupLCID = '@ViewBag.WorkOrderId';
+            var totalval = $("#Total").val();
+
+            var Model =
+            {
+                ComId: ComId,
+                LuserId: UserId,
+                Id: GroupLCID,
+                CommercialCompanyId: $("#toCompanyId option:selected").val(),
+                WorkOrderNo: $("#workOrderNo").val(),
+                WorkOrderDate: $("#woDate").val(),
+                SupplierId: $("#SupplierId option:selected").val(),
+                ToPerson: $("#toPerson").val(),
+                ServiceContractStartDate: $("#serviceStart").val(),
+                ServiceContractEndDate: $("#serviceEnd").val(),
+                CurrencyId: $("#Currency option:selected").val(),
+                ConversionRate: $("#ConvRate").val(),
+                WorkOrderType: $("#workOrederType").val(),
+                AgreementDate: $("#agreementDate").val(),
+                DeliveryDate: $("#deliveryDate").val(),
+                Subject: $("#subject").val(),
+                PaymentTerms: $("#payTerms").val(),
+                ShipTo: $("#shipTo").val(),
+                OtherTerms: $("#otherTerms").val(),
+                SubTotal: $("#totalAmount").val(),
+                RecommenedById: $("#recommendedBy option:selected").val(),
+                SalesTax: $("#salesTax").val(),
+                ApprovedById: $("#ApprovedBy option:selected").val(),
+                Shipping: $("#Shipping").val(),
+                OtherExp: $("#OtherExp").val(),
+                //Total: $("#Total").val(),
+                Total: totalval,
+                AdvancePayment: $("#AdvancePay").val(),
+                NetPayable: $("#NetPayable").val(),
+            };
+
+            // if (!totalval) {
+            //     $("#total-validation").html("Please enter the Percentage");
+            //     $("#Total").focus();
+            // }
+
+            console.log("after save console", Model)
+            var PurchaseIdAbc = 0;
+
+            $.ajax({
+                async: false,
+                type: "POST",
+                        url: "@Url.Action("SaveWorkOrder", "Variable")",
+                data: JSON.stringify(Model),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //console.log("after save console::", response);
+                            PurchaseIdAbc = response.Id;
+                            setTimeout(function () {
+                                toastr.success(response.message, "", {
+                                    "toastClass": "toast-green"
+                                });
+                            }, 1500);
+                    //alert(" Data Saved");
+
+                },
+                error: function (response) {
+                }
+            });
+
+            if (PurchaseIdAbc > 0) {
+                setTimeout(function () {
+                            window.location.href = '@Url.Action("CreateWorkOrder", "Variable")?&WorkOrderId=' + PurchaseIdAbc;
+                }, 3000)
+            }
+
+
+        });
+
+        $('#BtnSaveAndClose').click(function () {
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            $("#ComId").val(ComId);
+            $("#LuserId").val(UserId);
+
+            var GroupLCID = '@ViewBag.WorkOrderId';
+            var totalval = $("#Total").val();
+
+            //====validation handle ends======
+            var Model =
+                {
+                    ComId: ComId,
+                    LuserId: UserId,
+                    Id: GroupLCID,
+                    CommercialCompanyId: $("#toCompanyId option:selected").val(),
+                    WorkOrderNo: $("#workOrderNo").val(),
+                    WorkOrderDate: $("#woDate").val(),
+                    SupplierId: $("#SupplierId option:selected").val(),
+                    ToPerson: $("#toPerson").val(),
+                    ServiceContractStartDate: $("#serviceStart").val(),
+                    ServiceContractEndDate: $("#serviceEnd").val(),
+                    CurrencyId: $("#Currency option:selected").val(),
+                    ConversionRate: $("#ConvRate").val(),
+                    WorkOrderType: $("#workOrederType").val(),
+                    AgreementDate: $("#agreementDate").val(),
+                    DeliveryDate: $("#deliveryDate").val(),
+                    Subject: $("#subject").val(),
+                    PaymentTerms: $("#payTerms").val(),
+                    ShipTo: $("#shipTo").val(),
+                    OtherTerms: $("#otherTerms").val(),
+                    SubTotal: $("#totalAmount").val(),
+                    RecommenedById: $("#recommendedBy option:selected").val(),
+                    SalesTax: $("#salesTax").val(),
+                    ApprovedById: $("#ApprovedBy option:selected").val(),
+                    Shipping: $("#Shipping").val(),
+                    OtherExp: $("#OtherExp").val(),
+                    //Total: $("#Total").val(),
+                    Total: totalval,
+                    AdvancePayment: $("#AdvancePay").val(),
+                    NetPayable: $("#NetPayable").val(),
+            };
+
+            // if (!totalval) {
+            //     $("#total-validation").html("Please enter the Percentage");
+            //     $("#Total").focus();
+            // }
+
+            console.log("after save console", Model)
+            var PurchaseIdAbc = 0;
+
+            $.ajax({
+                async: false,
+                type: "POST",
+                        url: "@Url.Action("SaveWorkOrder", "Variable")",
+                data: JSON.stringify(Model),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //console.log("after save console::", response);
+                            PurchaseIdAbc = response.Id;
+                            setTimeout(function () {
+                                toastr.success(response.message, "", {
+                                    "toastClass": "toast-green"
+                                });
+                            }, 1500);
+
+                },
+                error: function (response) {
+                }
+            });
+
+            if (PurchaseIdAbc > 0) {
+                setTimeout(function () {
+                   window.location.href = '@Url.Action("Import", "Variable", new { Type = "WorkOrder" })';
+                }, 3000)
+            }
+
+
+        });
+
+        //=============edit mode starts==============
+        var globalStyleNo;
+        if ('@ViewBag.ActionType' == "Edit") {
+            $.ajax({
+                type: "GET",
+                        url: "@Url.Action("GetWorkOrder", "Variable")",
+                data: { "id": '@ViewBag.WorkOrderId' },
+                dataType: "json",
+                success: function (response) {
+                    console.log("edit mode er data dekhi:", response);
+                            $("#workOrderNo").val(response.data.WorkOrderNo),
+                                $("#woDate").val(response.data.WorkOrderDate),
+                                $("#toPerson").val(response.data.ToPerson),
+                                $("#serviceStart").val(response.data.ServiceContractStartDate),
+                                $("#serviceEnd").val(response.data.ServiceContractEndDate),
+                                $("#ConvRate").val(response.data.ConversionRate ?? 1),
+                                $("#workOrederType").val(response.data.WorkOrderType),
+                                $("#agreementDate").val(response.data.AgreementDate),
+                                $("#deliveryDate").val(response.data.DeliveryDate),
+                                $("#subject").val(response.data.Subject),
+                                $("#payTerms").val(response.data.PaymentTerms),
+                                $("#shipTo").val(response.data.ShipTo),
+                                $("#otherTerms").val(response.data.OtherTerms),
+                                $("#totalAmount").val(response.data.SubTotal),
+                                $("#salesTax").val(response.data.SalesTax),
+                                $("#Shipping").val(response.data.Shipping),
+                                $("#OtherExp").val(response.data.OtherExp),
+                                $("#Total").val(response.data.Total),
+                                $("#AdvancePay").val(response.data.AdvancePayment),
+                                $("#NetPayable").val(response.data.NetPayable),
+                    setTimeout(function () {
+                                    $('#toCompanyId').val(response.data.CommercialCompanyId).change();
+                                    $('#SupplierId').val(response.data.SupplierId).change();
+                                    $('#Currency').val(response.data.CurrencyId).change();
+                                    $('#recommendedBy').val(response.data.RecommenedById).change();
+                                    $('#ApprovedBy').val(response.data.ApprovedById).change();
+                    }, 2000);
+
+                },
+                error: function (error) {
+                    console.error("Error fetching data: " + error);
+                }
+            });
+
+        }
+        //=============edit mode ends===========
+
+
+
+
+        //duplicate bblc no error  handling
+        var currentPOLId = '@ViewBag.WorkOrderId';
+        var BtnSave = document.querySelector('#BtnSave');
+        var BtnSaveAndClose = document.querySelector('#BtnSaveAndClose');
+        function getBBLC(callback) {
+            $.ajax({
+                type: "GET",
+                        url: '@Url.Action("GetWorkOrderList", "Variable")',
+                dataType: "json",
+                success: function (data) {
+                    // console.log("data::", data.data);
+                    var SizeCodeGetArray = [];
+
+                    data.data.forEach(function (item) {
+                                var SizeName = item.woWorkOrderNo;
+                        var SizeIdGet = item.Id;
+                        var SizeData = {
+                            SizeName: SizeName,
+                            Id: SizeIdGet
+                        };
+                        SizeCodeGetArray.push(SizeData);
+                    });
+
+                    if (typeof callback === "function") {
+                        callback(SizeCodeGetArray);
+                    }
+                },
+                error: function (error) {
+                    console.error("Error:", error);
+                }
+            });
+        }
+
+        function checkPOLExists(sizeName) {
+            getBBLC(function (data) {
+                var lowercasedSizeName = sizeName.toLowerCase();
+
+                var sizeExists = data.some(function (item) {
+                    // console.log("item.Id", item.Id);
+                    //console.log("currentSizeIdd", currentSizeIdd);
+
+                    if (currentPOLId == item.Id) {
+                        return false;
+                    }
+
+                    return item.SizeName.trim().toLowerCase() === lowercasedSizeName;
+                });
+
+                // console.log("sizeExists", sizeExists);
+
+                if (sizeExists) {
+                            $("#workOrderNoValidation").html("Already has the same Work Order No!");
+                    BtnSave.disabled = true;
+                    BtnSaveAndClose.disabled = true;
+                } else {
+                            $("#workOrderNoValidation").html("");
+                    BtnSave.disabled = false;
+                    BtnSaveAndClose.disabled = false;
+
+                }
+            });
+        }
+
+                var POLNameHandle = document.getElementById("workOrderNo");
+        POLNameHandle.addEventListener("input", function () {
+            //console.log("currentSizeId", currentSizeIdd);
+
+            var enteredSizeName = POLNameHandle.value;
+            checkPOLExists(enteredSizeName);
+        });
+        //==================dropdown populate===============
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("supplierDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                            $('#SupplierId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("lctypeDropdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#LCTypeId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("documentStatusDropdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#DocumentStatusId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("bblcnoDropdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#BBLCId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("itemGroupDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#ItemGroupId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("concernDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                            $('#toCompanyId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("qtyDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#UnitMasterId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("itemDescriptionDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                    $('#ItemDecId').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("currencyDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                            $('#Currency').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+        $.ajax({
+            type: "GET",
+                    url: '@Url.Action("approvedByDrodpdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    // console.log("value dekhi country er", value);
+                            $('#recommendedBy').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                            $('#ApprovedBy').append('<option value="' + value.Value + '">' + value.Text + '</option>');
+                });
+            }
+        });
+
+        // $('select').select2();
+
+        var today = new Date();
+        var day = today.getDate();
+        var month = today.toLocaleString('default', { month: 'short' });
+        var year = today.getFullYear();
+
+        var formattedDay = (day < 10 ? '0' : '') + day;
+
+        var formattedDate = formattedDay + '-' + month + '-' + year;
+        $('#woDate').val(formattedDate);
+        $('#serviceStart').val(formattedDate);
+        $('#serviceEnd').val(formattedDate);
+        $('#agreementDate').val(formattedDate);
+        $('#deliveryDate').val(formattedDate);
+
+        $(function () {
+                    $("#woDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            })
+                    $("#serviceStart").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+                    $("#serviceEnd").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+                    $("#agreementDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+                $("#deliveryDate").removeClass("hasDatepicker").datepicker({
+            dateFormat: "dd-M-yy"
+            });
+            $("#woDate").attr("autocomplete", "off");
+            $("#serviceStart").attr("autocomplete", "off");
+            $("#serviceEnd").attr("autocomplete", "off");
+            $("#agreementDate").attr("autocomplete", "off");
+            $("#deliveryDate").attr("autocomplete", "off");
+        });
+
+
+
+
+        //===============================work order functionaloties end========================
+    </script>
+}

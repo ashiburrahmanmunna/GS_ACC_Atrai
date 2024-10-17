@@ -1,0 +1,207 @@
+﻿@model Atrai.Core.Entity.ToDoModel
+@{ ViewData["Title"] = "AddToDo";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-md-7 col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>To Do Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="Internet" asp-action="AddToDo" method="post">
+                                @if (Model != null)
+                                {
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" />
+                                    <input type="hidden" asp-for="LuserId" /> 
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Id" value="0" />
+                                }
+                                <input type="hidden" asp-for="InternetUserId" />
+
+                            <div class="form-group row">
+                                <div class="col-md-6 col-12">
+                                    <label asp-for="EntryDate"></label>
+                                    <input asp-for="EntryDate" class="form-control" type="date">
+                                    <span asp-validation-for="EntryDate" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-6 col-12">
+                                    <label asp-for="Subject"></label>
+                                    <input type="text" asp-for="Subject" class="form-control" placeholder="eg Subject">
+                                    <span asp-validation-for="Subject" class="text-danger"></span>
+                                </div>
+                            </div>
+
+
+                            <div class="form-group row">
+
+                                <div class="col-md-6 col-12">
+                                    <label asp-for="Description"></label>
+                                    <textarea class="form-control" asp-for="Description" rows="4" placeholder="Description"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+
+
+                                <div class="col-md-6 col-12">
+                                    <label asp-for="TicketId"></label>
+                                    <textarea class="form-control" asp-for="TicketId" rows="4" placeholder="Ticket Id"></textarea>
+                                    <span asp-validation-for="TicketId" class="text-danger"></span>
+                                </div>
+
+                            </div>
+
+
+                                <div class="form-group row">
+
+                                    <div class="col-md-6 col-12">
+                                        @Html.LabelFor(x => x.UserId)
+                                        @Html.TextBoxFor(x => x.UserId, null, new { @class = "form-control", @placeholder = "User Id" })
+                                        @Html.ValidationMessageFor(x => x.UserId, "", new { @class = "text-danger" })
+                                    </div>
+
+
+                                    @*<div class="col-md-6 col-12">
+
+                                        <label asp-for="InternetUserId">Apps User Id</label>
+                                        <input asp-for="InternetUserId" class="form-control" placeholder="eg User Id" readonly="@(true)">
+                                        <span asp-validation-for="InternetUserId" class="text-danger"></span>
+                                    </div>*@
+
+
+                                    <div class="col-md-6 col-12">
+                                        @Html.LabelFor(x => x.UserName)
+                                        @Html.TextBoxFor(x => x.UserName, null, new { @class = "form-control", @placeholder = "User Name ", @readonly = "readonly" })
+                                        @Html.ValidationMessageFor(x => x.UserName, "", new { @class = "text-danger" })
+                                    </div>
+
+
+                                </div>
+
+
+
+                                <div class="form-group row">
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="StaffComment"></label>
+                                        <textarea class="form-control" asp-for="StaffComment" placeholder="Staff Comment."></textarea>
+                                        <span asp-validation-for="StaffComment" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="AssaignFusionTeam"></label>
+                                        <textarea class="form-control" asp-for="AssaignFusionTeam" placeholder="Assaign Fusion Team"></textarea>
+                                        <span asp-validation-for="AssaignFusionTeam" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6 col-12">
+                                        <label for="TeamType"> Status : </label>
+                                        @Html.DropDownList("Status", new List<SelectListItem>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 {
+                                                    new SelectListItem() {Text = "Completed", Value="Completed"},
+                                                    new SelectListItem() {Text = "Pending", Value="Pending"},
+                                                    new SelectListItem() {Text = "Postponed", Value="Postponed"},
+                                                    new SelectListItem() {Text = "Cancel", Value="Cancel"}
+
+                                                }, "Select Status", new { @class = "form-control" })
+
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="Comment"></label>
+                                        <textarea class="form-control" asp-for="Comment" rows="4" placeholder="Comment"></textarea>
+                                        <span asp-validation-for="Comment" class="text-danger"></span>
+                                    </div>
+
+
+                                </div>
+
+
+                                <div class="form-group">
+                                    @if (ViewBag.ActionType == "Create")
+                                    {
+                            <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" /> }
+                        else if (ViewBag.ActionType == "Edit")
+                        {
+                            <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" /> }
+                        else if (ViewBag.ActionType == "Delete")
+                        {
+                            <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>}
+                                    @Html.ActionLink("Back", "ToDoList", "Internet", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                </div>
+
+
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+@section scripts {
+    <script type="text/javascript">
+
+
+        autocompletefunction();
+
+
+        function autocompletefunction() {
+            $("#UserId").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '../Internet/internetuserIddata/',
+                        dataType: "json",
+                        data: { query: $("#UserId").val() },
+                        success: function (data) {
+                            console.log(data);
+                            response($.map(data, function (item) {
+                                return {  label: item.UserId, UserName: item.UserName, Id: item.Id };//, , BillAmount: item.BillAmount
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                autoFocus: true,
+                minLength: 3,
+                change: function (event, ui) {
+                    if (ui.item === null) {
+                        $(this).val('');
+                        $('#UserId').val('');
+                        $('#UserName').val('');
+                        $('#InternetUserId').val('');
+                        //$('#MobileNoIfNecessary').val('');
+
+                    }
+                },
+                select: function (event, ui) {
+
+
+                    $("#UserName").val(ui.item.UserName);
+                    $("#UserId").val(ui.item.label);
+                    $("#InternetUserId").val(ui.item.Id);
+
+
+
+                    return false;
+                }
+            });
+        }
+
+    </script>
+
+}

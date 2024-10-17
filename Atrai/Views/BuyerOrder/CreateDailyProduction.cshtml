@@ -1,0 +1,771 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Daily Production";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        /* border-right: 1px solid #dee2e6; */
+    }
+    
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    #example-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+</style>
+
+
+<div class="container-fluid">
+    <h3 style="border-bottom: 1px solid gray">Daily Production</h3>
+    <div class="d-flex mb-3">
+        <div class="ms-4">
+            <label><strong>Buyer PO</strong></label>
+            <select id="buyer_po" class="form-control">
+                <option value="">Select Buyer PO</option>
+            </select>
+        </div>
+        <div class="ms-4">
+            <input type="text" placeholder="Search Style" id="Id" class="form-control d-none" value="0">
+            <label><strong>Style</strong></label>
+            <input type="text" placeholder="Search Style" id="style-name" class="form-control" style="padding:1px;">
+            <input type="text" placeholder="Search Style" id="style-id" class="form-control d-none">
+
+        </div>
+        <div class="ms-4">
+            <label><strong>Buyer</strong></label>
+            <select id="Buyer" class="form-control">
+                <option value="">Select Buyer</option>
+            </select>
+        </div>
+        <div class="ms-4">
+            <label><strong>Total Quantity</strong></label>
+            <input type="text" id="total_quantity" class="form-control" style="padding:1px;">
+        </div>
+        <div class="ms-4">
+            <label><strong>Department</strong></label>
+            <select id="department" class="form-control">
+                <option value="">Select Department</option>
+            </select>
+        </div>
+        <button type="button" class="btn btn-primary ms-4" onclick="loadData()" style="margin-top: 15px;">Load Data</button>
+    </div>
+    <div style="padding:20px;">
+        <div id="example-table"></div>
+    </div>
+    <div>
+
+        @if (ViewBag.ActionType == "Edit")
+        {
+            <button class="btn btn-success" id="BtnSave" style="float:right;">Update</button>
+
+        }
+        else if (ViewBag.ActionType == "Create")
+        {
+            <button class="btn btn-success" id="BtnSave" style="float:right;">Save</button>
+        }
+        <button class="btn btn-warning" onclick="gotoInvoiceList()" style="float: right; margin-right: 10px;"><span style="color: white">Back to List</span></button>
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+   
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+
+    <script>
+
+        $("#buyer_po").select2();
+        $("#Buyer").select2();
+        $("#department").select2();
+
+        function gotoInvoiceList() {
+            var Type = "Daily_Production";
+
+            window.location.href = '@Url.Action("BuyerPOList", "BuyerOrder")' + '?Type=' + encodeURIComponent(Type);
+        }
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetBuyersPO", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#buyer_po').append('<option value="' + value.Id + '" >' + value.BuyerPO + '</option>');
+                });
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetBuyers", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#Buyer').append('<option value="' + value.Id + '" data-currency-id="' + value.CustomerCurrencyId + '" >' + value.Name + '-' + value.CurrencyShortName + '</option>');
+                });
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetDepartments", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#department').append('<option value="' + value.Id + '" >' + value.DeptName + '</option>');
+                });
+            }
+        });
+
+        var table = new Tabulator("#example-table", {
+            layout: "fitColumns",
+            addRowPos: "bottom",
+        });
+
+        // $("#buyer_po").on("select2:select", function () {
+        //     var buyerpoId = $("#buyer_po").val();
+        //     var deptId = $("#department").val();
+
+
+        //     $.ajax({
+        //         url: '@Url.Action("GetPODetails", "BuyerOrder")' + '?buyerPOId=' + buyerpoId + '&DeptId=' + deptId,
+        //         success: function (response) {
+        //             if (response.success == "1") {
+        //                 var model = response.data;
+        //                 $("#Buyer").val(model.BuyerId).trigger('change');
+        //                 $("#style-id").val(model.StyleId);
+        //                 $("#style-name").val(model.StyleNo);
+        //                 //console.log(response.dataTable1);
+
+
+        //                 var data = response.dataTable;
+        //                 var data1 = response.dataTable1;
+
+        //                 const columnsToCopy = Object.keys(data1[0]).filter(columnName =>
+        //                     columnName.includes("Already Rcvd")
+        //                 );
+
+        //                 columnsToCopy.forEach(columnName => {
+        //                     if (data[0].hasOwnProperty(columnName)) {
+        //                         data1.forEach((row, index) => {
+        //                             data[index][columnName] = row[columnName];
+        //                         });
+        //                     }
+        //                 });
+
+
+        //                 console.log(data);
+        //                 var columns = [];
+        //                 var Allcolumns = [];
+        //                 var columnIndex;
+        //                 var groupedColumns = {};
+
+        //                 for (var key in data[0]) {
+        //                     var isEditable = key.includes("Rcv QTY");
+        //                     var isVisible = key !== "ColorId"; 
+        //                     var title = key;
+
+        //                     // Handling ColorId and ColorName separately
+        //                     if (title === "ColorId" || title === "ColorName") {
+        //                         Allcolumns.push(key);
+        //                         columns.push({
+        //                             title: title,
+        //                             field: key,
+        //                             sorter: "string",
+        //                             editor: isEditable ? "input" : false, 
+        //                             visible: isVisible
+        //                         });
+        //                     } else {
+        //                         // Extracting parent column name
+        //                         var parentColumnName = title.split("(")[0].trim();
+        //                         parentColumnName = parentColumnName.split(">")[1].trim();
+
+        //                         if (!groupedColumns[parentColumnName]) {
+        //                             groupedColumns[parentColumnName] = {
+        //                                 title: parentColumnName,
+        //                                 columns: []
+        //                             };
+        //                         }
+
+        //                         var childColumnName = title.substring(title.indexOf("(") + 1, title.indexOf(")"));
+        //                         Allcolumns.push(key);
+        //                         console.log(Allcolumns);
+        //                         groupedColumns[parentColumnName].columns.push({
+        //                             title: childColumnName,
+        //                             field: key,
+        //                             sorter: "string",
+        //                             editor: isEditable ? "input" : false, 
+        //                             visible: isVisible, 
+        //                             hozAlign: "center",
+        //                             cellEdited: function (cell) {
+        //                                 var currentColumnField = cell.getColumn().getField();
+        //                                 function findColumnIndex(field) {
+        //                                     for (var j = 0; j < columns.length; j++) {
+        //                                         if (columns[j].field === field) {
+        //                                             return j;
+        //                                         } else if (columns[j].columns) {
+        //                                             for (var k = 0; k < Allcolumns.length; k++) {
+        //                                                 if (Allcolumns[k] === field) {
+        //                                                     return k; // Return the index of the parent column
+        //                                                 }
+        //                                             }
+        //                                         }
+        //                                     }
+        //                                     return -1; // Return -1 if column not found
+        //                                 }
+
+        //                                 // Usage in your cellEdited function
+        //                                 var columnIndex = findColumnIndex(currentColumnField);
+        //                                 var flag = columnIndex - 2;
+        //                                 if(flag % 4 == 0) {
+        //                                     var data = cell.getRow().getData();
+        //                                     var previousColumn = Allcolumns[columnIndex];
+        //                                     var previousColumndata = parseInt(data[previousColumn]);
+        //                                     var currentColumn = Allcolumns[columnIndex + 1];
+        //                                     var secondLastColumn = Allcolumns[columnIndex + 2];
+        //                                     var secondLastdata = parseInt(data[secondLastColumn]);
+        //                                     var nextColumn = Allcolumns[columnIndex + 3];
+        //                                     var nextColumndata = parseInt(data[nextColumn]);
+
+        //                                     if (previousColumndata > (nextColumndata - secondLastdata)) {
+        //                                         data[previousColumn] = 0;
+        //                                         data[currentColumn] = nextColumndata -  secondLastdata;
+        //                                     } else {
+        //                                         data[currentColumn] = nextColumndata - previousColumndata - secondLastdata;
+        //                                     }
+        //                                     cell.getRow().update(data);
+        //                                 }
+        //                             }
+        //                         });
+        //                     }
+        //                 }
+
+        //                 // Push grouped columns into final columns array
+        //                 for (var groupName in groupedColumns) {
+        //                     columns.push(groupedColumns[groupName]);
+        //                 }
+
+        //                 // columns.push({//create column group
+        //                 //     title: "Work Info",
+        //                 //     columns: [
+        //                 //         { title: "Progress", field: "progress", hozAlign: "right", sorter: "number", width: 100 },
+        //                 //         { title: "Rating", field: "rating", hozAlign: "center", width: 80 },
+        //                 //         { title: "Driver", field: "car", hozAlign: "center", width: 80 },
+        //                 //     ],
+        //                 // });
+        //                 for (var key in data) {
+        //                     for (var prop in data[key]) {
+        //                         if (data[key][prop] === null) {
+        //                             data[key][prop] = 0;
+        //                         }
+        //                     }
+        //                 }
+        //                 console.log(data);
+        //                 table = new Tabulator("#example-table", {
+        //                     layout: "fitColumns",
+        //                     addRowPos: "bottom",
+        //                     columns: columns ,
+        //                     data: data
+        //                 });
+
+                        
+        //             }
+        //         }
+        //     });
+        // });
+
+        function loadData() {
+            var buyerpoId = $("#buyer_po").val();
+            var deptId = $("#department").val();
+
+
+            $.ajax({
+                url: '@Url.Action("GetPODetails", "BuyerOrder")' + '?buyerPOId=' + buyerpoId + '&DeptId=' + deptId,
+                success: function (response) {
+                    if (response.success == "1") {
+                        toastr.success(response.msg, "", {
+                            "toastClass": "toast-green",
+                        });
+
+                        var model = response.data;
+                        $("#Buyer").val(model.BuyerId).trigger('change');
+                        $("#style-id").val(model.StyleId);
+                        $("#style-name").val(model.StyleNo);
+                        //console.log(response.dataTable1);
+
+
+                        var data = response.dataTable;
+                        var data1 = response.dataTable1;
+                        
+
+                        if (data1.length > 0) {
+                            const columnsToCopy = Object.keys(data1[0]).filter(columnName =>
+                                columnName.includes("Already Rcvd")
+                            );
+
+                            columnsToCopy.forEach(columnName => {
+                                if (data[0].hasOwnProperty(columnName)) {
+                                    data1.forEach((row, index) => {
+                                        data[index][columnName] = row[columnName];
+                                    });
+                                }
+                            });
+                        }
+                        
+
+
+                        console.log(data);
+                        var columns = [];
+                        var Allcolumns = [];
+                        var columnIndex;
+                        var groupedColumns = {};
+
+                        for (var key in data[0]) {
+                            var isEditable = key.includes("Rcv QTY");
+                            var isVisible = key !== "ColorId";
+                            var title = key;
+
+                            // Handling ColorId and ColorName separately
+                            if (title === "ColorId" || title === "ColorName") {
+                                Allcolumns.push(key);
+                                columns.push({
+                                    title: title,
+                                    field: key,
+                                    sorter: "string",
+                                    editor: isEditable ? "input" : false,
+                                    visible: isVisible
+                                });
+                            } else {
+                                // Extracting parent column name
+                                var parentColumnName = title.split("(")[0].trim();
+                                parentColumnName = parentColumnName.split(">")[1].trim();
+
+                                if (!groupedColumns[parentColumnName]) {
+                                    groupedColumns[parentColumnName] = {
+                                        title: parentColumnName,
+                                        columns: []
+                                    };
+                                }
+
+                                var childColumnName = title.substring(title.indexOf("(") + 1, title.indexOf(")"));
+                                Allcolumns.push(key);
+                                console.log(Allcolumns);
+                                groupedColumns[parentColumnName].columns.push({
+                                    title: childColumnName,
+                                    field: key,
+                                    sorter: "string",
+                                    editor: isEditable ? "input" : false,
+                                    visible: isVisible,
+                                    hozAlign: "center",
+                                    cellEdited: function (cell) {
+                                        var currentColumnField = cell.getColumn().getField();
+                                        function findColumnIndex(field) {
+                                            for (var j = 0; j < columns.length; j++) {
+                                                if (columns[j].field === field) {
+                                                    return j;
+                                                } else if (columns[j].columns) {
+                                                    for (var k = 0; k < Allcolumns.length; k++) {
+                                                        if (Allcolumns[k] === field) {
+                                                            return k; // Return the index of the parent column
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            return -1; // Return -1 if column not found
+                                        }
+
+                                        // Usage in your cellEdited function
+                                        var columnIndex = findColumnIndex(currentColumnField);
+                                        var flag = columnIndex - 2;
+                                        if (flag % 4 == 0) {
+                                            var data = cell.getRow().getData();
+                                            var previousColumn = Allcolumns[columnIndex];
+                                            var previousColumndata = parseInt(data[previousColumn]);
+                                            var currentColumn = Allcolumns[columnIndex + 1];
+                                            var secondLastColumn = Allcolumns[columnIndex + 2];
+                                            var secondLastdata = parseInt(data[secondLastColumn]);
+                                            var nextColumn = Allcolumns[columnIndex + 3];
+                                            var nextColumndata = parseInt(data[nextColumn]);
+
+                                            if (previousColumndata > (nextColumndata - secondLastdata)) {
+                                                data[previousColumn] = 0;
+                                                data[currentColumn] = nextColumndata - secondLastdata;
+                                            } else {
+                                                data[currentColumn] = nextColumndata - previousColumndata - secondLastdata;
+                                            }
+                                            cell.getRow().update(data);
+                                        }
+                                    }
+                                });
+                            }
+                        }
+
+                        // Push grouped columns into final columns array
+                        for (var groupName in groupedColumns) {
+                            columns.push(groupedColumns[groupName]);
+                        }
+
+                        // columns.push({//create column group
+                        //     title: "Work Info",
+                        //     columns: [
+                        //         { title: "Progress", field: "progress", hozAlign: "right", sorter: "number", width: 100 },
+                        //         { title: "Rating", field: "rating", hozAlign: "center", width: 80 },
+                        //         { title: "Driver", field: "car", hozAlign: "center", width: 80 },
+                        //     ],
+                        // });
+                        for (var key in data) {
+                            for (var prop in data[key]) {
+                                if (data[key][prop] === null) {
+                                    data[key][prop] = 0;
+                                }
+                            }
+                        }
+                        console.log(data);
+                        table = new Tabulator("#example-table", {
+                            layout: "fitColumns",
+                            addRowPos: "bottom",
+                            columns: columns,
+                            data: data
+                        });
+
+
+                    }
+                }
+            });
+        }
+
+
+        function gatherData() {
+
+            var rows = table.getData();
+
+            var formattedData = [];
+
+            var totalqty = 0;
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+            rows.forEach(function (row) {
+                var colorId = row.ColorId;
+                var sizes = [];
+                var rowSum = row.RowSum;
+                var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+                
+                for (var key in row) {
+                    if (key !== 'ColorId' && key !== 'RowSum' && key !== 'ColorName' && key.includes("Rcv QTY")) {
+
+                        var quantityValue = parseInt(row[key]) || 0;
+
+                        totalqty += quantityValue;
+                        var sizeId = key.split("<")[0].trim();
+
+                        formattedData.push({
+                            Id: 0,
+                            ColorId: colorId,
+                            SizeId: sizeId,
+                            ReceivedQuantity: quantityValue,
+                            DepartmentId: $("#department").val(),
+                            ComId: ComId
+                        });
+                    }
+                }
+
+
+            });
+
+
+            var orderData = {
+                Id: $("#Id").val(),
+                StyleId: $("#style-id").val(),
+                BuyerId: $("#Buyer").val(),
+                DepartmentId: $("#department").val(),
+                BuyerPOId: $("#buyer_po").val(),
+                TotalQuantity: totalqty,
+                DailyProduction_Details: formattedData,
+                LuserId: UserId
+            };
+            return orderData;
+        }
+
+        function sendDataToServer() {
+            var orderData = gatherData();
+
+            var data = JSON.stringify(orderData);
+
+            $.ajax({
+
+                url: '@Url.Action("DailyProductionCreation", "BuyerOrder")',
+                type: 'POST',
+                data: data,
+                async: false,
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (response) {
+                    toastr.success(response.message, "", {
+                        "toastClass": "toast-green",
+                    });
+                    setTimeout(function () {
+
+                        var Type = "Daily Production";
+
+                        window.location.href = '@Url.Action("BuyerPOList", "BuyerOrder")' + '?Type=' + encodeURIComponent(Type);
+
+                    }, 1000);
+                },
+                error: function (error) {
+                    console.log("Error");
+                }
+            });
+        }
+
+        var saveButton = document.getElementById('BtnSave');
+        saveButton.addEventListener('click', function () {
+            sendDataToServer();
+        });
+
+        $(document).ready(function () {
+            if ('@actiontype' === "Edit") {
+
+                OrderDetails();
+
+
+                function OrderDetails() {
+                    
+
+                    function fetchColumnsData() {
+                        var id = @ViewBag.Id;
+                        return $.ajax({
+                            url: '@Url.Action("GetDailyProductionDetails", "BuyerOrder")',
+                            data: { id: id },
+                            method: 'GET',
+                            dataType: 'json',
+                        });
+                    }
+                    
+                    fetchColumnsData()
+                        .done(function (response) {
+                            if (response.Success == 1) {
+                                var model = response.masterdata;
+                                $("#Buyer").val(model.BuyerId).trigger('change');
+                                $("#buyer_po").val(model.BuyerPOId).trigger('change');
+                                $("#department").val(model.DepartmentId).trigger('change');
+                                $("#style-id").val(model.StyleId);
+                                $("#Id").val(model.Id);
+                                $("#total_quantity").val(model.TotalQuantity);
+                                $("#style-name").val(model.Style.StyleNo);
+                                //console.log(response.dataTable1);
+
+
+                                var data = response.data;
+                                var data1 = response.data1;
+                                var data2 = response.data2;
+
+                                if (data1.length > 0) {
+                                    const columnsToCopy = Object.keys(data1[0]).filter(columnName =>
+                                        columnName.includes("Already Rcvd")
+                                    );
+
+                                    columnsToCopy.forEach(columnName => {
+                                        if (data[0].hasOwnProperty(columnName)) {
+                                            data1.forEach((row, index) => {
+                                                data[index][columnName] = row[columnName];
+                                            });
+                                        }
+                                    });
+                                }
+                                
+                                if (data2.length > 0) {
+
+                                    const columnsToCopy1 = Object.keys(data2[0]).filter(columnName =>
+                                        columnName.includes("Rcv QTY")
+                                    );
+
+                                    columnsToCopy1.forEach(columnName => {
+                                        if (data[0].hasOwnProperty(columnName)) {
+                                            data2.forEach((row, index) => {
+                                                data[index][columnName] = row[columnName];
+                                            });
+                                        }
+                                    });
+
+                                }
+                                
+
+                                console.log(data);
+                                var columns = [];
+                                var Allcolumns = [];
+                                var columnIndex;
+                                var groupedColumns = {};
+
+                                for (var key in data[0]) {
+                                    var isEditable = key.includes("Rcv QTY");
+                                    var isVisible = key !== "ColorId";
+                                    var title = key;
+
+                                    // Handling ColorId and ColorName separately
+                                    if (title === "ColorId" || title === "ColorName") {
+                                        Allcolumns.push(key);
+                                        columns.push({
+                                            title: title,
+                                            field: key,
+                                            sorter: "string",
+                                            editor: isEditable ? "input" : false,
+                                            visible: isVisible
+                                        });
+                                    } else {
+                                        // Extracting parent column name
+                                        var parentColumnName = title.split("(")[0].trim();
+                                        parentColumnName = parentColumnName.split(">")[1].trim();
+
+                                        if (!groupedColumns[parentColumnName]) {
+                                            groupedColumns[parentColumnName] = {
+                                                title: parentColumnName,
+                                                columns: []
+                                            };
+                                        }
+
+                                        var childColumnName = title.substring(title.indexOf("(") + 1, title.indexOf(")"));
+                                        Allcolumns.push(key);
+                                        console.log(Allcolumns);
+                                        groupedColumns[parentColumnName].columns.push({
+                                            title: childColumnName,
+                                            field: key,
+                                            sorter: "string",
+                                            editor: isEditable ? "input" : false,
+                                            visible: isVisible,
+                                            hozAlign: "center",
+                                            cellEdited: function (cell) {
+                                                var currentColumnField = cell.getColumn().getField();
+                                                function findColumnIndex(field) {
+                                                    for (var j = 0; j < columns.length; j++) {
+                                                        if (columns[j].field === field) {
+                                                            return j;
+                                                        } else if (columns[j].columns) {
+                                                            for (var k = 0; k < Allcolumns.length; k++) {
+                                                                if (Allcolumns[k] === field) {
+                                                                    return k; // Return the index of the parent column
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    return -1; // Return -1 if column not found
+                                                }
+
+                                                // Usage in your cellEdited function
+                                                var columnIndex = findColumnIndex(currentColumnField);
+                                                var flag = columnIndex - 2;
+                                                if (flag % 4 == 0) {
+                                                    var data = cell.getRow().getData();
+                                                    var previousColumn = Allcolumns[columnIndex];
+                                                    var previousColumndata = parseInt(data[previousColumn]);
+                                                    var currentColumn = Allcolumns[columnIndex + 1];
+                                                    var secondLastColumn = Allcolumns[columnIndex + 2];
+                                                    var secondLastdata = parseInt(data[secondLastColumn]);
+                                                    var nextColumn = Allcolumns[columnIndex + 3];
+                                                    var nextColumndata = parseInt(data[nextColumn]);
+
+                                                    if (previousColumndata > (nextColumndata - secondLastdata)) {
+                                                        data[previousColumn] = 0;
+                                                        data[currentColumn] = nextColumndata - secondLastdata;
+                                                    } else {
+                                                        data[currentColumn] = nextColumndata - previousColumndata - secondLastdata;
+                                                    }
+                                                    cell.getRow().update(data);
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+
+                                // Push grouped columns into final columns array
+                                for (var groupName in groupedColumns) {
+                                    columns.push(groupedColumns[groupName]);
+                                }
+
+                                for (var key in data) {
+                                    for (var prop in data[key]) {
+                                        if (data[key][prop] === null) {
+                                            data[key][prop] = 0;
+                                        }
+                                    }
+                                }
+                                console.log(data);
+                                table = new Tabulator("#example-table", {
+                                    layout: "fitColumns",
+                                    addRowPos: "bottom",
+                                    columns: columns,
+                                    data: data
+                                });
+
+
+                            }
+                        })
+                        .fail(function (error) {
+                            console.error('Error fetching column data:', error);
+                        });
+
+                }
+
+
+            }
+        });
+
+    </script>
+}

@@ -1,0 +1,1493 @@
+﻿@using Microsoft.AspNetCore.Http
+@*@using Microsoft.AspNetCore.Antiforgery
+    @inject IAntiforgery AntiForgery*@
+@inject IHttpContextAccessor HttpContextAccessor
+@*@model IEnumerable<Atrai.Model.Core.Entity.Acc_PurchaseMainModel>
+    @{
+        List<Atrai.Model.Core.Entity.Acc_PurchaseCodePrefixModel> PurchaseTypes = ViewBag.Acc_PurchaseCodePrefix;
+    }*@
+@model int
+@{
+    ViewData["Title"] = "Purchase Entry";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var DocTypeValue = ViewBag.DocTypeValue;
+
+    //var PurchaseTypeId = ViewBag.PurchaseTypeId;
+    //var PurchaseTypeName = ViewBag.PurchaseTypeName;
+    var PurchaseId = ViewBag.PurchaseId;
+    var SupplierId = ViewBag.SupplierId;
+    var MakePayment = ViewBag.MakePayment;
+    //var purchaItemsId = ViewBag.purchaItemsId;
+    //var purchaItemsCategoryId = ViewBag.purchaItemsCategoryId;
+
+    //var DocTypeId = ViewBag.DocTypeId;
+    //var DocTypeName = ViewBag.DocTypeName;
+
+}
+
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<style>
+    .bottom-bar-css:hover {
+        background: #212529;
+    }
+
+    .bottom-bar-css-s-n-c:hover {
+        background: #007611d6;
+    }
+    /* CSS for the arrow icon */
+    span.arrow-icon {
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .red-text {
+        color: white;
+        background-color: red;
+        padding: 5px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-style: italic;
+    }
+
+    .footerButton {
+        margin-top: 40px;
+    }
+
+    .green-text {
+        color: white;
+        background-color: green;
+        border-radius: 8px;
+        padding: 5px;
+        font-weight: bold;
+        font-style: italic;
+    }
+
+    .italic-text {
+        font-style: italic;
+    }
+
+    .tabulator .tabulator-header .tabulator-col {
+        display: inline-flex;
+        position: relative;
+        box-sizing: border-box;
+        flex-direction: column;
+        justify-content: flex-start;
+        border-right: 1px solid #aaa;
+        background: #ffffff !important;
+        text-align: left;
+        vertical-align: bottom;
+        overflow: hidden;
+    }
+
+    .tabulator-row .tabulator-cell {
+        display: inline-block;
+        position: relative;
+        box-sizing: border-box;
+        padding: 8px;
+        border-right: 1px dotted #aaa;
+        vertical-align: middle;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .tabulator .tabulator-footer .tabulator-calcs-holder {
+        box-sizing: border-box;
+        width: 100%;
+        text-align: left;
+        background: #f3f3f3 !important;
+        border-bottom: 1px;
+        border-top: 1px;
+        overflow: hidden;
+    }
+
+    .tabulator {
+        position: relative;
+        border: 1px #999;
+        background-color: #ffffff;
+        font-size: 14px;
+        text-align: left;
+        overflow: hidden;
+        -webkit-transform: translateZ(0);
+        -moz-transform: translateZ(0);
+        -ms-transform: translateZ(0);
+        -o-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+
+    .loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+    /* Customize the Select2 container */
+    .select2-container {
+        font-size: 16px;
+    }
+
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #aaaaaa94;
+    }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 23px;
+        }
+    /* Customize the Select2 selection box */
+    .select2-selection {
+        background-color: #f2f2f2;
+        border-radius: 5px;
+        height: 30px;
+        padding-bottom: 37px;
+        border: 1px solid #ced4da
+    }
+
+    .select2-selection__rendered, .select2-selection__arrow {
+        margin-top: 8px;
+    }
+
+
+
+    .tabulator-row .tabulator-cell.tabulator-editing input {
+        margin-top: 6px;
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-editing {
+        padding-bottom: 10px;
+    }
+
+    .bootstrap-tagsinput {
+        height: 45px;
+        /* width: 485px; */
+    }
+
+    .move-right {
+        margin-left: 160px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+    .customize-btn-another {
+        background: #2CA01C;
+        border: 1px solid black;
+        border-radius: 20px;
+        color: #FFFFFF;
+        border: 1px solid #2CA01C;
+    }
+
+        .customize-btn-another:hover {
+            background: #2CA01C;
+            border: 1px solid black;
+            border-radius: 20px;
+            color: #FFFFFF;
+            border: 1px solid #2CA01C;
+        }
+
+    .customize-btn:hover {
+        background: #ffffff;
+        border: 1px solid black;
+        color: black;
+        border-radius: 20px;
+    }
+
+    input[type="checkbox"] {
+        width: 20px; /* Set the width */
+        height: 20px; /* Set the height */
+    }
+
+    .collapse-icon {
+        cursor: pointer;
+    }
+
+    input::placeholder {
+        font-style: italic;
+        font-size: 15px;
+    }
+
+
+
+    .content {
+        /* Add some content to create space for the bottom bar */
+        height: 1500px;
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 99%;
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+
+    /* .bottom-bar button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+
+            .bottom-bar button:hover {
+                background-color: #0056b3;
+            }*/
+
+    .icon-container {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+        /* Add any other styles you need for the active cell */
+    }
+
+    .input-column {
+        /* Add any custom styles you want to make it look like an input field */
+    }
+
+    .tabulator-input {
+        /* Tabulator input field styling (e.g., border, padding, width) */
+        border: 1px solid #ccc;
+        padding: 4px;
+        width: 100%;
+    }
+
+    .customize-btnew {
+        background: transparent;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btnew:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .filter-dropdown > .filter-dropdown-class.show {
+        width: 580px;
+    }
+</style>
+
+
+<div class="page-wrapper">
+
+    <div class="container-fluid">
+        @*<div class="col-md-12 row mt-5" >*@
+
+        <div class="hiddenSector">
+            <div class="row">
+                <input type="hidden" id="CountryIdLocal" name="CountryIdLocal" value="" />
+                <input type="hidden" id="Id" name="Id" value="" />
+                <input type="hidden" id="PurchaseSerialId" name="PurchaseSerialId" value="" />
+                <input type="hidden" id="LuserId" name="LuserId" value="" />
+                <input type="hidden" id="ComId" name="ComId" value="" />
+                <input type="hidden" id="LuserIdUpdate" name="LuserIdUpdate" value="" />
+                <input type="hidden" id="CreateDate" name="CreateDate" value="" />
+                <input type="hidden" id="UpdateDate" name="UpdateDate" value="" />
+                <input type="hidden" id="isPosted" name="isPosted" value="" />
+                <input type="hidden" id="IsCash" name="IsCash" value="" />
+                <input type="hidden" id="LuserIdApprove" name="LuserIdApprove" value="" />
+                <input type="hidden" id="LuserIdCheck" name="LuserIdCheck" value="" />
+                <input type="hidden" id="vAmountInWords" name="vAmountInWords" value="" />
+                <input type="hidden" id="PurchaseFilePath" name="PurchaseFilePath" value="" />
+
+
+
+            </div>
+
+        </div>
+
+        <div>
+            <div class="upperSection">
+                <div class="row">
+                    <div class="col-lg col-12">
+                        <button type="button" id="modal-btn-id" class="btn text-center border" data-bs-toggle="modal" data-bs-target="#historyModal">
+                            <i class="bi bi-clock-history fw-bold"></i>
+                        </button>
+                        <!---Modal start-->
+                        <div class="modal fade modal-lg" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="historyModalLabel">Purchase History</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+
+                                        <div class="card rounded-10">
+                                            <div id="jsClockHistory"></div>
+
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        @*<button type="button" class="btn btn-primary">Save changes</button>*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="ms-2 fs-5 fw-bold">Bill</span>
+                    </div>
+
+                    <div class="col-lg" style="padding: 5px; position: fixed; right: 0px; top: 7%; border-top-right-radius: 0; border-bottom-right-radius: 0; ">
+                        <button class="btn btn-primary float-end" id="showoffcanvas"><i class="bi bi-chevron-double-right"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-2 my-auto" id="divLocation">
+                    <div class="mb-2 mt-4">
+                        <label class="form-label">
+                            Bank/Credit account<span class="text-danger"> *</span>
+                        </label>
+                        <select id="bank-credit-account" class="form-control">
+                            <option value="">Cash and cash equivalents</option>
+                        </select>
+                        <span class="text-danger" id="bank-credit-account-validation"></span>
+                    </div>
+                </div>
+                <div class="col-lg-1 my-auto" id="divLocation">
+                    <div class="mb-2 mt-4">
+                        <span>Balance</span><span id="account-type-wise-balance-id"></span>
+                    </div>
+                </div>
+                <div class="col-lg-2 my-auto mt-4 ms-5" id="divLocation">
+                    <div class="mb-2">
+                        <label class="form-label">Payment Date</label>
+
+                        <input class="form-control" id="payment-date" />
+                        <span class="text-danger" id="due-date-validation"></span>
+                    </div>
+                </div>
+                <div class="col-lg-2 my-auto mt-4" id="divLocation">
+                    <div class="mb-2">
+                        <label class="form-label">Ref No</label><span class="text-danger"> *</span>
+                        <input id="bill-no" class="form-control" />
+                        <span class="text-danger" id="bill-no-validation"></span>
+                    </div>
+                </div>
+                <div class="col-lg">
+                    <span class="float-lg-end">TOTAL PAYMENT AMOUNT</span> <br />
+                    <span class="float-lg-end fs-1 fw-bold"><span class="rate">&nbsp;</span><span id="balance-due">0.00</span></span>
+                </div>
+            </div>
+        </div>
+        @if (ViewBag.isMultiCurrency)
+        {
+            <div class="mt-3 d-flex">
+            <div>
+                <labe>Currency</labe>
+                    <select id="currency" class="form-control" style="width: 200px" >
+            <option value="">Select Currency</option>
+        </select>
+            </div>
+             @* <div class="d-flex mt-3 ms-2 d-none" id="yourRateParent" style="width: 126%;">
+                <label>1 <span class="rate"></span> = </label>
+                <input type="text" class="form-control h-100 ms-2 me-2" id="CurrencyRate" style="border-radius:0px;width: 150px;">
+                <input type="text" class="form-control w-50 h-100 ms-2 me-2" id="MultiiCurrencyId" style="border-radius:0px;" hidden>
+                <label>BDT</label>
+            </div> *@
+
+                <div class="d-flex mt-3 d-none" id="yourRateParent" style="width: 300px;">
+                    <label style="margin-top: 0.5rem">1 <span class="rate"></span><span class="flag"></span> = </label>
+                    <input type="text" class="form-control h-100 ms-2 me-2 text-end" id="CurrencyRate" style="border-radius:0px; width: 40%;">
+                    <input type="text" class="form-control w-50 h-100 ms-2 me-2" id="MultiiCurrencyId" style="border-radius:0px;" hidden>
+                    <label style="margin-top: 0.5rem">BDT</label>  <i class="flag-icon flag-icon-bd"></i>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="mt-3 d-none">
+            <labe>Currency</labe>
+        <select id="currency" class="form-control" style="width: 200px">
+            <option value="">Select Currency</option>
+        </select>
+       </div>
+        }
+
+        <div class="d-flex justify-content-between">
+            <div class="dropdown payment-dropdown" onclick="keepDropdownOpened(event)">
+                <button id="payment-btn" type="button" class="btn customize-btnew fw-bold ms-2 dropdown-toggle mt-3 px-4" data-bs-toggle="dropdown" aria-expanded="false">Filter</button>
+                <div class="dropdown-menu dropdown-of filter-drop filter-drop-payment" aria-labelledby="filter-btn-btn" id="filter-btn-dropdown-id" style="width:400px;">
+                    <form class="p-3">
+                        <div class="row" id="fromToDateParent">
+                            <div class="mb-3 col-lg">
+                                <label for="fromInput" class="form-label fw-bold">From</label>
+                                <input class="form-control" id="payment-start-date" style="border-radius:0;" onclick="keepDropdownOpened(event)" />
+                            </div>
+                            <div class="mb-3 col-lg">
+                                <label for="toInput" class="form-label fw-bold">To</label>
+                                <input class="form-control" id="payment-end-date" style="border-radius:0;" onclick="keepDropdownOpened(event)" />
+                            </div>
+                        </div>
+                        <div class="mb-3 col-lg-6" id="payeeDropdownParent">
+                            <label for="payeeDropdown" class="form-label fw-bold">Payee</label>
+                            <select class="form-select" id="payment-payeeDropdown" style="border-radius:0;" onclick="event.stopPropagation()">
+                                <option value="0">All</option>
+                            </select>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="overdue-show-id">
+                            <label class="form-check-label" for="overdue-show-id">
+                                Overdue status only
+                            </label>
+                        </div>
+                        <div class="d-flex justify-content-between mt-5">
+                            <button type="reset" class="btn customize-btn radius-30 fw-bold" onclick="resetPaymentForm(event)">Reset</button>
+                            <button type="button" class="btn  customize-btn-another fw-bold" onclick="reloadPaymentTableData()">Apply</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div title="Settings" class="dropdown1 mt-3 custom-grid" style="display:inline-block;">
+                <span id="overdue-open-set-id" class="me-3"></span>
+                <a href="#" class="text-decoration-none text-black" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                   aria-expanded="false">
+                    <i class="bi bi-gear fs-5"></i>
+                </a>
+                <div class="dropdown-menu gear-dropdown" aria-labelledby="dropdownMenuButton-expense">
+                    <div class="row p-4 main-dropdown-size" style="overflow:hidden;">
+                        <div class="ms-3">
+                            <label>Rows</label> <br />
+                            <select name="rows" id="expense-rows" class="cursor-pointer" style="padding: 10px 0 10px 5px; width: 70px;">
+                                <option value="0" disabled selected>Rows</option>
+                                <option value="5" selected>5</option>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="1000">1000</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+
+        <div class="row mt-5">
+            <div class="col-12 col-md-12">
+                <div id="item-details-content">
+                    <div id="tabulatorItemsGrid"></div>
+                    <span class="text-danger" id="item-table-validation"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<div class="mt-5">
+    <span class="fs-6"><span id="selected-bills-id">0</span> Bills selected</span>
+</div>
+<div id="balance-set-parent" class="d-flex float-lg-end me-3 d-none" style="margin-bottom:100px;">
+    <div class="me-4">
+        <p style="">Account balance</p>
+        <p style="">Total payment(<span class="rate"></span>):</p>
+        <p style="" class="inBDT d-none">Total payment(BDT):</p>
+        <p style="" class="text-danger">New account balance</p>
+    </div>
+    <br />
+    <div>
+        <p id="account-balance" style="">0</p>
+        <p class="" id="total-payment-set" style=""></p>
+        <p class="inBDT d-none" id="total-payment" style=""></p>
+        <p class="text-danger" id="new-account-balance" style=""></p>
+    </div>
+    <br />
+</div>
+
+<div>
+    <div class="row">
+        <div class="footerButton">
+            <button class="btn btn-outline-dark fw-bolder btn-sm mt-4 d-none" id="view-image-or-pdf">Full view <i class="bi bi-eye-fill"></i></button>
+            <button class="btn btn-outline-dark fw-bolder btn-sm mt-4 bg-danger text-white d-none" id="remove-image-or-pdf">X</button>
+        </div>
+        <div class="col-lg-12">
+            <iframe id="pdf-iframe" class="d-none" style="width: 66%; height: 500px;"></iframe>
+        </div>
+        @if (ViewBag.ActionType == "Edit")
+        {
+            <div class="bottom-bar">
+                <div>
+                    <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="gotobillList()">Cancel</button>
+                </div>
+                <div>
+                    <button class="text-white border-0 py-1" style="background: transparent;" id="printButton">Print</button>
+                </div>
+                <div class="dropdown">
+                    @*<button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Update</button>*@
+
+                    <button id="BtnSave" class="btn-success dropdown-toggle fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="dropdown" data-purchase-Id="@Model">
+                        Save
+                    </button>
+                    <ul class="dropdown-menu" id="ul-id-for-expenses">
+                        <li class="dropdown-item">
+                            <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        }
+        else if (ViewBag.ActionType == "Create")
+        {
+            <div class="bottom-bar">
+                <div>
+                    <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("billlistqb", "Accounts")';">Cancel</button>
+                </div>
+                <div>
+                    <button class="text-white border-0 py-1" style="background: transparent;" id="printButton" disabled>Print</button>
+                </div>
+                <div class="dropdown">
+                    @*<button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" data-purchase-Id="@Model">Save</button>*@
+
+                    <button id="BtnSave" class="btn-success dropdown-toggle fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="dropdown" data-purchase-Id="@Model">
+                        Save and close
+                    </button>
+                  @* <ul class="dropdown-menu" id="ul-id-for-expenses">
+                        <li class="dropdown-item">
+                            <a href="" class="dropdown-link" style="color: black;">Time activity</a>
+                        </li>
+                    </ul> *@
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="bottom-bar">
+                <div>
+                    <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '/Accounts/billlistqb';">Cancel</button>
+                </div>
+                <div>
+                    <button class="text-white border-0 py-1" style="background: transparent;" id="printButton">Print</button>
+                </div>
+                <div class="dropdown">
+                    @*<button id="BtnSave" class="btn-close-white radius-30 px-4 fw-bold py-1 bottom-bar-css" style="border: 1px solid #808080b5;background: transparent;" data-purchase-Id="@Model">Save</button>*@
+
+                    <button id="BtnSave" class="btn-success dropdown-toggle fw-bold radius-30 py-1 me-3 bottom-bar-css-s-n-c" type="button" data-bs-toggle="dropdown" data-purchase-Id="@Model">
+                        Save and close
+                    </button>
+                    <ul class="dropdown-menu" id="ul-id-for-expenses">
+                        <li class="dropdown-item">
+                            <a href="/Accounts/ImportTransaction" class="dropdown-link" style="color: black;">Time activity</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        }
+        <input type="button" id="unknown" class="btn  btn-md" value="" />
+        <div class="dropdown" id="unknown1" style="display: inline-block;">
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsPurchaseReport.js" asp-append-version="true"></script>
+
+
+    <script type="text/javascript">
+
+
+            //get supplier starts
+            $.ajax({
+                type: "GET",
+                url: "../Purchase/GetSuppliers",
+                datatype: "Json",
+                success: function (data) {
+
+                    //$.each(data, function (index, value) {
+                    //    $('#payeeDropdown').append('<option value="' + value.Id + '">' + value.SupplierName + '</option>');
+                    //});
+                    $.each(data, function (index, value) {
+                        $('#payment-payeeDropdown').append('<option value="' + value.Id + '">' + value.SupplierName + '</option>');
+                    });
+                }
+            });
+            var tableItems;
+            // Get the current date
+            var currentDate = new Date();
+
+            // Define an array of month names
+            var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            // Create the formatted date string
+            var formattedDate = currentDate.getDate() + "-" + monthNames[currentDate.getMonth()] + "-" + currentDate.getFullYear();
+
+            // Set the formatted date as the value of the input field
+            $("#payment-date").val(formattedDate);
+
+
+        $('#bank-credit-account').select2();
+            $(function () {
+                $("#payment-date").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy",
+                    showOn: "focus"
+                });
+                $("#payment-start-date").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy",
+                    showOn: "focus"
+                });
+                $("#payment-end-date").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy",
+                    showOn: "focus"
+                });
+
+                $("#payment-date").attr("autocomplete", "off");
+                $("#payment-start-date").attr("autocomplete", "off");
+                $("#payment-end-date").attr("autocomplete", "off");
+
+                // Prevent clicking on the datepicker calendar from closing the dropdown
+                $(".ui-datepicker").on("click", function (event) {
+                    event.stopPropagation();
+                });
+
+                // Add a click event handler on the document body to close the dropdown when clicking outside of it
+                $("#filter-btn").on("click", function (event) {
+                    if (!$(event.target).closest(".filter-drop").length && !$(event.target).is("#start-date, #end-date")) {
+                        $(".filter-drop").addClass("show"); // Remove the "show" class to close the dropdown
+                    }
+                });
+            });
+            //get Account heads starts
+            $.ajax({
+                type: "GET",
+                url: "../Admin/GetBanksAccountHeads",
+                datatype: "Json",
+                success: function (data) {
+                    console.log("account heads,", data)
+                    $.each(data, function (index, value) {
+                        $('#bank-credit-account').append('<option value="' + value.Id + '" data-account-balance="' + value.AccountBalance + '">' + value.AccName + '</option>');
+                    });
+                }
+            });
+            $('#bank-credit-account').on('change', function () {
+                var selectedAccountBalance = $('option:selected', this).data('account-balance');
+
+                // Update the AccountBalance in the 'account-type-wise-balance-id' element
+                $('#account-type-wise-balance-id').text('  '+selectedAccountBalance);
+                $('#account-balance').text(selectedAccountBalance);
+
+
+                var totalPayment = parseFloat($("#account-type-wise-balance-id").text());
+                var accountBalance = parseFloat($("#balance-due").text());
+                var newAccountBalance = totalPayment + accountBalance;
+
+
+                $("#account-balance").text(accountBalance);
+                $("#total-payment-set").text(totalPayment);
+                $("#new-account-balance").text(newAccountBalance);
+
+                if (newAccountBalance > 0) {
+                    $('#balance-set-parent').removeClass('d-none');
+                }
+                else {
+                    $('#balance-set-parent').addClass('d-none');
+                }
+            });
+
+            function customCheckBoxFormatter(cell, formatterParams, onRendered) {
+                return '<input type="checkbox" class="custom-checkbox">';
+            }
+            function paymentEditor(cell, onRendered, success, cancel, editorParams) {
+                var input = document.createElement("input");
+                input.type = "number";
+                input.className = "editor-input";
+                input.style.padding = "4px";
+                input.style.width = "100%";
+                input.value = cell.getValue();
+
+                // Set placeholder text
+                input.placeholder = "Enter Payment";
+
+                input.addEventListener("change", function () {
+                    var paymentValue = parseFloat(input.value);
+                    if (!isNaN(paymentValue)) {
+                        cell.setValue(paymentValue); // Update the cell value with the entered payment
+                        cell.getRow().getCell("TotalAmount").setValue(paymentValue); // Update the "Total Amount" field
+                        success(paymentValue);
+                    } else {
+                        cancel();
+                    }
+                });
+
+                return input;
+            }
+
+           $.ajax({
+                type: 'GET',
+                url: '@Url.Action("GetOpenOverDueBill", "Accounts")',
+                //dataType: 'json',
+                contentType: 'application/json;',
+                dataType: 'json',
+               success: function (result) {
+                   console.log("yoho", result);
+                   var span = `<span>${result.data.Table[0].Status}, ${result.data.Table1[0].Status}</span><i class="bi bi-exclamation-circle-fill fs-5 ms-2 text-danger"></i>`;
+                   $("#overdue-open-set-id").append(span);
+               }
+                });
+
+        function customRowSelectionFormatter(cell, formatterParams, onRendered) {
+            var checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+
+            checkbox.checked = cell.getRow().isSelected();
+
+            checkbox.addEventListener("click", function (e) {
+                e.stopPropagation();
+
+                // Toggle the selection first
+                cell.getRow().toggleSelect();
+
+                // Get the count of selected rows
+                var selectedRowCount = tableItems.getSelectedRows().length;
+
+                if (checkbox.checked) {
+                    //alert("Checkbox checked! Selected Count: " + selectedRowCount);
+                    $("#selected-bills-id").text(selectedRowCount);
+                } else {
+                    //alert("Checkbox unchecked! Selected Count: " + selectedRowCount);
+                    $("#selected-bills-id").text(selectedRowCount);
+
+                }
+            });
+
+            return checkbox;
+        }
+
+
+
+
+             $.ajax({
+                type: 'GET',
+                url: '@Url.Action("GetRefDetailsNewForQb", "Admin")',
+                //dataType: 'json',
+                contentType: 'application/json;',
+                dataType: 'json',
+                 success: function (result) {
+                     $("#new-account-balance").text("");
+                     console.log("notun rupe data", result);
+                     var data = result.data;
+                     console.log("getref", result);
+                    var apiUrl = '@Url.Action("GetPayBills", "Admin")';
+                    tableItems = new Tabulator("#tabulatorItemsGrid", {
+                        height: "auto",
+                        layout: "fitColumns",
+                        data: data,
+                        pagination: "local",
+                        paginationSize: 10,
+                        paginationSizeSelector: [10, 25, 50, 100, true],
+                        movableColumns: true,
+
+                        //paginationMode: "remote",
+                        //paginationInitialPage: 1,
+
+                        paginationCounter: "rows",
+                        ajaxURL: apiUrl,
+                        ajaxConfig: "get",
+                        ajaxContentType: "json",
+
+                        ajaxResponse: function (url, params, response) {
+                            console.log("response ta dekhi", response);
+                            PaymentTable.setMaxPage(response.last_page);
+                            console.log("response.last_page", response.last_page);
+
+                            dataLoadExpense = response.data;
+                            /* console.log("dataLoadExpense:", dataLoadExpense);*/
+
+                            return {
+
+                                data: dataLoadExpense,
+                                last_page: response.last_page,
+
+                            };
+                        },
+
+                        columns: [
+                            {
+                                title: "",
+                                field: "selected",
+                                headerSort: false,
+                                formatter: customRowSelectionFormatter,
+                                width: 30,
+                                titleFormatter: "rowSelection",
+                                hozAlign: "center",
+                                headerSort: false,
+                            },
+
+
+
+                          /*  { title: "", field: "CheckBox", headerHozAlign: "left", width: "3px", headerSort: false, hozAlign: "left", visible: true, formatter: customCheckBoxFormatter },*/
+                            { title: "PurchaseId", field: "PurchaseId", movable: false, width: "14px", headerSort: false, visible: false, editor: false, },
+                            { title: "PAYEE", headerHozAlign: "left", field: "RefName", width: "14px", hozAlign: "left", },
+                            { title: "RefId", headerHozAlign: "left", field: "RefId", width: "14px", hozAlign: "left", visible: false },
+                            { title: "REF NO.", headerHozAlign: "left", field: "RefCode", width: "14px", hozAlign: "left", },
+
+                            {
+                                title: "DUE DATE",
+                                headerHozAlign: "left",
+                                field: "PurchaseDate",
+                                width: "7px",
+                                hozAlign: "left",
+                                visible: true,
+                                formatter: function (cell, formatterParams, onRendered) {
+                                    const originalDate = cell.getValue();
+
+                                    if (originalDate) {
+                                        const purchaseDate = new Date(originalDate);
+                                        const today = new Date();
+
+                                        const formattedDate = purchaseDate.toLocaleDateString('en-GB', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                        }).replace(/\//g, '-');
+
+                                        // Add an exclamation mark if PurchaseDate is less than today
+                                        const isPastDue = purchaseDate < today;
+                                        const icon = isPastDue ? '<i class="bi bi-exclamation-circle-fill fs-6 text-danger"></i>' : '';
+
+                                        return `${formattedDate} ${icon}`;
+                                    } else {
+                                        return originalDate;
+                                    }
+                                }
+                            },
+
+                            {
+                                title: "OPEN BALANCE", headerHozAlign: "right", field: "Amount", width: "14px", hozAlign: "right", visible: true, bottomCalc: "sum", formatter: "money",
+                                formatterParams: {
+                                    precision: 2,
+                                    symbol: "",
+                                    thousand: ",",
+                                    decimal: ".",
+                                },
+                                bottomCalcFormatter: "money",
+                                bottomCalcFormatterParams: {
+                                    precision: 2,
+                                    symbol: "",
+                                    thousand: ",",
+                                    decimal: ".",
+                                },
+                            },
+                            {
+                                title: "CREDIT APPLIED", headerHozAlign: "left", field: "CreditApplied", width: "14px", hozAlign: "left", visible: true, bottomCalc: "sum", formatter: "money",
+                                formatterParams: {
+                                    precision: 2,
+                                    symbol: "",
+                                    thousand: ",",
+                                    decimal: ".",
+                                },
+                                bottomCalcFormatter: "money",
+                                bottomCalcFormatterParams: {
+                                    precision: 2,
+                                    symbol: "",
+                                    thousand: ",",
+                                    decimal: ".",
+                                },
+                            },
+                            {
+                                title: "PAYMENT",
+                                field: "NetAmount", // Field name for the "Payment" column
+                                headerSort: false,
+                                frozen: false,
+                                width: "14px",
+                                hozAlign: "left",
+                                headerHozAlign: "left",
+                                bottomCalc: "sum",
+                                cssClass: "input-column",
+                                editorParams: {
+                                    elementAttributes: {
+                                        class: "tabulator-input", // Add the tabulator-input class to style as an input field
+                                        type: "number",
+                                    },
+                                },
+                                editor: "input",
+                                editor: paymentEditor,
+                                formatter: "money",
+                                formatterParams: {
+                                    precision: 2,
+                                    symbol: "",
+                                    thousand: ",",
+                                    decimal: ".",
+                                },
+                                bottomCalcFormatter: "money",
+                                bottomCalcFormatterParams: {
+                                    precision: 2,
+                                    symbol: "",
+                                    thousand: ",",
+                                    decimal: ".",
+                                },
+                                cellEdited: function (cell) {
+                                    // Log the edited value to the console
+                                    var editedValue = cell.getValue();
+
+                                    // Calculate the sum of "Payment" column values
+                                    var rows = tableItems.getRows();
+                                    var totalPayment = 0;
+
+                                    // Iterate through rows to find the edited row and calculate total payment
+                                    rows.forEach(function (row) {
+                                        var rowData = row.getData();
+
+                                        if (!isNaN(rowData.NetAmount)) {
+                                            totalPayment += parseFloat(rowData.NetAmount);
+
+                                            // Check the "selected" field in the edited row
+                                            if (row === cell.getRow()) {
+                                                rowData.selected = true; // Set the "selected" field to true
+                                            }
+                                        }
+                                    });
+
+                                    // Update the "balance-due" HTML element with the summed value
+                                    const amountDisplay = document.getElementById("balance-due");
+                                    amountDisplay.textContent = isNaN(totalPayment) ? "" : totalPayment.toLocaleString('en-US', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    });
+
+                                    var currrencyRate = $("#CurrencyRate").val();
+                                    const amountDisplayInTotal = document.getElementById("total-payment");
+                                    amountDisplayInTotal.textContent = isNaN(totalPayment) ? "" : (totalPayment*currrencyRate).toLocaleString('en-US', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    });
+
+                                    // Get the row associated with the edited cell
+                                    //var editedRow = cell.getRow();
+
+                                    //// Select the row if the "Payment" value is not empty
+                                    //if (editedValue !== null && editedValue !== "") {
+                                    //    editedRow.select();
+                                    //}
+
+                                    // Get the count of selected rows
+                                    var selectedRowCount = tableItems.getSelectedRows().length;
+
+                                    // Update the count in the 'selected-bills-id' span
+                                    $("#selected-bills-id").text(selectedRowCount);
+
+                                    $("#total-payment-set").text(totalPayment);
+
+                                    var accountBalance = parseFloat($("#account-balance").text());
+                                    var newAccountBalance = (accountBalance + totalPayment);
+                                    if (isNaN(newAccountBalance)) {
+                                        $("#new-account-balance").text("");
+                                    }
+                                    else {
+                                        $("#new-account-balance").text(newAccountBalance);
+                                    }
+                                    if (totalPayment > 0) {
+                                        $('#balance-set-parent').removeClass('d-none');
+                                    }
+                                    else {
+                                        $('#balance-set-parent').addClass('d-none');
+                                    }
+
+                                }
+
+                            },
+                            {
+                                title: "TOTAL AMOUNT",
+                                field: "TotalAmount", // Field name for the "Total Amount" column
+                                headerHozAlign: "right",
+                                width: "14px",
+                                hozAlign: "right",
+                                bottomCalc: "sum",
+                                formatter: "money",
+                                formatterParams: {
+                                    precision: 2,
+                                    symbol: "",
+                                    thousand: ",",
+                                    decimal: ".",
+                                },
+                                bottomCalcFormatter: "money",
+                                bottomCalcFormatterParams: {
+                                    precision: 2,
+                                    symbol: "",
+                                    thousand: ",",
+                                    decimal: ".",
+                                },
+                            },
+                            {
+                                title: "",
+                                field: "Delete",
+                                movable: false,
+
+                                formatter: function (cell, formatterParams) {
+                                    return "<i id='delete-row' class='fas fa-trash-alt delete-icon'></i>";
+                                },
+                                width: "6px",
+                                headerSort: false,
+                                cellClick: function (e, cell) {
+                                    var rowData = cell.getRow().getData();
+                                    var row = cell.getRow();
+                                    deleteRow(row);
+                                }
+                            }
+                        ],
+
+                        cellEdited: function (cell) {
+                            // Check if the "Amount" cell is empty (value is not provided)
+                            if (cell.getColumn().getField() === "Amount" && cell.getValue() === null) {
+                                // Display an error message in the specified <span> element
+                                $("#item-table-validation").text("Please enter an amount.");
+                            }
+                            if (cell.getColumn().getField() === "QTY" && cell.getValue() === null) {
+                                // Display an error message in the specified <span> element
+                                $("#item-table-validation").text("Please enter an quantity.");
+                            }
+                            if (cell.getColumn().getField() === "Rate" && cell.getValue() === null) {
+                                // Display an error message in the specified <span> element
+                                $("#item-table-validation").text("Please enter an rate.");
+                            }
+                            else {
+                                // Clear the error message if the "Amount" cell has a value
+                                $("#item-table-validation").text("");
+                            }
+                        },
+
+                        movableRows: true,
+                        movableColumns: true,
+
+                        responsiveLayout: true
+
+                    });
+                    if (result.success == "1") {
+                        }
+                        else {
+                            alert(result.ex);
+                        }
+                    }
+                });
+
+        //Add event listener to the rows select input
+        $("#expense-rows").on("change", function () {
+            var selectedRows = $(this).val();
+            if (selectedRows !== null) {
+                // Convert the selected value to an integer
+                var pageSize = parseInt(selectedRows);
+                if (!isNaN(pageSize)) {
+                    // Set the page size for the parentTable
+                    tableItems.setPageSize(pageSize);
+
+                    //// You may also want to update the parent table height
+                    //updateParentTableHeight();
+                }
+            }
+        });
+        function gotobillList() {
+            window.location.href = '@Url.Action("billlistqb", "Accounts")';
+        }
+
+            function renumberRowsItem() {
+                var rowsSecondTable = tableItems.getRows();
+                rowsSecondTable.forEach(function (row, index) {
+                    if (!row.getData().Id && !row.getData().QTY) {
+                        row.update({ SLNo: index + 1, PurchaseId: @ViewBag.PurchaseId, Id: 0, QTY: 1 });
+                    }
+                });
+            }
+          function renumberRows() {
+                var rows = tableCategory.getRows();
+                rows.forEach(function (row, index) {
+                    if (!row.getData().Id) {
+                        row.update({ SLNo: index + 1, PurchaseId: @ViewBag.PurchaseId, Id: 0});
+                    }
+                });
+            }
+
+            function deleteRow(row) {
+                // Show a confirmation dialog and delete the row if confirmed
+                if (confirm("Are you sure you want to delete this row?")) {
+                    var rowData = [row.getData()]; // Store the data of the deleted row
+
+                    // Delete the row from the tableCategory
+                    tableCategory.deleteRow(row);
+
+                    console.log("Row deleted successfully.", rowData);
+                    var tableData = table2.getData(); // Get the existing data in table2
+
+                    rowData.forEach(function (item) {
+                        var PurchaseId = item.PurchaseId;
+                        var salesDate = new Date(item.PurchaseDate);
+                        var formattedSalesDate = salesDate.getDate() + '-' +
+                            salesDate.toLocaleString('default', { month: 'short' }) + '-' +
+                            salesDate.getFullYear();
+
+                        var description = '<div class="border border-dark rounded" style="padding: 5px;">' +
+                            'Total:  ' + 'TK' + item.NetAmount + '<br/>' +
+                            'Balance:  ' + 'TK' + item.NetAmount + '<br/>' +
+                            formattedSalesDate + '<br>' +
+                            '<div style="display: flex; justify-content: space-between;">' +
+                            '<a href="#" onclick="handleAddClick(' + PurchaseId + ')"><p style="font-weight: bold">Add</p></a>' +
+                            '<a href="#"><p style="font-weight: bold">Open</p></a>' + '</div>' +
+                            '</div';
+
+                        // Check if data for the same PurchaseId already exists in tableData
+                        var existingDataIndex = tableData.findIndex(item => item.PurchaseId === PurchaseId);
+                        if (existingDataIndex !== -1) {
+                            // Update the existing data for that PurchaseId
+                            tableData[existingDataIndex].Description = description;
+                        } else {
+                            // Add a new entry for the unique PurchaseId
+                            tableData.push({
+                                PurchaseId: PurchaseId,
+                                Description: description
+                            });
+                        }
+                    });
+
+                    // Update the off-canvas (table2) with the combined data
+                    table2.setData(tableData);
+                }
+                calculation();
+            }
+
+            function getAllPurchase(callback) {
+                $.ajax({
+                    type: "GET",
+                    url: "../Admin/GetTransactiList",
+                    dataType: "json",
+                    success: function (data) {
+                        console.log("data::hehe", data);
+                        var purchaseCodeGetArray = [];
+
+                        data.forEach(function (item) {
+                            var purchaseCodeGet = item.PurchaseCode;
+                            var purchaseIdGet = item.Id;
+                            var purchaseData = {
+                                PurchaseCode: purchaseCodeGet,
+                                Id: purchaseIdGet
+                            };
+                            purchaseCodeGetArray.push(purchaseData);
+                        });
+
+                        if (typeof callback === "function") {
+                            callback(purchaseCodeGetArray);
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Error:", error);
+                    }
+                });
+            }
+
+
+                //previous ok code
+                var billNoHandle = document.getElementById("bill-no");
+                var PurchaseCode = $('#bill-no').val();
+                var PurchaseId = @ViewBag.PurchaseId;
+                console.log("purchase id dekhi", PurchaseId);
+                var btnSave = document.querySelector('#BtnSave');
+
+
+                billNoHandle.addEventListener("input", function () {
+                    var PurchaseCode = $('#bill-no').val();
+                    if (PurchaseCode) {
+                        getAllPurchase(function (purchaseCodeGetArray) {
+                            // Filter the purchaseCodeGetArray to exclude entries with the same PurchaseId
+                            var filteredPurchaseCodes = purchaseCodeGetArray.filter(function (item) {
+                                return item.Id !== PurchaseId;
+                            });
+
+                            var existingPurchaseCodes = filteredPurchaseCodes.map(function (item) {
+                                return item.PurchaseCode;
+                            });
+
+                            if (existingPurchaseCodes.includes(PurchaseCode)) {
+                                $("#bill-no-validation").html("Already has the same bill no!");
+                                btnSave.disabled = true;
+                            } else {
+                                $("#bill-no-validation").html("");
+                                btnSave.disabled = false;
+                            }
+                        });
+                    } else {
+                        $("#bill-no-validation").html(""); // Clear any previous validation message
+                        btnSave.disabled = false; // Enable the button when the input is empty
+                    }
+                });
+
+
+
+            $('#BtnSave').click(function () {
+                var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+                var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+                $("#ComId").val(ComId);
+                $("#LuserId").val(UserId);
+
+                checkedRows = [];
+
+                var rows = tableItems.getRows();
+
+                rows.forEach(function (row) {
+                    // Check if the "selected" field is true for the current row
+                    if (row.getData().selected) {
+                        var rowData = row.getData();
+                        checkedRows.push(rowData);
+                    }
+                });
+
+                console.log("Checked Rows:", checkedRows);
+                 ChildDetails = tableItems.getData();
+
+                let TransactionDetails = checkedRows;
+                var AccountPayTypeId = Number($('#bank-credit-account option:selected').val());
+                var InputDate = $('#payment-date').val();
+                 var TransactionCode = $('#bill-no').val();
+                var TransactionAmount = $("#balance-due").text();
+                var CurrencyId = $("#currency").val();
+
+
+                //====validation handle starts======
+                if (!InputDate) {
+                    $("#payment-date-validation").html("Please enter Payment date");
+                    $("html, body").animate({
+                        scrollTop: $("#modal-btn-id").offset().top
+                    }, 100);
+                }
+                if (!AccountPayTypeId) {
+                    $("#bank-credit-account-validation").html("Please select a Bank/Credit account");
+                    $("html, body").animate({
+                        scrollTop: $("#modal-btn-id").offset().top
+                    }, 100);
+                }
+                //====validation handle ends======
+
+
+                var vouchermodel =
+                {
+                    /*Id: TransactionId,*/
+                    CreditAccountId: AccountPayTypeId,
+                    DebitAccountId: @ViewBag.DebitAccountId,
+                    InputDate: InputDate,
+                    TransactionAmount: TransactionAmount,
+                    TransactionCategory:"Purchase",
+                    TransactionCode: TransactionCode,
+                    TransactionDetails: TransactionDetails,
+                    CurrencyId: CurrencyId,
+                };
+
+                console.log(vouchermodel)
+                var TransactionIdAbc = 0;
+
+
+                @*if (TransactionDetails.length === 0) {
+                     var myUrlInactive = '@Url.Action("DeleteTransaction", "Admin")';
+                $.ajax({
+                    type: "get",
+                    data: { TransactionId: @ViewBag.TransactionId },
+                    url: myUrlInactive,
+                    success: function (response) {
+                        if (response.success == "1") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-green",
+                            });
+                              setTimeout(function () {
+                            window.location.href = '@Url.Action("BillListQB", "Accounts")';
+                        }, 1000);
+                        }
+                        else if (response.success == "0") {
+                            //alert()
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-red",
+                            });
+                            getPayment();
+                        }
+                    }
+                });
+                }
+                else {*@
+
+                  $.ajax({
+                    async: false,
+                    type: "POST",
+                    url: "@Url.Action("AddTransactionQB", "Admin")",
+                    data: JSON.stringify(vouchermodel), //{ model: vouchermodel, CopyBill: 1 }, //
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        console.log("after save console::", response);
+                        TransactionIdAbc = response.Id;
+                        //console.log(response);
+                        console.log("response.message::", response.message);
+                            @*if (response.message =="Data Save Successfully.") {
+                    setTimeout(function () {
+                            window.location.href = '@Url.Action("Paybills", "Accounts")';
+                    }, 3000)
+                        };*@
+                        if (response.message =="Purchase updated successfully") {
+                            $("#bill-no").on("focus", function () {
+                                $("#bill-no-validation").html(""); // Clear the validation message
+                            });
+                        }
+                        setTimeout(function () {
+                            toastr.success(response.message, "", {
+                                "toastClass": "toast-green"
+                            });
+                        }, 1500);
+                        //alert(" Data Saved");
+
+                    },
+                    error: function (response) {
+                        /*$("supplier-id-validation").innerHTML(response.message);*/
+                    }
+                });
+
+               /* }*/
+                if (TransactionIdAbc > 0) {
+                    setTimeout(function () {
+                         window.location.href = '@Url.Action("AddBill", "Accounts")';
+                    },3000)
+                }
+
+
+            });
+
+        function keepDropdownOpened(event) {
+            event.preventDefault;
+            event.stopPropagation;
+        }
+        function dropDownKeepOpen(event) {
+            event.preventDefault;
+            event.stopPropagation;
+        }
+        $('.dropdown-menu').on('click', function (e) {
+            e.stopPropagation();
+        })
+        function resetPaymentForm(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById('payment-start-date').value = '';
+            document.getElementById('payment-end-date').value = '';
+            document.getElementById('payment-payeeDropdown').selectedIndex = 0;
+            $("#overdue-show-id").prop("checked", false);
+            return false;
+        }
+        function reloadPaymentTableData() {
+            var startDate = $("#payment-start-date").val();
+            var endDate = $("#payment-end-date").val();
+            var payee = $("#payment-payeeDropdown").val();
+            var showOverdueOnly = $("#overdue-show-id").prop("checked");
+
+            // Define the filter function
+            function customFilter(data) {
+                // Implement your custom filtering logic here
+                // Return true for rows that should be displayed, false for rows to be hidden
+                var isDateInRange = true;
+                var isPayeeMatch = true;
+                var isOverdue = true;
+
+                // Check date range
+                if (startDate && endDate) {
+                    var purchaseDate = new Date(data.PurchaseDate);
+                    isDateInRange = purchaseDate >= new Date(startDate) && purchaseDate <= new Date(endDate);
+                }
+
+                // Check payee
+                if (payee && payee !== "0") {
+                    isPayeeMatch = data.RefName == payee;
+                }
+
+                // Check overdue status
+                if (showOverdueOnly) {
+                    var purchaseDate = new Date(data.PurchaseDate);
+                    var today = new Date();
+                    isOverdue = purchaseDate < today;
+                }
+
+                return isDateInRange && isPayeeMatch && isOverdue;
+            }
+
+            // Apply the filter
+            tableItems.setFilter(customFilter);
+        }
+                getCurrencyDropdown();
+           function getCurrencyDropdown() {
+           $.ajax({
+               url: '@Url.Action("GetCurrencyDropdowForCurrencyCenter", "Admin")',
+               success: function (data) {
+                   console.log("see currency",data);
+                   const select = document.querySelector('#currency');
+                   for (var i = 0; i < data.length; i++) {
+                       const option = document.createElement('option');
+                       option.value = data[i].Value;
+                       option.text = data[i].Text;
+                       select.appendChild(option);
+                   }
+               }
+           });
+     };
+
+     //currency wise bill show
+  $("#currency").on("change", function () {
+    var selectedOption = $(this).find("option:selected");
+    var currencyId = selectedOption.val();
+    console.log('Selected Currency ID:', currencyId);
+    $.ajax({
+               url: '@Url.Action("GetCurrencyRateForExpense", "Admin")' + '?CurrencyId=' + currencyId,
+               success: function (data) {
+                   if(data[0].CurrencyShortName=="BDT"){
+                       $("#yourRateParent").addClass("d-none");
+                        $(".rate").text(data[0].CurrencyShortName);
+                        $(".inBDT").addClass("d-none");
+                   }
+                   else {
+                       $("#yourRateParent").removeClass("d-none");
+                        var flag = '<i class="flag-icon ' + data[0].FlagClass + '"></i>';
+                        $(".flag").html(flag);
+                        $(".rate").text(data[0].CurrencyShortName);
+                        $("#CurrencyRate").val(data[0].CurrencyRate);
+                        $("#MultiiCurrencyId").val(data[0].CurrencyId);
+                        $(".inBDT").removeClass("d-none");
+                   }
+                   console.log("see currency",data);
+               
+               }
+           });
+    $.ajax({
+        url: '@Url.Action("GetRefDetailsNewForQb", "Admin")' + '?CurrencyId=' + currencyId,
+        success: function (data) {
+            console.log("see currency", data);
+            tableItems.setData(data.data);
+        }
+    });
+});
+
+        
+
+    </script>
+}
+
+

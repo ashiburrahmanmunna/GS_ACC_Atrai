@@ -1,0 +1,1816 @@
+﻿@*@model IEnumerable<Atrai.Core.Entity.SalesModel>*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Sales List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+
+<style>
+
+    .p-15 {
+        padding: 10px 13px 15px 13px !important;
+    }
+
+    .card-dashboard p {
+        font-size: 12px;
+        font-family: arial narrow;
+    }
+
+    .media p {
+        font-size: 14px;
+        font-family: "Arial Narrow";
+    }
+
+    .media {
+        font-size: 12px;
+        font-family: "Arial Narrow";
+        text-align: right;
+        padding-bottom: 2px !important;
+    }
+
+/*    a {
+        color: #0a275ec9;
+    }*/
+    /*
+            tbody tr td {
+                font-family: "Arial Narrow";
+                font-size: 13px;
+            }*/
+
+    .lineheight {
+        margin-bottom: 1px;
+    }
+
+    h5 {
+        margin-top: 5px;
+        margin-bottom: 1px;
+    }
+
+
+
+    .table-sm th {
+        /*        padding: 5px;
+                font-size: 13px;*/
+        /*        border-color: black;
+                border-bottom-width:10px;*/
+    }
+
+    hr.solid {
+        border-top: 2px solid #bbb;
+        margin-top: .2rem;
+        margin-bottom: .2rem;
+        vertical-align: middle;
+    }
+
+    .dropdownplacement{
+    transform: translate3d(-2px, 30px, 0px);
+    }
+
+    .dropdown-divider {
+      margin: .0rem 0!important;
+    }
+
+</style>
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                                          @Html.Hidden("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+                                @Html.Hidden("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+
+                    <div class="card-body">
+                        @*<h5 class="card-header">Sales List</h5>*@
+                        <div class="row mb-1">
+                            @*<div class="col-md-2 col-12">
+                                @Html.ActionLink("Create Invoice", "AddSale", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                                </div>
+                                <div class="col-md-2 col-12">
+                                @Html.ActionLink("POS Sales", "POSCreate", null, null, new { @class = "btn btn-outline-purple btn-block rounded-0", @id = "btnBack" })
+                                </div>
+                                <div class="col-md-2 col-12">
+                                @Html.ActionLink("Sales With Serial", "AddSaleSerial", null, null, new { @class = "btn btn-outline-danger btn-block rounded-0", @id = "btnBack" })
+                                </div>
+                                <div class="col-md-2 col-12">
+                                @Html.ActionLink("Sales With [ Row Wise Serial]", "AddSaleSerialSide", null, null, new { @class = "btn btn-outline-purple btn-block rounded-0", @id = "btnBack" })
+                                </div>*@
+                            <div class="col-md-2 col-12 mb-2">
+                                @*                                @Html.ActionLink("New Sales With Scan", "AddSaleBySerialSearch", null, null, new { @class = "btn btn-outline-info btn-block rounded-0", @id = "btnBack" })*@
+                                @Html.ActionLink("New Sales", "AddSaleBySerialSearch", null, null, new { @class = "btn btn-outline-info btn-block rounded-0", @id = "btnsale" })
+
+                            </div>
+                            <div class="col-md-2 col-12 mb-2">
+                                @*                                @Html.ActionLink("New Sales With Scan", "AddSaleBySerialSearch", null, null, new { @class = "btn btn-outline-info btn-block rounded-0", @id = "btnBack" })*@
+                                @Html.ActionLink("New Whole Sales", "AddWholeSale", null, null, new { @class = "btn btn-outline-primary btn-block rounded-0", @id = "btnwholesale" })
+
+                            </div>
+                            <div class="col-md-3 col-12">
+
+                                <h4 style="color: #1976d2;">Sales List</h4>
+                                
+          
+                            </div>
+                            <div class="col-md-3 col-12 divHiddenItems">
+                                <label class="pr-2"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                                <label class="pr-2"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                                <label class="pr-2"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+
+                            </div>
+                            <div class="col-md-2 col-12 divHiddenItems">
+                                <button class="btn btn-sm btn-info mb-1 btn-block rounded-0 mt-md-1" type="button" onclick="ReportPrint('PrintSalesListWithItem')">Sales Details List</button>
+                            </div>
+
+                        </div>
+
+
+                        <div class="card p-2 mb-2">
+                            <div class="row">
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Customers", ViewBag.Customers as List<SelectListItem>, "Select Customers", new { id = "CustomerId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Users", ViewBag.Users as List<SelectListItem>, "Select Sales User", new { id = "UserId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+
+
+
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Warehouse", ViewBag.Warehouse as List<SelectListItem>,  new { id = "WarehouseId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-3 col-12">
+                                    @Html.DropDownList("Status", new List<SelectListItem>
+                                    {
+                                    new SelectListItem() {Text = "Due", Value="Due"},
+                                    new SelectListItem() {Text = "Date Wise Due", Value="Date Wise Due"},
+                                    new SelectListItem() {Text = "Cash Discount", Value="Cash Discount"},
+                                    new SelectListItem() {Text = "Date Wise Cash Discount", Value="Date Wise Discount"},
+                                    new SelectListItem() {Text = "Missing Head", Value="Missing Head"},
+                                    new SelectListItem() {Text = "All Sales", Value="All"},
+                                    }, new { @class = "form-control form-control-sm" })
+                                </div>
+
+
+
+                     @*           <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                From
+                                               
+                                            </span>
+                                        </div>
+                                        @Html.TextBox("FromDate", null, new { @class = "form-control form-control-sm text-center FromDate", @placeholder = "Select From Date ", @autocomplete = "off", name = "FromDate" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                To
+                                              
+                                            </span>
+                                        </div>
+                                        @Html.TextBox("ToDate", null, new { @class = "form-control form-control-sm  text-center ToDate", @placeholder = "Select To Date ", @autocomplete = "off", name = "ToDate" })
+                                    </div>
+                                </div>*@
+                                
+                                 <div class="col-md-6 col-12  mb-2">
+                                               <div class="form-inline divHiddenItems">
+                                         <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text">
+                                               <i class="fa fa-calendar"></i>
+                                             </div>
+                                        </div>
+                                        <input type="text" class="form-control from-control-sm" name="date" id="daterange-btn" style="width: auto;">
+                                         <button id='btnDec' type="button" class="btn btn-danger rounded-0" title='Decrement month'><i class="fa fa-calendar-minus-o" aria-hidden="true"></i></button>
+                                        <button id='btnInc' type="button" class="btn btn-info  rounded-0" title='Increment month'><i class="fa fa-calendar-plus-o" aria-hidden="true"></i></button>
+                                        </div>
+                                        @*<span type="button" class="btn btn-sm btn-outline-info" id="daterange-btn">
+
+                                            <i class="fa fa-calendar"></i>&nbsp; <span>defaut date</span>
+
+                                            <i class="fa fa-caret-down"></i>
+                                        </span>
+                                        <input id="daterange-btn" size="40" value="">*@
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Category", ViewBag.Warehouse as List<SelectListItem>, "Select Category", new { id = "CategoryId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        @*<input type="text" id="myInput" class="form-control form-control-sm" onmouseover="this.focus();" placeholder="On Page Filtering / Search." title="Search Item">*@
+                                        @Html.DropDownList("DocType", ViewBag.DocType as List<SelectListItem>, "Select Type", new { id = "DocTypeId", @class = "form-control form-control-sm" })
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        @*           <hr />*@
+
+                        @*<div class="row center">
+
+                            <div class="col-md-1 col-12">
+                            </div>
+                            <div class="col-md-2 col-12">
+                            <button class="btn btn-sm btn-success mb-1 btn-block rounded-0 mt-md-1" type="button" onclick="ReportPrint('PrintSalesList')">Sales List</button>
+                            </div>
+                            <div class="col-md-2 col-12">
+                            <button class="btn btn-sm btn-success mb-1 btn-block rounded-0 mt-md-1" type="button" onclick="ReportPrint('PrintSalesListWithItem')">Sales Details List</button>
+                            </div>
+                            <div class="col-md-1 col-12">
+
+                            </div>
+
+                            </div>*@
+
+                        <div class="table-responsive">
+                            <table id="saleslist" class="table table-sm table-bordered text-nowrap table-striped table-hover">
+                            </table>
+                        </div>
+
+                        <div class="p-2 mb-2 animated slideInRight">
+                            <div class="row">
+                                @*<div class="col-md-3 col-12">
+                                    </div>*@
+
+
+                                <div class="col-md-3 col-12">
+
+
+                                    <div id="divfullinfoone" class="card-dashboard P-15 mt-3" style="background:antiquewhite">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-user fontshadow f-s-40 color-success"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>User Wise Sales</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfoone" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+                                    <div id="divfullinfofour" class="card-dashboard P-15 mt-3" style="background:lavender">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-money fontshadow f-s-40 color-primary"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>User Wise Commission</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfofour" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+                                    <div id="divfullinfoeight" class="card-dashboard P-15 mt-3" style="background:aliceblue">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-copy fontshadow f-s-40 font-color-7"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Post / Unpost Sales</h5>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfoeight" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3 col-12">
+
+                                    <div id="divfullinfotwo" class="card-dashboard P-15 mt-3" style="background:beige">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-calendar fontshadow f-s-40 color-info"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Date Wise Sales</h5>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfotwo" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+                                    <div id="divfullinfonine" class="card-dashboard P-15 mt-3" style="background:ivory">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-cubes fontshadow f-s-40 color-primary"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Top Selling Category</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfonine" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div id="divfullinfothree" class="col">
+
+                                    <div class="card-dashboard P-15 mt-3" style="background:seashell">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-sitemap fontshadow f-s-40 color-warning"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Receive By Head</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfothree" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div id="divfullinfoseven" class="card-dashboard P-15 mt-3" style="background:honeydew">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-users fontshadow f-s-40 color-info"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Top Selling Customer</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfoseven" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+                                    <div id="divfullinfosix" class="card-dashboard P-15 mt-3" style="background:ivory">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd fontshadow f-s-40 color-danger"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Top Due Customer</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfosix" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3 col-12">
+
+                                    <div id="divfullinfofive" class="card-dashboard P-15 mt-3" style="        background: lavenderblush">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd fontshadow f-s-40 color-info"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Top Selling Item</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfofive" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+
+
+
+
+
+                                    <div id="divfullinfoten" class="card-dashboard P-15 mt-3" style="background:ivory">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd fontshadow f-s-40 color-danger"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Day Wise Sales</h5>
+
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfoten" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+
+                            </div>
+                        </div>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+
+
+@section Scripts{
+
+
+
+
+
+<script type="text/javascript">
+
+        var VatViewActivate = '@HttpContextAccessor.HttpContext.Session.GetInt32("VatViewActivate").ToString()';
+        if (VatViewActivate == 1){$('.divHiddenItems').hide();}
+        //var isHidden = VatViewActivate != 1;
+
+
+        $(window).bind('keydown', function (event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch (String.fromCharCode(event.which).toLowerCase()) {
+                        case 'h':
+                        event.preventDefault();
+                        //alert('ctrl-s');
+                        //alert($('#tblpayments').DataTable().data().count());
+                        //if ($('#tblpayments').DataTable().data().count() == 0) {
+                        //    $("#addpayment").trigger('click');
+                        //}
+
+                        //$("#BtnSave").trigger('click');
+                        //alert('hit');
+                        SomeAction("cntrlh");
+                        return;
+                        //Sales_save();
+                        break;
+                        case 'r':
+                        event.preventDefault();
+                        alert('ctrl-r');
+                        ProfitAction("cntrlr");
+                        return;
+                        break;
+                        case 'd':
+                        event.preventDefault();
+                        SomeAction("cntrlu");
+                        //alert('ctrl-s');
+                        //Sales_delete();
+                        return;
+                        break;
+                        @*case 'n':
+                                event.preventDefault();
+                                //alert('ctrl-n');
+                                window.location.href = '@Url.Action("POSCreate", "Sales")';
+                                break;
+                            case 'r':
+                                event.preventDefault();
+                                //alert('ctrl-r');
+                                window.location.href = '@Url.Action("POSCreate", "Sales")';
+                                break;
+                            case 'b':
+                                event.preventDefault();
+                                //alert('ctrl-b');
+                                window.location.href = '@Url.Action("Index", "Sales")';
+                                //$('#btnBack').click(function () {
+                                //    ///Code
+                                //});
+                                break;*@
+                    }
+            }
+        });
+
+        function ProfitAction(commandtype) {
+
+            var totalsaleslist = $('#saleslist').DataTable();
+            var rows = totalsaleslist.rows('.selected').data();
+
+            var pid = [];
+
+            for (var i = 0; i < rows.length; i++) {
+
+                var rowData = rows[i];
+                pid.push(rowData["Id"]);
+                //doctype.push(rowData[5]);
+
+            }
+
+            if ((pid == null) || (pid == "")) {
+                toastr.error("Please Select Sales from the List.");
+                return true;
+            }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("ProfitAction", "Sales")',
+                    dataType: 'json',
+                    async: true,
+                    data: { SalesId: pid, CommandType: commandtype},
+                    success: function (response) {
+
+                        if (response.Success == "1") {
+
+                            toastr.success(response.ex);
+                            //$("#btnLoad").focus();
+                        }
+                        else if (response.Success == "2") {
+                            toastr.warning(response.ex);
+                        }
+
+                    },
+                    error: function (ex) {
+                        alert('Failed.' + ex);
+                    }
+
+                });
+
+
+            }
+
+           function SomeAction(commandtype) {
+
+            var totalsaleslist = $('#saleslist').DataTable();
+            var rows = totalsaleslist.rows('.selected').data();
+            //console.log(rows.length);
+            //console.log(rows);
+
+
+            //var selectedsaleslist = [];
+            //var pid = 0;
+
+            //if (rows.length > 0) {
+            //    pid = rows[0]["Id"];
+            //}
+
+
+            var pid = [];
+            //var doctype = [];
+
+
+
+                for (var i = 0; i < rows.length; i++) {
+
+                    var rowData = rows[i];
+                    pid.push(rowData["Id"]);
+                    //doctype.push(rowData[5]);
+
+                }
+
+                //console.log(pid);
+                //alert(WarehouseId);
+                //alert(btnvalue);
+
+                if ((pid == null) || (pid == "")) {
+                    toastr.error("Please Select Product from the List.");
+                    return true;
+                }
+
+                //console.log(rows);
+                //var doctype = "pdf";
+                //var criteria = "DownloadReport";
+
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("SomeAction", "Sales")',
+                    dataType: 'json',
+                    async: true,
+                    data: { SalesId: pid, CommandType: commandtype},
+                    success: function (response) {
+
+                        if (response.Success == "1") {
+                            var selectedRows = table.rows(".selected");
+                            selectedRows.remove().draw();
+                            toastr.success(response.ex);
+                            //$("#btnLoad").focus();
+                        }
+                        else if (response.Success == "2") {
+                            toastr.warning(response.ex);
+                        }
+                        //else if (response.Success == "3") {
+                        //    toastr.error(response.ex);
+                        //    setTimeout(function () {
+                        //        // whene transaction error then reload page
+                        //        $("#btnLoad").click();
+                        //    }, 3000);
+                        //}
+                        //else {
+                        //    toastr.error(response.ex);
+                        //}
+
+                        //toastr.success("Command Executed Successfully.");
+                        //window.open(response.Url, '_blank')
+                    },
+                    error: function (ex) {
+                        alert('Failed.' + ex);
+                    }
+
+                });
+
+
+            }
+
+
+
+
+        var filter = '@ViewBag.filter';
+        $("#Status").val(filter);
+
+
+
+        if (filter == "Due") {
+
+            $(".FromDate").val('1-jan-' + new Date().getFullYear().toString().substr(-2));
+        }
+
+
+        DefaultFormat('pdf');
+        $('input[type="radio"]').change(function () {
+            selectedValue = this.value;
+            DefaultFormat(selectedValue);
+
+        });
+
+        function DefaultFormat(selectedValue) {
+            $.ajax({
+                type: "GET",
+                //url: "../Admin/SetReportFormat",
+                "url": "@Url.Action("SetReportFormat", "Admin")",
+                datatype: "Json",
+                data: { reportformat: selectedValue },
+                success: function (data) {
+                    if (data.Success == 1) {
+                        //toastr.success(selectedValue + " Format Selected");
+                    }
+                }
+            });
+        }
+
+
+           function ReportPrint(btnvalue) {
+
+                //var peopleList = $('#tbllist').DataTable();
+                //var rows = peopleList.rows('.selected').data();
+
+               var CustomerId = $('#CustomerId').val();
+               var UserId = $('#UserId').val();
+               var WarehouseId = $('#WarehouseId').val();
+               var CategoryId = $('#CategoryId').val();
+               var DocTypeId = $('#DocTypeId').val();
+
+
+               var Status = $('#Status').val();
+
+
+                var reporttype = $("input[name=RptType]:checked").val();
+                var FromDate = $(".FromDate").val();
+                var ToDate = $(".ToDate").val();
+
+
+
+                ////console.log(rows.length);
+                ////console.log(rows);
+
+
+                //var productidlist = [];
+                //var pid = 0;
+
+                //if (rows.length > 0) {
+                //    pid = rows[0]["Id"];
+                //}
+
+
+
+               //if (btnvalue == "PrintSalesListWithItem") {
+
+               //     //if ((WarehouseId == null) || (WarehouseId == "")) {
+               //     //    toastr.error("Please Select Store First.");
+               //     //    return true;
+
+               //     //}
+               //     //else if ((pid == null) || (pid == ""))
+               //     //{
+               //     //    toastr.error("Please Select Product from the List.");
+               //     //    return true;
+               //     //}
+               //     //alert('Wait');
+               // }
+
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("AllSalesReport", "Sales")',
+                dataType: 'json',
+                async: true,
+                data: { rptFormat: reporttype, action: btnvalue, CustomerId: CustomerId, UserId: UserId, FromDate: FromDate, ToDate: ToDate, WarehouseId: WarehouseId, CategoryId: CategoryId, Status: Status },
+                success: function (response) {
+                    //console.log(response.Url)
+                    window.open(response.Url, '_blank')
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+
+         }
+
+
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        //    CurrentDate();
+
+        //    $(".FromDate").datepicker({
+
+        //        dateFormat: "dd-M-y",
+        //        changeMonth: true,
+        //        changeYear: true
+
+        //    });
+
+
+        //$(".ToDate").datepicker({
+
+        //    dateFormat: "dd-M-y",
+        //    changeMonth: true,
+        //    changeYear: true
+
+        //});
+
+        //function CurrentDate() {
+        //    var date = new Date();
+        //    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        //    var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+        //    if ($(".FromDate").val() == '') {
+        //        $(".FromDate").val(val);
+        //    }
+        //    if ($(".ToDate").val() == '') {
+        //        $(".ToDate").val(val);
+        //    }
+        //}
+
+            var CustomerId = $("#CustomerId").val();
+            var UserId = $("#UserId").val();
+            var Status = $("#Status").val();
+            var WarehouseId = $("#WarehouseId").val();
+            var CategoryId = $("#CategoryId").val();
+
+
+
+                var fromdate = $("#FromDate").val();
+                var todate = $("#ToDate").val();
+
+
+            var permission = false;
+            var UserRole = `@HttpContextAccessor.HttpContext.Session.GetString("UserRole")`;
+            //alert(UserRole);
+            //alert(permission);
+
+            //if (UserRole.toLowerCase().includes("admin")) { permission = true; };
+            //alert(permission);
+
+            permission = true;
+
+
+            loaddata();
+
+            if (permission == true) {
+                loadsummarydata();
+
+            }
+            else {
+                $("#divfullinfoone").hide();
+                $("#divfullinfotwo").hide();
+                $("#divfullinfothree").hide();
+                $("#divfullinfofour").hide();
+                $("#divfullinfofive").hide();
+                $("#divfullinfosix").hide();
+                $("#divfullinfoseven").hide();
+                $("#divfullinfoeight").hide();
+                $("#divfullinfonine").hide();
+                $("#divfullinfoten").hide();
+                $("#divfullinfoeleven").hide();
+
+            }
+
+
+
+
+            function format(d) {
+                //console.log(d.Items);
+                var trs = '';
+                var trf = '';
+                var sumindsalesprice = 0.00;
+                var sumindcostprice = 0.00;
+                var suminddiscount = 0.00;
+                var sumindquantity = 0.00;
+
+                var sumindprofit = 0.00;
+                var sumindcomissionamount = 0.00;
+
+                var sumsalesprice = 0.00;
+                var sumcostprice = 0.00;
+                var sumavgcostprice = 0.00;
+
+                var sumprofit = 0.00;
+                var sumcommission = 0.00;
+
+
+
+                var i = 0;
+
+
+
+                $.each($(d.SalesItems), function (key, value) {
+                    //console.log(d.SalesItems[key]);
+                    //console.log(value);
+                    i++;
+                    var indsalesprice = (parseFloat(d.SalesItems[key].Price));
+                    var indcostprice = (parseFloat(d.SalesItems[key].CostPrice));
+                    var indavgcostprice = (parseFloat(d.SalesItems[key].AvgCostPrice));
+
+                    var inddiscount = (parseFloat(d.SalesItems[key].IndDiscountProportion));
+                    var indquantity = (parseFloat(d.SalesItems[key].Quantity));
+                    var indprofit = parseFloat(parseFloat(indsalesprice - indcostprice) * parseFloat(indquantity)) - parseFloat(inddiscount);
+                    //alert(indprofit);
+                    var indcomission = parseFloat(d.SalesItems[key].CommissionAmount);
+
+                    var totalsalesprice = indsalesprice * indquantity;
+                    var totalcostprice = indcostprice * indquantity;
+                    var totalavgcostprice = indavgcostprice;
+
+                    var totalprofit = totalsalesprice - totalcostprice ;//- totalservicecharge - totalvat;
+
+                    //console.log(profit);
+
+                    sumindsalesprice += parseFloat(indsalesprice);
+                    //sumindcostprice += parseFloat(indcostprice);
+
+                    suminddiscount += parseFloat(inddiscount);
+                    sumindquantity += parseFloat(indquantity);
+                    //sumindprofit += indprofit.toFixed();
+                    sumindcomissionamount += parseFloat(indcomission);
+
+                    sumsalesprice += parseFloat(totalsalesprice);
+                    //sumcostprice += parseFloat(totalcostprice);
+                    //sumavgcostprice += parseFloat(totalavgcostprice);
+
+                    //sumprofit += parseFloat(totalprofit.toFixed(2));
+                    sumcommission += parseFloat(sumindcomissionamount);
+
+
+                    if (permission == false)
+                    {
+                        indcostprice = 0.00;
+                        indavgcostprice = 0.00;
+                        indprofit = 0.00;
+                        totalcostprice = 0.00;
+                    }
+                    else
+                    {
+                    //alert('found');
+                        sumindcostprice += parseFloat(indcostprice);
+
+                        sumindprofit += parseFloat(indprofit.toFixed());
+
+                        sumcostprice += parseFloat(totalcostprice);
+
+                        sumavgcostprice += parseFloat(totalavgcostprice);
+
+                        sumprofit += parseFloat(totalprofit.toFixed(2));
+
+                    }
+
+
+                    let allbatchno = ' ; ';
+                     //console.log(d.SalesItems[key]);
+                    $.each($(d.SalesItems[key].BatchSerial), function (keyabc, valueabc) {
+                        allbatchno +=  d.SalesItems[key].BatchSerial[keyabc].BatchSerialNo + ' ; ';
+                        //console.log(d.SalesItems[key].BatchSerial[keyabc].BatchSerialNo);
+                    })
+
+
+                    trs += '<tr><td>' + i + '</td><td>' + d.SalesItems[key].CategoryName + '</td><td>' + d.SalesItems[key].ProductCode + '</td><td>' + d.SalesItems[key].ProductName + ' ' + allbatchno + '</td><td>' + indsalesprice.toLocaleString() + '</td><td>' + indquantity.toLocaleString() + '</td><td>' + indcostprice.toLocaleString() + '</td><td>' + indavgcostprice.toLocaleString() + '</td><td>' + inddiscount.toLocaleString() + '</td><td>' + totalsalesprice.toLocaleString() + '</td><td>' + totalcostprice.toLocaleString() + '</td><td>' + indprofit.toLocaleString() + '</td><td>' + indcomission.toLocaleString() + '</td></tr>';
+
+                })
+
+                if (i > 1) {
+                    trf += '<tr><td></td><td>Total :</td><td></td><td>Item Count : '+ i +'</td><td>' + sumindsalesprice.toLocaleString() + '</td><td>' + sumindquantity.toLocaleString() + '</td><td>' + sumindcostprice.toLocaleString() + '</td><td>' + sumavgcostprice.toLocaleString() + '</td><td>' + suminddiscount.toLocaleString() + '</td><td>' + sumsalesprice.toLocaleString() + '</td><td>' + sumcostprice.toLocaleString() + '</td><td>' + sumindprofit.toLocaleString() + '</td><td>' + sumcommission.toLocaleString() + '</td></tr>';
+
+                }
+
+                // `d` is the original data object for the row
+                return '<div class="col-md-6"><table class="table text-center table-sm text-nowrap table-border table-hover table-condensed">' +
+                    '<thead class="border">' +
+                    '<th>SLNo.</th>' +
+                    '<th>Category</th>' +
+                    '<th>Code</th>' +
+                    '<th>Product Name</th>' +
+                    '<th>Sales Price</th>' +
+                    '<th>Quantity</th>' +
+                    '<th>Cost Price</th>' +
+                    '<th>Total Average Cost</th>' +
+                    '<th>Ind. Discount</th>' +
+                    '<th>Total Sales</th>' +
+                    '<th>Total Cost</th>' +
+                    '<th>Total Profit</th>' +
+                    '<th>Commission</th>' +
+                    '</thead><tbody class="border">' +
+
+                    trs +
+                    '</tbody><tfoot class="text-center font-weight-bold border">' + trf + '</tfoot></table></div>';
+            }
+
+
+
+            $('#saleslist tbody').on('click', 'td.details-control', function () {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+
+                if (row.child.isShown()) {
+                    // This row is already open - close it
+                    row.child.hide();
+                    tr.removeClass('shown');
+                }
+                else {
+                    // Open this row
+                    row.child(format(row.data())).show();
+                    tr.addClass('shown');
+                }
+            });
+
+
+
+
+            function loaddata() {
+            //alert(CustomerId, FromDate, ToDate);
+
+
+
+            var othersearchvalue = $("#myInput").val() || "";
+
+
+
+
+            table = $('#saleslist').DataTable({
+                initComplete: function () {
+
+                    var input = $('.dataTables_filter input'),//.unbind(),
+                        self = this.api(),
+
+                        //$searchButton = $('<button class="btn rounded-0 btn-info btn-sm" tabindex="0" aria-controls="saleslist" TransactionId="button" title="Search"><span><i class="mdi mdi-file-excel"></i></span></button>')
+                        //    .text('Search')
+                        //    .click(function () {
+                        //        if (input.val().length > 0) {
+                        //            self.search(input.val()).draw();
+
+                        //        }
+                        //        else {
+                        //            loaddata(fromdate, todate, CustomerId, UserId , Status, 1);
+
+                        //        }
+                        //    }),
+                        //$clearButton = $('<button class="btn rounded-0 btn-warning btn-sm" tabindex="0" aria-controls="saleslist" TransactionId="button" title="Export to PDF"><span><i class="mdi mdi-file-pdf"></i></span></button>')
+                        //    .text('Clear')
+                        //    .click(function () {
+                        //        input.val('');
+                        //        $searchButton.click();
+                        //    }),
+
+                        $OtherSearch = $('<input class="form-control form-control-sm text-center rounded-0 ml-2" id="myInput" name="myInput" placeholder="On Page Filtering / Search. " title="Search" type="text" value="'+othersearchvalue+'">')
+
+                        $allButton = $('<button class="btn rounded-0 btn-purple btn-sm ml-2" tabindex="0" aria-controls="saleslist" TransactionId="button" title="Load"></button>')
+                            .text('Load')
+                            .click(function () {
+                                input.val('');
+                                //alert(FromDate);
+                                loaddata();
+
+
+                                if (permission == true) {
+                                    loadsummarydata();
+                                }
+                                else {
+                                    $("#divfullinfoone").hide();
+                                    $("#divfullinfotwo").hide();
+                                    $("#divfullinfothree").hide();
+                                    $("#divfullinfofour").hide();
+                                    $("#divfullinfofive").hide();
+                                    $("#divfullinfosix").hide();
+                                    $("#divfullinfoseven").hide();
+                                    $("#divfullinfoeight").hide();
+                                    $("#divfullinfonine").hide();
+                                    $("#divfullinfoten").hide();
+
+
+
+
+                                }
+
+                                //table.ajax.reload();
+
+
+                            })
+                    $('.dataTables_filter').append($allButton,$OtherSearch);//, $clearButton // , $searchButton
+
+
+
+
+                    $("#myInput").on("click", function () {
+
+                            setTimeout(function () {
+                                // whene transaction error then reload page
+                                 table.page.len(1000).draw();
+
+                            }, 1);
+
+
+                    });
+
+                    $("#myInput").on("keyup", function () {
+                        //table.page.len(100).draw();
+                        var value = $(this).val().toLowerCase();
+                        //alert(value);
+                        $("#saleslist tr").filter(function () {
+                            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                            //$(this).addClass("selected");
+
+
+                        });
+
+
+                    });
+                     //table.columns.adjust().draw();
+
+                    // $('#saleslist').on( 'column-sizing.dt', function ( e, settings ) {
+                    //    console.log( 'Column width recalculated in table' );
+                    //} );
+
+                },
+
+                serverSide: true,  
+                "scrollX": true,
+                //"scrollY": "238px",
+                //"scrollCollapse": true,
+
+                "orderCellsTop": true,
+
+                //"iDisplayLength": 10,
+                //"lengthMenu": [[5, 10, 20, 50, -1], [5, 10, 20, 50, "All"]],
+
+                ////dom: '<"dom_wrapper fh-fixedHeader"lBf>tip',
+                //dom: '<"dom_wrapper fh-fixedHeader"fl>tip',
+
+                "lengthMenu": [[5, 10, 20, 50, 100, 500, 1000], [5, 10, 20, 50, 100, 500, 1000]],
+                //rowId: 'Id',
+                //dom: 'Bfrtip',
+                dom: '<"dom_wrapper fh-fixedHeader"flB>tip',
+
+                buttons: {
+                    dom: {
+                        button: {
+                            className: 'btn rounded-0'
+                        }
+                    },
+                    buttons: [
+                        //'copy', 'csv', 'excel', 'pdf', 'print'
+                        //{ "extend": 'excel', "text": 'Excel', "className": 'btn btn-sm btn-success-info fa fa-excel rouned-0' }
+
+                        {       extend: 'excel',
+                                text: '<i class="mdi mdi-file-excel"></i>',
+                                className: 'btn-success',
+                                titleAttr: 'Export to excel'
+                        }
+
+                    ],
+                },
+                "ajax": {
+                    "url": "@Url.Action("GetSalesList", "Sales")",
+                    "data": { FromDate: $("#FromDate").val(), ToDate: $("#ToDate").val(), CustomerId: $("#CustomerId").val(), UserId: $("#UserId").val(), Status: $("#Status").val(), WarehouseId: $("#WarehouseId").val(), CategoryId: $("#CategoryId").val() ,DocTypeId: $("#DocTypeId").val() },
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                "autoWidth": false,
+                "columns": [
+                        { "title": "Id", "data": "Id", "visible": false },
+                        //    { "title": "Sale Code", "data": "SaleCode", "searchable": true },
+
+
+                            {
+                            "title":"Sale Code",
+                                "className": "text-left",
+                                "data": {
+                                    Id: "SaleCode"
+                                //    DocType: "DocType"
+                                },
+                                "searchable": true,
+                                "render": function (data, type, row)
+                                {
+
+                                    var myUrlprint = '@Url.Action("SaleReport", "Sales")?SaleId=' + data.Id;
+                                    var myUrlprintCH = '@Url.Action("ChallanReport", "Sales")?SaleId=' + data.Id;
+                                    var myUrlprintinvoice = '@Url.Action("InvoiceViewReport", "Sales")?SaleId=' + data.Id + '&ReportType=SALES INVOICE';
+                                    var myUrlprintmoneyreceipt = '@Url.Action("InvoiceViewReport", "Sales")?SaleId=' + data.Id + '&ReportType=MONEY RECEIPT';
+                                    var myUrlcopy = '@Url.Action("EditSale", "Sales")?SaleId=' + data.Id + '&IsCopy=2';;
+
+
+                                    var SaleCode = data.SaleCode;
+                                    var buttons = '';
+                                    //console.log(data.DocType);
+
+                                    if (data.DocType == 'Sales')
+                                    {
+
+                                        buttons += `<div class="btn-group w-100">
+                                          <button class="btn btn-primary btn-sm" type="button">
+                                           <a href=\"` + myUrlprint + `\" class=\"text-white rounded-0 mb-0 py-0\"  target=\"_blank\">` + SaleCode +` </a>
+                                          </button>
+                                          <button type="button" class="btn btn-sm btn-info dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span class="sr-only">Toggle Dropdown</span>
+                                          </button>
+                                          <div class="dropdown-menu dropdownplacement m-0 p-0" style="font-size:13px">
+                                             <a class="dropdown-item" href=\"` + myUrlprintCH + `\"  \" target=\"_blank\"> <i class="fa fa-print ml-1"></i> Challan Print </a> 
+                                              <div class="dropdown-divider"></div>
+                                             <a class="dropdown-item" href=\"` + myUrlprintinvoice + `\"  \" target=\"_blank\"> <i class="fa fa-print ml-1"></i> View Report </a> 
+                                              <div class="dropdown-divider"></div>
+                                             <a class="dropdown-item" href=\"` + myUrlprintmoneyreceipt + `\"  \" target=\"_blank\"> <i class="fa fa-print ml-1"></i> Money Receipt </a> 
+                                               <div class="dropdown-divider"></div>
+                                             <a class="dropdown-item" href=\"` + myUrlcopy + `\"  \" target=\"_blank\"> <i class="fa fa-print ml-1"></i> Duplicate Copy </a> 
+                                          
+                                             </div>
+                                        </div>`;
+
+
+
+
+                                         //buttons +=  '<div class="dropdown">  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"   aria-haspopup="true" aria-expanded="false">  More  </button>  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">    <a class="dropdown-item" href="#">Action</a>    <a class="dropdown-item" href="#">Another action</a>    <a class="dropdown-item" href="#">Something else here</a>  </div></div>';
+                                        //buttons += '<div><span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"btn btn-sm btn-primary w-65 rounded-0 mb-0 py-0\"  target=\"_blank\">' + SaleCode +' </a></span></div>';
+                                        
+                                         //buttons +=  '<div class="dropdown">  <button class="btn btn-sm btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">  More  </button>  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">      <a class="dropdown-item" href=\"' + myUrlprintCH + '\"  \" target=\"_blank\"> <i class="fa fa-print ml-2"></i> Challan Print </a>  <a class="dropdown-item" href=\"' + myUrlprintinvoice + '\"  \" target=\"_blank\"> <i class="fa fa-print ml-2"></i> View Report </a> </div></div>';
+                                        
+                                        //buttons += '<span data-toggle="tooltip" title="Challan Print"> <a href=\"' + myUrlprintCH + '\" class=\"btn btn-sm btn-icon btn-primary rounded-0 mb-0 \" target=\"_blank\"> <i class="fa fa-print"></i> </a></span>';
+                                        //buttons += '<span data-toggle="tooltip" title="Print View"> <a href=\"' + myUrlprintinvoice + '\" class=\"btn btn-sm btn-icon btn-info rounded-0 mb-0 \" target=\"_blank\"> <i class="fa fa-print"></i> </a></span>';
+                                    
+                                    }
+                                    else{
+
+
+                                          buttons += `<div class="btn-group w-100">
+                                          <button class="btn btn-outline-primary btn-sm" type="button">
+                                           <a href=\"` + myUrlprint + `\" class=\" rounded-0 mb-0 py-0\"  target=\"_blank\">` + SaleCode +` </a>
+                                          </button>
+                                          <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span class="sr-only">Toggle Dropdown</span>
+                                          </button>
+                                          <div class="dropdown-menu dropdownplacement m-0 p-0" style="font-size:13px">
+                                             <a class="dropdown-item" href=\"` + myUrlprintinvoice + `\"  \" target=\"_blank\"> <i class="fa fa-print ml-1"></i> View Report </a> 
+                                              <div class="dropdown-divider"></div>
+                                             <a class="dropdown-item" href=\"` + myUrlcopy + `\"  \" target=\"_blank\"> <i class="fa fa-print ml-1"></i> Duplicate Copy </a> 
+                                          
+                                             </div>
+                                        </div>`;
+
+
+
+
+                                   // buttons += '<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"btn btn-sm btn-outline-primary rounded-0 mb-0 \"  target=\"_blank\">' + SaleCode +' </a></span>';
+
+                                    }
+
+                                    return buttons;
+                                }
+                    },
+                    {
+                        "class": 'details-control',
+                        "role":"row",
+                        "orderable": false,
+                        "data": null,
+                        "defaultContent": ''
+                    },
+                    { "title": "Sales User", "data": "SalesUser", "className": "text-center", "searchable": true },
+
+
+
+
+                            { "title": "Sales Date", "data": "SalesDateString", "className": "text-nowrap text-center", "searchable": false , "orderable":false},
+                            { "title": "Time", "data": "EntryTimeString", "className": "text-nowrap text-center", "searchable": false , "orderable":false},
+
+                            { "title": "Customer Name", "data": "CustomerName", "className": "text-center", "searchable": true },
+                            { "title": "Primary Address", "data": "PrimaryAddress", "className": "text-center", "searchable": true },
+                            { "title": "Mobile", "data": "PhoneNo", "searchable": true },
+                            { "title": "Notes", "data": "Notes", "className": "text-center", "searchable": true },
+                            {
+                                "title": "Total", "data": {
+                                    Total: "Total" //,
+                                },
+                                "render": function (data, type, row) {
+                                    return data.Total.toLocaleString();
+                                },
+                                "searchable": false
+                            },
+                            { "title": "Discount", "data": "Discount", "searchable": true },
+
+
+                             { "title": "Service Charge", "data": "ServiceCharge", "className": "text-center", "searchable": false },
+                             { "title": "Total VAT", "data": "TotalVat", "className": "text-center", "searchable": false },
+                             { "title": "Shipping", "data": "Shipping", "className": "text-center", "searchable": false },
+                             {
+                                "title": "Net.Amt.",
+                                    "data": {
+                                        Id: "Id" //,
+                                    },
+                                    "render": function (data, type, row) {
+                                        return ((data.NetAmount + data.SalesReturnAmount).toLocaleString());
+                                    },
+                                "searchable": true 
+                             },
+                                //{ "title": "Status", "data": "Status", "searchable": true },
+                                {
+                                    "title": "Rcvd.Amt.",
+                                    "data": {
+                                        PaidAmt: "PaidAmt" //,
+                                    },
+                                    "render": function (data, type, row) {
+                                        return data.PaidAmt.toLocaleString();
+                                    },
+                                    "searchable": false
+                                },
+                                { "title": "Location", "data": "Location", "searchable": false },
+
+                            //{ "title": "Received By", "data": "ReceivingHead", "searchable": false },
+
+                            {
+                                "title": "Received By",
+                                //"data": "SalesPayments",
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "className": "text-nowrap text-center", "searchable": false,
+                                "render": function (data, type, row) {
+                                    //console.log(data);
+
+
+
+                                    //for (var i = 0; i < data.length; i++) {
+                                    //    //output += '<p class="lineheight>' + data[i].WhShortName + ' : ' + data[i].CurrentStock + ' : ' + data[i].CostingValue.toFixed(2) + ' : ' + data[i].SalesValue;
+                                    //    //totalsalesvalue = totalsalesvalue + parseFloat(data[i].SalesValue.toFixed(2))
+
+                                    //    if (i < data.length - 1) {
+                                    //        output += "  </p>";
+
+                                    //        //'<p>' + this + '</p>'
+                                    //    }
+                                    //    count++;
+                                    //console.log(data.SalesReturnPayments , data.SalesReturnAmount);
+                                    //};
+                                    var dueamount = data.NetAmount - (data.PaidAmt - data.SalesReturnPayments - data.SalesReturnAmount);
+
+
+                                    if (data.SalesPayments.length != 0) {
+                                        //console.log(data.SalesPayments.TransactionCode);
+
+                                        var output = "";
+
+                                        for (var i = 0; i < data.SalesPayments.length; i++) {
+                                            if (data.SalesPayments[i].AccName != null) {
+                                                //console.log(data.SalesPayments[i]);
+                                                //alert(data.SalesPayments[i].Amount.toLocaleString());
+                                                output += '<p class=narrowlineheight style="font-weight: bold; color:darkgreen">' + data.SalesPayments[i].AccName + " : " + data.SalesPayments[i].Amount.toLocaleString()
+                                            }
+                                            else     {
+                                                output += '<p class=narrowlineheight style="font-weight: bold; color:red">' + data.SalesPayments[i].TransactionCode + " <br> Missing Receiving Head"
+
+                                            }
+
+
+                                            if (i < data.SalesPayments.length - 1) {
+                                                output += '  </p>';
+
+                                                //'<p>' + this + '</p>'
+                                            }
+                                        };
+
+                                        //console.log("Net Amount :" + data.NetAmount.toString());
+                                        //console.log("paid Amount :" + data.PaidAmt.toString());
+                                        //console.log("due Amount :" + dueamount.toString());
+
+                                        if (dueamount > 0.9) {
+                                            output += '<p class=narrowlineheight style="font-weight: bold; color:red">Due  : ' + dueamount.toLocaleString() + '</p>';
+                                        }
+                                        else if (dueamount < 0)
+                                        {
+                                            output += '<p class=narrowlineheight style="font-weight: bold; color:brown">Excess Rcvd.  : ' + dueamount.toLocaleString() + '</p>';
+                                        }
+                                        else{
+                                            //output += '<p class=narrowlineheight style="font-weight: bold; color:brown">' + data.SalesPayments[0].TransactionCode + '</p>';
+
+                                        };
+
+
+                                        //console.log(output);
+
+                                        return output;
+                                    }
+                                    else {
+
+
+                                        var output = '<p class=narrowlineheight style="font-weight: bold; color:red">Due : ' + dueamount.toLocaleString() + '</p>';
+                                        return output;
+
+                                        //return null;
+                                    }
+                                }
+
+                            },
+
+                            {
+                            "title": "Total.Cost", "data": { FinalCostingPrice: "FinalCostingPrice"  },
+                                "render": function (data, type, row) {
+                                    return data.FinalCostingPrice.toLocaleString();
+                                },
+                                "searchable": false, "visible": permission
+                            },
+
+                            {
+                            "title": "Profit", "data": { Profit: "Profit"  },
+                                "render": function (data, type, row) {
+                                    return data.Profit.toLocaleString();
+                                },
+                                "searchable": false, "visible": permission
+                            },
+
+                            {
+                            "title": "Profit%", "data": { ProfitPercentage: "ProfitPercentage"  },
+                                "render": function (data, type, row) {
+                                    return data.ProfitPercentage.toLocaleString();
+                                },
+                                "searchable": false, "visible": permission
+                            },
+
+
+                            //{ "title": "Total.Cost", "data": "FinalCostingPrice", "searchable": false, "visible": permission  },
+                            //{ "title": "Profit", "data": "Profit", "searchable": false, "visible": permission },
+                            //{ "title": "Profit[%]", "data": "ProfitPercentage", "searchable": false, "visible": permission },
+
+
+                            { "title": "Post.Status",
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "render": function (data, type, row) {
+                                    var information = '';
+                                    if (!data.isPosted) {
+                                        information = '<p class=narrowlineheight style="font-weight: bold; color:red">Not Posted</p>';
+                                    }
+                                    else
+                                    {
+                                        information = '<p class=narrowlineheight style="font-weight: bold; color:darkgreen">Posted</p>';
+                                    }
+                                    return information;
+                                }
+
+                    },
+
+
+
+
+                            {
+                                //"title": "Action",
+                                "orderable":false,
+                                //"className" : "text-left",
+                                //"data": "Id",
+
+                                "data": {
+                                    Id: "Id" //,
+                                    //VoucherTypeName:"VoucherTypeName",
+                                    //isPosted:"isPosted"
+                                },
+                                "render": function (data, type, row) {
+                                    var dueamount = data.NetAmount - data.PaidAmt;
+                                    var myUrledit = '@Url.Action("EditSale", "Sales")?SaleId=' + data.Id;
+                            
+                                    var myUrldelete = '@Url.Action("DeleteSale", "Sales")?SaleId=' + data.Id;
+                                    var myUrlposedit = '@Url.Action("POSEdit", "Sales")?SaleId=' + data.Id;
+
+                                    //var myUrlSerialSalesedit = '@Url.Action("EditSaleBySerialSearch", "Sales")?SaleId=' + data.Id;
+
+                                    var myUrlReport = '@Url.Action("SaleReport", "Sales")?SaleId=' + data.Id;
+                                    var myUrlAccTransaction = '@Url.Action("AddTransaction", "Admin")?Type=Sales&RefId=' + data.Id ;
+
+
+                                    var message = `return confirm('Are you sure you want to Remove the Sales Information ?')`;
+
+                                    var buttons = '';// '<span data-toggle="tooltip" title="Report"> <a href=\"' + myUrlReport + '\"  class=\"btn btn-icon btn-success btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-print"></i></a></span>';
+                                    if (!data.isPosted) {
+                                        if (data.isPOSSales) {
+                                            buttons += '<span data-toggle="tooltip" title="POS Edit"> <a href=\"' + myUrlposedit + '\" class=\"btn btn-icon btn-info btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>';
+                                        }
+                                        //else if (data.isSerialSales) {
+                                        //    buttons += '<span data-toggle="tooltip" title="Barcode Scan Sales Edit"> <a href=\"' + myUrlSerialSalesedit + '\" class=\"btn btn-icon btn-default btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>';
+                                        //}
+                                        else {
+                                            buttons += '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>';
+                                        }
+                                        buttons += '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\"  onclick = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_self\"><i class="fa fa-remove"></i></a></span>';
+                                        
+                                        console.log(dueamount);
+                                        console.log(data.DocType);
+
+
+                                     
+                                    
+                                    }
+                                       if (dueamount > 0 && data.DocType != 'Quotation') {
+                                            buttons += '<span data-toggle="tooltip" title="Collection"> <a href=\"' + myUrlAccTransaction + '\"  class=\"btn btn-icon btn-info btn-sm rounded-0 mb-1\" target=\"_self\"><i class="fa fa-money"></i></a></span>';
+                                        }
+                                    //else
+                                    //{
+                                    //    if (dueamount > 0) {
+                                    //        buttons += '<span data-toggle="tooltip" title="Collection"> <a href=\"' + myUrlAccTransaction + '\"  class=\"btn btn-icon btn-info btn-sm rounded-0 mb-1\" target=\"_self\"><i class="fa fa-money"></i></a></span>';
+                                    //    }
+
+                                    //   // buttons += '<span data-toggle="tooltip" title="View"> <a href=\"' + myUrlView + '\" class=\"fa fa-eye text-info px-1 h4\" target=\"_blank\"></a></span>';
+                                    //}
+                                    return buttons;
+
+                                    //if (!data.isPOSSales) {
+                                    //    return '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                    //        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick=return confirm("Are you sure you want to Remove this Customer ?")  class=\"btn btn-icon btn-danger btn-sm mb-1\" target=\"_blank\"><i class="fa fa-remove"></i></a></span>' +
+                                    //        '<span data-toggle="tooltip" title="Report"> <a href=\"' + myUrlReport + '\"  class=\"btn btn-icon btn-success btn-sm mb-1\" target=\"_blank\"><i class="fa fa-print"></i></a></span>';
+                                    //}
+                                    //else {
+                                    //    return '<span data-toggle="tooltip" title="POS Edit"> <a href=\"' + myUrlposedit + '\" class=\"btn btn-icon btn-warning btn-sm mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                    //        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick=return confirm("Are you sure you want to Remove this Customer ?")  class=\"btn btn-icon btn-danger btn-sm mb-1\" target=\"_blank\"><i class="fa fa-remove"></i></a></span>' +
+                                    //        '<span data-toggle="tooltip" title="Report"> <a href=\"' + myUrlReport + '\"  class=\"btn btn-icon btn-success btn-sm mb-1\" target=\"_blank\"><i class="fa fa-print"></i></a></span>';
+                                    //}
+                                }
+
+                            }
+                ],
+
+                //"columnDefs": [
+                //    { "width": "100px", "targets": 0 },
+                //    { "width": "140px", "targets": 1 },
+                //    { "width": "100px", "targets": 2 },
+                //    { "width": "120px", "targets": 3 },
+                //    { "width": "120px", "targets": 4 },
+                //    { "width": "100px", "targets": 5 }
+                //],
+                "order": [0, "desc"],
+                "processing": true,
+                select: {
+                    style: 'multi',
+                    selector: 'td:nth-child(3),td:nth-child(4),td:nth-child(5),td:nth-child(6),td:nth-child(7),td:nth-child(8),td:nth-child(9),td:nth-child(10),td:nth-child(11),td:nth-child(12),td:nth-child(13),td:nth-child(14)'
+                },
+                    "language": {
+                            "lengthMenu": "_MENU_",
+                            //"zeroRecords": "Nothing found - sorry",
+                            //"info": "Showing page _PAGE_ of _PAGES_",
+                            "infoEmpty": "No records available",
+                            "infoFiltered": "(filtered from _MAX_ total records)",
+                            "searchPlaceholder": "Search",
+                             "sSearch" : '<em class="fa fa-search"></em>'
+                        },
+                "destroy": true
+            });
+            //$('#saleslist_filter input').unbind();
+            // alert('Load Successfully');
+            //$('.dataTables_filter input').bind('keyup', function (e) {
+            //    if (e.keyCode == 13) {
+            //        //alert('enter');
+            //        table.search(this.value).draw();
+            //    }
+            //});
+
+
+
+
+
+
+        }
+
+
+
+
+
+             function loadsummarydata() {
+
+                 //alert($("#FromDate").val());
+
+                 var x = $("#FromDate").val();
+                 var y = $("#ToDate").val();
+                 var CustomerId = $("#CustomerId").val();
+                 var UserId = $("#UserId").val();
+                 var Status = $("#Status").val();
+                 var WarehouseId = $("#WarehouseId").val();
+                 var CategoryId = $("#CategoryId").val();
+                 var DocTypeId = $("#DocTypeId").val();
+
+
+
+
+                 //alert(x , y);
+                $.ajax({
+
+                    url: '@Url.Action("GetSaleSummaryInfo", "Sales")',
+                    data: { FromDate: x, ToDate: y, CustomerId: CustomerId, UserId: UserId, WarehouseId: WarehouseId, CategoryId: CategoryId ,DocTypeId: DocTypeId },
+                        //data: JSON.stringify(purchasesmain),
+                        //type: 'POST',
+                        //async: true,
+                        contentType: 'application/json;',
+                        dataType: 'json',
+                        success: function (result) {
+                            //console.log(result);
+                            //console.log(result.salesbyuser);
+                            //console.log(result.salesreceivebyhead);
+
+
+                            var output = "";
+                            if (result.salesbyuser.length != 0) {
+                                for (var i = 0; i < result.salesbyuser.length; i++) {
+                                    if (result.salesbyuser[i] != null) {
+                                        //console.log(result.salesbyuser[i]);
+                                        output += '<p class=lineheight  style="color:darkslategray">' + result.salesbyuser[i].UserName + " : " + result.salesbyuser[i].TotalSalesCount + " : " + result.salesbyuser[i].TotalSalesSum.toLocaleString() + ' </p>'
+                                    }
+                                };
+                                $("#divfullinfoone").show();
+                                document.getElementById("fullinfoone").innerHTML = output;
+                            }
+                            else {
+                                $("#divfullinfoone").hide();
+                            }
+
+
+
+                            output = "";
+                            if (result.commissionbyuser.length != 0) {
+                                for (var i = 0; i < result.commissionbyuser.length; i++) {
+                                    if (result.commissionbyuser[i] != null) {
+                                        //console.log(result.commissionbyuser[i]);
+                                        output += '<p class=lineheight  style="color:darkslategray">' + result.commissionbyuser[i].UserName + " : " + result.commissionbyuser[i].TotalSalesCount + " : " + result.commissionbyuser[i].TotalCommissionAmount + ' </p>'
+                                    }
+                                };
+                                $("#divfullinfofour").show();
+                                document.getElementById("fullinfofour").innerHTML = output;
+                            }
+                            else {
+                                $("#divfullinfofour").hide();
+                            }
+
+
+
+                            output = "";
+                            if (result.totalsalessummary.length != 0) {
+                                for (var i = 0; i < result.totalsalessummary.length; i++) {
+                                    if (result.totalsalessummary[i] != null) {
+                                        //console.log(result.totalsalessummary[i]);
+                                        output += '<p class=lineheight> Total Sales :' + result.totalsalessummary[i].TotalSalesCount + ' </p>'
+                                        output += '<p class=lineheight> Total Sales Value : ' + result.totalsalessummary[i].TotalSalesValue.toLocaleString() + ' </p>'
+                                        output += '<p class=lineheight> Total Costing : ' + result.totalsalessummary[i].TotalCosting.toLocaleString() + ' </p>'
+                                        output += '<p class=lineheight> Total Discount : ' + result.totalsalessummary[i].TotalDiscount.toLocaleString() + ' </p>'
+                                        output += '</hr><p class="text-bold"> Total Profit : ' + result.totalsalessummary[i].TotalProfit.toLocaleString() + ' </p>'
+                                    }
+
+                                };
+                                $("#divfullinfotwo").show();
+                                document.getElementById("fullinfotwo").innerHTML = output;
+                            }
+                            else {
+                                $("#divfullinfotwo").hide();
+                            }
+
+
+
+
+                            output = "";
+                            if (result.salesreceivebyhead.length != 1) {
+                                for (var i = 0; i < result.salesreceivebyhead.length; i++) {
+                                    if (result.salesreceivebyhead[i] != null) {
+                                        //console.log(result.salesreceivebyhead[i]);
+
+
+                                        if (result.salesreceivebyhead[i].AccName == "Due" && result.salesreceivebyhead[i].Amount != 0) {
+                                            output += '<p class=lineheight style="color:red">Total Due  : ' + result.salesreceivebyhead[i].Amount.toLocaleString() + '</p>';
+                                        }
+                                        else {
+                                            output += '<p class=lineheight style="color:darkslategray">' + result.salesreceivebyhead[i].AccName + " : " + result.salesreceivebyhead[i].Amount.toLocaleString() + ' </p>'
+                                        }
+
+                                    }
+                                };
+                                $("#divfullinfothree").show();
+                                document.getElementById("fullinfothree").innerHTML = output;
+
+                            }
+                            else {
+
+                                $("#divfullinfothree").hide();
+                            }
+
+
+                            var output = "";
+                            if (result.topsellingitem.length != 0) {
+                                for (var i = 0; i < result.topsellingitem.length; i++) {
+                                    if (result.topsellingitem[i] != null) {
+                                        //console.log(result.topsellingitem[i]);
+                                        output += '<p class=lineheight style="color:darkslategray">' + result.topsellingitem[i].ProductName + " : " + result.topsellingitem[i].ProductCount + ' </p>'
+                                    }
+                                };
+                                $("#divfullinfofive").show();
+                                document.getElementById("fullinfofive").innerHTML = output;
+                            }
+                            else {
+
+                                $("#divfullinfofive").hide();
+                            }
+
+
+
+
+
+                            output = "";
+                            if (result.topsellingcustomer.length != 0) {
+                                for (var i = 0; i < result.topsellingcustomer.length; i++) {
+                                    if (result.topsellingcustomer[i] != null) {
+
+                                        if (result.topsellingcustomer[i].CustomerName == "") {
+                                            result.topsellingcustomer[i].CustomerName = "=N/A=";
+                                        }
+
+                                        //console.log(result.topsellingcustomer[i]);
+                                        output += '<p class=lineheight style="color:darkslategray">' + result.topsellingcustomer[i].CustomerName + " : " + result.topsellingcustomer[i].SalesAmount.toLocaleString() + ' </p>'
+                                    }
+                                };
+                                $("#divfullinfoseven").show();
+                                document.getElementById("fullinfoseven").innerHTML = output;
+                            }
+                            else {
+
+                                $("#divfullinfoseven").hide();
+                            }
+
+
+
+                            output = "";
+                            if (result.topduecustomer.length != 0) {
+                                for (var i = 0; i < result.topduecustomer.length; i++) {
+
+                                    var DueAmount = result.topduecustomer[i].TotalSales - result.topduecustomer[i].ReceivedAmount;
+
+                                    if (result.topduecustomer[i].CustomerName == "") {
+                                        result.topduecustomer[i].CustomerName = "=N/A=";
+                                    }
+
+
+                                    if (result.topduecustomer[i] != null && DueAmount > 0) {
+                                        output += '<p class=lineheight style="color:darkslategray">' + result.topduecustomer[i].CustomerName + " : " + DueAmount.toLocaleString() + ' </p>'
+                                    }
+                                };
+                                $('#divfullinfosix').show();
+                                document.getElementById("fullinfosix").innerHTML = output;
+
+                            }
+                            else {
+
+                                $("#divfullinfosix").hide();
+                            }
+
+
+                            output = "";
+                            if (result.postunpostcount.length != 0) {
+                                for (var i = 0; i < result.postunpostcount.length; i++) {
+                                    if (result.postunpostcount[i] != null && result.postunpostcount[i].DocCount > 0 && result.postunpostcount[i].isPosted == false) {
+                                        output += '<p class=lineheight  style="color:darkslategray">' + "Not Posted : " + result.postunpostcount[i].DocCount + ' </p>'
+                                    }
+                                    else {
+                                        output += '<p class=lineheight  style="color:darkslategray">' + "Posted : " + result.postunpostcount[i].DocCount + ' </p>'
+                                    }
+                                };
+                                $('#divfullinfoeight').show();
+                                document.getElementById("fullinfoeight").innerHTML = output;
+                            }
+                            else {
+                                $("#divfullinfoeight").hide();
+                            }
+
+
+                            var categorytotalprofit = 0.00;
+                            var categorytotalprofitavg = 0.00;
+
+                            output = "";
+                            if (result.sellingitembycategory.length != 0) {
+                                for (var i = 0; i < result.sellingitembycategory.length; i++) {
+                                    if (result.sellingitembycategory[i] != null) {
+                                        //console.log(result.topsellingitem[i]);
+                                        output += '<p class=lineheight  style="color:darkslategray">' + result.sellingitembycategory[i].CategoryName + " (" + result.sellingitembycategory[i].CategoryCount + ") " + result.sellingitembycategory[i].TotalSales.toLocaleString() + " : Profit " + result.sellingitembycategory[i].TotalProfit.toLocaleString() + " || " + result.sellingitembycategory[i].TotalProfitAvgCost.toLocaleString() + ' </p>'
+                                        categorytotalprofit += parseFloat(result.sellingitembycategory[i].TotalProfit);
+                                        categorytotalprofitavg += parseFloat(result.sellingitembycategory[i].TotalProfitAvgCost);
+
+                                    }
+                                };
+                                output += '<hr class="solid"><p class=""> Total Profit : ' + categorytotalprofit.toLocaleString() + ' || ' + categorytotalprofitavg.toLocaleString() + '(Avg.Cst) </p>'
+                                $('#divfullinfonine').show();
+                                document.getElementById("fullinfonine").innerHTML = output;
+                            }
+                            else {
+                                $("#divfullinfonine").hide();
+                            }
+
+
+                            ///console.log(result.daywisesalescount);
+                            output = "";
+                            if (result.daywisesalescount.length != 0) {
+                                for (var i = 0; i < result.daywisesalescount.length; i++) {
+
+                                    //var DueAmount = result.daywisesalescount[i].TotalSales - result.daywisesalescount[i].ReceivedAmount;
+                                    if (result.daywisesalescount[i] != null) {
+                                        output += '<p class=lineheight style="color:darkslategray">' + result.daywisesalescount[i].SalesDate + " : " + result.daywisesalescount[i].TotalSalesCount + " : " + result.daywisesalescount[i].TotalSalesSum.toLocaleString() + ' </p>'
+                                    }
+                                };
+                                $('#divfullinfoten').show();
+                                document.getElementById("fullinfoten").innerHTML = output;
+
+                            }
+                            else {
+
+                                $("#divfullinfoten").hide();
+                            }
+
+
+
+                            //toastr.success('Sales Summary Load Successfully.');
+                            //alert('Wait');
+                        },
+                        error: function () {
+                            toastr.error('Unable to Load');
+                            //alert('Unable to Save');
+                        }
+                    });
+
+
+            };
+
+
+    });
+
+
+
+
+
+
+
+        @*var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+                var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+                var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+                    {
+                    style: 'currency',
+                    currency: CurrencyShortNameViewFormat,///'BDT'
+                    minimumFractionDigits: 2,
+                });*@
+
+</script>
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,361 @@
+﻿@model List<Atrai.Model.Core.Entity.AccountHeadModel>
+@{
+    ViewData["Title"] = "Dynamic Report View";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+     System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+}
+<style>
+    .table>:not(:first-child) {
+    border-top:0;
+}
+
+    #treegridTable th{
+          text-align:center;
+          font-weight: 600;
+         border: 1px solid #BABEC5;
+/*font-size: 14px;*/
+    }
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+       border: 1px solid #c9c9c9;
+       
+    }
+
+
+    .table tbody tr td {
+     /* border: 1px solid #c9c9c9;*/
+      font: 14px;      
+color: #8A8A8A;
+line-height: 15px;
+    }
+/*    .table>:not(caption)>*>* {
+
+     border-bottom-width: 0px; 
+
+}*/
+    .text-red{
+        color:#FF0000!important;
+    }
+    #body td:not(:first-child){
+     text-align:center;
+ }
+ .root-node{
+     font-weight: 500;  
+ }
+</style>
+
+
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+
+        <div class="table-responsive">
+
+        <table class="table table-condensed table-hover tree" data-statement-id="balancesheet" id="treegridTable">
+            <tbody id="body">
+            </tbody>
+        </table>
+        </div>
+
+
+
+
+    </div>
+
+</div>
+
+
+
+
+
+@section Scripts{
+<script>
+
+    //alert('wait');
+    var StrId =  @ViewBag.Id;
+    var Criteria =  "@ViewBag.Criteria";
+
+    //alert(StrId);
+    //console.clear();
+    var balanceSheet;
+    var MyAppUrlSettings = {
+            MyUsefulUrl : '@Url.Action("GetBalanceSheet", "Accounts")'
+        }
+    $.ajax({
+      //url:"https://raw.githubusercontent.com/kautuk-desai/demo-data/master/datagrid-lib.json",
+      url: MyAppUrlSettings.MyUsefulUrl,
+      data: { StrId: StrId ,Criteria : Criteria },
+      type: "GET",
+      dataType: 'json',
+      //shrinkToFit : false,
+      scrollX:        true,
+        buttons: {
+        dom: {
+        button: {
+            className: 'btn rounded-0'
+        }
+        },
+        buttons: [
+        //'copy', 'csv', 'excel', 'pdf', 'print'
+        //{ "extend": 'excel', "text": 'Excel', "className": 'btn btn-sm btn-success-info fa fa-excel rouned-0' }
+
+        {       extend: 'excel',
+                text: '<i class="bi bi-file-earmark-excel"></i>',
+                className: 'btn-success',
+                titleAttr: 'Export to excel'
+        }
+
+        ],
+        },
+
+      success: function(response) {
+        
+        console.log(response);
+          
+        //const data = JSON.parse(response);
+        //balanceSheet = data.hierarchy.data;
+        //console.log(balanceSheet);
+
+
+        const balanceSheet = response.reportdata;
+
+        //var montharray = response.monthname.split(',');
+        //const monthname = montharray;
+        ////console.log(balanceSheet);
+
+
+        const monthname = response.monthname;
+        //console.log("all data come");
+
+        const columns = [
+        "Count" ,"Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct",  "Nov", "Dec"];
+
+          //console.log(monthname);
+          //console.log(columns);
+
+/*        const columns = monthname;*/
+
+        $('[data-statement-id="balancesheet"]').append(formHeaderColumns(columns));
+
+        formTable(balanceSheet, undefined, 1);
+
+        $(".tree").treegrid({
+ expanderExpandedClass: "bi bi-chevron-down pe-4",
+          expanderCollapsedClass: "bi bi-chevron-right pe-4"
+        });
+      }
+    });
+
+
+
+
+    var tbody = $("#body");
+
+    var formHeaderColumns = function(timeseriesprojections) {
+      var thead = "<thead><tr><th>Account Head</th>";
+        $.grep(timeseriesprojections, function (ele, i) {
+        
+        thead += "<th>" + ele + "</th>";
+      });
+      thead += "</thead>";
+      return thead;
+    };
+
+    var formTable = function(data, parentID, level) {
+      var currentLevel = level;
+        $.each(data, function (i, ele) {
+            //console.log("i:", i);
+            console.log("ele:", ele);
+        ele.datalevel = currentLevel;
+        var tr = "<tr data-account-name='" + ele.name + "' class='";
+        tr += "treegrid-" + ele.id;
+        if (parentID !== undefined && ele.id !== parentID) {
+          tr += " treegrid-parent-" + parentID;
+        }
+        if (ele.datalevel == 1) {
+          tr += " root-node'>";
+        } else {
+          tr += " node'>";
+        }
+
+
+        if (ele.accType == "G")
+        {
+            tr += "<td class='text-left text-nowrap font-weight-bold'>" + ele.description + "</td>";
+        }
+        else
+        {
+           tr += "<td class='text-left'>" + ele.description + "</td>";
+        }
+        //tr += "<td class=text-left>" + ele.description + "</td>";
+
+        //console.log(ele.data)
+        //console.log(ele.data["col_2"]);
+        //var columncount  = Object.keys(ele.data).length;
+        //console.log(columncount);
+
+        if (jQuery.isEmptyObject(ele.data))
+        {
+     
+
+            for(var i = 1; i < 14; i++)//see that I removed the $ preceeding the `for` keyword, it should not have been there
+            {
+                    tr += "<td>-</td>";
+            } 
+
+          //console.log('found');
+           //tr += "<td>-</td>";
+           //tr += "<td>-</td>";
+           //tr += "<td>-</td>";
+           //tr += "<td>-</td>";
+           //tr += "<td>-</td>";
+           //tr += "<td>-</td>";
+           //tr += "<td>-</td>";
+           //tr += "<td>-</td>";
+           //tr += "<td>-</td>";
+           //tr += "<td>-</td>";
+           //tr += "<td>-</td>";
+           //tr += "<td>-</td>";
+
+        }
+        else
+          {
+            
+             //console.log(ele.data);
+             let sortedData = Object.keys(ele.data).sort();
+             let group= 0;
+             for(let i in sortedData) {
+                 let key = sortedData[i];
+                 let value = ele.data[sortedData[i]]
+                 console.log("key:", key, "value:", value);
+
+                if (key == "Account" || key == "Action" || key == "ID"|| key == "AccId" || key == "ParentId")
+                {
+
+                }
+                else if (key == "col_0")
+                {
+                    if (value > 0)
+                    {
+                        tr += "<td class=text-center>" + value + "</td>";
+                        group = 1;
+                    }
+                    else
+                    {
+                     tr += "<td>-</td>";
+                     group = 0;
+                    }
+                }
+                else
+                {
+                    if (value > 0)
+                    {
+                        if (group ==1)
+                        {
+                        //console.log( key + ": " + value );
+                        tr += "<td class='text-right font-weight-bold'>" + value.toLocaleString('en-IN') + "</td>";
+                        }
+                        else
+                        {
+
+                        tr += "<td class=text-right>" + value.toLocaleString('en-IN') + "</td>";
+
+                        }
+                    }
+                    else if (value < 0)
+                    {
+                        if (group ==1)
+                        {
+                        //console.log( key + ": " + value );
+                        tr += "<td class='text-right font-weight-bold text-red'>" + value.toLocaleString('en-IN') + "</td>";
+                        }
+                        else
+                        {
+
+                        tr += "<td class='text-right text-red'>" + value.toLocaleString('en-IN') + "</td>";
+
+                        }
+                    }
+                    else
+                    {
+                     tr += "<td>-</td>";
+                    }
+                }
+
+                 //console.log("Key: " + sortedData[i] + "   " + ele.data[sortedData[i]])
+             }
+
+            // $.each( ele.data, function( key, value ) {
+            //  if (key == "Account" || key == "Action" || key == "ID"|| key == "AccId" || key == "ParentId")
+            //    {
+
+            //    }
+            //    else
+            //    {
+            //        //console.log( key + ": " + value );
+            //        tr += "<td>" + value + "</td>";
+            //    }
+            //   //console.log(ele.data["col_2"]);
+            //});
+          }
+
+
+
+
+
+             //tr += "<td>" + ele.data["col_2"] + "</td>";
+
+
+
+
+
+
+
+        if (ele.projections && ele.projections.length > 0) {
+          tr += bindAccountValues(ele.projections);
+        }
+
+        tr += "</tr>";
+        tbody.append(tr);
+        ele.parentID = parentID;
+        if (ele.hasOwnProperty("children")) {
+          formTable(ele.children, ele.id, parseInt(currentLevel + 1));
+        }
+      });
+    };
+
+    var bindAccountValues = function(projections) {
+      var accountValues = "";
+      $.grep(projections, function(ele, i) {
+        accountValues +=
+          '<td data-account-dt="' + ele.dt + '">' + ele.value + "</td>";
+      });
+      return accountValues;
+    };
+
+
+
+
+    //    $("#treegridTable").tableExport({
+    //headings: true,                    // (Boolean), display table headings (th/td elements) in the <thead>
+    //footers: true,                     // (Boolean), display table footers (th/td elements) in the <tfoot>
+    //formats: ["xls", "csv"],    // (String[]), filetypes for the export
+    //fileName: "id",                    // (id, String), filename for the downloaded file
+    //position: "bottom",                 // (top, bottom), position of the caption element relative to table
+    //ignoreRows: null,                  // (Number, Number[]), row indices to exclude from the exported file
+    //ignoreCols: null                 // (Number, Number[]), column indices to exclude from the exported file
+    //});
+    //$.fn.tableExport.csv = {
+    //    defaultClass: "",
+    //    buttonContent: "Export",
+    //    separator: ",",
+    //    mimeType: "application/csv",
+    //    fileExtension: ".csv"
+    //};
+    //$.fn.tableExport.defaultButton = "default";
+    //$.fn.tableExport.bootstrap = ["btn", "btn-primary", "btn-toolbar"];
+
+
+</script>
+}

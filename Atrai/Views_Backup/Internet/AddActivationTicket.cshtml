@@ -1,0 +1,253 @@
+﻿@model Atrai.Core.Entity.ActivationTicketModel
+@{
+    ViewData["Title"] = "Add ActivationTicket";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>New Activation Ticket</h4>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="Internet" asp-action="AddActivationTicket" method="post" enctype="multipart/form-data">
+
+                                @if (Model != null)
+                                {
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" />
+                                    <input type="hidden" asp-for="LuserId" />
+
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Id" value="0" />
+                                }
+
+
+                                <div class="row">
+                                    <div class="col-lg-8">
+
+
+
+                                        @*<div class="form-group">
+            <div class="col-md-5 col-md-offset-2">
+                <img src="..@Model.ImagePath" alt="img" id="UploadFile" class="img-thumbnail" style="height: 150px" width="150px" /> <br />
+                <input type="file" name="logoPostedFileBase" accept="image/x-png, image/gif, image/jpeg" id="FileUpload" onchange="PreviewImage()" />
+            </div>
+        </div>*@
+
+
+
+
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-3 col-12 ">
+                                                    <label asp-for="TicketNo"></label>
+                                                    <input type="text" asp-for="TicketNo" class="form-control" placeholder="Auto Generated" readonly="readonly">
+                                                    <span asp-validation-for="TicketNo" class="text-danger"></span>
+                                                </div>
+                                                <div class="col-md-3 col-12 ">
+                                                    <label asp-for="ContactName"></label>
+                                                    <input type="text" asp-for="ContactName" class="form-control" placeholder="Enter Contact Name">
+                                                    <span asp-validation-for="ContactName" class="text-danger"></span>
+                                                </div>
+                                                <div class="col-md-3 col-12 ">
+                                                    <label asp-for="ContactNumber"></label>
+                                                    <input type="tel" asp-for="ContactNumber" class="form-control" placeholder="Enter Contact Number">
+                                                    <span asp-validation-for="ContactNumber" class="text-danger"></span>
+                                                </div>
+                                                <div class="col-md-3 col-12 ">
+                                                    <label asp-for="Address"></label>
+                                                    <input type="text" asp-for="Address" class="form-control" placeholder="Enter Address">
+                                                    <span asp-validation-for="Address" class="text-danger"></span>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
+
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="AreaZone"></label>
+                                                <input type="text" asp-for="AreaZone" class="form-control" placeholder="Enter Area / Zone">
+                                                <span asp-validation-for="AreaZone" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-3 col-12">
+                                                @Html.LabelFor(x => x.PromiseDate)
+                                                @Html.TextBoxFor(x => x.PromiseDate, @"{0:dd-MMM-yyyy}", new { id = "PromiseDate", @class = "form-control", @placeholder = "Enter Promise Date", autocomplete = "off" })
+                                                @Html.ValidationMessageFor(x => x.PromiseDate, "", new { @class = "text-danger" })
+                                            </div>
+
+
+
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="OTC"></label>
+                                                <input asp-for="OTC" class="form-control" type="text" placeholder="Enter OTC">
+                                                <span asp-validation-for="OTC" class="text-danger"></span>
+                                            </div>
+
+
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="MRC"></label>
+                                                <input asp-for="MRC" class="form-control" type="text" placeholder="Enter MRC">
+                                                <span asp-validation-for="MRC" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="form-group row">
+
+                                            <div class="col-md-4 col-12 ">
+                                                @Html.LabelFor(x => x.PackageId)
+                                                @Html.DropDownListFor(x => x.PackageId,
+                                                 new SelectList((IEnumerable<SelectListItem>)ViewBag.PackageId, "Value", "Text"), "Select Package", htmlAttributes: new { @class = "form-control", id = "PackageId" })
+                                                @Html.ValidationMessageFor(x => x.PackageId, "", new { @class = "text-danger" })
+                                            </div>
+
+                                            <div class="col-md-4 col-12">
+                                                <label for="UserType"> User Type : </label>
+                                                @Html.DropDownList("UserType", new List<SelectListItem>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             {
+                                                        new SelectListItem() {Text = "STATIC", Value="STATIC"},
+                                                        new SelectListItem() {Text = "PPOE", Value="PPOE"}
+                                                    }, "Select User Type", new { @class = "form-control" })
+
+                                            </div>
+
+                                            <div class="col-md-4 col-12">
+                                                <label for="Priority"> Priority : </label>
+                                                @Html.DropDownList("Priority", new List<SelectListItem>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             {
+                                                        new SelectListItem() {Text = "Normal", Value="Normal"},
+                                                        new SelectListItem() {Text = "High", Value="High"},
+                                                        new SelectListItem() {Text = "Highest", Value="Highest"}
+                                                    }, "Select Priority", new { @class = "form-control" })
+
+                                            </div>
+
+
+
+                                        </div>
+
+
+                                        <div class="form-group row">
+                                            <div class="col-md-6 col-12 ">
+                                                <label asp-for="ONUFrom"></label>
+                                                <input asp-for="ONUFrom" class="form-control" type="text" placeholder="Enter ONU From">
+                                                <span asp-validation-for="ONUFrom" class="text-danger"></span>
+                                            </div>
+
+
+                                            <div class="col-md-6 col-12 ">
+                                                <label asp-for="ROUTERFrom"></label>
+                                                <input asp-for="ROUTERFrom" class="form-control" type="text" placeholder="Enter ROUTER From">
+                                                <span asp-validation-for="ROUTERFrom" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-6 col-12 ">
+                                                <label asp-for="ReferanceBy"></label>
+                                                <input asp-for="ReferanceBy" class="form-control" type="text" placeholder="Enter Referance By">
+                                                <span asp-validation-for="ReferanceBy" class="text-danger"></span>
+                                            </div>
+
+
+                                            <div class="col-md-6 col-12 ">
+                                                <label asp-for="Note"></label>
+                                                <input type="text" asp-for="Note" class="form-control" placeholder="Enter Note">
+                                                <span asp-validation-for="Note" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+
+
+
+                                        <div class="form-group">
+                                            <div class="row">
+
+
+                                                <div class="col-md-6 col-12 ">
+                                                    @Html.LabelFor(x => x.FusionTeamLUserId)
+                                                    @Html.DropDownListFor(x => x.FusionTeamLUserId,
+                                                                   new SelectList((IEnumerable<SelectListItem>)ViewBag.FusionTeamLUserId, "Value", "Text"), "Select Fusion Team Member", htmlAttributes: new { @class = "form-control", id = "FusionTeamLUserId" })
+                                                    @Html.ValidationMessageFor(x => x.FusionTeamLUserId, "", new { @class = "text-danger" })
+                                                </div>
+
+                                                <div class="col-md-6 col-12 ">
+                                                    @Html.LabelFor(x => x.ActivatedbyLUserId)
+                                                    @Html.DropDownListFor(x => x.ActivatedbyLUserId,
+                                                                   new SelectList((IEnumerable<SelectListItem>)ViewBag.ActivatedbyLUserId, "Value", "Text"), "Select Activated By User", htmlAttributes: new { @class = "form-control", id = "ActivatedbyLUserId" })
+                                                    @Html.ValidationMessageFor(x => x.ActivatedbyLUserId, "", new { @class = "text-danger" })
+                                                </div>
+
+
+                                            </div>
+
+                                        </div>
+
+
+
+                                        <div class="form-group">
+                                            @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+
+
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                                <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" /> }
+                                                            else if (ViewBag.ActionType == "Edit")
+                                                            {
+                                                                <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" /> }
+                                                            else if (ViewBag.ActionType == "Delete")
+                                                            {
+                                                <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>}
+
+
+                                            @Html.ActionLink("Back", "ActivationTicketList", "Internet", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                        </div>
+
+
+
+                                    </div>
+                                    </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#PromiseDate').datepicker({
+                dateFormat: 'dd-M-yy',
+                todayHighlight: true,
+                autoclose: true
+
+            });
+
+        });
+
+        function PreviewImage() {
+            var oFReader = new FileReader();
+            oFReader.readAsDataURL(document.getElementById("FileUpload").files[0]);
+
+            oFReader.onload = function (oFREvent) {
+                document.getElementById("UploadFile").src = oFREvent.target.result;
+            };
+        };
+    </script>
+}
+

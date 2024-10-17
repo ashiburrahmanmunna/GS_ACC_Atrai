@@ -1,0 +1,364 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Export Invoice";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    
+    .btn
+    {
+        border-radius: 3%;
+    }
+</style>
+
+<div>
+    <h5>Export Shipping Documents</h5>
+    <div class="shadow p-3 mb-5 bg-white rounded">
+        <div class="row">
+            <div class="col-md-3 col-3 mt-3">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="RptType" id="inlineRadio1" value="PDF" checked>
+                    <label class="form-check-label" for="inlineRadio1">PDF</label>
+                </div>
+
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="RptType" id="inlineRadio2" value="EXCEL">
+                    <label class="form-check-label" for="inlineRadio2">EXCEL</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="RptType" id="inlineRadio3" value="WORD">
+                    <label class="form-check-label" for="inlineRadio3">WORD</label>
+                </div>
+            </div>
+            <div class="col-md-3 col-3">
+                <label><strong>Sales Contract/Master LC</strong></label>
+                <select id="MasterLCId" class="form-control" onchange="afterMasterSelect()">
+                    <option value="">Please Select</option>
+                </select>
+            </div>
+            <div class="row-md-3 col-3">
+                <label><strong>Export Invoice</strong></label><br />
+                <select data-mdb-select-init multiple id="InvoiceId">
+                </select>
+            </div>
+            <div class="col-md-3 col-3">
+                <label><strong>Buyer</strong></label><br />
+                <input class="w-100" id="Buyer" disabled />
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-3 col-3">
+                <label><strong>Exporter:</strong></label><br />
+                <input class="w-100" id="Exporter" disabled />
+            </div>
+            <div class="col-md-3 col-3">
+                <label><strong>Total Invoice Qty:</strong></label><br />
+                <input class="w-100" id="TotalInvoiceQty" disabled />
+            </div>
+            <div class="col-md-3 col-3">
+                <label><strong>Total Value:</strong></label><br />
+                <input class="w-100" id="TotalValue" disabled />
+            </div>
+            <div class="col-md-3 col-3">
+                <label><strong>Print/Ref Date:</strong></label><br />
+                <input id="PrintDate" class="form-control" style="height: 26px;" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="shadow mb-5 bg-white rounded mt-1" style="padding: 20px;">
+    <div class="row mt-2">
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintCIE')">Export Invoice</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintCountryOfOrigin')">Country of Origin</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintGSP')">GSP</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintBL')">BL Draft</a>
+        </div>
+        
+    </div>
+    <div class="row mt-3">
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintBillOfExchange')">Bill of Exchange</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintKPT')">KPT</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintSAFTA')">SAFTA</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintTC')">AFTA(Document Need)</a>
+        </div>
+        
+    </div>
+    <div class="row mt-3">
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintMCD')">MCD(Document Need)</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintB255')">B255</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintCanadaCustom')">CANADA Custom</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintPSIC')">Request of COO</a>
+        </div>
+       
+    </div>
+    <div class="row mt-3">
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintCOPE')">Colle. Of Proc.</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintCertificateOfOrigin')">Certificate of ORigin</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintEPB')">EPB</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintPriceList')">Price List</a>
+        </div>
+        
+    </div>
+    <div class="row mt-3">
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintBillOfExchangeTwo')">Bill Of Exchange RS</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintLDCStatement813')">LDS Statement-813</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintProductionCertificate')">Production Certificate</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintBeneficiaryConfirmation785')">Beneficiary's Confirm. - 785</a>
+        </div>
+       
+    </div>
+    <div class="row mt-3">
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintSubmissionDOC')">Subm. Doc For Collection</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintIDMForm')">IDM Form 813</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintNewPackingDec')">New Packing Declaration</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintDOCWithoutIC')">Doc Without IC</a>
+        </div>
+       
+    </div>
+    <div class="row mt-3">
+    <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintProformaInvoice')">Proforma Invoice</a>
+    </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintExportSalesContract')">Sales Contract</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintBankCertificate')">Bank Certificate</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintCIFCIPFOB')">CIF-CIP-FOB</a>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintUndertaking')">Undertaking</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintOutPass')">Out Pass</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintOutPassBn')">Out Pass Bn</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintOutPassEn')">Out Pass En</a>
+        </div>
+        
+    </div>
+    <div class="row mt-3">      
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintOutPassChoice')">Out Pass (1)</a>
+        </div>
+        @* <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100" onclick="ReportPrint('PrintUndertakingChoice')">Undertaking_choice</a>
+        </div> *@
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintUndertakingProg')">Undertaking (2)</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintOutPassSains')">Out Pass (2)</a>
+        </div>
+    </div>
+    <div class="row mt-3">
+        @* <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100" onclick="ReportPrint('PrintUndertakingPrimark')">Undertaking_Primark</a>
+        </div> *@
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('PrintOutPassPrimark')">Out Pass (3)</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('ExportPackingList')">Packing List</a>
+        </div>
+        <div class="col-lg">
+            <a type="button" class="btn btn-light border-dark w-100 text-start" onclick="ReportPrint('ExportDetailsPackingList')">Detail Packing List</a>
+        </div>
+    </div>
+    </div>
+
+
+@section Scripts
+{
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Add DataTables script -->
+    <script src="https://cdn.datatables.net/1.11.6/js/jquery.dataTables.min.js"></script>
+    <!-- Add jQuery UI for Datepicker -->
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+    <script type ="text/javascript">
+
+        // JavaScript to add serial numbers
+        document.addEventListener("DOMContentLoaded", function () {
+            let buttons = document.querySelectorAll('.col-lg a');
+            buttons.forEach((button, index) => {
+                button.innerHTML = (index + 1) + ". " + button.innerHTML;
+            });
+        });
+
+
+        $("#MasterLCId").select2();
+        $("#InvoiceId").select2();
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("getMasterLCDropdown", "Variable")',
+            datatype: "Json",
+            success: function (data) {
+
+                $.each(data, function (index, value) {
+                    $('#MasterLCId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                });
+            }
+        });
+
+        $(function () {
+            
+            $("#PrintDate").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#PrintDate").attr("autocomplete", "off");
+        });
+
+        function afterMasterSelect() {
+            var masterLCId = $("#MasterLCId").val();
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("upgradeInvoiceId", "Variable")',
+                data: { id: masterLCId },
+                datatype: "Json",
+                success: function (response) {
+
+                    $('#InvoiceId').empty();
+                    $.each(response.proformaInvoice, function (index, value) {
+                        $('#InvoiceId').append('<option value="' + value.Value + '" >' + value.Text + '</option>');
+                    });
+                }
+            });
+        }
+        $('#InvoiceId').on('select2:select', function (e) {
+            var selectedOptions = this.selectedOptions;
+            if (selectedOptions.length > 0) {
+                var lastSelectedId = selectedOptions[selectedOptions.length - 1].value;
+                console.log("Last selected ID:", lastSelectedId);
+
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("GetInvoiceDetails", "Variable")',
+                    data: { id: lastSelectedId },
+                    datatype: "Json",
+                    success: function (response) {
+
+                        $('#TotalValue').val(response.data.TotalValue);
+                        $('#TotalInvoiceQty').val(response.data.TotalInvoiceQty);
+                        $('#Buyer').val(response.data.Buyer);
+                        $('#Exporter').val(response.data.Exporter);
+                        
+                    }
+                });
+            }
+        });
+
+        function ReportPrint(btnvalue) {
+            var MasterLCId = 0;
+            var InvoiceId = 0;
+            var printdate = "";
+
+            MasterLCId = $('#MasterLCId').val();
+            GroupLCId = 0;//$('#GroupLCId').val();
+
+            InvoiceId = $('#InvoiceId').val();
+            //alert(InvoiceId);
+            printdate = $('#PrintDate').val();
+
+
+            //if (GroupLCId == '') {
+            //    alert('Please Select GroupLC From List');
+            //    return;
+            //}
+            if (MasterLCId == '') {
+                alert('Please Select Sales Contract From List');
+                return;
+            }
+            if (InvoiceId == '') {
+                alert('Please Select Export Invoice From List');
+                return;
+            }
+            if (printdate == '') {
+                alert('Please Select Ref Date For Print');
+                return;
+            }
+
+
+            var reporttype = $("input[name=RptType]:checked").val();
+
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("ExportSetSession", "Variable")',
+                dataType: 'json',
+                async: true,
+                data: { reporttype: reporttype, action: btnvalue, masterlcid: MasterLCId, grouplcid: GroupLCId, reportid: InvoiceId.toString(), printdate: printdate },
+                success: function (response) {
+                    //  window.location.href = response.Url;
+
+                    window.open(response.Url, '_blank')
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+        }
+    </script>
+}

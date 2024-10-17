@@ -1,0 +1,333 @@
+﻿@model Atrai.Model.Core.Entity.CustomerModel
+@{
+    ViewData["Title"] = "AddCustomer";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<!-- Start Page Content -->
+<div class="row">
+    <div class="col-md-11 col-12">
+        <div class="card">
+            <div class="card-body">
+                 <h3 class="my-4">Customer Information</h3>
+                <div class="basic-elements">
+                    <form asp-controller="admin" asp-action="AddCustomer" method="post">
+                        @if (Model != null)
+                        {
+                            <input type="hidden" asp-for="Id" />
+                            <input type="hidden" asp-for="CreateDate" />
+                            <input type="hidden" asp-for="LuserId" />
+                        }
+                        else
+                        {
+                            <input type="hidden" asp-for="Id" value="0" />
+                        }
+
+                        <div class="row">
+                            <div class="col-md-12 col-12">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                      <div class="form-floating mb-2">
+                                            <input type="text" asp-for="Name" class="form-control" placeholder="Name">
+                                          <label>Name</label>
+                                           <span asp-validation-for="Name" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-6">
+                                    <div class="form-floating mb-2">
+                                      <input asp-for="Email" class="form-control" type="email" placeholder="Enter Email">
+                                      <label asp-for="Email"></label>
+                                       <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+                                    </div>
+
+
+
+                                    <div class="col-md-6">
+                                      <div class="form-floating mb-2">
+                                            <input asp-for="Phone" class="form-control" type="tel" placeholder="Enter phone">
+                                                <label asp-for="Phone"></label>
+                                             <span asp-validation-for="Phone" class="text-danger"></span>
+
+                                            </div>
+                                    </div>
+
+
+                                    <div class="col-md-6">
+                                   <div class="form-floating mb-2">
+                                          <textarea  asp-for="Notes" class="form-control" placeholder="Enter Notes" rows="3"></textarea>
+                                          <label asp-for="Notes"></label>
+                                          <span asp-validation-for="Notes" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="col-md-4">
+                            <div class="form-floating mb-2">
+                                            <input asp-for="ContactPersonName" class="form-control" type="tel" placeholder="Enter Name">
+                                           <label asp-for="ContactPersonName"></label>
+                                            <span asp-validation-for="ContactPersonName" class="text-danger"></span>
+
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-4">
+                                  <div class="form-floating mb-2">
+                                            <input asp-for="ContactPersonDesignation" class="form-control" type="text" placeholder="Enter Designation">
+                                             <label asp-for="ContactPersonDesignation"></label>
+                                            <span asp-validation-for="ContactPersonDesignation" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-4">
+                                    <div class="form-floating mb-2">
+                                            <input asp-for="Website" class="form-control" type="text" placeholder="Enter Website">
+                                           <label asp-for="Website"></label>
+                                            <span asp-validation-for="Website" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="col-md-6">
+                                         <div class="form-floating mb-2">
+                                            <textarea class="form-control" asp-for="PrimaryAddress" placeholder="Primary Address input" style="height: 100px"></textarea>
+                                                <label asp-for="PrimaryAddress"></label>
+                                            <span asp-validation-for="PrimaryAddress" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                <div class="form-floating mb-2">
+                                            <textarea class="form-control" asp-for="SecoundaryAddress" placeholder="Secoundary Address input" style="height: 100px"></textarea>
+                                                <label asp-for="SecoundaryAddress"></label>
+                                            <span asp-validation-for="SecoundaryAddress" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+
+
+
+                                    <div class="col-md-4">
+                                   <div class="form-floating mb-2">
+                                            <input asp-for="OpBalance" class="form-control" type="number" placeholder="Opening balance">
+                                            <label asp-for="OpBalance"></label>
+                                            <span asp-validation-for="OpBalance" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+
+
+
+                                    <div class="col-md-4">
+                                                      <div class="form-floating mb-2">
+                                            @Html.DropDownList("CustType", new List<SelectListItem>
+                                            {
+                                            new SelectListItem() {Text = "Ledger", Value="L"},
+                                            new SelectListItem() {Text = "Group", Value="G"},
+
+                                            }, new { @class = "form-select" })
+                                           <label for="Date"> Type </label>
+                                            @Html.ValidationMessage("CustType", "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+
+
+
+
+
+                                    <div class="col-md-4">
+                                      <div class="form-floating mb-2">
+                                            @Html.DropDownListFor(x => x.CustParentId,
+                                            new SelectList((IEnumerable<SelectListItem>)ViewBag.CustomerGroupHead, "Value", "Text"), "Select Customer Group",
+                                            htmlAttributes: new { @class = "form-select",@placeholder="Select Customer Group", id = "CustParentId" })
+                                               <label> Select Customer Group</label>
+                                            @Html.ValidationMessageFor(x => x.CustParentId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="col-md-4">
+                                      <div class="form-floating mb-2">
+                                            <input asp-for="CreditLimit" class="form-control" type="number" placeholder="CreditLimit">
+                                                <label asp-for="CreditLimit"></label>
+                                            <span asp-validation-for="CreditLimit" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-2">
+                                            @Html.DropDownListFor(x => x.TradeTermsId, new SelectList((IEnumerable<SelectListItem>)ViewBag.TradeTerms, "Value", "Text"), "Select Trade Terms",
+                                            htmlAttributes: new { @class = "form-select", id = "TradeTermsId" })
+                                           @Html.LabelFor(x => x.TradeTermsId)
+                                            @Html.ValidationMessageFor(x => x.TradeTermsId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+
+
+
+                                    <div class="col-md-4">
+                                       <div class="form-floating mb-2">
+                                            @Html.TextBoxFor(x => x.NextPaymentDate, @"{0:dd-MMM-yyyy}", new { id = "NextPaymentDate", @class = "form-control datepicker", @placeholder = "Enter Next Payment Date", autocomplete = "off" })
+                                            @Html.LabelFor(x => x.NextPaymentDate)
+                                            @Html.ValidationMessageFor(x => x.NextPaymentDate, "", new { @class = "text-danger " })
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                    <div class="form-floating mb-2">
+                                            <input asp-for="CustomerCommissionPer" class="form-control" type="number" placeholder="Customer Commission Per">
+                                            <label asp-for="CustomerCommissionPer"></label>
+                                            <span asp-validation-for="CustomerCommissionPer" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                   <div class="form-floating mb-2">
+                                            <input asp-for="SRCommissionPer" class="form-control" type="number" placeholder="SR Commission Per">
+                                           <label asp-for="SRCommissionPer"></label>
+                                            <span asp-validation-for="SRCommissionPer" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-2">
+                                            <input asp-for="MonthlyTarget" class="form-control" type="number" placeholder="Monthly Target">
+                                                <label asp-for="MonthlyTarget"></label>
+                                            <span asp-validation-for="MonthlyTarget" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-6">
+                                 <div class="form-floating mb-2">
+                                           
+                                                @Html.DropDownListFor(x => x.SalesRepresentativeId,
+                                            new SelectList((IEnumerable<SelectListItem>)ViewBag.SalesRepresentative, "Value", "Text"), "Select Sales Representative",
+                                            htmlAttributes: new { @class = "form-select", id = "SalesRepresentativeId" })
+                                            
+                                            <label asp-for="SalesRepresentativeId"></label>
+                                            @Html.ValidationMessageFor(x => x.SalesRepresentativeId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                <div class="form-floating mb-2">
+                                            <input type="text" asp-for="LoginId" class="form-control" placeholder="Login Id">
+                                                <label asp-for="LoginId"></label>
+                                            <span asp-validation-for="LoginId" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-6">
+                          <div class="form-floating mb-2">
+                                            <input type="text" asp-for="Password" class="form-control" placeholder="Password">
+                                           <label asp-for="Password"></label>
+                                            <span asp-validation-for="Password" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="col-md-1 d-grid">
+                                        @if (ViewBag.ActionType == "Create")
+                                    {
+                                        <input type="submit" value="Save" class="btn  btn-success rounded-0 " />
+                                    }
+                                    else if (ViewBag.ActionType == "Edit")
+                                    {
+                                        <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" />
+                                    }
+                                    else if (ViewBag.ActionType == "Delete")
+                                    {
+                                        <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>
+                                    }
+
+                                    </div>
+                                    <div class="col-md-1 d-grid">
+                                    @Html.ActionLink(" ", "CustomerList", "Admin", null, new { @class = "btn btn-danger rounded-0 bi bi-chevron-double-left", @id = "btnBack" })
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End PAge Content -->
+
+@section scripts {
+
+    <script type="text/javascript">
+
+
+
+        //$('#NextPaymentDate').datepicker({
+        //    //dateFormat: 'dd/mm/yy',
+        //    dateFormat: 'dd-M-yy',
+        //    todayHighlight: true,
+        //    autoclose: true
+        //});
+
+        $('#CustParentId').select2({
+            theme: 'bootstrap-5'
+        });
+        if ($("#NextPaymentDate").val() == "") {
+
+            CurrentDateForPayment();
+        }
+
+
+        function CurrentDateForPayment() {
+            var date = new Date();
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            //var val = pad2(date.getDate()) + "/" + pad2(date.getMonth() + 1) + "/" + date.getFullYear();
+            //var val = date.getMonth()+1 + "/" +  date.getDate()  + "/" + date.getFullYear();
+
+
+            //alert(val);
+            var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear();
+            $("#NextPaymentDate").val(val);
+
+        }
+
+    </script>
+
+}

@@ -1,0 +1,260 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Daily Production";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+}
+
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        /* border-right: 1px solid #dee2e6; */
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    .tabulator-cell {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        color: #000;
+    }
+
+    .tabulator-col-title {
+        font-size: 14px;
+        color: #000;
+    }
+
+    #example-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+   
+</style>
+
+<div>
+    <div class="d-flex mb-3">
+        <div>
+            <input type="text" id="Id" class="form-control d-none" value="0">
+            <label><strong>Style</strong></label>
+            <input type="text" placeholder="Search Style" id="style-name" class="form-control" style="padding:1px;">
+            <input type="text" placeholder="Search Style" id="style-id" class="form-control d-none">
+
+        </div>
+        <div class="ms-4">
+            <label><strong>Lot</strong></label>
+            <select id="buyer_po" class="form-control">
+                <option value="">Select Buyer PO</option>
+            </select>
+        </div>
+        
+        
+        <button type="button" class="btn btn-primary mt-3 ms-4" onclick="BtnloadData()">Load</button>
+    </div>
+    <div class="d-flex justify-content-end">
+        <button title="Print" class="btn btn-white border-0" type="button" id="salesPrint-pdf" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-printer fs-5" style=" margin-right: 0px; "></i>
+        </button>
+        <button title="Export to excel" class="btn btn-white border-0" type="button" id="salesPrint-excel" style="padding: 0px;padding-bottom: 10px;"
+                aria-expanded="false">
+            <i class="bi bi-file-earmark-excel fs-5" style=" margin-right: 0px; "></i>
+        </button>
+
+    </div>
+    <div>
+        <div id="example-table"></div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+    <script>
+        $('#buyer_po').select2();
+        $(function () {
+
+            $("#start-date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy",
+                onSelect: function (dateText, inst) {
+                    //getverifyFiscalMonth(dateText);
+                }
+            }).attr('readonly', 'readonly');
+
+            $("#style-name").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "@Url.Action("SearchStyle", "BuyerOrder")",
+                        dataType: "json",
+                        data: {
+                            term: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 1,
+                focus: function (event, ui) {
+                    event.preventDefault();
+                    $("#style-name").val(ui.item.label);
+                },
+                select: function (event, ui) {
+
+                    $("#style-name").val(ui.item.label);
+                    $("#style-id").val(ui.item.value);
+
+                    handleSelectedStyle(ui.item.value);
+                    return false;
+                }
+            });
+        });
+
+        function handleSelectedStyle(styleId) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetBuyersPOStyleWise", "BuyerOrder")',
+                data: { styleId: styleId },
+                datatype: "Json",
+                success: function (data) {
+                    $('#buyer_po').empty();
+                    $('#buyer_po').append('<option value="">Select Buyer PO</option>');
+                    $.each(data, function (index, value) {
+                        $('#buyer_po').append('<option value="' + value.Id + '" >' + value.BuyerPO + '</option>');
+                    });
+                }
+            });
+        }
+
+        var columns = [
+            { title: "Style No", field: "StyleNo", visible: true },
+            { title: "BuyerPO/Lot No", field: "LotNo" },
+            { title: "Color", field: "Color", visible: true },
+            { title: "Size", field: "Size" },
+            { title: "Order Qty", field: "OrderQty", searchable: true, visible: true, bottomCalc: "sum", hozAlign: "center" },
+            { title: "Cutting Qty", field: "CuttingQty", searchable: true, visible: true, bottomCalc: "sum", hozAlign: "center" },
+            { title: "Sewing Qty", field: "SewingQty", searchable: true, visible: true, bottomCalc: "sum", hozAlign: "center" },
+            { title: "Ship A", field: "ShipA", bottomCalc: "sum", hozAlign: "center" },
+            { title: "Ship B", field: "ShipB", bottomCalc: "sum", hozAlign: "center" },
+            { title: "Remain A", field: "RemainA", bottomCalc: "sum", hozAlign: "center" },
+            { title: "Remain B", field: "RemainB", bottomCalc: "sum", hozAlign: "center" },
+            { title: "Remain C", field: "RemainC", bottomCalc: "sum", hozAlign: "center" },
+            { title: "Remain Total", field: "RemainTotal", bottomCalc: "sum", hozAlign: "center" }
+        ];
+
+        var table = new Tabulator("#example-table", {
+            layout: "fitColumns",
+            columns: columns,
+            placeholder: "No data available",
+        });
+
+        function BtnloadData() {
+            var styleId = $("#style-id").val();
+            var buyerPOId = $("#buyer_po").val();
+            $.ajax({
+                url: '@Url.Action("GetDailyproductionReport", "BuyerOrder")',
+                type: 'GET',
+                data: { styleId: styleId, buyerPOId: buyerPOId },
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (response) {
+                    var data = response.data;
+                    console.log(data);
+                    table.setData(data);
+                },
+                error: function (error) {
+                    console.log("Error");
+                }
+            });
+        }
+
+
+        $(document).ready(function () {
+            
+
+            $('#buyer_po').select2();
+
+            // Other code for autocomplete, datepicker, etc.
+
+            //loadData();
+
+            function loadData() {
+                var styleId = $("#style-id").val();
+                var buyerPOId = $("#buyer_po").val();
+                $.ajax({
+                    url: '@Url.Action("GetDailyproductionReport", "BuyerOrder")',
+                    type: 'GET',
+                    data: { styleId: styleId, buyerPOId: buyerPOId },
+                    contentType: "application/json; charset=utf-8",
+                    dataType: 'json',
+                    success: function (response) {
+                        var data = response.data;
+                        console.log(data);
+                        table.setData(data);
+                    },
+                    error: function (error) {
+                        console.log("Error");
+                    }
+                });
+            }
+
+            document.getElementById("salesPrint-pdf").addEventListener("click", function () {
+                table.print(false, true);
+            });
+
+            document.getElementById("salesPrint-excel").addEventListener("click", function () {
+                table.download("xlsx", "table.xlsx", { sheetName: "Table Data" });
+            });
+        });
+
+    </script>
+}

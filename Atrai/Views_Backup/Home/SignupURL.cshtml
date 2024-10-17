@@ -1,0 +1,424 @@
+﻿@model Atrai.Core.ViewModel.SigninViewModel
+@{ ViewData["Title"] = "Signup";
+                Layout = "~/Views/Shared/_Layout.cshtml"; }
+
+<style>
+    .form-group {
+        margin-bottom: 10px;
+    }
+</style>
+
+<br />
+<br />
+<br />
+<br />
+
+
+<div class="container-fluid">
+    @Html.AntiForgeryToken()
+
+
+    <div class="row justify-content-center">
+
+
+        <div class="card p-0 col-md-5 col-12">
+            <div class="card-header">
+
+                <div class="form-group row my-0">
+                    <div class="col">
+                        <h2 class="text-left" id="styletext">
+                            Sign up
+                        </h2>
+                    </div>
+                    <div class="col text-right">
+                        @if (@ViewBag.comImagePath != null)
+                        {
+                            <img width="60" class="img-circle" src="..@ViewBag.comImagePath" onerror="this.style.display='none'" id="main-img"> }
+                        else
+                        {
+                            <img width="10" class="img-circle" src="../Content/ProductImages/0.png" id="main-img">}
+                    </div>
+
+
+                </div>
+            </div>
+
+            <br />
+            <br />
+            <div class="card-body">
+
+                @if (TempData["UserSignUpFailed"] != null)
+                {
+        <p class="alert alert-danger">@TempData["UserLoginFailed"]</p>            }
+            <form id="myform" asp-action="SignupURL" asp-controller="Home" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group row">
+                    <div class="col-md-6 col-12">
+                        <label asp-for="CompanyName" class="control-label"></label>
+                        <input asp-for="CompanyName" class="form-control" />
+                        <span asp-validation-for="CompanyName" class="text-danger"></span>
+                    </div>
+                    @*<div class="col-md-3 col-12">
+                <label asp-for="CompanyShortName" class="control-label"></label>
+                <input asp-for="CompanyShortName" class="form-control" />
+                <span asp-validation-for="CompanyShortName" class="text-danger"></span>
+            </div>*@
+
+                    <div class="col-md-6 col-12">
+                        @Html.LabelFor(x => x.CountryId)
+                        @Html.DropDownListFor(x => x.CountryId,
+                                                                          new SelectList((IEnumerable<SelectListItem>)ViewBag.Country, "Value", "Text"), "Select Country",
+                                                                          htmlAttributes: new { @class = "form-control", id = "CountryId" })
+                        @Html.ValidationMessageFor(x => x.CountryId, "", new { @class = "text-danger" })
+                    </div>
+
+                </div>
+
+
+                @*<div class="form-group">
+
+            <label class="col-md-6">Country</label>
+            <div class="input-group col-md-8">
+                @Html.DropDownList("Country", ViewBag.Country as List<SelectListItem>, new { id = "Country", @class = "form-control" })
+            </div>
+
+        </div>*@
+
+
+
+                @*<div class="form-group row">
+            <div class="col-md-6 col-12">
+                @Html.LabelFor(x => x.SubscriptionTypeId)
+                @Html.DropDownListFor(x => x.SubscriptionTypeId,
+                                                             new SelectList((IEnumerable<SelectListItem>)ViewBag.SubscriptionType, "Value", "Text"), "Select Subscription Type",
+                                                             htmlAttributes: new { @class = "form-control", id = "SubscriptionTypeId" })
+                @Html.ValidationMessageFor(x => x.SubscriptionTypeId, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="col-md-6 col-12">
+                @Html.LabelFor(x => x.BusinessTypeId)
+                @Html.DropDownListFor(x => x.BusinessTypeId,
+                                              new SelectList((IEnumerable<SelectListItem>)ViewBag.BusinessType, "Value", "Text"), "Select Business Type",
+                                              htmlAttributes: new { @class = "form-control", id = "BusinessTypeId" })
+                @Html.ValidationMessageFor(x => x.BusinessTypeId, "", new { @class = "text-danger" })
+            </div>
+        </div>*@
+
+                <div class="form-group row">
+                    <div class="col-md-6 col-12">
+                        <label asp-for="ContactName" class="control-label"></label>
+                        <input asp-for="ContactName" class="form-control" />
+                        <span asp-validation-for="ContactName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <label asp-for="ContactDesig" class="control-label"></label>
+                        <input asp-for="ContactDesig" class="form-control" />
+                        <span asp-validation-for="ContactDesig" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    @*<div class="col-md-6 col-12">
+                <label asp-for="Web" class="control-label"></label>
+                <input asp-for="Web" class="form-control" />
+                <span asp-validation-for="Web" class="text-danger"></span>
+            </div>*@
+                    <div class="col-md-6 col-12">
+
+                        <label asp-for="PhoneNumber" class="control-label"></label>
+                        <input asp-for="PhoneNumber" class="form-control" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <label asp-for="Email" class="control-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6 col-12">
+                        <label asp-for="Password" class="control-label"></label>
+                        <input type="password" asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <label asp-for="ConfirmPassword" class="control-label"></label>
+                        <input type="password" asp-for="ConfirmPassword" class="form-control" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+
+                </div>
+                <div class="form-group row">
+
+
+                    <div class="col-md-6 col-12">
+                        <label asp-for="BusinessAddress" class="control-label"></label>
+                        <textarea class="form-control" asp-for="BusinessAddress" rows="2" placeholder="Enter address"></textarea>
+                        <span asp-validation-for="BusinessAddress" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3 col-6 my-5">
+                        @Html.ActionLink("Back", "Login", "Home", null, new { @class = "btn btn-sm btn-outline-info btn-block  rounded-0", @id = "btnBack" })
+                    </div>
+                    <div class="col-md-3 col-6 my-5">
+                        @*<input type="submit" value="Signup" class="btn btn-default btn-success rounded-0" />*@
+                        <button id="create" class="btn btn-success btn-block rounded-0" onclick="SaveCompanyInfo()" type="button">Confirm</button>
+
+                    </div>
+                </div>
+
+
+
+
+    
+            </form>
+            </div>
+
+        </div>
+    </div>
+
+    <br />
+
+
+
+
+    @*<div class="row">
+
+
+            <div class="wrapper-page animated fadeInDown">
+                <div class="panel panel-color panel-primary">
+
+                    @using (Html.BeginForm("Signup", "Home", FormMethod.Post, new { @class = "form-horizontal m-t-40" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        if (TempData["FFMsg"] != null)
+                        {
+                            <div class="alert alert-danger alert-dismissable">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                                    ×
+                                </button>
+                                @TempData["FFMsg"].ToString()
+                            </div>
+                            <br />
+                        }
+                        <br />
+
+                        <div class="form-group ">
+
+                            <div class="col-xs-12">
+                                @Html.TextBoxFor(m => m.CompanyName, new { @class = "form-control", placeholder = "Enter Company Name" })
+                                @Html.ValidationMessageFor(x => x.CompanyName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group ">
+
+                            <div class="col-xs-12">
+                                @Html.TextBoxFor(m => m.ContactName, new { @class = "form-control", placeholder = "Enter Contact Name" })
+                                @Html.ValidationMessageFor(x => x.ContactName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group ">
+                            <div class="col-xs-12">
+                                @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control", placeholder = "Enter Phone No" })
+                                @Html.ValidationMessageFor(x => x.PhoneNumber, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group ">
+                            <div class="col-xs-12">
+                                @Html.TextBoxFor(m => m.Email, null, new { @class = "form-control", placeholder = "Enter Email" })
+                                @Html.ValidationMessageFor(x => x.Email, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group ">
+
+                            <div class="col-xs-12">
+                                @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Enter Password" })
+                                @Html.ValidationMessageFor(x => x.Password, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group ">
+
+                            <div class="col-xs-12">
+                                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "Enter Confirm Password" })
+                                @Html.ValidationMessageFor(x => x.ConfirmPassword, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group ">
+                            <div class="col-xs-12">
+
+                            </div>
+                        </div>
+                        <div class="form-group text-right">
+                            <div class="col-xs-12">
+                                <button class="btn btn-primary w-md" type="submit">Sign up</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+
+
+        </div>*@
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+
+
+
+
+        var antiForgeryToken;
+        var billeddateglobal = new Date();
+        antiForgeryToken = $("input[name='Dominate_ANTIFORZERY']").val();
+
+        $(document).ready(function () {
+
+        });
+
+
+        function SaveCompanyInfo() {
+
+            //var d = parseFloat($("#TotalQty").val());
+            //if (d > 15) {
+            //    $("#TotalQty").removeClass(" yellow");
+            //    $("#TotalQty").addClass("important red");
+            //    $("#TotalQty").css({ 'color': 'yellow', 'font-size': '150%' });
+            //    toastr.error('Load qty must not be greter than 15 metric ton');
+            //    return true;
+            //}
+            //else {
+            //    $("#TotalQty").removeClass("important red");
+            //    $("#TotalQty").addClass(" yellow");
+            //    $("#TotalQty").css({ 'color': 'green', 'font-size': '100%' });
+            //}
+
+
+            //$('select').removeAttr('disabled');
+
+
+            if (!$("#myform").valid()) {
+                toastr.error('Please Fill Up All Necessary Information Correctly.');
+                $("html, body").animate({ scrollTop: 0 }, 500);
+                $("#create").prop("disabled", false);
+                return true;
+            }
+
+
+
+            var signinmodel = {
+
+                Id: 0,
+
+                Email: "",
+                Web: "",
+                Password: "",
+                ConfirmPassword: "",
+                CompanyName: "",
+                ContactName: "",
+                ContactDesig: "",
+                CompanyShortName: "",
+
+
+                PhoneNumber: "",
+                BusinessAddress: "",
+                SubscriptionTypeId: "",
+                CountryId: "",
+                BusinessTypeId: ""
+            };
+
+
+
+            signinmodel.Id = $("#Id").val();
+            signinmodel.Email = $("#Email").val();
+
+            signinmodel.Web = "=N/A=";//$("#Web").val();
+            signinmodel.Password = $("#Password").val();
+            signinmodel.ConfirmPassword = $("#ConfirmPassword").val();
+
+            signinmodel.CompanyName = $("#CompanyName").val();
+            signinmodel.ContactName = $("#ContactName").val();
+            signinmodel.ContactDesig = $("#ContactDesig").val();
+            signinmodel.CompanyShortName = "";//$("#CompanyShortName").val();
+
+
+            signinmodel.PhoneNumber = $("#PhoneNumber").val();
+            signinmodel.BusinessAddress = $("#BusinessAddress").val();
+            signinmodel.SubscriptionTypeId = 1;//$("#SubscriptionTypeId").val();
+            signinmodel.CountryId = $("#CountryId").val();
+
+            signinmodel.BusinessTypeId = 1;//$("#BusinessTypeId").val();
+
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SignupURL", "Home")',
+                dataType: 'json',
+                async: 'false',
+                headers: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                data: { signinmodel: signinmodel },
+                success: function (result) {
+                    if (result.Success == "1") {
+
+                        toastr.success('Registration Done Successfully.Please Check Your eMail to finalize your Registration.');
+                        //var signinmodelidprint = result.Id;
+                        //var urllink = '@Url.Action("InvoiceBillPrint", "Home", new { InvoiceBillId = "xxxx" })'.replace("xxxx", signinmodelidprint);
+
+                        //window.open(urllink, '_blank');
+
+                        setTimeout(
+                            function () {
+                                //do something special
+
+                                    var urllinknew = '@Url.Action("EmailConfirmation", "Home")';
+                                    window.open(urllinknew, "_self");
+
+                                @*if ($('#Update').length) {
+
+                                    var urllinknew = '@Url.Action("Login", "Home")';
+                                    window.open(urllinknew, "_self");
+                                    /* it exists */
+                                }
+                                else {
+                                    $("#create").prop("disabled", false);
+                                    //$("#TruckNumber").val(result.TruckNumber);
+                                    ClearData();
+                                    /* it doesn't exist */
+                                }*@
+
+
+
+                            }, 3000);
+
+
+
+                    }
+                    else {
+                        toastr.warning(result.ex);
+
+                        alert(result.ex);
+                    }
+                },
+                error: function (ex) {
+                    alert('error');
+                }
+            });
+
+            //$('#TotalQty').attr("disabled", true);
+
+
+        };
+
+    </script>
+
+    <!-- Event snippet for Sign-up conversion page -->
+    <script>
+      gtag('event', 'conversion', {'send_to': 'AW-10853655508/L5I-CNajsaEDENTHtrco'});
+    </script>
+
+}
+

@@ -1,0 +1,628 @@
+﻿@model Atrai.Core.Entity.ProductModel
+@{
+    ViewData["Title"] = "Add Product";
+    Layout = "~/Views/Shared/_customerLayout.cshtml";
+}
+
+<div class="">
+    <div class="container">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>Product @ViewBag.ActionType</h4>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="admin" asp-action="AddSupplierProduct" method="post" enctype="multipart/form-data">
+
+                                @if (Model != null)
+                                {
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" />
+                                    <input type="hidden" asp-for="LuserId" />
+                                    <input type="hidden" asp-for="ImagePath" />
+
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Id" value="0" />
+                                }
+
+
+
+
+                                <div class="row">
+                                    <div class="col-md-9 col-12">
+
+                                        <div class="form-group row">
+                                            <div class="col-md-3 col-md-offset-1">
+                                                <img src="..@Model.ImagePath" alt="img" id="UploadFile" class="img-thumbnail" style="height: 150px;width:150px" onerror="this.onerror=null;this.src='../Content/ProductImages/0.png'" /> <br />
+                                                <input type="file" name="logoPostedFileBase" accept="image/x-png, image/gif, image/jpeg" id="FileUpload" onchange="PreviewImage()" />
+                                            </div>
+                                            <div class="col-md-3 col-12 text-center">
+                                                <label asp-for="IsPublished"></label>
+                                                <input asp-for="IsPublished" class="form-control" type="checkbox">
+                                                <span asp-validation-for="IsPublished" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-4 col-12 text-center">
+                                                <label asp-for="IsNonInventory"></label>
+                                                <input asp-for="IsNonInventory" class="form-control" type="checkbox">
+                                                <span asp-validation-for="IsNonInventory" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+
+
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                                <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" />
+                                            }
+                                            else if (ViewBag.ActionType == "Edit")
+                                            {
+                                                <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" />
+                                            }
+                                            else if (ViewBag.ActionType == "Delete")
+                                            {
+                                                <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>
+                                            }
+
+
+                                            @Html.ActionLink("Back", "SupplierProductList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                            @*@Html.ActionLink("Reset / Cancel", "AddSupplierProduct", "Admin", null, new { isReset = 1, @class = "btn btn-danger rounded-0", @id = "btnReset" })
+                                                @Html.ActionLink("AddSupplierProduct", "Admin", new { id = 1 })*@
+
+
+                                            <a href="@Url.Action("AddSupplierProduct", "Admin", new { IsPrevRef = 1 })" class="btn btn-success rounded-0">
+                                                Previous Referance Data
+                                            </a>
+
+
+                                            <a href="@Url.Action("AddSupplierProduct", "Admin", new { IsPrevRef = 0 })" class="btn btn-danger rounded-0">
+                                                Clear / Reset
+                                            </a>
+
+
+                                        </div>
+
+
+
+                                        <nav>
+                                            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                                <a class="nav-item nav-link active" id="nav-basic-tab" data-toggle="tab" href="#nav-basic" role="tab" aria-controls="nav-basic" aria-selected="true">Basic</a>
+                                        @*        <a class="nav-item nav-link " id="nav-home-tab" data-toggle="tab" href="#nav-advance" role="tab" aria-controls="nav-advance" aria-selected="false">Advance</a>
+                                                <a class="nav-item nav-link " id="nav-accounts-tab" data-toggle="tab" href="#nav-accounts" role="tab" aria-controls="nav-accounts" aria-selected="false">Accounts Integration</a>
+*@
+                                            </div>
+
+                                            @*btn btn-sm btn-outline-info rounded-0*@
+                                        </nav>
+
+
+                                        <div class="tab-content" id="nav-tabContent">
+                                            <div class="tab-pane fade show active" id="nav-basic" role="tabpanel" aria-labelledby="nav-basic-tab">
+
+                                                <br />
+                                                <div class="form-group">
+                                                    <div class="row">
+
+                                                        <div class="col-md-6 col-12 ">
+                                                            @*    @Html.LabelFor(x => x.CategoryId)
+                                                                @Html.DropDownListFor(x => x.CategoryId,
+                                                                new SelectList((IEnumerable<SelectListItem>)ViewBag.Category, "Value", "Text"), "Select Category", htmlAttributes: new { @class = "form-control", id = "CategoryId" })
+                                                                @Html.ValidationMessageFor(x => x.CategoryId, "", new { @class = "text-danger" })
+                                                            *@
+                                                            @Html.LabelFor(x => x.CategoryId)
+                                                            <div class="input-group">
+
+
+                                                                @*<div class="input-group-prepend">
+
+                                                                    </div>*@
+
+                                                                @Html.DropDownListFor(x => x.CategoryId,new SelectList((IEnumerable<SelectListItem>)ViewBag.Category, "Value", "Text"), "Select Category", htmlAttributes: new { @class = "form-control", id = "CategoryId" })
+                                                                <div class="input-group-append">
+                                                                    @*<button type="button" class="btn-purple btn-sm rounded-0"><i class="fa fa-plus"></i></button>*@
+
+                                                                    @*@Html.ActionLink(" ", "AddCategory", null, null, new { IsPartialView = 1 , @class = "btn btn-sm btn-purple rounded-0 fa fa-plus abcdef" ,title="Add Category" ,@width = 562 , @height = 420 })*@
+                                                                    @*                                                                              <a href="@Url.Action("AddCategory", "Admin", new { IsPartialView = 1 })" class="btn btn-purple rounded-0 abcdef" title="Add Category" data-width = "562" data-height ="420">
+                                                                        <i class="fa fa-plus"></i>
+                                                                        </a>*@
+                                                                </div>
+
+                                                                @* <ul class="thumb">
+                                                                    <li><a href="http://www.google.com"
+                                                                    data-title="Category Entry" data-width="512" data-height="384"><img src="http://dummyimage.com/120x90/000/f00&text=Std+4-3+ratio+video" /></a></li>
+                                                                    <li><a href="http://www.yahoo.com"
+                                                                    data-title="Unit Entry" data-width="512" data-height="288"><img src="http://dummyimage.com/120x90/000/f00&text=HD+16-9+ratio+video" /></a></li>
+                                                                    </ul>*@
+
+                                                            </div>
+
+
+                                                        </div>
+
+
+                                                        <div class="col-md-6 col-12 ">
+                                                            @Html.LabelFor(x => x.UnitId)
+                                                            @Html.DropDownListFor(x => x.UnitId, new SelectList((IEnumerable<SelectListItem>)ViewBag.Unit, "Value", "Text"), "Select Unit", htmlAttributes: new { @class = "form-control", id = "Unit" })
+                                                            @Html.ValidationMessageFor(x => x.UnitId, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+
+
+                                                <div class="form-group">
+                                                    <div class="row">
+                                                        <div class="col-md-6 col-12 ">
+                                                            <label asp-for="Code"></label>
+                                                            <input type="text" asp-for="Code" class="form-control" placeholder="Enter Product Code">
+                                                            <span asp-validation-for="Code" class="text-danger"></span>
+                                                        </div>
+
+                                                        <div class="col-md-6 col-12 ">
+                                                            <label asp-for="Name"></label>
+                                                            <input type="text" asp-for="Name" class="form-control" placeholder="Enter Product Name">
+                                                            <span asp-validation-for="Name" class="text-danger"></span>
+                                                        </div>
+
+
+
+                                                        
+                                                         <div class="col-md-6 col-12 ">
+                                                            @Html.LabelFor(x => x.BrandId)
+                                                            @Html.DropDownListFor(x => x.BrandId, new SelectList((IEnumerable<SelectListItem>)ViewBag.Brand, "Value", "Text"), "Select Brand", htmlAttributes: new { @class = "form-control", id = "BrandId" })
+                                                            @Html.ValidationMessageFor(x => x.BrandId, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    @*    <div class="col-md-6 col-12 ">
+                                                            <label asp-for="BrandName"></label>
+                                                            <input type="text" asp-for="BrandName" class="form-control" placeholder="Enter Brand">
+                                                            <span asp-validation-for="BrandName" class="text-danger"></span>
+                                                        </div>*@
+
+                                                        <div class="col-md-6 col-12 ">
+                                                            <label asp-for="ModelName"></label>
+                                                            <input type="text" asp-for="ModelName" class="form-control" placeholder="Enter Model">
+                                                            <span asp-validation-for="ModelName" class="text-danger"></span>
+                                                        </div>
+                                                        <div class="col-md-6 col-12 ">
+                                                            <label asp-for="ColorName"></label>
+                                                            <input type="text" asp-for="ColorName" class="form-control" placeholder="Enter Color Name">
+                                                            <span asp-validation-for="ColorName" class="text-danger"></span>
+                                                        </div>
+                                                        <div class="col-md-6 col-12 ">
+                                                            <label asp-for="SizeName"></label>
+                                                            <input type="text" asp-for="SizeName" class="form-control" placeholder="Enter Size Name">
+                                                            <span asp-validation-for="SizeName" class="text-danger"></span>
+                                                        </div>
+                                                        <div class="col-md-6 col-12 ">
+                                                            @Html.LabelFor(x => x.WarrentyId)
+                                                            @Html.DropDownListFor(x => x.WarrentyId,
+                                                            new SelectList((IEnumerable<SelectListItem>)ViewBag.Warrenty, "Value", "Text"), htmlAttributes: new { @class = "form-control", id = "WarrentyId" })
+                                                            @Html.ValidationMessageFor(x => x.WarrentyId, "", new { @class = "text-danger" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="form-group">
+                                                    <div class="row">
+
+                                                        <div class="col-md-3 col-12 ">
+                                                            <label asp-for="CostPrice"></label>
+                                                            <input asp-for="CostPrice" class="form-control" type="text" placeholder="Enter Cost Price">
+                                                            <span asp-validation-for="CostPrice" class="text-danger"></span>
+                                                        </div>
+
+
+                                                        <div class="col-md-3 col-12 ">
+                                                            <label asp-for="Price"></label>
+                                                            <input asp-for="Price" class="form-control" type="text" placeholder="Enter Price">
+                                                            <span asp-validation-for="Price" class="text-danger"></span>
+                                                        </div>
+
+                                                        <div class="col-md-3 col-12 ">
+                                                            <label asp-for="WholeSalePrice"></label>
+                                                            <input asp-for="WholeSalePrice" class="form-control" type="text" placeholder="Wholesale Price">
+                                                            <span asp-validation-for="WholeSalePrice" class="text-danger"></span>
+                                                        </div>
+
+
+
+
+                                                    </div>
+
+                                                </div>
+
+
+
+
+
+
+
+                                                <div class="form-group row">
+                                                    <div class="col-md-6 col-12 ">
+                                                        <label asp-for="Description"></label>
+                                                        @*<input asp-for="Description" class="form-control" type="text" placeholder="Enter Description">*@
+                                                        <textarea class="form-control" asp-for="Description" rows="2" placeholder="Enter Description"></textarea>
+
+                                                        <span asp-validation-for="Description" class="text-danger"></span>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                            <div class="tab-pane fade" id="nav-advance" role="tabpanel" aria-labelledby="nav-advance-tab">
+                                                <br />
+                                          
+
+                                                <div class="form-group row">
+
+
+                                                    <div class="col-md-6 col-12 ">
+                                                        <label asp-for="LocalName"></label>
+                                                        <input type="text" asp-for="LocalName" class="form-control" placeholder="Enter Bangla / Arabic Name">
+                                                        <span asp-validation-for="LocalName" class="text-danger"></span>
+                                                    </div>
+
+                                                    <div class="col-md-6 col-12 ">
+                                                        @Html.LabelFor(x => x.SupplierId)
+                                                        @Html.DropDownListFor(x => x.SupplierId, new SelectList((IEnumerable<SelectListItem>)ViewBag.Supplier, "Value", "Text"), "Select Default Supplier", htmlAttributes: new { @class = "form-control", id = "Supplier" })
+                                                        @Html.ValidationMessageFor(x => x.SupplierId, "", new { @class = "text-danger" })
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="form-group row">
+
+                                                    <div class="col-md-4 col-12 ">
+                                                        <label asp-for="ROL"></label>
+                                                        <input asp-for="ROL" class="form-control" type="text" placeholder="Enter ROL">
+                                                        <span asp-validation-for="ROL" class="text-danger"></span>
+                                                    </div>
+
+
+                                                    <div class="col-md-4 col-12 ">
+                                                        <label asp-for="ROLTwo"></label>
+                                                        <input asp-for="ROLTwo" class="form-control" type="text" placeholder="Enter ROQ">
+                                                        <span asp-validation-for="ROLTwo" class="text-danger"></span>
+                                                    </div>
+
+
+                                                    <div class="col-md-4 col-12 ">
+                                                        <label asp-for="ROLThree"></label>
+                                                        <input asp-for="ROLThree" class="form-control" type="text" placeholder="Enter MOQ">
+                                                        <span asp-validation-for="ROLThree" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="form-group row">
+
+                                                    <div class="col-md-4 col-12 ">
+                                                        <label asp-for="ROQ"></label>
+                                                        <input asp-for="ROQ" class="form-control" type="text" placeholder="Enter ROQ">
+                                                        <span asp-validation-for="ROQ" class="text-danger"></span>
+                                                    </div>
+
+
+                                                    <div class="col-md-4 col-12 ">
+                                                        <label asp-for="MOQ"></label>
+                                                        <input asp-for="MOQ" class="form-control" type="text" placeholder="Enter MOQ">
+                                                        <span asp-validation-for="MOQ" class="text-danger"></span>
+                                                    </div>
+
+
+                                                    <div class="col-md-4 col-12 ">
+                                                        <label asp-for="PCTN"></label>
+                                                        <input asp-for="PCTN" class="form-control" type="text" placeholder="Enter PCTN">
+                                                        <span asp-validation-for="PCTN" class="text-danger"></span>
+                                                    </div>
+                                                    </div>
+
+
+
+                                                <div class="form-group row">
+
+
+                                                    <div class="col-md-2 col-12 ">
+                                                        <label asp-for="CommissionPer"></label>
+                                                        <input asp-for="CommissionPer" class="form-control" type="text" placeholder="Sales Commission Per.">
+                                                        <span asp-validation-for="CommissionPer" class="text-danger"></span>
+                                                    </div>
+                                                    <div class="col-md-1 col-12 ">
+                                                        or
+                                                    </div>
+
+                                                    <div class="col-md-3 col-12 ">
+                                                        <label asp-for="CommissionAmount"></label>
+                                                        <input asp-for="CommissionAmount" class="form-control" type="text" placeholder="Sales Commission Amt.">
+                                                        <span asp-validation-for="CommissionAmount" class="text-danger"></span>
+                                                    </div>
+
+                                                </div>
+
+
+
+
+                                            </div>
+                                            <div class="tab-pane fade" id="nav-accounts" role="tabpanel" aria-labelledby="nav-accounts-tab">
+                                                <br />
+                                           
+
+                                                <div class="form-group row">
+
+
+                                                    <div class="col-md-4 col-12 ">
+                                                        @Html.LabelFor(x => x.AccIdInventory)
+                                                        @Html.DropDownListFor(x => x.AccIdInventory,
+                                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.Inventory, "Value", "Text"), null, htmlAttributes: new { @class = "form-control", id = "AccIdInventory" })
+                                                        @Html.ValidationMessageFor(x => x.AccIdInventory, "", new { @class = "text-danger" })
+                                                    </div>
+
+                                                    <div class="col-md-4 col-12 ">
+                                                        @Html.LabelFor(x => x.AccIdConsumption)
+                                                        @Html.DropDownListFor(x => x.AccIdConsumption,
+                                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.Consumption, "Value", "Text"), null, htmlAttributes: new { @class = "form-control", id = "AccIdConsumption" })
+                                                        @Html.ValidationMessageFor(x => x.AccIdConsumption, "", new { @class = "text-danger" })
+                                                    </div>
+
+                                                    <div class="col-md-4 col-12 ">
+                                                        @Html.LabelFor(x => x.AccIdSales)
+                                                        @Html.DropDownListFor(x => x.AccIdSales, new SelectList((IEnumerable<SelectListItem>)ViewBag.Sales, "Value", "Text"), null, htmlAttributes: new { @class = "form-control", id = "AccIdSales" })
+                                                        @Html.ValidationMessageFor(x => x.AccIdSales, "", new { @class = "text-danger" })
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="form-group row">
+
+
+                                                    <div class="col-md-4 col-12 ">
+                                                        @Html.LabelFor(x => x.AccIdSalesVAT)
+                                                        @Html.DropDownListFor(x => x.AccIdSalesVAT, new SelectList((IEnumerable<SelectListItem>)ViewBag.SalesVAT, "Value", "Text"), null, htmlAttributes: new { @class = "form-control", id = "AccIdSalesVAT" })
+                                                        @Html.ValidationMessageFor(x => x.AccIdSalesVAT, "", new { @class = "text-danger" })
+                                                    </div>
+
+
+                                                    <div class="col-md-4 col-12 ">
+                                                        @Html.LabelFor(x => x.AccIdPurchaseVAT)
+                                                        @Html.DropDownListFor(x => x.AccIdPurchaseVAT, new SelectList((IEnumerable<SelectListItem>)ViewBag.PurchaseVAT, "Value", "Text"), null, htmlAttributes: new { @class = "form-control", id = "AccIdPurchaseVAT" })
+                                                        @Html.ValidationMessageFor(x => x.AccIdPurchaseVAT, "", new { @class = "text-danger" })
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+
+
+
+
+                                        </div>
+
+
+
+
+
+
+
+
+
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+
+
+
+
+
+</div>
+
+@section scripts {
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+
+
+            autocompleteBrandName();
+            autocompleteModelName();
+            autocompleteSizeName();
+            autocompleteColorName();
+
+
+
+            function autocompleteBrandName() {
+                var MyAppUrlset = {
+                    MyUsefulUrl: '@Url.Action("BrandReferance", "Admin")'
+                }
+                //Referance//ReferanceTwo//ReferanceThree
+                $("#BrandName").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: MyAppUrlset.MyUsefulUrl,
+                            dataType: "json",
+                            data: { query: $("#BrandName").val() },
+                            success: function (data) {
+                                console.log(data);
+
+                                response($.map(data, function (item) {
+                                    return { label: item.Text };
+                                }));
+                            },
+                            error: function (xhr, status, error) {
+                                alert("Error");
+                            },
+                        });
+                    },
+                    autoFocus: true,
+                    minLength: 2
+                });
+            }
+
+
+                        function autocompleteModelName() {
+                var MyAppUrlset = {
+                    MyUsefulUrl: '@Url.Action("ModelReferance", "Admin")'
+                }
+                //Referance//ReferanceTwo//ReferanceThree
+                $("#ModelName").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: MyAppUrlset.MyUsefulUrl,
+                            dataType: "json",
+                            data: { query: $("#ModelName").val() },
+                            success: function (data) {
+                                console.log(data);
+
+                                response($.map(data, function (item) {
+                                    return { label: item.Text };
+                                }));
+                            },
+                            error: function (xhr, status, error) {
+                                alert("Error");
+                            },
+                        });
+                    },
+                    autoFocus: true,
+                    minLength: 2
+                });
+            }
+
+
+
+                        function autocompleteSizeName() {
+                var MyAppUrlset = {
+                    MyUsefulUrl: '@Url.Action("SizeReferance", "Admin")'
+                }
+                //Referance//ReferanceTwo//ReferanceThree
+                $("#SizeName").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: MyAppUrlset.MyUsefulUrl,
+                            dataType: "json",
+                            data: { query: $("#SizeName").val() },
+                            success: function (data) {
+                                console.log(data);
+
+                                response($.map(data, function (item) {
+                                    return { label: item.Text };
+                                }));
+                            },
+                            error: function (xhr, status, error) {
+                                alert("Error");
+                            },
+                        });
+                    },
+                    autoFocus: true,
+                    minLength: 2
+                });
+            }
+
+
+
+
+                        function autocompleteColorName() {
+                var MyAppUrlset = {
+                    MyUsefulUrl: '@Url.Action("ColorReferance", "Admin")'
+                }
+                //Referance//ReferanceTwo//ReferanceThree
+                $("#ColorName").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: MyAppUrlset.MyUsefulUrl,
+                            dataType: "json",
+                            data: { query: $("#ColorName").val() },
+                            success: function (data) {
+                                console.log(data);
+
+                                response($.map(data, function (item) {
+                                    return { label: item.Text };
+                                }));
+                            },
+                            error: function (xhr, status, error) {
+                                alert("Error");
+                            },
+                        });
+                    },
+                    autoFocus: true,
+                    minLength: 2
+                });
+            }
+
+
+
+
+
+
+
+    $(function () {
+        //alert('hit');
+        var iframe = $('<iframe frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>');
+        var dialog = $("<div></div>").append(iframe).appendTo("body").dialog({
+            autoOpen: false,
+            modal: true,
+            resizable: false,
+            width: "auto",
+            height: "auto",
+            close: function () {
+                var abc  = iframe.attr("src");
+                iframe.attr("src", "");
+                alert('test');
+            }
+        });
+        $(".abcdef").on("click", function (e) {
+            //alert('find');
+            e.preventDefault();
+            var src = $(this).attr("href");
+            var title = $(this).attr("title");
+            var width = $(this).attr("data-width");
+            var height = $(this).attr("data-height");
+            iframe.attr({
+                width: +width,
+                height: +height,
+                src: src
+            });
+            dialog.dialog("option", "title", title).dialog("open");
+                });
+        });
+    });
+
+    function PreviewImage() {
+        var oFReader = new FileReader();
+        oFReader.readAsDataURL(document.getElementById("FileUpload").files[0]);
+
+        oFReader.onload = function (oFREvent) {
+            document.getElementById("UploadFile").src = oFREvent.target.result;
+        };
+    };
+
+
+
+
+
+
+
+
+</script>
+}
+

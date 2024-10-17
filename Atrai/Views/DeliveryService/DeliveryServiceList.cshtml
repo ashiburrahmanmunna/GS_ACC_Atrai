@@ -1,0 +1,513 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+<style>
+
+/*    th {
+        white-space: nowrap;
+    }*/
+
+
+    hr.solid {
+        border-top: 2px solid #bbb;
+        margin-top: .5rem;
+        margin-bottom: .5rem;
+        vertical-align: middle;
+    }
+
+    p.lineheight {
+        line-height: 6px;
+        vertical-align: middle;
+    }
+/*
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+        line-height: 18px;
+        padding-top: 6px;
+        vertical-align: top;
+        vertical-align: middle;
+        text-align: center;
+        color: dimgray;
+        font-family: Poppins;
+    }*/
+
+</style>
+
+@{ ViewData["Title"] = "Delivery Service List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+
+                    <div class="card-body">
+
+                        <div class="row mb-2">
+                            <div class="col-md-2 col-12">
+                                @Html.ActionLink("Create Delivery Service", "AddDeliveryService", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md-2 col-12 m-t-8">
+                                <h4 class="card-header" style="color: #1976d2;">Delivery Service List</h4>
+                            </div>
+                            <div class="col-md-2 col-12 m-t-8">
+                                <input type="text" id="myInput" class="form-control" onmouseover="this.focus();" placeholder="On Page Filtering / Search." title="Search Item" style="height: 45px !important;">
+                            </div>
+                        </div>
+
+
+
+                        <div class="table-responsive m-t-10">
+                            <table id="tbllist" class="display table table-hover  table-bordered table-striped" cellspacing="0" width="100%">
+
+                                <thead>
+                                    <tr>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr></tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+
+
+                    </div>
+                    </div>
+
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+<div class="modal" id="CommentinfoModal" tabindex="-1" role="dialog" aria-labelledby="CommentinfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="CommentinfoModalLabel">Add Comment</h5>
+                <button id="btnclose" type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="Commentinfo" class="row">
+                    <div class="col-md-12">
+
+                        <div class="from-group row">
+
+                            <div class="col-md-12 col-12 ">
+                            <label>Reply To User</label>
+                                @Html.DropDownList("CommentToLuserId", new SelectList((IEnumerable<SelectListItem>)ViewBag.CommentToLuserId, "Value", "Text"), "Reply To User / Assaign To User", htmlAttributes: new { @class = "form-control", id = "CommentToLuserId" })
+                            </div>
+
+                            <input type="hidden" id="DeliveryServiceId" />
+                            <input type="hidden" id="CellId" />
+
+
+                            @*<div class="col-md-12 col-12 mb-2">
+            <label>DeliveryServiceId</label>
+            <input type="text" id="DeliveryServiceId" class="form-control form-control-sm" />
+        </div>*@
+
+                            @*<div class="col-md-12 col-12 mb-2">
+                                <label>Cell Id</label>
+                                <input type="text" id="CellId" class="form-control form-control-sm" readonly="readonly" />
+                            </div>*@
+
+                            <div class="col-md-12 col-12 mb-2">
+                                <label>Service No</label>
+                                <input type="text" id="DeliveryBillNo" class="form-control form-control-sm" readonly="readonly" />
+                            </div>
+
+                            <div class="col-md-12 col-12 mb-2" row="4">
+                                <label>Comment</label>
+                                <textarea type="text" id="Comment" class="form-control form-control-sm">
+ 
+                                </textarea>
+                            </div>
+
+
+                            <br />
+
+
+                        </div>
+
+
+                    </div>
+                </div> 
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="SaveCommentinfo()">Add New Comment</button>
+                <button type="button" id="btnCloseCommentModal" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*<td>
+        <div height="50px">
+            <div class="img-thumbnail flag flag-icon-background @item.FlagClass.ToString().ToLower()"></div>
+        </div>
+    </td>*@
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+
+
+
+        //function loaddata() {
+
+        //    $("#DeliveryServiceId").val();
+
+        //}
+
+           function SaveCommentinfo() {
+
+               var DeliveryServiceId = $("#DeliveryServiceId").val();
+               var Comment = $("#Comment").val();
+               var CellId = $("#CellId").val();
+               var CommentToLuserId = $("#CommentToLuserId").val();
+               var CommentToUserText = $('#CommentToLuserId option:selected').text();
+               //var ReplyToLuserId = $("#ReplyToLuserId").val();
+
+               if (DeliveryServiceId.length == 0) {
+                   toastr.error('Something Wroking with that Delivery Service..');
+               }
+
+               if (Comment.length == 0) {
+                   toastr.error('Comment Box Have no Valid Data.');
+               }
+
+
+               var CommentModel = {
+                   DeliveryServiceId: DeliveryServiceId,
+                   Comment: Comment,
+                   CommentToLuserId: CommentToLuserId
+                    //UnitId: UnitId
+
+               }
+               //console.log(CommentModel);
+               var prevcomment = $("#" + CellId).html();
+               //alert(prevcomment);
+               //$("#" + CellId).val(prevcomment + Comment);
+
+
+
+
+
+               //'<p class="lineheight">abcd : ABDUR RAHIM : 30-Aug-21 19:21:47  </p>'
+
+               //var targetTablepl = $('#tbllist').DataTable();
+               //var row = $("#1").index();
+               //var data = targetTablepl.row(row).data();
+               //data[0] = 'True';
+
+               const date = new Date();
+               var formattedDate = date.toLocaleDateString('en-GB', {
+                   day: 'numeric', month: 'short', year: 'numeric' //, minute: 'numeric', second:'numeric'
+               }).replace(/ /g, '-');
+
+                //console.log(Comment);
+                //alert(`${Code} ${Name} ${CostPrice} ${Price}`);
+
+
+
+               //var ddef = $("#1").index();
+               ////var ddef = $("#1").index().parent().parent()
+               ////alert(ddef);
+
+               //var targetTablepl = $('#tbllist').DataTable();
+               ////var row = $(this).parent().parent();
+               //var data = targetTablepl.row(ddef).data();
+               //console.log(data);
+               ////data[6] = 'fahad xxxxxxxxxxxxxx';
+
+               ///need to open when all ok
+
+                $.ajax({
+
+                    url: '@Url.Action("SaveCommentModal", "DeliveryService")',
+                    data: JSON.stringify(CommentModel), //use id here
+                    //data: JSON.stringify(purchasesmain),
+                    type: 'POST',
+                    async: true,
+                    contentType: 'application/json;',
+                    dataType: 'json',
+                    success: function (result) {
+                        //alert(result);
+                        //$("#Search").val($("#Name").val());
+
+                        toastr.success('Comment Added Successfully.');
+                        $("#btnCloseCommentModal").trigger("click");
+
+                        var abc = '';
+                        if (CommentToUserText.length > 0) {
+
+                            abc = 'Repl. To : ' + CommentToUserText + ' - ';
+
+                        }
+
+
+                        formattedDate = formattedDate + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+                        $("#" + CellId).html(prevcomment + "<p class=lineheight >" + abc + Comment + " Me : " + " " + formattedDate) + " </p>";
+                        $("#Comment").val("");
+
+                        //var $targetTable = $('#tbllist').dataTable(); 
+                        //$targetTable.fnUpdate('-fahad xxx', '2', 8);
+
+                        //var table = $('#tbllist').DataTable();
+
+                        //var rowId = $('#tbllist').dataTable().fnFindCellRowIndexes('Angelica Ramos', 0);
+
+                        //table
+                        //    .cell(rowId, 0)
+                        //    .data('Angelica Ramos (UPDATED)')
+                        //    .draw(false);
+
+                        //autocompletefunction();
+                        //$("#Search").focus();
+                        //var e = jQuery.Event("keydown");
+                        //e.keyCode = 50;
+                        //$("#search").trigger(e);
+
+                    },
+                    error: function () {
+                        toastr.error('Unable to Save');
+                        //alert('Unable to Save');
+                    }
+                });
+            }
+
+
+        //var rowIdx = $(event.target).data('rowId');
+        //$("#tbllist").DataTable()
+        //    .cell({ row: rowIdx, column: 3 })
+        //    .data('<div class="label label-success">Valid</div>')
+        //    .draw(false);
+
+        //function find_in_table(table, column, row) {
+        //    var table = $(table)
+        //    var column_index = table.find('thead tr [rowId=' + column + ']').index()
+        //    var row = table.find('tr[data-row-id="' + row + '"]')
+
+        //    return row.find('td').eq(column_index);
+
+        //}
+
+        //$('body').append(find_in_table('#tbllist', 'lat', 1))
+
+
+                $(function () {
+                    var peopleList = $('#tbllist').DataTable({
+
+                        serverSide: true,  "scrollX": true,
+                        processing: true,
+
+                        "orderCellsTop": false,
+                        "scrollX": true,
+                        "scrollY": "60vh",
+                        "order": [0, "desc"],
+                        //"order"; false,
+                        //"sortable": false,
+                        "scrollCollapse": true,
+
+                        dom: '<"dom_wrapper fh-fixedHeader"lBf>tip',
+
+                        ajax: {
+                            url: '@Url.Action("GetDeliveryServiceList", "DeliveryService")',
+                            type: "POST"
+                        },
+                        "lengthMenu": [[5, 10, 20, 50, 100, 500, 1000], [5, 10, 20, 50, 100, 500, 1000]],
+                        rowId: 'Id',
+                        dom: '<"dom_wrapper fh-fixedHeader"lBf>tip',
+                        //buttons: [
+                        //    'copy', 'csv', 'excel', 'pdf'
+                        //],
+                        buttons: {
+                            dom: {
+                                button: {
+                                    className: 'btn btn-sm rounded-0'
+                                }
+                            },
+                            buttons: [
+
+                                {
+                                    extend: 'excel',
+                                    text: '<i class="bi bi-file-earmark-excel"></i>',
+                                    className: 'btn-success',
+                                    titleAttr: 'Export to excel'
+                                }
+
+                            ]
+                        },
+
+                        columns: [
+
+                            { "title": "Id", "data": "Id", "visible": true },
+                            { "title": "Bill No", "data": "BillNo", "searchable": true },
+
+                            //{ "title": "UserId", "data": "UserId", "className": "nowrap text-nowrap text-center", "searchable": false },
+                            //{ "title": "User Name", "data": "UserName", "className": "nowrap text-nowrap text-center", "searchable": false },
+
+                            { "title": "Delivery Client PhoneNo", "data": "DeliveryClientPhoneNo", "searchable": true },
+                            { "title": "Delivery To", "data": "DeliveryClientName", "searchable": true },
+                            { "title": "Delivery Address", "data": "DeliveryClientAddress", "searchable": true },
+                            { "title": "User Name", "data": "UserName", "searchable": true },
+                            { "title": "Parcel Placed By", "data": "DeliveryEntryClientName", "searchable": true },
+
+
+
+                            { "title": "Entry Date", "data": "BilledDateString", "searchable": false },
+                            { "title": "Preferable Date & Time", "data": "PreferableDateTimeString", "searchable": false },
+                            { "title": "Create Date", "data": "CreateDateString", "searchable": false },
+
+
+                            { "title": "Category Name", "data": "CategoryName", "searchable": true },
+                            { "title": "Weight Name", "data": "WeightName", "searchable": true },
+                            { "title": "Distance Name", "data": "DistanceName", "searchable": true },
+                            { "title": "Note", "data": "Note", "searchable": true },
+                            { "title": "Pickup Point", "data": "PickupPoint", "searchable": true },
+                            { "title": "Delivery Service Comment", "data": "DeliveryServiceComment", "searchable": true },
+
+                            {
+                                "title": "Comment",
+                                "className": "text-nowrap text-right", //"data": "CommentList",
+                                //"data": {
+                                //    Id: "Id"//,                                    CommentList: "CommentList"
+                                //},
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                //ColumnId: "abc"+'Id',
+                                "searchable": false,
+                                "render": function (data, type, row) {
+
+                                    //var output = "";
+                                    var count = 0;
+                                    var output = "";
+
+                                    if (data != null) {
+
+                                        for (var i = 0; i < data.CommentList.length; i++) {
+                                            //$("#DeliveryServiceId").val(data[0].Id);
+
+
+                                            var abc = '';
+                                            if (data.CommentList[i].CommentToUser != null) {
+
+                                                abc = 'Asg. / Repl. To : ' + data.CommentList[i].CommentToUser + ' - ';
+
+                                            }
+
+
+
+                                            output += '<p class="lineheight"> ' + abc  + data.CommentList[i].Comment + ' : ' + data.CommentList[i].CommentByUser + ' : ' + data.CommentList[i].CreateDateString;
+
+                                            if (i < data.CommentList.length - 1) {
+                                            output += "  </p> ";
+
+                                            //'<p>' + this + '</p>'
+                                        }
+                                        count++;
+                                    };
+                                    };
+
+
+                                    //if (data.TotalDue > 0) {
+                                    //    showdata += '<p style="color:red"> Due </p>';
+                                    //}
+                                    //else {
+                                    //    showdata += '<p style="color:green"> Paid </p>';
+                                    //}
+                                    return '<button id="btncommentmodal"  data-no="' + data.BillNo +'"  data-id="'+data.Id+'" data-comment="" type="button" class="btn-primary btn-sm" style="margin-bottom:10px" data-bs-toggle="modal" data-bs-target="#CommentinfoModal"><i class="bi bi-plus">  Add Comment</i></button>' + output;
+                                },
+                                "searchable": true
+                            },
+
+                            {
+                                "title": "Action",
+                                "data": "Id",
+                                "render": function (data, type, row) {
+                                    var myUrledit = '@Url.Action("EditDeliveryService", "DeliveryService")?DeliveryServiceId=' + data;
+                                    var myUrldelete = '@Url.Action("DeleteDeliveryService", "DeliveryService")?DeliveryServiceId=' + data;
+                                    var message = `return confirm('Are you sure you want to Remove the DeliveryService Information ?')`;
+
+                                    return '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="bi bi-pencil-square"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="bi bi-x"></i></a></span>';
+
+                                }
+
+                            }
+                        ],
+                        autoWidth: true,
+
+                        'columnDefs': [
+                            {
+                            //'targets': "_all",
+                            "targets": [11, 12],
+                            'createdCell': function (td, cellData, rowData, row, col) {
+                                $(td).attr('id',
+                                    'cell-' + rowData.Id + col//+ cellData
+                                );
+                            }
+                            },
+                            {
+                                "width": "300px", "targets": [8, 9]
+                            }
+
+                        ]
+
+                    });
+
+
+                });
+
+
+
+                $(document).on("click", "#btncommentmodal", function (e) {
+                    $('#CommentinfoModal #DeliveryServiceId').attr("value", $(this).attr("data-id"));
+                    $('#CommentinfoModal #DeliveryBillNo').attr("value", $(this).attr("data-no"));
+                    $('#CommentinfoModal #CellId').attr("value", $(this).parents('td').attr("Id"));
+
+                    //$('#CommentinfoModal #Comment').attr("value", $(this).attr("data-comment"));
+                    $('#CommentinfoModal #Comment').val("");
+
+
+                    
+                })
+
+
+
+                var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+                var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+                var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+                    {
+                    style: 'currency',
+                    currency: CurrencyShortNameViewFormat,///'BDT'
+                    minimumFractionDigits: 2,
+                });
+                //document.body.innerHTML += '<br />' + formatter.format(53425.34);
+
+
+
+
+            $(document).ready(function () {
+                $("#myInput").on("keyup", function () {
+                    var value = $(this).val().toLowerCase();
+                    $("#tbllist tr").filter(function () {
+                        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                    });
+                });
+            });
+
+    </script>
+}

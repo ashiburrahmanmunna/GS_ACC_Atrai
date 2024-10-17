@@ -1,0 +1,251 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Document Prefix Creation";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var Id = ViewBag.Id as string;
+    var actiontype = ViewBag.ActionType as string;
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<div style="display: flex; justify-content: center; ">
+    <div style="width: 40%;" class="mx-3">
+        <div style="background: #F4F3F3; padding: 5px; display: flex; justify-content: center; align-items: center; " class="mb-3">
+            <h4 style="margin: 0;">Document Prefix @ViewBag.ActionType</h4>
+            <input id="Id" value="0" class="d-none"/>
+        </div>
+
+        <div style="background: #F9F9F9;" class="p-5">
+            <div class="mb-3">
+                <label class="form-label" style="color: black">Doc Prefix</label>
+                <input class="form-control" id="docPrefix">
+            </div>
+            <div class="mb-3">
+                <label class="form-label" style="color: black">Last Doc No</label>
+                <input class="form-control" id="lastDocNo">
+            </div>
+            <div class="mb-3">
+                <label style="color: black">Doc Type</label>
+                <select id="doc_type" class="form-control">
+                    <option value="">Select Doc Type</option>
+                </select>
+            </div>
+            <div class="mb-3 d-flex">
+                <div>
+                    <input class="form-check-input" type="checkbox" style="color: black" id="yearsuffix">
+                    <label class="form-check-label" style="color: black">
+                        Year suffix required?
+                    </label>
+                </div>
+                <div style="margin-left: 10px;">
+                    @Html.DropDownList("yearformat", ViewBag.yearformat as List<SelectListItem>, new { id = "YearFormat", @class = "form-select form-select-sm d-none" })
+                </div>
+            </div>
+            <div class="mb-3 d-flex">
+                <div>
+                    <input class="form-check-input" type="checkbox" value="" id="monthsuffix">
+                    <label class="form-check-label" style="color: black">
+                        Month suffix required?
+                    </label>
+                </div>
+                <div style="margin-left: 10px;">
+                    @Html.DropDownList("monthformat", ViewBag.monthformat as List<SelectListItem>, new { id = "MonthFormat", @class = "wide-dropdown form-select form-select-sm d-none" })
+
+                </div>
+            </div>
+            <div class="mb-3 d-flex">
+                <div>
+                    <input class="form-check-input" type="checkbox" value="" id="dailysuffix">
+                    <label class="form-check-label" style="color: black">
+                        Daily suffix required?
+                    </label>
+                </div>
+                <div style="margin-left: 10px;">
+                    @Html.DropDownList("dateformat", ViewBag.dateformat as List<SelectListItem>, new { id = "DateFormat", @class = "wide-dropdown form-select form-select-sm d-none" })
+
+                </div>
+            </div>
+            @if (ViewBag.ActionType == "Edit")
+            {
+                <button class="btn btn-success" id="BtnSave" style="float:right;">Update</button>
+            }
+            else if (ViewBag.ActionType == "Create")
+            {
+                <button class="btn btn-success" id="BtnSave" style="float:right;">Save</button>
+            }
+            <button class="btn btn-warning" onclick="gotoInvoiceList()" style="float: right; margin-right: 10px;"><span style="color: white">Back to List</span></button>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+    <script>
+        $('#doc_type').select2();
+
+        function gotoInvoiceList() {
+            var editUrl = '@Url.Action("DocPrefix", "BuyerOrder")';
+            window.location.href = editUrl;
+        }
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetDocType", "BuyerOrder")',
+            datatype: "Json",
+            success: function (data) {
+                //$('#doc_type').append('<option value="">Select Doc Type</option>');
+                $.each(data, function (index, value) {
+                    $('#doc_type').append('<option value="' + value.Id + '" >' + value.DocType + '</option>');
+                });
+            }
+        });
+
+        $(document).ready(function () {
+            $('#yearsuffix').click(function () {
+                if ($(this).prop('checked')) {
+                    $('#monthsuffix').prop('checked', false);
+                    $('#dailysuffix').prop('checked', false);
+
+                    $("#YearFormat").removeClass("d-none");
+                    $("#MonthFormat").addClass("d-none");
+                    $("#DateFormat").addClass("d-none");
+                }
+            });
+
+            $('#monthsuffix').click(function () {
+                if ($(this).prop('checked')) {
+                    $('#yearsuffix').prop('checked', false);
+                    $('#dailysuffix').prop('checked', false);
+
+                    $("#YearFormat").addClass("d-none");
+                    $("#MonthFormat").removeClass("d-none");
+                    $("#DateFormat").addClass("d-none");
+                }
+            });
+
+            $('#dailysuffix').click(function () {
+                if ($(this).prop('checked')) {
+                    $('#yearsuffix').prop('checked', false);
+                    $('#monthsuffix').prop('checked', false);
+
+                    $("#YearFormat").addClass("d-none");
+                    $("#MonthFormat").addClass("d-none");
+                    $("#DateFormat").removeClass("d-none");
+                }
+            });
+
+            if ('@actiontype' === "Edit") {
+
+                docPrefixDetails();
+
+
+                function docPrefixDetails() {
+
+
+                    function fetchColumnsData() {
+                        var id = @ViewBag.Id;
+                        return $.ajax({
+                            url: '@Url.Action("GetDocPrefixDetails", "BuyerOrder")',
+                            data: { id: id },
+                            method: 'GET',
+                            dataType: 'json',
+                        });
+                    }
+
+                    fetchColumnsData()
+                        .done(function (response) {
+                            if (response.Success == 1) {
+                                var model = response.data;
+                                $("#doc_type").val(model.DocTypeId).trigger('change');
+                                $("#docPrefix").val(model.DocPrefix);
+                                $("#Id").val(model.Id);
+                                $("#lastDocNo").val(model.LastDocNo);
+                                if (model.YearSuffix === true) {
+                                    $("#yearsuffix").prop("checked", true);
+                                    $("#YearFormat").removeClass("d-none");
+                                    $("#YearFormat").val(model.Format);
+                                }
+                                if (model.MonthSuffix === true) {
+                                    $("#monthsuffix").prop("checked", true);
+                                    $("#MonthFormat").removeClass("d-none");
+                                    $("#MonthFormat").val(model.Format);
+                                }
+                                if (model.DateSuffix === true) {
+                                    $("#dailysuffix").prop("checked", true);
+                                    $("#DateFormat").removeClass("d-none");
+                                    $("#DateFormat").val(model.Format);
+                                }
+                            }
+                        })
+                        .fail(function (error) {
+                            console.error('Error fetching column data:', error);
+                        });
+
+                }
+
+
+            }
+        });
+
+
+
+
+        function gatherData() {
+            var object = {
+                Id: $("#Id").val(),
+                DocTypeId: $("#doc_type").val(),
+                DocPrefix: $("#docPrefix").val(),
+                LastDocNo: $("#lastDocNo").val(),
+                FirstDocNo: $("#lastDocNo").val(), 
+                YearSuffix: $('#yearsuffix').prop('checked'),
+                MonthSuffix: $('#monthsuffix').prop('checked'),
+                DateSuffix: $('#dailysuffix').prop('checked'),
+                Format: $('#yearsuffix').prop('checked') == true ? $("#YearFormat").val() : $('#monthsuffix').prop('checked') == true ? $("#MonthFormat").val() : $("#DateFormat").val()
+            };
+
+            return object;
+        }
+
+
+        function sendDataToServer() { 
+            var objData = gatherData();
+
+            var data = JSON.stringify(objData);
+
+            $.ajax({
+
+                url: '@Url.Action("DocumentPrefixCreation", "BuyerOrder")',
+                type: 'POST',
+                data: data,
+                async: false,
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (response) {
+                    toastr.success(response.message, "", {
+                        "toastClass": "toast-green",
+                    });
+                    setTimeout(function () {
+
+                        window.location.href = '@Url.Action("DocPrefix", "BuyerOrder")';
+
+                    }, 1000);
+                },
+                error: function (error) {
+                    console.log("Error");
+                }
+            });
+        }
+
+        var saveButton = document.getElementById('BtnSave');
+        saveButton.addEventListener('click', function () {
+            sendDataToServer();
+        });
+
+        
+    </script>
+}

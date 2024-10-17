@@ -1,0 +1,623 @@
+﻿@*@model Atrai.Model.Core.Entity.SalesModel*@
+@model int
+@{
+    ViewData["Title"] = "AddGatePass";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<h2>Gate Pass / Delivery Challan</h2>
+</br>
+
+
+<div class="page-wrapper">
+    <div class="container">
+         <div class="UpperSection">
+            <div class="row mt-5">
+                <div class="leftSection col-md-7">
+                    <div class="row">
+
+                        <div class="col-md-5 col-12" id="divTo">
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold">
+                                    To
+                                </label>
+                                <input type="text" class="form-control tg" id="to">
+
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-5 col-12">
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold">Date</label>
+                                <input type="text" class="form-control tg" id="Date">
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                    <div class="row">
+
+                        <div class="col-md-5 col-12">
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold">Style</label>
+                                <input type="text" class="form-control tg" id="style">
+                            </div>
+                        </div>
+
+                        <div class="col-md-5 col-12">
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold">Buyer</label>
+                                <input type="text" class="form-control tg" id="buyer">
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-10 col-12">
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold">Remarks</label>
+                                <input type="text" class="form-control tg" id="remarks">
+                            </div>
+                        </div>
+                    </div>
+               
+
+
+        </div>
+       
+            
+
+            <div class="rightSection col-md-5">
+                <div class="col-md-8 col-12 row mb-2 ms-3" id="divNo">
+                        <label class="form-label fw-semibold">No.</label>
+                        <input type="text" class="form-control tg" id="no">
+                </div>
+                
+                  <div class="col-md-8 col-12 row mb-2 ms-3" id="divtransport">
+                    <label class="form-label fw-semibold">Transport</label>
+                    <input type="text" class="form-control tg" id="transport">
+                </div>
+                <div class="col-md-8 col-12 row mb-2 ms-3" id="divManual">
+                    <label class="form-label fw-semibold">Manual No.</label>
+                    <input type="text" class="form-control tg" id="manual">
+                </div>
+                <div class="col-md-8 col-12 row mb-2 ms-3" id="divThrough">
+                    <label class="form-label fw-semibold">Through Mr.</label>
+                    <input type="text" class="form-control tg" id="Through">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="gridSection"style="margin-top:50px;">
+
+        <div id="jsGridItems"></div>
+            
+
+    </div>
+        <div class="footerButton" style="margin-top:5%">
+            <button class="btn btn-info btn-sm" id="BtnSave" data-gatepass-Id=@Model>Save</button>
+            @*<button class="btn btn-info btn-sm" id="btnBack" data-gatepass-Id="@GatePassId">Back to List</button>*@
+            <input type="button" class="btn btn-primary btn-sm" value="Back To List" onclick="@("window.location.href='" + @Url.Action("GatePassList", "Sales") + "'");" />
+            @*            <button class="btn btn-info btn-sm" id="json">Json Data</button>
+            <button id="gatepassSave" class="btn btn-primary btnGatePass btn-sm" type="button">
+            <span class="d-none spinner-border spinner-border-lg" id="gatepassspinner" role="status" aria-hidden="true"></span> S
+            </button>*@
+        </div>
+
+
+
+</div>
+</div>
+    @section Scripts{
+        <script type="text/javascript">
+
+
+
+     $(document).ready(function() {
+
+                $('#Date').datepicker({
+                    dateFormat: 'dd-M-y',
+                    todayHighlight: true,
+                    autoclose: true
+                });
+
+
+
+
+            var productid = 0;
+            var autocompleteId = 0;
+            var autocompleteColor = '';
+            var autocompleteSize = '';
+            var autoCompleteField = function (config) {
+                jsGrid.Field.call(this, config);
+            };
+
+            autoCompleteField.prototype = new jsGrid.Field({
+
+
+                itemTemplate: function (value) {
+
+
+                    return value;
+                },
+
+                _createSelect: function (selected, callback) {
+
+                    var $input = $("<input>").attr("type", "text").attr("name", this.name).attr('autocomplete', 'off').autocomplete({
+
+                        source: function (request, response) {
+                            console.log(request.term);
+                            $.ajax({
+                                url: "@Url.Action("GetProductSearchList", "Admin")",
+                                dataType: "json",
+                                data: {
+                                    dropdownSearch: request.term,
+                                    type: "public",
+                                    pageSize: 5,
+                                    minimumInputLength: 0
+                                },
+                                success: function (data) {
+                                    console.log(data);
+                                  
+                                    var results = [];
+                                    var categoryNames = $.unique($.map(data.ProductList, function (item) {
+                                        return item.ProductName;
+                                    }));
+
+                                    $.each(categoryNames, function (index, categoryName) {
+                                        var group = {
+                                            label: categoryName,
+                                            children: []
+                                        };
+
+                                        group.children = $.grep(data.ProductList, function (item) {
+                                            return item.ProductName == group.label;
+                                        });
+
+                                        group.children = $.map(group.children, function (item) {
+                                            console.log(item);
+                                            console.log('item ID');
+                                            console.log(item.Id);
+                                            productid = item.Id;
+                                            return {
+                                                color:item.ColorName,
+                                                size:item.SizeName,
+                                                label: item.ProductName + ' - ' + item.ProductCode ,
+                                                value: item.Id,
+
+                                            };
+                                        });
+
+                                        results.push(group);
+                                    });
+
+                                    response(results);
+                                }
+                            });
+                        },
+                        select: function (event, ui) {
+                            // var selectedId = ui;
+                            // console.log(ui);
+                            if (ui.item.children) {
+                                console.log(ui.item);
+                                
+                                autocompleteId = ui.item.children[0].value;
+                                autocompleteColor = ui.item.children[0].color;
+                                autocompleteSize = ui.item.children[0].size;
+
+                                //countryIDfunc(countryId);
+                                console.log(ui.item);
+                                return true;
+                            } else {
+                                // handle selection of item here
+                            }
+                        },
+                        focus: function (event, ui) {
+                            if (ui.item.children) {
+                                return true;
+                            } else {
+                                // handle focus on item here
+                            }
+                        },
+
+                        minLength: 0,
+                        autoFocus: true,
+                        allowCustomValue: false,
+                        delay: 0,
+                        //cacheLength: 0,
+                        open: function () {
+                            $(this).removeClass("ui-corner-all").addClass("ui-corner-top");
+                        },
+                        close: function () {
+                            $(this).removeClass("ui-corner-top").addClass("ui-corner-all");
+                        },
+                        change: function (event, ui) {
+                            if (ui.item === null) {
+                                $(this).val('');
+                                autocompleteId = 0;
+                                autocompleteColor = 0;
+                                autocompleteSize = 0;
+
+                                //  $('#field_id').val('');
+                            }
+                        },
+                        create: function () {
+                            $(this).data('ui-autocomplete')._renderItem = function (ul, item) {
+                                if (item.children) {
+
+                                    return $("<li><table style='font-size:11px;' class='table table-sm table-bordered'><thead><tr><th style='width:30%;' scope='col'> " + item.label + " </th></tr></thead></table></li>")
+                                        .data("ui-autocomplete-item", item)
+                                        .appendTo(ul);
+                                } else {
+                                    return $("<li><table style='font-size:10px;' class='table table-sm table-bordered'><tbody><tr><td style='width:30%;'><i class='p-0 m-0'> &nbsp;" + item.label + "</i></td></tr><tbody></table></li>")
+                                        .data("ui-autocomplete-item", item)
+                                        .appendTo(ul);
+                                }
+                            };
+                        }
+
+
+                    }).focus(function () {
+                        $(this).autocomplete("search", $(this).val());
+                        $(this).select();
+
+
+                    });
+
+                    // Set the value of the input element to the current field value
+                    $input.val(selected);
+                    //$input.click(function () {
+                    //    if ($input.val().length === 0) {
+                    //        $input.autocomplete("search", "");
+                    //    }
+                    //});   ///// fahad
+
+                    return $input;
+                },
+
+                insertTemplate: function () {
+                    var insertControl = this._insertControl = this._createSelect(null, function (id) {
+
+                        insertControl.val(id);
+                    });
+
+                    return insertControl;
+                },
+
+                editTemplate: function (value) {
+                    var editControl = this._editControl = this._createSelect(value, function (id) {
+                        editControl.val(id);
+                    });
+
+                    return editControl;
+                },
+
+                insertValue: function () {
+                    return this._insertControl.val();
+                },
+
+                editValue: function () {
+                    return this._editControl.val();
+                }
+
+            });
+
+            jsGrid.fields.autocomplete = jsGrid.autoCompleteField = autoCompleteField;
+            $('select').select2();
+
+            
+            var selectedValue = '';
+            $('#jsGridItems').on('blur', '.ui-autocomplete-input', function () {
+
+                selectedValue = $(this).val();
+                if (selectedValue !== '') {
+                    alert('Selected value: ' + selectedValue);
+
+                    var $gridRow = $(this).closest('.jsgrid-row');
+                    var $textFields = $gridRow.find('.jsgrid-cell input[name="ColorName"]').not(this);
+                    $textFields.prop('readonly', true);
+                    // $("#jsGridItems").jsGrid("fieldOption", "ColorName", "readonly", true);
+
+                    //var $gridRow = $(this).closest('.jsgrid-row');
+                    //var $textFields = $gridRow.find('.jsgrid-cell input[type="text"]').not(this);
+                    //$textFields.prop('readonly', true);
+                }
+            });
+
+          
+          
+
+
+        $('#jsGridItems').jsGrid({
+                width: "100%",
+                height: 'auto',
+                editing: true,
+                //filtering: true,
+                inserting: true,
+                autoload: true,
+                pageSize: 5,
+                paging: true,
+               // controller: filterSearchDb,
+                  fields: [
+
+                        //{ name: "Id", title: 'Id', type: "label", visible: true },
+                        { name: "GatePassId", title: 'GatePassId', type: "label", visible: true },
+                        { name: "SLNo", title: 'SLNo' },
+                        { name: "ProductId", title: 'Product ID' },
+                        { name: "ProductName", title: "Item From the List", "visible": true, type: "autocomplete" },
+                        { name: "Name", title: 'Item', type: "text" },
+                    {
+                        name: "ColorName", title: 'Color', type: "text",
+                         
+                    },
+                    {
+                        name: "SizeName", title: 'Size', type: "text"
+                        //, itemTemplate: function (value, item) {
+                        //    if (item.ProductName !== '') {
+                        //        return $("<label>").text(value);
+                        //    } else {
+                        //        return $("<input>").attr("type", "text").val(value);
+                        //    }
+                        //}
+                    },
+                        { name: "Quantity", title: 'Total Qty.', type: "text" },
+                        { name: "PackageQuantity", title: 'No of Package', type: "text" },
+                        { name: "Description", title: 'Remarks', type: "text" },
+                       // { name: "ComId", title: 'ComId', type: "label",visible: true},
+                        { name: "IsTransaction", title: 'IsTransaction', type: "label", visible: false },
+                         {type: "control"}
+                                                       
+                         ],
+                onItemInserted: function (args) {
+                    
+                     args.item.IsTransaction = true;
+                        if(args.item.ProductName!=''){
+                        args.item.ProductId = autocompleteId;
+                        args.item.ColorName = autocompleteColor;
+                        args.item.SizeName = autocompleteSize;
+                        }
+                        else{
+                        args.item.ProductId = null;
+                        }
+                },
+                         onItemUpdated: function(args){
+
+                             args.item.GatePassId = $("#BtnSave").attr("data-gatepass-Id");
+                                args.item.IsTransaction = true;
+                                if (args.item.ProductName != '') {
+                                    args.item.ProductId = autocompleteId;
+                                    args.item.ColorName = autocompleteColor;
+                                    args.item.SizeName = autocompleteSize;
+                                }
+                                else {
+                                    args.item.ProductId = null;
+                                }
+                                         $('#jsGridItems').jsGrid('refresh');
+                            },
+                         onItemInserting: function(args){
+                               if (selectedValue !== '') {
+                                alert('Selected value: ' + selectedValue);
+                                // $("#jsGridItems").jsGrid("fieldOption", "ColorName", "readonly", true);
+
+                               
+                            }
+
+
+                                $("#jsGridItems").off().on('keydown', 'input[type=text], input[type=number]', (event) => {
+                                    if (event.which === 13) { // Detect enter keypress
+                                        $("#jsGridItems .jsgrid-insert-button").trigger("click");
+
+                                    }
+
+                                });
+
+
+                    args.item.IsTransaction = true;
+
+                             args.item.GatePassId = $("#BtnSave").attr("data-gatepass-Id");
+                             var parentValue = $('#jsGridItems').jsGrid('option', 'data');
+                             var serial = parentValue.length + 1;
+                             args.item.SLNo=serial;
+                             console.log(args.item);
+                         },
+                          onItemEditing: function (args) {
+                                $("#jsGridItems").off().on('keydown', 'input[type=text], input[type=number]', (event) => {
+                                    if (event.which === 13) { // Detect enter keypress
+                                        $("#jsGridItems .jsgrid-update-button").trigger("click");
+
+                                    }
+
+                                });
+
+                    
+
+                            },
+                        onItemDeleted: function (args) {
+                            args.item.IsTransaction = false;
+
+                            var parentValue = $('#jsGridItems').jsGrid('option', 'data');
+                            var serial = 0;
+                            for (var i = 0; i < parentValue.length; i++) {
+                                parentValue[i].SLNo = serial + 1;
+                                serial++;  
+                            }
+                               
+                            $("#jsGridItems").jsGrid("refresh");
+
+                        },
+                        onRefreshed:function(args){
+                            console.log(args);
+                        }
+            });
+
+
+           
+
+                //function getGatePass(id) {
+                //    return $.ajax({
+                //        type: 'GET',
+                //        datatype: "Json",
+                //        url: "../Sales/GetGatePass",
+                //        data: { "GatePassId": id, isCopy: @ViewBag.IsCopy }
+                //    });
+                //}
+
+                //var GatePassIddata = $("#BtnSave").attr("data-gatepass-Id");
+                //alert(GatePassIddata);
+                //if (GatePassIddata > 0) {
+                //    $.when(getGatePass(GatePassIddata)).then(function (res) {
+
+                //        console.log(res);
+                   
+                //        parent = res;
+
+                //        alert('items');
+
+                //        // console.log(parent);
+                //        if (@ViewBag.IsCopy == "2") {
+                //            //let idGencopy = new Generator();
+                //            $("#BtnSave").attr("data-gatepass-Id", "0");
+                //            $('#GatePassNo').val("Auto Generated");
+                //            //$('#GatePassDate').val(ret);
+                //        }
+                //        else {
+                //        $("#GatePassNo").val(res.GatePassNo);
+                //        }
+                //         $("#jsGridItems").jsGrid({
+                //              data: res.GatePassItems
+                //        })
+
+                //    $("#to").val(res.ToName);
+                //    $('#Date').val(res.GatePassDate);
+                //    $('#style').val(res.StyleNo);
+                //    $('#buyer').val(res.BuyerName);
+                //    $('#remarks').val(res.Remarks);
+                //    $('#no').val(res.GatePassCode);
+                //    $('#transport').val(res.Transport);
+                //    $('#manual').val(res.ManualNo);
+                //    $('#Through').val(res.Through);
+                   
+
+
+                //    }).fail(function (err) {
+                //        console.log(err);
+                //    });
+                //}
+
+
+
+
+            function getGatePass(GatePassId) {
+                return $.ajax({
+                    type: 'GET',
+                    datatype: "json",
+                    url: "../Sales/GetGatePass",
+                    data: { "GatePassId": GatePassId },
+                });
+            }
+
+            var GatePassIdData = $("#BtnSave").attr("data-gatepass-Id");
+            if (GatePassIdData > 0) {
+                $.when(getGatePass(GatePassIdData)).then(function (response) {
+                    var gatepass = response;
+                    console.log(response);
+                    $("#GatePassNo").val(gatepass.GatePassCode);
+                    $("#to").val(gatepass.ToName);
+                    $('#Date').val(gatepass.GatePassDate);
+                    $('#style').val(gatepass.StyleNo);
+                    $('#buyer').val(gatepass.BuyerName);
+                    $('#remarks').val(gatepass.Remarks);
+                    $('#no').val(gatepass.GatePassCode);
+                    $('#transport').val(gatepass.Transport);
+                    $('#manual').val(gatepass.ManualNo);
+                    $('#Through').val(gatepass.Through);
+
+                    // Populate items grid
+                    var items = gatepass.GatePassItems;
+                    $("#jsGridItems").jsGrid({
+                        data: items,
+                        
+                    });
+                }).fail(function (error) {
+                    console.log(error);
+                });
+            }
+
+
+            
+
+
+
+
+                $('#BtnSave').click(function(){
+
+
+                let Items = $("#jsGridItems").jsGrid('option', 'data');
+                let gridData = [...Items];
+
+               // var gridData = $('#jsGridItems').jsGrid('option','data');
+                gridData.forEach(function (item) {
+                    item.IsTransaction = true;
+                });
+                var gatepassmodel =
+                {
+
+                        Id: $("#BtnSave").attr("data-gatepass-Id"),
+                        ToName: $('#to').val(),
+                        GatePassDate: $('#Date').val(),
+                        GatePassDateString: $('#Date').val(),
+                        StyleNo: $('#style').val(),
+                        BuyerName: $('#buyer').val(),
+                        Remarks: $('#remarks').val(),
+                        GatePassCode: $('#no').val(),
+                        Transport: $('#transport').val(),
+                        ManualNo: $('#manual').val(),
+                        Through: $('#Through').val(),
+                        Items: Items
+                };
+
+
+                    var jsonItems = JSON.stringify(gatepassmodel);
+                    console.log(jsonItems);
+                    alert('Wait');
+
+                    var gatepassid=0;
+                    $.ajax({
+                        async: false,
+                        type: "POST",
+                        url: "@Url.Action("AddGatePass", "Sales")",
+                        data: JSON.stringify(gatepassmodel),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (response) {
+                            
+                            gatepassid = response.Id;
+                            //alert(GatePassIdabc);
+                            toastr.success(response.message, "", {
+                                "toastClass": "toast-green",
+                            });
+                            //if (response) {
+
+                            // }
+                            // else{
+                            //     toastr.success(response.msg, "", {
+                            //         "toastClass": "toast-red",
+                            //     });
+                            // }
+
+                            // Handle the response
+                        }
+                    });
+                    
+                });
+
+      });
+
+        </script>
+}

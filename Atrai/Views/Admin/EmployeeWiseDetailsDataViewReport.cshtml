@@ -1,0 +1,448 @@
+﻿@using Microsoft.AspNetCore.Http
+@model Atrai.Controllers.AdminController.EmployeeSummaryModel
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Date Wise Summary";
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>
+    </title>
+    <script type="text/javascript">
+        function ClosePrint() {
+            var print = document.getElementById("print");
+            print.style.visibility = "hidden";
+            //            print.display = false;
+
+            window.print();
+        }
+    </script>
+
+    <style media="print">
+        
+     @@media print {
+      .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,
+      .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+           float: left;               
+      }
+
+      .col-md-12 {
+           width: 100%;
+      }
+
+      .col-md-11 {
+           width: 91.66666666666666%;
+      }
+
+      .col-md-10 {
+           width: 83.33333333333334%;
+      }
+
+      .col-md-9 {
+            width: 75%;
+      }
+
+      .col-md-8 {
+            width: 66.66666666666666%;
+      }
+
+       .col-md-7 {
+            width: 58.333333333333336%;
+       }
+
+       .col-md-6 {
+            width: 50%;
+       }
+
+       .col-md-5 {
+            width: 41.66666666666667%;
+       }
+
+       .col-md-4 {
+            width: 33.33333333333333%;
+       }
+
+
+       .col-md-3 {
+            width: 25%;
+       }
+       .col-md-2 {
+            width: 16.666666666666666%;
+       }
+       .col-md-1 {
+            width: 8.33333333333333%;
+       }
+
+           
+        .showHeader thead {
+            display: table-header-group;
+            border: 1px solid #000;
+        }
+        }
+    
+    </style>
+
+    <style type="text/css">
+        .bg-offwhite {
+            background-color: #D3D3D3;
+        }
+
+        .table-bordered td, .table-bordered th, .table-bordered {
+            border: 1px solid black;
+            color: black;
+        }
+
+        .table thead th {
+            border-bottom: inherit;
+        }
+
+        .table th {
+            background: inherit;
+        }
+
+        .bg-asswhite {
+            background-color: #F5F5F5 !important;
+        }
+       
+        .table th:last-child, .table tbody tr.even td:last-child {
+            position: inherit !important;
+            right: 0px;
+            background-color: inherit !important;
+            z-index: 1;
+        }
+
+        .table th, .table td {
+          padding-top: 0.25rem;
+          padding-bottom: 0.25rem;
+          padding-left: 0.40rem;
+          padding-right: 0.40rem;
+        }
+
+
+    </style>
+</head>
+<body>
+
+        <h3>
+            @{
+                System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+                
+
+                var UserRole = HttpContextAccessor.HttpContext.Session.GetString("UserRole");
+                double ttlloanamt = 0;
+                double ttladvamt = 0;
+                double ttlloandeduction = 0;
+                double ttladvdeduction = 0;
+            
+
+
+
+        }
+
+        </h3>
+        <div id="main">
+
+
+
+
+            <div class="container">
+                                                            <span class="float-right">
+                            <input id="print" tabindex="1" type="button" value="Print" onclick="ClosePrint()" />
+                        </span>
+                <div class="row mb-2">
+
+                    <div class="col-md-12">
+                        <h2 class="text-center">@Model.CompanyList.StoreName</h2>
+                    </div>
+                    <div class="col-md-12 text-center">
+                        <span>
+                            <h5 class="text-center">@Model.CompanyList.Address</h5>
+                        </span>
+                        <span>
+                            @if (Model.EmployeeSummaryDetails.Count() > 0)
+                            {
+                                <h5 class="text-center">@Model.EmployeeSummaryDetails.FirstOrDefault().Caption</h5>
+                            }
+                        </span>
+@*                         <span>
+                            @if (Model.EmployeeSummaryDetails.Count() > 0)
+                            {
+                                <h6 class="text-center">@Model.EmployeeSummaryDetails.FirstOrDefault().DateCaption</h6>
+                            }
+                        </span>*@
+
+                    </div>
+       
+                    <div class="col-md-12 text-center">
+                    <hr />
+
+                        <h3><span class="border-bottom border-dark">Employee Info</span></h3>
+                    </div>
+                </div>
+
+
+                <table class="table table-bordered border-dark text-dark">
+                    <thead class="bg-asswhite font-weight-bold">
+                        <tr class="text-nowrap text-center">
+                            <th class="font-weight-bold">Type</th>
+               
+                            <th class="font-weight-bold">Joining Date</th>
+                            <th class="font-weight-bold">Emp. Code</th>
+                            <th class="font-weight-bold">Emp. Name</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        @{
+
+
+
+                        foreach (var item in Model.EmployeeSummaryDetails.Where(x => x.Type == "Employee_Info"))
+                            {
+                       
+                                    <tr style="font-family:Arial Narrow;font-size:16px;">
+                                    <td class="text-center">@Html.DisplayFor(modelItem => item.Type) </td>
+                 
+                                    <td class="text-center">@Html.DisplayFor(modelItem => item.JoiningDate) </td>
+                                    <td class="text-center">@Html.DisplayFor(modelItem => item.EmployeeCode) </td>
+                                    <td class="text-center">@Html.DisplayFor(modelItem => item.EmployeeName) </td>
+                                    
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+
+            @if (Model.EmployeeSummaryDetails.Where(x => x.Type == "Loan_Taken").Count() > 0)
+            {
+                <div class="row mb-2">
+                    <div class="col-md-12 text-center">
+                        <h3><span class="border-bottom border-dark">Loan Receive</span></h3>
+                    </div>
+                </div>
+
+                <table class="table table-bordered border-dark text-dark">
+                    <thead class="bg-asswhite font-weight-bold">
+                        <tr class="text-nowrap text-center">
+                            <th class="font-weight-bold">Type</th>
+                            <th class="font-weight-bold">Account Head</th>
+                            <th class="font-weight-bold">Transaction Date</th>
+                            <th class="font-weight-bold">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+
+
+                            foreach (var item in Model.EmployeeSummaryDetails.Where(x => x.Type == "Loan_Taken"))
+                            {
+                                ttlloanamt += item.Amount;
+
+                                <tr style="font-family:Arial Narrow;font-size:16px;">
+                                    <td class="text-center">@Html.DisplayFor(modelItem => item.Type) </td>
+                                    <td class="text-center">@Html.DisplayFor(modelItem => item.AccName) </td>
+                                    <td class="text-center">@Html.DisplayFor(modelItem => item.TransactionDate) </td>
+                                    <td class="text-right">@(
+                                String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.Amount))
+                                ) </td>
+
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                <tfoot>
+                    <tr class="text-right">
+                        <td colspan="2" class="bg-asswhite font-weight-bold"><h6>Total :</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttlloanamt)))</h6></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+
+            }
+            @if (Model.EmployeeSummaryDetails.Where(x => x.Type == "Advance_Taken").Count() > 0)
+            {
+                <div class="row mb-2">
+                    <div class="col-md-12 text-center">
+                        <h3><span class="border-bottom border-dark">Advance Receive</span></h3>
+                    </div>
+                </div>
+
+                <table class="table table-bordered border-dark text-dark">
+                    <thead class="bg-asswhite font-weight-bold">
+                        <tr class="text-nowrap text-center">
+                            <th class="font-weight-bold">Type</th>
+                            <th class="font-weight-bold">Account Head</th>
+                            <th class="font-weight-bold">Entry Date</th>
+                            <th class="font-weight-bold">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+
+
+                            foreach (var item in Model.EmployeeSummaryDetails.Where(x => x.Type == "Advance_Taken"))
+                            {
+                                ttladvamt += item.Amount;
+
+                                <tr style="font-family:Arial Narrow;font-size:16px;">
+                                    <td class="text-center">@Html.DisplayFor(modelItem => item.Type) </td>
+                                    <td class="text-center">@Html.DisplayFor(modelItem => item.AccName) </td>
+                                    <td class="text-center">@Html.DisplayFor(modelItem => item.TransactionDate) </td>
+                                    <td class="text-right">@(
+                                String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.Amount))
+                                ) </td>
+
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                <tfoot>
+                    <tr class="text-right">
+                        <td colspan="2" class="bg-asswhite font-weight-bold"><h6>Total :</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttladvamt)))</h6></td>
+                    </tr>
+                </tfoot>
+            </table>
+            }
+            @if (Model.EmployeeSummaryDetails.Where(x => x.Type == "Loan_Deduction").Count() > 0)
+            {
+                <div class="row mb-2">
+                    <div class="col-md-12 text-center">
+                        <h3><span class="border-bottom border-dark">Loan Adjust</span></h3>
+                    </div>
+                </div>
+                <table class="table table-bordered border-dark text-dark">
+                    <thead class="bg-asswhite font-weight-bold">
+                        <tr class="text-nowrap text-center">
+                            <th class="font-weight-bold">Type</th>
+                            <th class="font-weight-bold">Entry Date</th>
+                            <th class="font-weight-bold">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+
+
+                            foreach (var item in Model.EmployeeSummaryDetails.Where(x => x.Type == "Loan_Deduction"))
+                            {
+                                ttlloandeduction += item.Amount;
+
+                                <tr style="font-family:Arial Narrow;font-size:16px;">
+                                    <td class="text-center">@Html.DisplayFor(modelItem => item.Type) </td>
+                                    <td class="text-center">@Html.DisplayFor(modelItem => item.TransactionDate) </td>
+                                    <td class="text-right">@(
+                                String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.Amount))
+                                ) </td>
+
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="text-right">
+                            <td colspan="2" class="bg-asswhite font-weight-bold"><h6>Total :</h6></td>
+                            <td class="font-weight-bold"><h6>@(
+                                String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttlloandeduction))
+                                )</h6></td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+            }
+            @if (Model.EmployeeSummaryDetails.Where(x => x.Type == "Advance_Deduction").Count() > 0)
+            {
+                <div class="row mb-2">
+                    <div class="col-md-12 text-center">
+                        <h3><span class="border-bottom border-dark">Advance Adjust</span></h3>
+                    </div>
+                </div>
+                <table class="table table-bordered border-dark text-dark">
+                    <thead class="bg-asswhite font-weight-bold">
+                        <tr class="text-nowrap text-center">
+                            <th class="font-weight-bold">Type</th>
+                            <th class="font-weight-bold">Entry Date</th>
+                            <th class="font-weight-bold">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+
+
+                            foreach (var item in Model.EmployeeSummaryDetails.Where(x => x.Type == "Advance_Deduction"))
+                            {
+                                ttladvdeduction += item.Amount;
+
+                                <tr style="font-family:Arial Narrow;font-size:16px;">
+                                    <td class="text-center">@Html.DisplayFor(modelItem => item.Type) </td>
+                                    <td class="text-center">@Html.DisplayFor(modelItem => item.TransactionDate) </td>
+                                    <td class="text-right">@(
+                                String.Format(BDFormat, "{0:N}", Convert.ToDecimal(item.Amount))
+                                ) </td>
+
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                <tfoot>
+                    <tr class="text-right">
+                        <td colspan="2" class="bg-asswhite font-weight-bold"><h6>Total :</h6></td>
+                        <td class="font-weight-bold"><h6>@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttladvdeduction)))</h6></td>
+                    </tr>
+                </tfoot>
+            </table>      
+            }
+
+            <div class="row mb-2">
+                <div class="col-md-12 text-center">
+                    <h3><span class="border-bottom border-dark">Summary Info</span></h3>
+                </div>
+            </div>
+
+            <table class="table table-bordered border-dark text-dark">
+                <thead class="bg-asswhite font-weight-bold">
+                    <tr class="text-nowrap text-center">
+                        <th class="font-weight-bold">Loan Taken</th>
+                        <th class="font-weight-bold">Loan Adj.</th>
+                        <th class="font-weight-bold">Adv. Taken</th>
+                        <th class="font-weight-bold">Adv. Adjust</th>
+                        <th class="font-weight-bold">Closing Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+
+
+                            <tr style="font-family:Arial Narrow;font-size:16px;">
+                            <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttlloanamt))) </td>
+                            <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttlloandeduction))) </td>
+                            <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttladvamt))) </td>
+                            <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttladvdeduction))) </td>
+                            <td class="text-right">@(String.Format(BDFormat, "{0:N}", Convert.ToDecimal(ttlloanamt+ttladvamt - ttlloandeduction - ttladvdeduction))) </td>
+
+                            </tr>
+                      
+                    }
+                </tbody>
+
+            </table>
+
+
+
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6>Software Generated Report || Developed By : Dominate Software Solution || Contact No : 01671-303 302</h6>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+</body>
+</html>

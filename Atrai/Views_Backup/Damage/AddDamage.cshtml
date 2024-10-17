@@ -1,0 +1,2530 @@
+﻿@using Microsoft.AspNetCore.Http
+@*@model Atrai.Core.Entity.DamageModel*@
+@inject IHttpContextAccessor HttpContextAccessor
+@model int
+@{ ViewData["Title"] = "AddDamage";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+<style type="text/css">
+
+    ul.ui-autocomplete {
+        z-index: 1100;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #acadfb;
+        border: 1px solid #fff;
+        /*margin-right: 2px;*/
+        margin-top: 3px;
+        padding: 0px 5px;
+        font-weight: 500;
+        /*margin-left: 1px;*/
+        color: #041c3c;
+    }
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .table th {
+        text-align: center;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > td > input {
+
+        font-size: 13px;
+
+    }
+
+
+
+
+    .bg_1 {
+        background-color: green;
+    }
+
+    .bg_2 {
+        background-color: gray;
+    }
+
+    .error_msg {
+        color: #f00;
+        display: none;
+    }
+
+
+
+
+
+
+    .ui-combobox {
+        display: inline-block;
+        margin: 0;
+        margin-right: 1.8em;
+        position: relative;
+    }
+
+    .ui-combobox-input {
+        padding: 0.2em;
+        margin: 0;
+    }
+
+    .ui-combobox-button {
+        position: absolute;
+        width: 1.8em !important;
+        margin: 0;
+        margin-left: -1px;
+        top: 0;
+        bottom: 0;
+    }
+
+        .ui-combobox-button .ui-button-text {
+            padding: 0em;
+        }
+
+    .ui-combobox .ui-autocomplete {
+        max-height: 10em;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+</style>
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <input type="hidden" id="isSerialDamage" name="isSerialDamage" value="" />
+
+                        <h4>
+                            Product / Item Damage / Store-Out
+                        </h4>
+
+                    </div>
+                    <div class="card-body" id="masterDamage">
+                        @*<input type="hidden" id="DamageId" />*@
+                        <input type="hidden" Id="InternetUserId" />
+                        <div class="row">
+
+
+                        
+                                    <div class="col-md-4 col-12">
+
+                                        <div class="input-group input-group-sm mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-0">
+                                                    Issue No :
+                                                </span>
+                                            </div>
+                                            @Html.TextBox("Code", null, new { @class = "form-control  form-control-sm", onkeyup = "blankme(this.id)", autocomplete = "off", @readonly = "readonly" })
+                                            <small id="error_Code" class="form-text error_msg col-md-offset-2 "> Issue No is Required</small>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-4 col-12">
+
+                                        <div class="input-group input-group-sm mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-0">
+                                                    Date :
+                                                </span>
+                                            </div>
+                                            @Html.TextBox("Date", null, new { @class = "form-control  form-control-sm mydatepicker", onchange = "blankme(this.id)", autocomplete = "off" })
+                                            <small id="error_Date" class="form-text error_msg col-md-offset-2 ">Issue Date is Required</small>
+                                        </div>
+
+                                    </div>
+               
+                                    <div class="col-md-5 col-12">
+
+
+                                        <div class="input-group  input-group-sm mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-0">
+                                                    Ref. One :
+                                                </span>
+                                            </div>
+                                            @Html.TextBox("ReferanceOne", null, new { @class = "form-control form-control-sm",  autocomplete = "off" })
+                                            <small id="error_ReferanceOne" class="form-text error_msg col-md-offset-2 ">Referance One Required</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5 col-12">
+                                        <div class="input-group input-group-sm mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-0">
+                                                    Ref. Two :
+                                                </span>
+                                            </div>
+                                            @Html.TextBox("ReferanceTwo", null, new { @class = "form-control form-control-sm",  autocomplete = "off" })
+                                            <small id="error_ReferanceTwo" class="form-text error_msg col-md-offset-2 ">Referance One Required</small>
+                                        </div>
+                                    </div>
+                      
+
+
+                        
+                        <div class="col-md-12">
+
+                                <div class="row">
+
+                                    <div class="col-md-5 col-12 mb-2">
+
+                                        <div class="input-group  col-md-10">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-purple text-white">
+                                                    <i class="ti-search "></i>
+                                                </span>
+                                            </div>
+                                            <input type="text" placeholder="Search Product" name="Search" id="Search" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-12 mb-2">
+
+                                        <div class="input-group  col-md-10">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-primary text-white">
+                                                    <i class="ti-search "></i>
+                                                </span>
+                                            </div>
+
+                                          <input type="text" placeholder="Search Serial" name="Search" id="SearchSerial" class="form-control rounded-0">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-12">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-0">
+                                                    Warehouse &nbsp
+                                                </span>
+                                            </div>
+                                            @Html.DropDownList("Warehouse", ViewBag.Warehouse as List<SelectListItem>, new { id = "Warehouse", @class = "form-control rounded-0" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                            <br />
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="DamageItems" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th class="d-none">Id</th>
+                                            <th class="d-none">Product Id</th>
+                                            <th class="d-none">Warehouse Id</th>
+                                            <th style="min-width:200px">Name</th>
+                                            <th style="min-width:200px">SLNO / Description</th>
+                                            <th style="min-width:80px">Warehouse</th>
+                                            <th class="d-none" style="min-width:80px;max-width:100px">Unit Price</th>
+                                            <th style="min-width:80px;max-width:100px">Quantity</th>
+                                            <th class="d-none" style="min-width:80px;max-width:100px">Amount</th>
+                                            <th style="min-width:80px;max-width:100px"></th>
+                                            <th class="d-none" style="min-width:80px;max-width:100px">Batch Info</th>
+                                            <th>IsDelete</th>
+                                            <th>IsTransaction</th>
+                                            <th style="min-width:200px">Description</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemDetails">
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td class="d-none"></td>
+                                            <td class="d-none"></td>
+                                            <td class="d-none"></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td> <strong> Total:</strong> </td>
+                                            <td> <strong id="TotalQty">  </strong> </td>
+                                            <td> <strong id="SubTotal">  </strong> </td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <small id="error_SubTotal" class="form-text error_msg">Atleast add one item</small>
+                            <br />
+
+                            <div class="row">
+
+                                
+                                <div class="col-md-6">
+
+
+
+                                    <div class="col-md-12 col-12">
+
+                                        <div class="input-group input-group-sm  mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-1">
+                                                    <label for="Notes"> Notes: </label>
+                                                </span>
+                                            </div>
+
+                                            @Html.TextArea("Notes", new { @class = "form-control", @rows = "3", @placeholder = "Enter Notes / Remarks" })
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+
+                                <div class="col-md-2 col-md-offset-2"></div>
+                                <div class="col-md-4 mt-4">
+
+                                    <div class="form-group row">
+
+                                        <div class="col-md-6 col-12">
+                                            @*<button type="submit" class="btn btn-success"> Save Changes </button>*@
+
+
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                <input id="BtnSave" data-Damage-Id="@Model" class="btn  btn-success btn-block  rounded-0" type="submit" value="Save" /> @*<button type="button" id="BtnSave"  class="btn btn-success btn-block rounded-0">Save</button>*@ }
+                            else if (ViewBag.ActionType == "Edit")
+                            { @*<input type="submit" id="BtnSave" value="Update" class="btn btn-warning btn-block rounded-0" />*@
+                                            <input id="BtnSave" data-Damage-Id="@Model" class="btn btn-warning btn-block rounded-0" type="submit" value="Update Damage" /> } @*else if (ViewBag.ActionType == "Delete")
+                        {
+                            <button class="btn btn-danger btn-block rounded-0" type="button" onclick="Damage_delete()">Delete</button>
+                        }*@
+
+                                        </div>
+
+                                        <div class="col-md-6 col-12">
+                                            @Html.ActionLink("Back", "Index", "Damage", null, new { @class = "btn btn-info btn-block rounded-0", @id = "btnBack" })
+
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+
+
+                            </div>
+
+
+
+
+
+
+                            @*<div class="form-horizontal">
+                <label> </label>
+                <input id="BtnSave" class="btn btn-success col-md-3 pull-right" type="submit" value="Save Damage" />
+            </div>*@
+                        </div>
+                    </div>
+                    </div>
+                <!-- panel-body -->
+            </div>
+            <!-- panel -->
+        </div>
+    </div>
+
+
+</div>
+
+<div class="modal" id="productinfoModal" tabindex="-1" role="dialog" aria-labelledby="productinfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productinfoModalLabel">Add Product</h5>
+                <button id="btnclose" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="productinfo" class="row">
+                    <div class="col-md-12">
+
+                        <div class="from-group row">
+
+                            <div class="col-md-12 mb-2">
+                                <label>Name</label>
+                                <input type="text" id="Name" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-md-6 col-12 ">
+                                <label>Category</label>
+                                @Html.DropDownList("CategoryId", new SelectList((IEnumerable<SelectListItem>)ViewBag.Category, "Value", "Text"), "Select Category", htmlAttributes: new { @class = "form-control", id = "CategoryId" })
+                            </div>
+
+                            <div class="col-md-6 col-12 ">
+                                <label>Unit</label>
+                                @Html.DropDownList("UnitId", new SelectList((IEnumerable<SelectListItem>)ViewBag.Unit, "Value", "Text"), "Select Unit", htmlAttributes: new { @class = "form-control", id = "UnitId" })
+                            </div>
+                            <div class="col-md-6 col-12 mb-2">
+                                <label>Product Code</label>
+                                <input type="text" id="ProductCode" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-md-6 col-12 mb-2">
+                                <label>Brand</label>
+                                <input type="text" id="BrandName" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-md-6 col-12 mb-2">
+                                <label>Color</label>
+                                <input type="text" id="ColorName" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-md-6 col-12 mb-2">
+                                <label>Size</label>
+                                <input type="text" id="SizeName" class="form-control form-control-sm" />
+                            </div>
+
+                            <div class="col-md-6 col-12 mb-2">
+                                <label>Cost Price</label>
+                                <input type="text" id="CostPrice" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-md-6 col-12 mb-2">
+                                <label>Selling Price</label>
+                                <input type="text" id="Price" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label>Description</label>
+                                <input type="text" id="Description" class="form-control form-control-sm" />
+                            </div>
+
+                            <br />
+
+                        </div>
+
+
+
+                    </div>
+                </div>  @*Datatable Initializer tblproductserialsearch*@
+            </div>
+            <div class="modal-footer">
+                @*<div class="col-md-12 mb-2" style="text-align:center">
+                        <button type="button" onclick="Saveproductinfo()" class="btn btn-success rounded-0">Save Product</button>
+                    </div>*@
+                <button type="button" class="btn btn-primary" onclick="Saveproductinfo()">Add New Product</button>
+
+                <button type="button" id="btnCloseProductModal" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="checkModal" tabindex="-2" role="dialog" aria-labelledby="checkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header d-none">
+                <h5 class="modal-title text-center" id="checkModalLabel">Batch Serial </h5>
+                @*<button id="btncloseabc" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>*@
+                <div class="from-group row">
+                    @*<div class="col mb-2">
+                            <input type="text" id="myInputSearch" class="form-control form-control-sm" onkeyup="myFunctionSearch()" onmouseover="this.focus();" placeholder="Search for PONO." title="Type in a name">
+                        </div>*@
+                    <div class="col mb-2">
+                        <input type="text" id="slnoPrefix" class="form-control form-control-sm" placeholder="Prefix" title="Prefix">
+                    </div>
+
+                </div>
+                <div class="from-group row">
+
+                    <div class="col mb-2">
+                        <input type="number" id="BatchFromNo" class="form-control form-control-sm" placeholder="From NO." title="From No">
+                    </div>
+
+                </div>
+                <div class="from-group row">
+
+                    <div class="col mb-2">
+                        <input type="number" id="BatchToNo" class="form-control form-control-sm" placeholder="To NO." title="To No">
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="checkModalLabel">Batch Serial Search</h5>
+                @*<div class="from-group row">
+                        <div class="col-12 mb-2">
+                            <input type="text" id="slnoSearch" class="form-control form-control-sm" placeholder="Search Serail No" title="SearchSerial">
+                        </div>
+
+                    </div>*@
+            </div>
+
+
+            <div id="BatchSerialListModal" class="modal-body">
+
+                <div class="from-group row  mb-3">
+                    <div class="input-group  input-group-sm  col-md-12">
+                        <span class="input-group-btn"><button class="btn btn-primary rounded-0" type="submit"><i class="ti-search"></i></button></span>
+                        <input type="text" placeholder="Search Product Serial" name="Search" id="slnoSearch" class="form-control">
+                    </div>
+
+                </div>
+
+
+                <div class="row">
+                    <div class="col order-md-1 mb-2">
+
+
+                        <form class="card p-2">
+                            <br />
+
+                            @*<div class="table-responsive text-nowrap">
+
+                                <table id="BatchSerialList" class="table display nowrap table-striped table-hover no-footer text-center" cellspacing="0" width="100%">*@
+
+
+                            <div class="table-responsive">
+                                <table class="table table-hover text-nowrap" id="BatchSerialList" style="width:100%">
+
+                                    <thead>
+                                        <tr>
+                                            <th class="d-none">Batch Id</th>
+                                            <th class="d-none">Damage Items Id</th>
+                                            <th class="d-none">Product Id</th>
+                                            <th>Product Serial</th>
+                                            <th>SL No</th>
+                                            <th>Action</th>
+                                            <th class="">Is Delete</th>
+                                            <th class="">Is Used</th>
+                                            <th class="">IsTransaction</th>
+                                            <th class=""> PurchaseBatchId</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemDetails">
+                                    </tbody>
+
+                                </table>
+                            </div>
+                            <br />
+
+                        </form>
+
+                        <div class="row">
+
+                            <div class="col ">
+                                <button type="button" onclick="ShowAllPackingList()" class="btn btn-sm btn-info mb-2 btn-block rounded-0">Show All</button>
+                            </div>
+                            <div class="col ">
+                                <button type="button" class="btn btn-sm btn-danger mb-2 rounded-0 btn-simple btn-block" data-dismiss="modal">Close</button>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+@section scripts {
+
+
+<script type="text/javascript">
+   
+
+    function beep() {
+        (new Audio("data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vmz+ Zt//+mm3Wm3Q576v////+32///5/EOgAAADVghQAAAAA//uQZAUAB1WI0PZugAAAAAoQwAAAEk3nRd2qAAAAACiDgAAAAAAABCqEEQRLCgwpBGMlJkIz8jKhGvj4k6jzRnqasNKIeoh5gI7BJaC1A1AoNBjJgbyApVS4IDlZgDU5WUAxEKDNmmALHzZp0Fkz1FMTmGFl1FMEyodIavcCAUHDWrKAIA4aa2oCgILEBupZgHvAhEBcZ6joQBxS76AgccrFlczBvKLC0QI2cBoCFvfTDAo7eoOQInqDPBtvrDEZBNYN5xwNwxQRfw8ZQ5wQVLvO8OYU+mHvFLlDh05Mdg7BT6YrRPpCBznMB2r//xKJjyyOh+cImr2/4doscwD6neZjuZR4AgAABYAAAABy1xcdQtxYBYYZdifkUDgzzXaXn98Z0oi9ILU5mBjFANmRwlVJ3/6jYDAmxaiDG3/6xjQQCCKkRb/6kg/wW+kSJ5//rLobkLSiKmqP/0ikJuDaSaSf/6JiLYLEYnW/+kXg1WRVJL/9EmQ1YZIsv/6Qzwy5qk7/+tEU0nkls3/zIUMPKNX/6yZLf+kFgAfgGyLFAUwY//uQZAUABcd5UiNPVXAAAApAAAAAE0VZQKw9ISAAACgAAAAAVQIygIElVrFkBS+Jhi+EAuu+lKAkYUEIsmEAEoMeDmCETMvfSHTGkF5RWH7kz/ESHWPAq/kcCRhqBtMdokPdM7vil7RG98A2sc7zO6ZvTdM7pmOUAZTnJW+NXxqmd41dqJ6mLTXxrPpnV8avaIf5SvL7pndPvPpndJR9Kuu8fePvuiuhorgWjp7Mf/PRjxcFCPDkW31srioCExivv9lcwKEaHsf/7ow2Fl1T/9RkXgEhYElAoCLFtMArxwivDJJ+bR1HTKJdlEoTELCIqgEwVGSQ+hIm0NbK8WXcTEI0UPoa2NbG4y2K00JEWbZavJXkYaqo9CRHS55FcZTjKEk3NKoCYUnSQ 0rWxrZbFKbKIhOKPZe1cJKzZSaQrIyULHDZmV5K4xySsDRKWOruanGtjLJXFEmwaIbDLX0hIPBUQPVFVkQkDoUNfSoDgQGKPekoxeGzA4DUvnn4bxzcZrtJyipKfPNy5w+9lnXwgqsiyHNeSVpemw4bWb9psYeq//uQZBoABQt4yMVxYAIAAAkQoAAAHvYpL5m6AAgAACXDAAAAD59jblTirQe9upFsmZbpMudy7Lz1X1DYsxOOSWpfPqNX2WqktK0DMvuGwlbNj44TleLPQ+Gsfb+GOWOKJoIrWb3cIMeeON6lz2umTqMXV8Mj30yWPpjoSa9ujK8SyeJP5y5mOW1D6hvLepeveEAEDo0mgCRClOEgANv3B9a6fikgUSu/DmAMATrGx7nng5p5iimPNZsfQLYB2sDLIkzRKZOHGAaUyDcpFBSLG9MCQALgAIgQs2YunOszLSAyQYPVC2YdGGeHD2dTdJk1pAHGAWDjnkcLKFymS3RQZTInzySoBwMG0QueC3gMsCEYxUqlrcxK6k1LQQcsmyYeQPdC2YfuGPASCBkcVMQQqpVJshui1tkXQJQV0OXGAZMXSOEEBRirXbVRQW7ugq7IM7rPWSZyDlM3IuNEkxzCOJ0ny2ThNkyRai1b6ev//3dzNGzNb//4uAvHT5sURcZCFcuKLhOFs8mLAAEAt4UWAAIABAAAAAB4qbHo0tIjVkUU//uQZAwABfSFz3ZqQAAAAAngwAAAE1HjMp2qAAAAACZDgAAAD5UkTE1UgZEUExqYynN1qZvqIOREEFmBcJQkwdxiFtw0qEOkGYfRDifBui9MQg4QAHAqWtAWHoCxu1Yf4VfWLPIM2mHDFsbQEVGwyqQoQcwnfHeIkNt9YnkiaS1oizycqJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7 FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb//////////////////////////// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU="
+        )).play();
+    }
+
+</script>
+
+
+<script type="text/javascript">
+
+    autocompletefunctionInternetUserId();
+
+
+    function autocompletefunctionInternetUserId() {
+        ///fahad fahad
+        $("#ReferanceOne").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '../Internet/internetuserIddata/',
+                    dataType: "json",
+                    data: { query: $("#ReferanceOne").val() },
+                    success: function (data) {
+                        console.log(data);
+                        response($.map(data, function (item) {
+                            return { label: item.UserId, UserName: item.UserName, Id: item.Id };//, , BillAmount: item.BillAmount
+                        }));
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error");
+                    },
+                });
+            },
+            autoFocus: true,
+            minLength: 3,
+            change: function (event, ui) {
+                if (ui.item === null) {
+                    //$(this).val('');
+                    //$('#ReferanceOne').val('');
+                    //$('#UserName').val('');
+                    $('#InternetUserId').val('');
+                    //$('#MobileNoIfNecessary').val('');
+
+                }
+            },
+            select: function (event, ui) {
+
+
+                //$("#UserName").val(ui.item.UserName);
+                $("#ReferanceOne").val(ui.item.label);
+                $("#InternetUserId").val(ui.item.Id);
+
+
+
+                return false;
+            }
+        });
+    }
+
+
+
+
+        (function ($) {
+            $.fn.inputFilter = function (inputFilter) {
+                return this.on("input keydown keyup mousedown mouseup select contextmenu drop", function () {
+                    if (inputFilter(this.value)) {
+                        this.oldValue = this.value;
+                        this.oldSelectionStart = this.selectionStart;
+                        this.oldSelectionEnd = this.selectionEnd;
+                    } else if (this.hasOwnProperty("oldValue")) {
+                        this.value = this.oldValue;
+                        this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                    } else {
+                        this.value = "";
+                    }
+                });
+            };
+        }(jQuery));
+
+        $(document).ready(function () {
+
+
+
+            var rowone
+            $('#DamageItems tbody').on('click', 'td', function (e) {
+
+
+                var table = $('#DamageItems').DataTable();
+                rowone = $(this).parent();
+
+
+                var data = table.row(rowone).data();
+                //alert(data);
+                data[12] = 'True';
+                $(this).closest('tr').children('td.IsTransaction').text('True');
+
+                calculateSum();
+            });
+
+
+            var row;
+
+            $('#DamageItems tbody').on('click', '.dlttrashsubsection', function (e) {
+
+                var table = $('#DamageItems').DataTable();
+                row = $(this).parent().parent();
+                var data = table.row(row).data();
+                data[11] = 'True';
+                //alert('hit');
+                $(this).parent().parent().hide(); ///fahad for checking.
+                toastr.error("Items Row Deleted");
+
+
+
+                $(this).closest('tr').children('td.IsDelete').text('True');
+
+                var x = "100.00";
+                var y = $('#DamageItems').height();
+                var z = parseFloat(x) + parseFloat(y);
+
+                table.draw();
+
+                $("html, body").animate({ scrollTop: z }, 500);
+                $(".dataTables_scrollBody").scrollTop(9999);
+
+                calculateSum();
+
+            });
+
+
+
+
+            $('#BatchSerialList tbody').on('click', 'td', function (e) {
+
+
+                var table = $('#BatchSerialList').DataTable();
+                rowone = $(this).parent();
+
+
+                var data = table.row(rowone).data();
+                //alert(data);
+                data[8] = 'True';
+                $(this).closest('tr').children('td.IsTransaction').text('True');
+
+                calculateSum();
+            });
+
+
+
+
+            $('#BatchSerialList tbody').on('click', '.dlttrash', function (e) {
+
+                var targetTablepl = $('#BatchSerialList').DataTable();
+                row = $(this).parent().parent();
+                var data = targetTablepl.row(row).data();
+                data[6] = 'True';
+
+                $(this).parent().parent().hide(); ///fahad for checking.
+                toastr.error("Serial Row Deleted")
+
+
+
+                $(this).closest('tr').children('td.IsDelete').text('True');
+
+                var x = "100.00";
+                var y = $('#BatchSerialList').height();
+                var z = parseFloat(x) + parseFloat(y);
+
+                targetTablepl.draw();
+
+                $("html, body").animate({ scrollTop: z }, 500);
+                $(".dataTables_scrollBody").scrollTop(9999);
+
+
+
+
+                var xcount = targetTablepl.rows(':visible').count();
+                //alert(xcount);
+                var table = $('#DamageItems').DataTable();
+                //var datacurrentvalue = table.row($('input[type=checkbox]:checked').parents('tr')).data();
+                var rownovouchersub = table.row($('input[type=checkbox]:checked').parents('tr')).index();
+                //alert(rownovouchersub);
+
+                var cellprice = $('#DamageItems tbody tr').filter(':has(:checkbox:checked)').find('.price').val();
+                console.log(cellprice);
+                //cellprice.data(xcount);
+
+                var cellqty = table.cell(rownovouchersub, 7);
+                cellqty.data(xcount);
+                var cellamount = table.cell(rownovouchersub, 8);
+                cellamount.data(xcount * cellprice);
+
+
+                calculateSum();
+
+            });
+
+
+
+
+
+
+            $("#ServiceCharge , #Shipping , #TotalVat , #Discount  ").inputFilter(function (value) {
+                return /^-?\d*[.,]?\d{0,2}$/.test(value);
+            });
+
+
+            $(".price").inputFilter(function (value) {
+                return /^-?\d*[.,]?\d{0,2}$/.test(value);
+            });
+            });
+
+
+
+        function AddSerialData() {
+
+            var check = $('#DamageItems').find('input[type=checkbox]:checked').length;
+            //alert(check);
+
+            if (check > 0) {
+                //alert(check);
+                //alert("Checkbox Selected");
+            }
+            else {
+                alert("At least One Row Should Be Selected");
+                e.preventDefault();
+            }
+
+
+            var targetTablepl = $("#BatchSerialList").DataTable();
+
+            var rowCountpl = targetTablepl
+                .column(0)
+                .data()
+                .length;
+
+
+            $('#BatchSerialList').dataTable().fnAddData([
+                0,
+                DamageItemId,
+                ProductId,
+                "",
+                rowCountpl + 1,
+                '<a data-itemId="0" href="#" class="dlttrash deleteItem"> <i class="fa fa-trash"></i></a >',
+                false,
+                false,
+                true,
+                0
+            ]);
+
+
+
+            var xcount = targetTablepl.rows(':visible').count();
+            //alert(xcount);
+            var table = $('#DamageItems').DataTable();
+            //var datacurrentvalue = table.row($('input[type=checkbox]:checked').parents('tr')).data();
+            var rownovouchersub = table.row($('input[type=checkbox]:checked').parents('tr')).index();
+            //alert(rownovouchersub);
+
+            var cellprice  = $('#DamageItems tbody tr').filter(':has(:checkbox:checked)').find('.price').val();
+            console.log(cellprice);
+            //cellprice.data(xcount);
+
+            var cellqty = table.cell(rownovouchersub, 7);
+            cellqty.data(xcount);
+            var cellamount = table.cell(rownovouchersub, 8);
+            cellamount.data(xcount * cellprice);
+
+            calculateSum();
+
+        }
+
+        function AddSerialDataAuto() {
+
+
+
+
+            var check = $('#DamageItems').find('input[type=checkbox]:checked').length;
+            //alert(check);
+
+            if (check > 0) {
+                //alert(check);
+                //alert("Checkbox Selected");
+            }
+            else {
+                alert("At least One Row Should Be Selected");
+                e.preventDefault();
+            }
+            // alert(serialno);
+            // alert('test');
+
+            var targetTablepl = $("#BatchSerialList").DataTable();
+
+            var rowCountpl = targetTablepl
+                .column(0)
+                .data()
+                .length;
+
+
+
+            var from = $("#BatchFromNo").val();
+            var to = $("#BatchToNo").val();
+            var prefix = $("#slnoPrefix").val();
+
+
+            if (prefix.length > 0 && from.length > 0 && to.length > 0) {
+                for (var i = from; i <= to; i++) {
+                    $('#BatchSerialList').dataTable().fnAddData([
+                        0,
+                        DamageItemId,
+                        ProductId,
+                        prefix + i,
+                        i,//rowCountpl + 1,
+                        '<a data-itemId="0" href="#" class="dlttrash deleteItem"> <i class="fa fa-trash"></i></a >',
+                        false,
+                        false,
+                        true,
+                        0
+                    ]);
+                }
+            }
+            else {
+                toastr.error("Please fill up Necessary Info.")
+            };
+
+
+
+
+            var xcount = targetTablepl.rows(':visible').count();
+            //alert(xcount);
+            var table = $('#DamageItems').DataTable();
+            //var datacurrentvalue = table.row($('input[type=checkbox]:checked').parents('tr')).data();
+            var rownovouchersub = table.row($('input[type=checkbox]:checked').parents('tr')).index();
+            //alert(rownovouchersub);
+
+            var cellprice  = $('#DamageItems tbody tr').filter(':has(:checkbox:checked)').find('.price').val();
+            console.log(cellprice);
+            //cellprice.data(xcount);
+
+            var cellqty = table.cell(rownovouchersub, 7);
+            cellqty.data(xcount);
+            var cellamount = table.cell(rownovouchersub, 8);
+            cellamount.data(xcount * cellprice);
+
+            calculateSum();
+
+
+        }
+
+
+        $('body').on('expanded.pushMenu collapsed.pushMenu', function () {
+            setTimeout(function () {
+                $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+            }, 350);
+        });
+
+
+        function ShowAllPackingList() {
+            var cbs = document.getElementsByClassName("clickchk");
+            for (var i = 0; i < cbs.length; i++) {
+                cbs[i].checked = false;
+            }
+
+            $('#BatchSerialList tbody tr').each(function () {
+                $(this).show();
+            });
+
+        }
+
+
+        var BatchSerialList = $('#BatchSerialList').DataTable({
+            "aoColumns": [
+                { "sClass": "BatchId d-none", "visible": true },
+                { "sClass": "DamageItemId d-none", "visible": true },
+                { "sClass": "ProductId d-none", "visible": true },
+
+                {
+                    "sClass": "BatchSerialNoRow ",
+                    "visible": true
+                },
+
+                { "sClass": "SLNo d-none", "visible": true },
+                { "sClass": "dltrashimage", "visible": true },
+                { "sClass": "IsDelete d-none", "visible": true },
+                { "sClass": "IsUsed d-none", "visible": true },
+                { "sClass": "IsTransaction d-none", "visible": true },
+                { "sClass": "PurchaseBatchId d-none", "visible": true }
+
+
+
+
+            ],
+            columnDefs: [
+                {
+                    "render": function (data, type, row) {
+                        var IsUsed = row[7];
+                        if (IsUsed == false) {
+                            return '<input class="form-control form-control-sm BatchSerialNo  text-center" id="BatchSerialNo"  name="BatchSerialNo" type="text"  value = ' + data + '  >';
+                        }
+                        else {
+                            return '<input class="form-control form-control-sm BatchSerialNo  text-center" id="BatchSerialNo"  name="BatchSerialNo" type="text"  value = ' + data + ' , readonly=readonly  >';
+                        }
+
+                    },
+                    "targets": 3
+
+                }
+            ],
+            rowCallback: function (row) {
+                $(row).addClass('RowBatchSerialList');
+            },
+            scrollY: "300px",
+            scrollX: true,
+            //"scrollCollapse": true,
+            'paging': false,
+            'info': false,
+            'ordering': false,
+            'searching': false,
+            language: { search: '', searchPlaceholder: "Search..." }
+            //, sorting: false
+        });
+
+
+   function Saveproductinfo() {
+
+
+        var Code = $("#ProductCode").val();
+        var Name = $("#Name").val();
+        var CostPrice = $("#CostPrice").val();
+        var Price = $("#Price").val();
+        var Description = $("#Description").val();
+
+        var ColorName = $("#ColorName").text();
+        var SizeName = $("#SizeName").text();
+        var BrandName = $("#BrandName").val();
+        var UnitId = $("#UnitId").val();
+        var CategoryId = $("#CategoryId").val();
+
+
+
+
+        var Product = {
+            Code: Code,
+            Name: Name,
+            CostPrice: CostPrice,
+            Description: Description,
+
+            ColorName: ColorName,
+            SizeName: SizeName,
+            BrandName: BrandName,
+            UnitId: UnitId,
+            CategoryId: CategoryId
+
+        }
+        //console.log(Product);
+        //alert(`${Code} ${Name} ${CostPrice} ${Price}`);
+
+        $.ajax({
+
+
+
+
+            url: '@Url.Action("SaveProductModal", "Admin")',
+            data: JSON.stringify(Product), //use id here
+            //data: JSON.stringify(purchasesmain),
+            type: 'POST',
+            async: true,
+            contentType: 'application/json;',
+            dataType: 'json',
+            success: function (result) {
+                //alert(result);
+                $("#Search").val($("#Name").val());
+                $("#ProductCode").val("");
+                $("#Name").val("");
+                $("#CostPrice").val("");
+                $("#Price").val("");
+                $("#Description").val("");
+
+                $("#SizeName").val("");
+                $("#BrandName").val("");
+                $("#ColorName").val("");
+                $("#CategoryId").val(null);
+                $("#UnitId").val(0);
+
+                //productinfo_Info();
+                toastr.success('Product Added Successfully.');
+                $("#btnCloseProductModal").trigger("click");
+
+
+
+                autocompletefunction();
+                $("#Search").focus();
+                var e = jQuery.Event("keydown");
+                e.keyCode = 50;
+                $("#search").trigger(e);
+
+            },
+            error: function () {
+                toastr.error('Unable to Save');
+                //alert('Unable to Save');
+            }
+        });
+    }
+
+
+       // $('#ReferanceOneinfo').hide();
+
+
+        //function ReferanceOneinfohide() {
+
+        //    if ($('#ReferanceOne option:selected').text().toUpperCase() == "Cash ReferanceOne".toUpperCase() || $('#ReferanceOne option:selected').text().toUpperCase() == "Walk In ReferanceOne".toUpperCase()) {
+
+        //        $('#ReferanceOneinfo').show();
+
+
+        //    }
+        //    else {
+        //        $('#ReferanceOneinfo').hide();
+        //        $('#ReferanceOne').val('');
+        //        $('#InternetUserId').val('');
+        //        $('#PhoneNo').val('');
+        //        $('#ReferanceTwo').val('');
+        //    }
+        //}
+
+
+
+        //$('#ReferanceOne').select2({})
+        //.on("select2:select", function (e) {
+
+        //    ReferanceOneinfohide();
+
+
+        //});
+
+        function blankme(id) {
+
+            var val = document.getElementById(id).value;
+            var error_id = "error_" + id;
+
+            if (val == "" || val === 0.00) {
+
+                document.getElementById(error_id).style.display = "block";
+            }
+            else {
+                document.getElementById(error_id).style.display = "none";
+            }
+        }
+        function submitValidation() {
+            var ReferanceOne = document.getElementById("ReferanceOne").value;
+            var code = document.getElementById("Code").value;
+            var date = document.getElementById("Date").value;
+            var total = parseFloat($("#SubTotal").text());
+
+            if (ReferanceOne == "" || code == "" || date == ""  ) {
+
+                if (ReferanceOne == "") {
+                    document.getElementById("error_ReferanceOne").style.display = "block";
+                }
+                else {
+                    document.getElementById("error_ReferanceOne").style.display = "none";
+                }
+
+                if (code == "") {
+                    document.getElementById("error_Code").style.display = "block";
+                }
+                else {
+                    document.getElementById("error_Code").style.display = "none";
+                }
+                if (date == "") {
+                    document.getElementById("error_Date").style.display = "block";
+                }
+                else {
+                    document.getElementById("error_Date").style.display = "none";
+                }
+                if (total == "" || total === 0.00 || isNaN(total)) {
+                    document.getElementById("error_SubTotal").style.display = "block";
+                }
+                else {
+                    document.getElementById("error_SubTotal").style.display = "none";
+                }
+
+                return false;
+            }
+            else {
+                return true;
+            }
+
+
+        }
+
+
+
+        $(document).ready(function () {
+           // console.log("ready!");
+
+             $('#masterDamage').ready(function () {
+
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var value = new Date();
+            var ret = value.getDate() + "-" + months[value.getMonth()] + "-" + value.getFullYear(); //value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
+            $("#Date").val(ret);
+
+
+
+
+
+            function getDamage(id) {
+                return $.ajax({
+                    type: 'GET',
+                    datatype: "Json",
+                    url: "../Damage/GetDamage",
+                    data: "DamageId=" + id
+                });
+            }
+
+            var DamageId = $("#BtnSave").attr("data-Damage-Id");
+
+            if (DamageId > 0) {
+                $.when(getDamage(DamageId)).then(function (res) {
+                    console.log(res);
+                    var detArr = [];
+
+                    var stringarray = [""];
+                    var arr = [];
+
+                    $("#Code").val(res.DamageCode);
+
+                    var value = new Date(res.DamageDate);
+
+                    var ret = value.getDate() + "-" + months[value.getMonth()] + "-" + value.getFullYear(); //value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
+
+
+                    $("#Date").val(ret);
+                    $("#Warehouse").val(res.WarehouseIdMain);
+
+                    $("#ReferanceOne").val(res.ReferanceOne);
+                    $("#InternetUserId").val(res.InternetUserId);
+
+
+                    $("#PhoneNo").val(res.PhoneNo);
+                    $("#ReferanceTwo").val(res.ReferanceTwo);
+
+
+                    $("#Notes").val(res.Notes);
+                    $("#isSerialDamage").val(res.isSerialDamage);
+
+                    //$("#SubTotal").text(res.Total);
+
+
+
+
+
+
+                    $.each(res.Items, function (i, v) {
+
+                        console.log(v);
+                        $('#DamageItems').dataTable().fnAddData([v.Id, v.ProductId, v.WarehouseId, v.Product.Name, v.Description, v.vWarehouse.WhShortName, v.Price, v.Quantity, v.Amount, '<a data-itemId="0" href="#" class="dlttrashsubsection deleteItem"> <i class="fa fa-trash"></i></a>', null, false, false,v.Description]);
+
+                        //console.log(v.BatchSerialItems);
+
+                        $.each(v.BatchSerialItems, function (ii, vv) {
+
+                            //var rowid = generateRandom();
+                            //alert(vv.ProductId);
+
+                            var deletestring = '<a data-itemId="0" href="#" class="dlttrash deleteItem"> <i class="fa fa-trash"></i></a >';
+                            if (vv.IsUsed == true) { deletestring = '<h5 style="color:Red; font-weight:bold">Sold</h5>' }
+
+                            $('#BatchSerialList').dataTable().fnAddData([
+                                vv.Id,
+                                vv.DamageItemId,
+                                vv.ProductId,
+                                vv.BatchSerialNo,
+                                0,//vv.SLNo,//rowCountpl + 1,
+                                deletestring,
+                                false,
+                                vv.IsUsed,
+                                false,
+                                vv.PurchaseBatchId
+                            ]);
+
+                        });
+                        //BatchSerialList.draw();
+
+
+
+                        var rowid = finalrowid;
+
+
+
+                        $("#N" + rowid).autocomplete({
+                            source: function (request, response) {
+                                $.ajax({
+                                    url: '../admin/ProductSearch/',
+                                    dataType: "json",
+                                    data: { query: $("#N" + rowid).val() },
+                                    success: function (data) {
+                                        //console.log(data);
+                                        response($.map(data, function (item) {
+                                            return { ProductId: item.Id, Description: item.Description, label: item.Category.Name + ' ' + item.Name + ' ' + item.BrandName + ' ' + item.ModelName + ' ' + item.SizeName + ' ' + item.Description + ' ' + item.Code, CostPrice: item.CostPrice };
+                                        }));
+                                    },
+                                    error: function (xhr, status, error) {
+                                        alert("Error");
+                                    },
+                                });
+                            },
+                            minLength: 3,
+                            select: function (event, uirow) {
+                                $("#PI" + rowid).html(uirow.item.ProductId);
+                                //$("#WHI" + rowid).html(uirow.item.ProductId);
+
+                                $("#P" + rowid).val(uirow.item.CostPrice);
+                                $("#D" + rowid).val(uirow.item.Description);
+                                var quantity = $("#Q" + rowid).val();
+                                $("#A" + rowid).html(uirow.item.CostPrice * quantity);
+                                calculateSum();
+
+
+
+                            }
+
+                        });
+
+
+
+
+
+                        $("#D" + rowid).select2({
+                            minimumResultsForSearch: Infinity
+                        });
+
+
+                        $("#D" + rowid).empty();
+                        arr.length = 0;
+
+
+                        //alert($("#PI" + rowid).html());
+
+                        $.ajax({
+                            type: 'POST',
+                            url: '@Url.Action("ProductsBatchSerialMultiSelect", "Admin")',
+                            dataType: 'json',
+                            async: false,
+                            data: { ProductId: $("#PI" + rowid).html(), DamageId: $("#BtnSave").attr("data-Damage-Id") },
+                            success: function (data) {
+
+                                    $("#D" + rowid).select2({
+                                        data: data,
+                                        escapeMarkup: function(markup) {
+                                            return markup;
+                                        },
+                                        templateResult: function(data) {
+                                            return data.html;
+                                        },
+                                        templateSelection: function(data) {
+                                            return data.text;
+                                        }
+
+                                    })
+                            },
+                            error: function (ex) {
+                                alert('Failed.' + ex);
+                            }
+
+                        });
+
+                        console.log(v.SerialItemArray);
+                        $("#D" + rowid).val(v.SerialItemArray).change();//v.SerialItem
+                        //return false;
+
+
+
+
+
+                    });
+
+                    
+                    $("#AccountHead").val(res.AccountPayTypeId).change();
+                    //ReferanceOneinfohide();
+
+
+                    calculateSum();
+
+                    //$("#orderMasterId").val(res.result.MasterId);
+
+                }).fail(function (err) {
+                    console.log(err);
+                });
+            }
+            else {
+                var idGen = new Generator();
+                $('#Code').val(idGen.getId());
+
+            }
+
+
+                 if (DamageId == 0) {
+                     $(document).on('click', 'a.deleteItem', function (e) {
+                         e.preventDefault();
+                         var $self = $(this);
+                         $(this).parents('tr').css("background-color", "#1f306f").fadeOut(800, function () {
+                             $(this).remove();
+                             calculateSum();
+                         });
+                     });
+                 };
+
+
+             });
+
+
+
+
+        });
+
+        function Generator() { };
+        Generator.prototype.rand = Math.floor(Math.random() * 26) + Date.now();
+        Generator.prototype.getId = function () {
+            return this.rand++;
+        };
+
+
+        $('.mydatepicker').datepicker({
+            dateFormat: 'dd-M-yy',
+            todayHighlight: true,
+            autoclose: true
+        });
+
+        $('#DamageItems').on('change', ".quantity , .price", update);
+
+        function update() {
+
+            //alert('hit');
+            var qty = parseFloat($(this).parents('tr').find(".quantity").val());
+            var price = parseFloat($(this).parents('tr').find(".price").val());
+            var amount = qty * price;
+            $(this).parents('tr').find(".amount").text(amount);
+            calculateSum();
+        }
+
+
+
+        function generateRandom() {
+            const randomNum = 100000 + Math.random() * 100000;
+            return Math.round(randomNum / 10) * 10;
+        }
+        var finalrowid = 'N1234';
+
+        var IsSerialSales = '@HttpContextAccessor.HttpContext.Session.GetInt32("IsSerialSales").ToString()' == '1';
+        //var IsIndDiscount = '@HttpContextAccessor.HttpContext.Session.GetInt32("IsIndDiscount").ToString()' == '1';
+        var IsSalesDescription = '@HttpContextAccessor.HttpContext.Session.GetInt32("IsSalesDescription").ToString()' == '1';
+
+        var DamageItems = $('#DamageItems').DataTable({
+            dom: '<"dom_wrapper fh-fixedHeader"fl>tip',
+            'aoColumns': [
+                { 'sClass': 'id d-none', 'visible': true },
+                { 'sClass': 'productid d-none', 'visible': true },
+                { 'sClass': 'warehouseid d-none', 'visible': true },
+
+                { 'sClass': 'prdname_row', 'visible': true },
+                { 'sClass': 'description_row', 'visible': IsSerialSales },
+                { 'sClass': 'warehouse_row text-center', 'visible': true },
+
+                { 'sClass': 'price_row d-none', 'visible': true },
+                { 'sClass': 'quantity_row', 'visible': true },
+                { 'sClass': 'amount text-right d-none', 'visible': true },
+                null,
+                {
+                    "sClass": "checkbox d-none",
+                    "visible": true,
+                    "render": function () {
+                        return '<input type="checkbox" class="clickchk"  onchange ="cbChange(this)"  data-toggle="modal" data-target="#checkModal" >';
+                    }
+                },
+                { "sClass": "IsDelete d-none", "visible": true },
+                { "sClass": "IsTransaction d-none", "visible": true },
+                { 'sClass': 'textdescription_row', 'visible': IsSalesDescription }, //IsSalesDescription
+            ],
+            columnDefs: [
+                {
+                    'render': function (data, type, row) {
+                        return '<input class="prdname form-control" name="prdname" type="text" value="' + data + '" >';
+
+                    },
+                    'targets': 3
+                },
+                {
+                    "render": function (data, type, row) {
+                        //<input class="input-tags" type="text" data-role="tagsinput">
+                        //return '<input class="input-tags description form-control" name="description" type="text" data-val="true"  value="' + data + '">';
+                        return '<select class="description form-control" name="description" data-val="true" value="' + data + '" multiple = "multiple">';
+
+
+                    },
+                    "targets": 4
+                },
+                {
+                    'render': function (data, type, row) {
+                        return '<input class="form-control price text-center" name="price" type="number" data-val="true"  value="' + data + '"  autocomplete = "off" >';
+                    },
+                    'targets': 6
+                },
+                {
+                    "render": function (data, type, row) {
+
+                        return '<input class="form-control quantity text-center" name="quantity" type="number"   value="' + data + '"  autocomplete = "off"  >';
+                    },
+                    "targets": 7
+                },
+                {
+                    "render": function(data, type, row) {
+
+                        return '<input class="form-control textdescription text-center" name="textdescription" type="text"   value="' + data + '"  autocomplete = "off"  >';
+                    },
+                    "targets": 17
+                },
+            ],
+            "fnCreatedRow": function (nRow, aData, iDataIndex) {
+                var rowid = generateRandom();
+                //alert(aData);
+                $(nRow).attr('id', 'rowid' + rowid);
+                $('td:eq(1)', nRow).attr('id', 'PI' + rowid);
+                $('td:eq(2)', nRow).attr('id', 'WHI' + rowid);
+                $('td:eq(3)', nRow).find("input[name='prdname']").attr('id', 'N' + rowid);
+                $('td:eq(4)', nRow).find("select[name='description']").attr('id', 'D' + rowid);
+                $('td:eq(5)', nRow).find("input[name='warehouse']").attr('id', 'W' + rowid);
+                $('td:eq(6)', nRow).find("input[name='price']").attr('id', 'P' + rowid);
+                $('td:eq(7)', nRow).find("input[name='quantity']").attr('id', 'Q' + rowid);
+                $('td:eq(8)', nRow).attr('id', 'A' + rowid);
+                $('td:eq(12)', nRow).attr('id', 'T' + rowid);
+                $(nRow).find("input[name='textdescription']").attr('id', 'TD' + rowid);
+
+
+
+                finalrowid = rowid;
+
+
+                var serialrowid = "#D" + rowid;
+                //alert(serialrowid);
+                $(document).on('change', serialrowid, function () {
+
+                    var countlength = $(serialrowid + ' :selected').length;
+                      if (countlength > 0) {
+                    $("#Q" + rowid).val(countlength);
+
+                        var price = parseFloat($("#P" + rowid).val());
+                        var amount = countlength * price;
+                    //alert(amount);
+                    $("#A" + rowid).text(amount);
+                    $("#T" + rowid).text('True');
+                      }
+                        calculateSum();
+
+                });
+
+
+
+            },
+            'paging': false,
+            'info': false,
+            'ordering': false,
+            'searching': false,
+
+            language: { search: '', searchPlaceholder: "Search..." }
+        });
+
+    autocompletefunction();
+    function autocompletefunction() {
+        $("#Search").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '../admin/ProductSearchAvgCosting/',
+                    dataType: "json",
+                    data: { query: $("#Search").val() },
+                    success: function (data) {
+                        //console.log(data);
+                        response($.map(data, function (item) {
+                            //return { ProductId: item.Id, Description: item.Description, label: item.Name, CostPrice: item.CostPrice, Code: item.Code };
+                            return { ProductId: item.Id, Description: item.Description, ProductName: item.Name + ' ' + item.Description  ,  label: item.Category.Name + ' ' + item.Name + ' ' + item.Description + ' ' + item.Code, CostPrice: item.CostPrice, WarehouseList: item.WarehouseList };
+                        }));
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error");
+                    },
+                });
+            },
+            autoFocus: true,
+            minLength: 3,
+            select: function (event, ui) {
+
+
+                var duplicatefound = 0;
+
+                $('#DamageItems tbody tr').each(function () {
+
+
+                    if ($.trim($(this).find('.ProductId').text()) == ui.item.ProductId) {
+                        //alert('Duplicate Found !!');
+                        toastr.error('Duplicate Found !! ' + ui.item.label);
+                        return true;
+                    }
+
+                });
+
+
+                if (duplicatefound == 0) {
+
+                    newrowwithui(ui);
+
+                }
+
+                calculateSum();
+                $('#Search').val("");
+
+
+                return false;
+            }
+        }).autocomplete("instance")._renderItem = function(ul, item) {
+
+                var trs = '';
+                console.log(item.WarehouseList);
+                if (item.WarehouseList.length > 0) {
+
+                    trs = '<p class="text-sm-left font-italic" style="font-size:12px"> Stock : ';
+                    $.each($(item.WarehouseList), function(key, value) {
+                        // alert('found');
+                        trs += '[ ' + item.WarehouseList[key].WhShortName + ' - ' + item.WarehouseList[key].CurrentStock + ' ]   - Cost :' + item.WarehouseList[key].AverageCosting + '  ';
+                    })
+
+                    trs += '</p>';
+                }
+
+                return $("<li>")
+                    .append("<div class=m-0>" + item.label + item.Description + trs + "</div>")
+                    .appendTo(ul);
+            };
+    }
+
+
+
+
+
+    autocompletefunctionBarcodeScan();
+    function autocompletefunctionBarcodeScan() {
+        $("#SearchSerial").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '../admin/ProductsSerialSearchByBarcode/',
+                    dataType: "json",
+                    data: { query: $("#SearchSerial").val() },
+                    success: function (data) {
+                        //console.log(data);
+                        response($.map(data, function (item) {
+                            return { SerialId: item.Id, ProductId: item.ProductId, label: item.BatchSerialNo + ' ' + item.ProductName, ProductName: item.ProductName, Description: item.Descriptionm, BatchSerialNo: item.BatchSerialNo, CostPrice: item.CostPrice };
+                        }));
+
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error");
+                    },
+                });
+            },
+            response: function (event, ui) {
+
+                    var len = $('.ui-autocomplete > li').length;
+                    console.log(len);
+                    if (len == "1") {
+
+                        var downKeyEvent = $.Event("keydown");
+                        downKeyEvent.keyCode = $.ui.keyCode.DOWN; // event for pressing "down" key
+
+                        var enterKeyEvent = $.Event("keydown");
+                        enterKeyEvent.keyCode = $.ui.keyCode.ENTER; // event for pressing "enter" key
+                        ////alert('found');
+
+                        ////$("#SearchSerial").val("SSD20"); // enter text to trigger autocomplete
+                        $("#SearchSerial").trigger(downKeyEvent); // First downkey invokes search
+                        $("#SearchSerial").trigger(downKeyEvent); // Second downkey highlights first item
+
+
+                        $("#SearchSerial").trigger(enterKeyEvent); // Enter key selects
+                    }
+
+            },
+            autoFocus: true,
+            focus: function (event, ui) { event.preventDefault(); },
+            minLength: 0,
+            select: function (event, ui) {
+
+
+                var duplicatefound = 0;
+
+                $('#DamageItems tbody tr').each(function () {
+                    if ($.trim($(this).find('.ProductId').text()) == ui.item.ProductId) {
+                        //alert('Duplicate Found !!');
+                        //toastr.warning('Product Already Included Here !! ' + ui.item.label);
+
+                        var array = $(this).find('.description').val();
+                        var quantityval = $(this).find('.quantity').val();
+
+
+                        $(this).find('.IsTransaction').val(true);
+
+                        var serialtextboxid = $(this).find('.description').attr('id');
+                        var quantityid = $(this).find('.quantity ').attr('id');
+
+                        //alert(serialtextboxid);
+
+
+                        $.each(array, function (key, value) {
+                            //alert(ui.item.SerialId);
+                            //alert(key + ": " + value);
+
+                            if (value == ui.item.SerialId) {
+                                toastr.error('Dupliacte Serial Found !! ' + ui.item.label);
+
+                            }
+                            else {
+
+
+                                array.push(ui.item.SerialId.toString());
+
+
+                                $("#" + serialtextboxid).val(array).trigger('change');
+
+                                return true;
+
+                            }
+
+
+                        });
+
+                        duplicatefound = 1;
+                        return true;
+                    }
+
+                });
+
+
+                if (duplicatefound == 0) {
+                    newrowwithuiBarcode(ui);
+                }
+
+
+
+
+
+                //newrowwithuiBarcode(ui);
+
+                calculateSum();
+                $('#SearchSerial').val("");
+
+
+                return false;
+            }
+        }).on("focus", function () {
+            if ($("#SearchSerial").val().length > 0)
+            {
+                $(this).autocomplete("search", '');
+
+            };
+      
+        });
+    }
+
+
+
+    autocompletefunctionSearchManually();
+
+    function autocompletefunctionSearchManually() {
+        $("#SearchSerial").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '../admin/ProductsSerialSearchByBarcode/',
+                    dataType: "json",
+                    data: { query: $("#SearchSerial").val() },
+                    success: function (data) {
+                        //console.log(data);
+                        response($.map(data, function (item) {
+                            return { SerialId: item.Id, ProductId: item.ProductId, label: item.BatchSerialNo + ' ' + item.ProductName, ProductName: item.ProductName, Description: item.Descriptionm, BatchSerialNo: item.BatchSerialNo, CostPrice: item.CostPrice };
+                        }));
+
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error");
+                    },
+                });
+            },
+            autoFocus: true,
+            focus: function (event, ui) { event.preventDefault(); },
+            minLength: 0,
+            select: function (event, ui) {
+
+
+                var duplicatefound = 0;
+
+                $('#DamageItems tbody tr').each(function () {
+                    if ($.trim($(this).find('.ProductId').text()) == ui.item.ProductId) {
+                        //alert('Duplicate Found !!');
+                        //toastr.warning('Product Already Included Here !! ' + ui.item.label);
+
+                        var array = $(this).find('.description').val();
+                        var quantityval = $(this).find('.quantity').val();
+
+
+                        $(this).find('.IsTransaction').val(true);
+
+                        var serialtextboxid = $(this).find('.description').attr('id');
+                        var quantityid = $(this).find('.quantity ').attr('id');
+
+                        //alert(serialtextboxid);
+
+
+                        $.each(array, function (key, value) {
+                            //alert(ui.item.SerialId);
+                            //alert(key + ": " + value);
+
+                            if (value == ui.item.SerialId) {
+                                toastr.error('Dupliacte Serial Found !! ' + ui.item.label);
+
+                            }
+                            else {
+
+
+                                array.push(ui.item.SerialId.toString());
+
+
+                                $("#" + serialtextboxid).val(array).trigger('change');
+
+                                return true;
+
+                            }
+
+
+                        });
+
+                        duplicatefound = 1;
+                        return true;
+                    }
+
+                });
+
+
+                if (duplicatefound == 0) {
+                    newrowwithuiBarcode(ui);
+                }
+
+                calculateSum();
+                $('#SearchSerial').val("");
+
+
+                return false;
+            }
+        }).on("focus", function () {
+            if ($("#SearchSerial").val().length > 0) {
+                $(this).autocomplete("search", '');
+
+            };
+
+        });
+    }
+
+
+
+
+    autocompleteSerialSearchfunction();
+
+    function autocompleteSerialSearchfunction() {
+        
+
+
+        $("#slnoSearch").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '../admin/ProductsBatchSerial/',
+                    dataType: "json",
+                    data: { query: $("#slnoSearch").val(), ProductId: ProductId },
+                    success: function (data) {
+                        //console.log(data);
+                        //alert(data);
+                        response($.map(data, function (item) {
+                            //return { ProductId: item.Id, Description: item.Description, label: item.Name, CostPrice: item.CostPrice, Code: item.Code };
+                            return { BatchSerialId: item.Id, label: item.BatchSerialNo };
+                        }));
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error");
+                    },
+                });
+            },
+            autoFocus: true,
+            minLength: 3,
+            select: function (event, ui) {
+
+                var duplicatefound = 0;
+
+                $('#BatchSerialList tbody tr').each(function () {
+                    if ($(this).find('.BatchSerialNo').val() == ui.item.label) {
+                        //alert('Duplicate Found !!');
+                        toastr.error('Duplicate Found !! ' + ui.item.label);
+                        duplicatefound = 1;
+                        return true;
+                    }
+
+                });
+
+
+                if (duplicatefound == 0) {
+                    $('#BatchSerialList').dataTable().fnAddData([
+                        0,
+                        DamageItemId,
+                        ProductId,
+                        ui.item.label,
+                        0,//rowCountpl + 1,
+                        '<a data-itemId="0" href="#" class="dlttrash deleteItem"> <i class="fa fa-trash"></i></a >',
+                        false,
+                        false,
+                        true,
+                        ui.item.BatchSerialId
+                    ]);
+
+                }
+
+
+                var targetTablepl = $("#BatchSerialList").DataTable();
+
+                var xcount = targetTablepl.rows(':visible').count();
+                //alert(xcount);
+                var table = $('#DamageItems').DataTable();
+                //var datacurrentvalue = table.row($('input[type=checkbox]:checked').parents('tr')).data();
+                var rownovouchersub = table.row($('input[type=checkbox]:checked').parents('tr')).index();
+                //alert(rownovouchersub);
+
+                var cellprice  = $('#DamageItems tbody tr').filter(':has(:checkbox:checked)').find('.price').val();
+                console.log(cellprice);
+                //cellprice.data(xcount);
+
+                var cellqty = table.cell(rownovouchersub, 7);
+                cellqty.data(xcount);
+                var cellamount = table.cell(rownovouchersub, 8);
+                cellamount.data(xcount * cellprice);
+
+
+
+                //update();
+
+                calculateSum();
+
+
+                $('#slnoSearch').val("");
+                $('#slnoSearch').text("");
+
+
+                return false;
+
+                //calculateSum();
+
+
+            }
+        });
+    }
+
+
+
+
+
+
+        var DamageItemId;
+        var ProductId;
+
+        var newDetailsId;
+        var newOrderNo;
+        var newUnitPrice;
+
+
+
+        function cbChange(obj) {
+            //calculateQtyBatch();
+
+            var cbs = document.getElementsByClassName("clickchk");
+            for (var i = 0; i < cbs.length; i++) {
+                cbs[i].checked = false;
+            }
+            obj.checked = true;
+            //alert('hit');
+            //console.log(obj);
+
+
+            var table = $('#DamageItems').DataTable();
+            //var tableserial = $('#tblserial').DataTable();
+            var data = null;
+
+            if (obj.checked == true) {
+                //alert('working');
+                //table = $('#tbl').DataTable();
+                //table.draw();
+
+                data = table.row($('input[type=checkbox]:checked').parents('tr')).data();
+
+                DamageItemId = data[0];
+                ProductId = data[1];
+
+
+
+
+                $('#BatchSerialList tbody tr').show();
+                //alert('working');
+                $('#BatchSerialList tbody tr').each(function () {
+                    //$(this).hide();
+
+                    //alert($.trim($(this).find('.IsDelete').text()));
+
+
+                    if ($.trim($(this).find('.ProductId').text()) == ProductId && $.trim($(this).find('.IsDelete').text()) == 'false') { // if V is selected, hide
+                        //  alert('found');
+                        $(this).show();
+                    }
+                    else {
+                        $(this).hide();
+                    }
+                });
+
+
+                var targetTablepl = $("#BatchSerialList").DataTable();
+
+                var xcount = targetTablepl.rows(':visible').count();
+                //alert(xcount);
+                var table = $('#DamageItems').DataTable();
+                //var datacurrentvalue = table.row($('input[type=checkbox]:checked').parents('tr')).data();
+                var rownovouchersub = table.row($('input[type=checkbox]:checked').parents('tr')).index();
+                //alert(rownovouchersub);
+
+                var cellprice  = $('#DamageItems tbody tr').filter(':has(:checkbox:checked)').find('.price').val();
+                console.log(cellprice.data());
+                //cellprice.data(xcount);
+
+                var cellqty = table.cell(rownovouchersub, 7);
+                cellqty.data(xcount);
+                var cellamount = table.cell(rownovouchersub, 8);
+                cellamount.data(xcount * cellprice);
+
+                calculateSum();
+
+
+            }
+            else {
+                // alert('You Un-Checked it');
+            }
+
+        }
+
+        function newblankrow() {
+
+
+            var rowid = generateRandom();
+            $('#DamageItems').dataTable().fnAddData(['0', 0, "", '', "", 0, '0', 0, '<a data-itemId="0" href="#" class="dlttrashsubsection deleteItem"> <i class="fa fa-trash"></i></a>', null, false, true,""]);
+
+            rowid = finalrowid;
+            $("#N" + rowid).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '../admin/ProductSearchAvgCosting/',
+                        dataType: "json",
+                        data: { query: $("#N" + rowid).val() },
+                        //data: { query: prdnametest },
+
+                        success: function (data) {
+                            //console.log(data);
+                            response($.map(data, function (item) {
+                                //return { ProductId: item.Id, Description: item.Description, label: item.Name, CostPrice: item.CostPrice, Code: item.Code };
+                                return { ProductId: item.Id, Description: item.Description, label: item.Category.Name + ' ' + item.Name + ' ' + item.Description + ' ' + item.Code, CostPrice: item.CostPrice, WarehouseList: item.WarehouseList };
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                minLength: 3,
+                select: function (event, uirow) {
+
+
+                    //alert("#P" + rowid);
+                    $("#PI" + rowid).html(uirow.item.ProductId);
+                    //alert('hit');
+                    $("#D" + rowid).val(uirow.item.Description);
+
+                    $("#P" + rowid).val(uirow.item.CostPrice);
+
+                    var quantity = $("#Q" + rowid).val();
+
+                    $("#A" + rowid).html(uirow.item.CostPrice * quantity);
+
+
+                }
+            }).autocomplete("instance")._renderItem = function(ul, item) {
+
+                            var trs = '';
+                            console.log(item.WarehouseList);
+                            if (item.WarehouseList.length > 0) {
+
+                                trs = '<p class="text-sm-left font-italic" style="font-size:12px"> Stock : ';
+                                $.each($(item.WarehouseList), function(key, value) {
+                                    // alert('found');
+                                    trs += '[ ' + item.WarehouseList[key].WhShortName + ' - ' + item.WarehouseList[key].CurrentStock + ' ]   - Cost :' + item.WarehouseList[key].AverageCosting + '  ';
+                                })
+
+                                trs += '</p>';
+                            }
+
+                            return $("<li>")
+                                .append("<div class=m-0>" + item.label + item.Description + trs + "</div>")
+                                .appendTo(ul);
+                        };
+
+
+
+
+        }
+
+
+        function newrowwithui(ui) {
+
+
+            var rowid = generateRandom();
+
+            $('#DamageItems').dataTable().fnAddData(['0', ui.item.ProductId, $("#Warehouse").val(), ui.item.ProductName, ui.item.Description, $('#Warehouse option:selected').text(), ui.item.CostPrice, '1', ui.item.CostPrice, '<a data-itemId="0" href="#" class="dlttrashsubsection deleteItem"> <i class="fa fa-trash"></i></a>',null, false, true,""]);
+
+            rowid = finalrowid;
+
+            $("#N" + rowid).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '../admin/ProductSearchAvgCosting/',
+                        dataType: "json",
+                        data: { query: $("#N" + rowid).val() },
+                        //data: { query: prdnametest },
+
+                        success: function (data) {
+                            //console.log(data);
+                            response($.map(data, function (item) {
+                                //return { ProductId: item.Id, Description: item.Description, label: item.Name, CostPrice: item.CostPrice, Code: item.Code };
+                                return { ProductId: item.Id, Description: item.Description, label: item.Category.Name + ' ' + item.Name + ' ' + item.Description + ' ' + item.Code, CostPrice: item.CostPrice,  WarehouseList: item.WarehouseList  };
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                minLength: 3,
+                autoFocus: true,
+                select: function (event, uirow) {
+
+                    //alert('hit');
+                    //alert(rowid);
+
+                    //alert("#P" + rowid);
+                    $("#PI" + rowid).html(uirow.item.ProductId);
+                    $("#D" + rowid).val(uirow.item.Description);
+                    $("#P" + rowid).val(uirow.item.CostPrice);
+                    var quantity = $("#Q" + rowid).val();
+                    $("#A" + rowid).html(uirow.item.CostPrice * quantity);
+                    
+                    $("#D" + rowid).empty();
+                    $("#D" + rowid).val(null);
+                    //$("#D" + rowid).select2();
+
+                    //arr.length = 0;
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("ProductsBatchSerialMultiSelect", "Admin")',
+                        dataType: 'json',
+                        async: false,
+                        data: { ProductId: $("#PI" + rowid).html()  },
+                        success: function (data) {
+                            
+                            $("#D" + rowid).select2({
+                                data: data,
+                                escapeMarkup: function(markup) {
+                                    return markup;
+                                },
+                                templateResult: function(data) {
+                                    return data.html;
+                                },
+                                templateSelection: function(data) {
+                                    return data.text;
+                                }
+
+                            })
+                        },
+                        error: function (ex) {
+                            alert('Failed.' + ex);
+                        }
+
+                    });
+
+                }
+            }).autocomplete("instance")._renderItem = function(ul, item) {
+
+                var trs = '';
+                console.log(item.WarehouseList);
+                if (item.WarehouseList.length > 0) {
+
+                    trs = '<p class="text-sm-left font-italic" style="font-size:12px"> Stock : ';
+                    $.each($(item.WarehouseList), function(key, value) {
+                        // alert('found');
+                        trs += '[ ' + item.WarehouseList[key].WhShortName + ' - ' + item.WarehouseList[key].CurrentStock + ' ]   - Cost :' + item.WarehouseList[key].AverageCosting + '  ';
+                    })
+
+                    trs += '</p>';
+                }
+
+                return $("<li>")
+                    .append("<div class=m-0>" + item.label + item.Description + trs + "</div>")
+                    .appendTo(ul);
+            };;
+
+
+
+
+            var stringarray = [""];
+            var arr = [];
+
+            var arr_pincode = {};//JSON.parse(`{"24":[${stringarray}]}`);
+           
+            $("#D" + rowid).select2({
+                minimumResultsForSearch: Infinity
+            });
+
+
+            $("#D" + rowid).empty();
+            arr.length = 0;
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("ProductsBatchSerialMultiSelect", "Admin")',
+                dataType: 'json',
+                async: false,
+                data: { ProductId: $("#PI" + rowid).html()  },
+                success: function (data) {
+
+
+                    $("#D" + rowid).select2({
+                        data: data,
+                        escapeMarkup: function(markup) {
+                            return markup;
+                        },
+                        templateResult: function(data) {
+                            return data.html;
+                        },
+                        templateSelection: function(data) {
+                            return data.text;
+                        }
+
+                    });
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+            return false;
+        };
+
+
+            function newrowwithuiBarcode(ui) {
+
+            var rowid = generateRandom();
+            $('#DamageItems').dataTable().fnAddData(['0', ui.item.ProductId, $("#Warehouse").val(), ui.item.ProductName, ui.item.Description, $('#Warehouse option:selected').text(), ui.item.CostPrice, '1', ui.item.CostPrice, '<a data-itemId="0" href="#" class="dlttrashsubsection deleteItem"> <i class="fa fa-trash"></i></a>',null, false, true,""]);
+
+            rowid = finalrowid;
+
+            $("#N" + rowid).autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '../admin/ProductSearch/',
+                        dataType: "json",
+                        data: { query: $("#N" + rowid).val() },
+                        //data: { query: prdnametest },
+
+                        success: function (data) {
+                            //console.log(data);
+                            response($.map(data, function (item) {
+                                //return { ProductId: item.Id, Description: item.Description, label: item.Name, CostPrice: item.CostPrice, Code: item.Code };
+                                return { ProductId: item.Id, Description: item.Description, label: item.Category.Name + ' ' + item.Name + ' ' + item.Description + ' ' + item.Code, CostPrice: item.CostPrice };
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                minLength: 3,
+                autoFocus: true,
+                select: function (event, uirow) {
+
+                    //alert("#P" + rowid);
+                    $("#PI" + rowid).html(uirow.item.ProductId);
+                    $("#D" + rowid).val(uirow.item.Description);
+                    $("#P" + rowid).val(uirow.item.CostPrice);
+                    var quantity = $("#Q" + rowid).val();
+                    $("#A" + rowid).html(uirow.item.Price * quantity);
+                    //newblankrow();
+
+                    //alert(rowid);
+
+
+                    $("#D" + rowid).empty();
+                    $("#D" + rowid).val(null);
+                    //$("#D" + rowid).select2();
+
+                    //arr.length = 0;
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("ProductsBatchSerialMultiSelect", "Admin")',
+                        dataType: 'json',
+                        async: false,
+                        data: { ProductId: $("#PI" + rowid).html()  },
+                        success: function (data) {
+
+                            $("#D" + rowid).select2({
+                                data: data,
+                                escapeMarkup: function(markup) {
+                                    return markup;
+                                },
+                                templateResult: function(data) {
+                                    return data.html;
+                                },
+                                templateSelection: function(data) {
+                                    return data.text;
+                                }
+
+                            })
+                        },
+                        error: function (ex) {
+                            alert('Failed.' + ex);
+                        }
+
+                    });
+
+                }
+            });
+
+
+
+
+            var stringarray = [""];
+            var arr = [];
+
+            var arr_pincode = {};//JSON.parse(`{"24":[${stringarray}]}`);
+            
+
+            $("#D" + rowid).select2({
+                minimumResultsForSearch: Infinity
+            });
+
+
+            $("#D" + rowid).empty();
+            arr.length = 0;
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("ProductsBatchSerialMultiSelect", "Admin")',
+                dataType: 'json',
+                async: false,
+                data: { ProductId: $("#PI" + rowid).html()  },
+                success: function (data) {
+                    //console.log(data);
+
+                    $("#D" + rowid).select2({
+                        data: data,
+                        escapeMarkup: function(markup) {
+                            return markup;
+                        },
+                        templateResult: function(data) {
+                            return data.html;
+                        },
+                        templateSelection: function(data) {
+                            return data.text;
+                        }
+
+                    })
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+
+                $("#D" + rowid).val(ui.item.SerialId);
+                            $("#D" + rowid).change();
+            return false;
+        };
+
+
+
+
+
+        function calculateSum() {
+            var sum = 0;
+            var sumQty = 0;
+
+         
+
+            $("#DamageItems > tbody  > tr .amount:visible").each(function () {
+
+                //var value = parseInt($(this).find('.amount').val());// $('.amount', this).text().replace(/[\$,]/g, '');//$(this).text();
+                var value = $(this).text();
+
+                //alert(value)
+                // add only if the value is number
+                if (!isNaN(value) && value.length !== 0) {
+                    sum += parseFloat(value);
+                }
+            });
+
+
+
+            $.each($("#BatchSerialList tbody tr"), function () {
+
+                var Quantity = parseInt($(this).find('.SLNo').val());
+                if (!isNaN(Quantity) && Quantity.length !== 0) {
+                    sumQty++;
+                }
+            });
+
+
+            $.each($("#DamageItems tbody tr"), function () {
+
+                var Quantity = parseInt($(this).find('.quantity').val());
+                if (!isNaN(Quantity) && Quantity.length !== 0) {
+                    sumQty += parseFloat(Quantity);
+                }
+            });
+
+
+            //console.log(sum);
+            $('#SubTotal').text(sum.toFixed(2));
+            //$('#GrandTotal').val(sum.toFixed(2));
+
+            $('#TotalQty').text(sumQty.toFixed(2));
+
+
+
+
+           // console.log(grandtotal);
+        };
+
+     
+
+        function saveOrder(data) {
+
+            //alert('Fahad found Damage');
+            //console.log(data);
+            return $.ajax({
+                contentType: 'application/json; charset=utf-8',
+                //contentType: "application/json",
+                dataType: 'json',
+                type: 'POST',
+                url: "../Damage/AddDamage",
+                data: data
+            });
+        }
+
+        $("#BtnSave").click(function (e) {
+            e.preventDefault();
+
+            if (submitValidation()) {
+
+
+                var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+                var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+
+
+                var orderArr = [];
+                orderArr.length = 0;
+                var i = 0
+                $.each($("#DamageItems tbody tr"), function () {
+                  
+
+                    var array = $(this).find('.description').val();
+                    var stringtext = $(this).find('.description option:selected').text();
+                    
+
+
+                    var option_all = $(this).find('.description option:selected').map(function () {
+                        return $(this).text();
+                    }).get().join(',');
+                    console.log(option_all);
+                    //$('#result').text(option_all);
+
+
+                    var arraytext = option_all.split(",");
+
+                    //$.each(arraytext, function (i) {
+                    //    alert(arraytext[i]);
+                    //});
+
+                    var firstDamageitemid = $(this).find('td:eq(0)').html();
+                    var firstproductid = $(this).find('td:eq(1)').html();
+
+
+                    var orderbatchArr = [];
+                    orderbatchArr.length = 0;
+
+                    console.log(array);
+                    //alert('Wait for array');
+
+                    $.each(array, function (i) {
+
+
+                        orderbatchArr.push({
+                            Id: 0,
+                            DamageItemId: firstDamageitemid,
+                            ProductId: firstproductid,
+                            BatchSerialNo: arraytext[i],
+                            SLNo: 0,
+                            IsDelete: false,
+                            IsUsed: false,
+                            IsTransaction: false,
+                            ComId: ComId,
+                            PurchaseBatchId: array[i]
+                        });
+
+
+                    });
+
+                    //alert($(this).find('td:eq(11)').html());
+                    //alert($(this).find('.quantity').val());
+                    orderArr.push({
+
+                        Id: $(this).find('td:eq(0)').html(),
+                        ProductId: $(this).find('td:eq(1)').html(),
+                        DamageId: parseInt($("#BtnSave").attr("data-Damage-Id")),
+                        WarehouseId: $(this).find('td:eq(2)').html(), //$('#Warehouse option:selected').text()
+                        //Name: $(this).find('td:eq(2)').html(),
+                        Name: $(this).find('.prdname').val(),
+                        //Description: $(this).find('.description').val(),
+                        Price: $(this).find('.price').val(),
+
+                        //CostPrice: parseFloat($(this).find('td:eq(4)').html()),
+                        Quantity: parseFloat($(this).find('.quantity').val()),
+                        Amount: parseFloat($(this).find('td:eq(8)').html()),
+                        BatchSerialItems: orderbatchArr,
+                        SerialItem: array.toString(),
+                        IsDelete: $(this).find('td:eq(11)').html(),
+                        IsTransaction: $(this).find('td:eq(12)').html(),
+                        ComId: ComId
+                        //SerialItem: $(this).find('.description').val()
+                    });
+                });
+
+
+                var data = JSON.stringify({
+                    Id: parseInt($("#BtnSave").attr("data-Damage-Id")),
+                   
+                    WarehouseIdMain: $("#Warehouse").val(),
+
+                    ReferanceOne: $("#ReferanceOne").val(),
+                    InternetUserId: $("#InternetUserId").val(), 
+
+                    
+                    ReferanceTwo: $("#ReferanceTwo").val(),
+
+                    DamageCode: $("#Code").val(),
+                    DamageDate: $("#Date").val(),
+                    Total: parseFloat($("#SubTotal").text()),
+                    Notes: $("#Notes").val(),
+                    isSerialDamage: 'True',
+
+
+                    Items: orderArr
+                });
+
+                //console.log(data);
+                //alert('Wait');
+                $.when(saveOrder(data)).then(function (response) {
+                    console.log(response);
+                    location.href = "../Damage/index";
+                }).fail(function (err) {
+
+                });
+            }
+        });
+
+                                </script>
+                            }
+

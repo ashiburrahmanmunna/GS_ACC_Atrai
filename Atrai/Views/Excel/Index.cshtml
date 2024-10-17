@@ -1,0 +1,157 @@
+﻿@model List<string>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<h1>Index</h1>
+
+
+<div id="jsGridExcel">
+  @*  <table class="table table-striped table-bordered" style="width:100%;">
+        <thead>
+            <tr>
+                <th>Column</th>
+                <th>Excel Column</th>
+                <th>Default Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var obj in Model)
+            {
+                <tr>
+                    <td>@obj</td>
+                    <td>
+                       
+                           <select class="form-select select2me select-option" id="CountryId"
+                                    aria-label="Floating label select example">
+                            </select>
+                       
+                    </td>
+                </tr>
+
+            }
+
+        </tbody>
+    </table>*@
+  @*  @foreach(var c in Model)
+    {
+        <p>@c</p>
+    }*@
+
+</div>
+
+
+@section Scripts{
+    <script type="text/javascript">
+            $(document).ready(function() {
+
+
+          
+           
+
+            //$.ajax({
+            //    method: "get",
+            //    async: false,
+            //    url: '@Url.Action("GetCurrencyDropdown", "Admin")',
+            //    //  data: { VoucherType: "Cash Payment" },
+
+            //    success: function (data) {
+
+
+
+            //        const select = document.querySelector('#CountryId');
+            //        for (var i = 0; i < data.length; i++) {
+            //            HeadAccountList = {
+            //                Value: parseInt(data[i].Value),
+            //                Text: data[i].Text
+            //            };
+            //            ExcellIST.push(HeadAccountList);
+                        
+            //        }
+            //    }
+            //});
+
+            var ExcellIST = [
+                { Text: "please select", Value: "0" },
+                { Text: "SLNo.", Value: "1" },
+                { Text: "Account Id", Value: "2" },
+                { Text: "Account Name", Value: "3" },
+                { Text: "Balance", Value: "4" },
+                { Text: "Type", Value: "5" },
+                { Text: "Date", Value: "6" }
+
+            ];
+
+            var length=0;
+                $('#jsGridExcel').jsGrid({
+                width: "100%",
+                height: "auto",
+               
+                editing: true,
+                autoload: true,
+                pageSize: 3,
+                pageLoading: true,
+                pageIndex: 1,
+                paging: true,
+                controller: {
+                    loadData: function (filter) {
+                        console.log(filter);
+                        var d = $.Deferred();
+                        $.ajax({
+                            type: "GET",
+                            url: '@Url.Action("GetDataMappingList", "Excel")',
+
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json"
+                        })
+
+                            .done(function (result) {
+                                console.log(result);
+                                d.resolve(result);
+                            });
+                        return d.promise().then(function (q) {
+
+                            length=q.length;
+                            return {
+
+                                data: q
+                               
+                            }
+                        });
+                    }
+                },
+                fields: [
+                    { name: "AtraiColumn", title: 'Atrai Column' },
+                    { name: "ExcelColumn", title: 'Excel Column', type: 'select', items: ExcellIST, valueField: "Value", textField: "Text" },
+                    { name: "DefaultValues", title: 'Default Values', type:'text' },
+                    { type: "control", width: '80', title: 'Action' },
+                   
+                ],
+                onItemEditing: function(args){
+                   
+                   
+                },
+                onItemUpdated: function(args){
+                    if (args.item.ExcelColumn == '6' && args.item.AtraiColumn == 'OP_Date') {
+                        args.item.DefaultValues = 'mm/dd/yyy';
+                        $('#jsGridExcel').jsGrid('refresh');
+
+                    }
+                    if ((args.item.ExcelColumn == '6' && args.item.AtraiColumn == 'OP_Date') || (args.item.ExcelColumn == '3' && args.item.AtraiColumn == "AccName") || (args.item.ExcelColumn == '2' && args.item.AtraiColumn == 'AccId') || (args.item.ExcelColumn == '4' && args.item.AtraiColumn == 'OP_Balance')||(args.item.ExcelColumn == '5' && args.item.AtraiColumn == "Type")) {
+                        args.cancel = false;
+                        
+                    }
+                    else
+                    {
+                        args.cancel=true;
+                        alert('Excel Column and Atrai Column not same');
+                        $("#jsGridExcel").jsGrid("editItem", args.item);
+                    }
+                  
+                }
+            });
+
+            })
+    </script>
+}

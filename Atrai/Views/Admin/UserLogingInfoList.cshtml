@@ -1,0 +1,128 @@
+﻿@*@model IEnumerable<Atrai.Model.Core.Entity.Loging InfoModel>*@
+@{ ViewData["Title"] = "Loging Information";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="color: #1976d2;">Loging Info List</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="d-flex justify-content-end">
+                            <button title="Print" class="btn btn-white border-0" type="button" id="print-pdf" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                <i class="bi bi-printer fs-5"></i>
+                            </button>
+                            <button title="Export to excel" class="btn btn-white border-0" type="button" id="print-excel" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                <i class="bi bi-file-earmark-excel fs-5"></i>
+                            </button>
+
+
+                        </div>
+                        <div id="tbllist">
+
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.3.0/js/tabulator.min.js"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+    <script type="text/javascript">
+        var globalfields = [
+
+                                { title: "Id", field: "Id", visible: false },
+                                { title: "WebLink", field: "WebLink", headerHozAlign: "center" },
+
+                                { title: "Status", field: "Status", headerHozAlign: "center" },
+                                { title: "LongString", field: "LongString", headerHozAlign: "center" },
+                                { title: "LoginTime", field: "LoginTime", headerHozAlign: "center" },
+                                { title: "IPAddress", field: "IPAddress", headerHozAlign: "center" },
+
+                                { title: "DeviceType", field: "DeviceType", headerHozAlign: "center" },
+                                { title: "Platform", field: "Platform", headerHozAlign: "center"},
+                                { title: "WebBrowserName", field: "WebBrowserName", headerHozAlign: "center"},
+                                { title: "UserName", field: "UserName", headerHozAlign: "center" },
+                                { title: "CompanyName", field: "CompanyName", headerHozAlign: "center" }
+
+
+                            ];
+                $(function () {
+                        var apiUrl = '@Url.Action("GetUserLogingInfoListTbltr", "Admin")';
+
+                        var parentTable = new Tabulator("#tbllist", {
+                            layout: "fitColumns",
+                            height: "fitDataFill",
+                            selectable: 1,
+                            pagination: true,
+                            scrollHorizontal: true,
+                            paginationMode: "remote",
+                            paginationSize: 5,
+                            paginationInitialPage: 1,
+                            paginationSizeSelector: [5, 10, 25, 50, 100, true],
+                            paginationCounter: "rows",
+                            columnDefaults: {
+                                resizable: true,
+                            },
+                            ajaxURL: apiUrl,
+                            ajaxConfig: "get",
+                            ajaxContentType: "json",
+                            ajaxResponse: function (url, params, response) {
+                                console.log("Response URL:", url);
+                                console.log("Response Params:", params);
+                                console.log("Response Data:", response.data);
+                                console.log("Last Page:", response.last_page);
+                                console.log("Total Records:", response.total);
+
+                                return {
+                                    data: response.data,
+                                    last_page: response.last_page,
+                                    total: response.total
+                                };
+                            },
+                            columns: globalfields,
+                        });
+
+                        parentTable.on("rowClick", function (e, row) {
+                            console.log("Row clicked: ", row.getData());
+                        });
+                        document.getElementById("print-pdf").addEventListener("click", function () {
+                            parentTable.print(false, true);
+                        });
+                        document.getElementById("print-excel").addEventListener("click", function () {
+                            parentTable.download("xlsx", "table.xlsx", { sheetName: "Table Data" });
+                        });
+                    });
+
+
+        $(document).ready(function () {
+            // var table = $('#tbllist').DataTable();
+
+            // $('#size').on('change', function () {
+            //     $('#tbllist').css({
+            //         'font-size': this.value + 'em',
+            //         'line-height': this.value + 'em'
+            //     });
+            // });
+        });
+
+    </script>
+}

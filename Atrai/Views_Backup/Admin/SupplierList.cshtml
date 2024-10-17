@@ -1,0 +1,484 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@*@model IEnumerable<Atrai.Core.Entity.SupplierModel>*@
+@{ ViewData["Title"] = "Supplier List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                                 @Html.Hidden("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+                                @Html.Hidden("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+
+
+                    <div class="card-header">
+                                   <div class="row">
+
+                            <div class="col-md-2 col-12">
+                               <h4 class="text-primary">Supplier List</h4>
+                            </div>
+               
+                           
+
+                            <div class="col-md-2 col-12">
+                                @Html.ActionLink("Add Supplier", "AddSupplier", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+
+                                                        <div class="col-md-3 col-12">
+                                <a class="btn btn-block btn-sm rounded-0 btn-purple mb-1" href="Download?file=SupplierSample.xlsx" target="_blank">Download Sample</a>
+                            </div>
+
+
+                             <div class="col-md-3 col-12">
+                                <form id="myform" method="post" enctype="multipart/form-data" asp-action="UploadFilesSupplier" asp-controller="Admin">
+
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-btn input-group-prepend">
+                                            <span class="btn btn-primary rounded-0" onclick="$(this).parent().find('input[type=file]').click();">Browse</span>
+                                            <input name="uploaded_file" onchange="$(this).parent().parent().find('.form-control').html($(this).val().split(/[\\|/]/).pop());" style="display: none;" type="file" id="FileUpload1">
+                                        </span>
+                                        <span class="form-control border border-primary" style="background: #f2f2f2e6;"></span>
+                                        <input class="rounded-0 btn btn-primary btn-sm" type="submit" id="btnUpload" value="Upload" />
+
+                                    </div>
+                                </form>
+                            </div>
+               
+
+                            </div>
+                    </div>
+
+
+                    <div class="card-body">
+
+
+
+                        <div class="row mb-2">
+                            <div class="col-md-1 col-6 mb-2">
+                                @Html.DropDownList("Status", new List<SelectListItem>
+                                                                                                                                                                                                                                                        {
+                                            new SelectListItem() {Text = "Due", Value="Due"},
+                                            new SelectListItem() {Text = "All", Value="All"}
+                                        }, new { @class = "form-control form-control-sm" })
+                            </div>
+                               <div class="col-md-4 col-12  mb-2">
+                                               <div class="form-inline divHiddenItems">
+                                         <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text">
+                                               <i class="fa fa-calendar"></i>
+                                             </div>
+                                        </div>
+                                        <input type="text" class="form-control form-control-sm" name="date" id="daterange-btn" style="width: auto;">
+                                         <button id='btnDec' type="button" class="btn btn-danger rounded-0" title='Decrement month'><i class="fa fa-calendar-minus-o" aria-hidden="true"></i></button>
+                                        <button id='btnInc' type="button" class="btn btn-info  rounded-0" title='Increment month'><i class="fa fa-calendar-plus-o" aria-hidden="true"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                              <div class="col-md-3 col-9 pt-0 divHiddenItems">
+                                <fieldset class="float-right">
+                                    <label class="pr-2"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+                                </fieldset>
+                            </div>
+
+
+                            <div class="col-md-1 col-12 divHiddenItems">
+                                <button class="btn btn-sm btn-outline-success mb-0 btn-block rounded-0" type="button" onclick="ReportPrint('PrintLedger')">Ledger</button>
+                            </div>
+
+                            
+                        <div class="col-md-2 col-12 divHiddenItems">
+                            <button class="btn btn-sm btn-outline-primary mb-0 btn-block rounded-0" type="button" onclick="ReportPrint('SupplierPerformance')">Performance</button>
+                        </div>
+
+                        <div class="col-md-1 col-12 divHiddenItems">
+                            @*<button class="btn btn-sm btn-outline-info mb-0 btn-block rounded-0" type="button" onclick="ReportPrint('ViewLedger')">View</button>*@
+                                      <button class="btn btn-sm btn-outline-info mb-0 btn-block rounded-0" type="button" onclick="ReportPrint('Supplier')">View</button>
+                        </div>
+
+
+                        <div class="table-responsive mt-1">
+                            <table id="tbllist" class="table table-sm table-hover table-striped table-bordered text-nowrap" cellspacing="0" width="100%">
+                            </table>
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+@*<td>
+        <div height="50px">
+            <div class="img-thumbnail flag flag-icon-background @item.FlagClass.ToString().ToLower()"></div>
+        </div>
+    </td>*@
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+
+                            var VatViewActivate = '@HttpContextAccessor.HttpContext.Session.GetInt32("VatViewActivate").ToString()';
+                    if (VatViewActivate == 1){$('.divHiddenItems').hide();}
+                    var isHidden = VatViewActivate != 1;
+
+        loaddata();
+        var filter = '@ViewBag.filter';
+        $("#Status").val(filter);
+
+        $("#Status").change(function () {
+            loaddata();
+        });
+
+
+        function loaddata(){
+            $(function () {
+                var peopleList = $('#tbllist').DataTable({
+
+                    "serverSide": true,
+                    "orderCellsTop": true,
+                    "scrollX": true,
+                    "scrollY": "60vh",
+                    "scrollCollapse": true,
+                    "info": true,
+                    "iDisplayLength": 8,
+                  "lengthMenu": [[5 , 8, 10, 20, 50, 20000], [5,8, 10, 20, 50, "All"]],
+
+
+                    dom: '<"dom_wrapper fh-fixedHeader"flB>tip',
+                    buttons: {
+                        dom: {
+                            button: {
+                                className: 'btn rounded-0'
+                            }
+                        },
+                        buttons: [
+                            //'copy', 'csv', 'excel', 'pdf', 'print'
+                            //{ "extend": 'excel', "text": 'Excel', "className": 'btn btn-sm btn-success-info fa fa-excel rouned-0' }
+
+                            {       extend: 'excel',
+                                    text: '<i class="mdi mdi-file-excel"></i>',
+                                    className: 'btn-success',
+                                    titleAttr: 'Export to excel'
+                            }
+
+                        ],
+                    },
+                    select: {
+                        style: 'single',
+                        selector: 'td:nth-child(1),td:nth-child(2),td:nth-child(3),td:nth-child(4),td:nth-child(5),td:nth-child(6),td:nth-child(7),td:nth-child(8),td:nth-child(9),td:nth-child(10),td:nth-child(11),td:nth-child(12),td:nth-child(13)'
+                    },
+                    ajax: {
+                        url: '@Url.Action("GetSupplierList", "Admin")',
+                        "data": { Status: $("#Status").val() },
+
+                        type: "POST"
+                    },
+                    rowId: 'Id',
+                    "destroy": true,
+                                         "language": {
+                            "lengthMenu": "_MENU_",
+                            "zeroRecords": "Nothing found - sorry",
+                            "info": "Showing page _PAGE_ of _PAGES_",
+                            "infoEmpty": "No records available",
+                            "infoFiltered": "(filtered from _MAX_ total records)",
+                            "searchPlaceholder": "Search",
+                             "sSearch" : '<em class="fa fa-search"></em>'
+                        },
+                    columns: [
+
+                        { "title": "Id", "data": "Id", "visible": false },
+                        {
+                            "title": "Name",
+                            //"className": "text-nowrap",
+                            //"data": {
+                            //    Id: "Name"
+                            //},
+                            "searchable": true,
+                                    "data" : "Name",
+                            //"render": function (data, InternetUserId, row) {
+
+                            //    var myUrlprint = '@Url.Action("SubsidiaryLedger", "Admin")?Id=' + data.Id + '&Type=Supplier';
+                            //    var SupplierName = data.Name;
+                            //    var buttons = '';
+                            //    buttons += '<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"btn btn-icon btn-sm btn-outline-primary mb-0 rounded-0\" target=\"_blank\"><i class="fa fa-print"> ' + SupplierName + '</i></a></span>';
+                            //    return buttons;
+                            //}
+                        },
+                         { "title": "Balance", "data": "TotalDue", "searchable": false, "visible":isHidden },
+
+                        //{ "title": "Name", "data": "Name", "searchable": true },
+
+                        { "title": "Email", "data": "Email", "searchable": true },
+                        { "title": "Address", "data": "Address", "searchable": true },
+                        { "title": "Phone", "data": "Phone", "searchable": true },
+                        { "title": "Notes", "data": "Notes", "searchable": true },
+                        {
+                            "title": "Total Purchase Value", "visible":isHidden,
+                            //"className": "text-nowrap text-center",
+
+                            "data": {
+                                Id: "Id" //,
+                            },
+                            "searchable": false,
+                            "render": function (data, type, row) {
+                                var showdata = '';
+
+                                console.log(data);
+                                    if (data.TotalPurchaseValue - data.TotalPurchaseReturnValue > 0) {
+                                    showdata += '<span style="color:black"> ' + formatter.format(data.TotalPurchaseValue - data.TotalPurchaseReturnValue) + ' </span>';
+                                }
+                                return showdata;
+                            }
+                        },
+
+                        //{
+                        //    "title": "Total Purchase", "visible":isHidden,
+                        //    "className": "text-nowrap text-center",
+                        //    "data": {
+                        //        TotalPurchaseValue: "TotalPurchaseValue" //,
+                        //    },
+                        //    "searchable": false,
+                        //    "render": function (data, type, row) {
+                        //        var showdata = '';
+                        //        if (data.TotalPurchaseValue > 0) {
+                        //            showdata += '<span style="color:black"> ' + formatter.format(data.TotalPurchaseValue) + ' </span>';
+                        //        }
+                        //        return showdata;
+                        //    }
+                        //},
+                        {
+                            "title": "Total Payment", "visible":isHidden,
+                            //"className": "text-nowrap text-center",
+                            "data": {
+                                Id: "Id" //,
+                            },
+                            "searchable": false,
+                            "render": function (data, type, row) {
+                                var showdata = '';
+                                    if (data.TotalPayment - data.TotalAmountBack > 0) {
+                                        showdata += '<span style="color:black"> ' + formatter.format(data.TotalPayment - data.TotalAmountBack) + ' </span>';
+                                }
+                                return showdata;
+                            }
+                        },
+                        //{
+                        //    "title": "Total Payment", "visible":isHidden,
+                        //    "className": "text-nowrap text-center",
+                        //    "data": {
+                        //        TotalPayment: "TotalPayment" //,
+                        //    },
+                        //    "searchable": false,
+                        //    "render": function (data, type, row) {
+                        //        var showdata = '';
+                        //        if (data.TotalPayment > 0) {
+                        //            showdata += '<span style="color:black"> ' + formatter.format(data.TotalPayment) + ' </span>';
+                        //        }
+                        //        return showdata;
+                        //    }
+                        //}, 
+
+
+
+                                                {
+                            "title": "Ledger Balance", "visible":isHidden,
+                           // "className": "text-nowrap text-center",
+                            "data": {
+                                Id: "Id" //,
+                            },
+                            "render": function (data, type, row) {
+                                var buttons = '';
+                                if (data.TotalDue > 0) {
+                                    buttons += '<span style="color:red"> ' + formatter.format(data.TotalDue) + ' </span>';
+                                }
+                                else 
+                                {
+                                 buttons += '<span style="color:green"> ' + formatter.format(data.TotalDue) + ' </span>';
+                                }
+                                return buttons;
+                            }
+                        },
+
+
+                        //{
+                        //    "title": "Ledger Balance", "visible":isHidden,
+                        //    "className": "text-nowrap text-center",
+                        //    "data": {
+                        //        Id: "Id" //,
+                        //    },
+                        //    "render": function (data, type, row) {
+                        //        var buttons = '';
+                        //        var TotalDueTest = data.TotalPurchaseValue - data.TotalPayment;
+                        //        if (TotalDueTest > 0) {
+                        //            buttons += '<span style="color:red"> ' + formatter.format(TotalDueTest) + ' </span>';
+                        //        }
+                        //        else if (TotalDueTest < 0) 
+                        //        {
+                        //            buttons += '<span style="color:green"> ' + formatter.format(TotalDueTest) + ' </span>';
+
+                        //        }
+                        //        return buttons;
+                        //    }
+                        //},
+
+                        { "title": "Last Purchase Date", "data": "LastPurchaseDate", "searchable": false, "visible":isHidden },
+                        { "title": "Last Billing No", "data": "LastInvoiceNo", "searchable": false, "visible":isHidden },
+                        { "title": "Last Purchase Product", "data": "LastPurchaseProduct", "searchable": false, "visible":isHidden },
+                       
+                        {
+                            //"title": "Action",
+                            "data": "Id",
+                            "orderable" :false,
+                            "render": function (data, type, row) {
+                                var myUrledit = '@Url.Action("EditSupplier", "Admin")?SupplierId=' + data;
+                                var myUrldelete = '@Url.Action("DeleteSupplier", "Admin")?SupplierId=' + data;
+                                var message = `return confirm('Are you sure you want to Remove the Supplier Information ?')`;
+                                //var myUrlprint = '@Url.Action("SubsidiaryLedger", "Admin")?Id=' + data + '&Type=Supplier';
+                                
+                                 //'<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"fa fa-file-pdf-o text-success px-1 h4\" target=\"_blank\"></a></span>' +
+                                 return   '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"fa fa-edit text-warning px-1 h4\" target=\"_blank\"></a></span>' +
+                                    '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" class=\"fa fa-trash text-danger px-1 h4\" target=\"_blank\"></a></span>';
+
+                                //return '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 \" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                //    '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 \" target=\"_blank\"><i class="fa fa-remove"></i></a></span>';
+
+                            }
+
+                        }
+                    ]
+                });
+
+
+            });
+        }
+
+        var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+        var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+        var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+            {
+            style: 'currency',
+            currency: CurrencyShortNameViewFormat,///'BDT'
+            minimumFractionDigits: 2,
+        });
+        //document.body.innerHTML += '<br />' + formatter.format(53425.34);
+
+
+
+        
+
+        CurrentDate();
+
+        $(".FromDate").datepicker({
+
+            dateFormat: "dd-M-y",
+            changeMonth: true,
+            changeYear: true
+
+        });
+        $(".ToDate").datepicker({
+
+            dateFormat: "dd-M-y",
+            changeMonth: true,
+            changeYear: true
+
+        });
+
+        function CurrentDate() {
+            var date = new Date();
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+
+
+            if ($(".FromDate").val() == '') {
+                $(".FromDate").val(val);
+            }
+            if ($(".ToDate").val() == '') {
+                $(".ToDate").val(val);
+            }
+
+
+        }
+
+       function ReportPrint(btnvalue) {
+
+                var peopleList = $('#tbllist').DataTable();
+                var rows = peopleList.rows('.selected').data();
+
+                var reporttype = $("input[name=RptType]:checked").val();
+                var FromDate = $(".FromDate").val();
+                var ToDate = $(".ToDate").val();
+
+
+                var productidlist = [];
+                var pid = 0;
+                var type = btnvalue;
+
+
+                if (rows.length > 0) {
+                    pid = rows[0]["Id"];
+                    //type = rows[0]["AccountCategory"];
+
+                }
+                //console.log(pid);
+                //alert(WarehouseId);
+                //alert(btnvalue);
+
+
+                var isViewPageReport = 1;
+
+                if (btnvalue == "PrintLedger") {
+
+                    isViewPageReport = 0;
+
+                    if ((pid == null) || (pid == ""))
+                    {
+                        toastr.error("Please Select Account Head from the List.");
+                        return true;
+                    }
+                    //alert('Wait');
+                }
+
+
+                
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SubsidiaryLedger", "Admin")',
+                dataType: 'json',
+                async: true,
+                data: { rptFormat: reporttype, action: btnvalue, Id: pid , Type:type, FromDate: FromDate, ToDate: ToDate,isViewPageReport:isViewPageReport},
+                success: function (response) {
+
+                    //setTimeout(function () {
+                    //    window.open(response.Url, '_blank')
+                    //}, 3000);
+
+                    window.open(response.Url, '_blank')
+
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+          }
+
+    </script>
+}

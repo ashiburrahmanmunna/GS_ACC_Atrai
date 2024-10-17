@@ -1,0 +1,506 @@
+﻿@using Microsoft.AspNetCore.Http
+
+@{
+    ViewData["Title"] = "Voucher Created Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var ListType = ViewBag.ListType as string;
+}
+
+@inject IHttpContextAccessor HttpContextAccessor
+
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<style>
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 99%;
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+
+    .bottom-bar-css:hover {
+        background: #212529;
+    }
+</style>
+
+<div class="hiddenSector">
+    <div class="row">
+        <input type="hidden" id="Id" name="Id" value="" />
+        <input type="hidden" id="ComId" name="ComId" value="" />
+    </div>
+
+</div>
+
+<div class="row py-5" style="background: #e9ecef6b;">
+    <div class="row">
+        <div class="col-lg">
+            <h3 class="fw-bold">New Budget</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg" id="nameParent">
+            <label class="fw-bol">Name *</label>
+            <input id="name" class="form-control" />
+        </div>
+        <div class="col-lg f-year-parent">
+            <label class="fw-bold">Financial Year</label>
+            <select id="financialYear" class="form-control">
+                <option value="">Select</option>
+            </select>
+        </div>
+        <div class="col-lg interval-parent">
+            <label class="fw-bold">Interval</label>
+            <select id="interval" class="form-control">
+                <option value="">Select</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Quarterly">Quarterly</option>
+                <option value="Yearly">Yearly</option>
+            </select>
+        </div>
+        <div class="col-lg prefill-parent">
+            <label class="fw-bold">Pre-fill data?</label>
+            <select id="preFillData" class="form-control">
+                <option value="">Select</option>
+            </select>
+        </div>
+        @*<div class="col-lg">
+        <label class="fw-bold">Subdivided by</label>
+        <select id="subdividedBy" class="form-control">
+        <option value="">Select</option>
+        </select>
+        </div>
+        <div class="col-lg">
+        <label class="fw-bold">Add subdivided budget for</label>
+        <select id="addSubdividedBudgetFor" class="form-control">
+        <option value="">Select</option>
+        </select>
+        </div>*@
+    </div>
+    @*<div class="row">
+    <div class="col-lg-2 mt-4">
+    <label class="fw-bold">View budget for</label>
+    <select id="viewBudgetFor" class="form-control">
+    <option value="">Select</option>
+    </select>
+    </div>
+    </div>*@
+</div>
+
+<div id="tableContainer">
+    <div id="incomeStatementTable"></div>
+</div>
+
+<div class="bottom-bar">
+    <div>
+        <button class="btn-close-white radius-30 px-4 fw-bold py-1 ms-3 bottom-bar-css" style="border: 1px solid #808080b5; background: transparent;" onclick="window.location.href = '@Url.Action("budgets", "Admin")';">Cancel</button>
+    </div>
+    <div class="dropdown">
+        @if (ViewBag.ActionType == "Edit")
+        {
+            <button id="BtnSave" class="text-white radius-30 px-4 fw-bold py-1 bottom-bar-css me-5 bg-success" style="border: 1px solid #808080b5;" data-purchase-Id="@Model">Update</button>
+        }
+        else
+        {
+            <button id="BtnSave" class="text-white radius-30 px-4 fw-bold py-1 bottom-bar-css me-5 bg-success" style="border: 1px solid #808080b5;" data-purchase-Id="@Model">Save</button>
+
+        }
+    </div>
+</div>
+
+
+
+
+
+
+@section Scripts {
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript">
+                //Tabulator function starts
+                var budgetTable;
+
+        GetReport();
+                function GetReport(FyId) {
+                    let FiscalYearId = FyId;
+            $.ajax({
+                url: '@Url.Action("GetBudgetData", "Admin")',
+                data: { BudgetId: '@ViewBag.BudgetId', FyId: FiscalYearId },
+                success: function (response) {
+                console.log("response", response)
+                    function buildTree(dataArray) {
+                        const tree = [];
+                        const parentMap = {};
+
+                        //console.log("Received data in buildTree:", dataArray);
+
+                        dataArray.forEach(item => {
+                            if (item.AccName !== null && item.AccName !== undefined) {
+                                item.AccName = item.AccName.trim(); // Remove extra whitespace from account names
+                            }
+
+                            if (item.ParentId === 0 || !parentMap[item.ParentId]) {
+                                // Root level node or parent not found in parentMap
+                                tree.push(item);
+                            } else {
+                                const parent = parentMap[item.ParentId];
+
+                                if (!parent.hasOwnProperty('children')) {
+                                    parent.children = [];
+                                }
+
+                                parent.children.push(item);
+                            }
+
+                            parentMap[item.AccId] = item;
+                        });
+
+                        //console.log("Final tree:", tree);
+                        return tree;
+                    }
+                //console.log("notrmal response:", response.data.Table);
+                var dataTable = buildTree(response.data.Table);
+                    console.log("data table:", dataTable);
+                    function InputEditor(cell, onRendered, success, cancel, editorParams) {
+                        var accName = cell.getRow().getData().AccType;
+
+                        if (accName !== "G") {
+                            // Enable the editor if AccName is not "Income"
+                            var input = document.createElement("input");
+                            input.setAttribute("type", "input");
+                            input.setAttribute("value", cell.getValue());
+
+                            input.addEventListener("change", function () {
+                                success(input.value);
+                            });
+
+                            input.addEventListener("blur", function () {
+                                cancel();
+                            });
+                            onRendered(function () {
+                                input.focus();
+                            });
+                            return input;
+                        } else {
+                            return false;
+                        }
+                    }
+
+
+                    var ColumnsOfBudgets = [
+                        { title: "Id", field: "ID", movable: false, headerSort: false, visible: false },
+                        { title: "ParentId", field: "ParentId", movable: false, headerSort: false, visible: false },
+                        { title: "AccName", field: "AccName", movable: false, headerSort: false, visible: true },
+                        { title: "BudgetId", field: "BudgetId", editor: "input", headerSort: false, editable: true, movable: false, visible: false },
+                        { title: "AccCode", field: "AccCode", editor: "input", headerSort: false, editable: true, movable: false, visible: false },
+                        { title: "AccType", field: "AccType", editor: "input", headerSort: false, editable: true, movable: false, visible: false },
+                        { title: "Numeric_SLNo", field: "Numeric_SLNo", editor: "input", headerSort: false, editable: true, movable: false, visible: false },
+                        { title: "DataLevel", field: "DataLevel", editor: "input", headerSort: false, editable: true, movable: false, visible: false },
+                        {
+                            title: "Jan", field: "Jan", headerSort: false, movable: false, visible: true, editor: InputEditor,
+                            cellEdited: function (cell) {
+                                var row = cell.getRow();
+                                calculateAndSetTotal(row);
+                            }
+                        },
+                        {
+                            title: "Feb", field: "Feb", headerSort: false, movable: false, visible: true, editor: InputEditor,
+                            cellEdited: function (cell) {
+                                var row = cell.getRow();
+                                calculateAndSetTotal(row);
+                            }
+                        },
+                        {
+                            title: "Mar", field: "Mar", headerSort: false, movable: false, visible: true, editor: InputEditor,
+                            cellEdited: function (cell) {
+                                var row = cell.getRow();
+                                calculateAndSetTotal(row);
+                            }
+                        },
+                        {
+                            title: "April", field: "April", headerSort: false, movable: false, visible: true, editor: InputEditor,
+                            cellEdited: function (cell) {
+                                var row = cell.getRow();
+                                calculateAndSetTotal(row);
+                            }
+                        },
+                        {
+                            title: "May", field: "May", headerSort: false, movable: false, visible: true, editor: InputEditor,
+                            cellEdited: function (cell) {
+                                var row = cell.getRow();
+                                calculateAndSetTotal(row);
+                            }
+                        },
+                        {
+                            title: "Jun", field: "Jun", headerSort: false, movable: false, visible: true, editor: InputEditor,
+                            cellEdited: function (cell) {
+                                var row = cell.getRow();
+                                calculateAndSetTotal(row);
+                            }
+                        },
+                        {
+                            title: "Jul", field: "Jul", headerSort: false, movable: false, visible: true, editor: InputEditor,
+                            cellEdited: function (cell) {
+                                var row = cell.getRow();
+                                calculateAndSetTotal(row);
+                            }
+                        },
+                        {
+                            title: "Aug", field: "Aug", headerSort: false, movable: false, visible: true, editor: InputEditor,
+                            cellEdited: function (cell) {
+                                var row = cell.getRow();
+                                calculateAndSetTotal(row);
+                            }
+                        },
+                        {
+                            title: "Sep", field: "Sep", headerSort: false, movable: false, visible: true, editor: InputEditor,
+                            cellEdited: function (cell) {
+                                var row = cell.getRow();
+                                calculateAndSetTotal(row);
+                            }
+                        },
+                        {
+                            title: "Oct", field: "Oct", headerSort: false, movable: false, visible: true, editor: InputEditor,
+                            cellEdited: function (cell) {
+                                var row = cell.getRow();
+                                calculateAndSetTotal(row);
+                            }
+                        },
+                        {
+                            title: "Nov", field: "Nov", headerSort: false, movable: false, visible: true, editor: InputEditor,
+                            cellEdited: function (cell) {
+                                var row = cell.getRow();
+                                calculateAndSetTotal(row);
+                            }
+                        },
+                        {
+                            title: "Dec", field: "Dec", headerSort: false, movable: false, visible: true, editor: InputEditor,
+                            cellEdited: function (cell) {
+                                var row = cell.getRow();
+                                calculateAndSetTotal(row);
+                            }
+                        },
+                        { title: "Total", field: "Total", headerSort: false, movable: false, visible: true },
+                    ];
+
+
+
+
+                    budgetTable = new Tabulator("#incomeStatementTable", {
+                        data: dataTable,
+                        layout: "fitColumns",
+                        dataTree: true,
+                        dataTreeStartExpanded: true,
+                        dataTreeChildField: "children",
+                        columns: ColumnsOfBudgets,
+                        printAsHtml: true,
+                        frozenRows: 1,
+                        dataBound: function () {
+                            var rows = budgetTable.getRows();
+                            if (rows.length > 0) {
+                                var cells = rows[0].getCells();
+                                cells.forEach(cell => {
+                                    cell.freeze();
+                                });
+                            }
+                        }
+                    });
+
+                    function calculateAndSetTotal(row) {
+                        var total = 0;
+                        var columnsToSum = ["Jan", "Feb", "Mar", "April", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+                        columnsToSum.forEach(column => {
+                            var value = row.getData()[column];
+                            //console.log(`Column: ${column}, Value: ${value}`);
+
+                            // Check for null, undefined, and empty string
+                            if (value === null || value === undefined || value === "") {
+                                value = 0;
+                            }
+
+                            total += parseFloat(value);
+                        });
+
+                        //console.log(`Total: ${total}`);
+                        row.update({ Total: total });
+                    }
+
+            }
+        });
+
+
+                };
+                getFiscalYearDropdown();
+              function getFiscalYearDropdown() {
+                $.ajax({
+                    url: '@Url.Action("GetFiscalyear", "Admin")',
+                    success: function (data) {
+                        console.log("term ajax data::", data);
+                        const select = document.querySelector('#financialYear');
+                        for (var i = 0; i < data.length; i++) {
+                            const option = document.createElement('option');
+                            option.value = data[i].Value;
+                            option.text = data[i].Text;
+                            select.appendChild(option);
+                        }
+                        const selectPrefillData = document.querySelector('#preFillData');
+                        for (var i = 0; i < data.length; i++) {
+                            const option = document.createElement('option');
+                            option.value = data[i].Value;
+                            option.text = data[i].Text;
+                            selectPrefillData.appendChild(option);
+                        }
+                    }
+                });
+
+
+
+
+              }
+        //Tabulator function ends
+
+                $("#preFillData").on("change", function () {
+                    var selectedVal = $(this).find("option:selected").val();
+                    //alert(selectedVal);
+                    GetReport(selectedVal);
+                });
+
+                      $('#BtnSave').click(function () {
+                        var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+                        var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+                        $("#ComId").val(ComId);
+                        $("#LuserId").val(UserId);
+                                let BudgetSubs = budgetTable.getData();
+
+                                console.log("BudgetSubs", BudgetSubs);
+
+                                const allChildrenArray = BudgetSubs
+                                    .map(item => item && item.children)
+                                    .flat()
+                                    .filter(child => child !== undefined && child !== null)
+                                    .flatMap(item => item && item.children ? item.children : []);
+
+                                console.log("All Children Array without undefined and null", allChildrenArray);
+
+
+
+
+                                                    const filteredArray = allChildrenArray.map(item => {
+                                                        // Filter out properties with empty values
+                                                        const filteredItem = Object.entries(item)
+                                                            .filter(([key, value]) => value !== "" && value !== undefined && value !== null)
+                                                            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
+                                                        return filteredItem;
+                                                    });
+
+                                                    //console.log("Filtered Array", filteredArray);
+                                                    const filteredArrayyyy = Array.from(new Set(filteredArray.map(JSON.stringify)))
+                                                        .map(JSON.parse);
+
+                                                    console.log("Filtered Array", filteredArrayyyy);
+
+
+
+
+                        var Name = $('#name').val();
+                        var FiscalYearId = $('#financialYear option:selected').val();
+                        var Interval = $('#interval option:selected').text();
+                        var PreFillId = $('#preFillData option:selected').val();
+
+                         var vouchermodel =
+                            {
+                             ComId: ComId,
+                             Id: "@ViewBag.BudgetId",
+                             Name: Name,
+                             FiscalYearId: FiscalYearId,
+                             Interval: Interval,
+                             PreFillId: PreFillId,
+                             BudgetSubs: filteredArrayyyy,
+                            };
+
+
+
+                        console.log("after save console:", vouchermodel)
+                        var PurchaseIdAbc = 0;
+
+
+                        $.ajax({
+                            async: false,
+                            type: "POST",
+                            url: "@Url.Action("AddBudget", "Admin")",
+                            data: JSON.stringify(vouchermodel),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (response) {
+                                PurchaseIdAbc = response.Id;
+                                Doctype = response.Doctype;
+
+                                if (response.message =="Purchase updated successfully") {
+
+                                }
+                                setTimeout(function () {
+                                    toastr.success(response.message, "", {
+                                        "toastClass": "toast-green"
+                                    });
+                                }, 1500);
+
+                                setTimeout(function () {
+                                     window.location.href = '@Url.Action("budgets", "Admin")';
+                                },3000)
+
+                            },
+                            error: function (response) {
+                            }
+                        });
+
+
+                    });
+
+
+                //==============================================edit mode starts============================================
+                if ('@ViewBag.ActionType' == "Edit") {
+                            $.ajax({
+                            type: "GET",
+                            url: "@Url.Action("GetBudget", "Admin")",
+                            data: { "PurchaseId": '@ViewBag.BudgetId'},
+                            dataType: "json",
+                            success: function (response) {
+                                console.log("edit mode er data dekhi:", response.data.BudgetSubs);
+                                var res = response.data;
+                                $("#name").val(res.Name);
+                                $("#Id").val(res.Id);
+                            },
+                            error: function (error) {
+                                console.error("Error fetching data: " + error);
+                            }
+                        });
+
+                }
+                if ('@ViewBag.BudgetId' > 0) {
+                    $(".f-year-parent").addClass("d-none");
+                    $(".interval-parent").addClass("d-none");
+                    $(".prefill-parent").addClass("d-none");
+                    $("#nameParent").removeClass("col-lg");
+                    $("#nameParent").addClass("col-lg-2");
+                }
+                else {
+                    $(".f-year-parent").removeClass("d-none");
+                    $(".interval-parent").removeClass("d-none");
+                    $(".prefill-parent").removeClass("d-none");
+                    $("#nameParent").removeClass("col-lg-2");
+                    $("#nameParent").addClass("col-lg");
+                }
+                //==============================================edit mode ends==============================================
+
+
+
+
+    </script>
+
+}

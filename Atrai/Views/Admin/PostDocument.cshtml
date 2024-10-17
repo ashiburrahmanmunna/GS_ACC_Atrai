@@ -1,0 +1,870 @@
+﻿
+@model IEnumerable<Atrai.Model.Core.Entity.DocumentList>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@*@using Invoice.Models.Common
+
+    @{
+        UserPermission permission = HttpContextAccessor.HttpContext.Session.GetObject<UserPermission>("userpermission");
+    }*@
+@{ ViewData["Title"] = "Post Document";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; 
+
+
+    var permission = false;
+    var UserRole = @HttpContextAccessor.HttpContext.Session.GetString("UserRole").ToString().ToLower();
+    //alert(UserRole);
+    //alert(permission);
+
+    string[] salesDocTypes = new string[] { "Sales", "POS Sales", "SERVICE BILL", "ISSUE BDPO", "ISSUE", "Retail Sales", "Fuel Sales", "GENERAL SALES", "FORWARD SALES", "RETURN", "TOKEN BILL" };
+    string[] purchaseDocTypes = new string[] { "Purchase", "Opening Stock", "GRR" };
+    if (UserRole.Contains("admin")) { permission = true; };
+
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+@using (Html.BeginForm())
+{
+
+    <div class="page-wrapper">
+        @Html.AntiForgeryToken()
+        <div class="container-fluid">
+            <div class="card my-2">
+
+@*                                @Html.Hidden("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+                                @Html.Hidden("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+*@
+            <div class="card-body">
+                <div class="row my-3">
+                       <div class="col-md-3 col-12">
+                        <h4>Document List</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6">
+
+                             <div class="divHiddenItems mb-2">
+                                      
+                                <label class="form-label fw-semibold">
+                                    Date Range
+                                </label>
+                                 <div class="input-group">
+                    
+                                <input type="text" class="form-control" name="date" id="daterange-btn">
+                                 <button id='btnDec' type="button" class="btn btn-danger rounded-0" title='Decrement month'><i class="bi bi-calendar-minus" aria-hidden="true"></i></button>
+                                <button id='btnInc' type="button" class="btn btn-primary  rounded-0" title='Increment month'><i class="bi bi-calendar-plus" aria-hidden="true"></i></button>
+                                </div>
+
+@*                                <span type="button" class="btn btn-sm btn-outline-info" id="daterange-btn">
+
+                                    <i class="bi bi-calendar"></i>&nbsp; <span>defaut date</span>
+
+                                    <i class="fa fa-caret-down"></i>
+                                </span>*@
+                          @*        <input id="daterange-btn" size="40" value="">*@
+                            </div>
+                            </div>
+
+                                @if (permission == true)
+                                {
+
+                                    <div class="col-md-6 col-6 d-none">
+                                        <div class="input-group  mb-2">
+                                            <div>
+                                                <span class="input-group-text">From Date</span>
+                                            </div>
+                                            @Html.TextBox("FromDate", null, new { @class = "form-control  text-center FromDate", @placeholder = "Select From Date ", @autocomplete = "off", name = "FromDate" })
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 col-6 d-none">
+                                        <div class="input-group mb-2">
+                                            <div>
+                                                <span class="input-group-text">To Date</span>
+                                            </div>
+                                            @Html.TextBox("ToDate", null, new { @class = "form-control  text-center ToDate", @placeholder = "Select To Date ", @autocomplete = "off", name = "ToDate" })
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+
+                                    <div class="col-md-6 col-6 d-none">
+                                        <div class="input-group  mb-2">
+                                            <div>
+                                                <span class="input-group-text">From Date</span>
+                                            </div>
+                                            @Html.TextBox("FromDate", null, new { @class = "form-control  text-center FromDate", @placeholder = "Select From Date ", @autocomplete = "off", name = "FromDate" , @readonly = "readonly" })
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 col-6 d-none">
+                                        <div class="input-group mb-2">
+                                            <div>
+                                                <span class="input-group-text">To Date</span>
+                                            </div>
+                                            @Html.TextBox("ToDate", null, new { @class = "form-control  text-center ToDate", @placeholder = "Select To Date ", @autocomplete = "off", name = "ToDate", @readonly = "readonly" })
+                                        </div>
+                                    </div>
+                                }
+
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                        <label class="form-label fw-semibold">
+                                            Location
+                                        </label>
+                                       @Html.DropDownList("Warehouse", ViewBag.Warehouse as List<SelectListItem>,  new { @class = "form-select " })
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                   <div class="mb-2">
+                           <label class="form-label fw-semibold">
+                                    Document Type
+                                </label>
+                            @Html.DropDownList("DocType", null, null, htmlAttributes: new { @class = "form-select  " })
+                            </div>
+                            </div>
+                            <div class="col-md-4 pt-4 mt-3">
+                                    <label><input type="radio" name="criteria" checked="checked" value="All" /> All</label>
+                                    <label><input type="radio" name="criteria" value="Post"/> Post </label>
+                                    <label><input type="radio" name="criteria" value="UnPost"/> UnPost</label>
+                            </div>
+                              <div class="col-md-2 pt-4">
+                                    <input type="submit" id="btnLoad" value="Load" class="btn  btn-success " />
+                            </div>
+                         
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        
+            <hr/>
+                <div class="table-responsiv p-2" style="overflow-x: auto;">
+                <table id="tbllist" class="table table-striped table-bordered table-hover border" cellspacing="0" width="100%">
+                        <thead class="text-nowrap">
+                            @{
+                                <tr>
+                                    <th>
+
+                                    </th>
+                                    <th>
+                                        CostCalculation Id
+                                    </th>
+                                    <th class="text-nowrap">
+                                        Posted Date
+                                    </th>
+
+
+                                    <th>
+                                        Document Id
+                                    </th>
+                                    <th>
+                                        Document Code / No
+                                    </th>
+                                    <th>
+                                        Type
+                                    </th>
+                                    <th>
+                                        Doc. Date
+                                    </th>
+                                    <th>
+                                        User Info
+                                    </th>
+                                    <th>Amount</th>
+                                    <th>Location</th>
+
+                                    <th>
+                                        Remarks / Desc.
+                                    </th>
+                                    <th>
+                                        Appr. Sts
+                                    </th>
+                                    <th class="text-nowrap">
+                                        Posted
+                                    </th>
+                                    <th></th>
+
+                                </tr>
+                            }
+
+                        <thead>
+                        <tbody>
+
+                                    @foreach (var item in Model)
+                                    {
+                                <tr>
+                                    <td>
+                                    </td>
+                                    <td>
+                                                @Html.DisplayFor(modelItem => item.CostCaclculatedId)
+                                    </td>
+                                    <td class="text-nowrap">
+                                                @Html.DisplayFor(modelItem => item.CreatedDate)
+                                    </td>
+                                    <td>
+                                                @Html.DisplayFor(modelItem => item.DocumentId)
+                                    </td>
+                                    <td>
+                                                @Html.DisplayFor(modelItem => item.DocumentNo)
+                                    </td>
+                                    <td>
+                                                @Html.DisplayFor(modelItem => item.DocumentType)
+                                    </td>
+                                    <td>
+                                                @Html.DisplayFor(modelItem => item.DocumentDate)
+                                    </td>
+                                    <td>
+                                                @Html.DisplayFor(modelItem => item.UserInfo)
+                                    </td>
+                                            @if ((item.DocumentType == "Purchase") || (item.DocumentType == "Sales") || (item.DocumentType == "SalesReturn") || (item.DocumentType == "PurchaseReturn"))
+                                            {
+                                        <td class="h4" style="font-size: 16px;">
+
+                                                    @*var abc = Decimal.Parse(item.NetAmount);
+                                @Html.DisplayName(abc.ToString());*@
+
+                                                    @string.Format("{0:N}", Decimal.Parse(@item.NetAmount))
+
+                                        </td>
+                                            }
+                                            else
+                                            {
+                                        <td class="h4" style="font-size: 18px;">
+                                                    @(
+                                                        decimal.TryParse(@item.NetAmount, out decimal netAmountDecimal)
+                                                        ? string.Format("{0:N}", netAmountDecimal)
+                                                        : @item.NetAmount
+                                                        )
+                                                    @*                                        @Html.DisplayFor(modelItem => item.NetAmount)*@
+                                        </td>
+                                            }
+                                    <td>
+                                                @Html.DisplayFor(modelItem => item.Location)
+                                    </td>
+                                    <td>
+                                                @Html.DisplayFor(modelItem => item.Remarks)
+                                    </td>
+                                    <td>
+                                                @Html.DisplayFor(modelItem => item.ApproveStatus)
+                                    </td>
+                                    <td class="text-nowrap">
+                                                @if (@item.DocumentStatus != "Posted")
+                                                {
+                                                    @*
+
+                                else if (item.DocumentType == "SalesReturn ")
+                                {
+                                @Html.ActionLink("", "SalesReturnReport", "SalesReturn", new { saleReturnId = item.DocumentId }, new { @target = "_blank", @class = "fa fa-print btn btn-success btn-xs" })
+                                }
+                                else if (item.DocumentType == "PurchaseReturn")
+                                {
+                                @Html.ActionLink("", "PurchaseReturnReport", "PurchaseReturn", new { PurchaseReturnId = item.DocumentId }, new { @target = "_blank", @class = "fa fa-print btn btn-success btn-xs" })
+                                }
+                                else if (item.DocumentType == "Damage")
+                                {
+                                @Html.ActionLink("", "DamageReport", "Damage", new { DamageId = item.DocumentId }, new { @target = "_blank", @class = "fa fa-print btn btn-success btn-xs" })
+                                }
+                                else if (item.DocumentType == "InternalTransfer")
+                                {
+                                @Html.ActionLink(" ", "InternalTransferReport", "InternalTransfer", new { InternalTransferId = item.DocumentId }, new { @target = "_blank", @class = "fa fa-print btn btn-success btn-xs" })
+                                }
+
+                                else if (item.DocumentType.Contains("Voucher"))
+                                {
+                                @Html.ActionLink(" ", "Print", "Accounts", new { id = item.DocumentId , type = item.DocumentType }, new { @target = "_blank", @class = "fa fa-print btn btn-success btn-xs" })
+                                }*@
+
+                                                    if (item.DocumentType.Contains("Account"))
+                                                    {
+                                                        @Html.ActionLink(" ", "EditTransaction", "Admin", new { TransactionId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-pencil-square btn btn-warning btn-xs" })
+                                                    }
+                                                    //else if (item.DocumentType == "Sales")
+                                                    else if (salesDocTypes.Contains(item.DocumentType))
+                                                    {
+                                                        if (item.DocumentType == "POS Sales")
+                                                        {
+                                                            @Html.ActionLink(" ", "POSEdit", "Sales", new { SaleId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-pencil-square btn btn-warning btn-xs" })
+
+                                                        }
+                                                        else
+                                                        {
+
+                                                            @Html.ActionLink(" ", "EditSale", "Sales", new { SaleId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-pencil-square btn btn-warning btn-xs" })
+
+                                                        }
+                                                    }
+                                                    else if (item.DocumentType.Contains("SalesReturn"))
+                                                    {
+                                                        @Html.ActionLink(" ", "EditSalesReturn", "SalesReturn", new { SalesReturnId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-pencil-square btn btn-warning btn-xs" })
+                                                    }
+                                                    @*       else if (item.DocumentType == "Purchase")*@
+                                                    else if (purchaseDocTypes.Contains(item.DocumentType))
+                                                    {
+                                                        @Html.ActionLink(" ", "EditPurchase", "Purchase", new { PurchaseId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-pencil-square btn btn-warning btn-xs" })
+                                                    }
+                                                    else if (item.DocumentType == "PurchaseReturn")
+                                                    {
+                                                        @Html.ActionLink(" ", "EditPurchaseReturn", "PurchaseReturn", new { PurchaseReturnId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-pencil-square btn btn-warning btn-xs" })
+                                                    }
+                                                    else if (item.DocumentType == "Damage")
+                                                    {
+                                                        @Html.ActionLink("", "EditDamage", "Damage", new { DamageId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-pencil-square btn btn-warning btn-xs" })
+                                                    }
+                                                    else if (item.DocumentType == "InternalTransfer")
+                                                    {
+                                                        @Html.ActionLink(" ", "EditInternalTransfer", "InternalTransfer", new { InternalTransferId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-pencil-square btn btn-warning btn-xs" })
+                                                    }
+                                                    else if (item.DocumentType == "Issue")
+                                                    {
+                                                        @Html.ActionLink(" ", "EditIssue", "Issue", new { IssueId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-pencil-square btn btn-warning btn-xs" })
+                                                    }
+                                                    else if (item.DocumentType.Contains("Voucher"))
+                                                    {
+                                                        @Html.ActionLink(" ", "AddVoucher", "Accounts", new { VoucherId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-pencil-square btn btn-warning btn-xs" })
+                                                    }
+
+
+                                                }
+                                                else
+                                                {
+                                                    @Html.DisplayFor(modelItem => item.DocumentStatus)
+
+                                                }
+
+                                    </td>
+
+                                    <td class="text-nowrap">
+                                        <span data-toggle="tooltip" title="Print!">
+                                                    @if (purchaseDocTypes.Contains(item.DocumentType))
+                                                    {
+                                                        @Html.ActionLink(" ", "PurchaseReport", "Purchase", new { purchaseid = item.DocumentId }, new { @target = "_blank", @class = "bi bi-printer btn btn-success btn-xs" })
+                                                    }
+                                                    //else if (item.DocumentType == "Sales")
+                                                    else if (salesDocTypes.Contains(item.DocumentType))
+                                                    {
+                                                        @Html.ActionLink(" ", "SaleReport", "Sales", new { saleId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-printer btn btn-success btn-xs" })
+                                                    }
+                                                    else if (item.DocumentType == "SalesReturn")
+                                                    {
+                                                        @Html.ActionLink("", "SalesReturnReport", "SalesReturn", new { SalesReturnId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-printer btn btn-success btn-xs" })
+                                                    }
+                                                    else if (item.DocumentType == "PurchaseReturn")
+                                                    {
+                                                        @Html.ActionLink("", "PurchaseReturnReport", "PurchaseReturn", new { PurchaseReturnId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-printer btn btn-success btn-xs" })
+                                                    }
+                                                    else if (item.DocumentType == "Damage")
+                                                    {
+                                                        @Html.ActionLink("", "DamageReport", "Damage", new { DamageId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-printer btn btn-success btn-xs" })
+                                                    }
+                                                    else if (item.DocumentType == "InternalTransfer")
+                                                    {
+                                                        @Html.ActionLink(" ", "InternalTransferReport", "InternalTransfer", new { InternalTransferId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-printer btn btn-success btn-xs" })
+                                                    }
+                                                    else if (item.DocumentType == "Issue")
+                                                    {
+                                                        @Html.ActionLink(" ", "IssueReport", "Issue", new { IssueId = item.DocumentId }, new { @target = "_blank", @class = "bi bi-printer btn btn-success btn-xs" })
+                                                    }
+                                                    else if (item.DocumentType.Contains("Voucher"))
+                                                    {
+                                                        @Html.ActionLink(" ", "Print", "Accounts", new { id = item.DocumentId, type = item.DocumentType }, new { @target = "_blank", @class = "bi bi-printer btn btn-success btn-xs" })
+                                                    }
+                                                    else if (item.DocumentType.Contains("Account"))
+                                                    {
+                                                        @Html.ActionLink(" ", "TransactionVoucherViewReport", "Admin", new { TransactionId = item.DocumentId, type = "PDF" }, new { @target = "_blank", @class = "bi bi-printer btn btn-success btn-xs" })
+                                                    }
+                                                    else
+                                                    {
+                                                        @*@Html.ActionLink(" ", "Print", new { Id = item.DocumentId, type = "pdf", docname = item.DocumentType }, new { @target = "_blank", @class = "fa fa-print btn btn-success btn-xs" })*@
+                                                    }
+                                        </span>
+
+
+                                    </td>
+
+                                </tr>
+                                    }
+                        </tbody>
+
+                </table>
+            </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+}
+
+
+
+@section Scripts{
+    <script type="text/javascript">
+
+
+
+        var antiForgeryToken;
+
+        $(document).ready(function () {
+
+            //$(".table-responsive").attr("disabled", "disabled");
+
+
+            antiForgeryToken = $("input[name='Dominate_ANTIFORZERY']").val();
+            var tbllist = $('#tbllist').DataTable({
+                'columnDefs': [
+                    {
+                        'targets': 1,
+                        'visible': false,
+                        'className': 'chkAllPost',
+                        'searchable': false,
+                         //orderable: true,
+
+
+                    },
+                    {
+                        'targets': 2,
+                        'searchable': false,
+                         //'sorting': true,
+
+
+                    },
+                    {
+                        'targets': 3,
+                        'visible': false,
+                        'searchable': false
+
+                    },
+                    {
+                        orderable: false,
+                        className: 'select-checkbox',
+                        targets: 0
+                    }
+
+                ],
+                'ordering':false,
+                'paging': true,
+                'searching': true,
+                select: {
+                    style: 'os',
+                    selector: 'td:first-child'
+                },
+                //dom: 'Blfrtip',
+                dom: "<'row'<'col-md-8'f><'col-md-4 d-flex justify-content-end'B>>" +
+                "<'row'<'col-md-12'tr>>" +
+                "<'row'<'col-md-12 col-5'i><'col-md-12 col-7'p>>",
+                buttons: [
+                    //'selected',
+                    //'selectedSingle',
+                    'selectAll',
+                    'selectNone',
+                    {
+                        attr: {
+                            title: 'Post',
+                            id: "btnPost",
+                        },
+                        text: 'Post',
+                        className:" btn-success btnpost rounded-end",    
+                        action: function (e, dt, node, config) {
+
+                                ConfirmDialog("Post");
+
+                        }
+                    },
+                    {
+                        attr: {
+                            title: 'Un Post',
+                            id: "btnUnPost",
+                        },
+
+                        text: 'UnPost',
+                        className: "btn btn-warning btnunpost rounded-end",
+                        action: function (e, dt, node, config) {
+                            //alert('Button activated');
+                           {
+                                ConfirmDialog("UnPost");
+                            }
+
+                        }
+                    }
+                    //'selectRows',
+                    //'selectColumns',
+                    //'selectCells'
+                ],
+                'info': true,
+                "language": {
+                    sLengthMenu: " _MENU_",
+                      "info": "Results: _PAGE_ - _PAGES_ of _MAX_",
+                   "searchPlaceholder": "Filter by name",
+                    "sSearch": '<i class="bi bi-funnel"></i>',
+                    "paginate": {
+                        "previous": '<i class="bi bi-chevron-left"></i>',
+                        "next": '<i class="bi bi-chevron-right"></i>'
+                    }
+                },
+
+            }
+            );
+
+           // $('#tbllist tbody td').off('click');
+
+            $(".btnpost, .btnunpost").append('<span class="d-none spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>')
+
+            var viewbagtitle = "@ViewBag.criteria";
+            //alert(viewbagtitle);
+
+            if (viewbagtitle == "Post") {
+                $(".btnunpost").show();
+                $(".btnpost").hide();
+            }
+            else if (viewbagtitle == "UnPost") {
+                $(".btnunpost").hide();
+                $(".btnpost").show();
+            }
+            //else if (viewbagtitle != "") {
+            //    $(".btnunpost").text("DisApprove");
+            //    $(".btnpost").text("Approve");
+            //    if (viewbagtitle == "Pending") {
+            //        $(".btnunpost").show();
+            //        $(".btnpost").show();
+            //    }
+            //    else if (viewbagtitle == "Approved") {
+            //        $(".btnunpost").show();
+            //        $(".btnpost").hide();
+            //    }
+            //    else if (viewbagtitle == "DisApproved") {
+            //        $(".btnunpost").hide();
+            //        $(".btnpost").show();
+            //    }
+            //}
+            else
+            {
+                $(".btnunpost").hide();
+                $(".btnpost").hide();
+                $(".buttons-select-all").hide();
+                $(".buttons-select-none").hide();
+            };
+
+            //$("input[name=criteria][value='Post']").prop("checked",true);
+             $("input[name=criteria]").val([viewbagtitle]);
+
+
+            var table = $('#tbllist').DataTable();
+
+
+            $('#tbllist tbody').on('click', 'tr', function () {
+                $(this).toggleClass('selected');
+            });
+
+
+
+
+            function fncSubmitPost() {
+
+                //alert(table.rows('.selected').data().length + ' row(s) selected');
+
+                var rows = table.rows('.selected').data();
+
+                //console.log(rows);
+
+                if (rows.length < 1) {
+                    return false;
+                }
+
+                if ($('.btnpost').children('span').eq(1).hasClass('d-none')) {
+                    $('.btnpost').children('span').eq(1).removeClass('d-none');
+                    $('.btn').addClass('disabled');
+                    $(".table *").prop('disabled', true);
+                }
+
+
+
+                var docid = [];
+                var doctype = [];
+
+                var criteria = "Post";
+
+
+                for (var i = 0; i < rows.length; i++) {
+
+                    var rowData = rows[i];
+                    docid.push(rowData[3]);
+                    doctype.push(rowData[5]);
+                    //approvaltype.push(rowData[99]);
+
+
+                }
+
+                //console.log(docid);
+
+                $.ajax({
+                    type: 'POST',
+                    headers: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                url: '@Url.Action("PostUnpostDocument", "Admin")',
+                dataType: 'json',
+                async: true,
+                    data: { docid: docid, criteria: criteria, doctype: doctype }, //, approvaltype: approvaltype
+                    success: function (response) {
+                        if (response.Success == "1") {
+                            var selectedRows = table.rows(".selected");
+                            selectedRows.remove().draw();
+                            //toastr.success(response.ex);
+                            //toastr.success('<span style="color: green;">Post Successful</span>');
+                            toastr.options = {
+                                "positionClass": "toast-bottom-center",
+                                "closeButton": true,
+                                "progressBar": true,
+                                "showDuration": "300",
+                                "hideDuration": "1000",
+                                "timeOut": "5000",
+                                "extendedTimeOut": "1000",
+                                "onShown": function () {
+                                    // Set the text color to white and background color to green
+                                    $(".toast-success").css("color", "white").css("background-color", "green");
+                                }
+                            };
+                            toastr.success("Post Successful");                           
+                            $("#btnLoad").focus();
+
+                            if (!$('.btnpost').children('span').eq(1).hasClass('d-none')) {
+                                //alert('now here');
+                                $('.btnpost').children('span').eq(1).addClass('d-none');
+                                $('.btn').removeClass('disabled');
+                                $(".table *").prop('disabled', false);
+                            }
+
+                        }
+                        else if (response.Success == "2") {
+                            toastr.warning(response.ex);
+                        }
+                        else if (response.Success == "3") {
+                            
+                              $('.btn').addClass('disabled');
+                            $(".table *").prop('disabled', true);
+
+                            toastr.error(response.ex);
+                            $(".toast-error").css("background-color", "red");
+                            $(".toast-error").css("color", "white");
+
+                            setTimeout(function () {
+                                // whene transaction error then reload page
+                                $("#btnLoad").click();
+                            }, 5000);
+
+                            //alert('Error Found.');
+
+                        }
+                        else {
+                            toastr.error(response.ex);
+                            $(".toast-error").css("background-color", "red");
+                            $(".toast-error").css("color", "white");
+                        }
+
+
+
+                    },
+                    error: function (ex) {
+                        alert('Failed.' + ex);
+                        if (!$('.btnpost').children('span').eq(1).hasClass('d-none')) {
+                            $('.btnpost').children('span').eq(1).addClass('d-none');
+                            $('.btn').removeClass('disabled');
+                            $(".table *").prop('disabled', false);
+                        }
+                    }
+
+                });
+
+                //alert('Post Successfull');
+
+            };
+            function fncSubmitUnPost() {
+
+                //alert(table.rows('.selected').data().length + ' row(s) selected');
+
+                var rows = table.rows('.selected').data();
+                if (rows.length < 1) {
+                    return false;
+                }
+
+
+                //console.log(rows);
+
+                if ($('.btnunpost').children('span').eq(1).hasClass('d-none')) {
+                    $('.btnunpost').children('span').eq(1).removeClass('d-none');
+                    $('.btn').addClass('disabled');
+                    $(".table *").prop('disabled', true);
+                }
+
+
+
+
+                var docid = [];
+                var doctype = [];
+                var criteria = "UnPost";
+
+                for (var i = 0; i < rows.length; i++) {
+
+                    var rowData = rows[i];
+                    //alert(rowData[0]);
+                    //console.log(rowData);
+                    docid.push(rowData[3]);
+                    doctype.push(rowData[5]);
+                }
+
+
+                $.ajax({
+                    type: 'POST',
+                    headers: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                url: '@Url.Action("PostUnpostDocument", "Admin")',
+                dataType: 'json',
+                async: true,
+                    data: { docid: docid, criteria: criteria , doctype:doctype},
+                    success: function (response) {
+                        if (response.Success == "1") {
+                            var selectedRows = table.rows(".selected");
+                            selectedRows.remove().draw();
+                            //toastr.success(response.ex);
+                            toastr.options = {
+                                "positionClass": "toast-bottom-center",
+                                "closeButton": true,
+                                "progressBar": true,
+                                "showDuration": "300",
+                                "hideDuration": "1000",
+                                "timeOut": "5000",
+                                "extendedTimeOut": "1000",
+                                "onShown": function () {
+                                    // Set the text color to white and background color to green
+                                    $(".toast-success").css("color", "white").css("background-color", "green");
+                                }
+                            };
+                            toastr.success("UnPost Successful");                           
+                            $("#btnLoad").focus();
+                        }
+                        else if (response.Success == "2") {
+                            toastr.warning(response.ex);
+                            $(".toast-warning").css("background-color", "red");
+                            $(".toast-warning").css("color", "white");
+                        }
+                        else if (response.Success == "3") {
+                            toastr.error(response.ex);
+                            $(".toast-error").css("background-color", "red");
+                            $(".toast-error").css("color", "white");
+                            setTimeout(function () {
+                                // whene transaction error then reload page
+                                $("#btnLoad").click();
+                            }, 7000);
+                        }
+                        else {
+                            toastr.error(response.ex);
+                            $(".toast-error").css("background-color", "red");
+                            $(".toast-error").css("color", "white");
+                        }
+
+                        if (!$('.btnunpost').children('span').eq(1).hasClass('d-none')) {
+                            $('.btnunpost').children('span').eq(1).addClass('d-none');
+                            $('.btn').removeClass('disabled');
+                            $(".table *").prop('disabled', false);
+                        }
+
+                    },
+
+
+
+                    error: function (ex) {
+                        alert('Failed.' + ex);
+
+                        if (!$('.btnunpost').children('span').eq(1).hasClass('d-none')) {
+                            $('.btnunpost').children('span').eq(1).addClass('d-none');
+                            //$('.btnunpost').prop("disabled", false);
+                            $('.btn').removeClass('disabled');
+                            $(".table *").prop('disabled', false);
+                        }
+                    }
+
+                });
+
+                //alert('Unpost Successfull');
+
+            };
+
+            CurrentDate();
+
+            $(".FromDate").datepicker({
+
+                dateFormat: "dd-M-y",
+                changeMonth: true,
+                changeYear: true
+
+            });
+            $(".ToDate").datepicker({
+
+                dateFormat: "dd-M-y",
+                changeMonth: true,
+                changeYear: true
+
+            });
+
+            function CurrentDate() {
+                var date = new Date();
+                var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                    "Aug", "Sep", "Oct", "Nov", "Dec"];
+                var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear();
+
+
+                if ($(".FromDate").val() == '') {
+                    $(".FromDate").val(val);
+                }
+                if ($(".ToDate").val() == '') {
+                    $(".ToDate").val(val);
+                }
+
+
+            }
+
+
+            function ConfirmDialog(message) {
+                var modalHtml = `
+                    <div class="modal" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Confirmation message</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <h6>${message}?</h6>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-success" id="confirmYesBtn">Yes</button>
+                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">No</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+
+                var $modal = $(modalHtml);
+                $modal.appendTo('body');
+                var modalInstance = new bootstrap.Modal($modal[0]);
+                $modal.modal('show');
+
+                $('#confirmYesBtn').on('click', function () {
+                    modalInstance.hide();
+                    if (message == "Post" || message == "Approve") {
+                        fncSubmitPost();
+                    } else if (message == "UnPost" || message == "DisApprove") {
+                        fncSubmitUnPost();
+                    }
+                });
+
+                $modal.on('hidden.bs.modal', function () {
+                    $modal.remove();
+                });
+            };
+        });
+    </script>
+
+}
+
+

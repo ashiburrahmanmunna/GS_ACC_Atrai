@@ -1,0 +1,278 @@
+﻿@model IEnumerable<Atrai.Core.Entity.AccountHeadSystemModel>
+@{ ViewData["Title"] = "AccountHeadSystem List";
+                Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+
+        @*
+
+            </div>*@
+
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header form-inline">
+
+                            <div class="col-md-4 col-12">
+                                @Html.ActionLink("Create Account Head", "AddAccountHeadSystem", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md-4 col-12 mt-1">
+                                <h4 style="color: #1976d2;">Account Head List</h4>
+                            </div>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+                        <div class="table-responsive mt-1">
+                            <table id="tbllist" class="display nowrap table table-sm table-hover  table-bordered" cellspacing="0" width="100%">
+                            </table>
+                        </div>
+
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+        $(function () {
+            var peopleList = $('#tbllist').DataTable({
+
+                serverSide: true,  "scrollX": true,
+                processing: true,
+
+                ajax: {
+                    url: '@Url.Action("GetAccountHeadSystemList", "Admin")',
+                    type: "POST"
+                },
+                language: {
+                    sLengthMenu: "Show _MENU_"
+                },
+
+                select: {
+                    style: 'single',
+                    selector: 'td:nth-child(1),td:nth-child(2),td:nth-child(3),td:nth-child(4),td:nth-child(5),td:nth-child(6),td:nth-child(7),td:nth-child(8)'
+                },
+                dom: 'Bfrltip',
+                buttons: [
+                    //'copy', 'csv', 'excel', 'pdf', 'print'
+                  
+                        {       extend: 'excel',
+                                text: '<i class="mdi mdi-file-excel"></i>',
+                                className: 'btn-success',
+                                titleAttr: 'Export to excel'
+                        }
+                ],
+                //"info": false,
+                rowId: 'Id',
+                columns: [
+
+                    { "title": "Id", "data": "Id", "visible": false },
+                    { "title": "SL No", "data": "NumericNumber", "searchable": true },
+                    { "title": "Type", "data": "AccType", "searchable": true },
+                    //{ "title": "Account Category Type", "data": "AccountCategory", "searchable": true },
+                    { "title": "Account Category", "data": "AccountCategory", "searchable": true },
+
+                    {
+                        "title": "Base / Parent Head",
+                        "data": "vAccountGroupHead",
+                        "searchable": true,
+                        "render": function (data, type, row) {
+                            var parentaccname = "";
+
+                            if (data != null) {
+                                parentaccname = data.AccName + ' - ' + data.AccCode;
+
+                            }
+                            return parentaccname;
+
+                        }
+                    },
+                    { "title": "Account Code", "data": "AccCode", "searchable": true },
+                    { "title": "Account Head", "data": "AccName", "searchable": true },
+
+
+
+                    //{ "title": "Balance", "data": "AccountBalance", "searchable": false },
+                    {
+                        "title":"Debit Balance",
+                        "className": "text-nowrap",
+                        "data": {
+                            Id: "AccountBalance"
+                        },
+                        "searchable": false,
+                        "render": function (data, row) {
+
+                            //var myUrlprint = '@Url.Action("SubsidiaryLedger", "Admin")?Id=' + data.Id + '&Type=Account';
+
+                            var myUrlprint = '@Url.Action("SubsidiaryLedger", "Admin")?Id=' + data.Id + '&Type=' + data.AccountCategory+'';
+
+                            
+                            var AccountBalance = data.AccountBalance;
+                            var buttons = '';
+                            if (data.AccountBalance >= 0)
+                            {
+                            if (data.AccType == "L") {
+                                buttons += AccountBalance;//'<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"btn btn-icon btn-success btn mb-0\" target=\"_blank\"><i class="fa fa-print"> ' + AccountBalance + '</i></a></span>';
+                            }
+                            }
+                            return buttons;
+                        }
+                    },
+                    {
+                        "title":"Credit Balance",
+                        "className": "text-nowrap",
+                        "data": {
+                            Id: "AccountBalance"
+                        },
+                        "searchable": false,
+                        "render": function (data, row) {
+
+                            //var myUrlprint = '@Url.Action("SubsidiaryLedger", "Admin")?Id=' + data.Id + '&Type=Account';
+
+                            var myUrlprint = '@Url.Action("SubsidiaryLedger", "Admin")?Id=' + data.Id + '&Type=' + data.AccountCategory+'';
+
+                            
+                            var AccountBalance = -data.AccountBalance;
+                            var buttons = '';
+                            if (data.AccountBalance <0)
+                            {
+                                if (data.AccType == "L") {
+                                    buttons +=  AccountBalance;//'<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"btn btn-icon btn-success btn mb-0\" target=\"_blank\"><i class="fa fa-print"> ' + AccountBalance + '</i></a></span>';
+                                }
+                            }
+                            return buttons;
+                        }
+                    },
+                    {
+                        "title": "Action",
+                        "data": "Id",
+                        "render": function (data, type, row) {
+                            var myUrledit = '@Url.Action("EditAccountHeadSystem", "Admin")?AccountHeadSystemId=' + data;
+                            var myUrldelete = '@Url.Action("DeleteAccountHeadSystem", "Admin")?AccountHeadSystemId=' + data;
+                            var message = `return confirm('Are you sure you want to Remove the AccountHeadSystem Information ?')`;
+
+
+                            if (!data.isSystem) {
+                                return '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                    '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\"  onclick = \"' + message + '\"   class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-remove"></i></a></span>';
+                            }
+
+
+                        }
+
+                    }
+                ]
+            });
+        });
+
+        CurrentDate();
+
+        $(".FromDate").datepicker({
+
+            dateFormat: "dd-M-y",
+            changeMonth: true,
+            changeYear: true
+
+        });
+        $(".ToDate").datepicker({
+
+            dateFormat: "dd-M-y",
+            changeMonth: true,
+            changeYear: true
+
+        });
+
+        function CurrentDate() {
+            var date = new Date();
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+
+
+            if ($(".FromDate").val() == '') {
+                $(".FromDate").val(val);
+            }
+            if ($(".ToDate").val() == '') {
+                $(".ToDate").val(val);
+            }
+
+
+        }
+
+       function ReportPrint(btnvalue) {
+
+                var peopleList = $('#tbllist').DataTable();
+                var rows = peopleList.rows('.selected').data();
+
+                var reporttype = $("input[name=RptType]:checked").val();
+                var FromDate = $(".FromDate").val();
+                var ToDate = $(".ToDate").val();
+
+
+                var productidlist = [];
+                var pid = 0;
+                var type = "Account";
+
+
+                if (rows.length > 0) {
+                    pid = rows[0]["Id"];
+                    type = rows[0]["AccountCategory"];
+
+                }
+                //console.log(pid);
+                //alert(WarehouseId);
+                //alert(btnvalue);
+
+
+                if (btnvalue == "PrintLedger") {
+
+                    if ((pid == null) || (pid == ""))
+                    {
+                        toastr.error("Please Select Account Head from the List.");
+                        return true;
+                    }
+                    //alert('Wait');
+                }
+
+
+                
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SubsidiaryLedger", "Admin")',
+                dataType: 'json',
+                async: true,
+                data: { rptFormat: reporttype, action: btnvalue, Id: pid , Type:type, FromDate: FromDate, ToDate: ToDate},
+                success: function (response) {
+
+                    //setTimeout(function () {
+                    //    window.open(response.Url, '_blank')
+                    //}, 3000);
+
+                    window.open(response.Url, '_blank')
+
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+          }
+
+    </script>
+}

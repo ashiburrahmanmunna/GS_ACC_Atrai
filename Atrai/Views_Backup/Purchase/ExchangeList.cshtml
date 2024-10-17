@@ -1,0 +1,202 @@
+﻿@model IEnumerable<Atrai.Core.Entity.AccountHeadModel>
+@{ ViewData["Title"] = "Exchange List";
+                Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                                @Html.Hidden("FromDate", null, new { @class = "form-control from-control-sm text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+                                @Html.Hidden("ToDate", null, new { @class = "form-control from-control-sm text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+
+                    <div class="card-header">
+                            <div class="row">
+                            <div class="col-md-4 col-12">
+                                @Html.ActionLink("Add New Exchange", "IMEIExchange", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md-4 col-12 mt-1">
+                                <h4 style="color: #1976d2;">Exchange List</h4>
+                            </div>
+
+                             <div class="col-md-4 col-9 pt-2 divHiddenItems">
+                                <fieldset class="float-right">
+                                    <label class="pr-2"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+                                </fieldset>
+                            </div>
+                            </div>
+
+                    </div>
+
+
+                    <div class="card-body">
+                        <div class="row mb-2">
+                                 <div class="col-md-6 col-12  mb-2">
+                                              <div class="form-inline divHiddenItems">
+                                         <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text">
+                                               <i class="fa fa-calendar"></i>
+                                             </div>
+                                        </div>
+                                        <input type="text" class="form-control  from-control-sm" name="date" id="daterange-btn" style="width: auto;">
+                                         <button id='btnDec' type="button" class="btn btn-danger rounded-0" title='Decrement month'><i class="fa fa-calendar-minus-o" aria-hidden="true"></i></button>
+                                        <button id='btnInc' type="button" class="btn btn-info  rounded-0" title='Increment month'><i class="fa fa-calendar-plus-o" aria-hidden="true"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                                              <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Suppliers", ViewBag.Suppliers as List<SelectListItem>, "Select Suppliers", new { id = "SupplierId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+
+              
+
+                        <div class="table-responsive mt-1">
+                            <table id="tbllist" class="display nowrap table table-sm table-hover  table-bordered" cellspacing="0" width="100%">
+                            </table>
+                        </div>
+
+                     
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+        
+
+        loaddata();
+
+            function loaddata() {
+
+            peopleList = $('#tbllist').DataTable({
+                 initComplete: function () {
+
+                    var input = $('.dataTables_filter input'),//.unbind(),
+                        self = this.api(),
+                        $allButton = $('<button class="btn rounded-0 btn-primary btn-sm" tabindex="0" aria-controls="purchaselist" TransactionId="button" title="Supplier & Load"></button>')
+                            .text('Supplier & Load')
+                            .click(function () {
+                                input.val('');
+                                loaddata();
+                            })
+                    $('.dataTables_filter').append($allButton);
+                    $("#myInput").on("click", function () {
+                        
+                            setTimeout(function () {
+                                 table.page.len(1000).draw();
+                                
+                            }, 1);
+                    });
+
+                    $("#myInput").on("keyup", function () {
+                        var value = $(this).val().toLowerCase();
+                      
+                        $("#saleslist tr").filter(function () {
+                            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                            //
+                        });
+                         
+                        
+                    });
+
+
+                },
+                serverSide: true,  "scrollX": true,
+                processing: true,
+
+                ajax: {
+                    url: '@Url.Action("GetExchangeList", "Purchase")',
+                    type: "POST",
+                    "data": { FromDate: $("#FromDate").val(), ToDate: $("#ToDate").val(), SupplierId: $("#SupplierId").val() },
+
+                },
+                language: {
+                    sLengthMenu: "Show _MENU_"
+                },
+
+                select: {
+                    style: 'single',
+                    selector: 'td:nth-child(1),td:nth-child(2),td:nth-child(3),td:nth-child(4)'
+                },
+                dom: 'Bfrltip',
+                buttons: [
+                  
+                        {       extend: 'excel',
+                                text: '<i class="mdi mdi-file-excel"></i>',
+                                className: 'btn-success',
+                                titleAttr: 'Export to excel'
+                        }
+                ],
+                rowId: 'Id',
+                columns: [
+
+                    { "title": "Id", "data": "Id", "visible": false },
+                    { "title": "Given IMEI", "data": "ExchangeSerialNo", "searchable": true },
+                    { "title": "Taken IMEI", "data": "BatchSerialNo", "searchable": true },
+                    { "title": "Product", "data": "ProductName", "searchable": true },
+                    
+                    //{ "title": "Brand", "data": "BrandName", "searchable": true },
+                    //{ "title": "Color", "data": "ColorName", "searchable": true },
+                    //{ "title": "Size", "data": "SizeName", "searchable": true },
+
+                    { "title": "Supplier", "data": "SupplierName", "searchable": true },
+                    { "title": "Exchange Date", "data": "ExchangeDateString", "searchable": false },
+                    { "title": "Purchase Date", "data": "PurchaseDateString", "searchable": false },
+                    { "title": "Purchase Code", "data": "PurchaseCode", "searchable": false },
+                    {
+                                "title": "Action",
+                                "className" : "text-nowrap",
+                                //"data": "Id",
+                                "data": {
+                                    Id: "Id" //,
+                                    //VoucherTypeName:"VoucherTypeName",
+                                    //isPosted:"isPosted"
+                                },
+                                "render": function (data, type, row) {
+                                    var myUrledit = '@Url.Action("EditIMEIExchange", "Purchase")?IMEIId=' + data.Id;
+                                    //var message = `return confirm('Are you sure you want to Remove the Purchase Information ?')`;
+                                    var buttons = "";
+                                    if (!data.IsUsed) {
+                                            buttons += '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 m-b-5\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>';
+                                    }
+                                             return buttons;
+                                    }
+
+                           
+
+                                }
+                            ],
+                "order": [0, "desc"],
+                "processing": true,
+                    "language": {
+                            "lengthMenu": "_MENU_",
+                            //"zeroRecords": "Nothing found - sorry",
+                            //"info": "Showing page _PAGE_ of _PAGES_",
+                            "infoEmpty": "No records available",
+                            "infoFiltered": "(filtered from _MAX_ total records)",
+                            "searchPlaceholder": "Search",
+                             "sSearch" : '<em class="fa fa-search"></em>'
+                        },
+                "destroy": true
+            });
+
+     };
+      
+
+    </script>
+}

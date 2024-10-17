@@ -1,0 +1,1864 @@
+﻿@*@model List<Atrai.Model.Core.Entity.AccountHeadModel>*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model IEnumerable<Atrai.Controllers.AccountsController.BalanceSheetModel>
+@*@model Tuple<List<Atrai.Model.Core.Entity.AccountHeadModel>, IEnumerable<Atrai.Controllers.AccountsController.BalanceSheetModel>>*@
+@{
+    ViewData["Title"] = "Voucher Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var criteria = ViewBag.criteria;
+    var strId = ViewBag.strId;
+    var dtFrom = ViewBag.dtFrom;
+    var dtTo = ViewBag.dtTo;
+    System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+}
+<style>
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+             border-bottom-width: 0px;
+
+        }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    .tabulator-table .tabulator-row {
+        background-color: white;
+    }
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+        .report-text-style:hover {
+            cursor: pointer;
+        }
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btn:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .dropdown-menu.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+    }
+    /*    .tabulator-row .tabulator-cell, .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: none;
+        border-left: none;
+    }*/
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+        border: 0.3px solid #d4d4d4;
+    }
+
+    .tabulator .tabulator-header .tabulator-col {
+        border-right-color: #dee2e6;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    #tableContainer {
+        text-align: center; /* Horizontally center its children */
+    }
+
+    #incomeStatementTable {
+        display: inline-block; /* Make it a block element and align it inline */
+        margin: 0 auto; /* Center it horizontally */
+    }
+
+    .tabulator {
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+    }
+
+    td {
+        font-weight: bold !important;
+    }
+
+    .icon-space {
+        margin-right: 10px;
+    }
+
+</style>
+<div class="row" id="change-checkbox">
+    <div class="col-12 col-md-12">
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row m-0 ps-4 upper-form-style pt-2">
+                    <div class="col-md-12 mb-2">
+                        <span class="report-text-style" onclick="gotoReportList()"><i class="bi bi-chevron-left"></i> Back to report list</span>
+                        <h4 class="fw-bold fs-3 mt-3">
+                            Sales by Customer Summary Report
+                        </h4>
+                        <span class="float-end">
+                            <button type="button" class="btn customize-btn fw-bold">Customize</button>
+                            <button type="button" class="btn customization-btn fw-bold">Save Customization</button>
+                        </span>
+                    </div>
+                    <div class="col-md-8 col-12 mb-2">
+
+
+
+                        <div class="row">
+                            <div class="col-lg-4 col-12">
+                                <div class="mb-2" id="reportrange">
+                                    <label class="form-label">Report period</label>
+                                    <select onclick="setDateRange()" id="select2" class="form-select">
+                                        @*<option selected="selected" disabled="disabled">Select an Option</option>*@
+                                        <option value="1">All Dates</option>
+                                        <option value="2">Custom</option>
+                                        <option value="3" selected>Today</option>
+                                        <option value="4">This Week</option>
+                                        <option value="5">This Week-to-date</option>
+                                        <option value="6">This Month</option>
+                                        <option value="7">This Month-to-date</option>
+                                        <option value="8">This Quarter</option>
+                                        <option value="9">This Quarter-to-date</option>
+                                        <option value="10">This Year</option>
+                                        <option value="11">This Year-to-date</option>
+                                        <option value="12">This Year-to-last-month</option>
+                                        <option value="13">Yesterday</option>
+                                        <option value="14">Recent</option>
+                                        <option value="15">Last Week</option>
+                                        <option value="16">Last Week-to-date</option>
+                                        <option value="17">Last Month</option>
+                                        <option value="18">Last Month-to-date</option>
+                                        <option value="19">Last Quarter</option>
+                                        <option value="20">Last Quarter-to-date</option>
+                                        <option value="21">Last Year</option>
+                                        <option value="22">Last Year-to-date</option>
+                                        <option value="23">Since 30 days ago</option>
+                                        <option value="24">Since 60 days ago</option>
+                                        <option value="25">Since 90 days ago</option>
+                                        <option value="26">Since 365 days ago</option>
+                                        <option value="27">Next Week</option>
+                                        <option value="28">Next 4 Weeks</option>
+                                        <option value="29">Next Month</option>
+                                        <option value="30">Next Quarter</option>
+                                        <option value="31">Next Year</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-lg-4 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">From Date</label>
+
+                                    <input class="form-control" id="start-date" disabled="disabled" />
+
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">To Date</label>
+
+                                    <input class="form-control" id="end-date" disabled="disabled" />
+
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-lg-4 col-12">
+                                    <div class="mb-2">
+                                        <label class="form-label">Display columns by</label>
+                                        <select class="form-select" id="select3">
+                                            <option value="0" selected>Total Only</option>
+                                            <option value="1">Days</option>
+                                            <option value="2">Weeks</option>
+                                            <option value="2">Months</option>
+                                            <option value="2">Quarters</option>
+                                            <option value="2">Years</option>
+                                            <option value="2">Customers</option>
+                                            <option value="2">Vendors</option>
+                                            <option value="2">Products/Services</option>
+                                        </select>
+
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4  col-12">
+                                    <label class="form-label">Show non-zero or active only</label>
+                                    <div class="dropdown1 d-grid">
+                                        <button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown"
+                                                aria-expanded="false">
+                                            Active rows/columns
+                                        </button>
+                                        <ul class="dropdown-menu" id="dropdown-menu-id" aria-labelledby="dropdownMenuButton">
+                                            <li class="fw-bold ms-3">Show rows</li>
+                                            <li>
+                                                <a class="dropdown-item" href="#">
+                                                    <div class="custom-control custom-checkbox">
+                                                        @*<input class="form-check-input ms-3" type="checkbox" value="Months" name="flexRadioDefault" id="previous-period">*@
+                                                        <input class="form-check-input" type="radio" name="flexRadioDefault1" id="isActive" Checked>
+                                                        <label class="custom-control-label cursor-pointer" id="active-label" for="active-id">Active</label>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="form-check-input" type="radio" name="flexRadioDefault1" value="All" id="isAll">
+                                                        <label class="custom-control-label cursor-pointer" id="with-all-label" for="isAll">All</label>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="form-check-input" type="radio" name="flexRadioDefault1" id="isNonZero">
+                                                        <label class="custom-control-label cursor-pointer" for="non-zero">Non-zero</label>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            @*<li>
+                                            <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                            <input id="with-group" class="form-check-input" type="radio" name="flexRadioDefault" ">
+                                            <label class="custom-control-label cursor-pointer" for="with-group">With Group</label>
+                                            </div>
+                                            </a>
+                                            </li>*@
+                                            <li class="fw-bold ms-3">Show columns</li>
+                                            <li>
+                                                <a class="dropdown-item" href="#">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input Checked class="form-check-input" type="radio" name="flexRadioDefault2" id="isActiveColumn">
+                                                        <label class="custom-control-label cursor-pointer" id="with-group-label" for="column-active">Active</label>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="form-check-input" type="radio" name="flexRadioDefault2" id="isAllColumn">
+                                                        <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="isAllColumn">All</label>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="form-check-input" type="radio" name="flexRadioDefault2" id="non-zero-column">
+                                                        <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="non-zero-column">Non-zero</label>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-12">
+                                    <div class="dropdown1 d-grid">
+                                        <label class="form-label">Compare another period</label>
+                                        <button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                                aria-expanded="false">
+                                            <span class="me-5">Select period </span>
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                            <li>
+                                                @*<a id="" class="dropdown-item" href="#">*@
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input ms-3" type="checkbox" value="Months" name="flexRadioDefault" id="previous-period">
+                                                    <label class="custom-control-label cursor-pointer" id="PP" for="with-group">Previous period (PP)</label>
+                                                </div>
+
+                                                <div class="ms-4 d-flex my-2">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" value="1" id="TkChange" disabled>
+                                                        <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="TkChange">Tk change</label>
+                                                    </div>
+                                                    <div class="custom-control custom-checkbox ms-2">
+                                                        <input class="form-check-input" type="checkbox" value="1" name="flexRadioDefault" id="PercentageChange" disabled>
+                                                        <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="PercentageChange">% change</label>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                @*<a id="" class="dropdown-item" href="#">*@
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input ms-3" type="checkbox" value="Months PY" name="flexRadioDefault" id="previous-year">
+                                                    <label class="custom-control-label cursor-pointer" id="PY" for="with-group">Previous year (PY)</label>
+                                                </div>
+
+                                                <div class="ms-4 d-flex my-2">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" value="1" id="TkChangePy" disabled>
+                                                        <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="TkChangePy">Tk change</label>
+                                                    </div>
+                                                    <div class="custom-control custom-checkbox ms-2">
+                                                        <input class="form-check-input" type="checkbox" value="1" name="flexRadioDefault" id="PercentageChangePy" disabled>
+                                                        <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="PercentageChangePy">% change</label>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li>
+
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input ms-3" type="checkbox" value="Year" name="flexRadioDefault" id="year-to-date">
+                                                    <label class="custom-control-label cursor-pointer" id="Year" for="with-group">Year-to-date (YTD)</label>
+                                                </div>
+
+                                                <div class="ms-4 d-flex my-2">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" value="1" id="TkChangePy" disabled>
+                                                        <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="TkChangePy">% of YTD</label>
+                                                    </div>
+
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="percent-of-row">
+                                                        <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="with-inactive">% of Row</label>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="percent-of-column">
+                                                        <label class="custom-control-label cursor-pointer" id="with-group-label" for="with-group">% of Column</label>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li class="mt-3 ms-3"><a href="#">Reorder columns</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-12">
+                                    <div class="mb-2">
+                                        <label class="form-label">Accounting method</label>
+                                        <div class="mt-2">
+                                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                                            <label class="form-label">Cash</label>
+                                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault11" checked>
+                                            <label class="form-label">Accural</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                           
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4 col-12 mb-2 mt-5 d-flex justify-content-center">
+                        <div>
+                            <button type="button" class="btn customize-btn fw-bold" style="" onclick="GetReport()">Run Report</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="balance-sheet" class="me-lg-auto ms-lg-auto " style="border: 1px solid #e3eaf3;  margin-top:40px;">
+                    <div class="ms-3 mt-3">
+                        <a class="text-decoration-none text-black cursor-pointer" id="add-notes"><span>Add notes</span></a>
+                        <span class="float-end">
+                            <a type="button" id="toggle-fullscreen" class="text-decoration-none text-black"> <i class="bi bi-arrows-fullscreen fs-6 icon-space"></i> </a>
+
+                            <a type="button" id="printPdfLoaded" href="#" class="text-decoration-none text-black" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <i class="bi bi-envelope me-3 fs-5"></i>
+                            </a>
+                            <a href="#" class="text-decoration-none text-black" id="print-table">
+                                <i class="bi bi-printer me-3 fs-5"></i>
+                            </a>
+                            <span class="dropdown1 me-3">
+                                <a class="dropdown-toggle text-decoration-none text-black cursor-pointer" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="bi bi-upload fs-5"></i>
+                                </a>
+                                @*<button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    </button>*@
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li><a class="dropdown-item" href="#" id="export-excel">Export to Excel</a></li>
+                                    <li><a class="dropdown-item" href="#" id="export-csv">Export to CSV</a></li>
+                                    @*<li><a class="dropdown-item" href="#">Export to Google Sheets</a></li>*@
+                                </ul>
+                            </span>
+                            <span class="dropdown1 me-3">
+                                <a class="text-decoration-none text-black cursor-pointer" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="bi bi-gear fs-5"></i>
+
+                                </a>
+                                @*<button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    </button>*@
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li class="fw-bold ms-3">Display density</li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input title-input" id="compact" value="compact">
+                                                <label class="custom-control-label cursor-pointer" id="compact-label" for="compact">Compact</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </span>
+                            @*<a href="#" class="text-decoration-none text-black">
+                                <i class="bi bi-upload me-3 fs-5"></i>
+                                </a>*@
+                            @*<a href="#" class="text-decoration-none text-black">
+                                <i class="bi bi-gear me-3 fs-5"></i>
+                                </a>*@
+                        </span>
+
+                        @*print modal*@
+                        <!-- Button trigger modal -->
+                        @*<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            Launch demo modal
+                            </button>*@
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content" style="border-radius:0px;">
+                                    <div class="d-flex mt-4 mb-3">
+                                        <h4 class="ms-3 fw-bold">Print, email, or save as PDF</h4>
+                                        <div class="ms-auto"><button type="button" class="btn-close me-2 mt-2" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                                    </div>
+                                    <div class="modal-body">
+                                        To print, right-click the preview and select <span class="fw-bold">Print</span>. Or, click the <span class="fw-bold">Print</span> icon if you see one below.
+                                        <div class="row">
+                                            @*report-print-setting-style*@
+                                            <p class="fw-bold">Report print settings</p>
+                                            <div class="col-lg-1 mt-2">
+                                                Orientation
+                                            </div>
+                                            <div class="col-lg-2">
+                                                <select class="form-select" id="orientation">
+                                                    <option value="portrait" selected>Portrait</option>
+                                                    <option value="landscape">Landscape</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <iframe id="pdf-iframe" name="pdf-iframe" style="width: 100%; height: 500px;"></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 mt-3">
+                                        <button type="button" class="btn ms-5 customize-btn fw-bolder" data-bs-dismiss="modal">Close</button>
+                                        <button id="print-pdf" type="button" class="btn float-end me-5 customization-btn fw-bolder">Print</button>
+                                        <button type="button" class="btn float-end me-2 customize-btn fw-bolder">Save as PDF</button>
+                                        <button type="button" class="btn float-end me-2 customize-btn fw-bolder">Email</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div id="parentDiv">
+                        <div class="row">
+                            <div class="col">
+
+                                <div id="make-editable" class="text-center company-and-other-text-style" onclick="makeEditable()">
+                                    <div class="form-check d-none" id="form-check-visibility">
+                                        <input class="form-check-input float-md-none" type="checkbox" name="flexCheckDefaultforImage" id="flexCheckDefaultforImage">
+                                        <label class="form-check-label" for="flexCheckDefaultforImage">
+                                            Show Image
+                                        </label>
+                                    </div>
+                                    <img id="company-image" style="width:10%" class="d-none" src="~/assets/Custom-URL-Shortener.jpg" />
+                                    <h3 id="company-name">@HttpContextAccessor.HttpContext.Session.GetString("CompanyName")</h3>
+                                    <h6 id="primary-address">@HttpContextAccessor.HttpContext.Session.GetString("PrimaryAddress")</h6>
+                                    <h6 id="trial-balance" class="text-black fw-bolder">Sales by Customer Summary</h6>
+                                    <h6 id="date-month-year"></h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end mb-2">                         
+                        </div>
+                        <br />
+                        <br />
+                        <div id="tableContainer">
+                            <div id="incomeStatementTable" ></div>
+                        </div>
+                        <br />
+                        <br />
+                        <div class="row m-0 p-0">
+                            <div class="table-responsive">
+                                <table class="table table-condensed table-hover tree bg-white border" data-statement-id="balancesheet" id="treegridTable">
+                                    <tbody id="body" class="treegrid-body">
+                                    </tbody>
+                                </table>
+                                @*<div id="loader" class="d-none"></div>*@
+
+                            </div>
+                            <!--<table class="table-borderless table-sm">
+                            <thead style="border-top: 0.5px solid #00000059; border-bottom: 0.5px solid #00000059; ">
+                                <tr id="add-th">
+                                </tr>
+                                <tr id="t-head-rows">-->
+                            @*<th class="w-50" scope="col"></th>
+                                <th class="text-end p-2 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">DEBIT</th>
+                                <th class="text-end pe-3 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">CREDIT</th>*@
+                            <!--</tr>
+                                </thead>
+
+                                <tbody id="t-body">
+                                </tbody>
+                            </table>-->
+                            @*<div id="tableContainer"></div>*@
+                            <div class="form-floating d-none" id="add-notes-textarea">
+                                <textarea class="form-control" placeholder="Add notes or include additional info with your report" id="floatingTextarea2" style="height: 200px"></textarea>
+                                <label for="floatingTextarea2">Add notes or include additional info with your report</label>
+                                <i class="bi bi-x cursor-pointer float-end" id="close-textarea" style="position: absolute; top: -10px; right: 13px; font-size:25px; "></i>
+                                @*<button type="button" class="close" id="close-textarea">&times;</button>*@
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div>
+    @*<button id="print-table">Print</button>*@
+    @*<button id="export-csv">CSV</button>*@
+    @*<button id="export-excel">Excel</button>*@
+
+</div>
+
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-treegrid/0.2.0/js/jquery.treegrid.bootstrap3.js"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+            $('#make-editable').mouseover(function () {
+                $('#form-check-visibility').removeClass('d-none').addClass('d-block');
+            });
+            $('#make-editable').mouseout(function () {
+                $('#form-check-visibility').removeClass('d-block').addClass('d-none');
+            });
+        });
+
+        function gotoReportList() {
+
+            var editUrl = '@Url.Action("ReportList", "Admin")';
+            window.location.href = editUrl;
+        }
+        function makeEditable() {
+            $("#form-check-visibility").removeClass("d-none");
+            var checkbox = document.getElementById("flexCheckDefaultforImage");
+            var image = document.getElementById("company-image");
+
+            checkbox.addEventListener("change", function () {
+                if (this.checked) {
+                    image.classList.remove("d-none");
+                } else {
+                    image.classList.add("d-none");
+                }
+            });
+            var companyName = document.getElementById("company-name");
+            var primaryAddress = document.getElementById("primary-address");
+            var trialBalanceName = document.getElementById("trial-balance");
+            var dateMonthYear = document.getElementById("date-month-year");
+            companyName.contentEditable = true;
+            primaryAddress.contentEditable = true;
+            trialBalanceName.contentEditable = true;
+            dateMonthYear.contentEditable = true;
+        }
+        //document.getElementById("change-checkbox").on("click", function () {
+        //    $("#form-check-visibility").toggleClass("d-none");
+        //})
+        $('#compact').change(function() {
+            if ($(this).is(':checked')) {
+                $('#treegridTable th').addClass('pt-3 pb-3');
+                $('.table tbody tr td').addClass('pt-3 pb-3');
+            }
+            else {
+                $('#treegridTable th').removeClass('pt-3 pb-3');
+                $('.table tbody tr td').removeClass('pt-3 pb-3');
+            }
+        });
+        $("#add-notes").click(function() {
+            $("#add-notes-textarea").toggleClass("d-none");
+            $("#floatingTextarea2").focus();
+            $("#add-notes").text("Edit notes");
+        });
+
+        /*function to close  text area after click*/
+        $("#close-textarea").click(function() {
+            $("#add-notes-textarea").addClass("d-none");
+            $("#add-notes").text("Add notes");
+            var elem = document.getElementById("add-notes");
+            elem.scrollIntoView();
+        });
+
+      //compare another period functionalities starts
+                    var pp = false;
+                    document.getElementById("previous-period").addEventListener("change", function () {
+                        if (this.checked) {
+                            pp = true;
+                           
+                            document.getElementById("TkChange").disabled = false;
+                            document.getElementById("PercentageChange").disabled = false;
+                        } else {
+                            pp = false;
+                            // valueOfPP = "Total Only";
+                            document.getElementById("TkChange").checked = false;
+                            document.getElementById("TkChange").disabled = true;
+                            document.getElementById("PercentageChange").checked = false;
+                            document.getElementById("PercentageChange").disabled = true;
+                        }
+                    });
+
+                    var ChangeValueTk = "0";
+                    var tkpp = false;
+                    document.getElementById("TkChange").addEventListener("change", function () {
+                        if (this.checked) {
+                            tkpp = true;
+                            ChangeValueTk = "1";
+                        } else {
+                            tkpp = false;
+                            ChangeValueTk = "0";
+                        }
+                    });
+                    var ChangeValuePercentage = "0";
+                    var perPP = false;
+                    document.getElementById("PercentageChange").addEventListener("change", function () {
+                        if (this.checked) {
+                            perPP = true;
+                            ChangeValuePercentage = "1";
+                        } else {
+                            perPP = false;
+                            ChangeValuePercentage = "0";
+                        }
+                    });
+                    var py = false;
+                    document.getElementById("previous-year").addEventListener("change", function () {
+                        if (this.checked) {
+                            py = true;
+                          
+                            document.getElementById("TkChangePy").disabled = false;
+                            document.getElementById("PercentageChangePy").disabled = false;
+                        } else {
+                            py = false;
+                           /// valueOfPP = "Total Only";
+                            document.getElementById("TkChangePy").checked = false;
+                            document.getElementById("TkChangePy").disabled = true;
+                            document.getElementById("PercentageChangePy").checked = false;
+                            document.getElementById("PercentageChangePy").disabled = true;
+                        }
+                    });
+                    var tkpy = false;
+                    document.getElementById("TkChangePy").addEventListener("change", function () {
+                        if (this.checked) {
+                            tkpy = true;
+                            ChangeValueTk = "1";
+                        } else {
+                            tkpy = false;
+                            ChangeValueTk = "0";
+                        }
+                    });
+                    var perPY = false;
+                    document.getElementById("PercentageChangePy").addEventListener("change", function () {
+                        if (this.checked) {
+                            perPY = true;
+                            ChangeValuePercentage = "1";
+                        } else {
+                            perPY = false;
+                            ChangeValuePercentage = "0";
+                        }
+                    });
+                    // % change wise functionality starts
+
+
+                    //% of row, % of column,% of income functionalities starts
+                    var valueOfPercentOfColumn = "0";
+                    var perRow = false;
+                    document.getElementById("percent-of-row").addEventListener("change", function () {
+                        if (this.checked) {
+                            perRow = true;
+                            document.getElementById('percent-of-column').checked = false;
+                            //valueOfPercentOfColumn = "1";
+                            ChangeValuePercentage = '3';
+                            //valueOfPP = 'Months';
+                            console.log("ChangeValuePercentage:", ChangeValuePercentage);
+                        }
+                        else {
+                            perRow = false;
+                            ChangeValuePercentage = "0";
+                            //valueOfPP = 'Total Only';
+                            console.log("ChangeValuePercentage:", ChangeValuePercentage);
+
+                        }
+                    });
+                    //var valueOfPercentOfColumn = "0";
+                    var perCol = false;
+                    document.getElementById("percent-of-column").addEventListener("change", function () {
+                        if (this.checked) {
+                            perCol = true;
+                            document.getElementById('percent-of-row').checked = false;
+                            toCheckColumn = true;
+                            ChangeValuePercentage = '2';
+                            //valueOfPP = 'Months';
+                            console.log("ChangeValuePercentage::", ChangeValuePercentage);
+
+                        }
+                        else {
+                            perCol = false;
+                            ChangeValuePercentage = "0";
+                            //valueOfPP = 'Total Only';
+                        }
+                    });
+                    //var perCol = false;
+      //compare another period functionalities ends
+
+
+        var totallength = "";
+        var firstTotalValueofIncome;
+        var firstTotalValueofExpense;
+        var substractionTotal;;
+        setDateRange(3);
+        //Show non-zero or active only functionalities starts
+        const radioButtons = document.querySelectorAll('input[type="radio"][name="flexRadioDefault"]');
+        const button = document.getElementById('dropdownMenuButton');
+
+        radioButtons.forEach((radio) => {
+            radio.addEventListener('click', () => {
+                if (radio.checked) {
+                    button.innerText = radio.nextElementSibling.innerText;
+                }
+            });
+        });
+
+
+
+        //Show rows, columns functiuonalities starts
+                    var valueofRows = "0";
+                    var active = false;
+                    var isViewPageReport = 1;
+                    var allSelectedValue = false;
+                    var condition = 1;
+                    
+        //Show rows, columns functiuonalities ends
+        var py = false;
+        document.getElementById("previous-year").addEventListener("change", function () {
+            if (this.checked) {
+                py = true;
+                // valueOfPP = "Months PY";
+                document.getElementById("TkChangePy").disabled = false;
+                document.getElementById("PercentageChangePy").disabled = false;
+            } else {
+                py = false;
+                /// valueOfPP = "Total Only";
+                document.getElementById("TkChangePy").checked = false;
+                document.getElementById("TkChangePy").disabled = true;
+                document.getElementById("PercentageChangePy").checked = false;
+                document.getElementById("PercentageChangePy").disabled = true;
+            }
+        });
+                //Tabulator function starts
+        GetReport();
+                    function GetReport() {
+
+            var isActiveChecked = document.getElementById("isActive").checked;
+            // Check if Active checkbox is checked
+            if (isActiveChecked) {
+                // Your event listener functionality
+                active = true;
+                valueofRows = '1';
+                isViewPageReport = 1;
+                allSelectedValue = false;
+                condition = 1;
+                console.log("valueofRows", valueofRows);
+            }
+
+
+            var isAllChecked = document.getElementById("isAll").checked;
+            // Check if Active checkbox is checked
+            if (isAllChecked) {
+                // Your event listener functionality
+                active = true;
+                valueofRows = '0';
+                isViewPageReport = 1;
+                allSelectedValue = false;
+                condition = 1;
+                console.log("valueofRows", valueofRows);
+            }
+
+            var isNonZeroChecked = document.getElementById("isNonZero").checked;
+            // Check if Active checkbox is checked
+            if (isNonZeroChecked) {
+                // Your event listener functionality
+                active = true;
+                valueofRows = '2';
+                isViewPageReport = 1;
+                allSelectedValue = false;
+                condition = 1;
+                console.log("valueofRows", valueofRows);
+            }
+
+            //Show columns functionality
+            var isNonZero1Checked = document.getElementById("non-zero-column").checked;
+            // Check if Active checkbox is checked
+            if (isNonZero1Checked) {
+                // Your event listener functionality
+                active = true;
+                valueofRows = '2';
+                isViewPageReport = 1;
+                allSelectedValue = false;
+                condition = 1;
+                console.log("valueofRows", valueofRows);
+            }
+
+
+            var isActive1Checked = document.getElementById("isActiveColumn").checked;
+            // Check if Active checkbox is checked
+            if (isActive1Checked) {
+                // Your event listener functionality
+                active = true;
+                valueofRows = '1';
+                isViewPageReport = 1;
+                allSelectedValue = false;
+                condition = 1;
+                console.log("valueofRows", valueofRows);
+            }
+
+
+            //Previous Period Functionality
+            var isPreviousPeriod = document.getElementById("previous-period").checked;
+            // Check if Active checkbox is checked
+            if (isPreviousPeriod) {
+                // Your event listener functionality
+                active = true;
+                valueofRows = '3';
+                isViewPageReport = 1;
+                allSelectedValue = false;
+                condition = 1;
+                console.log("valueofRows", valueofRows);
+            }
+
+            //Previous Year Functionality
+            var isPreviousYear = document.getElementById("previous-year").checked;
+            // Check if Active checkbox is checked
+            if (isPreviousYear) {
+                // Your event listener functionality
+                active = true;
+                valueofRows = '4';
+                isViewPageReport = 1;
+                allSelectedValue = false;
+                condition = 1;
+                console.log("valueofRows", valueofRows);
+            }
+
+            //Year-to-date Functionality
+            var isYearDate = document.getElementById("year-to-date").checked;
+            // Check if Active checkbox is checked
+            if (isYearDate) {
+                // Your event listener functionality
+                active = true;
+                valueofRows = '5';
+                isViewPageReport = 1;
+                allSelectedValue = false;
+                condition = 1;
+                console.log("valueofRows", valueofRows);
+            }
+
+
+
+            var parentDiv = document.getElementById("parentDiv");
+            var trialBalanceDate;
+            parentDiv.scrollIntoView({ behavior:"smooth" });
+                        $("#loader").toggleClass("d-none");
+
+            function fetchDataFromServer() {
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetSalesByCustomerSummaryQuickBook", "Accounts")'
+                };
+                return $.ajax({
+                    url: MyAppUrlSettings.MyUsefulUrl,
+                    data: { FromDate: $('#start-date').val(), ToDate: $('#end-date').val(), rpttype: "TB", criteria: $("#select2 option:selected").text(), displayBy: $("#select3 option:selected").text(), isGroup: 0, isViewPageReport: isViewPageReport, Months: $("#select-form option:selected").text(), valueofRows: valueofRows, ChangeValuePercentage: ChangeValuePercentage },  // $('#start-date').val() ChangeValueTk: ChangeValueTk, ChangeValuePercentage: ChangeValuePercentage, valueOfPercentOfColumn: valueOfPercentOfColumn  $("#select-form option:selected").text()
+                    dataType: "json",
+                });
+            }
+
+            function removeExportEventListeners() {
+                var printBtn = document.getElementById("print-table");
+                var exportCsvBtn = document.getElementById("export-csv");
+                var exportExcelBtn = document.getElementById("export-excel");
+
+                var printBtnClone = printBtn.cloneNode(true);
+                var exportCsvBtnClone = exportCsvBtn.cloneNode(true);
+                var exportExcelBtnClone = exportExcelBtn.cloneNode(true);
+
+                printBtn.parentNode.replaceChild(printBtnClone, printBtn);
+                exportCsvBtn.parentNode.replaceChild(exportCsvBtnClone, exportCsvBtn);
+                exportExcelBtn.parentNode.replaceChild(exportExcelBtnClone, exportExcelBtn);
+            }
+
+            fetchDataFromServer().done(function (response) {
+
+                console.log("notrmal response:",response.data);
+                var dataTable = response.data.Table;
+                console.log("data table:", dataTable);
+                // trialBalanceDate = `<span>${response.data.Table[0].MonthCaption}</span>`;
+                var trialBalanceDate = $('#end-date').val();
+                $("#date-month-year").empty();
+                $("#date-month-year").append(trialBalanceDate);
+                var columnsToExclude = ["MonthCaption","FontSignal"]; // Define columns to be excluded
+
+                var columns = Object.keys(dataTable[0]).map((column) => {
+                    if (!columnsToExclude.includes(column)) {
+                        var columnDefinition = {
+                            title: column === "CUSTOMER" ? "" : column,
+                            field: column,
+                            formatter: function (cell, formatterParams) {
+                                var accName = cell.getRow().getData().AccName;
+                                var field = cell.getColumn().getField();
+                                var istopborder = cell.getRow().getData().IsTopBorder;
+                                var isbottomborder = cell.getRow().getData().IsBottomBorder;
+                                var borderstyle = cell.getRow().getData().IsBottomBorder;
+
+                                var rowEl = cell.getRow().getElement();
+
+                                if (cell.getData().FontSignal === "B") {
+                                    rowEl.style.fontWeight = "bold";
+                                }
+                                return cell.getValue();
+                            },
+                            hozAlign: column === "CUSTOMER" ? "left" : "right",
+                            frozen: column === "AccName" ? true : (column === "AccCode" ? true : false),
+                        };
+
+                        // Apply bottomCalc: 'sum' only to numeric columns
+                        //if (column !== "CustomerName" && !isNaN(parseFloat(dataTable[0][column]))) {
+                        //    columnDefinition.bottomCalc = 'sum';
+                        //}
+
+                        return columnDefinition;
+                    }
+                }).filter((column) => column !== undefined);
+
+
+                // //code to show % column starts
+                // if (ChangeValuePercentage == "2") {
+                //     var updatedColumns = columns.map((column) => {
+                //         if (column.field === 'CUSTOMER') {
+                //             column.rowspan = 2;
+                //         }
+                //         else {
+                //             column.colspan = 2;
+                //             //const debitField = column.field + "_Debit";
+                //             const monthWise = column.field + "_monthWise";
+                //             const percentOfColumn = column.field + "_percentWise";
+                //             var selectedTextofDisplayColumnBy = $("#select-form option:selected").text();
+                //             if (selectedTextofDisplayColumnBy == "Total Only") {
+                //                 column.columns = [
+                //                     {//first column
+                //                         title: trialBalanceDate,
+                //                         field: monthWise,
+                //                         hozAlign: 'right',
+                //                         frozen: false,
+                //                         formatter: function (cell, formatterParams) {
+                //                             var data = cell.getRow().getData();
+                //                             var monthWiseData = data[column.field];
+                //                             return monthWiseData
+                //                         }
+                //                     },
+                //                     { //second column
+                //                         title: '% OF COLUMN',
+                //                         field: percentOfColumn,
+                //                         hozAlign: 'right',
+                //                         frozen: false,
+                //                         formatter: function (cell, formatterParams) {
+                //                             var data = cell.getRow().getData();
+                //                             var monthData = data[column.field];
+                //                             //console.log("monthData::", monthData);
+
+                //                             // Retrieve percentData outside the loop
+                //                             var percentData;
+                //                             var rows = cell.getTable().getRows();
+                //                             rows.forEach(function (row) {
+                //                                 var rowData = row.getData();
+                //                                 var accName = rowData["CUSTOMER"];
+                //                                 if (accName === "Total") {
+                //                                     percentData = rowData[column.field];
+                //                                     return false; // Exit the loop once percentData is found
+                //                                 }
+                //                             });
+
+                //                             var percentColumnCalculation = null;
+
+                //                             if (percentData !== undefined && percentData !== null) {
+                //                                 percentColumnCalculation = (monthData / percentData) * 100;
+                //                                 percentColumnCalculation = percentColumnCalculation.toFixed(2) + " %"; // Format to two decimal places
+                //                             }
+
+                //                             //console.log("def::", def);
+                //                             return percentColumnCalculation;
+
+                //                         }
+                //                     }
+                //                 ];
+                //             }
+
+                //             else {
+                //                 column.columns = [
+                //                     { //first column
+                //                         title: "CURRENT",
+                //                         field: debitField,
+                //                         hozAlign: 'right',
+                //                         frozen: false,
+                //                         formatter: function (cell, formatterParams) {
+                //                             var data = cell.getRow().getData();
+                //                             let debitData;
+                //                             debitData = data[column.field]; // Get the original value from the data
+                //                             return debitData
+                //                         }
+                //                     },
+                //                     { //second column
+                //                         title: '% COLUMN',
+                //                         field: creditField,
+                //                         hozAlign: 'right',
+                //                         frozen: false,
+                //                         formatter: function (cell, formatterParams) {
+                //                             var data = cell.getRow().getData();
+                //                             var monthData = data[column.field];
+                //                             //console.log("monthData::", monthData);
+
+                //                             // Retrieve percentData outside the loop
+                //                             var percentData;
+                //                             var rows = cell.getTable().getRows();
+                //                             rows.forEach(function (row) {
+                //                                 var rowData = row.getData();
+                //                                 var accName = rowData["AccName"];
+                //                                 if (accName === "NET PROFIT/(LOSS) AFTER INCOME TAX") {
+                //                                     percentData = rowData[column.field];
+                //                                     return false; // Exit the loop once percentData is found
+                //                                 }
+                //                             });
+
+                //                             var percentColumnCalculation = null;
+
+                //                             if (percentData !== undefined && percentData !== null) {
+                //                                 percentColumnCalculation = (monthData / percentData) * 100;
+                //                                 percentColumnCalculation = percentColumnCalculation.toFixed(2) + " %"; // Format to two decimal places
+                //                             }
+
+                //                             //console.log("def::", def);
+                //                             return percentColumnCalculation;
+
+                //                         }
+                //                     }
+                //                 ];
+                //             }
+                //         }
+
+                //         return column;
+                //     });
+                // }
+                // //code to show % column ends
+
+
+                // //code to show % ROW starts
+                // if (ChangeValuePercentage == "3") {
+                //     var updatedColumns = columns.map((column) => {
+                //         if (column.field === 'CUSTOMER') {
+                //             column.rowspan = 2;
+                //         }
+                //         else {
+                //             column.colspan = 2;
+                //             const monthWise = column.field + "_monthWise";
+                //             const percentOfRow = column.field + "_percentWise";
+                //             var selectedTextofDisplayColumnBy = $("#select-form option:selected").text();
+                //             if (selectedTextofDisplayColumnBy == "Total Only") {
+                //                 column.columns = [
+                //                     {//first column
+                //                         title: trialBalanceDate,
+                //                         field: monthWise,
+                //                         hozAlign: 'right',
+                //                         frozen: false,
+                //                         formatter: function (cell, formatterParams) {
+                //                             var data = cell.getRow().getData();
+                //                             var monthWiseData = data[column.field]; // Get the original value from the data
+                //                             return monthWiseData;
+                //                         }
+                //                     },
+                //                     { //second column
+                //                         title: '% OF ROW',
+                //                         field: percentOfRow,
+                //                         hozAlign: 'right',
+                //                         frozen: false,
+                //                         formatter: function (cell, formatterParams) {
+                //                             var data = cell.getRow().getData();
+                //                             var monthData = data[column.field];
+
+                //                             var percentColumnCalculation = null;
+
+                //                             if (monthData === undefined || monthData === null || monthData === 0) {
+                //                                 percentColumnCalculation = 0;
+                //                             }
+                //                             else {
+                //                                 percentColumnCalculation = (monthData / monthData) * 100;
+                //                                 percentColumnCalculation = percentColumnCalculation.toFixed(2) + " %"; // Format to two decimal places
+                //                             }
+
+                //                             //console.log("def::", def);
+                //                             return percentColumnCalculation;
+
+                //                         }
+                //                     }
+                //                 ];
+                //             }
+
+                //             else {
+                //                 column.columns = [
+                //                     { //first column
+                //                         title: "CURRENT",
+                //                         field: debitField,
+                //                         hozAlign: 'right',
+                //                         frozen: false,
+                //                         formatter: function (cell, formatterParams) {
+                //                             var data = cell.getRow().getData();
+                //                             let debitData;
+                //                             debitData = data[column.field]; // Get the original value from the data
+                //                             return debitData
+                //                         }
+                //                     },
+                //                     { //second column
+                //                         title: '% OF ROW',
+                //                         field: creditField,
+                //                         hozAlign: 'right',
+                //                         frozen: false,
+                //                         formatter: function (cell, formatterParams) {
+                //                             var data = cell.getRow().getData();
+                //                             var monthData = data[column.field];
+                //                             //console.log("monthData::", monthData);
+
+                //                             // Retrieve percentData outside the loop
+                //                             var percentData;
+                //                             var rows = cell.getTable().getRows();
+                //                             rows.forEach(function (row) {
+                //                                 var rowData = row.getData();
+                //                                 var accName = rowData["AccName"];
+                //                                 if (accName === "NET PROFIT/(LOSS) AFTER INCOME TAX") {
+                //                                     percentData = rowData[column.field];
+                //                                     return false; // Exit the loop once percentData is found
+                //                                 }
+                //                             });
+
+                //                             var percentColumnCalculation = null;
+
+                //                             if (monthData === undefined || monthData === null || monthData === 0) {
+                //                                 percentColumnCalculation = 0;
+                //                             }
+                //                             else {
+                //                                 percentColumnCalculation = (monthData / monthData) * 100;
+                //                                 percentColumnCalculation = percentColumnCalculation.toFixed(2) + " %"; // Format to two decimal places
+                //                             }
+                //                             //console.log("def::", def);
+                //                             return percentColumnCalculation;
+
+                //                         }
+                //                     }
+                //                 ];
+                //             }
+                //         }
+
+                //         return column;
+                //     });
+                // }
+                //code to show % ROW ends
+
+
+                //code to show % ROW starts
+                if (ChangeValuePercentage == "3") {
+                    var updatedColumns = columns.map((column) => {
+                        if (column.field === 'CUSTOMER') {
+                            column.rowspan = 2;
+                        }
+
+                        else {
+                            column.colspan = 2;
+                            //const debitField = column.field + "_Debit";
+                            const debitField = column.field + "_Debit";
+                            const creditField = column.field + "_Credit";
+
+
+                            column.columns = [
+                                {//first column
+                                    title: trialBalanceDate,
+                                    field: debitField,
+                                    hozAlign: 'right',
+                                    frozen: false,
+                                    formatter: function (cell, formatterParams) {
+                                        var data = cell.getRow().getData();
+                                        let debitData;
+                                        debitData = data[column.field]; // Get the original value from the data
+                                        return debitData
+                                    }
+                                },
+                                { //second column
+                                    title: '% OF ROW',
+                                    field: creditField,
+                                    hozAlign: 'right',
+                                    frozen: false,
+                                    formatter: function (cell, formatterParams) {
+                                        var data = cell.getRow().getData();
+                                        var monthData = data[column.field];
+                                        console.log("data::", data);
+                                        console.log("monthData::", monthData);
+
+                                        var CustomerName = data['CUSTOMER'];
+                                        console.log("CustomerName::", CustomerName);
+
+                                        var percentColumnCalculation = null;
+
+                                        if (monthData === undefined || monthData === null || monthData === 0) {
+                                            percentColumnCalculation = 0;
+                                        }
+                                        else {
+                                            percentColumnCalculation = (monthData / monthData) * 100;
+                                            percentColumnCalculation = percentColumnCalculation.toFixed(2) + " %"; // Format to two decimal places
+                                        }
+
+                                        //console.log("def::", def);
+                                        return percentColumnCalculation;
+
+
+
+
+
+
+                                    }
+                                }
+                            ];
+
+
+
+                        }
+
+                        return column;
+                    });
+                }
+                //code to show % ROW ends
+
+                //code to show % column starts
+                if (ChangeValuePercentage == "2") {
+                    var updatedColumns = columns.map((column) => {
+                        if (column.field === 'CUSTOMER') {
+                            column.rowspan = 2;
+                        }
+
+                        else {
+                            column.colspan = 2;
+
+                            const debitField = column.field + "_Debit";
+                            const creditField = column.field + "_Credit";
+
+                            column.columns = [
+                                {//first column
+                                    title: trialBalanceDate,
+                                    field: debitField,
+                                    hozAlign: 'right',
+                                    frozen: false,
+                                    formatter: function (cell, formatterParams) {
+                                        var data = cell.getRow().getData();
+                                        let debitData;
+                                        debitData = data[column.field]; // Get the original value from the data
+                                        return debitData
+                                    }
+                                },
+                                { //second column
+                                    title: '% COLUMN',
+                                    field: creditField,
+                                    hozAlign: 'right',
+                                    frozen: false,
+                                    formatter: function (cell, formatterParams) {
+                                        var data = cell.getRow().getData();
+                                        var monthData = data[column.field];
+                                        console.log("data::", data);
+                                        console.log("monthData::", monthData);
+                                        var CustomerName = data['CUSTOMER'];
+                                        var total = data.Total;
+                                        console.log("total dekhi", total);
+
+                                        var allTotal = 0; // Initialize allTotal
+
+                                        // Find the corresponding "Total" row for the current supplier
+                                        var allTotalRow = table.getData().find(function (row) {
+                                            return row['CUSTOMER'] === 'Total';
+                                        });
+                                        console.log("allTotalRow", allTotalRow);
+
+                                        if (allTotalRow) {
+                                            allTotal = allTotalRow.Total;
+                                        }
+
+                                        console.log("allTotal::", allTotal);
+
+                                        var percentColumnCalculation = null;
+
+                                        if (allTotal !== 0) {
+                                            percentColumnCalculation = (monthData / allTotal) * 100;
+                                            percentColumnCalculation = percentColumnCalculation.toFixed(2) + " %"; // Format to two decimal places
+                                        }
+
+                                        return percentColumnCalculation;
+                                    }
+
+
+                                }
+                            ];
+
+
+                        }
+
+                        return column;
+                    });
+                }
+
+
+                removeExportEventListeners();
+
+                var companyName = "@HttpContextAccessor.HttpContext.Session.GetString("CompanyName")";
+                var primaryAddress = "@HttpContextAccessor.HttpContext.Session.GetString("PrimaryAddress")";
+                var endDate = $("#date-month-year").text();
+                var trialBalance = $("#trial-balance").text();
+
+                var table = new Tabulator("#incomeStatementTable", {
+                    data: dataTable,
+                    dataTree: true,
+                    dataTreeStartExpanded: true ,
+                    dataTreeChildField: "children",
+                    layout: "datafit",
+                    printAsHtml: true,
+                    printHeader: "<h1>" + companyName + "</h1><h5>" + primaryAddress + "</h5><h6>" + trialBalance + "</h6><h6>" + endDate + "</h6><br>",
+                    frozenRows: 1,
+                    columns: columns, //updatedColumns
+                    //    columns.map(column => {
+                    //    return {
+                    //        ...column,
+                    //        headerSort: false, // Disable sorting for each column in the columns array
+                    //    };
+                    //}),
+                    rowFormatter: function (row) {
+                        var rowEl = row.getElement();
+                        var cusName = row.getData()["CUSTOMER"];
+
+                        if (cusName === "Total") {
+                            rowEl.style.borderTop = "2px solid #adb5bd";
+                            //rowEl.style.borderBottom = "2px solid #adb5bd";
+                            rowEl.style.fontWeight = "bold";
+
+                        }
+
+                    },
+                    dataBound: function () {
+                        // Freeze the top 1 row (index 0) after the table is created
+                        var rows = table.getRows();
+                        if (rows.length > 0) {
+                            var cells = rows[0].getCells();
+                            cells.forEach(cell => {
+                                cell.freeze();
+                            });
+                        }
+                    },
+                });
+                document.getElementById("print-table").addEventListener("click", function () {
+                    table.print(false, true);
+                });
+                document.getElementById("export-csv").addEventListener("click", function () {
+                    table.download("csv", "table.csv");
+                });
+                document.getElementById("export-excel").addEventListener("click", function () {
+                    // Use the same columns array that is used for rendering the table
+                    table.download("xlsx", "table.xlsx", { sheetName: "Table Data", columns: updatedColumns });
+                });
+                //document.getElementById("export-excel").addEventListener("click", function () {
+                //    table.download("xlsx", "table.xlsx", { sheetName: "Table Data" });
+                //});
+            });
+        };
+        document.getElementById("toggle-fullscreen").addEventListener("click", function () {
+            var tableContainer = document.getElementById("incomeStatementTable");
+
+            if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                // If not in fullscreen, enter fullscreen
+                if (tableContainer.requestFullscreen) {
+                    tableContainer.requestFullscreen();
+                } else if (tableContainer.mozRequestFullScreen) { /* Firefox */
+                    tableContainer.mozRequestFullScreen();
+                } else if (tableContainer.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                    tableContainer.webkitRequestFullscreen();
+                } else if (tableContainer.msRequestFullscreen) { /* IE/Edge */
+                    tableContainer.msRequestFullscreen();
+                }
+            } else {
+                // If already in fullscreen, exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) { /* Firefox */
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE/Edge */
+                    document.msExitFullscreen();
+                }
+            }
+        });
+
+        //Tabulator function ends
+
+
+
+
+
+        $(function () {
+            $("#start-date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#end-date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+        });
+
+        /*     $("#treegridTable").empty();*/
+
+
+        //function for pdf call portrait start
+        window.jsPDF = window.jspdf.jsPDF;
+
+        // Store the references to the print button element and the current PDF document
+        var printButton = document.getElementById("print-pdf");
+        var currentDoc;
+
+        // Event handler for printing the PDF
+        printButton.addEventListener("click", function () {
+            if ($("#orientation").val() === 'portrait') {
+                portrait();
+            } else if ($("#orientation").val() === 'landscape') {
+                landscape();
+            }
+
+            // Auto-print the current PDF document
+            if (currentDoc) {
+                currentDoc.autoPrint();
+                currentDoc.output("dataurlnewwindow");
+            }
+        });
+
+
+        function portrait() {
+
+
+            var selectedText = $("#select-form option:selected").text();
+            var selectedPeriod = $("#select2 option:selected").text();
+              var previousPeriodCheckbox = $('#previous-period');
+                var previousYearCheckbox = $('#previous-year');
+
+            // Set the font styles
+            var fontUrl = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap';
+
+            // Load the font styles dynamically
+            var fontLink = document.createElement('link');
+            fontLink.href = fontUrl;
+            fontLink.rel = 'stylesheet';
+            document.head.appendChild(fontLink);
+
+
+
+            var element = document.getElementById("parentDiv");
+            var companyName = document.getElementById("company-name").innerText;
+            var primaryAddress = document.getElementById("primary-address").innerText;
+            var trialBalance = document.getElementById("trial-balance").innerText;
+            var dateMonthYear = document.getElementById("date-month-year").innerText;
+
+            // Set the PDF dimensions and margins for A4 size (in points) for portrait mode
+            //var pdfWidth = 850; // A4 width in points
+            //var pdfHeight = 841.89; // A4 height in points
+            var pdfWidth = 595.28; // A4 width in points
+            var pdfHeight = 841.89;
+            // var margin = 40; // Margin size in points
+
+
+            var jsPDF = window.jspdf.jsPDF;
+            var doc = new jsPDF({
+                orientation: "portrait",
+                unit: "pt",
+                format: "a4"
+            });
+
+
+
+            var centerX = pdfWidth / 2;
+
+            // Add the content to the PDF
+            doc.setFont('Montserrat', 'sans-serif');
+            doc.setTextColor(76, 82, 88);
+            doc.setFontSize(20);
+            var textWidth = doc.getStringUnitWidth(companyName) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(companyName, centerX - textWidth / 2, 40);
+
+            doc.setFontSize(12);
+            doc.setFont('Montserrat', 'sans-serif');
+            doc.setTextColor(76, 82, 88);
+            var textWidth = doc.getStringUnitWidth(primaryAddress) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(primaryAddress, centerX - textWidth / 2, 40 + 20);
+
+            doc.setFontSize(12);
+            doc.setFont('Montserrat', 'sans-serif');
+            doc.setTextColor(0, 0, 0);
+            var textWidth = doc.getStringUnitWidth(trialBalance) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(trialBalance, centerX - textWidth / 2, 40 + 40);
+
+            doc.setFontSize(12);
+            doc.setFont('Montserrat', 'sans-serif');
+            doc.setTextColor(76, 82, 88);
+            var textWidth = doc.getStringUnitWidth(dateMonthYear) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(dateMonthYear, centerX - textWidth / 2, 40 + 60);
+
+
+
+
+
+
+
+
+
+
+            var headers = ["Account Head", "clBalance"];
+
+
+            var tableData = [];
+            var uniqueAccountNames = {};
+
+            for (var i = 0; i < allData.length; i++) {
+                var account = allData[i];
+                var accountName = account.AccName.trim();
+                var clBalance = account.clBalance;
+
+                tableData.push([accountName, clBalance]);
+
+                if (account.Children && account.Children.length > 0) {
+                    for (var j = 0; j < account.Children.length; j++) {
+                        var childAccount = account.Children[j];
+                        var childAccountName = childAccount.AccName.trim();
+                        var childClBalance = childAccount.clBalance;
+
+                        tableData.push(['\t' + childAccountName, childClBalance]);
+
+                        if (childAccount.Children && childAccount.Children.length > 0) {
+                            for (var k = 0; k < childAccount.Children.length; k++) {
+                                var subChildAccount = childAccount.Children[k];
+                                var subChildAccountName = subChildAccount.AccName.trim();
+                                var subChildClBalance = subChildAccount.clBalance;
+
+                                tableData.push(['\t\t' + subChildAccountName, subChildClBalance]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            var tableWidth = 360; // Assuming the total width of the table is 360 points
+            var pdfWidth = 595.28; // Width of the PDF in points
+            var margin = (pdfWidth - tableWidth) / 2;
+
+            var tableOptions = {
+                startY: 120,
+                startX : margin,
+                head: [headers],
+                body: tableData,
+                headStyles: {
+                    fillColor: [255, 255, 255],
+                    textColor: [0, 0, 0], // Set text color to black
+                    fontSize: 12,
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    font: 'Montserrat'
+                },
+                // startX: (pdfWidth - 20 * 2) / 2,
+                didDrawCell: function (data) {
+                    var isLastRow = (data.row.index === tableData.length - 1);
+                    console.log(tableData.length);
+                    console.log(data.row);
+                    if (data.section === 'head') {
+                        doc.setFillColor(255, 255, 255); // Set the desired light color
+                        doc.setTextColor(0, 0, 0); // Set text color to black
+                        doc.setFont('Montserrat', 'bold'); // Set font style to bold
+                        doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S'); // Draw border around header cells
+                    }
+                    if (data.section === 'body') {
+                        if (isLastRow) {
+                            // Draw top border and two bottom borders for the last row
+                            doc.setDrawColor(0); // Set border color to black
+                            doc.setLineWidth(0.2); // Set border width to thin
+
+                            // Draw top border
+                            doc.line(data.cell.x, data.cell.y, data.cell.x + data.cell.width, data.cell.y);
+
+                            // Draw first bottom border
+                            doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+
+                            // Draw second bottom border
+                            doc.line(data.cell.x, data.cell.y + data.cell.height + 2, data.cell.x + data.cell.width, data.cell.y + data.cell.height + 2);
+                        } else if (data.row.index % 2 === 0) {
+                            // Remove the background color of alternate rows
+                            data.cell.styles.fillColor = [255, 255, 255]; // Set the background color to white
+                        }
+                    }
+
+
+
+
+
+
+                },
+                didParseCell: function (data) {
+                    if (data.section === 'head') {
+                        //doc.setDrawColor(0); // Set border color to black
+                        // doc.setLineWidth(0.2); // Set border width to thin
+                        // doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+                        data.cell.styles.fillColor = [255, 255, 255];
+                        data.cell.styles.textColor = [0, 0, 0];
+                        // Increase the font size of the header
+                        data.cell.styles.fontSize = 9.5;
+                        data.cell.styles.fontStyle = 'bold';
+                        data.cell.styles.halign = 'center';
+
+                    }
+                    if (data.section === 'body') {
+                        data.cell.styles.fillColor = [255, 255, 255];
+                        if (data.row.index === tableData.length - 1) {
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+
+
+                    }
+
+                    doc.setDrawColor(200); // Set border color
+                    doc.setLineWidth(0.2); // Set border width
+                    doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S');
+                },
+                columnStyles: {
+                    0: { cellWidth: 180, halign: 'left', font: 'Montserrat' },
+                    1: { cellWidth: 180, halign: 'right', font: 'Montserrat' }
+
+                }
+            };
+
+            doc.autoTable(tableOptions);
+
+
+
+            var pdfDataUrl = doc.output("datauristring");
+            var pdfIframe = document.getElementById("pdf-iframe");
+            pdfIframe.src = pdfDataUrl;
+            currentDoc = doc;   //// this is my final code; here the pdf convertion is working.. some desigining issues are left. like; the table should be at center
+            //// Event handler for printing the PDF }
+            // document.getElementById("print-pdf").addEventListener("click", function () {
+
+            //    doc.autoPrint();
+            //     doc.output("dataurlnewwindow");
+            //});
+
+            // doc='';
+        }
+
+        function landscape() {
+            var element = document.getElementById("parentDiv");
+
+            // Set the PDF dimensions and margins for A4 size (in points) for portrait mode
+            var pdfWidth = 595.28; // A4 width in points
+            var pdfHeight = 841.89; // A4 height in points
+            var margin = 40; // Margin size in points
+
+            // Create a new jsPDF instance
+            var doc = new jsPDF({
+                orientation: "landscape",
+                unit: "pt",
+                format: [pdfWidth, pdfHeight],
+            });
+
+            // Calculate the inner width and height considering the margins
+            var innerWidth = pdfWidth - 2 * margin;
+            var innerHeight = pdfHeight - 2 * margin;
+
+            // Convert the parentDiv to canvas using html2canvas
+            html2canvas(element)
+                .then(function (canvas) {
+                    // Convert the canvas to an image data URL
+                    var imageData = canvas.toDataURL("image/jpeg");
+
+                    // Calculate the positioning of the content within the PDF
+                    var x = margin;
+                    var y = margin;
+                    var width = innerWidth;
+                    var height = (innerWidth / canvas.width) * canvas.height;
+
+                    // If the height exceeds the inner height, scale down the height
+                    if (height > innerHeight) {
+                        height = innerHeight;
+                        width = (innerHeight / canvas.height) * canvas.width;
+
+                        // Calculate the horizontal positioning for center alignment
+                        x = margin + (innerWidth - width) / 2;
+                    }
+
+                    // Add the image to the PDF
+                    doc.addImage(imageData, "JPEG", x, y, width, height);
+
+                    // Save or display the PDF
+                    var pdfDataUrl = doc.output("datauristring");
+                    var pdfIframe = document.getElementById("pdf-iframe");
+                    pdfIframe.src = pdfDataUrl;
+
+                    currentDoc = doc;
+                })
+                .catch(function (error) {
+                    console.error("Error occurred while generating PDF:", error);
+                });
+        }
+
+        $('#printPdfLoaded').on('click', function () {
+            portrait();
+        })
+
+        //new pdf portrait landscape code start
+        $("#orientation").change(function () {
+            if ($(this).val() === 'portrait') {
+                portrait();
+            }
+            else if ($(this).val() === 'landscape') {
+                landscape();
+            }
+        });
+       //new pdf portrait landscape code end
+
+
+    </script>
+
+
+
+
+}

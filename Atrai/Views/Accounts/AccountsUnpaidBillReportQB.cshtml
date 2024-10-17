@@ -1,0 +1,1245 @@
+﻿@*@model List<Atrai.Model.Core.Entity.AccountHeadModel>*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Voucher Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+}
+
+<style>
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+                         border-bottom-width: 0px;
+
+                    }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        /*padding-top: 62px*/
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+        .report-text-style:hover {
+            cursor: pointer;
+        }
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btn:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .dropdown-menu.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator-table .tabulator-row {
+        background-color: white;
+    }
+
+    .tabulator-row:hover {
+        color: white;
+        background-color: #787474;
+    }
+
+    .tabulator-table .tabulator-data-tree-branch {
+        display: none;
+    }
+
+    #my-dropdown-item {
+        display: none;
+    }
+
+    #balance-sheet {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .tabulator {
+        border-right-color: white;
+        border-left-color: white;
+        border-top: none !important;
+    }
+
+    .tabulator-table .tabulator-row {
+        background-color: white;
+    }
+
+    .tabulator-row:nth-child(odd) .tabulator-cell {
+        border-right-color: #f8f9fa;
+    }
+
+    .tabulator-row:nth-child(even) .tabulator-cell {
+        border-right-color: #f8f9fa;
+    }
+
+    .tabulator .tabulator-header .tabulator-col {
+        background: white !important;
+        border-right-color: #f8f9fa;
+    }
+
+    .tabulator .tabulator-col {
+        border-right-color: #aaaaaa42 !important;
+    }
+
+    .tabulator .tabulator-table .tabulator-cell {
+        border-right-color: #aaaaaa42 !important;
+    }
+
+    #tableContainer {
+        text-align: center; /* Horizontally center its children */
+    }
+
+    #incomeStatementTable {
+        display: inline-block; /* Make it a block element and align it inline */
+        margin: 0 auto; /* Center it horizontally */
+    }
+
+    .align-right {
+        text-align: right;
+    }
+
+    td {
+        font-weight: bold !important;
+    }
+
+    .icon-space {
+        margin-right: 10px;
+    }
+
+</style>
+<div class="row" id="change-checkbox">
+    <div class="col-12 col-md-12">
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row m-0 ps-4 upper-form-style pt-2">
+                    <div class="col-md-12 mb-2">
+                        <span class="report-text-style" onclick="gotoReportList()"><i class="bi bi-chevron-left"></i> Back to report list</span>
+                        <h4 class="fw-bold fs-3 mt-3">
+                            Unpaid Bills Report
+                        </h4>
+                        <span class="float-end">
+                            <button type="button" class="btn customize-btn fw-bold">Customize</button>
+                            <button type="button" class="btn customization-btn fw-bold">Save Customization</button>
+                        </span>
+                    </div>
+                    <div class="col-md-8 col-12 mb-2">
+
+
+
+                        <div class="row">
+                            <div class="col-md-3 col-12">
+                                <div class="mb-2" id="reportrange">
+                                    <label class="form-label">Report period</label>
+                                    <select onclick="setDateRange()" id="select2" class="form-select">
+                                        @*<option selected="selected" disabled="disabled">Select an Option</option>*@
+                                        <option value="1">All Dates</option>
+                                        <option value="2">Custom</option>
+                                        <option value="3">Today</option>
+                                        <option value="4">This Week</option>
+                                        <option value="5">This Week-to-date</option>
+                                        <option value="6">This Month</option>
+                                        <option value="7">This Month-to-date</option>
+                                        <option value="8">This Quarter</option>
+                                        <option value="9">This Quarter-to-date</option>
+                                        <option value="10">This Year</option>
+                                        <option value="11">This Year-to-date</option>
+                                        <option value="12">This Year-to-last-month</option>
+                                        <option value="13">Yesterday</option>
+                                        <option value="14">Recent</option>
+                                        <option value="15">Last Week</option>
+                                        <option value="16">Last Week-to-date</option>
+                                        <option value="17">Last Month</option>
+                                        <option value="18">Last Month-to-date</option>
+                                        <option value="19">Last Quarter</option>
+                                        <option value="20">Last Quarter-to-date</option>
+                                        <option value="21">Last Year</option>
+                                        <option value="22">Last Year-to-date</option>
+                                        <option value="23">Since 30 days ago</option>
+                                        <option value="24">Since 60 days ago</option>
+                                        <option value="25">Since 90 days ago</option>
+                                        <option value="26">Since 365 days ago</option>
+                                        <option value="27">Next Week</option>
+                                        <option value="28">Next 4 Weeks</option>
+                                        <option value="29">Next Month</option>
+                                        <option value="30">Next Quarter</option>
+                                        <option value="31">Next Year</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-3 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">From Date</label>
+
+                                    <input class="form-control" id="start-date" disabled />
+
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">To Date</label>
+
+                                    <input class="form-control" id="end-date" disabled />
+
+                                </div>
+                            </div>
+                            <div class="col-md-3  col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">Filter</label>
+                                    <select id="filter" class="form-select">
+                                        <option value="1">Off</option>
+                                        <option value="2">On</option>
+                                    </select>
+                                </div>
+                            </div>
+                            @*<div class="col-lg-3  col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">Accounting method</label>
+                                    <div class="mt-2">
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                                        <label class="form-label">Cash</label>
+                                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                                        <label class="form-label">Accural</label>
+                                    </div>
+                                </div>
+                            </div>*@
+                            
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4 col-12 mb-2 mt-5 d-flex justify-content-center">
+                        <div>
+                            <button type="button" class="btn customize-btn fw-bold" style="" onclick="GetReport()">Run Report</button>
+                            
+                        </div>
+                    </div>
+                </div>
+                <div id="balance-sheet" class="me-lg-auto ms-lg-auto w-80" style="border: 1px solid #e3eaf3;  margin-top:40px;">
+                    <div class="ms-3 mt-3">
+                        <a class="text-decoration-none text-black cursor-pointer" id="add-notes"><span>Add notes</span></a>
+                        <span class="float-end">
+                            <a type="button" id="toggle-fullscreen" class="text-decoration-none text-black"> <i class="bi bi-arrows-fullscreen fs-6 icon-space"></i> </a>
+
+                            <a type="button" id="printPdfLoaded" href="#" class="text-decoration-none text-black" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <i class="bi bi-envelope me-3 fs-5"></i>
+                            </a>
+                            <a href="#" class="text-decoration-none text-black" id="print-table">
+                                <i class="bi bi-printer me-3 fs-5"></i>
+                            </a>
+                            <span class="dropdown1 me-3">
+                                <a class="dropdown-toggle text-decoration-none text-black cursor-pointer" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="bi bi-upload fs-5"></i>
+                                </a>
+                                @*<button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                </button>*@
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li><a class="dropdown-item" href="#" id="export-excel">Export to Excel</a></li>
+                                    <li><a class="dropdown-item" href="#" id="export-csv">Export to CSV</a></li>
+                                    @*<li><a class="dropdown-item" href="#">Export to Google Sheets</a></li>*@
+                                </ul>
+                            </span>
+                            <span class="dropdown1 me-3">
+                                <a class="text-decoration-none text-black cursor-pointer" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="bi bi-gear fs-5"></i>
+
+                                </a>
+                                @*<button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                </button>*@
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li class="fw-bold ms-3">Display density</li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input title-input" id="compact" value="compact">
+                                                <label class="custom-control-label cursor-pointer" id="compact-label" for="compact">Compact</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </span>
+                            
+                        </span>
+
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content" style="border-radius:0px;">
+                                    <div class="d-flex mt-4 mb-3">
+                                        <h4 class="ms-3 fw-bold">Print, email, or save as PDF</h4>
+                                        <div class="ms-auto"><button type="button" class="btn-close me-2 mt-2" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                                    </div>
+                                    <div class="modal-body">
+                                        To print, right-click the preview and select <span class="fw-bold">Print</span>. Or, click the <span class="fw-bold">Print</span> icon if you see one below.
+                                        <div class="row">
+                                            @*report-print-setting-style*@
+                                            <p class="fw-bold">Report print settings</p>
+                                            <div class="col-lg-1 mt-2">
+                                                Orientation
+                                            </div>
+                                            <div class="col-lg-2">
+                                                <select class="form-select" id="orientation">
+                                                    <option value="portrait" selected>Portrait</option>
+                                                    <option value="landscape">Landscape</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <iframe id="pdf-iframe" name="pdf-iframe" style="width: 100%; height: 500px;"></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div id="parentDiv">
+                        <div class="row">
+                            <div class="col">
+
+                                <div id="make-editable" class="text-center company-and-other-text-style" onclick="makeEditable()">
+                                    <div class="form-check d-none" id="form-check-visibility">
+                                        <input class="form-check-input float-md-none" type="checkbox" name="flexCheckDefaultforImage" id="flexCheckDefaultforImage">
+                                        <label class="form-check-label" for="flexCheckDefaultforImage">
+                                            Show Image
+                                        </label>
+                                    </div>
+                                    <img id="company-image" style="width:10%" class="d-none" src="~/assets/Custom-URL-Shortener.jpg" />
+                                    <h3 id="company-name">@HttpContextAccessor.HttpContext.Session.GetString("CompanyName")</h3>
+                                    <h6 id="primary-address">@HttpContextAccessor.HttpContext.Session.GetString("PrimaryAddress")</h6>
+                                    <h6 id="trial-balance" class="text-black fw-bolder">Unpaid Bills</h6>
+                                    <h6 id="date-month-year"></h6>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row m-0 p-0">
+                            <div class="table-responsive">
+                                <table class="table table-condensed table-hover tree bg-white border" data-statement-id="balancesheet" id="treegridTable">
+                                    <tbody id="body">
+                                    </tbody>
+                                </table>
+                                @*<div id="loader" class="d-none"></div>*@
+
+                            </div>
+
+                            @*<div id="tableContainer"></div>*@
+                            <div class="form-floating d-none" id="add-notes-textarea">
+                                <textarea class="form-control" placeholder="Add notes or include additional info with your report" id="floatingTextarea2" style="height: 200px"></textarea>
+                                <label for="floatingTextarea2">Add notes or include additional info with your report</label>
+                                <i class="bi bi-x cursor-pointer float-end" id="close-textarea" style="position: absolute; top: -10px; right: 13px; font-size:25px; "></i>
+                                @*<button type="button" class="close" id="close-textarea">&times;</button>*@
+                            </div>
+                        </div>
+                        <div class="text-end mb-2">
+                            @* <button id="expandBtn">Expand</button>
+                            <button id="collapseBtn">Collapse</button> *@
+                            @* <button id="toggle-fullscreen" class="btn btn-primary py-0"> <i class="bi bi-arrows-fullscreen" style="font-size: 17px;"></i> </button> *@
+                        </div>
+                        <br />
+                        <br />
+                        <div id="tableContainer">
+                            <div id="incomeStatementTable"></div>
+                        </div>
+                        <br />
+                        <br />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-treegrid/0.2.0/js/jquery.treegrid.bootstrap3.js"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+
+
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            function setTodayDate() {
+                // Get the current date
+                var currentDate = new Date();
+
+                // Format the date as YYYY-MM-DD
+                var year = currentDate.getFullYear();
+                var startDate = '1-Jan-' + year;
+
+                // Set the end date to the last day of the year (31-Dec-YYYY)
+                var endDate = '31-Dec-' + year;
+
+                // Set the value of the input fields to the calculated dates
+                document.getElementById('start-date').value = startDate;
+                document.getElementById('end-date').value = endDate;
+
+            }
+            //setTodayDate();
+
+            $('#make-editable').mouseover(function () {
+                $('#form-check-visibility').removeClass('d-none').addClass('d-block');
+            });
+            $('#make-editable').mouseout(function () {
+                $('#form-check-visibility').removeClass('d-block').addClass('d-none');
+            });
+        });
+
+
+       
+
+
+        document.getElementById("toggle-fullscreen").addEventListener("click", function () {
+            var tableContainer = document.getElementById("incomeStatementTable");
+
+            if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                // If not in fullscreen, enter fullscreen
+                if (tableContainer.requestFullscreen) {
+                    tableContainer.requestFullscreen();
+                } else if (tableContainer.mozRequestFullScreen) { /* Firefox */
+                    tableContainer.mozRequestFullScreen();
+                } else if (tableContainer.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                    tableContainer.webkitRequestFullscreen();
+                } else if (tableContainer.msRequestFullscreen) { /* IE/Edge */
+                    tableContainer.msRequestFullscreen();
+                }
+            } else {
+                // If already in fullscreen, exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) { /* Firefox */
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE/Edge */
+                    document.msExitFullscreen();
+                }
+            }
+        });
+        function gotoReportList() {
+
+            var editUrl = '@Url.Action("ReportList", "Admin")';
+            window.location.href = editUrl;
+        }
+
+        //GetReport();
+        function makeEditable() {
+            $("#form-check-visibility").removeClass("d-none");
+            var checkbox = document.getElementById("flexCheckDefaultforImage");
+            var image = document.getElementById("company-image");
+
+            checkbox.addEventListener("change", function () {
+                if (this.checked) {
+                    image.classList.remove("d-none");
+                } else {
+                    image.classList.add("d-none");
+                }
+            });
+            var companyName = document.getElementById("company-name");
+            var primaryAddress = document.getElementById("primary-address");
+            var trialBalanceName = document.getElementById("trial-balance");
+            var dateMonthYear = document.getElementById("date-month-year");
+            companyName.contentEditable = true;
+            primaryAddress.contentEditable = true;
+            trialBalanceName.contentEditable = true;
+            dateMonthYear.contentEditable = true;
+        }
+
+        const endDateInput = document.getElementById('end-date');
+        const dateMonthYearElement = document.getElementById('date-month-year');
+
+        $('#compact').change(function () {
+            if ($(this).is(':checked')) {
+                $('#treegridTable th').addClass('pt-3 pb-3');
+                $('.table tbody tr td').addClass('pt-3 pb-3');
+            }
+            else {
+                $('#treegridTable th').removeClass('pt-3 pb-3');
+                $('.table tbody tr td').removeClass('pt-3 pb-3');
+            }
+        });
+
+        $("#add-notes").click(function () {
+            $("#add-notes-textarea").toggleClass("d-none");
+            $("#floatingTextarea2").focus();
+            $("#add-notes").text("Edit notes");
+        });
+
+        /*function to close  text area after click*/
+        $("#close-textarea").click(function () {
+            $("#add-notes-textarea").addClass("d-none");
+            $("#add-notes").text("Add notes");
+            var elem = document.getElementById("add-notes");
+            elem.scrollIntoView();
+        });
+
+       
+        var isViewPageReport = 1;
+
+        // document.getElementById("show-all-column").addEventListener("change", function () {
+        //     if (this.checked) {
+        //         active = false;
+        //         valueofRows = "0";
+        //         isViewPageReport = 1;
+        //         console.log("isViewPageReport::", isViewPageReport);
+        //     }
+
+        // });
+
+        var isActive = 0;
+        // document.getElementById("isActive").addEventListener("change", function () {
+        //     if (this.checked) {
+        //         isActive = 1;
+        //     }
+
+        // });
+        // document.getElementById("isNonZero").addEventListener("change", function () {
+        //     if (this.checked) {
+        //         isActive = 2;
+        //     }
+
+        // });
+
+       
+
+
+        var totallength = "";
+        setDateRange();
+        
+        function GetReport() {
+            
+
+            var parentDiv = document.getElementById("parentDiv");
+            var trialBalanceDate;
+            parentDiv.scrollIntoView({ behavior: "smooth" });
+            $("#loader").toggleClass("d-none");
+            /* $("#treegridTable").empty();*/
+
+
+            function calculateCumulativeBalance1(data) {
+                let cumulativeSum = 0;
+
+                data.forEach(item => {
+                    item.OpenBalance = cumulativeSum + (item.Amount || 0);
+                    cumulativeSum = item.OpenBalance;
+
+                    if (item.children && item.children.length > 0) {
+                        calculateCumulativeBalance1(item.children);
+                    }
+                });
+            }
+
+            // function buildTree(dataArray) {
+            //     const tree = [];
+
+            //     for (let i = 0; i < dataArray.length; i++) {
+            //         const currentItem = dataArray[i];
+            //         if (currentItem.ParentId === 0) {
+            //             const parent = { ...currentItem, children: [] };
+            //             tree.push(parent);
+
+            //             for (let j = i + 1; j < dataArray.length; j++) {
+            //                 const childItem = dataArray[j];
+            //                 if (childItem.ParentId === currentItem.TId) {
+            //                     parent.children.push(childItem);
+            //                 }
+            //             }
+            //         }
+            //     }
+            //     calculateCumulativeBalance(tree);
+            //     return tree;
+            // }
+
+
+            function calculateCumulativeBalance(data) {
+                data.forEach(item => {
+                    let cumulativeSum = 0;
+
+                    if (item.children && item.children.length > 0) {
+                        calculateCumulativeBalance(item.children);
+                        item.children.forEach(child => {
+                            cumulativeSum += child.Amount || 0;
+                        });
+
+                        // Add a special child item for displaying the total sum
+                        item.children.push({
+                            IndividualName: 'Sub Total',
+                            Amount: cumulativeSum,
+
+                            TransactionType: item.IndividualName === 'Sub Total' ? '' : item.TransactionType || '',
+                            NUM: item.IndividualName === 'Sub Total' ? '' : item.NUM || '',
+                            DueDate: item.IndividualName === 'Sub Total' ? '' : item.DueDate || '',
+                            PastDue: item.IndividualName === 'Sub Total' ? '' : item.PastDue || '',
+                        });
+                    }
+                });
+            }
+
+            function buildTree(dataArray) {
+                const tree = [];
+                const totalRow = { IndividualName: 'Grand Total', Amount: 0 };
+
+                for (let i = 0; i < dataArray.length; i++) {
+                    const currentItem = dataArray[i];
+                    if (currentItem.ParentId === 0) {
+                        const parent = { ...currentItem, children: [] };
+                        tree.push(parent);
+
+                        for (let j = i + 1; j < dataArray.length; j++) {
+                            const childItem = dataArray[j];
+                            if (childItem.ParentId === currentItem.TId) {
+                                parent.children.push(childItem);
+                            }
+                        }
+                    }
+                    totalRow.Amount += currentItem.Amount || 0;
+                }
+
+                calculateCumulativeBalance(tree);
+                calculateCumulativeBalance1(tree);
+
+                if (totalRow.IndividualName === 'Grand Total') {
+                    totalRow.TransactionType = '';
+                    totalRow.NUM = '';
+                    totalRow.DueDate = '';
+                    totalRow.PastDue = '';
+                }
+
+                tree.push(totalRow);
+                return tree;
+            }
+
+           
+            function fetchDataFromServer() {
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetUnpaidBillQB", "Accounts")'
+                };
+                return $.ajax({
+                    url: MyAppUrlSettings.MyUsefulUrl,
+                    data: { FromDate: $('#start-date').val(), ToDate: $('#end-date').val(), criteria: $("#select2 option:selected").text() },
+                    dataType: "json",
+                });
+            }
+            function removeExportEventListeners() {
+                var printBtn = document.getElementById("print-table");
+                var exportCsvBtn = document.getElementById("export-csv");
+                var exportExcelBtn = document.getElementById("export-excel");
+
+                var printBtnClone = printBtn.cloneNode(true);
+                var exportCsvBtnClone = exportCsvBtn.cloneNode(true);
+                var exportExcelBtnClone = exportExcelBtn.cloneNode(true);
+
+                printBtn.parentNode.replaceChild(printBtnClone, printBtn);
+                exportCsvBtn.parentNode.replaceChild(exportCsvBtnClone, exportCsvBtn);
+                exportExcelBtn.parentNode.replaceChild(exportExcelBtnClone, exportExcelBtn);
+            }
+
+
+            var table;
+
+            var monthCaption;
+            fetchDataFromServer().done(function (response) {
+
+                console.log(response.data);
+                var dataTable = buildTree(response.data.Table);
+
+                // monthCaption = dataTable[0].MonthCaption;
+                // var trialBalanceDate = `<span>${response.data.Table[0].MonthCaption}</span>`;
+
+                var trialBalanceDate = $('#end-date').val();
+                $("#date-month-year").empty();
+                $("#date-month-year").append(trialBalanceDate);
+
+                console.log(dataTable);
+                var columnsToExclude = ["TId", "ID", "IndividualID", "ParentId", "MonthCaption", "DataLevel", "children", "Numeric_SLNo", "IsTopBorder", "IsBottomBorder", "BorderStyle"]; // Define columns to be excluded
+
+
+                var filter = $("#filter option:selected").val();
+                var columns = Object.keys(dataTable[0]).map((column) => {
+                    if (!columnsToExclude.includes(column)) {
+
+                        return {
+                            title: column === "AccCode" ? "Note" : column,
+                            field: column,
+                            formatter: function (cell, formatterParams) {
+                                var accName = cell.getRow().getData().AccName;
+                                var cusName = cell.getRow().getData().IndividualName;
+                                var field = cell.getColumn().getField(); // Get the column field name
+                                var istopborder = cell.getRow().getData().IsTopBorder;
+                                var isbottomborder = cell.getRow().getData().IsBottomBorder;
+                                var borderstyle = cell.getRow().getData().IsBottomBorder;
+                                var alignRightColumns = ["Amount", "OpenBalance"];
+
+                                if (alignRightColumns.includes(field)) {
+                                    // Add a CSS class to right-align the cell content
+                                    cell.getElement().classList.add("align-right");
+                                }
+
+
+                                if (field === "Amount" || field === "OpenBalance") {
+                                    var balance = cell.getValue();
+                                    console.log("balance", balance);
+                                    var curr = $("#select3 option:selected").text();                                   
+                                   
+
+                                    // if (balance === null || balance === 0) {
+                                    //     balance = '';
+                                    // }
+
+                                    if (balance === null || balance === 0 || balance === undefined) {
+                                        balance = '';
+                                    } else {
+                                        // Format numerical values with commas
+                                        balance = balance.toLocaleString();
+                                    }
+                                   
+
+
+                                    return balance;
+
+                                }
+                                var rowEl = cell.getRow().getElement();
+                                if (cusName === "Grand Total") {
+                                    rowEl.style.borderTop = "1px double #ced4da";
+                                    rowEl.style.borderBottom = "2px solid black";                                   
+                                }
+                                // if (istopborder === 1) {
+                                //     if (borderstyle === 1) {
+                                //         rowEl.style.borderTop = "1px solid black";
+                                //     }
+                                //     else {
+                                //         rowEl.style.borderTop = "2px double black";
+                                //         rowEl.style.borderBottom = "1px solid black";
+                                //     }
+                                // }
+                                // if (isbottomborder === 1) {
+                                //     rowEl.style.borderBottom = "1px solid black";
+                                // }
+                                // if (cell.getData().DataLevel == 3) {
+                                //     rowEl.style.borderTop = "0.1px solid grey";
+                                //     rowEl.style.textShadow = "0.5px 0.5px 0 rgba(0, 0, 0, 0.5)";
+                                // }
+
+                                if (cell.getData().ParentId === 0) {
+                                    rowEl.style.fontWeight = "bold";
+                                } else if (cusName === "Grand Total") {
+                                    rowEl.style.fontWeight = "bold";
+                                } else if (cusName === "Sub Total") {
+                                    rowEl.style.fontWeight = "bold";
+                                } else {
+                                    rowEl.style.fontWeight = "normal";
+                                }
+                                if (cell.getData().AccType === "L") {
+                                    rowEl.style.fontStyle = "italic";
+                                    rowEl.style.fontSize = "12px";
+                                }
+
+                                if ((field === "PastDue" || field === "NUM") && cell.getValue() === 0) {
+                                    return '';
+                                }
+
+                                return cell.getValue();
+                            },
+                            
+                        };
+
+                    }
+                }).filter((column) => column !== undefined);
+
+                if (filter != 1) {
+                    columns.forEach(function (column) {
+                        column.headerFilter = "input"; // Enable filtering for dynamic columns
+                    });
+                }
+                var curr = $("#select3 option:selected").text();
+
+
+                
+                //code to show % INCOME ends
+
+                removeExportEventListeners();
+
+                var companyName = "@HttpContextAccessor.HttpContext.Session.GetString("CompanyName")";
+                var primaryAddress = "@HttpContextAccessor.HttpContext.Session.GetString("PrimaryAddress")";
+                var endDate = $("#date-month-year").text();
+                var trialBalance = $("#trial-balance").text();
+
+                table = new Tabulator("#incomeStatementTable", {
+                    data: dataTable,
+                    dataTree: true,
+                    dataTreeStartExpanded: true,
+                    dataTreeChildField: "children",
+                    layout: "datafit",
+                    printAsHtml: true,
+                    printHeader: "<h1>" + companyName + "</h1><h5>" + primaryAddress + "</h5><h6>" + trialBalance + "</h6><h6>" + endDate + "</h6><br>",
+                    frozenRows: 1,
+                    columns: columns,
+                    // columns: columns.map(column => {
+                    //     return {
+                    //         ...column,
+                    //         headerSort: false, // Disable sorting for each column in the columns array
+                            
+                    //     };
+                    // }),                   
+                    dataBound: function () {
+                        // Freeze the top 1 row (index 0) after the table is created
+                        var rows = table.getRows();
+                        if (rows.length > 0) {
+                            var cells = rows[0].getCells();
+                            cells.forEach(cell => {
+                                cell.freeze();
+                            });
+                        }                      
+                    },
+                });
+
+
+                document.getElementById("print-table").addEventListener("click", function () {
+                    table.print(false, true);
+                });               
+                document.getElementById("export-csv").addEventListener("click", function () {
+                    table.download("csv", "table.csv");
+                });
+                document.getElementById("export-excel").addEventListener("click", function () {
+                    table.download("xlsx", "table.xlsx", { sheetName: "Table Data" });
+                });
+
+
+            });
+        };
+
+
+        var tbody = $("#body");
+        var hasTotal;
+        var hasPercentageRow;
+        var fromToDate;
+
+        
+
+        document.addEventListener('fullscreenchange', function () {
+            if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                // The page is not in fullscreen, scroll to the bottom
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        });
+
+
+        
+
+
+        
+
+      
+
+
+        $(function () {
+            $("#start-date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#end-date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+        });
+
+
+        window.jsPDF = window.jspdf.jsPDF;
+
+        var printButton = document.getElementById("print-pdf");
+        var currentDoc;
+
+        // printButton.addEventListener("click", function () {
+        //     if ($("#orientation").val() === 'portrait') {
+        //         portrait();
+        //     } else if ($("#orientation").val() === 'landscape') {
+        //         landscape();
+        //     }
+
+        //     if (currentDoc) {
+        //         currentDoc.autoPrint();
+        //         currentDoc.output("dataurlnewwindow");
+        //     }
+        // });
+
+
+        function portrait() {
+
+
+            var selectedText = $("#select-form option:selected").text();
+            var selectedPeriod = $("#select2 option:selected").text();
+            var previousPeriodCheckbox = $('#previous-period');
+            var previousYearCheckbox = $('#previous-year');
+
+            var fontUrl = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap';
+
+            var fontLink = document.createElement('link');
+            fontLink.href = fontUrl;
+            fontLink.rel = 'stylesheet';
+            document.head.appendChild(fontLink);
+
+
+
+            var element = document.getElementById("parentDiv");
+            var companyName = document.getElementById("company-name").innerText;
+            var primaryAddress = document.getElementById("primary-address").innerText;
+            var trialBalance = document.getElementById("trial-balance").innerText;
+            var dateMonthYear = document.getElementById("date-month-year").innerText;
+
+
+            var pdfWidth = 595.28; // A4 width in points
+            var pdfHeight = 841.89;
+
+
+            var jsPDF = window.jspdf.jsPDF;
+            var doc = new jsPDF({
+                orientation: "portrait",
+                unit: "pt",
+                format: "a4"
+            });
+
+
+
+            var centerX = pdfWidth / 2;
+
+            doc.setFont('Montserrat', 'sans-serif');
+            doc.setTextColor(76, 82, 88);
+            doc.setFontSize(20);
+            var textWidth = doc.getStringUnitWidth(companyName) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(companyName, centerX - textWidth / 2, 40);
+
+            doc.setFontSize(12);
+            doc.setFont('Montserrat', 'sans-serif');
+            doc.setTextColor(76, 82, 88);
+            var textWidth = doc.getStringUnitWidth(primaryAddress) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(primaryAddress, centerX - textWidth / 2, 40 + 20);
+
+            doc.setFontSize(12);
+            doc.setFont('Montserrat', 'sans-serif');
+            doc.setTextColor(0, 0, 0);
+            var textWidth = doc.getStringUnitWidth(trialBalance) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(trialBalance, centerX - textWidth / 2, 40 + 40);
+
+            doc.setFontSize(12);
+            doc.setFont('Montserrat', 'sans-serif');
+            doc.setTextColor(76, 82, 88);
+            var textWidth = doc.getStringUnitWidth(dateMonthYear) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(dateMonthYear, centerX - textWidth / 2, 40 + 60);
+
+
+
+
+
+
+
+
+
+
+            var headers = ["Account Head", "clBalance"];
+
+
+            var tableData = [];
+            var uniqueAccountNames = {};
+
+            for (var i = 0; i < allData.length; i++) {
+                var account = allData[i];
+                var accountName = account.AccName.trim();
+                var clBalance = account.clBalance;
+
+                tableData.push([accountName, clBalance]);
+
+                if (account.Children && account.Children.length > 0) {
+                    for (var j = 0; j < account.Children.length; j++) {
+                        var childAccount = account.Children[j];
+                        var childAccountName = childAccount.AccName.trim();
+                        var childClBalance = childAccount.clBalance;
+
+                        tableData.push(['\t' + childAccountName, childClBalance]);
+
+                        if (childAccount.Children && childAccount.Children.length > 0) {
+                            for (var k = 0; k < childAccount.Children.length; k++) {
+                                var subChildAccount = childAccount.Children[k];
+                                var subChildAccountName = subChildAccount.AccName.trim();
+                                var subChildClBalance = subChildAccount.clBalance;
+
+                                tableData.push(['\t\t' + subChildAccountName, subChildClBalance]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            var tableWidth = 360; // Assuming the total width of the table is 360 points
+            var pdfWidth = 595.28; // Width of the PDF in points
+            var margin = (pdfWidth - tableWidth) / 2;
+
+            var tableOptions = {
+                startY: 120,
+                startX: margin,
+                head: [headers],
+                body: tableData,
+                headStyles: {
+                    fillColor: [255, 255, 255],
+                    textColor: [0, 0, 0], // Set text color to black
+                    fontSize: 12,
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    font: 'Montserrat'
+                },
+                // startX: (pdfWidth - 20 * 2) / 2,
+                didDrawCell: function (data) {
+                    var isLastRow = (data.row.index === tableData.length - 1);
+                    console.log(tableData.length);
+                    console.log(data.row);
+                    if (data.section === 'head') {
+                        doc.setFillColor(255, 255, 255); // Set the desired light color
+                        doc.setTextColor(0, 0, 0); // Set text color to black
+                        doc.setFont('Montserrat', 'bold'); // Set font style to bold
+                        doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S'); // Draw border around header cells
+                    }
+                    if (data.section === 'body') {
+                        if (isLastRow) {
+                            // Draw top border and two bottom borders for the last row
+                            doc.setDrawColor(0); // Set border color to black
+                            doc.setLineWidth(0.2); // Set border width to thin
+
+                            // Draw top border
+                            doc.line(data.cell.x, data.cell.y, data.cell.x + data.cell.width, data.cell.y);
+
+                            // Draw first bottom border
+                            doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+
+                            // Draw second bottom border
+                            doc.line(data.cell.x, data.cell.y + data.cell.height + 2, data.cell.x + data.cell.width, data.cell.y + data.cell.height + 2);
+                        } else if (data.row.index % 2 === 0) {
+                            // Remove the background color of alternate rows
+                            data.cell.styles.fillColor = [255, 255, 255]; // Set the background color to white
+                        }
+                    }
+
+
+
+
+
+
+                },
+                didParseCell: function (data) {
+                    if (data.section === 'head') {
+                        // doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+                        data.cell.styles.fillColor = [255, 255, 255];
+                        data.cell.styles.textColor = [0, 0, 0];
+                        // Increase the font size of the header
+                        data.cell.styles.fontSize = 9.5;
+                        data.cell.styles.fontStyle = 'bold';
+                        data.cell.styles.halign = 'center';
+
+                    }
+                    if (data.section === 'body') {
+                        data.cell.styles.fillColor = [255, 255, 255];
+                        if (data.row.index === tableData.length - 1) {
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+
+
+                    }
+
+                    doc.setDrawColor(200); // Set border color
+                    doc.setLineWidth(0.2); // Set border width
+                    doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S');
+                },
+                columnStyles: {
+                    0: { cellWidth: 180, halign: 'left', font: 'Montserrat' },
+                    1: { cellWidth: 180, halign: 'right', font: 'Montserrat' }
+
+                }
+            };
+
+            doc.autoTable(tableOptions);
+
+
+
+            var pdfDataUrl = doc.output("datauristring");
+            var pdfIframe = document.getElementById("pdf-iframe");
+            pdfIframe.src = pdfDataUrl;
+            currentDoc = doc;   //// this is my final code; here the pdf convertion is working.. some desigining issues are left. like; the table
+        }
+
+        function landscape() {
+            var element = document.getElementById("parentDiv");
+
+            var pdfWidth = 595.28; // A4 width in points
+            var pdfHeight = 841.89; // A4 height in points
+            var margin = 40; // Margin size in points
+
+            var doc = new jsPDF({
+                orientation: "landscape",
+                unit: "pt",
+                format: [pdfWidth, pdfHeight],
+            });
+
+            var innerWidth = pdfWidth - 2 * margin;
+            var innerHeight = pdfHeight - 2 * margin;
+
+            html2canvas(element)
+                .then(function (canvas) {
+                    // Convert the canvas to an image data URL
+                    var imageData = canvas.toDataURL("image/jpeg");
+
+                    // Calculate the positioning of the content within the PDF
+                    var x = margin;
+                    var y = margin;
+                    var width = innerWidth;
+                    var height = (innerWidth / canvas.width) * canvas.height;
+
+                    // If the height exceeds the inner height, scale down the height
+                    if (height > innerHeight) {
+                        height = innerHeight;
+                        width = (innerHeight / canvas.height) * canvas.width;
+
+                        // Calculate the horizontal positioning for center alignment
+                        x = margin + (innerWidth - width) / 2;
+                    }
+
+                    // Add the image to the PDF
+                    doc.addImage(imageData, "JPEG", x, y, width, height);
+
+                    // Save or display the PDF
+                    var pdfDataUrl = doc.output("datauristring");
+                    var pdfIframe = document.getElementById("pdf-iframe");
+                    pdfIframe.src = pdfDataUrl;
+
+                    currentDoc = doc;
+                })
+                .catch(function (error) {
+                    console.error("Error occurred while generating PDF:", error);
+                });
+        }
+
+        $('#printPdfLoaded').on('click', function () {
+            portrait();
+        })
+
+        $("#orientation").change(function () {
+            if ($(this).val() === 'portrait') {
+                portrait();
+            }
+            else if ($(this).val() === 'landscape') {
+                landscape();
+            }
+        });
+
+    </script>
+}

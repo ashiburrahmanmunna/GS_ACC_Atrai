@@ -1,0 +1,2505 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model Atrai.Model.Core.Entity.TransactionModel
+@{
+    ViewData["Title"] = "AddTransaction";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var actionType = ViewBag.ActionType as string;
+    var TransactionId = ViewBag.TransactionId;
+    var TransactionTags = Model.TransactionTagsList;
+    var TransactionFilePath = Model.TransactionFilePath;
+    List<SelectListItem> recurringTypeList = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "Scheduled", Value = "Scheduled" },
+        new SelectListItem { Text = "Reminder", Value = "Reminder" },
+        new SelectListItem { Text = "Unscheduled", Value = "Unscheduled" },
+    };
+    List<SelectListItem> IntervalList = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "Daily", Value = "Daily" },
+        new SelectListItem { Text = "Weekly", Value = "Weekly" },
+        new SelectListItem { Text = "Monthly", Value = "Monthly" },
+        new SelectListItem { Text = "Yearly", Value = "Yearly" },
+    };
+    List<SelectListItem> weekList = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "Monday", Value = "Monday" },
+        new SelectListItem { Text = "Tuesday", Value = "Tuesday" },
+        new SelectListItem { Text = "Wednesday", Value = "Wednesday" },
+        new SelectListItem { Text = "Thursday", Value = "Thursday" },
+        new SelectListItem { Text = "Friday", Value = "Friday" },
+        new SelectListItem { Text = "Saturday", Value = "Saturday" },
+        new SelectListItem { Text = "Sunday", Value = "Sunday" },
+    };
+    List<SelectListItem> countList = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "day", Value = "day" },
+        new SelectListItem { Text = "first", Value = "first" },
+        new SelectListItem { Text = "second", Value = "second" },
+        new SelectListItem { Text = "third", Value = "third" },
+        new SelectListItem { Text = "fourth", Value = "fourth" },
+        new SelectListItem { Text = "last", Value = "last" },
+    };
+    List<SelectListItem> intergerList = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "1st", Value = "1st" },
+        new SelectListItem { Text = "2nd", Value = "2nd" },
+        new SelectListItem { Text = "3rd", Value = "3rd" },
+    };
+    for (int i = 4; i <= 28; i++)
+    {
+        intergerList.Add(new SelectListItem { Text = $"{i}th", Value = $"{i}th" });
+    }
+    intergerList.Add(new SelectListItem { Text = "Last", Value = "Last" });
+
+    List<SelectListItem> monthList = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "January", Value = "January" },
+        new SelectListItem { Text = "February", Value = "February" },
+        new SelectListItem { Text = "March", Value = "March" },
+        new SelectListItem { Text = "April", Value = "April" },
+        new SelectListItem { Text = "May", Value = "May" },
+        new SelectListItem { Text = "June", Value = "June" },
+        new SelectListItem { Text = "July", Value = "July" },
+        new SelectListItem { Text = "August", Value = "August" },
+        new SelectListItem { Text = "September", Value = "September" },
+        new SelectListItem { Text = "October", Value = "October" },
+        new SelectListItem { Text = "November", Value = "November" },
+        new SelectListItem { Text = "December", Value = "December" }
+    };
+    List<SelectListItem> EndList = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "None", Value = "None" },
+        new SelectListItem { Text = "By", Value = "By" },
+        new SelectListItem { Text = "After", Value = "After" },
+    };
+}
+
+
+<style>
+
+
+    .select2-container .select2-selection--single {
+        box-sizing: border-box;
+        cursor: pointer;
+        display: block;
+        height: 38px !important;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .wide-dropdown {
+        height: fit-content; /* Set the desired width here */
+    }
+    p.lineheight {
+        line-height: 6px;
+        vertical-align: middle;
+    }
+    /* style add by shahinur*/
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+    }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #999;
+        }
+
+        .separator:not(:empty)::before {
+            margin-right: .25em;
+        }
+
+        .separator:not(:empty)::after {
+            margin-left: .25em;
+        }
+    /* style add by shahinur*/
+    /*hr.hr-text {
+                        position: relative;
+                        border: none;
+                        height: 1px;
+                        background: #999;
+                    }
+
+                        hr.hr-text::before {
+                            content: attr(data-content);
+                            display: inline-block;
+                            background: #fff;
+                            font-weight: bold;
+                            font-size: 0.85rem;
+                            color: #999;
+                            border-radius: 30rem;
+                            padding: 0.2rem 0.5rem;
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                        }*/
+
+    .dropdown-item {
+        padding: 5px 1rem;
+        color: #67757c;
+        /*text-align: center;*/
+    }
+
+    .blue-text {
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 17px;
+        color: #3777DB;
+    }
+
+    .bootstrap-tagsinput {
+        width: 50%;
+    }
+
+    .button {
+        border-radius: 25px;
+    }
+
+    .modal-content {
+        width: 80%;
+    }
+</style>
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-md-12 col-12">
+                <div class="card">
+                    <div class="card-header py-1" id="top-row">
+                        @if (@ViewBag.Type == "Sales" || @ViewBag.Type == "Customer")
+                        {
+                            <h3 style="color:darkgreen">Received Amount From Customer</h3>
+                        }
+                        else if (@ViewBag.Type == "Income")
+                        {
+                            <h3 style="color:darkgreen">Income</h3>
+                        }
+                        else if (@ViewBag.Type == "Purchase" || @ViewBag.Type == "Supplier")
+                        {
+                            <h3 style="color:red">Paid To Supplier</h3>
+                        }
+                        else if (@ViewBag.Type == "Paid")
+                        {
+                            <h3 style="color:red">Amount Paid</h3>
+                        }
+                        else if (@ViewBag.Type == "PaidToCustomer")
+                        {
+                            <h3 style="color:red">Amount Paid To Customer</h3>
+                        }
+                        else if (@ViewBag.Type == "PaidToEmployee")
+                        {
+                            <h3 style="color:red">Amount Paid To Employee</h3>
+                        }
+                        else if (@ViewBag.Type == "Received")
+                        {
+                            <h3 style="color:darkgreen">Amount Received</h3>
+                        }
+                        else if (@ViewBag.Type == "ReceivedFromSupplier")
+                        {
+                            <h3 style="color:darkgreen">Amount Received From Supplier</h3>
+                        }
+                        else if (@ViewBag.Type == "ReceivedFromEmployee")
+                        {
+                            <h3 style="color:darkgreen">Amount Received From Employee</h3>
+                        }
+                        else if (@ViewBag.Type == "Contra")
+                        {
+                            <h3 style="color:darkgreen"> Amount Transfer to Cash / Bank .</h3>
+                        }
+                        else if (@ViewBag.Type == "CashContra")
+                        {
+                            <h3 style="color:darkgreen"> Cash Received / Withdrawn from Bank.</h3>
+                        }
+                        else if (@ViewBag.Type == "BankContra")
+                        {
+                            <h3 style="color:royalblue"> Cash Deposit To Bank.</h3>
+                        }
+                        else if (@ViewBag.Type == "CustomerDiscount")
+                        {
+                            <h3 style="color:red"> Discount Given to Customer</h3>
+                        }
+                        else if (@ViewBag.Type == "SupplierDiscount")
+                        {
+                            <h3 style="color:royalblue">Discount by Supplier.</h3>
+                        }
+                        else if (@ViewBag.Type == "Expense")
+                        {
+                            <h3 style="color:red"> Expense </h3>
+                        }
+                        else if (@ViewBag.Type == "Journal")
+                        {
+                            <h3 style="color:royalblue"> Journal </h3>
+                        }
+                        else
+                        {
+                            <h3 style="color:royalblue"> Accounts Transaction </h3>
+                        }
+                    </div>
+                    <input type="hidden" id="@Model.TransactionFilePath" name="TransactionFilePath" value="" />
+
+                    <div class="card-body">
+                        <form asp-controller="admin" asp-action="AddTransaction" method="post" id="myForm">
+                            @if (Model != null)
+                            {
+                                <input type="hidden" asp-for="Id" />
+                                <input type="hidden" asp-for="CreateDate" />
+                                <input type="hidden" asp-for="LuserId" />
+                                <input type="hidden" asp-for="isSystem" />
+                                <input type="hidden" asp-for="TransactionCategory" />
+
+                                <input type="hidden" asp-for="isPost" />
+                            }
+                            else
+                            {
+                                <input type="hidden" asp-for="Id" value="0" />
+                            }
+                            <div class="container-fluid">
+                                <div class="upperSection">
+                                    <div class="row">
+                                        <div class="col-md-7 col-12">
+                                            <div style="padding-bottom: 18px;" id="First-row-Recurring" >
+                                                <input id="recurr-id" type="text" value="0" hidden />
+                                                @if(@ViewBag.Type == "Expense")
+                                                {
+                                                    <h4 style="color:red">Recurring Expense </h4>
+                                                }
+                                                <div class="d-flex justify-content-start" style=" border-bottom: 1px solid #e0e0d1">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Template name</label>
+                                                        <input class="form-control custom-xy" id="temp-name" autocomplete="off" />
+                                                    </div>
+                                                    <div class="mb-3" style="margin-left: 40px;">
+                                                        <label class="form-label ">
+                                                            Type
+                                                        </label>
+                                                        @Html.DropDownList("RecurringType", recurringTypeList as List<SelectListItem>, new { id = "RecurringType", @class = "wide-dropdown form-select form-select-sm", onchange = "recurringTypeCriteria()" })
+                                                    </div>
+                                                    <div id="date-duration" class="d-flex">
+                                                        <div style="margin-top: 26px;margin-left: 10px;">
+                                                            <p id="before-create-days">Create</p>
+                                                        </div>
+                                                        <div style="margin-top: 26px; ">
+                                                            <div class="mb-3">
+                                                                <input class="form-control" id="create-days" autocomplete="off" style="width: 50px; height: 30px;" />
+                                                            </div>
+                                                        </div>
+                                                        <div style="margin-top: 26px;">
+                                                            <p id="after-create-days">days in advance</p>
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-1 col-4">
+                                                    <button type="button" class="btn text-center border" data-bs-toggle="modal" data-bs-target="#historyModal">
+                                                        <i class="bi bi-clock-history fw-bold"></i>
+                                                    </button>
+                                                    <!---Modal start-->
+                                                    <div class="modal fade modal-lg" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h1 class="modal-title fs-5" id="historyModalLabel">Modal title</h1>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+
+                                                                    <div class="card rounded-10">
+                                                                        <div id="jsClockHistory"></div>
+
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                    @*<button type="button" class="btn btn-primary">Save changes</button>*@
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!---Modal ends-->
+                                                </div>
+
+                                                <div class="col-md-3 col-4">
+                                                    <button class="btn btn-primary" id="VoucherTypeName" style="width:100%" disabled>
+                                                        @if (@ViewBag.Type == "Income")
+                                                        {
+                                                            <h6 style="color:white; margin-bottom: 0;">Income</h6>
+                                                        }
+                                                        else if (@ViewBag.Type == "Paid")
+                                                        {
+                                                            <h6 style="color:white; margin-bottom: 0;">Expense</h6>
+                                                        }
+                                                        else if (@ViewBag.Type == "Customer")
+                                                        {
+                                                            <h6 style="color:white; margin-bottom: 0;">Customer</h6>
+                                                        }
+                                                        else if (@ViewBag.Type == "Sales")
+                                                        {
+                                                            <h6 style="color:white; margin-bottom: 0;">Invoice</h6>
+                                                        }
+                                                        else if (@ViewBag.Type == "ReceivedFromSupplier")
+                                                        {
+                                                            <h6 style="color:white; margin-bottom: 0;">Supplier</h6>
+                                                        }
+                                                        else if (@ViewBag.Type == "Supplier")
+                                                        {
+                                                            <h6 style="color:white; margin-bottom: 0;">Supplier</h6>
+                                                        }
+                                                        else if (@ViewBag.Type == "Purchase")
+                                                        {
+                                                            <h6 style="color:white; margin-bottom: 0;">Purchase</h6>
+                                                        }
+                                                        else if (@ViewBag.Type == "PaidToCustomer")
+                                                        {
+                                                            <h6 style="color:white; margin-bottom: 0;">Customer</h6>
+                                                        }
+                                                        else if (@ViewBag.Type == "CashContra")
+                                                        {
+                                                            <h7 style="color:white; margin-bottom: 0;"> From Bank</h7>
+                                                        }
+                                                        else if (@ViewBag.Type == "BankContra")
+                                                        {
+                                                            <h7 style="color:white; margin-bottom: 0;"> From Bank</h7>
+                                                        }
+                                                        else if (@ViewBag.Type == "Contra")
+                                                        {
+                                                            <h6 style="color:white; margin-bottom: 0;"> Contra</h6>
+                                                        }
+                                                        else if (@ViewBag.Type == "CustomerDiscount")
+                                                        {
+                                                            <h6 style="color:white; margin-bottom: 0;"> Customer</h6>
+                                                        }
+                                                        else if (@ViewBag.Type == "SupplierDiscount")
+                                                        {
+                                                            <h6 style="color:white; margin-bottom: 0;"> Supplier</h6>
+                                                        }
+                                                        else if (@ViewBag.Type == "Expense")
+                                                        {
+                                                            <h6 style="color:white; margin-bottom: 0;"> Expense</h6>
+                                                        }
+                                                        else if (@ViewBag.Type == "Journal")
+                                                        {
+                                                            <h6 style="color:white; margin-bottom: 0;"> Journal</h6>
+                                                        }
+                                                    </button>
+                                                    <input type="hidden" id="VoucherTypeId" name="" value="" />
+                                                </div>
+                                                @* <div class="col-md-2 col-4">
+                                                <div class="dropdown">
+                                                <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                BDT
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                <li><button class="dropdown-item">Doller</button></li>
+                                                </ul>
+                                                </div>
+                                                </div>*@
+                                                <div class="col-md-2 col-12" id="divCurrency">
+                                                    <div class="mb-2">
+                                                        @Html.DropDownListFor(x => x.CurrencyId,
+                                                                 new SelectList((IEnumerable<SelectListItem>)ViewBag.Currency, "Value", "Text"),
+                                                                 htmlAttributes: new { @class = "form-select", id = "CurrencyId" })
+                                                        @Html.ValidationMessageFor(model => model.CurrencyId, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                                <div class="col-md col-12" id="divCurrency">
+                                                    @* <div class="d-flex mt-3 ms-2 d-none" id="yourRateParent" style="width: 126%;">
+                                                        <label>1 <span class="rate"></span> = </label>
+                                                        <input type="text" class="form-control h-100 ms-2 me-2" id="CurrencyRate" style="border-radius:0px;width: 150px;">
+                                                        <input type="text" class="form-control w-50 h-100 ms-2 me-2" id="MultiiCurrencyId" style="border-radius:0px;" hidden>
+                                                        <label>BDT</label>
+                                                    </div> *@
+                                                    <div class="d-flex d-none" id="yourRateParent" style="width: 300px;">
+                                                        <label style="margin-top: 0.5rem">1 <span class="rate"></span><span class="flag"></span> = </label>
+                                                        <input type="text" class="form-control h-100 ms-2 me-2 text-end" id="CurrencyRate" style="border-radius:0px; width: 40%;">
+                                                        <input type="text" class="form-control w-50 h-100 ms-2 me-2" id="MultiiCurrencyId" style="border-radius:0px;" hidden>
+                                                        <label style="margin-top: 0.5rem">BDT</label>  <i class="flag-icon flag-icon-bd"></i>
+                                                    </div>
+                                                </div>
+
+                                                <div id="divcurrencyrate" class="col-md-3 col-12 mt-2">
+                                                    <span>
+                                                        @Html.LabelFor(x => x.CurrencyRate, new { @class = "fw-bold" }) :
+                                                    </span>
+                                                    <span class="fw-bold">
+                                                        @Model.CurrencyRate
+                                                        @*                                                        @Html.TextBoxFor(x => x.CurrencyRate, null, new { @disabled="disabled",@id="convert-rate-field" })
+                                                        *@
+                                                    </span>
+
+                                                    @Html.ValidationMessageFor(x => x.CurrencyRate, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <div class="row" id="IntervalDiv">
+                                                <div class="d-flex justify-content-start" style=" border-bottom: 1px solid #e0e0d1; border-top: 1px solid #e0e0d1;">
+                                                    <div style="margin-bottom: 10px;">
+                                                        <div class="mb-3">
+                                                            <label class="form-label ">
+                                                                Interval
+                                                            </label>
+                                                            @Html.DropDownList("Interval", IntervalList as List<SelectListItem>, new { id = "Interval", @class = "wide-dropdown form-select form-select-sm", onchange = "intervalCriteria()" })
+                                                        </div>
+                                                    </div>
+                                                    <div id="date-duration" class="d-flex">
+                                                        <div style="margin-top: 26px;margin-left: 10px;">
+                                                            <p id="before-every">every</p>
+                                                        </div>
+                                                        <div style="margin-top: 26px; ">
+                                                            <div class="mb-3">
+                                                                <input class="form-control" id="every" autocomplete="off" style="width: 50px; height: 30px;" />
+                                                            </div>
+                                                        </div>
+                                                        <div style="margin-top: 26px;">
+                                                            <p id="after-interval">day(s) on</p>
+                                                        </div>
+                                                        <div class="d-flex" style="margin-top: 26px; margin-bottom: 10px; ">
+                                                            @Html.DropDownList("Count", countList as List<SelectListItem>, new { id = "Count", @class = "wide-dropdown form-select form-select-sm d-none", onchange = "changeListForMonth()" })
+                                                            @Html.DropDownList("Week", weekList as List<SelectListItem>, new { id = "Week", @class = "wide-dropdown form-select form-select-sm d-none" })
+                                                            @Html.DropDownList("Integer", intergerList as List<SelectListItem>, new { id = "Integer", @class = "wide-dropdown form-select form-select-sm d-none" })
+                                                            @Html.DropDownList("Month", monthList as List<SelectListItem>, new { id = "Month", @class = "wide-dropdown form-select form-select-sm d-none" })
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex">
+                                                        <div style="width: 150px; margin-left: 10px;">
+                                                            <label style="margin-bottom: 3px;">Start date</label>
+                                                            <input class="form-control custom-height" id="recurring-start-date" autocomplete="off" />
+                                                        </div>
+                                                        <div style="margin-left: 10px;">
+                                                            <label style="margin-bottom: 3px; ">End</label>
+                                                            @Html.DropDownList("End", EndList as List<SelectListItem>, new { id = "End", @class = "wide-dropdown form-select form-select-sm", onchange = "limitCriteria()" })
+                                                        </div>
+                                                        <div style="width: 150px; margin-left: 10px;" id="recurringEndDiv" class="d-none">
+                                                            <label style="margin-bottom: 3px;">End date</label>
+                                                            <input class="form-control custom-height" id="recurring-end-date" autocomplete="off" />
+                                                        </div>
+                                                        <div style="margin-top: 26px; margin-left: 10px;" class="d-none" id="occurencesDiv">
+                                                            <div class="mb-3">
+                                                                <input class="form-control" id="occurences" autocomplete="off" style="width: 50px; height: 30px;" />
+                                                            </div>
+                                                        </div>
+                                                        <div style="margin-top: 26px;margin-left: 10px;" id="occurencesSpan" class="d-none">
+                                                            occurences
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4 col-12 mb-2">
+                                                    <div class="">
+                                                        <label class="form-label fw-semibold"> @Html.LabelFor(model => model.InputDate, "Date")</label>
+                                                        <input asp-for="InputDate" class="form-control tg" value="@Model.InputDate.ToString("yyyy-MM-dd")" type="date" />
+                                                        <span asp-validation-for="InputDate" class="text-danger"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 col-12 mb-2" id="divcode">
+                                                    <div class="">
+                                                        <label class="form-label fw-semibold">
+                                                            @Html.LabelFor(model => model.TransactionCode, "Code")
+                                                        </label>
+                                                        @Html.EditorFor(model => model.TransactionCode, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                        @Html.ValidationMessageFor(model => model.TransactionCode, "", new { @class = "text-danger" })
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 col-12 mb-2" id="divLocationHead">
+                                                    <div>
+                                                        <label class="form-label fw-semibold">
+                                                            @Html.LabelFor(model => model.WarehouseId)
+                                                        </label>
+
+                                                    </div>
+                                                    @Html.DropDownListFor(x => x.WarehouseId,
+                                                             new SelectList((IEnumerable<SelectListItem>)ViewBag.Warehouse, "Value", "Text"),
+                                                             htmlAttributes: new { @class = "form-select", id = "WarehouseId" })
+                                                    @Html.ValidationMessageFor(model => model.WarehouseId, "", new { @class = "text-danger" })
+                                                </div>
+
+
+                                                <div class="col-md-4 col-12" id="divtransfer">
+                                                    <div class="mb-2">
+                                                        <label class="form-label fw-semibold">
+                                                            Amount
+                                                        </label>
+                                                        <input type="text" asp-for="TransactionAmount" class="form-control" id="transferAmountVal" oninput="updateAmount(this.value)" />
+                                                        <span id="amountValidationMessage" class="text-danger" style="display: none;">Amount must be greater than 0</span>
+                                                        @Html.ValidationMessageFor(model => model.TransactionAmount, "", new { @class = "text-danger" })
+
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="col-md-6 col-12" id="divdebitaccountid">
+                                                    <div class="mb-2">
+
+                                                        <div>
+                                                            <label class="form-label fw-semibold">
+                                                                @Html.LabelFor(model => model.DebitAccountId, new { @id = "DebitAccountLabel" })
+                                                            </label>
+
+
+
+
+                                                        </div>
+                                                        @Html.DropDownListFor(x => x.DebitAccountId,
+                                                                 new SelectList((IEnumerable<SelectListItem>)ViewBag.DebitAccountId, "Value", "Text"), " Please Select",
+                                                                 htmlAttributes: new { @class = "form-select", id = "DebitAccountId" })
+                                                        <span id="accountPayTypeValidationMessage" class="text-danger" style="display: none;">Payment/Received Head must be selected</span>
+                                                        @Html.ValidationMessageFor(x => x.DebitAccountId, "", new { @class = "text-danger" })
+
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6 col-12" id="divcreditaccountid">
+                                                    @*divFundsFrom*@
+                                                    <div class="mb-2">
+                                                        <div>
+                                                            <label class="form-label fw-semibold">
+                                                                @Html.LabelFor(model => model.CreditAccountId, new { @id = "CreditAccountLabel" })
+                                                            </label>
+
+                                                        </div>
+                                                        @Html.DropDownListFor(x => x.CreditAccountId,
+                                                                 new SelectList((IEnumerable<SelectListItem>)ViewBag.CreditAccountId, "Value", "Text"), "Select Account Head",
+                                                                 htmlAttributes: new { @class = "form-select", id = "CreditAccountId" })
+                                                        @Html.ValidationMessageFor(x => x.CreditAccountId, "", new { @class = "text-danger" })
+
+                                                    </div>
+                                                </div>
+
+                                                <div id="divCheckInformation" class="col-md-8 col-12 my-2">
+                                                    <div class="row">
+
+                                                        <div class="col-md-6 col-12">
+                                                            <div class="form-floating mb-3">
+                                                                <input type="text" asp-for="CheckNo" class="form-control" placeholder=" ">
+                                                                <label asp-for="CheckNo"></label>
+                                                                <span asp-validation-for="CheckNo" class="text-danger"></span>
+                                                            </div>
+                                                        </div>
+
+
+                                                        <div class="col-md-6 col-12">
+                                                            <div class="form-floating mb-3">
+                                                                <input type="text" asp-for="CheckRemarks" class="form-control" placeholder=" ">
+                                                                <label asp-for="CheckRemarks"></label>
+                                                                <span asp-validation-for="CheckRemarks" class="text-danger"></span>
+                                                            </div>
+                                                        </div>
+
+
+
+
+
+                                                        <div class="col-md-4 col-12">
+                                                            <div class="form-floating mb-3">
+                                                                <input asp-for="dtFromChk" class="form-control tg" type="date" />
+                                                                <label asp-for="dtFromChk"></label>
+                                                                <span asp-validation-for="dtFromChk" class="text-danger"></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4 col-12">
+                                                            <div class="form-floating mb-3">
+                                                                <input asp-for="dtToChk" class="form-control tg" type="date" />
+                                                                <label asp-for="dtToChk"></label>
+                                                                <span asp-validation-for="dtToChk" class="text-danger"></span>
+                                                            </div>
+                                                        </div>
+
+
+
+
+
+
+                                                        <div class="col-md-4 col-12">
+                                                            <div class="form-floating mb-3">
+                                                                <input asp-for="dtClearChk" class="form-control tg" type="date" />
+                                                                <label asp-for="dtClearChk"></label>
+                                                                <span asp-validation-for="dtClearChk" class="text-danger"></span>
+                                                            </div>
+                                                        </div>
+
+
+
+                                                    </div>
+                                                </div>
+
+
+
+
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 col-12">
+                                            <div class="row">
+                                                <div class="col-md-9 col-10"></div>
+                                                <div class="col-md-2 col-12">
+                                                    <!-- Example single danger button -->
+                                                    <div class="dropdown">
+
+                                                        <a class="btn btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            Add New
+                                                        </a>
+
+                                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+
+                                                            @Html.ActionLink("Transaction", "AddTransaction", new { Type = "Journal" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            <div class="separator">Received</div>
+                                                            @Html.ActionLink("By Income", "AddTransaction", new { Type = "Income" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            @Html.ActionLink("From Customer", "AddTransaction", new { Type = "Customer" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            @Html.ActionLink("By Invoice", "AddTransaction", new { Type = "Sales" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            @Html.ActionLink("From Customer - Multiple Invoice", "AddTransactionDetails", new { Type = "Customer" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            @Html.ActionLink("From Supplier", "AddTransaction", new { Type = "ReceivedFromSupplier" }, new { @class = "dropdown-item", @id = "btnFromSupplier" })
+                                                            @Html.ActionLink("From Employee", "AddTransaction", new { Type = "ReceivedFromEmployee" }, new { @class = "dropdown-item", @id = "btnFromEmployee" })
+                                                            @*<div class="dropdown-divider"></div>*@
+                                                            <div class="separator">Paid</div>
+                                                            @Html.ActionLink("For Expense", "AddTransaction", new { Type = "Expense" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            @Html.ActionLink("To Supplier", "AddTransaction", new { Type = "Supplier" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            @Html.ActionLink("By Purchase Order", "AddTransaction", new { Type = "Purchase" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            @Html.ActionLink("To Supplier - Multiple Invoice", "AddTransactionDetails", new { Type = "Supplier" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            @Html.ActionLink("To Customer", "AddTransaction", new { Type = "PaidToCustomer" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            @Html.ActionLink("To Employee", "AddTransaction", new { Type = "PaidToEmployee" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            <div class="separator">Accounts</div>
+                                                            @Html.ActionLink("Cash Received From Bank", "AddTransaction", new { Type = "CashContra" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            @Html.ActionLink("Cash Deposit To Bank", "AddTransaction", new { Type = "BankContra" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            @Html.ActionLink("Contra", "AddTransaction", new { Type = "Contra" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            <div class="separator">Discount</div>
+                                                            @Html.ActionLink("Discount To Customer", "AddTransaction", new { Type = "CustomerDiscount" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                                            @Html.ActionLink("Discount From Supplier", "AddTransaction", new { Type = "SupplierDiscount" }, new { @class = "dropdown-item", @id = "btnBack" })
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 col-12">
+                                                </div>
+                                                <div class="col-md-6 col-12 mt-2">
+                                                    @* <span class="ps-4 ms-1 blue-text d-block" id="total-rate-label">Amount</span> *@
+                                                    <h3 class="text-end fw-blod" id="amountDisplay"><span class="rate"></span>@ViewBag.Amount</h3>
+                                                    <h3 class="text-end fw-blod" id="amountDisplayInMulti"><span class="rate"></span></h3>
+                                                </div>
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+
+
+
+                                <div class="row mt-4">
+
+                                    @* <div id="divcurrencyid" class="col-md-6 col-12 my-2">
+                                    @Html.LabelFor(x => x.CurrencyId)
+                                    @Html.DropDownListFor(x => x.CurrencyId,
+                                    new SelectList((IEnumerable<SelectListItem>)ViewBag.Currency, "Value", "Text"),
+                                    htmlAttributes: new { @class = "form-control", id = "CurrencyId" })
+                                    @Html.ValidationMessageFor(x => x.CurrencyId, "", new { @class = "text-danger" })
+                                    </div>*@
+                                    @* <div id="divcurrencyrate" class="col-md-6 col-12  my-2">
+                                    @Html.LabelFor(x => x.CurrencyRate)
+                                    @Html.TextBoxFor(x => x.CurrencyRate, null, new { @class = "form-control", @placeholder = "Currency Rate" })
+                                    @Html.ValidationMessageFor(x => x.CurrencyRate, "", new { @class = "text-danger" })
+                                    </div>*@
+
+                                    <div id="divcustomerid" class="col-md-4 col-12">
+                                        <div class="mb-2">
+                                            <div>
+                                                <label class="form-label fw-semibold">
+                                                    @Html.LabelFor(model => model.Customer, "Customer")
+                                                </label>
+
+                                            </div>
+                                            @Html.DropDownListFor(x => x.CustomerId,
+                                                     new SelectList((IEnumerable<SelectListItem>)ViewBag.Customer, "Value", "Text"), "Select Customer",
+                                                     htmlAttributes: new { @class = "form-select", id = "CustomerId" })
+                                            <h3 id="CustomerPrevDue" class="float-right text-danger">
+                                            </h3>
+                                            @Html.ValidationMessageFor(model => model.CustomerId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    @if (@ViewBag.Type == "Supplier")
+                                    {
+                                        <div id="divsupplierid" class="col-md-4 col-12">
+                                            <div class="mb-2">
+                                                <div>
+                                                    <label class="form-label fw-semibold">
+                                                        @Html.LabelFor(x => x.Supplier)
+                                                    </label>
+                                                </div>
+                                                @Html.DropDownListFor(x => x.SupplierId,
+                                                         new SelectList((IEnumerable<SelectListItem>)ViewBag.Supplier, "Value", "Text"), "Select Supplier",
+                                                         htmlAttributes: new { @class = "form-control", id = "SupplierId" })
+                                                <h3 id="SupplierPrevDue" class="float-right text-danger">
+                                                </h3>
+                                                <span id="supplierIdValidationMessage" class="text-danger" style="display: none;">Supplier must be selected</span>
+                                                @Html.ValidationMessageFor(x => x.SupplierId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    }
+                                    else if (@ViewBag.Type == "ReceivedFromSupplier")
+                                    {
+                                        <div id="divsupplierid" class="col-md-4 col-12">
+                                            <div class="mb-2">
+                                                <div>
+                                                    <label class="form-label fw-semibold">
+                                                        @Html.LabelFor(x => x.Supplier)
+                                                    </label>
+                                                </div>
+                                                @Html.DropDownListFor(x => x.SupplierId,
+                                                         new SelectList((IEnumerable<SelectListItem>)ViewBag.Supplier, "Value", "Text"), "Select Supplier",
+                                                         htmlAttributes: new { @class = "form-control", id = "SupplierId1" })
+                                                <h3 id="SupplierPrevDue" class="float-right text-danger">
+                                                </h3>
+                                                <span id="supplierIdValidationMessage1" class="text-danger" style="display: none;">Supplier must be selected</span>
+                                                @Html.ValidationMessageFor(x => x.SupplierId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    }
+
+
+
+                                    <div id="divdiscountamount" class="col-md-4 col-12  mb-2">
+                                        <div>
+                                            <label class="form-label fw-semibold">
+                                                @Html.LabelFor(x => x.DiscountAmount)
+                                            </label>
+                                        </div>
+                                        @Html.TextBoxFor(x => x.DiscountAmount, null, new { @class = "form-control", @placeholder = "Enter Discount Amount " })
+                                        @Html.ValidationMessageFor(x => x.DiscountAmount, "", new { @class = "text-danger" })
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 col-12">
+                                            <label class="form-label fw-semibold">
+                                                @Html.LabelFor(x => x.TransactionTags)
+                                            </label>
+                                            <div class="mb-2">
+                                                @*<label class="form-label fw-semibold">Tags</label>
+
+                                                *@
+
+                                                <input id="MultiTags" type="text" value="" data-role="tagsinput" />
+                                                @*@Html.ValidationMessageFor(x => x.TransactionTags, "", new { @class = "text-danger" })*@
+
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+
+
+                                    @{
+                                        var BusinessType = @HttpContextAccessor.HttpContext.Session.GetString("BusinessType").ToString();
+                                        if (BusinessType == "Association")
+                                        {
+                                            <div class="col-md-4 col-12  my-2">
+                                                <div class="input-group mb-2">
+                                                    <div>
+                                                        <span class="input-group-text py-0">
+                                                            @Html.LabelFor(model => model.MemberId, "Member")
+                                                        </span>
+                                                    </div>
+                                                    @Html.DropDownListFor(x => x.MemberId,
+                                                         new SelectList((IEnumerable<SelectListItem>)ViewBag.Member, "Value", "Text"), "Select Member",
+                                                         htmlAttributes: new { @class = "form-select", id = "MemberId" })
+                                                    @Html.ValidationMessageFor(x => x.MemberId, "", new { @class = "text-danger" })
+
+                                                </div>
+                                            </div>
+
+                                        }
+                                    }
+
+                                    <div id="divemployeeid" class="col-md-6 col-12  mb-2">
+                                        <div>
+                                            <label class="form-label fw-semibold">
+                                                @Html.LabelFor(model => model.EmployeeId, "Employee")
+                                            </label>
+                                        </div>
+                                        @Html.DropDownListFor(x => x.EmployeeId,
+                                                 new SelectList((IEnumerable<SelectListItem>)ViewBag.Employee, "Value", "Text"), "Select Employee",
+                                                 htmlAttributes: new { @class = "form-select", id = "EmployeeId" })
+                                        @Html.ValidationMessageFor(x => x.EmployeeId, "", new { @class = "text-danger" })
+
+
+                                    </div>
+
+                                    <div id="divsalesid" class="col-md-4 col-12">
+                                        <div class="mb-2">
+                                            <div>
+                                                <label class="form-label fw-semibold">
+                                                    @Html.LabelFor(model => model.SalesId, "Invoice")
+                                                </label>
+
+                                            </div>
+                                            @Html.DropDownListFor(x => x.SalesId,
+                                                     new SelectList((IEnumerable<SelectListItem>)ViewBag.Sales, "Value", "Text"), "Select Sales Invoice",
+                                                     htmlAttributes: new { @class = "form-select", id = "SalesId" })
+                                            @Html.ValidationMessageFor(x => x.SalesId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div id="divpurchaseid" class="col-md-4 col-12 hidden mb-2">
+                                        <div>
+                                            <label class="form-label fw-semibold">
+                                                @Html.LabelFor(model => model.PurchaseId, "Purchase Order")
+                                            </label>
+                                        </div>
+                                        @Html.DropDownListFor(x => x.PurchaseId,
+                                                 new SelectList((IEnumerable<SelectListItem>)ViewBag.Purchase, "Value", "Text"), "Select Purchase Bill",
+                                                 htmlAttributes: new { @class = "form-control form-control-sm", id = "PurchaseId" })
+                                        <span id="purchaseIdValidationMessage" class="text-danger" style="display: none;">Purchase must be selected</span>
+                                        @Html.ValidationMessageFor(x => x.PurchaseId, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+
+
+
+
+                                <div class="row">
+                                    <div class="col-md-6 col-12">
+                                        <div class="mb-2">
+                                            <label class="form-label fw-semibold">
+                                                @Html.LabelFor(x => x.Description)
+                                            </label>
+                                            @Html.TextAreaFor(x => x.Description, new { @class = "form-control", @style = "height:112px" })
+                                            @Html.ValidationMessageFor(x => x.Description, "", new { @class = "text-danger" })
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12 mt-4 pt-1">
+                                        <input id="image-uploadify" type="file" accept=".xlsx,.xls,image/*,.doc,audio/*,.docx,video/*,.ppt,.pptx,.txt,.pdf" multiple>
+                                    </div>
+
+
+                                </div>
+
+
+                                <!-- Add this HTML to your page -->
+                                <div class="modal" id="confirmModal" tabindex="-1">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirmation</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p></p>
+                                            </div>
+                                            <div class="modal-footer justify-content-between">
+                                                <button type="button" class="btn btn-light button" data-bs-dismiss="modal">No</button>
+                                                <button type="button" class="btn btn-success button" id="confirmYesBtn">Yes</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+
+                                <div class="row">
+                                    <div class="col-md-12 my-2">
+                                        <div id="divbutton" class="row">
+                                            @*<button type="submit" class="btn btn-primary"> Save Changes </button>*@
+                                            <div class="col-md-1 col-1 d-grid mb-2">
+                                                @Html.ActionLink("Back", "TransactionList", "Admin", null, new { @class = "btn btn-primary ", @id = "btnBack" })
+                                            </div>
+                                            <div class="col-md-10 col-10" style="text-align: center; margin-top: 7px;">
+                                                <div id="makeRecurringDiv">
+                                                    @if (ViewBag.ActionType == "Create" && ViewBag.Type == "Expense")
+                                                    {
+                                                        <a href="#" onclick="makeRecurring();" style="display: flex; align-items: center; justify-content: center;"><span style="font-weight:bold; font-size: 16px;">Make recurring</span></a>
+
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-1 col-1 d-grid mb-2">
+
+                                                @if (ViewBag.ActionType == "Create" || ViewBag.ActionType == "Copy")
+                                                {
+                                                    @*<input type="submit" value="Save" class="btn  btn-primary" />*@
+                                                    @* <button id="BtnSave" class="btn  btn-primary" onclick="ConfirmDialog('Do you want to save ?')" type="button">Save</button> *@
+                                                    <button id="BtnSave" class="btn  btn-success" onclick="validateAndSave()" type="button">Save</button>
+
+
+                                                }
+                                                else if (ViewBag.ActionType == "Edit")
+                                                {
+                                                    @* <input type="submit" value="Update Changes" class="btn btn-outline-warning" />*@
+                                                    @* <button id="BtnSave" class="btn btn-warning " onclick="ConfirmDialog('Do you want to update ?')" type="button">Update Changes</button> *@
+                                                    <button id="BtnSave" class="btn btn-outline-light" onclick="validateAndSave()" type="button" style="background-color: #FF5733;" data-is-recurring="@Model.IsRecurring">Update</button>
+                                                }
+                                                else if (ViewBag.ActionType == "Delete")
+                                                {
+                                                    <button class="btn btn-outline-danger" type="button" onclick="Bank_delete()">Delete</button>
+                                                }
+                                            </div>
+                                            
+                                            <!-- Example single danger button -->
+                                            
+                                        </div>
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="footerButton">
+                            <a href="@Url.Content(Model.FilePath)" class="btn btn-outline-dark fw-bolder btn-sm mt-4 @(Model.Id==0 ||Model.TransactionFilePath==null?"d-none":"")" target="_blank">Full view <i class="bi bi-eye-fill"></i></a>
+                            <button class="btn btn-outline-dark fw-bolder btn-sm mt-4 bg-danger text-white @(Model.Id==0 ||Model.TransactionFilePath==null?"d-none":"")" id="remove-image-or-pdf">X</button>
+                        </div>
+                        <div class="col-lg-12">
+                            @*<iframe id="pdf-iframe" class="@(Model.Id==0 ||Model.TransactionFilePath==null?"d-none":"")" style="width: 66%; height: 500px;" src="~/@Model.TransactionFilePath"></iframe>*@
+                            <iframe id="pdf-iframe" class="@(Model.Id==0 ||Model.TransactionFilePath==null?"d-none":"")" style="width: 60%; height: 500px;" src="@Url.Content(Model.FilePath)"></iframe>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- End PAge Content -->
+
+        </div>
+
+
+    </div>
+</div>
+
+
+
+
+
+@section scripts {
+    <script type="text/javascript">
+
+         var isMultiCurrency = '@HttpContextAccessor.HttpContext.Session.GetInt32("isMultiCurrency")';
+         var DefaultCurrencyId = '@HttpContextAccessor.HttpContext.Session.GetInt32("defaultcurrencyid").ToString()';
+
+        var transactionTags = @Html.Raw(Json.Serialize(Model.TransactionTagsList));
+        console.log(transactionTags);
+        $(document).ready(function () {
+            $("#top-row").removeClass("d-none");
+            $("#makeRecurringDiv").removeClass("d-none");
+            $("#First-row-Recurring").addClass("d-none");
+            $("#IntervalDiv").addClass("d-none");
+
+            $('#CurrencyId').on('select2:select', function () {
+                var selectedValue = $(this).val();
+                resetAmount();
+            });
+
+            var $tagInput = $("#MultiTags");
+
+            var values = transactionTags;
+            //Iterate over each value and add it as a tag
+            $.each(values, function (i, value) {
+                console.log(value, i);
+                setTimeout(function () {
+                    $tagInput.tagsinput('add', values[i].tag);
+                }, 100);
+            });
+
+            $(function () {
+                
+                $("#recurring-start-date").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                });
+                $("#recurring-end-date").removeClass("hasDatepicker").datepicker({
+                    dateFormat: "dd-M-yy"
+                });
+            });
+            function formatDateToCustomString(inputDate) {
+                const months = [
+                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                ];
+
+                if (inputDate instanceof Date && !isNaN(inputDate)) {
+                    const day = inputDate.getDate();
+                    const monthIndex = inputDate.getMonth();
+                    const year = inputDate.getFullYear();
+                    const formattedDay = day < 10 ? `0${day}` : day;
+
+                    const formattedDate = `${formattedDay}-${months[monthIndex]}-${year}`;
+                    return formattedDate;
+                } else {
+                    return inputDate;
+                }
+            }
+            if ('@actionType' === "Edit") {
+                var isRecurring = document.getElementById("BtnSave").getAttribute("data-is-recurring");
+                var currency = $("#CurrencyId option:selected").text();
+                $("#amountDisplay").text( currency + " " + '@ViewBag.Amount');
+                
+                
+                if (isRecurring === "True") {
+                    var TrxnId = $("#Id").val();
+                    $.ajax({
+                        type: "GET",
+                        url: '@Url.Action("GetRecurringDetailsForTrxn", "Sales")',
+                        data: { id: TrxnId },
+                        dataType: "json",
+                        success: function (response) {
+                            console.log(response.data);
+                            var model = response.data;
+                            $("#recurr-id").val(model.Id);
+                            $("#temp-name").val(model.TemplateName);
+                            $("#RecurringType").val(model.TemplateType);
+                            $("#create-days").val(model.CreateDays);
+                            $("#Interval").val(model.Interval);
+                            $("#Week").val(model.Week_);
+                            $("#Month").val(model.Month_);
+                            $("#Integer").val(model.Integer_);
+                            $("#Count").val(model.Count_);
+                            $("#every").val(model.Every_);
+                            $("#End").val(model.End_);
+                            $("#occurences").val(model.occurences);
+                            $("#occurences").val(model.occurences);
+                            $("#recurring-start-date").val(formatDateToCustomString(new Date(model.RecurringStartDate)));
+                            $("#recurring-end-date").val(formatDateToCustomString(new Date(model.RecurringEndDate)));
+
+                            if (model.TemplateType === "Scheduled") {
+                                document.getElementById("before-create-days").innerText = "Create";
+                                $("#create-days").removeClass("d-none");
+                                $("#after-create-days").removeClass("d-none");
+                                $("#IntervalDiv").removeClass("d-none");
+                            }
+                            if (model.TemplateType === "Reminder") {
+                                document.getElementById("before-create-days").innerText = "Remind";
+                                $("#create-days").removeClass("d-none");
+                                $("#after-create-days").removeClass("d-none");
+                                $("#IntervalDiv").removeClass("d-none");
+                            }
+                            if (model.TemplateType === "Unscheduled") {
+                                document.getElementById("before-create-days").innerText = "Unscheduled transactions don’t have timetables.";
+
+                                $("#create-days").addClass("d-none");
+                                $("#after-create-days").addClass("d-none");
+                                $("#IntervalDiv").addClass("d-none");
+                            }
+                            if (model.Interval === 'Daily') {
+                                document.getElementById("before-every").innerText = "every";
+                                document.getElementById("after-interval").innerText = "day(s)";
+                                $("#every").removeClass("d-none");
+                                $("#Week").addClass("d-none");
+                                $("#Count").addClass("d-none");
+                                $("#Integer").addClass("d-none");
+                                $("#Month").addClass("d-none");
+                            }
+                            if (model.Interval === 'Weekly') {
+                                document.getElementById("before-every").innerText = "every";
+                                document.getElementById("after-interval").innerText = "week(s) on";
+                                $("#every").removeClass("d-none");
+                                $("#Week").removeClass("d-none");
+                                $("#Count").addClass("d-none");
+                                $("#Integer").addClass("d-none");
+                                $("#Month").addClass("d-none");
+
+                            }
+                            if (model.Interval === 'Monthly') {
+                                document.getElementById("before-every").innerText = "of every";
+                                document.getElementById("after-interval").innerText = "month(s) on";
+                                $("#every").removeClass("d-none");
+                                $("#Week").addClass("d-none");
+                                $("#Count").removeClass("d-none");
+                                $("#Integer").removeClass("d-none");
+                                $("#Month").addClass("d-none");
+                            }
+                            if (model.Interval === 'Yearly') {
+                                document.getElementById("before-every").innerText = "every";
+                                document.getElementById("after-interval").innerText = "";
+                                $("#every").addClass("d-none");
+                                $("#Week").addClass("d-none");
+                                $("#Count").addClass("d-none");
+                                $("#Integer").removeClass("d-none");
+                                $("#Month").removeClass("d-none");
+                            }
+                            if (model.End_ === 'None') {
+                                $("#recurringEndDiv").addClass("d-none");
+                                $("#occurencesDiv").addClass("d-none");
+                                $("#occurencesSpan").addClass("d-none");
+                            }
+                            if (model.End_ === 'By') {
+                                $("#recurringEndDiv").removeClass("d-none");
+                                $("#occurencesDiv").addClass("d-none");
+                                $("#occurencesSpan").addClass("d-none");
+                            }
+                            if (model.End_ === 'After') {
+                                $("#recurringEndDiv").addClass("d-none");
+                                $("#occurencesDiv").removeClass("d-none");
+                                $("#occurencesSpan").removeClass("d-none");
+                            }
+                            if (model.Count_ === 'day') {
+                                $("#Week").addClass("d-none");
+                                $("#Count").removeClass("d-none");
+                                $("#Integer").removeClass("d-none");
+                                $("#Month").addClass("d-none");
+                            }
+                            else {
+                                $("#Week").removeClass("d-none");
+                                $("#Count").removeClass("d-none");
+                                $("#Integer").addClass("d-none");
+                                $("#Month").addClass("d-none");
+                            }
+                            $("#top-row").addClass("d-none");
+                            $("#makeRecurringDiv").addClass("d-none");
+                            $("#First-row-Recurring").removeClass("d-none");
+                            $("#IntervalDiv").removeClass("d-none");
+                        },
+                        error: function (error) {
+                            console.error("Error fetching data: " + error);
+                        }
+                    });
+                }
+            }
+
+        });
+
+
+        function resetAmount() {
+            const amountDisplay = document.getElementById("amountDisplay");
+            const amountDisplayInMulti = document.getElementById("amountDisplayInMulti");
+
+            amountDisplay.textContent = "";
+            amountDisplayInMulti.textContent = "";
+            $("#transferAmountVal").val(0);
+        }
+        // function updateAmount(amount) {
+        //     const parsedAmount = parseInt(amount);
+        //     const amountDisplay = document.getElementById("amountDisplay");
+
+        //     if (isNaN(parsedAmount)) {
+        //         amountDisplay.textContent = "TK: ";
+        //     } else {
+        //         amountDisplay.textContent = "TK: " + parsedAmount;
+        //     }
+        // }
+
+
+        // function ConfirmDialog(message) {
+        //     $('<div></div>').appendTo('body')
+        //         .html('<div><h6>' + message + '?</h6></div>')
+        //         .dialog({
+        //             modal: true,
+        //             title: 'Save / Update message',
+        //             zIndex: 10000,
+        //             autoOpen: true,
+        //             width: 'auto',
+        //             resizable: false,
+        //             buttons: {
+        //                 Yes: function () {
+
+        //                     $(this).dialog("close");
+        //                     $("#BtnSave").prop("disabled", true);
+        //                     SaveTransactionModel();
+        //                 },
+        //                 No: function () {
+
+        //                     $(this).dialog("close");
+
+        //                 }
+        //             },
+        //             close: function (event, ui) {
+        //                 $(this).remove();
+        //             }
+        //         });
+        // };
+
+        // function validateAndSave() {
+        //     var amount = parseFloat($("#transferAmountVal").val());
+
+        //     if (amount > 0) {
+        //         $("#amountValidationMessage").hide(); // Hide the validation message
+        //         ConfirmDialog('Do you want to save ?', function () {
+
+        //             SaveTransactionModel();
+        //         });
+        //     } else {
+        //         alert("Amount must be greater than 0");
+        //     }
+        // }
+
+        function validateAndSave() {
+            var amount = parseFloat($("#transferAmountVal").val());
+            var CreditAccountId = $("#CreditAccountId").val();
+            var DebitAccountId = $("#DebitAccountId").val();
+            var supplierId = $("#SupplierId").val();
+            var WarehouseId = $("#WarehouseId").val();
+            var supplierId1 = $("#SupplierId1").val();
+            var purchaseId = $("#PurchaseId").val();
+            var type = "@ViewBag.Type";
+
+            if ((type !== "Paid" || CreditAccountId) && (type !== "Supplier" || supplierId) && (type !== "ReceivedFromSupplier" || supplierId1) && (type !== "Received" || DebitAccountId) || (type !== "Purchase" || purchaseId) && amount > 0 && DebitAccountId) {
+                $("#amountValidationMessage").hide();
+                $("#accountValidationMessage").hide();
+                $("#accountValidationMessage1").hide();
+                $("#accountPayTypeValidationMessage").hide();
+                $("#supplierIdValidationMessage").hide();
+                $("#supplierIdValidationMessage1").hide();
+                $("#purchaseIdValidationMessage").hide();
+                ConfirmDialog('Do you want to save ?', function () {
+                    SaveTransactionModel();
+                });
+            } else {
+                if (!CreditAccountId && type === "Paid") {
+                    $("#accountValidationMessage").show().text("Account Head must be selected"); // Show the account head validation message
+                } else {
+                    $("#accountValidationMessage").hide(); // Hide the account head validation message
+                }
+
+                if (amount <= 0) {
+                    $("#amountValidationMessage").show().text("Amount must be greater than 0"); // Show the amount validation message
+                } else {
+                    $("#amountValidationMessage").hide(); // Hide the amount validation message
+                }
+
+                if (!DebitAccountId) {
+                    $("#accountPayTypeValidationMessage").show().text("Payment/Received Head must be selected"); // Show the account head validation message
+                } else {
+                    $("#accountPayTypeValidationMessage").hide(); // Hide the account head validation message
+                }
+
+                if (type === "Supplier" && !supplierId) {
+                    $("#supplierIdValidationMessage").show().text("Supplier must be selected"); // Show the account head validation message
+                } else {
+                    $("#supplierIdValidationMessage").hide(); // Hide the account head validation message
+                }
+
+                if (type === "ReceivedFromSupplier" && !supplierId1) {
+                    $("#supplierIdValidationMessage1").show().text("Supplier must be selected"); // Show the account head validation message
+                } else {
+                    $("#supplierIdValidationMessage1").hide(); // Hide the account head validation message
+                }
+
+                if (type === "Received" && !DebitAccountId) {
+                    $("#accountValidationMessage1").show().text("Account Head must be selected"); // Show the account head validation message
+                } else {
+                    $("#accountValidationMessage1").hide(); // Hide the account head validation message
+                }
+
+                if (type === "Purchase" && !purchaseId) {
+                    $("#purchaseIdValidationMessage").show().text("Purchase must be selected"); // Show the account head validation message
+                } else {
+                    $("#purchaseIdValidationMessage").hide(); // Hide the account head validation message
+                }
+            }
+        }
+
+
+        // function ConfirmDialog(message, callback) {
+        //     $('<div></div>').appendTo('body')
+        //         .html('<div><h6>' + message + '?</h6></div>')
+        //         .dialog({
+        //             modal: true,
+        //             title: 'Save / Update message',
+        //             zIndex: 10000,
+        //             autoOpen: true,
+        //             width: 'auto',
+        //             resizable: false,
+        //             buttons: {
+        //                 Yes: function () {
+        //                     $(this).dialog("close");
+        //                     if (typeof callback === 'function') {
+        //                         callback();
+        //                     }
+        //                 },
+        //                 No: function () {
+        //                     $(this).dialog("close");
+        //                 }
+        //             },
+        //             close: function (event, ui) {
+        //                 $(this).remove();
+        //             }
+        //         });
+        // }
+
+        function ConfirmDialog(message, callback) {
+            // Set the message in the modal
+            $('#confirmModal .modal-body p').text(message);
+
+            // Open the Bootstrap modal
+            $('#confirmModal').modal('show');
+
+            // Handle Yes button click
+            $('#confirmYesBtn').on('click', function () {
+                // Close the Bootstrap modal
+                $('#confirmModal').modal('hide');
+
+                // Execute the callback function if it's a function
+                if (typeof callback === 'function') {
+                    callback();
+                }
+            });
+
+            // Handle modal close event
+            $('#confirmModal').on('hidden.bs.modal', function () {
+                // Clean up event handlers
+                $('#confirmYesBtn').off('click');
+                $('#confirmModal').off('hidden.bs.modal');
+
+
+            });
+        }
+
+        function updateAmount(amount) {
+            var amounts = parseFloat(amount);
+            const parsedAmount = parseInt(amount);
+            const amountDisplay = document.getElementById("amountDisplay");
+            const amountDisplayInMulti = document.getElementById("amountDisplayInMulti");
+            const currRate = $("#CurrencyRate").val();
+
+            if (isNaN(parsedAmount)) {
+                amountDisplay.textContent = "";
+            } else {
+                var currency = $(".rate").text();
+                if(currency == "")
+                {
+                    currency = "BDT";
+                    amountDisplayInMulti.classList.add("d-none");
+                }
+                else
+                {
+                     amountDisplayInMulti.classList.remove("d-none");
+                }
+                amountDisplay.textContent = currency + " " + parsedAmount;
+                amountDisplayInMulti.textContent = "BDT" + " " + parsedAmount * currRate;
+            }
+
+            if (amounts > 0) {
+                $("#amountValidationMessage").hide();
+            }
+        }
+
+        // function updateAmount(value) {
+        //     var amount = parseFloat(value);
+
+
+        //     if (amount > 0) {
+        //         $("#amountValidationMessage").hide();
+        //     }
+        // }
+
+
+
+
+        var antiForgeryToken;
+        antiForgeryToken = $("input[name='Dominate_ANTIFORZERY']").val();
+
+        function ClearData() {
+            $("#Id").val('');
+            $("#TransactionCode").val('');
+            $("#Description").val('');
+        }
+
+        function getRecurringValues(TxnId) {
+            var values = {};
+
+            values.Id = parseInt(document.getElementById("recurr-id").value);
+
+            values.TemplateName = document.getElementById("temp-name").value;
+
+            values.TemplateType = document.getElementById("RecurringType").value;
+
+            values.CreateDays = parseInt(document.getElementById("create-days").value ? document.getElementById("create-days").value : 0);
+
+            values.Interval = document.getElementById("Interval").value;
+
+            values.Week_ = document.getElementById("Week").value;
+
+            values.Month_ = document.getElementById("Month").value;
+
+            values.Integer_ = document.getElementById("Integer").value;
+
+            values.Count_ = document.getElementById("Count").value;
+
+            values.Every_ = parseInt(document.getElementById("every").value ? document.getElementById("every").value : 0);
+
+            values.RecurringStartDate = document.getElementById("recurring-start-date").value;
+
+            values.End_ = document.getElementById("End").value;
+
+            values.RecurringEndDate = document.getElementById("recurring-end-date").value;
+
+            values.occurences = parseInt(document.getElementById("occurences").value ? document.getElementById("occurences").value : 0);
+
+            values.TransactionId = TxnId;
+
+            return values;
+        }
+
+        function SaveTransactionModel() {
+
+            //alert('test');
+
+
+
+            $('select').removeAttr('disabled');
+
+
+
+
+            var multipleTag = $("#MultiTags").tagsinput('items');
+            var TransactionId = $('#Id').val() || 0;
+            var IsRecurring = false;
+            var myDiv = document.getElementById("top-row");
+
+            if (myDiv.classList.contains("d-none")) {
+                IsRecurring = true;
+            }
+
+            var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+            var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+
+            var TransactionModel = {
+                ComId: ComId,
+                LuserId: UserId,
+                Id: "",
+                TransactionCode: "",
+                TransactionType: "",
+                TransactionCategory: "",
+                TransactionTags: multipleTag,
+                TransactionFilePath: "",
+
+                InputDate: "",
+                CreditAccountId: "",
+                CreditAccountId: "",
+                EmployeeId:"",
+                Description: "",
+                CurrencyId: "",
+                CurrencyRate: 0.00,
+
+
+                TransactionAmount: 0.00,
+                IsRecurring: IsRecurring,
+
+                //isPost:false,
+                DebitAccountId: null,
+                CustomerId: null,
+                SupplierId: null,
+                PurchaseId: null,
+                SalesId: null,
+                WarehouseId: null,
+
+
+
+
+            };
+
+
+            TransactionModel.Id = $("#Id").val();
+            TransactionModel.TransactionCode = $("#TransactionCode").val();
+            TransactionModel.TransactionType = $("#TransactionType").val();
+            TransactionModel.TransactionCategory = $("#TransactionCategory").val();
+
+            TransactionModel.InputDate = $("#InputDate").val();
+            TransactionModel.CreditAccountId = $("#CreditAccountId option:selected").val();
+            TransactionModel.CreditAccountId = $("#CreditAccountId option:selected").val();
+            TransactionModel.EmployeeId = $("#EmployeeId option:selected").val();
+            TransactionModel.DebitAccountId = $("#DebitAccountId option:selected").val();
+            TransactionModel.CustomerId = $("#CustomerId option:selected").val();
+            TransactionModel.SupplierId = $("#SupplierId option:selected").val();
+            TransactionModel.WarehouseId = $("#WarehouseId option:selected").val();
+
+
+
+            //TransactionModel.LuserId = $("#LuserId").val();//'@HttpContextAccessor.HttpContext.Session.GetString("LuserId")';
+            //TransactionModel.ComId = $("#ComId").val();//'@HttpContextAccessor.HttpContext.Session.GetString("ComId")';
+            TransactionModel.CreateDate = $("#CreateDate").val();
+
+            TransactionModel.CurrencyId = $("#CurrencyId").val();
+            TransactionModel.CurrencyRate = $("#CurrencyRate").val();
+            TransactionModel.Description = $("#Description").val();
+            //TransactionModel.TransactionAmount = $("#TransactionAmount").val();
+            TransactionModel.TransactionAmount = $("#transferAmountVal").val();
+
+
+
+
+            //console.log(TransactionModel);
+            //alert('Wait');
+
+
+
+            var TransactionIdabc = 0;
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("AddTransaction", "Admin")',
+                dataType: 'json',
+                async: 'false',
+                headers: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                data: { model: TransactionModel },
+                success: function (response) {
+                    if (response.Success == "1") {
+
+
+                        TransactionIdabc = response.TransactionId;
+
+
+                        //tblRefList.clear();
+
+                        //tbltransactionlist.clear();
+                        //tbltransactionlist.draw();
+                        //alert('found');
+
+                        //console.log(result.Id);
+
+
+                        toastr.success(response.message, "", {
+                            "toastClass": "toast-green"
+                        });
+                        if (TransactionModel.IsRecurring === true) {
+                            var recdata = getRecurringValues(TransactionIdabc);
+                            var data = JSON.stringify(recdata);
+                            $.ajax({
+
+                                url: '@Url.Action("RecurringDetailsCreation", "Sales")',
+                                type: 'POST',
+                                data: data,
+                                async: false,
+                                contentType: "application/json; charset=utf-8",
+                                dataType: 'json',
+                                success: function (response) {
+
+                                    console.log("Done");
+                                },
+                                error: function (error) {
+                                    console.log("Error");
+                                }
+                            });
+                        }
+
+
+
+
+                        var fileInput = $('input[type=file]')[0];
+                        if (fileInput.files.length > 0 && fileInput.files[0].size > 0) {
+
+                            var formData = new FormData();
+                            formData.append("file", fileInput.files[0]);
+                            formData.append("TransactionIdabc", TransactionIdabc);
+
+                            $.ajax({
+                                async: false,
+                                type: "POST",
+                                url: "@Url.Action("UploadImage", "Admin")",
+                                data: formData,
+                                contentType: false,
+                                processData: false,
+                                success: function (response) {
+                                    // Handle the response
+                                }
+                            });
+                        } else {
+                            // Handle the case where no file was selected
+                        }
+                        ClearData();
+                        if (TransactionIdabc > 0) {
+                            window.setTimeout(function () {
+                                window.location.href = '@Url.Action("TransactionList", "Admin")';
+                            }, 3000);
+
+
+                        }
+
+                    }
+
+                    else {
+                        alert(response.ex);
+                    }
+                },
+                error: function (ex) {
+                    console.log(ex);
+                    alert('error');
+                }
+            });
+
+
+
+
+        };
+
+
+
+        var TransactionList = [];
+        var TypeSearch = '@ViewBag.Type';
+        $.ajax({
+            method: "get",
+            async: false,
+            url: '@Url.Action("LastTransaction", "Admin")',
+            data: { transactionid: $("#Id").val(), transactiontypesearch: TypeSearch },
+
+            success: function (data) {
+
+                console.log(data);
+                TransactionList = data.PrevTransactionList;
+
+
+            }
+        });
+
+
+
+        $('#jsClockHistory').jsGrid({
+            width: '100%',
+            data: TransactionList,
+            fields: [
+                { name: "Id", title: 'Id', type: "label", visible: false },
+                { name: "TransactionCode", title: 'Transaction Code', type: "label" },
+                { name: "TransactionType", title: 'Type', type: "label", visible: false },
+                { name: "TransactionDate", title: 'Transaction Date', type: "label" },
+                { name: "TransactionDesc", title: 'Description', type: "label" },
+                { name: "Amount", title: 'Amount', type: "label" }
+            ]
+
+
+        });
+
+
+        $(document).ready(function () {
+
+            //$('#myForm').one('submit', function () {
+            //    $(this).find('input[type="submit"]').attr('disabled', 'disabled');
+            //});
+
+            document.getElementById("remove-image-or-pdf").addEventListener("click", function () {
+                document.getElementById("pdf-iframe").classList.add("d-none");
+                document.getElementById("view-image-or-pdf").classList.add("d-none");
+                document.getElementById("remove-image-or-pdf").classList.add("d-none");
+                document.getElementById("TransactionFilePath").value = "";
+            });
+
+
+
+            $('#TransactionTags').tagsinput({
+                trimValue: true
+            });
+
+            //var DefaultCurrencyId = '@HttpContextAccessor.HttpContext.Session.GetInt32("defaultcurrencyid").ToString()';
+
+            //var isMultiCurrency = '@HttpContextAccessor.HttpContext.Session.GetInt32("isMultiCurrency")';
+            //if (isMultiCurrency == "0") { // fathema need to hide later based on condition
+            //    //$("#divcurrencyid").hide();
+            //    //$("#divcurrencyrate").hide();
+            //}
+
+
+
+
+
+
+
+            var Type = '@ViewBag.Type';
+            $("#divdiscountamount").hide();
+            //$("#Status").val(filter);
+            //alert(Type);
+            $("#divcreditaccountid").hide();
+            $("#divdebitaccountid").hide();
+            $("#divcustomerid").hide();
+            $("#divsupplierid").hide();
+            //$("#divproductid").hide();
+
+
+
+
+            $("#divtransactiontype").hide();
+            $("#divsalesid").hide();
+            $("#divemployeeid").hide();
+            $("#divCheckInformation").hide();
+
+            ////////////////////    Received    ////////////////////////
+
+            if (Type.toLowerCase() == "Sales".toLowerCase()) {
+
+                $("#CreditAccountLabel").text("Received By");
+                $("#divsupplierid").hide();
+                $("#divemployeeid").hide();
+                $("#divpurchaseid").hide();
+                $("#divcustomerid").hide();
+                $("#divtransactiontype").hide();
+
+                $("#divsalesid").show();
+                $("#divcustomerid").show();
+                $("#divdebitaccountid").show();
+                //$("#divcreditaccountid").show();
+
+                //$("#divsalesid").show();
+                //$("#divcreditaccountid").hide();
+                //$("#divdebitaccountid").show();
+
+                //$("#TransactionType").attr('disabled', true);
+                //$("#AssetLiabilityAccountId").attr('disabled', true);
+                //$("#CustomerId").attr('disabled', true);
+                //$("#SalesId").attr('disabled', true);
+
+                //alert($("#CustomerId").val());
+                LedgerBalance('DebitAccountId', $('#DebitAccountId').val());
+
+            }
+            else if ((Type.toLowerCase() == "Customer".toLowerCase())) {
+
+                $("#DebitAccountLabel").text("Received By");
+                $("#divsupplierid").hide();
+                $("#divemployeeid").hide();
+                $("#divpurchaseid").hide();
+                $("#divdiscountamount").hide();
+                $("#divtransactiontype").hide();
+                $("#divcustomerid").show();
+                $("#divsalesid").show();
+
+                $("#divdebitaccountid").show();
+                //$("#divcreditaccountid").show();
+
+                LedgerBalance('DebitAccountId', $('#DebitAccountId').val());
+
+            }
+            else if ((Type.toLowerCase() == "Income".toLowerCase())) {
+
+                $("#DebitAccountLabel").text("Received By");
+                $("#CreditAccountLabel").text("Income Head");
+
+                $("#divdiscountamount").hide();
+                $("#divtransactiontype").hide();
+                $("#divcreditaccountid").show();
+                $("#divdebitaccountid").show();
+
+                $("#divcustomerid").hide();
+                $("#divsalesid").hide();
+                $("#divsupplierid").hide();
+                $("#divemployeeid").hide();
+                $("#divpurchaseid").hide();
+                LedgerBalance('DebitAccountId', $('#DebitAccountId').val());
+
+            }
+            else if ((Type.toLowerCase() == "ReceivedFromSupplier".toLowerCase())) {
+
+                $("#CreditAccountLabel").text("Received By");
+                $("#divdiscountamount").hide();
+                $("#divtransactiontype").hide();
+                $("#divdebitaccountid").show();
+                //$("#divcreditaccountid").show();
+
+                $("#divcustomerid").hide();
+                $("#divsalesid").hide();
+                $("#divsupplierid").show();
+                $("#divemployeeid").hide();
+                $("#divpurchaseid").hide();
+
+                LedgerBalance('DebitAccountId', $('#DebitAccountId').val());
+            }
+
+            else if (Type.toLowerCase() == "Expense".toLowerCase()) {
+
+                $("#DebitAccountLabel").text("Expense Head");
+                $("#CreditAccountLabel").text("Paid By");
+
+                $("#divcustomerid").hide();
+                $("#divsupplierid").hide();
+                $("#divpurchaseid").hide();
+                $("#divsalesid").hide();
+
+
+                //$("#divemployeeid").show();
+                $("#divdebitaccountid").show();
+                $("#divcreditaccountid").show();
+                $("#divtransactiontype").hide();
+
+
+
+                //$("#divsupplierid").hide();
+
+
+            }
+            ////////////////////    Paid    /////////////////////////
+            else if (Type.toLowerCase() == "PaidToEmployee".toLowerCase()) {
+
+                $("#CreditAccountLabel").text("Paid By");
+                $("#divsupplierid").hide();
+                $("#divdebitaccountid").show();
+                $("#divcreditaccountid").show();
+                $("#divemployeeid").show();
+
+                $("#divcustomerid").hide();
+                $("#divpurchaseid").hide();
+                $("#divdiscountamount").hide();
+                $("#divtransactiontype").hide();
+                $("#divsalesid").hide();
+                $("#divTransactionQuantity").hide();
+                $("#divTransactionRate").hide();
+
+                LedgerBalance('CreditAccountId', $('#CreditAccountId').val());
+            }
+            else if (Type.toLowerCase() == "ReceivedFromEmployee".toLowerCase()) {
+
+                //$("#CreditAccountLabel").text("Paid By");
+                $("#DebitAccountLabel").text("Received By");
+                $("#divsupplierid").hide();
+                $("#divdebitaccountid").show();
+                $("#divcreditaccountid").show();
+                $("#divemployeeid").show();
+
+                $("#divcustomerid").hide();
+                $("#divpurchaseid").hide();
+                $("#divdiscountamount").hide();
+                $("#divtransactiontype").hide();
+                $("#divsalesid").hide();
+                $("#divTransactionQuantity").hide();
+                $("#divTransactionRate").hide();
+            }
+            else if (Type.toLowerCase() == "PaidToCustomer".toLowerCase()) {
+                $("#CreditAccountLabel").text("Paid By");
+                $("#divsupplierid").hide();
+                //$("#divdebitaccountid").show();
+                $("#divcreditaccountid").show();
+
+                $("#divcustomerid").show();
+                $("#divpurchaseid").hide();
+                $("#divdiscountamount").hide();
+                $("#divtransactiontype").hide();
+                $("#divsalesid").show();
+                LedgerBalance('CreditAccountId', $('#CreditAccountId').val());
+
+                //fahad
+
+            }
+            else if (Type.toLowerCase() == "Purchase".toLowerCase()) {
+                $("#CreditAccountLabel").text("Paid By");
+                $("#divcustomerid").hide();
+                $("#divemployeeid").hide();
+                $("#divsalesid").hide();
+                $("#divtransactiontype").hide();
+                $("#divcreditaccountid").show();
+                //$("#divdebitaccountid").show();
+                //$("#divsupplierid").hide();
+
+                LedgerBalance('CreditAccountId', $('#CreditAccountId').val());
+            }
+            else if ((Type.toLowerCase() == "Supplier".toLowerCase())) {
+                $("#CreditAccountLabel").text("Paid By");
+                $("#divsupplierid").show();
+                $("#divcustomerid").hide();
+                $("#divemployeeid").hide();
+                $("#divsalesid").hide();
+                $("#divtransactiontype").hide();
+                //$("#divdebitaccountid").show();
+                $("#divcreditaccountid").show();
+
+
+                LedgerBalance('CreditAccountId', $('#CreditAccountId').val());
+
+
+
+            }
+            else if (Type.toLowerCase() == "CashContra".toLowerCase()) {
+
+                $("#DebitAccountLabel").text("To Account");
+                $("#CreditAccountLabel").text("From Account");
+
+                $("#divsupplierid").hide();
+                $("#divcustomerid").hide();
+                $("#divemployeeid").hide();
+                $("#divpurchaseid").hide();
+                $("#divsalesid").hide();
+                $("#divdebitaccountid").show();
+                $("#divcreditaccountid").show();
+                $("#divtransactiontype").hide();
+
+            }
+            else if (Type.toLowerCase() == "BankContra".toLowerCase()) {
+
+                $("#DebitAccountLabel").text("To Account");
+                $("#CreditAccountLabel").text("From Account");
+
+                $("#divsupplierid").hide();
+                $("#divcustomerid").hide();
+                $("#divemployeeid").hide();
+                $("#divtransactiontype").hide();
+                $("#divpurchaseid").hide();
+                $("#divsalesid").hide();
+
+                $("#divdebitaccountid").show();
+                $("#divcreditaccountid").show();
+
+
+            }
+            else if (Type.toLowerCase() == "Contra".toLowerCase()) {
+
+
+                $("#DebitAccountLabel").text("To Account");
+                $("#CreditAccountLabel").text("From Account");
+
+                $("#divsupplierid").hide();
+                $("#divcustomerid").hide();
+                $("#divemployeeid").hide();
+                $("#divtransactiontype").hide();
+                $("#divpurchaseid").hide();
+                $("#divsalesid").hide();
+
+                $("#divdebitaccountid").show();
+                $("#divcreditaccountid").show();
+
+
+            }
+            else if (Type.toLowerCase() == "CustomerDiscount".toLowerCase()) {
+
+
+                //alert('hit customer discoutn');
+                $("#divsupplierid").hide();
+                $("#divcustomerid").show();
+                $("#divemployeeid").hide();
+
+                $("#divpurchaseid").hide();
+                $("#divsalesid").show();
+
+                //$("#divdebitaccountid").show();
+                //$("#divcreditaccountid").show();
+
+                $("#divtransactiontype").hide();
+
+
+
+            }
+            else if (Type.toLowerCase() == "SupplierDiscount".toLowerCase()) {
+
+                $("#divsupplierid").show();
+                $("#divcustomerid").hide();
+                $("#divemployeeid").hide();
+                $("#divpurchaseid").show();
+                $("#divsalesid").hide();
+
+                $("#divtransactiontype").hide();
+                //$("#divdebitaccountid").show();
+                //$("#divcreditaccountid").show();
+
+            }
+            else {
+
+                $("#divsupplierid").hide();
+                $("#divcustomerid").hide();
+                $("#divemployeeid").hide();
+
+                $("#divpurchaseid").hide();
+                $("#divsalesid").hide();
+
+                $("#divdebitaccountid").show();
+                $("#divcreditaccountid").show();
+                //$("#divtransactiontype").hide();
+            }
+
+
+
+
+
+            //console.log("ready!");
+
+            //$("#AccountId").select2();
+            //$("#AssetLiabilityAccountId").select2();
+            //$("#AccountPayTypeId").select2();
+            //$("#CustomerId").select2();
+            //$("#SupplierId").select2();
+
+
+
+
+            function LedgerBalance(Type, AccountId) {
+                $("#divCheckInformation").hide();
+                //alert(AccountId);
+                //alert($("#Customer").val());
+                //tblaccountList.rows().remove().draw(false);
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetLedgerBalanceWithCategory", "Values")'
+                }
+                if (AccountId > 0) {
+
+                    //alert('test');
+                    $.ajax({
+                        type: 'Get',
+                        url: MyAppUrlSettings.MyUsefulUrl,
+                        dataType: 'json',
+                        data: { AccountId: AccountId, TransactionId: $("#Id").val() }, //, saleid: $("#Id").val()
+                        success: function (result) {
+
+                            console.log(result);
+                            if (Type == 'DebitAccountId') {
+                                $("#DebitAccountIdBalance").text("Balance :  " + result.AccountBalance.toLocaleString());
+                            }
+                            else if (Type == 'CreditAccountId') {
+                                $("#CreditAccountIdBalance").text("Balance :  " + result.AccountBalance.toLocaleString());
+                            }
+                            //console.log(result.AccountCategory);
+                            //alert('Wait');
+
+                            var isChequeDetails = '@HttpContextAccessor.HttpContext.Session.GetString("isChequeDetails").ToLower()' == 'true';
+
+
+                            if (result.AccountCategory.indexOf("Bank") !== -1 && isChequeDetails == true) {
+                                $("#divCheckInformation").show();
+                            } else {
+                                $("#divCheckInformation").hide();
+                            }
+
+
+
+
+                            //else if (Type == 'AssetLiabilityAccountId') {
+                            //    $("#AssetLiabilityAccountIdBalance").text("Balance :  " + result.toLocaleString());
+                            //    //$("#CustomerPrevDue").text("Previous Due :  " + result.CustomerInfo.PrevDue.toLocaleString());
+                            //}
+
+                        },
+                        error: function (ex) {
+                            alert('Failed.' + ex);
+                        }
+                    });
+
+
+
+                }
+
+                return false;
+            };
+
+            //LedgerBalance('CreditAccountId', $('#CreditAccountId').val());
+            //LedgerBalance('DebitAccountId', $('#DebitAccountId').val());
+
+
+            $('#CreditAccountId').select2({})
+                .on("select2:select", function (e) {
+                    //alert('hit');
+                    LedgerBalance('CreditAccountId', $('#CreditAccountId').val());
+                });
+
+            $('#DebitAccountId').select2({})
+                .on("select2:select", function (e) {
+                    //alert('hit');
+                    LedgerBalance('DebitAccountId', $('#DebitAccountId').val());
+                });
+
+
+
+
+            //console.log("ready!");
+            //select2 by shahinur
+            //$("#CreditAccountId").select2();
+            $("#CreditAccountId, #DebitAccountId, #TransactionType, #CurrencyId, #WarehouseId, #CreditAccountId,#CustomerId, #SalesId, #SupplierId, #PurchaseId    ").select2({
+                theme: 'bootstrap-5',
+            });
+
+
+            //$("#SupplierId").select2();
+
+            //const convertRateLabel = document.getElementById('convert-rate-field');
+            //const transferAmountVal = document.getElementById('transferAmountVal');
+
+            //transferAmountVal.addEventListener('input', () => {
+            //    var convertRate = $('#convert-rate-field').val();
+            //    const totalRateLabel = document.getElementById('total-rate-label');
+            //    totalRateLabel.textContent = 'Amount: ' + convertRate * transferAmountVal.value;
+
+            //});
+
+            //convertRateLabel.addEventListener('input', () => {
+
+            //    var transferAmount = $('#transferAmountVal').val();
+            //    console.log(transferAmount);
+            //    const totalRateLabel = document.getElementById('total-rate-label');
+            //    totalRateLabel.textContent = 'Amount: ' + transferAmount * convertRateLabel.value;
+
+            //});
+
+            $('#CurrencyId').select2({})
+                .on("select2:select", function (e) {
+                    var SelectedCurrencyId = $('#CurrencyId').val();
+                    console.log(SelectedCurrencyId);
+
+
+
+                    convertRateLabel.value = 1;
+                    convertRateLabel.disabled = true;
+
+                    if (DefaultCurrencyId == SelectedCurrencyId) {
+
+
+                        convertRateLabel.value = 1;
+                        convertRateLabel.disabled = true;
+
+                    }
+                    else {
+
+
+
+                        convertRateLabel.disabled = false;
+                        convertRateLabel.focus();
+
+                        console.log(transferAmountVal.value);
+
+
+
+
+
+                    }
+
+
+
+
+
+                });
+
+
+
+
+
+
+
+            $('#CustomerId').select2({})
+                .on("select2:select", function (e) {
+                    $('#SalesId').empty();
+                    customerinvoice();
+                });
+
+
+            $('#SupplierId').select2({})
+                .on("select2:select", function (e) {
+                    $('#PurchaseId').empty();
+                    supplierinvoice();
+                });
+
+
+            $("#MemberId").select2();
+            $("#WarehouseId").select2();
+            $("#TransactionType").select2({
+                theme: 'bootstrap-5'
+            });
+            $("#EmployeeId").select2();
+
+            $("#PurchaseId").select2();
+            $("#SalesId").select2();
+
+            if ($("#Id").val() > 0) {
+
+                if ($('#CustomerId').val() > 0) {
+                    customerinvoice();
+
+                }
+                else if ($('#SupplierId').val() > 0) {
+                    supplierinvoice();
+
+                }
+            }
+
+            function customerinvoice() {
+                //alert($("#Customer").val());
+                //tblaccountList.rows().remove().draw(false);
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetCustomerInvoice", "Sales")'
+                }
+                //alert(WW'test');
+                $.ajax({
+                    type: 'POST',
+                    url: MyAppUrlSettings.MyUsefulUrl,
+                    dataType: 'json',
+                    data: { CustomerId: $("#CustomerId").val(), TransactionId: $("#Id").val() }, //, saleid: $("#Id").val()
+                    success: function (result) {
+                        console.log(result.CustomerInvoiceList);
+                        var s = '<option value=>Please Select Sales Invoice</option>';
+                        for (var i = 0; i < result.CustomerInvoiceList.length; i++) {
+                            s += '<option value="' + result.CustomerInvoiceList[i].Value + '">' + result.CustomerInvoiceList[i].Text + '</option>';
+                        }
+                        $("#SalesId").html(s);
+
+
+
+                        $("#CustomerPrevDue").text("Previous Due :  " + result.CustomerInfo.PrevDue.toLocaleString());
+                    },
+                    error: function (ex) {
+                        alert('Failed.' + ex);
+                    }
+                });
+                return false;
+            };
+
+            function supplierinvoice() {
+
+                //alert($("#Customer").val());
+                // tblaccountList.rows().remove().draw(false);
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetSupplierInvoice", "Purchase")'
+                }
+                //alert('test');
+                $.ajax({
+                    type: 'POST',
+                    url: MyAppUrlSettings.MyUsefulUrl,
+                    dataType: 'json',
+                    data: { SupplierId: $("#SupplierId").val(), TransactionId: $("#Id").val() }, //, saleid: $("#Id").val()
+                    success: function (result) {
+
+                        var s = '<option value=>Please Select Purchase Invoice</option>';
+                        for (var i = 0; i < result.SupplierInvoiceList.length; i++) {
+                            s += '<option value="' + result.SupplierInvoiceList[i].Value + '">' + result.SupplierInvoiceList[i].Text + '</option>';
+                        }
+                        $("#PurchaseId").html(s);
+
+                        $("#SupplierPrevDue").text("Previous Due :  " + result.SupplierInfo.PrevDue.toLocaleString());
+                    },
+                    error: function (ex) {
+                        alert('Failed.' + ex);
+                    }
+                });
+                return false;
+
+            };
+
+
+
+            if ($("#Id").val() > 0) {
+
+            }
+            else {
+                //CurrentDate();
+
+            }
+
+
+            //$('#InputDate').datepicker({
+            //    dateFormat: 'dd-M-yy',
+            //    todayHighlight: true,
+            //    autoclose: true
+
+            //})
+
+            //$('.mydatepicker').datepicker({
+            //    format: 'dd-M-yyyy',
+            //    todayHighlight: true,
+            //    autoclose: true
+
+            //})
+
+            //function CurrentDate() {
+            //    var date = new Date();
+            //    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+            //        "Aug", "Sep", "Oct", "Nov", "Dec"];
+            //    var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear();
+            //    //var val = date.getMonth()+1 + "/" +  date.getDate()  + "/" + date.getFullYear();
+
+
+            //    //alert(val);
+            //    $("#InputDate").val(val);
+
+            //}
+
+            //$('#CreditAccountId').select2();
+            //$('#DebitAccountId').select2();
+        });
+    </script>
+    <script>
+        function recurringTypeCriteria() {
+            var selectedValue = document.getElementById("RecurringType").value;
+
+            if (selectedValue === "Scheduled") {
+                document.getElementById("before-create-days").innerText = "Create";
+                $("#create-days").removeClass("d-none");
+                $("#after-create-days").removeClass("d-none");
+                $("#IntervalDiv").removeClass("d-none");
+            }
+            if (selectedValue === "Reminder") {
+                document.getElementById("before-create-days").innerText = "Remind";
+                $("#create-days").removeClass("d-none");
+                $("#after-create-days").removeClass("d-none");
+                $("#IntervalDiv").removeClass("d-none");
+            }
+            if (selectedValue === "Unscheduled") {
+                document.getElementById("before-create-days").innerText = "Unscheduled transactions don’t have timetables.";
+
+                $("#create-days").addClass("d-none");
+                $("#after-create-days").addClass("d-none");
+                $("#IntervalDiv").addClass("d-none");
+            }
+
+        }
+
+        function intervalCriteria() {
+            var selectedValue = document.getElementById("Interval").value;
+
+            if (selectedValue === 'Daily') {
+                document.getElementById("before-every").innerText = "every";
+                document.getElementById("after-interval").innerText = "day(s)";
+                $("#every").removeClass("d-none");
+                $("#Week").addClass("d-none");
+                $("#Count").addClass("d-none");
+                $("#Integer").addClass("d-none");
+                $("#Month").addClass("d-none");
+            }
+            if (selectedValue === 'Weekly') {
+                document.getElementById("before-every").innerText = "every";
+                document.getElementById("after-interval").innerText = "week(s) on";
+                $("#every").removeClass("d-none");
+                $("#Week").removeClass("d-none");
+                $("#Count").addClass("d-none");
+                $("#Integer").addClass("d-none");
+                $("#Month").addClass("d-none");
+
+            }
+            if (selectedValue === 'Monthly') {
+                document.getElementById("before-every").innerText = "of every";
+                document.getElementById("after-interval").innerText = "month(s) on";
+                $("#every").removeClass("d-none");
+                $("#Week").addClass("d-none");
+                $("#Count").removeClass("d-none");
+                $("#Integer").removeClass("d-none");
+                $("#Month").addClass("d-none");
+            }
+            if (selectedValue === 'Yearly') {
+                document.getElementById("before-every").innerText = "every";
+                document.getElementById("after-interval").innerText = "";
+                $("#every").addClass("d-none");
+                $("#Week").addClass("d-none");
+                $("#Count").addClass("d-none");
+                $("#Integer").removeClass("d-none");
+                $("#Month").removeClass("d-none");
+            }
+        }
+
+        function limitCriteria() {
+            var selectedValue = document.getElementById("End").value;
+
+            if (selectedValue === 'None') {
+                $("#recurringEndDiv").addClass("d-none");
+                $("#occurencesDiv").addClass("d-none");
+                $("#occurencesSpan").addClass("d-none");
+            }
+            if (selectedValue === 'By') {
+                $("#recurringEndDiv").removeClass("d-none");
+                $("#occurencesDiv").addClass("d-none");
+                $("#occurencesSpan").addClass("d-none");
+            }
+            if (selectedValue === 'After') {
+                $("#recurringEndDiv").addClass("d-none");
+                $("#occurencesDiv").removeClass("d-none");
+                $("#occurencesSpan").removeClass("d-none");
+            }
+        }
+
+        function changeListForMonth() {
+            var selectedValue = document.getElementById("Count").value;
+            if (selectedValue === 'day') {
+                $("#Week").addClass("d-none");
+                $("#Count").removeClass("d-none");
+                $("#Integer").removeClass("d-none");
+                $("#Month").addClass("d-none");
+            }
+            else {
+                $("#Week").removeClass("d-none");
+                $("#Count").removeClass("d-none");
+                $("#Integer").addClass("d-none");
+                $("#Month").addClass("d-none");
+            }
+        }
+
+        function makeRecurring() {
+            $("#top-row").addClass("d-none");
+            $("#makeRecurringDiv").addClass("d-none");
+            $("#First-row-Recurring").removeClass("d-none");
+            $("#IntervalDiv").removeClass("d-none");
+
+        }
+
+        $(document).ready(function() {
+       // Set the default value of #CurrencyRate to 1
+         $("#CurrencyRate").val(1);
+        });
+
+            $("#CurrencyId").on("change", function () {
+            var selectedOption = $(this).find("option:selected");
+            var currencyId = selectedOption.val();
+            console.log('Selected Currency ID:', currencyId);
+            $.ajax({
+               url: '@Url.Action("GetCurrencyRateForExpense", "Admin")' + '?CurrencyId=' + currencyId,
+               success: function (data) {
+                   if(data[0].CurrencyShortName=="BDT"){
+                       $("#yourRateParent").addClass("d-none");
+                        var flag = '<i class="flag-icon ' + data[0].FlagClass + '"></i>';
+                        $(".flag").html(flag);
+                        $(".rate").text(data[0].CurrencyShortName);
+                        //$(".rate").text(data[0].CurrencyShortName);
+                        $("#CurrencyRate").val(data[0].CurrencyRate);                      
+                        $("#MultiiCurrencyId").val(data[0].CurrencyId);
+                   }
+                   else {
+                       $("#yourRateParent").removeClass("d-none");
+                        var flag = '<i class="flag-icon ' + data[0].FlagClass + '"></i>';
+                        $(".flag").html(flag);
+                        $(".rate").text(data[0].CurrencyShortName);
+                        //$(".rate").text(data[0].CurrencyShortName);
+                        $("#CurrencyRate").val(data[0].CurrencyRate);
+                        $("#MultiiCurrencyId").val(data[0].CurrencyId);
+                   }
+                   console.log("see currency",data);
+
+               }
+           });
+            $.ajax({
+                url: '@Url.Action("GetRefDetailsNewForQb", "Admin")' + '?CurrencyId=' + currencyId,
+                success: function (data) {
+                    console.log("see currency", data);
+                    //tableItems.setData(data.data);
+                }
+            });
+     });
+
+       $("#CurrencyId").on("select2:select", function () {
+            var selectedOption = $(this).find("option:selected");
+            var currencyId = selectedOption.val();
+            console.log('Selected Currency ID:', currencyId);
+            $.ajax({
+               url: '@Url.Action("GetCurrencyRateForExpense", "Admin")' + '?CurrencyId=' + currencyId,
+               success: function (data) {
+                   if(data[0].CurrencyShortName=="BDT"){
+                       $("#yourRateParent").addClass("d-none");
+                        var flag = '<i class="flag-icon ' + data[0].FlagClass + '"></i>';
+                        $(".flag").html(flag);
+                        $(".rate").text(data[0].CurrencyShortName);
+                        //$(".rate").text(data[0].CurrencyShortName);
+                        $("#CurrencyRate").val(data[0].CurrencyRate);
+                        $("#MultiiCurrencyId").val(data[0].CurrencyId);
+                   }
+                   else {
+                       $("#yourRateParent").removeClass("d-none");
+                        var flag = '<i class="flag-icon ' + data[0].FlagClass + '"></i>';
+                        $(".flag").html(flag);
+                        $(".rate").text(data[0].CurrencyShortName);
+                        //$(".rate").text(data[0].CurrencyShortName);
+                        $("#CurrencyRate").val(data[0].CurrencyRate);
+                        $("#MultiiCurrencyId").val(data[0].CurrencyId);
+                   }
+                   console.log("see currency",data);
+
+               }
+           });
+            $.ajax({
+                url: '@Url.Action("GetRefDetailsNewForQb", "Admin")' + '?CurrencyId=' + currencyId,
+                success: function (data) {
+                    console.log("see currency", data);
+                    //tableItems.setData(data.data);
+                }
+            });
+     });
+
+   </script>
+}

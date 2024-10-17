@@ -1,0 +1,174 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@*@model IEnumerable<Atrai.Core.Entity.CreditBalanceModel>*@
+@{
+    ViewData["Title"] = "Service Purchase List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; 
+    var userrole = HttpContextAccessor.HttpContext.Session.GetString("UserRole");
+
+
+
+}
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-3 col-12">
+                                <h4 class="text-primary">Service Purchase List</h4>
+                            </div>
+
+                            @if (userrole == "SuperAdmin")
+                            { 
+                                <div class="col-md-3 col-12">
+                                    @Html.ActionLink("Add Purchase Service", "AddCreditBalance", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                                </div>
+                            }                                
+
+
+
+                         
+                        </div>
+
+                    </div>
+
+                        <div class="card-body">
+
+
+
+
+                            <div class="table-responsive mt-2">
+                                <table id="tbllist" class="display nowrap table table-sm table-hover  table-bordered" cellspacing="0" width="100%">
+                                    <thead>
+                                        <tr></tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                    <tfoot>
+                                        <tr></tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+@*<td>
+        <div height="50px">
+            <div class="img-thumbnail flag flag-icon-background @item.FlagClass.ToString().ToLower()"></div>
+        </div>
+    </td>*@
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+                $(function () {
+                    var peopleList = $('#tbllist').DataTable({
+
+                        serverSide: true,  "scrollX": true,
+                        processing: true,
+
+                        ajax: {
+                            url: '@Url.Action("GetCreditBalanceList", "Admin")',
+                            type: "POST"
+                        },
+                        rowId: 'Id',
+                        columns: [
+
+                            { "title": "Id", "data": "Id", "visible": false },
+                           // { "title": "Type", "data": "Type", "searchable": true },
+                            { "title": "Company Name", "data": "CompanyName", "searchable": true },
+
+                    
+                            { "title": "Remarks", "data": "Remarks", "searchable": true },
+
+
+                            { "title": "Amount", "data": "Amount", "searchable": false },
+                            { "title": "ValidityDay", "data": "ValidityDay", "searchable": false },
+                            //{ "title": "Balance", "data": "Balance", "searchable": false },
+
+
+                            { "title": "Quantity", "data": "PurchaseQuantity", "searchable": false },
+                            { "title": "Rate", "data": "PurchaseRate", "searchable": false },
+                            { "title": "Balance", "data": "CreditBalance", "searchable": false },
+
+
+                            
+
+                            { "title": "Purchae Date", "data": "PurchaseDateString", "searchable": false },
+                            { "title": "Validity Date", "data": "ValidityDateString", "searchable": false },
+
+
+                            //{
+                            //    "title": "Active Yes/No",
+                            //    "className": "text-nowrap text-center",
+                            //    "data": {
+                            //        Id: "Id" //,
+                            //    },
+                            //    "render": function (data, type, row) {
+                            //        var buttons = '';
+                            //        if (data.IsActive == false) {
+                            //            buttons += '<p style="color:red"> No </p>';
+                            //        }
+                            //        else {
+                            //            buttons += '<p style="color:black"> Yes </p>';
+
+                            //        }
+                            //        return buttons;
+                            //    }
+                            //},
+                            {
+                                "title": "Action",
+                                "data": "Id",
+                                "render": function (data, type, row) {
+                                    var myUrledit = '@Url.Action("EditCreditBalance", "Admin")?CreditBalanceId=' + data;
+                                    var myUrldelete = '@Url.Action("DeleteCreditBalance", "Admin")?CreditBalanceId=' + data;
+                                    var message = `return confirm('Are you sure you want to Remove the CreditBalance Information ?')`;
+                                    var userrole = '@HttpContextAccessor.HttpContext.Session.GetString("UserRole")';
+
+                                    if (userrole == 'SuperAdmin')
+                                    {
+                                    return '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-remove"></i></a></span>';
+                                    }
+
+                                    return '';
+                                }
+
+                            }
+                        ],
+                        "order": [0, "desc"],
+                    });
+
+
+                });
+
+        var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+        var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+        var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+            {
+            style: 'currency',
+            currency: CurrencyShortNameViewFormat,///'BDT'
+            minimumFractionDigits: 2,
+        });
+        //document.body.innerHTML += '<br />' + formatter.format(53425.34);
+
+
+    </script>
+}

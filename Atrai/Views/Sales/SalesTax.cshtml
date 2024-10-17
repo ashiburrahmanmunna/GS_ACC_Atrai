@@ -1,0 +1,1807 @@
+﻿@*@model List<Atrai.Model.Core.Entity.AccountHeadModel>*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model Atrai.Model.Core.ViewModel.SalesTaxAgency
+@*@model Tuple<List<Atrai.Model.Core.Entity.AccountHeadModel>, IEnumerable<Atrai.Controllers.AccountsController.BalanceSheetModel>>*@
+@{
+    ViewData["Title"] = "Voucher Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var criteria = ViewBag.criteria;
+    var strId = ViewBag.strId;
+    var dtFrom = ViewBag.dtFrom;
+    var dtTo = ViewBag.dtTo;
+    System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+}
+<style>
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+                     border-bottom-width: 0px;
+
+                }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    .tabulator-table .tabulator-row {
+        background-color: white;
+    }
+
+    /*.upper-form-style {
+                background: #e9ecef6b;*/
+    /*padding-top: 62px*/
+    /*}*/
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btn:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .dropdown-menu.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header {
+        margin-left: 0px !important;
+    }
+
+        .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+            background-color: white;
+        }
+    /*    .tabulator-row .tabulator-cell, .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+                border-right: none;
+                border-left: none;
+            }*/
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator {
+        border: none;
+        background-color: white;
+    }
+
+        .tabulator .tabulator-footer {
+            background-color: white;
+        }
+
+    .left-button {
+        margin-right: auto; /* Push the button to the left by using auto margin */
+    }
+
+    .offcanvas-container {
+        overflow: auto;
+    }
+
+    .offcanvas-body {
+        padding: 20px;
+        background-color: #F8F8F8;
+    }
+
+    #offcanvasRightRate {
+        width: 40%;
+    }
+
+    #offcanvasRight{
+        width: 40%;
+    }
+
+    .tabulator .tabulator-cell {
+        overflow: visible !important; /* Ensure the cell does not clip content */
+    }
+
+    .tabulator .dropdown {
+        position: relative;
+    }
+
+    .tabulator .dropdown-menu {
+        width: 100px;
+        position: absolute;
+        will-change: transform;
+        transform: translate3d(0, 0, 0); /* Ensure the dropdown positions correctly */
+        z-index: 1050 !important; /* Higher z-index to appear above other elements */
+    }
+
+
+</style>
+<div class="row" id="change-checkbox">
+    <div class="col-12 col-md-12">
+        <div class="row account_offcanvas">
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasRightLabel" style="margin-top: 20px;">Agency</h5>
+                    <button id="clearAgencyModal" type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body mx-2">
+                    <div id="accountSave">
+                        <input type="hidden" id="AgentId" value="0" />
+
+                        <div class="" style="width: 60%">
+                            <div><label for="agencyName" class="account-head-name">Agency Name</label></div>
+                            <input type="text" id="agencyName" name="agencyName" class="account-name-input form-control">
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6 col-6" id="fillingFrequency">
+                                <div><label for="Fillingfrequency" class="account-head-name">Filling Frequency</label></div>
+                                @Html.DropDownList("Fillingfrequency", new List<SelectListItem>(), "Select Filling Frequency", new { id = "Fillingfrequency", @class = "form-select form-select-sm" })
+                                @Html.ValidationMessage("Fillingfrequency", "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6 col-6">
+                                <div><label for="StartOfTaxPeriod" class="account-head-name">Start Of Tax Period</label></div>
+                                @Html.DropDownList("StartOfTaxPeriod", new List<SelectListItem>(), "Choose month", new { id = "StartOfTaxPeriod", @class = "form-select form-select-sm" })
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6 col-6">
+                                <div><label for="StartDate" class="account-head-name">Start Date</label></div>
+                                <input type="date" id="StartDate" name="StartDate" class="drebit-credit w-100 form-control">
+                            </div>
+                            <div class="col-md-6 col-6" id="reportingMethod">
+                                <div><label for="ReportingMethod" class="account-head-name">Reporting Method</label></div>
+                                @Html.DropDownList("ReportingMethod", new List<SelectListItem>(), "Choose a method", new { id = "ReportingMethod", @class = "form-select form-select-sm" })
+
+                                @Html.ValidationMessage("ReportingMethod", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer my-2">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="offcanvas" id="cancelAgent">Cancel</button>
+                    <button id="agencySaveBtn" type="button" class="btn btn-success" style="margin-left: 10px;">Save</button>
+                    @*<button id="accountSaveBtn" type="button" class="btn next-btn text-white mx-2">Save</button>*@
+                </div>
+            </div>
+
+
+
+            <div class="offcanvas offcanvas-end overflow-scroll" tabindex="-1" id="offcanvasRightRate" aria-labelledby="offcanvasRightLabelRate">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasRightLabelRate">Add a custom tax rate</h5>
+                    <button id="clearRatesModal" type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <div id="taxSave">
+                        <div class="mt-3">
+                            <input checked id="singleRadio" type="radio" name="rateType" />
+                            <label for="singleRadio" class="account-head-name">Single</label>
+                        </div>
+                        <div class="mt-3">
+                            <input id="combinedRadio" type="radio" name="rateType" />
+                            <label for="combinedRadio" class="account-head-name">Combined</label>
+                        </div>
+                        <div id="singletax" >
+                            <input type="hidden" id="TaxId" value="0" />
+                            <input type="hidden" id="MasterTaxId" value="0" />
+
+                            <div class="row">
+                                <div class="col-md-6 col-6 mt-3">
+                                    <div><label for="Name" class="account-head-name">Name</label></div>
+                                    <input type="text" id="singleName" name="singleName" class="tax-name-input form-control">
+                                </div>
+
+                                <div class="col-md-6 col-6 mt-3">
+                                    <div><label for="Rate" class="account-head-name">Rate</label></div>
+                                    <div class="d-flex"><input type="text" id="singlerate" name="singlerate" class="drebit-credit w-100 form-control"><span style="margin-left: 10px; font-size: 20px;">%</span></div>
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="mt-3" id="singleAgency">
+                                <div><label for="AgentId" class="account-head-name">Agency</label></div>
+                                @Html.DropDownList("SelectedAgency", ViewBag.AgencyList as SelectList, "Select Agency", new { @id = "SingleAgentId", @class = "form-control" })
+                                @Html.ValidationMessage("SelectedAgency", "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="mt-3" id="singleCriteria">
+                                <div><label for="CriteriaId" class="account-head-name">Criteria</label></div>
+                                @Html.DropDownList("TaxCriteria", ViewBag.TaxCriteria as SelectList, "Select Criteria", new { @id = "SingleCriteriaId", @class = "form-control" })
+                            </div>
+
+                            <div class="mt-3" id="singleSalesTax">
+                                <div><label for="singleSalesTaxId" class="account-head-name">Sales Tax</label></div>
+                                @Html.DropDownList("SalesVAT", ViewBag.SalesVAT as SelectList, "Select Sales-Tax Head", new { @id = "salesTaxId", @class = "form-control" })
+                                @Html.ValidationMessage("MultiFillingfrequency", "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="mt-3" id="singlePurchaseTax">
+                                <div><label for="singlePurchaseTaxId" class="account-head-name">Purchase Tax</label></div>
+                                @Html.DropDownList("PurchaseVAT", ViewBag.PurchaseVAT as SelectList, "Select Purchase-Tax Head", new { @id = "PurchaseTaxId", @class = "form-control" })
+                                @Html.ValidationMessage("MultiFillingfrequency", "", new { @class = "text-danger" })
+                            </div>
+                            
+                            <div class="mt-3" id="singlePurchaseTax">
+                                <div><label for="singleExpenseId" class="account-head-name">Expense Head</label></div>
+                                @Html.DropDownList("ExpenseVAT", ViewBag.ExpenseVAT as SelectList, "Select Expense Head", new { @id = "ExpenseTaxId", @class = "form-control" })
+                                @Html.ValidationMessage("MultiFillingfrequency", "", new { @class = "text-danger" })
+                            </div>
+
+                            <div class="modal-footer my-2">
+
+                                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="offcanvas" onclick="clearModalData()">Cancel</button>
+                                <button id="singletaxSaveBtn" type="button" class="btn btn-success" style="margin-left: 5px;">Save</button>
+                            </div>
+
+                        </div>
+                        <div id="multipletax" style="display: none;">
+                            <input type="hidden" id="mastermulTaxId" value="0" />
+                            <div class="mt-3" style="width: 50%;">
+                                <div><label for="multiName" class="account-head-name">Name</label></div>
+                                <input type="text" id="multiName" name="multiName" class="account-name-input form-control">
+                            </div>
+                            <div id="contentContainer">
+                                <div id="innerbody" style=" background-color: #F8F8F8; margin-top: 20px">
+
+                                    <input type="hidden" id="mulTaxId" value="0" class="mTaxId"/>
+                                    <div class="row">
+                                        <div class="col-md-6 col-6">
+                                            <div><label for="nickName" class="nickname">Nickname</label></div>
+                                            <input type="text" id="multinickName" name="multinickName" class="nick-name-input form-control">
+                                        </div>
+                                        <div class="col-md-6 col-6">
+                                            <div><label for="StartOfTaxPeriod" class="account-head-name">Rate</label></div>
+                                            <div class="d-flex"><input type="text" id="multiRate" name="multiRate" class="drebit-credit w-100 form-control"><span style="margin-left: 10px; font-size: 20px;">%</span></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3" id="multifillingFrequency" >
+                                        <div><label for="Fillingfrequency" class="account-head-name">Agency</label></div>
+                                        @Html.DropDownList("SelectedAgency", ViewBag.AgencyList as SelectList, "Select Agency", new { @id = "MultiFillingfrequency", @class = "form-control" })
+                                        
+                                        @Html.ValidationMessage("MultiFillingfrequency", "", new { @class = "text-danger" })
+                                    </div>
+
+                                    <div class="mt-3" id="multipleCriteria">
+                                        <div><label for="CriteriaId" class="account-head-name">Criteria</label></div>
+                                        @Html.DropDownList("TaxCriteria", ViewBag.TaxCriteria as SelectList, "Select Criteria", new { @id = "MultiCriteriaId", @class = "form-control" })
+                                    </div>
+
+                                    <div class="mt-3" id="singleSalesTax">
+                                        <div><label for="SalesTaxId" class="account-head-name">Sales Tax</label></div>
+                                        @Html.DropDownList("SalesVAT", ViewBag.SalesVAT as SelectList, "Select Sales-Tax Head", new { @id = "MultisalesTaxId", @class = "form-control" })
+                                        @Html.ValidationMessage("MultiFillingfrequency", "", new { @class = "text-danger" })
+                                    </div>
+
+                                    <div class="mt-3" id="singlePurchaseTax" >
+                                        <div><label for="singlePurchaseTaxId" class="account-head-name">Purchase Tax</label></div>
+                                        @Html.DropDownList("PurchaseVAT", ViewBag.PurchaseVAT as SelectList, "Select Purchase-Tax Head", new { @id = "MultiPurchaseTaxId", @class = "form-control" })
+                                        @Html.ValidationMessage("MultiFillingfrequency", "", new { @class = "text-danger" })
+                                    </div>
+
+                                    <div class="mt-3" id="singlePurchaseTax">
+                                        <div><label for="singleExpenseId" class="account-head-name">Expense Head</label></div>
+                                        @Html.DropDownList("ExpenseVAT", ViewBag.ExpenseVAT as SelectList, "Select Expense Head", new { @id = "MultiExpenseTaxId", @class = "form-control" })
+                                        @Html.ValidationMessage("MultiFillingfrequency", "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                            </div>
+                            @*<div id="contentContainer" style="padding: 20px">
+                                <!-- New divs will be appended here -->
+                            </div>*@
+                            <div class="modal-footer my-2">
+                                <div class="left-button">
+                                    @*<button type="button" class="btn btn-outline-primary" onclick="addNewDiv()" id="addMore">Add Another Rate</button>*@
+                                    <a href="#" onclick="addNewDiv()"><span style="font-weight: bold;">Add Another Rate</span></a>
+                                </div>
+                                @*<button type="button" class="btn cancel-btn cancel-text" data-bs-dismiss="offcanvas" onclick="clearModalData()">Cancel</button>*@
+                                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="offcanvas" onclick="clearRatesModalData()">Cancel</button>
+                                <button onclick="collectDataAndStore()" type="button" class="btn btn-success" style="margin-left: 10px;">Save</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-12">
+
+        <div class="row m-0 ps-4 upper-form-style pt-2">
+            <div class="col-md-12 mb-2">
+                @* <span class="report-text-style"><i class="bi bi-chevron-left"></i> Back to sales tax center</span> *@
+                
+                <span class="float-start fs-2 fw-normal">
+                    Tax agencies
+
+                </span>
+                <span class="float-end">
+                    <button type="button" class="btn customize-btn fw-bold" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="">Add agency</button>
+                </span>
+            </div>
+        </div>
+        <div class="row m-0 ps-4 upper-form-style pt-2">
+            <div id="Agency_Table"></div>
+        </div>
+        <div class="row m-0 ps-4 upper-form-style pt-2">
+            <div class="col-md-12 mb-2">
+                <span class="float-start fs-2 fw-normal">
+                    Custom rates
+
+                </span>
+                <span class="float-end">
+                    <button type="button" class="btn customize-btn fw-bold" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRightRate" aria-controls="offcanvasRightRate">Add rate</button>
+                </span>
+            </div>
+        </div>
+
+        <div class="row m-0 ps-4 upper-form-style pt-2">
+            <div id="Sales_Table"></div>
+        </div>
+    </div>
+</div>
+<div>
+</div>
+
+
+
+@section Scripts{
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+
+            reportingMethodList();
+
+            fetchFrequencyList();
+
+            fetchMonthList();
+
+            $('#make-editable').mouseover(function () {
+                $('#form-check-visibility').removeClass('d-none').addClass('d-block');
+            });
+            $('#make-editable').mouseout(function () {
+                $('#form-check-visibility').removeClass('d-block').addClass('d-none');
+            });
+            $("#agencySaveBtn").click(function () {
+                SaveAgencyinfo();
+                setTimeout(function () { $("#offcanvasRight").offcanvas('hide'); }, 1400);
+            });
+            $("#singletaxSaveBtn").click(function () {
+                SaveSingleTax();
+                setTimeout(function () { $("#offcanvasRight").offcanvas('hide'); }, 1400);
+            });
+            // Get references to the radio buttons and div elements
+            const singleRadio = document.getElementById("singleRadio");
+            const combinedRadio = document.getElementById("combinedRadio");
+            const singletaxDiv = document.getElementById("singletax");
+            const multipletaxDiv = document.getElementById("multipletax");
+
+            // Add event listeners to the radio buttons
+            singleRadio.addEventListener("change", function () {
+                if (singleRadio.checked) {
+                    singletaxDiv.style.display = "block";
+                    multipletaxDiv.style.display = "none";
+                }
+            });
+
+            combinedRadio.addEventListener("change", function () {
+                if (combinedRadio.checked) {
+                    singletaxDiv.style.display = "none";
+                    multipletaxDiv.style.display = "block";
+                }
+            });
+
+
+            function SaveSingleTax() {
+                var TaxId = $("#TaxId").val();
+                var MasterTaxId = $("#MasterTaxId").val();
+                var singleName = $("#singleName").val();
+                var AgentId = $("#SingleAgentId").val();
+                var TaxCriteriaId = $("#SingleCriteriaId").val();
+                var singlerate = $("#singlerate").val();
+                var AccIdSalesTax = $("#salesTaxId").val();
+                var AccIdPurchaseTax = $("#PurchaseTaxId").val();
+                var AccIdExpenseTax = $("#ExpenseTaxId").val();
+
+                var taxModel =
+                {
+                    Id: TaxId,
+                    NickName: singleName,
+                    AgentId: AgentId,
+                    Rate: singlerate,
+                    IsSingleTax: true,
+                    SalesTaxMasterId: MasterTaxId,
+                    AccIdSalesTaxes: AccIdSalesTax,
+                    AccIdPurchaseTaxes: AccIdPurchaseTax,
+                    AccIdExpenseTax: AccIdExpenseTax,
+                    TaxCriteriaId: TaxCriteriaId
+                }
+                var MastertaxModel =
+                {
+                    Id: MasterTaxId,
+                    Name: singleName,
+                    SalesTax: [taxModel]
+                }
+                console.log(MastertaxModel);
+                $.ajax({
+                    url: '@Url.Action("TaxCreation", "Sales")',
+                    data: { model: MastertaxModel },
+                    type: 'POST',
+                    async: true,
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result.success == "1") {
+                            toastr.success(result.message, "", {
+                                "toastClass": "toast-green",
+                            });
+                            $('#exampleModal').modal('hide');
+                            //initjsGrid();
+                            //clearModalData();
+                        }
+                        setTimeout(function () {
+                            window.location.href = '@Url.Action("SalesTax", "Sales")';
+                        }, 1000);
+                    },
+                    error: function () {
+                        toastr.error('Unable to Save');                       
+                        $(".toast-error").css({"background-color": "red","color": "white"}); 
+                    }
+                });
+            }
+            document.getElementById("cancelAgent").addEventListener("click", function () {
+                clearAgencyModalData();
+            });
+            document.getElementById("clearAgencyModal").addEventListener("click", function () {
+                clearAgencyModalData();
+            });
+            function clearAgencyModalData(){
+                $("#agencyName").val('');
+                $("#Fillingfrequency").val('');
+                $("#StartOfTaxPeriod").val('');
+                $("#StartDate").val('');
+                $("#ReportingMethod").val('');
+
+                // Optionally, reset the hidden input field
+                $("#AgentId").val('0');
+            }
+            function SaveAgencyinfo() {
+                //$("#AccId").val(0);
+                var AgentId = $("#AgentId").val();
+                var AgencyName = $("#agencyName").val();
+                var fillingFrequency = $("#Fillingfrequency").val();
+                var StartOfTaxPeriod = $("#StartOfTaxPeriod").val();
+                var StartDate = $("#StartDate").val();
+                var ReportingMethod = $("#ReportingMethod").val();
+
+
+                var AgencyModel = {
+                    Id: AgentId,
+                    AgencyName: AgencyName,
+                    Fillingfrequency: fillingFrequency,
+                    StartOfTaxPeriod: StartOfTaxPeriod,
+                    StartDate: StartDate,
+                    ReportingMethod: ReportingMethod
+
+                }
+                console.log(AgencyModel);
+
+                $.ajax({
+                    url: '@Url.Action("AgencyCreation", "Sales")',
+                    data: { model: AgencyModel }, //use id here
+                    //data: JSON.stringify(purchasesmain),
+                    type: 'POST',
+                    async: true,
+                    //contentType: 'application/json;',
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result.success == "1") {
+                            toastr.success(result.message, "", {
+                                "toastClass": "toast-green",
+                            });
+                            $('#exampleModal').modal('hide');
+                            //initjsGrid();
+                            
+                        }
+                        clearAgencyModalData();
+                        setTimeout(function () {
+                            window.location.href = '@Url.Action("SalesTax", "Sales")';
+                        }, 1000);
+                    },
+                    error: function () {
+                        toastr.error('Unable to Save');
+                        //alert('Unable to Save');
+                    }
+                });
+            }
+        });
+
+        function reportingMethodList() {
+            const methodNames = [
+                "Accrual", "Cash"
+            ];
+
+            const dropdown = $('#ReportingMethod');
+            const selectedFrequency = dropdown.val();
+
+            dropdown.empty();
+
+            dropdown.append('<option value="">Choose a frequency</option>');
+
+            methodNames.forEach((method, index) => {
+                dropdown.append(`<option value="${method}">${method}</option>`);
+            });
+
+            dropdown.val(selectedFrequency);
+        }
+
+        function fetchFrequencyList() {
+            const frequencyNames = [
+                "Monthly", "Quarterly", "Half-yearly", "Yearly"
+            ];
+
+            const dropdown = $('#Fillingfrequency');
+            const selectedFrequency = dropdown.val();
+
+            dropdown.empty();
+
+            dropdown.append('<option value="">Choose a frequency</option>');
+
+            frequencyNames.forEach((frequency, index) => {
+                dropdown.append(`<option value="${frequency}">${frequency}</option>`);
+            });
+
+            dropdown.val(selectedFrequency);
+        }
+
+        function fetchMonthList() {
+            const monthNames = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+
+            const dropdown = $('#StartOfTaxPeriod');
+            const selectedMonth = dropdown.val();
+
+            dropdown.empty();
+
+            dropdown.append('<option value="">Choose month</option>');
+
+            monthNames.forEach((month, index) => {
+                dropdown.append(`<option value="${month}">${month}</option>`);
+            });
+
+            dropdown.val(selectedMonth);
+        }
+
+        var agencyList = @Html.Raw(Json.Serialize(ViewBag.AgencyList));
+        var salesVatList = @Html.Raw(Json.Serialize(ViewBag.SalesVAT));
+        var purchaseVATList = @Html.Raw(Json.Serialize(ViewBag.PurchaseVAT));
+        var expenseVATList = @Html.Raw(Json.Serialize(ViewBag.ExpenseVAT));
+        var taxCriteriaList = @Html.Raw(Json.Serialize(ViewBag.TaxCriteria));
+
+        //function addNewDiv() {
+        //    // Create a new div element with the specified content
+        //    var newDiv = document.createElement("div");
+        //    newDiv.className = "added-div";
+        //    newDiv.style.padding = "25px";
+        //    newDiv.style.backgroundColor = "#EEEEEE";
+        //    newDiv.style.marginTop = "20px";
+
+        //    var removeButton = document.createElement("button");
+        //    removeButton.className = "remove-btn";
+        //    removeButton.textContent = "Remove";
+        //    removeButton.onclick = function () {
+        //        removeDiv(newDiv);
+        //    };
+        //    var nicknameLabel = document.createElement("label");
+        //    nicknameLabel.textContent = "Nickname";
+        //    nicknameLabel.style.marginTop = "20px";
+
+        //    var nicknameInput = document.createElement("input");
+        //    nicknameInput.type = "text";
+        //    nicknameInput.className = "nick-name-input form-control";
+        //    nicknameInput.id = "multinickName";
+        //    nicknameInput.name = "multinickName";
+        //    nicknameInput.placeholder = "Nickname";
+
+        //    var fillingFrequencyLabel = document.createElement("label");
+        //    fillingFrequencyLabel.textContent = "Agency";
+        //    fillingFrequencyLabel.style.marginTop = "20px";
+
+        //    var fillingFrequencySelect = document.createElement("select");
+        //    fillingFrequencySelect.id = "MultiFillingfrequency";
+        //    fillingFrequencySelect.className = "form-control abc";
+        //    fillingFrequencySelect.name = "MultiFillingfrequency";
+
+        //    // Add options to the select element using the agencyList data
+        //    for (var i = 0; i < agencyList.length; i++) {
+        //        var option = new Option(agencyList[i].Text, agencyList[i].Value);
+        //        fillingFrequencySelect.appendChild(option);
+        //    }
+
+        //    var rateLabel = document.createElement("label");
+        //    rateLabel.textContent = "Rate";
+        //    rateLabel.style.marginTop = "20px";
+
+        //    var rateInput = document.createElement("input");
+        //    rateInput.type = "text";
+        //    rateInput.className = "drebit-credit w-100";
+        //    rateInput.id = "multiRate";
+        //    rateInput.name = "multiRate";
+        //    rateInput.placeholder = "Rate";
+
+        //    var rateContainer = document.createElement("div");
+        //    rateContainer.style.display = "inline-flex"; // Display the elements inline
+        //    rateContainer.className = "w-100";
+        //    rateContainer.appendChild(rateInput);
+        //    rateContainer.appendChild(document.createTextNode("%"));
+
+        //    var rateLabelDiv = document.createElement("div");
+        //    rateLabelDiv.appendChild(rateLabel);
+
+        //    removeButton.style.display = "block";
+        //    nicknameLabel.style.display = "block";
+
+        //    newDiv.appendChild(removeButton);
+        //    newDiv.appendChild(nicknameLabel);
+        //    newDiv.appendChild(nicknameInput);
+        //    newDiv.appendChild(fillingFrequencyLabel);
+        //    newDiv.appendChild(fillingFrequencySelect);
+        //    newDiv.appendChild(rateLabelDiv);
+        //    newDiv.appendChild(rateContainer);
+
+        //    // Append the new div to the content container
+        //    var contentContainer = document.getElementById("contentContainer");
+        //    contentContainer.appendChild(newDiv);
+        //}
+
+        var divCounter = 1; // Counter for unique div identifiers
+
+        function addNewDiv() {
+            // Create a new div element with the specified content
+            var newDiv = document.createElement("div");
+            newDiv.className = "added-div row";
+            newDiv.id = "addedDiv" + divCounter; // Unique identifier
+            newDiv.style.paddingRight = "10px";
+            newDiv.style.borderTop = "1px solid grey";
+            newDiv.style.backgroundColor = "#F8F8F8";
+            newDiv.style.marginTop = "10px";
+            newDiv.style.paddingTop = "10px";
+            newDiv.style.marginLeft = "2px";
+
+            var nicknameDiv = document.createElement("div");
+            nicknameDiv.className = "col-md-6 col-6";
+            nicknameDiv.style.setProperty('padding-left', '0', 'important');
+            var nicknameLabel = document.createElement("label");
+            nicknameLabel.textContent = "Nickname";
+            var nicknameInput = document.createElement("input");
+            nicknameInput.type = "text";
+            nicknameInput.className = "nick-name-input form-control";
+            nicknameInput.id = "multinickName" + divCounter;
+            nicknameInput.name = "multinickName";
+            nicknameInput.placeholder = "Nickname";
+            nicknameDiv.appendChild(nicknameLabel);
+            nicknameDiv.appendChild(nicknameInput);
+
+            var rateDiv = document.createElement("div");
+            rateDiv.className = "col-md-5 col-5";
+            var rateLabel = document.createElement("label");
+            rateLabel.textContent = "Rate";
+            var rateInput = document.createElement("input");
+            rateInput.type = "text";
+            rateInput.className = "drebit-credit w-100 form-control";
+            rateInput.id = "multiRate" + divCounter;
+            rateInput.name = "multiRate";
+            rateInput.placeholder = "Rate";
+            var rateSpan = document.createElement("span");
+            rateSpan.textContent = "%";
+            rateSpan.style.marginLeft = "10px";
+            rateSpan.style.fontSize = "20px";
+            var rateDivwithInputSpan = document.createElement("div");
+            rateDivwithInputSpan.className = "d-flex";
+            rateDivwithInputSpan.appendChild(rateInput);
+            rateDivwithInputSpan.appendChild(rateSpan);
+            rateDiv.appendChild(rateLabel);
+            rateDiv.appendChild(rateDivwithInputSpan);
+
+            var removeButtonDiv = document.createElement("div");
+            removeButtonDiv.className = "col-md-1 col-1";
+            removeButtonDiv.style.marginTop = "22px";
+            var removeButton = document.createElement("i");
+            removeButton.className = "bi bi-x-circle";
+            removeButton.style.fontSize = "20px";
+            removeButton.style.color = "red";
+            removeButton.onclick = function () {
+                removeDiv(newDiv);
+            };
+            removeButtonDiv.appendChild(removeButton);
+
+            var fillingFrequencyLabel = document.createElement("label");
+            fillingFrequencyLabel.textContent = "Agency";
+            fillingFrequencyLabel.style.marginTop = "20px";
+
+            var fillingFrequencySelect = document.createElement("select");
+            fillingFrequencySelect.id = "MultiFillingfrequency";
+            fillingFrequencySelect.className = "form-control abc";
+            fillingFrequencySelect.name = "MultiFillingfrequency";
+            //fillingFrequencySelect.style.width = "50%";
+            
+            for (var i = 0; i < agencyList.length; i++) {
+             var option = new Option(agencyList[i].Text, agencyList[i].Value);
+             fillingFrequencySelect.appendChild(option);
+            }
+
+            var vatContainer = document.createElement("div");
+            vatContainer.className = "d-flex";
+
+            var salesVatLabel = document.createElement("label");
+            salesVatLabel.textContent = "Sales Tax";
+            salesVatLabel.style.marginTop = "20px";
+
+            var salesVatSelect = document.createElement("select");
+            salesVatSelect.id = "SalesVat";
+            salesVatSelect.className = "form-control pqr";
+            salesVatSelect.name = "SalesVat";
+            //salesVatSelect.style.width = "50%";
+
+            var defaultOption = new Option("Select Sales-Tax Head", "");
+            salesVatSelect.appendChild(defaultOption);
+            
+            for (var i = 0; i < salesVatList.length; i++) {
+             var option = new Option(salesVatList[i].Text, salesVatList[i].Value);
+             salesVatSelect.appendChild(option);
+            }
+
+            var taxCriteriaLabel = document.createElement("label");
+            taxCriteriaLabel.textContent = "Tax Criteria";
+            taxCriteriaLabel.style.marginTop = "20px";
+
+            var taxCriteriaSelect = document.createElement("select");
+            taxCriteriaSelect.id = "TaxCriteria";
+            taxCriteriaSelect.className = "form-control tc";
+            taxCriteriaSelect.name = "TaxCriteria";
+
+
+            var defaultCriteria = new Option("Select Criteria", "");
+            taxCriteriaSelect.appendChild(defaultCriteria);
+
+            for (var i = 0; i < taxCriteriaList.length; i++) {
+                var option = new Option(taxCriteriaList[i].Text, taxCriteriaList[i].Value);
+                taxCriteriaSelect.appendChild(option);
+            }
+            
+            var purchaseVatLabel = document.createElement("label");
+            purchaseVatLabel.textContent = "Purchase Tax";
+            purchaseVatLabel.style.marginTop = "20px";
+         
+            var purchaseVatSelect = document.createElement("select");
+            purchaseVatSelect.id = "PurchaseVat";
+            purchaseVatSelect.className = "form-control xyz";
+            purchaseVatSelect.name = "PurchaseVat";
+            //purchaseVatSelect.style.width = "50%";
+
+            var defaultOption2 = new Option("Select Purchase-Tax Head", "");
+            purchaseVatSelect.appendChild(defaultOption2);
+            
+            for (var i = 0; i < purchaseVATList.length; i++) {
+             var option = new Option(purchaseVATList[i].Text, purchaseVATList[i].Value);
+             purchaseVatSelect.appendChild(option);
+            }
+
+            var expenseVatLabel = document.createElement("label");
+            expenseVatLabel.textContent = "Expense Head";
+            expenseVatLabel.style.marginTop = "20px";
+
+            var expenseVatSelect = document.createElement("select");
+            expenseVatSelect.id = "ExpenseVat";
+            expenseVatSelect.className = "form-control exp";
+            expenseVatSelect.name = "ExpenseVat";
+            //purchaseVatSelect.style.width = "50%";
+
+            var defaultOption3 = new Option("Select Expense Head", "");
+            expenseVatSelect.appendChild(defaultOption3);
+            
+            for (var i = 0; i < expenseVATList.length; i++) {
+             var option = new Option(expenseVATList[i].Text, expenseVATList[i].Value);
+             expenseVatSelect.appendChild(option);
+            }
+
+            var hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.id = "mulTaxId" + divCounter;
+            hiddenInput.value = "0";
+            hiddenInput.className = "mTaxId";
+
+            newDiv.appendChild(nicknameDiv);
+            newDiv.appendChild(rateDiv);
+            newDiv.appendChild(removeButtonDiv);
+            newDiv.appendChild(fillingFrequencyLabel);
+            newDiv.appendChild(fillingFrequencySelect);
+            newDiv.appendChild(taxCriteriaLabel);
+            newDiv.appendChild(taxCriteriaSelect);
+            newDiv.appendChild(hiddenInput);
+            newDiv.appendChild(salesVatLabel);
+            newDiv.appendChild(salesVatSelect);
+            newDiv.appendChild(purchaseVatLabel);
+            newDiv.appendChild(purchaseVatSelect);
+            newDiv.appendChild(expenseVatLabel);
+            newDiv.appendChild(expenseVatSelect);
+            // Append the new div to the content container
+            var contentContainer = document.getElementById("contentContainer");
+            contentContainer.appendChild(newDiv);
+
+            divCounter++; // Increment the counter for the next div
+        }
+
+        function removeDiv(divToRemove) {
+            // Get the content container
+            var contentContainer = document.getElementById("contentContainer");
+
+            // Remove the div
+            contentContainer.removeChild(divToRemove);
+        }
+
+        function collectDataAndStore() {
+            var addedDivs = document.getElementsByClassName("added-div");
+            var dataObjects = [];
+
+            var mulTaxId = $("#mulTaxId").val();
+            var mastermulTaxId = $("#mastermulTaxId").val();
+            var multiName = $("#multiName").val();
+            var multinickName = $("#multinickName").val();
+            var agentId = $("#MultiFillingfrequency").val();
+            var salesTaxId = $("#MultisalesTaxId").val();
+            var taxCriteriaId = $("#MultiCriteriaId").val();
+            var purchaseTaxId = $("#MultiPurchaseTaxId").val();
+            var expenseTaxId = $("#MultiExpenseTaxId").val();
+            var multirate = $("#multiRate").val();
+
+
+            var item = {
+                Id: mulTaxId,
+                Nickname: multinickName,
+                AgentId: agentId,
+                Rate: multirate,
+                AccIdSalesTaxes : salesTaxId,
+                AccIdPurchaseTaxes : purchaseTaxId,
+                AccIdExpenseTax: expenseTaxId,
+                SalesTaxMasterId: mastermulTaxId,
+                TaxCriteriaId: taxCriteriaId
+            };
+
+            dataObjects.push(item);
+
+            for (var i = 0; i < addedDivs.length; i++) {
+                var nicknameInput = addedDivs[i].querySelector(".nick-name-input");
+                var fillingFrequencySelect = addedDivs[i].querySelector(".abc");
+                var salesVatSelect = addedDivs[i].querySelector(".pqr");
+                var purchaseVatSelect = addedDivs[i].querySelector(".xyz");
+                var expenseVatSelect = addedDivs[i].querySelector(".exp");
+                var rateInput = addedDivs[i].querySelector(".drebit-credit");
+                var mulTaxIdInput = addedDivs[i].querySelector(".mTaxId");
+                var taxCriteriaIdInput = addedDivs[i].querySelector(".tc");
+
+                
+                let mulTaxIdValue = 0
+                if (mulTaxIdInput != null) {
+                    mulTaxIdValue = mulTaxIdInput.value;
+                }
+                
+
+                console.log(mulTaxIdValue);
+
+                var data = {
+                    Id: parseInt(mulTaxIdValue) || 0,
+                    Nickname: nicknameInput.value,
+                    AgentId: fillingFrequencySelect.value,
+                    AccIdSalesTaxes: salesVatSelect.value,
+                    AccIdPurchaseTaxes: purchaseVatSelect.value,
+                    AccIdExpenseTax: expenseVatSelect.value,
+                    Rate: rateInput.value,
+                    SalesTaxMasterId: mastermulTaxId,
+                    TaxCriteriaId: taxCriteriaIdInput.value
+                };
+
+                console.log(data);
+                dataObjects.push(data);
+            }
+            var MastertaxModel =
+            {
+                Id: mastermulTaxId,
+                Name: multiName,
+                SalesTax: dataObjects
+            }
+            //var jsonDatas = JSON.stringify(dataObjects);
+            //console.log(jsonDatas); // You can do whatever you want with the JSON data
+            $.ajax({
+                url: '@Url.Action("MultiTaxCreation", "Sales")',
+                data: { model: MastertaxModel },
+                type: 'POST',
+                async: true,
+                dataType: 'json',
+                success: function (result) {
+                    if (result.success == "1") {
+                        toastr.success(result.message, "", {
+                            "toastClass": "toast-green",
+                        });
+                        $('#exampleModal').modal('hide');
+                        //initjsGrid();
+                        //clearModalData();
+                    }
+                    setTimeout(function () {
+                        window.location.href = '@Url.Action("SalesTax", "Sales")';
+                    }, 1000);
+                },
+                error: function () {
+                    //toastr.error('Unable to Save');
+                    //alert('Unable to Save');
+                }
+            });
+        }       
+
+    </script>
+    <script>
+        function initTabulator() {
+
+            function fetchDataFromServer() {
+                
+                var MyAppUrlSettings = {
+                            MyUsefulUrl: '@Url.Action("GetAgenciesJson", "Sales")'
+                        };
+                        return $.ajax({
+                            url: MyAppUrlSettings.MyUsefulUrl,
+                            dataType: "json",
+                        });
+            }
+
+            fetchDataFromServer().done(function (response) {
+
+                console.log("notrmal response:", response.data);
+                var dataTable = response.data;
+                console.log("data table:", dataTable);// Define columns to be excluded
+
+
+                customerDetailsUrl = `@Url.Action("GetAgenciesJson", "Sales")`
+                customerDetailTable = new Tabulator("#Agency_Table", {
+
+                    layout: "fitColumns",
+                    minHeight: 300,
+                    pagination: true,
+                    movableColumns: true,
+                    ajaxURL: customerDetailsUrl,
+                    paginationMode: "remote",
+                    paginationSize: 10,
+                    paginationInitialPage: 1,
+                    paginationSizeSelector: [10, 25, 50, 100, true],
+                    paginationCounter: "rows",
+                    dataTree: true,
+                    dataTreeStartExpanded: false,
+                    ajaxConfig: "get",
+                    ajaxContentType: "json",
+
+                    ajaxResponse: function (url, params, response) {
+                        customerDetailTable.setMaxPage(response.last_page);
+                        console.log("response.last_page", response.last_page);
+
+                        dataLoadExpense = response.data;
+                        /* console.log("dataLoadExpense:", dataLoadExpense);*/
+
+                        return {
+
+                            data: dataLoadExpense,
+                            last_page: response.last_page,
+
+                        };
+                    },
+                    columns: [
+                        { title: "Name", field: "AgencyName", cssClass: "text-center", headerFilter: "input" },
+                        { title: "Filling Frequency", field: "Fillingfrequency", cssClass: "text-center", headerFilter: "input" },
+                        { title: "Start of Tax period", field: "StartOfTaxPeriod", cssClass: "text-center", headerFilter: "input" },
+                         {
+                              title: "Start Date",
+                              field: "StartDate",
+                              width: "15%", cssClass: "text-center",
+                              formatter: function (cell, formatterParams, onRendered) {
+                                   var date = new Date(cell.getValue());
+                                   var day = date.getDate();
+                                   var monthNames = [
+                                            "Jan", "Feb", "Mar",
+                                            "Apr", "May", "Jun",
+                                            "Jul", "Aug", "Sep",
+                                            "Oct", "Nov", "Dec"
+                                   ];
+                                   var monthIndex = date.getMonth();
+                                   var year = date.getFullYear().toString().substr(-2); 
+
+                                   return day + '-' + monthNames[monthIndex] + '-' + year;
+                              }
+                         },
+                        { title: "Reporting Method", field: "ReportingMethod", cssClass: "text-center", headerFilter: "input" },
+                         {
+                              title: "Action", width: "10%", cssClass: "text-center",
+                              // formatter: function (cell, formatterParams, onRendered) {
+                              //     return '<a href="#" class="edit-link">Edit</a>';
+                              // },
+                              // cellClick: function (e, cell) {
+                              //     var rowData = cell.getData();
+                              //     populateAccountSave(rowData);
+                              // },
+
+                            formatter: function (cell, formatterParams, onRendered) {
+                                return `
+                                    <div class="dropdown d-inline">
+                                        <a href="#" class="edit-link">Edit</a>
+                                        <a href="#" class="" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-caret-down"></i> <!-- Bootstrap arrow icon -->
+                                        </a>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item delete-link" href="#">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                `;
+                            },
+                            cellClick: function (e, cell) {
+                                var rowData = cell.getData();
+
+                                if (e.target.classList.contains('edit-link')) {
+                                    populateAccountSave(rowData);
+                                } else if (e.target.classList.contains('delete-link')) {
+                                    // Implement the delete functionality here
+                                    DeleteTaxAgency(rowData.Id);
+                                }
+                            },
+
+                              headerSort: false
+                         }
+                    ],
+
+                });
+                // document.getElementById("customerPrint-table").addEventListener("click", function () {
+                //     customerDetailTable.print(false, true);
+                // });
+                // document.getElementById("customerDownload-xlsx").addEventListener("click", function () {
+                //     customerDetailTable.download("xlsx", "data.xlsx", { sheetName: "Table Data" });
+                // });
+            });
+
+            // function fetchDataFromServer() {
+            //     var MyAppUrlSettings = {
+            //         MyUsefulUrl: '@Url.Action("GetAgenciesJson", "Sales")'
+            //     };
+            //     return $.ajax({
+            //         url: MyAppUrlSettings.MyUsefulUrl,
+            //         dataType: "json",
+            //     });
+            // }
+
+            // fetchDataFromServer().done(function (response) {
+
+            //     console.log("notrmal response:", response.data);
+            //     var dataTable = response.data;
+            //     console.log("data table:", dataTable);// Define columns to be excluded
+            //     var columnsToExclude = ["MonthCaption", "FontSignal"]; // Define columns to be excluded
+
+
+
+            //     var table = new Tabulator("#Agency_Table", {
+            //         data: dataTable,
+            //         dataTree: true,
+            //         dataTreeStartExpanded: true,
+            //         dataTreeChildField: "children",
+            //         layout: "datafit",
+                    
+            //         frozenRows: 1,
+            //         columns: [
+            //             { title: "Name", field: "AgencyName", cssClass: "text-center" },
+            //             { title: "Filling Frequency", field: "Fillingfrequency", cssClass: "text-center" },
+            //             { title: "Start of Tax period", field: "StartOfTaxPeriod", cssClass: "text-center" },
+            //             {
+            //                 title: "Start Date",
+            //                 field: "StartDate",
+            //                 width: "15%", cssClass: "text-center",
+            //                 formatter: function (cell, formatterParams, onRendered) {
+            //                     var date = new Date(cell.getValue());
+            //                     var day = date.getDate();
+            //                     var monthNames = [
+            //                         "Jan", "Feb", "Mar",
+            //                         "Apr", "May", "Jun",
+            //                         "Jul", "Aug", "Sep",
+            //                         "Oct", "Nov", "Dec"
+            //                     ];
+            //                     var monthIndex = date.getMonth();
+            //                     var year = date.getFullYear().toString().substr(-2); // Extract last 2 digits of year
+
+            //                     return day + '-' + monthNames[monthIndex] + '-' + year;
+            //                 }
+            //             },
+            //             { title: "Reporting Method", field: "ReportingMethod", cssClass: "text-center" },
+            //             {
+            //                 title: "Action", width: "10%", cssClass: "text-center",
+            //                 formatter: function (cell, formatterParams, onRendered) {
+            //                     return '<a href="#" class="edit-link">Edit</a>';
+            //                 },
+            //                 cellClick: function (e, cell) {
+            //                     var rowData = cell.getData();
+            //                     populateAccountSave(rowData);
+            //                     //var editUrl = '/controller/edit/' + rowData.id;
+            //                     //window.location.href = editUrl;
+            //                 },
+            //                 headerSort: false
+            //             }
+            //         ],
+            //         dataBound: function () {
+            //             // Freeze the top 1 row (index 0) after the table is created
+            //             var rows = table.getRows();
+            //             if (rows.length > 0) {
+            //                 var cells = rows[0].getCells();
+            //                 cells.forEach(cell => {
+            //                     cell.freeze();
+            //                 });
+            //             }
+            //         },
+            //     });
+            // });
+
+        }
+        function populateAccountSave(data) {
+            var startDate = new Date(data.StartDate);
+
+            var timezoneOffset = startDate.getTimezoneOffset();
+            startDate.setMinutes(startDate.getMinutes() - timezoneOffset);
+            var formattedStartDate = startDate.toISOString().split("T")[0];
+
+            $("#AgentId").val(data.Id);
+            $("#agencyName").val(data.AgencyName);
+            $("#Fillingfrequency").val(data.Fillingfrequency);
+            $("#StartDate").val(formattedStartDate);
+            $("#ReportingMethod").val(data.ReportingMethod);
+            $("#StartOfTaxPeriod").val(data.StartOfTaxPeriod);
+            $("#offcanvasRight").offcanvas('show');
+        }
+
+        $(document).ready(function () {
+
+            initTabulator();
+
+        });
+
+
+    </script>
+    <script>
+        function initTabulator1() {
+
+            function fetchDataFromServer() {
+
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetSalesJson", "Sales")'
+                };
+                return $.ajax({
+                    url: MyAppUrlSettings.MyUsefulUrl,
+                    dataType: "json",
+                });
+            }
+
+            fetchDataFromServer().done(function (response) {
+
+                console.log("notrmal response:", response.data);
+                var dataTable = response.data;
+                console.log("data table:", dataTable);// Define columns to be excluded
+
+
+                customerDetailsUrl = `@Url.Action("GetSalesJson", "Sales")`
+                customerDetailTable = new Tabulator("#Sales_Table", {
+
+                    layout: "fitColumns",
+                    minHeight: 300,
+                    pagination: true,
+                    movableColumns: true,
+                    ajaxURL: customerDetailsUrl,
+                    paginationMode: "remote",
+                    paginationSize: 10,
+                    paginationInitialPage: 1,
+                    paginationSizeSelector: [10, 25, 50, 100, true],
+                    paginationCounter: "rows",
+                    dataTree: true,
+                    dataTreeStartExpanded: false,
+                    ajaxConfig: "get",
+                    ajaxContentType: "json",
+
+                    ajaxResponse: function (url, params, response) {
+                        customerDetailTable.setMaxPage(response.last_page);
+                        console.log("response.last_page", response.last_page);
+
+                        dataLoadExpense = response.data;
+                        /* console.log("dataLoadExpense:", dataLoadExpense);*/
+
+                        return {
+
+                            data: dataLoadExpense,
+                            last_page: response.last_page,
+
+                        };
+                    },
+                    columns: [
+                        { title: "Nickname", field: "Nickname", width: "20%", cssClass: "text-center", headerFilter: "input" },
+                        { title: "Agency", field: "AgentName", width: "20%", cssClass: "text-center",headerFilter: "input" },
+                                { title: "Rate", field: "Rate", width: "20%", cssClass: "text-center" },
+                                {
+                                    title: "Action", width: "10%", cssClass: "text-center",
+                                    // formatter: function (cell, formatterParams, onRendered) {
+                                    //     return '<a href="#" class="edit-link">Edit</a>';
+                                    // },
+                                    // cellClick: function (e, cell) {
+                                    //     var rowData = cell.getData();
+                                    //     populateSingleTaxSave(rowData);
+                                    //     //var editUrl = '/controller/edit/' + rowData.id;
+                                    //     //window.location.href = editUrl;
+                                    // },
+
+                                     formatter: function (cell, formatterParams, onRendered) {
+                                            return `
+                                                <div class="dropdown d-inline">
+                                                    <a href="#" class="edit-link">Edit</a>
+                                                    <a href="#" class="" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <i class="bi bi-caret-down"></i> <!-- Bootstrap arrow icon -->
+                                                    </a>
+                                                    <ul class="dropdown-menu">
+                                                        <li><a class="dropdown-item delete-link" href="#">Delete</a></li>
+                                                    </ul>
+                                                </div>
+                                            `;
+                                        },
+                                        cellClick: function (e, cell) {
+                                            var rowData = cell.getData();
+
+                                            if (e.target.classList.contains('edit-link')) {
+                                                populateSingleTaxSave(rowData);
+                                            } else if (e.target.classList.contains('delete-link')) {
+                                                // Implement the delete functionality here
+                                                DeleteTaxRate(rowData.Id);
+                                            }
+                                        },
+
+                                    headerSort: false
+                                }
+                    ],
+
+                });
+                // document.getElementById("customerPrint-table").addEventListener("click", function () {
+                //     customerDetailTable.print(false, true);
+                // });
+                // document.getElementById("customerDownload-xlsx").addEventListener("click", function () {
+                //     customerDetailTable.download("xlsx", "data.xlsx", { sheetName: "Table Data" });
+                // });
+            });
+
+            // function fetchDataFromServer() {
+            //     var MyAppUrlSettings = {
+            //         MyUsefulUrl: '@Url.Action("GetSalesJson", "Sales")'
+            //     };
+            //     return $.ajax({
+            //         url: MyAppUrlSettings.MyUsefulUrl,
+            //         dataType: "json",
+            //     });
+            // }
+            // fetchDataFromServer().done(function (response) {
+
+            //     console.log("notrmal response:", response.data);
+            //     var dataTable = response.data;
+            //     console.log("data table:", dataTable);// Define columns to be excluded
+            //     var columnsToExclude = ["MonthCaption", "FontSignal"]; // Define columns to be excluded
+
+
+
+            //     var table = new Tabulator("#Sales_Table", {
+            //         data: dataTable,
+            //         dataTree: true,
+            //         dataTreeStartExpanded: true,
+            //         dataTreeChildField: "children",
+            //         layout: "datafit",
+            //         frozenRows: 1,
+            //         columns: [
+            //             { title: "Nickname", field: "Nickname", width: "20%", cssClass: "text-center" },
+            //             { title: "Agency", field: "AgentName", width: "20%", cssClass: "text-center" },
+            //             { title: "Rate", field: "Rate", width: "20%", cssClass: "text-center" },
+            //             {
+            //                 title: "Action", width: "10%", cssClass: "text-center",
+            //                 formatter: function (cell, formatterParams, onRendered) {
+            //                     return '<a href="#" class="edit-link">Edit</a>';
+            //                 },
+            //                 cellClick: function (e, cell) {
+            //                     var rowData = cell.getData();
+            //                     populateSingleTaxSave(rowData);
+            //                     //var editUrl = '/controller/edit/' + rowData.id;
+            //                     //window.location.href = editUrl;
+            //                 },
+            //                 headerSort: false
+            //             }
+            //         ],
+            //         dataBound: function () {
+            //             // Freeze the top 1 row (index 0) after the table is created
+            //             var rows = table.getRows();
+            //             if (rows.length > 0) {
+            //                 var cells = rows[0].getCells();
+            //                 cells.forEach(cell => {
+            //                     cell.freeze();
+            //                 });
+            //             }
+            //         },
+            //     });
+            // });
+        }
+        function populateSingleTaxSave(data) {
+
+            if (data.IsSingleTax == true) {
+                $("#TaxId").val(data.Id);
+                $("#singleName").val(data.Nickname);
+                $("#SingleAgentId").val(data.AgentId);
+                $("#SingleCriteriaId").val(data.TaxCriteriaId);
+                $("#singlerate").val(data.Rate);
+                $("#salesTaxId").val(data.AccIdSalesTaxes);
+                $("#PurchaseTaxId").val(data.AccIdPurchaseTaxes);
+                $("#ExpenseTaxId").val(data.AccIdExpenseTax);
+                $("#MasterTaxId").val(data.SalesTaxMasterId);
+                $("#multipletax").hide();
+                $("#singletax").show();
+                $("#combinedRadio").prop("checked", false);
+                $("#singleRadio").prop("checked", true);
+                $("#offcanvasRightRate").offcanvas('show');
+            }
+            else {
+                //$("#mulTaxId").val(data.Id);
+                //$("#mastermulTaxId").val(data.SalesTaxMasterId);
+                //$("#multiName").val(data.Name);
+                //$("#multinickName").val(data.Nickname);
+                //$("#MultiFillingfrequency").val(data.AgentId);
+                //$("#multiRate").val(data.Rate);
+
+                
+                $("#multipletax").show();
+                $("#singletax").hide();
+                $("#offcanvasRightRate").offcanvas('show');
+                $("#combinedRadio").prop("checked", true);
+                $("#singleRadio").prop("checked", false);
+                LoadAllChild(data.SalesTaxMasterId)
+            }
+        }
+        $(document).ready(function () {
+
+            initTabulator1();
+
+        });
+        
+        function LoadAllChild(id)
+        {
+            $.ajax({
+                url: '@Url.Action("GetAllChild", "Sales")',
+                data: { id: id },
+                type: 'GET',
+                async: true,
+                dataType: 'json',
+                success: function (result) {
+                    var dataTable = result.data;
+                    console.log(dataTable);
+                    populateMultipleTaxSave(dataTable);
+                    //reinittable(dataTable);
+                },
+                error: function () {
+                    //toastr.error('Unable to Save');
+                    //alert('Unable to Save');
+                }
+            });
+        }
+
+        document.getElementById("clearRatesModal").addEventListener("click", function () {
+            clearRatesModalData();
+        });
+
+        function clearRatesModalData() {          
+            $("#multiName").val('');
+            $("#multinickName").val('');
+            $("#MultiFillingfrequency").val('');
+            $("#MultisalesTaxId").val('');
+            $("#MultiCriteriaId").val('');
+            $("#MultiPurchaseTaxId").val('');
+            $("#MultiExpenseTaxId").val('');
+            $("#multiRate").val('');
+        }
+
+        function populateMultipleTaxSave(dataTable) {
+            var contentContainer = $("#contentContainer");
+
+            // Populate the first row's data
+            var firstRowData = dataTable[0];
+            $("#mulTaxId").val(firstRowData.Id);
+            $("#mastermulTaxId").val(firstRowData.SalesTaxMasterId);
+            $("#multiName").val(firstRowData.Name);
+            $("#multinickName").val(firstRowData.Nickname);
+            $("#MultiFillingfrequency").val(firstRowData.AgentId);
+            $("#MultisalesTaxId").val(firstRowData.AccIdSalesTaxes);
+            $("#MultiPurchaseTaxId").val(firstRowData.AccIdPurchaseTaxes);
+            $("#MultiExpenseTaxId").val(firstRowData.AccIdExpenseTax);
+            $("#multiRate").val(firstRowData.Rate);
+            $("#MultiCriteriaId").val(firstRowData.TaxCriteriaId);
+
+            // Populate additional rows using the addNewDiv function
+            for (var i = 1; i < dataTable.length; i++) {
+                var newRowData = dataTable[i];
+                addNewDiv1(contentContainer, newRowData);
+            }
+        }
+
+
+        function DeleteTaxRate(data) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteTaxRate", "Sales")',
+                        type: "get",
+                        data: { id: data },
+                        traditional: true,
+                        success: function (response) {
+                            if (response.success == "1") {
+                                toastr.success(response.msg, "", {
+                                    "toastClass": "toast-green",
+                                });
+                                initTabulator1();
+                            }
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+                            toastr.error("Error during delete.", "", { "toastClass": "toast-red" });
+                        }
+                    });
+                }
+            });
+        };
+
+
+        function DeleteTaxAgency(data) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteTaxAgency", "Sales")',
+                        type: "get",
+                        data: { id: data },
+                        traditional: true,
+                        success: function (response) {
+                            if (response.success == "1") {
+                                toastr.success(response.msg, "", {
+                                    "toastClass": "toast-green",
+                                });
+                                initTabulator();
+                            }
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+                            toastr.error("Error during delete.", "", { "toastClass": "toast-red" });
+                        }
+                    });
+                }
+            });
+        };
+
+        //var dynamicDivs = [];
+        //function addNewDiv1(container, data) {
+        //    var newDiv = $("<div>").addClass("added-div")
+        //        .css({ padding: "10px", backgroundColor: "#EEEEEE", marginTop: "20px" });
+
+        //    var removeButton = $("<button>").addClass("remove-btn")
+        //        .text("Remove")
+        //        .on("click", function () {
+        //            newDiv.remove();
+        //        });
+
+        //    var nicknameLabel = $("<label>").text("Nickname");
+
+        //    var nicknameInput = $("<input>").attr({ type: "text", id: "multinickName_" + data.Id, name: "multinickName_" + data.Id })
+        //        .addClass("nick-name-input form-control")
+        //        .attr("placeholder", "Nickname")
+        //        .val(data.Nickname);
+
+        //    var brElement = $("<br>");
+
+        //    var fillingFrequencyLabel = $("<label>").text("Agency");
+
+        //    var fillingFrequencySelect = $("<select>").addClass("form-control abc")
+        //        .attr("name", "MultiFillingfrequency_" + data.Id);
+
+        //    for (var i = 0; i < agencyList.length; i++) {
+        //        var option = $("<option>").text(agencyList[i].Text)
+        //            .attr("value", agencyList[i].Value);
+        //        fillingFrequencySelect.append(option);
+        //    }
+        //    fillingFrequencySelect.val(data.AgentId);
+
+        //    var rateLabel = $("<label>").text("Rate");
+
+        //    var rateInput = $("<input>").attr({ type: "text", id: "multiRate_" + data.Id, name: "multiRate_" + data.Id })
+        //        .addClass("drebit-credit w-100")
+        //        .attr("placeholder", "Rate")
+        //        .val(data.Rate);
+
+        //    var mulTaxIdInput = $("<input>").attr({ type: "hidden", id: "mulTaxId_" + data.Id, value: data.Id });
+
+        //    dynamicDivs.push(newDiv);
+
+        //    mulTaxIdInput.appendTo(newDiv);
+        //    removeButton.appendTo(newDiv);
+        //    brElement.appendTo(newDiv);
+        //    nicknameLabel.appendTo(newDiv);
+        //    nicknameInput.appendTo(newDiv);
+        //    fillingFrequencyLabel.appendTo(newDiv);
+        //    fillingFrequencySelect.appendTo(newDiv);
+        //    rateLabel.appendTo(newDiv);
+        //    rateInput.appendTo(newDiv);
+
+        //    newDiv.appendTo(container);
+        //}
+
+        var dynamicDivs = [];
+
+        function addNewDiv1(container, data) {
+            var newDiv = $("<div>").addClass("added-div row")
+                .css({ paddingRight: "30px", backgroundColor: "#F8F8F8", marginTop: "10px", paddingTop: "10px", marginLeft: "2px", borderTop: "1px solid grey" });
+
+            var nicknameDiv = $("<div>").addClass("col-md-6 col-6");
+            
+            var nicknameLabel = $("<label>").text("Nickname");
+            var nicknameInput = $("<input>").attr({
+                type: "text",
+                id: "multinickName_" + data.Id,
+                name: "multinickName_" + data.Id
+            }).addClass("nick-name-input form-control").attr("placeholder", "Nickname").val(data.Nickname);
+            nicknameDiv.append(nicknameLabel, nicknameInput);
+
+            var hiddenInput = $("<input>").attr({
+                type: "hidden",
+                id: "mulTaxId_" + data.Id,
+                name: "mulTaxId_" + data.Id
+            }).addClass("mTaxId").val(data.Id);
+
+
+
+            var rateDiv = $("<div>").addClass("col-md-5 col-5");
+            var rateLabel = $("<label>").text("Rate");
+            var rateInput = $("<input>").attr({
+                type: "text",
+                id: "multiRate_" + data.Id,
+                name: "multiRate_" + data.Id
+            }).addClass("drebit-credit w-100 form-control").attr("placeholder", "Rate").val(data.Rate);
+            var rateSpan = $("<span>").text("%").css("margin-left", "10px");
+            var rateDivwithInputSpan = $("<div>").addClass("d-flex").append(rateInput, rateSpan);
+            rateDiv.append(rateLabel, rateDivwithInputSpan);
+
+            var removeButtonDiv = $("<div>").addClass("col-md-1 col-1").css("margin-top", "22px");
+            var removeButton = $("<i>").addClass("bi bi-x-circle").css({ fontSize: "20px", color: "red"});
+            removeButton.on("click", function () {
+                newDiv.remove();
+                dynamicDivs.splice(dynamicDivs.indexOf(newDiv), 1);
+            });
+            removeButtonDiv.append(removeButton);
+
+            var fillingFrequencyLabel = $("<label>").text("Agency").css("margin-top", "20px");
+            var fillingFrequencySelect = $("<select>").addClass("form-control abc")
+                .attr("name", "MultiFillingfrequency_" + data.Id)/* .css("width", "50%") */;
+
+            for (var i = 0; i < agencyList.length; i++) {
+                var option = $("<option>").text(agencyList[i].Text)
+                    .attr("value", agencyList[i].Value);
+                fillingFrequencySelect.append(option);
+            }
+            fillingFrequencySelect.val(data.AgentId);
+
+            var taxCriteriaLabel = $("<label>").text("Criteria").css("margin-top", "20px");
+            var taxCriteriaSelect = $("<select>").addClass("form-control tc")
+                .attr("name", "TaxCriteria_" + data.Id)/* .css("width", "50%") */;
+
+            for (var i = 0; i < taxCriteriaList.length; i++) {
+                var option = $("<option>").text(taxCriteriaList[i].Text)
+                    .attr("value", taxCriteriaList[i].Value);
+                taxCriteriaSelect.append(option);
+            }
+            taxCriteriaSelect.val(data.TaxCriteriaId);
+
+            var salesVATLabel = $("<label>").text("Sales Tax").css("margin-top", "20px");
+            var salesVatSelect = $("<select>").addClass("form-control pqr")
+                .attr("name", "SalesVat_" + data.Id)/* .css("width", "50%") */;
+            
+            var defaultOption = new Option("Select Sales-Tax Head", "");
+            salesVatSelect.append(defaultOption);
+
+            for (var i = 0; i < salesVatList.length; i++) {
+                var option = $("<option>").text(salesVatList[i].Text)
+                    .attr("value", salesVatList[i].Value);
+                salesVatSelect.append(option);
+            }
+            salesVatSelect.val(data.AccIdSalesTaxes);
+
+            var purchaseVATLabel = $("<label>").text("Purchase Tax").css("margin-top", "20px");
+            var purchaseVatSelect = $("<select>").addClass("form-control xyz")
+                .attr("name", "PurchaseVat_" + data.Id)/* .css("width", "50%") */;
+
+            var defaultOption1 = new Option("Select Purchase-Tax Head", "");
+            purchaseVatSelect.append(defaultOption1);
+
+            for (var i = 0; i < purchaseVATList.length; i++) {
+                var option = $("<option>").text(purchaseVATList[i].Text)
+                    .attr("value", purchaseVATList[i].Value);
+                purchaseVatSelect.append(option);
+            }
+            purchaseVatSelect.val(data.AccIdPurchaseTaxes);
+
+            //Expense head start
+            var expenseVATLabel = $("<label>").text("Expense Head").css("margin-top", "20px");
+            var expenseVatSelect = $("<select>").addClass("form-control exp")
+                .attr("name", "ExpenseVat_" + data.Id)/* .css("width", "50%") */;
+
+            var defaultOption2 = new Option("Select Expense Head", "");
+            expenseVatSelect.append(defaultOption2);
+
+            for (var i = 0; i < expenseVATList.length; i++) {
+                var option = $("<option>").text(expenseVATList[i].Text)
+                    .attr("value", expenseVATList[i].Value);
+                expenseVatSelect.append(option);
+            }
+            expenseVatSelect.val(data.AccIdExpenseTax);
+
+            newDiv.append(nicknameDiv, rateDiv, removeButtonDiv, fillingFrequencyLabel, fillingFrequencySelect, taxCriteriaLabel, taxCriteriaSelect, hiddenInput, salesVATLabel, salesVatSelect,
+            purchaseVATLabel, purchaseVatSelect, expenseVATLabel, expenseVatSelect);
+
+            dynamicDivs.push(newDiv);
+
+            newDiv.appendTo(container);
+        }
+
+        function closeOffcanvas() {
+            clearDynamicDivs(); 
+        }
+
+        function clearDynamicDivs() {
+            for (var i = 0; i < dynamicDivs.length; i++) {
+                dynamicDivs[i].remove(); // Remove each dynamically created div
+            }
+            dynamicDivs = []; // Clear the tracking array
+        }
+
+        $(document).ready(function () {
+            $("#offcanvasRightRate").on("hidden.bs.offcanvas", function () {
+                closeOffcanvas(); 
+            });
+
+            $("#addMore").on("click", function () {
+                //addNewDiv();
+            });
+        });
+
+    </script>
+
+
+}

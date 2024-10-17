@@ -1,0 +1,2145 @@
+﻿@*@Html.AntiForgeryToken()
+    @using Microsoft.AspNetCore.Antiforgery
+    @inject IAntiforgery AntiForgery*@
+
+@model Atrai.Model.Core.Entity.TransactionModel
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "Add Transaction Details";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<style>
+   
+    .col-md-3 {
+        
+        width: 19%;
+    }
+                
+                    .table td:last-child {
+                  
+                  background-color: transparent !important;
+                }
+
+                table.dataTable tbody > tr.selected, table.dataTable tbody > tr > .selected, .txtMultExportInvoice.selected {
+                  background: linear-gradient(0deg, rgba(94, 121, 203, 0.57) 25%, rgba(209, 229, 250, 0.59) 86%, rgba(159, 217, 255, 0.55) 100%);
+                  font-weight: bolder;
+                  font-weight: 400;
+                  color: #05025e;
+                }
+
+
+                p.lineheight {
+        line-height: 6px;
+        vertical-align: middle;
+    }
+    /* style add by shahinur*/
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+    }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #999;
+        }
+
+        .separator:not(:empty)::before {
+            margin-right: .25em;
+        }
+
+        .separator:not(:empty)::after {
+            margin-left: .25em;
+        }
+    /* style add by shahinur*/
+    /*hr.hr-text {
+        position: relative;
+        border: none;
+        height: 1px;
+        background: #999;
+    }
+
+        hr.hr-text::before {
+            content: attr(data-content);
+            display: inline-block;
+            background: #fff;
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: #999;
+            border-radius: 30rem;
+            padding: 0.2rem 0.5rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }*/
+        .dropdown-item {
+          padding: 5px 1rem;
+          color: #67757c;
+          /*text-align: center;*/
+        }
+
+    .button {
+        border-radius: 25px;
+    }
+
+    .modal-content {  /*for save modal*/
+        width: 80%;
+    }
+
+    .modal-Invoice {
+        width: 115%;
+    }
+
+    .col-md-1 {
+        width: 3%;
+    }
+
+    .rounded {
+        border-radius: 10px; /* Adjust the radius value to your preference */
+    }
+
+</style>
+
+
+<div class="page-wrapper">
+    @Html.AntiForgeryToken()
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+
+        <div class="card">
+            <div class="card-header py-1">
+                @*<div class="py-7 text-center">
+                    <h2 id="styletext" class="text-center">@ViewBag.Title</h2>
+                    </div>*@
+
+                @if (@ViewBag.Type == "Sales" || @ViewBag.Type == "Customer")
+                {
+                    <h3 style="color:darkgreen">Received Amount From Customer</h3>
+                }
+                else if (@ViewBag.Type == "Purchase" || @ViewBag.Type == "Supplier")
+                {
+                    <h3 style="color:red">Paid To Supplier</h3>
+                }
+                else if (@ViewBag.Type == "Paid")
+                {
+                    <h3 style="color:red">Amount Paid</h3>
+                }
+                else if (@ViewBag.Type == "Received")
+                {
+                    <h3 style="color:darkgreen">Amount Received</h3>
+                }
+                else if (@ViewBag.Type == "CashContra")
+                {
+                    <h3 style="color:darkgreen"> Cash Received / Withdrawn from Bank.</h3>
+                }
+                else if (@ViewBag.Type == "BankContra")
+                {
+                    <h3 style="color:royalblue"> Cash Deposit To Bank.</h3>
+                }
+                else if (@ViewBag.Type == "CustomerDiscount")
+                {
+                    <h3 style="color:red"> Discount Given to Customer</h3>
+                }
+                else if (@ViewBag.Type == "SupplierDiscount")
+                {
+                    <h3 style="color:royalblue">Discount by Supplier.</h3>
+                }
+                else
+                {
+                    <h3 style="color:royalblue"> Accounts Transaction </h3>
+                }
+            </div>
+
+
+            <div class="card-body">
+
+                @using (Html.BeginForm("AddTransactionDetails", "Admin", FormMethod.Post, new { id = "myform", enctype = "multipart/form-data" }))
+                {
+                    @*@Html.AntiForgeryToken()*@
+                    <div class="container-fluid">
+
+                        <input type="hidden" id="mode" name="mode" value="@ViewBag.Title" />
+
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        @if (Model != null)
+                        {
+
+                            <input type="hidden" id="Id" name="Id" value="@Model.Id" />
+                            <input type="hidden" id="TransactionId" name="TransactionId" value="@Model.Id" />
+
+                            <input type="hidden" id="LuserId" name="LuserId" value="@Model.LuserId" />
+                            <input type="hidden" id="ComId" name="ComId" value="@Model.ComId" />
+                            <input type="hidden" id="LuserIdUpdate" name="LuserIdUpdate" value="@Model.LuserIdUpdate" />
+                            <input type="hidden" id="CreateDate" name="CreateDate" value="@Model.CreateDate" />
+                            <input type="hidden" id="UpdateDate" name="UpdateDate" value="@Model.UpdateDate" />
+                            <input type="hidden" asp-for="isSystem" />
+                            <input type="hidden" asp-for="TransactionCategory" />
+                            <input type="hidden" asp-for="TransactionType" />
+                        }
+                        else
+                        {
+                            <input type="hidden" id="ComId" name="ComId" value="0" />
+                            <input type="hidden" id="Id" name="Id" value="" />
+                            <input type="hidden" id="CreateDate" name="CreateDate" value="" />
+                            <input type="hidden" id="UpdateDate" name="UpdateDate" value="" />
+                        }
+                        <div class="order-md-1">
+                            <form class="needs-validation" novalidate>
+                                <div class="row">
+
+                                    <div id="divcurrencyid" class="col-md-3 col-12">
+                                                  <div class="mb-2">
+                                                            <div>
+                                                                <label class="form-label fw-semibold">
+                                                          @Html.LabelFor(x => x.CurrencyId)
+                                                                </label>
+                                                        
+                                                            </div>
+                                                               @Html.DropDownListFor(x => x.CurrencyId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.Currency, "Value", "Text"),
+                                        htmlAttributes: new { @class = "form-select", id = "CurrencyId" })
+                                            @Html.ValidationMessageFor(x => x.CurrencyId, "", new { @class = "text-danger" })
+                                                  </div>
+                                
+
+                                    </div>
+                                    <div id="divcurrencyrate" class="col-md-3 col-12">
+                                        <div class="mb-2">
+                                            <div>
+                                                <label class="form-label fw-semibold">
+                                                    @Html.LabelFor(x => x.CurrencyRate)
+                                                </label>
+                                            </div>
+                                            
+                                            @Html.TextBoxFor(x => x.CurrencyRate, null, new { @class = "form-control rounded", @placeholder = "Currency Rate" , @value=1 })
+                                            @Html.ValidationMessageFor(x => x.CurrencyRate, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3 col-12">
+                                        <div class="mb-2">
+                                            <div>
+                                                <label class="form-label fw-semibold">
+                                                    @Html.LabelFor(model => model.InputDate, "Entry Date")
+                                                </label>
+                                            </div>
+                                            <input asp-for="InputDate" class="form-control tg" value="@Model.InputDate.ToString("yyyy-MM-dd")" type="date" />
+                                            <span asp-validation-for="InputDate" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-12">
+                                              <div class="mb-2">
+                                                            <div>
+                                                                <label class="form-label fw-semibold">
+                                                    @Html.LabelFor(model => model.TransactionCode, "Code")
+                                                                </label>
+                                                        
+                                                            </div>
+                                                             @Html.EditorFor(model => model.TransactionCode, new { htmlAttributes = new { @class = "form-control" , @readonly="readonly" } })
+                                            @Html.ValidationMessageFor(model => model.TransactionCode, "", new { @class = "text-danger" })
+                                                        </div>
+                                    </div>
+                       
+                                </div>
+
+                                <div class="row">
+                                    @if (@ViewBag.Type == "Sales" || @ViewBag.Type == "Customer")
+                                    {
+                                        <div class="col-md-4 col-12">
+                                                      <div class="mb-2">
+                                                            <div>
+                                                                <label class="form-label fw-semibold">
+                                                        @Html.LabelFor(model => model.Customer, "Customer")
+                                                                </label>
+                                                            </div>
+                                                                   @Html.DropDownListFor(x => x.CustomerId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.Customer, "Value", "Text"), "Select Customer",
+                                        htmlAttributes: new { @class = "form-select", id = "CustomerId" })
+                                        <span id="customerIdValidationMessage" class="text-danger" style="display: none;">Customer must be selected</span>
+                                                @Html.ValidationMessageFor(model => model.CustomerId, "", new { @class = "text-danger" })
+                                                        </div>
+                                        </div>
+                                    }
+                                    else if (@ViewBag.Type == "Purchase" || @ViewBag.Type == "Supplier")
+                                    {
+                                        <div id="divsupplierid" class="col-md-4 col-12">
+                                                 <div class="mb-2">
+                                                            <div>
+                                                                <label class="form-label fw-semibold">
+                                                         @Html.LabelFor(x => x.Supplier)
+                                                         </label>
+                                                            </div>
+                                                                            @Html.DropDownListFor(x => x.SupplierId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.Supplier, "Value", "Text"), "Select Supplier",
+                                        htmlAttributes: new { @class = "form-select", id = "SupplierId" })
+                                        <span id="supplierIdValidationMessage" class="text-danger" style="display: none;">Supplier must be selected</span>
+                                                @Html.ValidationMessageFor(x => x.SupplierId, "", new { @class = "text-danger" })
+                                                        </div>
+                                        </div>
+                                    }
+
+                                    <div class="col-md-2 col-12 mt-4 pt-1">
+                                        <div type="button" class="btn btn-primary mb-2" id="addplus" onclick="getReferance()">Load</div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    @if (@ViewBag.Type == "Supplier")
+                                    {
+                                        <div class="col-md-4 col-12">
+                                            <div class="mb-2">
+                                                <div>
+                                                    <label class="form-label fw-semibold">
+                                                        @Html.LabelFor(model => model.CreditAccountId, "Account Head")
+                                                    </label>
+                                                </div>
+                                                @Html.DropDownListFor(x => x.CreditAccountId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.CashBankHead, "Value", "Text"), "Select Please",
+                                        htmlAttributes: new { @class = "form-select", id = "CreditAccountId" })
+                                                @* @Html.DropDownList("CashBankHead", null, htmlAttributes: new { id = "CreditAccountId", @class = "form-select" }) *@
+
+                                                @*<select asp-for="AccountId" class="form-control"></select>*@
+                                                <span id="accountPayTypeValidationMessage" class="text-danger" style="display: none;">Account Head must be selected</span>
+                                                @Html.ValidationMessageFor(model => model.CreditAccountId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    }
+                                    else if (@ViewBag.Type == "Customer")
+                                    {
+                                        <div class="col-md-4 col-12">
+                                            <div class="mb-2">
+                                                <div>
+                                                    <label class="form-label fw-semibold">
+                                                        @Html.LabelFor(model => model.CreditAccountId, "Account Head")
+                                                    </label>
+                                                </div>
+                                                @Html.DropDownListFor(x => x.CreditAccountId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.CashBankHead, "Value", "Text"), "Select Please",
+                                        htmlAttributes: new { @class = "form-select", id = "CreditAccountId" })
+                                                @* @Html.DropDownList("CashBankHead", null, htmlAttributes: new { id = "CreditAccountId", @class = "form-select" }) *@
+
+                                                @*<select asp-for="AccountId" class="form-control"></select>*@
+                                                <span id="accountPayTypeValidationMessage" class="text-danger" style="display: none;">Account Head must be selected</span>
+                                                @Html.ValidationMessageFor(model => model.CreditAccountId, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <div class="col-md-3 col-12">
+                                            <div class="mb-2">
+                                                            <div>
+                                                                <label class="form-label fw-semibold">
+                                                         @Html.LabelFor(model => model.TransactionAmount, "Amount")
+                                                                </label>
+                                                            </div>
+                                                              <input type="text" asp-for="TransactionAmount" class="form-control" />
+                                            @Html.ValidationMessageFor(model => model.TransactionAmount, "", new { @class = "text-danger" })
+                                                        </div>
+                                    </div>
+
+
+
+                                 <div id="divdiscountamount" class="col-md-4 col-12  my-2 d-none">
+
+                                                               <div class="input-group mb-2">
+                                        <div>
+                                            <span class="input-group-text py-0">
+                                                @Html.LabelFor(x => x.DiscountAmount)
+                                            </span>
+                                        </div>
+                                    @Html.TextBoxFor(x => x.DiscountAmount, null, new { @class = "form-control"})
+                                    @Html.ValidationMessageFor(x => x.DiscountAmount, "", new { @class = "text-danger" })
+                                </div>
+                                </div>
+
+
+                                                                    
+                                    <div class="col-md-3 col-12  d-none">
+                                        <div class="input-group mb-2">
+                                            <div >
+                                                <span class="input-group-text py-0">
+                                                    @Html.LabelFor(model => model.VATAmount, "VATAmount")
+                                                </span>
+                                            </div>
+                                            <input type="text" asp-for="VATAmount" class="form-control" />
+                                            @Html.ValidationMessageFor(model => model.VATAmount, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+
+                                    
+                                    <div class="col-md-3 col-12  d-none">
+                                        <div class="input-group mb-2">
+                                            <div >
+                                                <span class="input-group-text py-0">
+                                                    @Html.LabelFor(model => model.AITAmount, "AITAmount")
+                                                </span>
+                                            </div>
+                                            <input type="text" asp-for="AITAmount" class="form-control" />
+                                            @Html.ValidationMessageFor(model => model.AITAmount, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 col-12 d-none">
+                                        <div class="input-group mb-2">
+                                            <div >
+                                                <span class="input-group-text py-0">
+                                                    @Html.LabelFor(model => model.DebitAccountId, "Asset Liability Head")
+                                                </span>
+                                            </div>
+                                            @Html.DropDownListFor(x => x.DebitAccountId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.AssetLiabilityHead, "Value", "Text"), "Select Asset / Liability Head",
+                                        htmlAttributes: new { @class = "form-control", id = "DebitAccountId" })
+                                            @*@Html.DropDownList("AssetLiabilityHead", null, htmlAttributes: new { id = "DebitAccountId", @class = "form-control" })*@
+                                            @*<select asp-for="DebitAccountId" disabled class="form-control"></select>*@
+                                            @Html.ValidationMessageFor(model => model.DebitAccountId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-7 col-12">
+                                            <div class="mb-2">
+                                                            <div>
+                                                                <label class="form-label fw-semibold">
+                                                         @Html.LabelFor(model => model.Description, "Description")
+                                                                </label>
+                                                            </div>
+                                                               @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
+                                            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="table-responsive mb-2">
+                                    <button type="button" class="btn btn-sm btn-primary py-0 px-1 " data-bs-toggle="modal" data-bs-target="#exampleModal" id="viewmod"><i class="bi bi-plus-lg" style="font-size: 15px; margin-right: 0px;"></i></button>
+
+                                    <table id="tbltransactionlist" class="tbltransactionlist text-nowrap display table table-striped table-hover table-bordered text-center border-start" width="100%">
+                                        <thead>
+                                            <tr>
+
+                                                <th>TransactionId</th>
+                                                <th>Id</th>
+                                                <th>Doc. Type</th>
+                                                <th>Ref. Code</th>
+                                                <th>Date</th>
+                                                <th>Ref. Id</th>
+                                                <th>Ref. Name</th>
+                                                <th>Amount</th>
+                                                <th>Discount</th>
+                                                <th>VAT</th>
+                                                <th>AIT</th>
+                                                <th>Net Amount</th>
+                                                <th>Rem. Due</th>
+                                                <th>Action</th>
+                                                <th>PaymentType</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model != null)
+                                            {
+                                                if (Model.TransactionDetails != null)
+                                                {
+                                                    foreach (var item in Model.TransactionDetails)
+                                                    {
+                                                        <tr class="txtMultmasterlcdetails">
+
+                                                            <td>
+                                                                @item.TransactionId
+                                                            </td>
+                                                            <td>
+                                                                @item.Id
+                                                            </td>
+                                                            @if (@ViewBag.Type == "Sales" || @ViewBag.Type == "Customer")
+                                                            {
+                                                                if (@item.Sales != null)
+                                                                {
+                                                                    <td>Sales</td>
+                                                                    <td>@item.Sales.SaleCode</td>
+                                                                    <td> @item.Sales.SalesDate.ToString("dd-MMM-yy")  </td>
+                                                                    <td> @item.SalesId   </td>
+                                                                    <td> @item.Sales.CustomerModel.Name</td>
+                                                                    <td> @item.Sales.NetAmount </td>                                                     
+                                                                }
+                                                                else
+                                                                {
+                                                                    <td> Sales</td>
+                  @*                                                   if (@item.PaymentType == 2)
+                                                                    {
+                                                                        <td> Advance</td>
+                                                                       
+
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <td> Prev. Due</td>
+                                                                    } *@
+                                                                    <td> Prev. Due</td>
+                                                                    <td> </td>
+                                                                    <td> </td>
+                                                                    <td> @Model.Customer.Name</td>
+                                                                    <td> 0</td>                                                                  
+                                                                }
+
+                                                            }
+                                                            else if (@ViewBag.Type == "Purchase" || @ViewBag.Type == "Supplier") 
+                                                            {
+                                                                if (@item.Purchase != null)
+                                                                {
+                                                                    <td>Purchase</td>
+                                                                    <td>@item.Purchase.PurchaseCode</td>
+                                                                    <td> @item.Purchase.PurchaseDate.ToString("dd-MMM-yy")   </td>
+                                                                    <td> @item.PurchaseId   </td>
+                                                                    <td> @item.Purchase.SupplierModel.SupplierName</td>
+                                                                    <td> @item.Purchase.NetAmount </td>                                                                  
+                                                                }
+                                                                else
+                                                                {
+                                                                    <td> Purchase</td>
+                                                                     <td> Prev. Due</td>
+@*                                                                     if (@item.PaymentType == 2)
+                                                                    {
+                                                                        <td> Advance</td>
+
+
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <td> Prev. Due</td>
+                                                                    } *@
+                                                                    <td> </td>
+                                                                    <td> </td>
+                                                                     <td> @Model.Supplier.SupplierName</td>
+                                                                    <td> 0</td>
+                                                                    
+                                                                }
+
+                                                            }
+                                                            <td>
+                                                                @item.Discount
+                                                            </td>
+                                                                       <td>
+                                                                @item.VAT
+                                                            </td>
+                                                                       <td>
+                                                                @item.AIT
+                                                            </td>
+                                                            <td>
+                                                                @item.NetAmount
+                                                            </td>
+                                                            <td>
+                                                                @item.NetAmount
+                                                            </td>
+                                                            <td>
+                                                                @*<a data-itemid="0" href="#" class="dlttrash deleteItem"> <i class="bi bi-trash fa-2x"></i></a>*@
+                                                            </td>
+                                                           @*  <td> @item.PaymentType </td> *@
+                                                        </tr>
+                                                    }
+                                                }
+                                            }
+
+                                        </tbody>
+
+                                        <tfoot>
+                                            <tr class="font-weight-bolder">
+                                                <td colspan="4">
+                                                    @*<button type="button" class="btn-purple btn-sm" data-bs-toggle="modal" data-bs-target="#productinfoModal"><i class="bi bi-plus"></i></button>*@
+
+                                                </td>
+
+                                                <td class="text-end h6" colspan="3">
+                                                    <h5>Total Amount</h5>
+                                                </td>
+                                                <td class="ttlamount h5">
+
+                                                </td>
+                                                <td class="ttldiscount h5">
+
+                                                </td>
+                                                           <td class="ttlvat h5">
+
+                                                </td>
+                                                           <td class="ttlait h5">
+
+                                                </td>
+                                                <td class="ttlnetamount h5">
+
+                                                </td>
+                                                <td class="ttlremdue h5">
+
+                                                </td>
+
+
+
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+
+                                </div>
+
+                                @*</div>*@
+
+                                <!-- Add this HTML to your page -->
+                                <div class="modal" id="confirmModal" tabindex="-1">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirmation</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p></p>
+                                            </div>
+                                            <div class="modal-footer justify-content-between">
+                                                <button type="button" class="btn btn-light button" data-bs-dismiss="modal">No</button>
+                                                <button type="button" class="btn btn-success button" id="confirmYesBtn">Yes</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                <div class="col-md-5 col-12">
+                                <div class="row">
+
+                                <div style="width: @(ViewBag.ActionType == "Edit" ? "95px" : "70px");">
+                                    @if (ViewBag.ActionType == "Create")
+                                    {
+                                    @*<input type="submit" value="Save Changes" class="btn  btn-outline-primary " /> *@
+
+                                   @*  <button id="AddTransactionDetails" class="btn  btn-primary" onclick="ConfirmDialog('Do you want to save ?')" type="button">Save</button> *@
+                                      <button id="AddTransactionDetails" class="btn btn-md btn-primary" onclick="validateAndSave()" type="button">Save</button>
+
+                                    }
+                                    else if (ViewBag.ActionType == "Edit")
+                                    {
+                                    @* <button id="AddTransactionDetails" class="btn btn-outline-warningtext-danger " onclick="ConfirmDialog('Do you want to update ?')" type="button">Update Changes</button> *@
+                                      <button id="AddTransactionDetails" class="btn btn-md btn-primary " onclick="validateAndSave()" type="button">Update </button>
+                                    }
+@*                                    else if (ViewBag.ActionType == "Delete")
+                                    {
+                                    <button class="btn btn-outline-danger" type="button" onclick="Bank_delete()">Delete</button>
+                                    }*@
+                                </div>
+                                <div style=" width: 80px; ">
+                                    @Html.ActionLink("Reset", "AddTransactionDetails", "Admin", new { Type = @ViewBag.Type }, new { @class = "btn btn-md btn-warning" })
+                                </div>
+
+                                <div style=" width: 47px; ">
+                                   @Html.ActionLink(" ", "TransactionList", "Admin", null, new { @class = "btn btn-md btn-danger bi bi-chevron-double-left", style = "font-size: 13px;"  })
+                                </div>
+
+
+                              <div class="col-md-4 col-12  mb-2">
+                                        <!-- Example single danger button -->
+                                                <div class="dropdown dropup d-grid">
+                                            <a class="btn btn-success dropdown-toggle " href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Add New 
+                                            </a>
+
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+
+                                            @Html.ActionLink("Transaction", "AddTransaction", null, null, new { @class = "dropdown-item", @id = "btnBack" })
+                                                    @*<hr data-content="Received" class="hr-text">*@
+                                                      <div class="separator">Received</div>
+                                            @Html.ActionLink("By Income", "AddTransaction", new { Type = "Received" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("From Customer", "AddTransaction", new { Type = "Customer" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("By Invoice", "AddTransaction", new { Type = "Sales" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("From Customer - Multiple Invoice", "AddTransactionDetails", new { Type = "Customer" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("From Supplier", "AddTransaction", new { Type = "ReceivedFromSupplier" }, new { @class = "dropdown-item", @id = "btnFromSupplier" })
+                                            @*<div class="dropdown-divider"></div>*@
+                                            @*<hr data-content="Paid" class="hr-text">*@
+                                            <div class="separator">Paid</div>
+                                            @Html.ActionLink("For Expense", "AddTransaction", new { Type = "Paid" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("To Supplier", "AddTransaction", new { Type = "Supplier" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("By Purchase Order", "AddTransaction", new { Type = "Purchase" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("To Supplier - Multiple Invoice", "AddTransactionDetails", new { Type = "Supplier" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("To Customer", "AddTransaction", new { Type = "PaidToCustomer" }, new { @class = "dropdown-item", @id = "btnBack" })
+
+
+                                            @*<hr data-content="Accounts" class="hr-text">*@
+                                            <div class="separator">Accounts</div>
+                                            @Html.ActionLink("Cash Received From Bank", "AddTransaction", new { Type = "CashContra" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("Cash Deposit To Bank", "AddTransaction", new { Type = "BankContra" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("Contra", "AddTransaction", new { Type = "Contra" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @*<hr data-content="Discount" class="hr-text">*@
+                                            <div class="separator">Discount</div>
+                                            @Html.ActionLink("Discount To Customer", "AddTransaction", new { Type = "CustomerDiscount" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("Discount From Supplier", "AddTransaction", new { Type = "SupplierDiscount" }, new { @class = "dropdown-item", @id = "btnBack" })
+
+                                        </div>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+                                </div>
+                                </div>
+
+
+                            </form>
+                        </div>
+
+                    </div>
+
+                    <div class="modal" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content modal-Invoice">
+                                <div class="modal-header d-flex justify-content-between align-items-center">
+                                    <div class="col-md-2 col-6">
+                                        <h5 class="modal-title mb-0" id="exampleModalLabel">Add Invoice</h5>
+                                    </div>
+
+                                    <div class="col-md-9 col-6 text-md-end">
+                                        <div class="d-flex justify-content-md-end align-items-center">
+                                            <div class="col-md-3">
+                                                <input type="text" id="TotalCollection" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div type="button" class="btn btn-primary btn-sm" id="btnautoselect" onclick="AutoSelectInvoice()">Auto Select</div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div type="button" class="btn btn-primary btn-sm" id="btnPayment">Adv. Payment</div>
+                                            </div>
+                                            @* <div class="">
+                                               <div type="button" class="btn btn-primary btn-sm" id="btnDue" >Previous Due</div>
+                                              </div> *@
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1 col-6">
+                                    <button id="btnclose" type="button" class="btn-close text-danger" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                             <div class="float-end mt-1 ml-5">
+                                    <label class="pr-2"><input type="radio" name="RptType" value="NetAmount" checked="checked" /> Net Amount  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="Discount" /> Discount  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="VAT" /> VAT  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="AIT" /> AIT </label>
+
+                                    </div>
+                                        </div>
+                                         <div class="col-md-12">
+                                            <div id="SubSectionList" class="">
+                                                @*<div class="col-md-12 order-md-1">*@
+                                                <div class="table-responsive">
+                                                    @*<table id="tblreferance" class="table-sm table-responsive table-striped table-hover text-center;" style="text-align: center; width:100%">*@
+                                                    <table id="tblreferance" class="table-striped table table-sm table-hover text-center table-bordered border-start" width="100%">
+                                                        <thead class="text-nowrap">
+                                                            <tr>
+                                                                <th>TransactionId</th>
+                                                                <th>Id</th>
+                                                                <th>Doc. Type</th>
+                                                                <th>Ref. Code</th>
+                                                                <th>Date</th>
+                                                                <th>Ref. Id</th>
+                                                                <th>Ref. Name</th>
+                                                                <th>Amount</th>
+                                                                <th>Discount</th>
+                                                                <th>VAT</th>
+                                                                <th>AIT</th>
+                                                                <th>Net Amount</th>
+                                                                <th>Rem. Due</th>
+                                                                <th>Action</th>
+                                                                <th>PaymentType</th>
+                                                            </tr>
+                                                        </thead>
+                                                        @*<tbody>
+                                                    @if (ViewBag.RefDocList != null)
+                                                    {
+                                                    foreach (var item in ViewBag.RefDocList)
+                                                    {
+                                                    <tr class="txtMultmasterlcdetails">
+
+                                                    <td>
+                                                    @item.TransactionId
+                                                    </td>
+                                                    <td>
+                                                    @item.Id
+                                                    </td>
+                                                    <td>
+                                                    @item.DocType
+                                                    </td>
+                                                    <td>
+                                                    @item.RefCode
+                                                    </td>
+                                                    <td>
+                                                    @item.RefId
+                                                    </td>
+                                                    <td>
+                                                    @item.RefName
+                                                    </td>
+                                                    <td>
+                                                    @item.Amount
+                                                    </td>
+                                                    <td>
+                                                    @item.Discount
+                                                    </td>
+                                                    <td>
+                                                    @item.NetAmouont
+                                                    </td>
+                                                    <td>
+                                                    <a data-itemid="0" href="#" class="dlttrash deleteItem"> <i class="bi bi-trash fa-2x"></i></a>
+                                                    </td>
+                                                    </tr>
+                                                    }
+                                                    }
+
+                                                    </tbody>*@
+                                                        <tfoot>
+                                                            <tr>
+                                                                <td colspan="4">
+                                                                </td>
+                                                                <td class="text-right" colspan="3">
+                                                                    <h6>Total Rec. Amt.</h6>
+                                                                </td>
+                                                                <td colspan="1">
+                                                                    <h6 class="ttlloadamountreferance">0.00</h6>
+                                                                </td>
+                                                                <td colspan="1"></td>
+                                                                <td colspan="1"></td>
+                                                                <td colspan="1"></td>
+
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        </div>
+                                                    
+                               
+                                </div>
+                                <div class="modal-footer">
+                                    <div class="col-md-12">
+
+
+                                        <div class="row">
+                                            
+
+                                            <div class="col-md-3 col-12">
+                                            </div>
+
+
+
+
+                                            <div class="col-md-7 col-12 text-end">
+                                                <h4>Total Selected Amount : </h4>
+                                            </div>
+
+                                            <div class="col-md-2 col-12">
+                                                <input type="text" id="TotalAmountReferance" class="form-control disabled" />
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                }
+            </div>
+
+
+            @section scripts{
+
+
+            <script>
+
+                var isMultiCurrency = '@HttpContextAccessor.HttpContext.Session.GetInt32("isMultiCurrency").ToString()';
+                if (isMultiCurrency == "0")
+                {
+                  $("#divcurrencyid").hide();
+                  $("#divcurrencyrate").hide();
+                }
+
+
+                    function validateAndSave() {                      
+                        var AccountPayId = $("#CreditAccountId").val();
+                        var supplierId = $("#SupplierId").val();                     
+                        var customerId = $("#CustomerId").val();                     
+                        var type = "@ViewBag.Type";
+
+                        if ((type !== "Supplier" || supplierId) && (type !== "Customer" || customerId) && AccountPayId) {
+                            $("#amountValidationMessage").hide();
+                            
+                            $("#accountPayTypeValidationMessage").hide();
+                            $("#supplierIdValidationMessage").hide();
+                            
+                            $("#purchaseIdValidationMessage").hide();
+                            ConfirmDialog('Do you want to save ?', function () {
+                                SaveTransactionModel();
+                            });
+                        } else {                          
+                            if (amount <= 0) {
+                                $("#amountValidationMessage").show().text("Amount must be greater than 0"); // Show the amount validation message
+                            } else {
+                                $("#amountValidationMessage").hide(); // Hide the amount validation message
+                            }
+
+                            if (!AccountPayId) {
+                                $("#accountPayTypeValidationMessage").show().text("Payment/Received Head must be selected"); // Show the account head validation message
+                            } else {
+                                $("#accountPayTypeValidationMessage").hide(); // Hide the account head validation message
+                            }
+
+                            if (type === "Supplier" && !supplierId) {
+                                $("#supplierIdValidationMessage").show().text("Supplier must be selected"); // Show the account head validation message
+                            } else {
+                                $("#supplierIdValidationMessage").hide(); // Hide the account head validation message
+                            }
+
+                            if (type === "Customer" && !customerId) {
+                                $("#customerIdValidationMessage").show().text("Customer must be selected"); // Show the account head validation message
+                            } else {
+                                $("#customerIdValidationMessage").hide(); // Hide the account head validation message
+                            }
+                        }
+                    }
+
+                    function ConfirmDialog(message, callback) {
+                        // Set the message in the modal
+                        $('#confirmModal .modal-body p').text(message);
+
+                        // Open the Bootstrap modal
+                        $('#confirmModal').modal('show');
+
+                        // Handle Yes button click
+                        $('#confirmYesBtn').on('click', function () {
+                            // Close the Bootstrap modal
+                            $('#confirmModal').modal('hide');
+
+                            // Execute the callback function if it's a function
+                            if (typeof callback === 'function') {
+                                callback();
+                            }
+                        });
+
+                        // Handle modal close event
+                        $('#confirmModal').on('hidden.bs.modal', function () {
+                            // Clean up event handlers
+                            $('#confirmYesBtn').off('click');
+                            $('#confirmModal').off('hidden.bs.modal');
+
+
+                        });
+                    }
+
+                // function ConfirmDialog(message) {
+                //     $('<div></div>').appendTo('body')
+                //         .html('<div><h6>' + message + '?</h6></div>')
+                //         .dialog({
+                //             modal: true,
+                //             title: 'Save / Update message',
+                //             zIndex: 10000,
+                //             autoOpen: true,
+                //             width: 'auto',
+                //             resizable: false,
+                //             buttons: {
+                //                 Yes: function () {
+
+                //                     $(this).dialog("close");
+                //                     $("#AddTransactionDetails").prop("disabled", true);
+                //                     SaveTransactionModel();
+                //                 },
+                //                 No: function () {
+
+                //                     $(this).dialog("close");
+
+                //                 }
+                //             },
+                //             close: function (event, ui) {
+                //                 $(this).remove();
+                //             }
+                //         });
+                // };
+
+
+                    $(document).ready(function () {
+                        // Bind a click event to the "Adv. Payment" button
+                        $('#btnPayment').click(function () {
+                            // Get the DataTable instance
+                            var table = $('#tbltransactionlist').DataTable();
+
+                            var currentDate = getCurrentDateFormatted();                        
+
+                            // Create an array for the row data
+                            var rowData = [
+                                null, // TransactionId
+                                '0', // Id
+                                'Purchase', // DocType
+                                'Advance', // RefCode
+                                currentDate, // RefDate
+                                '', // RefId
+                                'Supplier', // RefName
+                                0,  // Amount (use 0 instead of empty string)
+                                0,  // Discount (use 0 instead of empty string)
+                                0,  // VAT (use 0 instead of empty string)
+                                0,  // AIT (use 0 instead of empty string)
+                                0,  // NetAmount (use 0 instead of empty string)
+                                0,  // Rem. Due
+                                '',  // Action
+                                2
+                            ];
+
+                            // Add the row data to the table
+                            table.row.add(rowData).draw(false);
+                        });
+                    });
+
+
+
+                    function getCurrentDateFormatted() {
+                        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                        var today = new Date();
+                        var day = today.getDate();
+                        var month = today.getMonth();
+                        var year = today.getFullYear().toString().substr(-2); // Get last two digits of the year
+                        return day + "-" + months[month] + "-" + year;
+                    }
+
+
+                    function AutoSelectInvoice(BalanceAmount) {
+
+
+                        var BalanceAmount = parseFloat($('#TotalCollection').val());
+                        var tblcollectiontable = $('#tblreferance').DataTable();
+
+                        tblcollectiontable.rows().every(function (rowIdx, tableLoop, rowLoop) {
+                            //this.select ();
+                            //console.log(this.data()[3]);
+                            if (parseFloat(this.data()[7]) <= BalanceAmount) {
+                                BalanceAmount = BalanceAmount - parseFloat(this.data()[7]);
+                                console.log(BalanceAmount);
+                                this.cell(rowIdx, 14).data(this.data()[7]);
+                                this.select();
+                            }
+                            else if ((parseFloat(this.data()[7]) > BalanceAmount) && (BalanceAmount > 0)) {
+                                this.cell(rowIdx, 14).data(BalanceAmount);
+                                BalanceAmount = BalanceAmount - parseFloat(this.data()[7]);
+                                console.log(BalanceAmount);
+
+
+                                this.select();
+                            }
+
+                            //else
+                            //{
+                            //    //this.select();
+                            //    //return false;
+                            //}
+                            //else
+                            //{
+
+                            //}
+                        });
+
+                    }
+
+                $('#exampleModal').on('shown.bs.modal', function (e) {
+                    $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+                });
+
+
+                var antiForgeryToken;
+                antiForgeryToken = $("input[name='Dominate_ANTIFORZERY']").val();
+
+
+                $('#TransactionAmount').attr("disabled", true);
+                $('#TotalAmountReferance').attr("disabled", true);
+
+
+                function TransactionModel_delete() {
+
+                    var Id = $("#Id").val();
+
+
+                    $.ajax({
+
+                        url: '@Url.Action("Delete", "Admin")',
+                        //url: '@Url.Action("Delete")',
+                        data: JSON.stringify({ id: Id }), //use id here
+                        //data: JSON.stringify(salesmain),
+                        type: 'POST',
+                        async: 'false',
+                        //headers: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                        contentType: 'application/json;',
+                        dataType: 'json',
+                        success: function (result) {
+                            if (result.Success == "1") {
+                                customFile('3', result.ex);
+                                window.setTimeout(function () {
+                                    // Move to a new location or you can do something else
+                                    window.location.href = '@Url.Action("TransactionList", "Admin")';
+                                }, 500);
+                            }
+                            else {
+                                toastr.error(result.ex);
+                            }
+                        }
+                    });
+                }
+
+
+                var tblRefList;
+                var tbltransactionlist;
+                // select2 by shahinur
+                    $("#CreditAccountId,#CustomerId, #SupplierId").select2({
+                        theme: 'bootstrap-5'
+                    });
+             
+                //$("#DebitAccountId").select2();
+                //$("select").select2({
+                //    theme: "bootstrap4",
+                //});
+
+
+
+
+
+                function getReferance() {
+
+
+                    var CustomerId = $("#CustomerId option:selected").val();
+                    var SupplierId = $("#SupplierId option:selected").val();
+                    //console.log(CustomerId);
+                    //console.log(SupplierId);
+
+
+                    if (CustomerId == "")
+                    {
+                        toastr.error("Please Select Customer First.");
+                        return true;
+                    }
+
+                    if (SupplierId == "")
+                    {
+                        toastr.error("Please Select Supplier First.");
+                        return true;
+
+                    }
+
+
+
+                    $.ajax({
+                        type: 'GET',
+                        url: '@Url.Action("GetRefDetails", "Admin")',
+                        //dataType: 'json',
+                        contentType: 'application/json;',
+                        dataType: 'json',
+                        //async: 'false',
+                       // headers: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                        data: { CustomerId: CustomerId, SupplierId: SupplierId },
+                        success: function (result) {
+
+                            if (result.success == "1") {
+                                if ($.fn.DataTable.isDataTable('#tblreferance')) {
+                                    tblRefList.clear().draw();
+                                }
+
+                                var d = result.data;
+                                //console.log(d);
+                                for (var i = 0; i < d.length; i++) {
+                                                   //console.log(d[i]);
+                                    $('#tblreferance').dataTable().fnAddData([
+                                        d[i].TransactionId,
+                                        d[i].Id,
+                                        d[i].DocType,
+                                        d[i].RefCode,
+                                        d[i].RefDate,
+                                        d[i].RefId,
+                                        d[i].RefName,
+                                        d[i].Amount,
+                                        d[i].Discount,
+                                        d[i].VAT,
+                                        d[i].AIT,
+                                        d[i].NetAmount,
+                                        0,
+                                        "",
+                                        d[i].PaymentType,
+                                    ]);
+                                }
+                                //if (CustomerId > 0) {
+                                //    $('#tblreferance').dataTable().fnAddData([
+                                //        0,
+                                //        0,
+                                //        "Sales",
+                                //        "Prev. Due",
+                                //        "",
+                                //        null,
+                                //        $("#CustomerId option:selected").text(),
+                                //        0,
+                                //        0,
+                                //        0,
+                                //        0,
+                                //        ""
+                                //    ]);
+                                //}
+
+                                //    if (SupplierId > 0) {
+                                //    $('#tblreferance').dataTable().fnAddData([
+                                //        0,
+                                //        0,
+                                //        "Purchase",
+                                //        "Prev. Due",
+                                //        "",
+                                //        null,
+                                //         $("#SupplierId option:selected").text(),
+                                //        0,
+                                //        0,
+                                //        0,
+                                //        0,
+                                //        ""
+                                //    ]);
+                                //}
+
+
+                               $("#CustomerId").select2({disabled:'readonly'});
+                             
+
+                                $("#viewmod").click();
+                                
+
+                                toastr.success('Data loaded in memory');
+
+                                //TotalLoadAmountReferance();
+                                //TotalLoadAmount();
+
+                                    //$("#mod").trigger('click');
+                                }
+                                else {
+                                    alert(result.ex);
+                                }
+                            }
+                        });
+
+                };
+
+
+                function ClearData() {
+                    $("#Id").val('');
+                    $("#TransactionCode").val('');
+                    $("#Description").val('');
+                }
+
+                function SaveTransactionModel() {
+
+                    //var d = parseFloat($("#TransactionAmount").val());
+                    //if (d > 15) {
+                    //    $("#TransactionAmount").removeClass(" yellow");
+                    //    $("#TransactionAmount").addClass("important red");
+                    //    $("#TransactionAmount").css({ 'color': 'yellow', 'font-size': '150%' });
+                    //    toastr.error('Load qty must not be greter than 15 metric ton');
+                    //    return true;
+                    //}
+                    //else {
+                    //    $("#TransactionAmount").removeClass("important red");
+                    //    $("#TransactionAmount").addClass(" yellow");
+                    //    $("#TransactionAmount").css({ 'color': 'green', 'font-size': '100%' });
+                    //}
+
+
+                    $('select').removeAttr('disabled');
+
+
+                    if (!$("#myform")) {
+                        toastr.error('Please Fill Up All Necessary Information Correctly.');
+                        $("html, body").animate({ scrollTop: 0 }, 500);
+                        $("#AddTransactionDetails").prop("disabled", false);
+                        return true;
+                    }
+
+
+                    var TransactionSubData = {
+                        "Id": 0,
+                        "TransactionId": "",
+                        "SalesId": "",
+                        "PurchaseId": "",
+                        "Amount": 0.00,
+                        "Discount": 0.00,
+                        "VAT": 0.00,
+                        "AIT": 0.00,
+                        "NetAmount": 0.00,
+                        "ComId":"",
+                        "LuserId":"",
+                            "PaymentType": "0"
+                    };
+
+                    var TransactionModel = {
+                        Id: "",
+                        TransactionCode: "",
+                        TransactionType: "",
+                        TransactionCategory: "",
+
+
+                        InputDate: "",
+                        AccountId: "",
+                        DebitAccountId: "",
+
+                        Description: "",
+                        CurrencyId: "",
+                        CurrencyRate: 0.00,
+
+
+                        TransactionAmount: 0.00,
+                        DiscountAmount: 0.00,
+                        VATAmount: 0.00,
+                        AITAmount: 0.00,
+
+
+                        //isPost:false,
+                        CreditAccountId:null,
+                        CustomerId:null,
+                        SupplierId:null,
+                        PurchaseId:null,
+                        SalesId:null,
+
+
+                        TransactionDetails: []
+
+                    };
+
+
+                    TransactionModel.Id = $("#Id").val();
+                    TransactionModel.TransactionCode = $("#TransactionCode").val();
+                    TransactionModel.TransactionType = $("#TransactionType").val();
+                    TransactionModel.TransactionCategory = $("#TransactionCategory").val();
+
+                    TransactionModel.InputDate = $("#InputDate").val();
+                    //TransactionModel.AccountId = $("#AccountId option:selected").val();
+                    TransactionModel.DebitAccountId = $("#DebitAccountId option:selected").val();
+                    TransactionModel.CreditAccountId = $("#CreditAccountId option:selected").val();
+                    TransactionModel.CustomerId = $("#CustomerId option:selected").val();
+                    TransactionModel.SupplierId = $("#SupplierId option:selected").val();
+
+
+
+                    //TransactionModel.LuserId = $("#LuserId").val();//'@HttpContextAccessor.HttpContext.Session.GetString("LuserId")';
+                    //TransactionModel.ComId = $("#ComId").val();//'@HttpContextAccessor.HttpContext.Session.GetString("ComId")';
+                    TransactionModel.CreateDate = $("#CreateDate").val();
+
+                    TransactionModel.CurrencyId = $("#CurrencyId").val();
+                    TransactionModel.CurrencyRate = $("#CurrencyRate").val();
+                    TransactionModel.Description = $("#Description").val();
+                    TransactionModel.TransactionAmount = $("#TransactionAmount").val();
+                    TransactionModel.DiscountAmount = $("#DiscountAmount").val();
+                    TransactionModel.VATAmount = $("#VATAmount").val();
+                    TransactionModel.AITAmount = $("#AITAmount").val();
+
+
+
+                        
+                    var oTablesubdatacheck = $('#tbltransactionlist').dataTable().fnGetData();
+
+                    if (oTablesubdatacheck.length == 0) {
+                        alert("Please Fill Necessary Data.");
+                        return;
+                    }
+
+                    if ($.fn.DataTable.isDataTable('#tbltransactionlist')) {
+                        var rows = $("#tbltransactionlist").dataTable().fnGetNodes();
+                        //var oTablevouchrSub = $('#tbltransactionlist').dataTable().fnGetData();
+
+                        //var data_AccId = tblVouchersub.column('AccId:name').data();
+
+                        //console.log(rows);
+
+                        var DeliveryReferanceIds = tbltransactionlist.column('TransactionId:name').data();
+                        ////console.log(DeliveryReferanceIds);
+                        ////alert(DeliveryReferanceIds.length)
+                        var TransactionModelSubIds = tbltransactionlist.column('Id:name').data();
+                        var TransactionModelPaymentTypes = tbltransactionlist.column('PaymentType:name').data();
+                        var TransactionModelSubRefIds = tbltransactionlist.column('ReferanceId:name').data();
+
+                        //console.log(TransactionModelSubRefIds);
+
+                        //var Truckloadnetamounts = tbltransactionlist.column('Truckloadnetamount:name').data();
+                        ////var Truckloadnetamounts = rows[i].cells[8].children[0].value | 0;
+
+                        for (var i = 0; i < DeliveryReferanceIds.length; i++) {
+
+                            TransactionSubData.TransactionId = $("#Id").val();
+                            TransactionSubData.Id = TransactionModelSubIds[i];
+
+                            //console.log($.trim(rows[i].cells[0].innerHTML.replace(/[\$,]/g, '')));
+                            if ($.trim(rows[i].cells[0].innerHTML.replace(/[\$,]/g, '')) == "Sales")
+                            {
+                                TransactionSubData.SalesId = TransactionModelSubRefIds[i];
+                            }
+                            if ($.trim(rows[i].cells[0].innerHTML.replace(/[\$,]/g, '')) == "Purchase")
+                            {
+                                TransactionSubData.PurchaseId = TransactionModelSubRefIds[i];
+                            }
+
+                            //TransactionSubData.Amount = rows[i].cells[6].children[0].value.replace(/[\$,]/g, '');
+                            TransactionSubData.Discount = rows[i].cells[5].children[0].value.replace(/[\$,]/g, '');
+                            TransactionSubData.VAT = rows[i].cells[6].children[0].value.replace(/[\$,]/g, '');
+                            TransactionSubData.AIT = rows[i].cells[7].children[0].value.replace(/[\$,]/g, '');
+
+                            TransactionSubData.NetAmount = rows[i].cells[8].children[0].value.replace(/[\$,]/g, '');
+
+                            TransactionSubData.ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId")';
+                            TransactionSubData.LuserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId")';
+                                TransactionSubData.PaymentType = TransactionModelPaymentTypes[i];
+                            TransactionModel.TransactionDetails.push(TransactionSubData);
+
+
+
+                               TransactionSubData = {
+                                    "Id": 0,
+                                    "TransactionId": "",
+                                    "SalesId": "",
+                                    "PurchaseId": "",
+                                    "Amount": 0.00,
+                                    "Discount": 0.00,
+                                    "VAT": 0.00,
+                                    "AIT": 0.00,
+                                    "NetAmount": 0.00,
+                                    "ComId":"",
+                                    "LuserId": "",
+                                    "PaymentType": "0"
+                                };
+
+                        }
+                        //console.log(TransactionModel);
+                        //alert('Wait');
+                    }
+                      
+
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("AddTransaction", "Admin")',
+                        dataType: 'json',
+                        async: 'false',
+                       headers: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                        data: { model: TransactionModel },
+                        success: function (result) {
+                            if (result.Success == "1") {
+
+                                toastr.success('Data Save Successfully');
+                                tblRefList.clear();
+                                ClearData();
+                                tbltransactionlist.clear();
+                                tbltransactionlist.draw();
+                                //alert('found');
+
+                                console.log(result.Id);
+
+
+
+                                 var transactionidprint = result.Id;
+
+
+                                window.setTimeout(function () {
+                                    // Move to a new location or you can do something else
+
+                                    //alert(transactionidprint);
+
+                                    //var url = '@Url.Action("Print", "Admin")';
+                                    //window.open(url, '_blank')
+
+
+                                    var urllink = '@Url.Action("TransactionVoucherViewReport", "Admin", new { TransactionId = "xxxx"})'.replace("xxxx", transactionidprint);
+
+                                    //alert(urllink);
+
+                                    //var url = '@Url.Action("Print", "Admin")?id=' + transactionidprint;
+                                    //alert(urllink);
+
+                                    window.open(urllink, '_blank');
+                                }, 500);
+
+
+                                //alert($("#TransactionId").val());
+                                //if ($('#edit').length > 0) {
+                                if ( $("#TransactionId").val() > 0) {
+
+                                    window.location.href = '@Url.Action("TransactionList", "Admin")';
+                                }
+                                else
+                                {
+                                var viewbagdata = '@ViewBag.Type';
+                                var urllink = '@Url.Action("AddTransactionDetails", "Admin",new { Type = "xxxx"})'.replace("xxxx", viewbagdata);
+                                window.open(urllink, '_self');
+                                }
+                               
+
+
+                                getReferance();
+
+                                TotalLoadAmountReferance();
+                                TotalLoadAmount();
+
+                                $("#AddTransactionDetails").prop("disabled", false);
+
+
+
+                                $("#TransactionAmount").val(0);//---fahad
+                                $(".ttlloadamountreferance").text(0);//---fahad
+
+
+                                
+
+                                //alert(result.TransactionCode);
+                                $("#TransactionCode").val(result.TransactionCode);
+                                $("#Description").val(result.Description);
+
+
+                            }
+                            else {
+                                alert(result.ex);
+                            }
+                        },
+                        error: function (ex) {
+                            alert('error');
+                        }
+                    });
+
+                    $('#TransactionAmount').attr("disabled", true);
+
+
+                };
+
+                $('#tbltransactionlist').on('keyup', '.NetAmount , .VAT , .AIT , .Discount'  , function () {
+                    TotalLoadAmount();
+                });
+
+
+                //$('#tbltransactionlist').on('keyup', ".NetAmount , .Discount , .VAT  , .AIT ", TotalLoadAmount()); //tbltransactionlist
+
+
+
+                function TotalLoadAmount() {
+
+
+                    //var abcdef = $('#tblreferance').DataTable();
+
+                    //var $loadnetamount;
+
+                    //var totalloadnetamount = 0;
+
+                    //var oTable = $("#tbltransactionlist").dataTable().fnGetData();
+                    var rows = $("#tbltransactionlist").dataTable().fnGetNodes();
+                    //console.log(rows);
+
+                     let $loadamount = 0.00;
+                     let $loaddiscountamount = 0.00;
+                     let $loadvatamount = 0.00;
+                     let $loadaitamount = 0.00;
+
+                     let $loadnetamount = 0.00;
+                     let $loadremdueamount = 0.00;
+
+                     let $totalloadamount = 0.00;
+                     let $totalloaddiscountamount= 0.00;
+                     let $totalloadvatamount= 0.00;
+                     let $totalloadaitamount= 0.00;
+
+                     let $totalloadnetamount= 0.00;
+                     let $totalloadremdueamount= 0.00;
+
+
+                    for (var i = 0; i < rows.length; i++) {
+
+
+
+                        $loadamount = rows[i].cells[4].innerHTML.replace(/[\$,]/g, '');
+                        //alert($loadamount);
+
+
+                        $loaddiscountamount = rows[i].cells[5].children[0].value.replace(/[\$,]/g, '');
+                        $loadvatamount = rows[i].cells[6].children[0].value.replace(/[\$,]/g, '');
+                        $loadaitamount = rows[i].cells[7].children[0].value.replace(/[\$,]/g, '');
+
+                        $loadnetamount = rows[i].cells[8].children[0].value.replace(/[\$,]/g, '');
+                        rows[i].cells[9].children[0].value = $loadamount  - $loadnetamount - $loaddiscountamount - $loadvatamount - $loadaitamount;
+                        $loadremdueamount = rows[i].cells[9].children[0].value.replace(/[\$,]/g, '');
+
+
+
+                        //alert($loaddiscountamount);
+                        // alert($loadnetamount);
+                        //alert($loadremdueamount);
+
+
+                        //var k=loadnetamount.toFixed(2);
+
+
+                        $totalloaddiscountamount += parseFloat($loaddiscountamount);
+                        $totalloadvatamount += parseFloat($loadvatamount);
+                        $totalloadaitamount += parseFloat($loadaitamount);
+
+                        $totalloadamount += parseFloat($loadamount);
+                        $totalloadnetamount += parseFloat($loadnetamount);
+                        $totalloadremdueamount += parseFloat($loadremdueamount);
+
+
+                        //alert($totalloaddiscountamount);
+                        //alert($totalloadamount);
+                        //alert($totalloadnetamount);
+                        //alert($totalloadremdueamount);
+
+
+
+                    }
+
+
+
+
+                    $(".ttlamount").val($totalloadamount.toLocaleString());
+                    $(".ttlamount").text($totalloadamount.toLocaleString());
+
+                    $(".ttldiscount").val($totalloaddiscountamount.toLocaleString());
+                    $(".ttldiscount").text($totalloaddiscountamount.toLocaleString());
+
+                    $(".ttlvat").val($totalloadvatamount.toLocaleString());
+                    $(".ttlvat").text($totalloadvatamount.toLocaleString());
+
+                    $(".ttlait").val($totalloadaitamount.toLocaleString());
+                    $(".ttlait").text($totalloadaitamount.toLocaleString());
+
+                    $(".ttlnetamount").val($totalloadnetamount.toLocaleString());
+                    $(".ttlnetamount").text($totalloadnetamount.toLocaleString());
+
+                    $(".ttlremdue").val($totalloadremdueamount.toLocaleString());
+                    $(".ttlremdue").text($totalloadremdueamount.toLocaleString());
+
+
+
+                    //$(".ttlloadnetamount").val(totalloadnetamount.toLocaleString());
+                    //$(".ttlloadnetamount").text(totalloadnetamount.toLocaleString());
+
+                    $("#TransactionAmount").val($totalloadnetamount.toLocaleString());//---fahad
+                    $("#TransactionAmount").text($totalloadnetamount.toLocaleString());//---fahad
+
+                    
+                    $("#DiscountAmount").val($totalloaddiscountamount);//---fahad
+                    $("#DiscountAmount").text($totalloaddiscountamount);//---fahad
+
+                    $("#VATAmount").val($totalloadvatamount);//---fahad
+                    $("#VATAmount").text($totalloadvatamount);//---fahad
+
+
+                    $("#AITAmount").val($totalloadaitamount);//---fahad
+                    $("#AITAmount").text($totalloadaitamount);//---fahad
+
+                    //var d =parseFloat( totalloadnetamount.toLocaleString());
+                    //if (d > 15) {
+                    //    $("#TransactionAmount").removeClass(" yellow");
+                    //    $("#TransactionAmount").addClass("important red");
+                    //    $("#TransactionAmount").css({ 'color': 'yellow', 'font-size': '150%' });
+                    //    toastr.error('Load qty must not be greter than 15 metric ton');
+                    //}
+                    //else {
+                    //    $("#TransactionAmount").removeClass("important red");
+                    //    $("#TransactionAmount").addClass(" yellow");
+                    //    $("#TransactionAmount").css({ 'color': 'green', 'font-size': '100%' });
+                    //}
+
+
+                };
+
+                function TotalLoadAmountReferance() {
+
+
+                    var totalloadamountreferance = 0;
+
+                    //var oTable = $("#tbltransactionlist").dataTable().fnGetData();
+                    var rows = $("#tblreferance").dataTable().fnGetNodes();
+                    //console.log(rows);
+
+                    var abcdef = $('#tblreferance').DataTable();
+
+                    var $loadnetamount;
+                    var xyz = $('#TransactionAmount').val();
+
+                    for (var i = 0; i < rows.length; i++) {
+                        //alert('for loop');
+                        //var $loadnetamount = rows[i].cells[6].children[0].valueAsNumber || 0.00;
+                        if ($(rows[i]).hasClass('selected')) {
+                           // aReturn.push(aTrs[i]);
+
+                            //console.log(rows[i]);
+                            var x = document.getElementById("tblreferance").rows[i+1].cells[4].innerText;
+                            //console.log(x);
+                            $loadnetamount = x;//rows[i].val();// .cells[6].children[0].value.replace(/[\$,]/g, '');
+                            totalloadamountreferance += parseFloat($loadnetamount);
+
+
+                        }
+
+
+                    }
+                    totalloadamountreferance = totalloadamountreferance + parseFloat(xyz);
+
+
+                    $(".ttlloadamountreferance").val(totalloadamountreferance.toLocaleString());
+                    $(".ttlloadamountreferance").text(totalloadamountreferance.toLocaleString());
+
+                    $("#TotalAmountReferance").val(totalloadamountreferance.toLocaleString());//---fahad
+                    $("#TotalAmountReferance").text(totalloadamountreferance.toLocaleString());//---fahad
+
+
+
+                    //var d = parseFloat(totalloadamountreferance.toLocaleString());
+                    //if (d > 15) {
+                    //    $("#TotalAmountReferance").removeClass(" yellow");
+                    //    $("#TotalAmountReferance").addClass("important red");
+                    //    $("#TotalAmountReferance").css({ 'color': 'yellow', 'font-size': '150%' });
+                    //    toastr.error('Load qty must not be greter than 15 metric ton');
+                    //}
+                    //else {
+                    //    $("#TotalAmountReferance").removeClass("important red");
+                    //    $("#TotalAmountReferance").addClass(" yellow");
+                    //    $("#TotalAmountReferance").css({ 'color': 'green', 'font-size': '100%' });
+                    //}
+
+                    //tblreferance.draw();
+
+                };
+
+
+                $(document).ready(function () {
+
+
+
+
+
+
+
+                    tblRefList = $("#tblreferance").DataTable({
+
+                        "aoColumns": [
+
+                            { name: "TransactionId", "sClass": "TransactionId", "visible": false },
+                            { name: "Id", "sClass": "Id", "visible": false },
+                            { name: "DocType", "sClass": "DocType", "visible": true },
+                            { name: "ReferanceCode", "sClass": "ReferanceCode", "visible": true },
+                            { name: "ReferanceDate", "sClass": "ReferanceDate", "visible": true },
+                            { name: "ReferanceId", "sClass": "ReferanceId", "visible": false },
+                            { name: "ReferanceName", "sClass": "ReferanceName", "visible": true },
+                            { name: "RefAmount", "sClass": "RefAmount text-right", "visible": true },
+                            { name: "Discounta", "sClass": "Discounta text-center", "visible": false },
+                            { name: "VATa", "sClass": "VATa text-center", "visible": false },
+                            { name: "AITa", "sClass": "AITa text-center", "visible": false },
+                            { name: "NetAmount", "sClass": "NetAmount text-center", "visible": false },
+                            { name: "RemDueAmount", "sClass": "RemDueAmount text-center", "visible": false },
+                            { name: "IsDelete", "sClass": "Action", "visible": false },
+                                { name: "PaymentType", "sClass": "PaymentType", "visible": false }
+                        ],
+
+
+
+                        //rowCallback: function (row) {
+                        //    $(row).addClass('txtMultmasterlcdetails');
+                        //},
+                        select: {
+                            style: 'multi',
+                            selector: 'td:nth-child(2),td:nth-child(3),td:nth-child(4),td:nth-child(5),td:nth-child(6)'
+                        },
+
+                        buttons: [
+                            {
+                                extend: "selectAll",
+                                    className: "ms-2 btn btn-sm btn-primary bi bi-check2",
+                                text: '',
+                            },
+                            {
+                                extend: "selectNone",
+                                    className: "btn btn-sm btn-warning bi bi-clock",
+                                text: '',
+                            },
+                            {
+                            extend: "selectRows",
+                            className: "btn-sm btn-success bi bi-plus",
+                            text: '',
+                            action: function (e, sourceTable, button, config) {
+                                var total_attached_value = 0;//$("#TransactionAmount").val();
+                                //var total_readyto_attached_value = $("#TotalAmountReferance").val(); 
+
+                                //var abc = parseFloat(parseFloat(total_attached_value) + parseFloat(total_readyto_attached_value));
+                                //alert(abc);
+
+
+                                //if (abc <= 15) {
+
+                                    var selectedRows = sourceTable.rows(".selected");
+                                    var mData = selectedRows.data();
+
+                                    selectedRows.remove().draw();
+                                    targetTable = $("#tbltransactionlist").DataTable();
+
+
+                                    var rowCount = targetTable
+                                        .column(0)
+                                        .data()
+                                        .length;
+
+                                    $.each(mData, function (idx, item) {
+
+                                            console.log(idx);
+                                            console.log(item);
+                                            item[13] = idx + 1 + rowCount;
+                                            item[11] = item[14];
+
+                                         
+                                        var reporttype = $("input[name=RptType]:checked").val();
+                                        
+
+                                        if (reporttype == 'Discount') {
+                                        item[8] = item[9];
+                                        item[9] = 0;
+                                        }
+                                 
+
+                                        //alert(item[24]);
+                                        targetTable.row.add(JSON.parse(JSON.stringify(
+
+                                            item
+                                        )));
+                                      
+                                        //alert('data added');
+
+                                    })
+
+                                    targetTable.draw();
+                                    TotalLoadAmount();
+                                    ////multInputsProduct();
+                                //}
+                            }
+                        }],
+                      initComplete: function () {
+
+                            $("#tblreferance button").on("click", function (evt) {
+
+                                var t1 = $("#tblreferance").DataTable();
+                                var t2 = $("#tbltransactionlist").DataTable();
+                                var tr = $(this).closest("tr");
+                                var row = t1.row(tr);
+                                //console.log(row);
+                                var data = JSON.parse(JSON.stringify(row.data()));
+                                //alert(data[0]);
+                                row.remove().draw();
+                                t2.row.add(data).draw();
+
+                                //multInputsProduct();
+                            });
+                        },
+                        //"bFilter": true,
+                        "paging": false,
+                         
+                        //"order": false,
+                        "orderable":false,
+                        //"retrieve": true,
+                        "iDisplayLength": 10,
+                        "lengthMenu": [[5, 10, 20, 50, -1], [5, 10, 20, 50, "All"]],
+                        "scrollX": true,
+                        "scrollY": 400,
+                        scrollCollapse: true,
+                        //"order": [2, 'asc'],
+                        //"oLanguage": { "sZeroRecords": "", "sEmptyTable": "" },
+                        //dom: 'tBlip' //fahad
+                        //dom: '<"top"fiB>rt',
+                         dom: '<"top"fB>rt<"bottom"i><"clear">',
+                        "language": {
+                            sLengthMenu: " _MENU_",
+                            search: "",
+                            searchPlaceholder: "Search...",
+                         info: "Results: _PAGE_ of _PAGES_",
+                              //"sInfo": "Showing _START_ to _END_ of _TOTAL_ records",
+                          
+                        }
+                    });
+
+
+                    //tblRefList.MakeCellsEditable({
+                    //    "onUpdate": myCallbackFunction,
+                    //    "inputCss": 'my-input-class',
+                    //    "columns": [8],
+
+                    //    "inputTypes": [
+                    //        {
+                    //            "column": 8,
+                    //            "type": "text",
+                    //            "options": null
+                    //        }
+
+                    //    ]
+                    //});
+
+
+                    tblRefList
+                        .on('select', function (e, dt, type, indexes) {
+                            TotalLoadAmountReferance();
+                            TotalLoadAmount();
+                        })
+                        .on('deselect', function (e, dt, type, indexes) {
+                            TotalLoadAmountReferance();
+                            TotalLoadAmount();
+                        });
+
+
+                    //function myCallbackFunction(updatedCell, updatedRow, oldValue) {
+                    //    var total = 0;
+
+
+                    //    multInputslcdetails();
+                    //    console.log(total);
+
+                    //    console.log("The new value for the cell is: " + updatedCell.data());
+                    //    console.log("The old value for that cell was: " + oldValue);
+                    //    console.log("The values for each cell in that row are: " + updatedRow.data());
+                    //    console.log(updatedRow.index());
+
+
+                    //    var cell_balanceqty = tblRefList.cell(updatedRow.index(), 12);
+                    //    //alert(cell_balanceqty.data());
+
+
+                    //    if (updatedCell.data() > cell_balanceqty.data()) {
+                    //        alert('Wrong Input');
+                    //        console.log($(this).index());
+
+                    //        var cell = tblRefList.cell(updatedRow.index(), 8);
+                    //        cell.data(cell_balanceqty.data());
+
+
+                    //    }
+
+                    //    TotalLoadAmountReferance();
+                    //    TotalLoadAmount();
+
+                    //}
+
+
+                    function multInputslcdetails() {
+
+                        var totalloadamountreferance = 0;
+
+
+
+                        $("tr.selected").each(function () {
+
+
+                            {
+
+                                // get the values from this row:
+                                var $val1 = $('.loadamountreferance', this).text().replace(/[\$,]/g, '');
+
+
+                                totalloadamountreferance += parseFloat($val1);
+
+                                //totalvalue += parseFloat($val4);
+
+
+                            }
+                            //ttlqty += $val1;
+
+                        });
+
+                        //var x = totalvalue.toFixed(3);
+
+                        $(".ttlloadamountreferance").val(totalloadamountreferance.toLocaleString());
+                        $(".ttlloadamountreferance").text(totalloadamountreferance.toLocaleString());
+
+                        $("#TotalAmountReferance").val(totalloadamountreferance.toLocaleString());//---fahad
+                        $("#TotalAmountReferance").text(totalloadamountreferance.toLocaleString());//---fahad
+
+                        //var d = parseFloat(totalloadamountreferance.toLocaleString());
+                        //if (d > 15) {
+                        //    $("#TotalAmountReferance").removeClass(" yellow");
+                        //    $("#TotalAmountReferance").addClass("important red");
+                        //    $("#TotalAmountReferance").css({ 'color': 'yellow', 'font-size': '150%' });
+                        //    toastr.error('Load qty must not be greter than 15 metric ton');
+                        //}
+                        //else {
+                        //    $("#TotalAmountReferance").removeClass("important red");
+                        //    $("#TotalAmountReferance").addClass(" yellow");
+                        //    $("#TotalAmountReferance").css({ 'color': 'green', 'font-size': '100%' });
+                        //}
+
+
+
+                    };
+
+
+
+                    tbltransactionlist = $('#tbltransactionlist').DataTable({
+                        columns: [
+
+                            { name: "TransactionId", "sClass": "TransactionId", "visible": false },
+                            { name: "Id", "sClass": "Id", "visible": false },
+                            { name: "DocType", "sClass": "DocType", "visible": true },
+                            { name: "ReferanceCode", "sClass": "ReferanceCode", "visible": true },
+                            { name: "ReferanceDate", "sClass": "ReferanceDate", "visible": true },
+                            { name: "ReferanceId", "sClass": "ReferanceId", "visible": false },
+                            { name: "ReferanceName", "sClass": "ReferanceName", "visible": true },
+                            { name: "RefAmount", "sClass": "RefAmount text-right", "visible": true },
+                            { name: "Discount", "sClass": "Discount text-center", "visible": true },
+                            { name: "VAT", "sClass": "VAT text-center", "visible": true },
+                            { name: "AIT", "sClass": "AIT text-center", "visible": true },
+
+                            { name: "NetAmount", "sClass": "NetAmount text-center", "visible": true },
+                            { name: "RemDueAmount", "sClass": "RemDueAmount text-center", "visible": true },
+                            { name: "IsDelete", "sClass": "Action", "visible": false },
+                                { name: "PaymentType", "sClass": "PaymentType", "visible": false }
+                        
+                        ],
+                        //"tableTools": {
+                        //    "sRowSelector": "td:not(:first-child)"
+                        //},
+                        //dom: 'litpfB',
+                        dom: 'tBlip',//fahad
+                        //select: "multi",
+
+                        select: {
+                            style: 'multi',
+                            selector: 'td:nth-child(1),td:nth-child(2),td:nth-child(3),td:nth-child(4)'
+                        },
+
+                        columnDefs: [
+
+                            {
+
+                                render: function (data) {
+                                    return "<input type='number' data-val='true'  data-val-required='Please Fill Discount.' class='form-control form-control-sm discount text-center' value='" + data + "'/>"
+                                },
+                                "targets": 8
+                            },
+
+                            {
+
+                                render: function (data) {
+                                    return "<input type='number' data-val='true'  data-val-required='Please Fill VAT.' class='form-control form-control-sm vat text-center' value='" + data + "'/>"
+                                },
+                                "targets": 9
+                            },
+
+                            {
+
+                                render: function (data) {
+                                    return "<input type='number' data-val='true'  data-val-required='Please Fill AIT.' class='form-control form-control-sm ait text-center' value='" + data + "'/>"
+                                },
+                                "targets": 10
+                            },
+
+                            {
+
+                                render: function (data) {
+                                    return "<input type='number' data-val='true'  data-val-required='Please Fill Amount.' class='form-control form-control-sm amount text-center'  value='" + data + "'/>"
+                                },
+                                "targets": 11
+                            },
+
+                            {
+
+                                render: function (data) {
+                                    return "<input type='number' data-val='true'  data-val-required='Please Fill Amount.' class='form-control form-control-sm remamount text-center'  value='" + data + "' readonly=readonly/>"
+                                },
+                                "targets": 12
+                            }
+
+                        ],
+                        //AddTransactionDetailsdRow: function (row) {
+                        //    $(".datecell", row).datepicker(
+                        //        { dateFormat: 'dd-M-yy' }
+                        //        //$('#datepicker').datepicker({ dateFormat: 'dd-mm-yy' }).val();
+
+                        //    ).val();
+                        //},
+                        buttons: [{
+                            extend: "selectRows",
+                            text: 'Detach From Transaction',
+                            className:" btn-danger mb-1 mt-2",
+
+                            action: function (e, sourceTable, button, config) {
+
+                                var selectedRows = sourceTable.rows(".selected");
+                                var mData = selectedRows.data();
+                                selectedRows.remove().draw();
+                                targetTable = $("#tblreferance").DataTable();
+                                $.each(mData, function (idx, item) {
+                                    targetTable.row.add(JSON.parse(JSON.stringify(item)));
+                                })
+                                targetTable.draw();
+                                TotalLoadAmount();
+                                //multInputsProduct();
+                            }
+
+                        }],
+
+                        initComplete: function () {
+                            $("#tbltransactionlist button").on("click", function (evt) {
+
+                                var t1 = $("#tbltransactionlist").DataTable();
+                                var t2 = $("#tblreferance").DataTable();
+                                var tr = $(this).closest("tr");
+                                var row = t1.row(tr);
+
+                                if (row.data().length > 0 || row.data() != "undefined")
+                                {
+                                               //console.log(row);
+                                var data = JSON.parse(JSON.stringify(row.data()));
+                                //alert(data[0]);
+                                row.remove().draw();
+                                t2.row.add(data).draw();
+                                }
+
+
+                                //multInputsProduct();
+                            });
+
+
+
+                        },
+
+                        "bFilter": false,
+                        //"bSort": true,
+                        ordering :false,
+                        "bInfo": false,
+                        "async": false,
+                        "paging": false,
+                        "retrieve": true,
+                        //"iDisplayLength": 10,
+                        //"lengthMenu": [[5, 10, 20, 50, -1], [5, 10, 20, 50, "All"]],
+                        "scrollX": false,
+                        "scrollCollapse": true
+                        //rowCallback: function (row) {
+                        //    $(row).addClass('txtMultInventorySub');
+                        //}
+                        //,select: "multi"
+                    });
+
+                    TotalLoadAmount();
+
+
+                });
+            </script>
+            }
+        </div>
+
+    </div>
+</div>
+
+
+
+

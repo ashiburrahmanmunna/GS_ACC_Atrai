@@ -1,0 +1,433 @@
+﻿@* @model List<Atrai.Model.Core.Entity.UserRoleMenuView> *@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{ ViewData["Title"] = "AddMenuPermission";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; 
+}
+<style>
+/*    .list {
+        display: grid;
+        grid-template-columns: 180px 180px 180px 180px 180px;
+        width: 360px;
+        margin-left: 0;
+        padding-left: 0;
+        border: 1px solid rgb(0, 0, 0);
+        list-style-type: none;
+    }
+
+        .list li {
+            width: 180px;
+            border: 1px solid rgb(0, 0, 0);
+            box-sizing: border-box;
+        }
+
+            .list li span {
+                display: block;
+                padding: 6px 9px;
+                border: 1px solid rgb(0, 0, 0);
+            }
+
+                .list li span.category {
+                    font-weight: bold;
+                    text-align: center;
+                    text-transform: uppercase;
+                }*/
+
+    .row ul li {
+        list-style-type: none;
+    }
+
+    .list-group-item {
+        display: flex;
+        width: 80%;
+        justify-content: space-between;
+        flex-direction: row;
+        flex-flow: row wrap;
+        min-height: 3em;
+    }
+
+    .items {
+    }
+
+     .tabulator {
+        border-top: none !important;
+        border-bottom: none !important;
+        border-right: none !important;
+        border-left: none !important;
+    }
+
+        .tabulator .tabulator-footer {
+            border-top: 1px solid #dee2e6;
+        }
+
+
+    
+
+    .tabulator-cell {
+        color: black;
+    }
+
+    .tabulator .tabulator-header {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .tabulator .tabulator-footer .tabulator-calcs-holder {
+        border-top: none !important;
+        border-bottom: none !important;
+    }
+
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-calcs.tabulator-calcs-bottom {
+        border-top: none !important;
+    }
+    /*style written by shahinur*/
+    /*   .jsgrid-grid-body {
+            overflow: auto;
+        }*/
+
+    /*.tabulator-row .tabulator-cell {
+            overflow: visible;
+        }*/
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+        /* Add any other styles you need for the active cell */
+    }
+
+
+
+    .tabulator-row:nth-child(odd) .tabulator-cell {
+        border-right-color: #ced4da;
+    }
+
+    .tabulator-row:nth-child(even) .tabulator-cell {
+        border-right-color: #ced4da;
+    }
+
+
+    /*
+        .label-hover:hover {
+            background-color: #E9ECEF;
+            border-right: 50px solid #E9ECEF;
+        }*/
+
+
+    .tabulator .tabulator-header {
+        background-color: #ffffff;
+    }
+
+    /* .tabulator .tabulator-row {
+            background-color: #ffffff;
+        } */
+
+    /* .tabulator .tabulator-row:nth-child(even) {
+        background-color: #e9ecef; 
+    }
+
+    .tabulator .tabulator-row:nth-child(odd) {
+        background-color: #ffffff; 
+    } */  
+
+
+    .tabulator .tabulator-header .tabulator-col {
+        display: inline-flex;
+        position: relative;
+        box-sizing: border-box;
+        flex-direction: column;
+        justify-content: flex-start;
+        border-right: 1px solid #dee2e6;
+        background: #ffffff !important;
+        text-align: left;
+        vertical-align: bottom;
+        overflow: hidden;
+    }
+
+    /* Targeting the header cells on hover */
+    .tabulator .tabulator-header:hover {
+        background-color: #ffffff;
+        color: black;
+    }
+
+
+    
+
+    .tabulator .tabulator-footer {
+        background-color: #fff;
+        color: black;
+    }
+
+    .tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-calcs {
+        font-weight: 700;
+        background: #ffffff !important;
+    }
+
+    .tabulator .tabulator-header-filter input {
+        border: 0.5px solid #ced4da;
+    }
+
+    .tabulator-tableholder {
+    background-color: white;
+    }
+
+
+</style>
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>Menu Permission</h4>
+                    </div>
+
+                        @*@Html.HiddenFor(m => m.Id, new { @value = Model.Id })
+                        @Html.HiddenFor(m => m.CreateDate, new { @value = Model.CreateDate })
+                        @Html.HiddenFor(m => m.LuserId, new { @value = Model.LuserId })*@
+
+                            <div class="card-body">
+                
+                                    <div class="">
+                                       
+                                            <div class="row">
+                                                <div class="col-md-3 col-12 ">
+                                                    @Html.DropDownList("BusinessTypeId", new SelectList((IEnumerable<SelectListItem>)ViewBag.BusinessType, "Value", "Text"), "Select BusinessType",
+                                                        htmlAttributes: new { @class = "form-control", id = "BusinessTypeId" })
+                                                </div>
+                                                @*<div class="col-md-3 col-12 ">
+                                                    <label for="Role"> Role : </label>
+                                                    @Html.DropDownList("UserRoleId", new SelectList((IEnumerable<SelectListItem>)ViewBag.Role, "Value", "Text"), "Select User Role",
+                                                    htmlAttributes: new { @class = "form-control", id = "UserRoleId" })
+                                                </div>*@
+
+                                                <div class="col-md-1 col-12">
+                                                    <button type="button" class="btn btn-success btn-block  rounded-0" id="loadButton"> Load </button>
+                                                </div>
+
+
+                                            </div>
+                                        
+
+
+
+                                        
+
+                                            <div class="">
+                                                <div class="row">
+
+                                                    <div class="col-md-3 col-12 mt-2">
+
+                                                        <input type="checkbox" id="myCheckAll" /> Check All
+
+                                                        <br />
+                                                        <br />
+                                                    </div>
+
+                                                    <div class="col-md-2 col-12 mt-2">                                                     
+                                                        <button id="SaveMenu" type="button" class="btn btn-primary btn-block  rounded-0"> Save </button>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+
+                                           
+
+                                           
+                                            <input type="text" class="form-control col-md-3 w-25 mb-4" id="filter" value="" placeholder="Search"/>
+                                            <span id="filter-count"></span>
+
+                                             <div class="row display">
+                                                <div class="col-md-12">
+
+                                                    
+
+                                                </div>
+                                            </div> 
+                                        
+
+
+                                    </div>
+
+
+
+         
+
+               
+                    </div>
+                    <div id="example-table"></div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+@section scripts {
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#myCheckAll').click(function () {
+            var chk = $(this).is(':checked');
+            var cnt = $('input[type=checkbox]').length;
+            $('input[type=checkbox]').each(function () {
+                if (chk) {
+                    $(this).attr('checked', 'checked');
+                }
+                else {
+                    $(this).removeAttr('checked');
+                }
+            });
+        }); 
+
+
+    });
+
+
+
+        $(document).ready(function () {
+            $("#filter").keyup(function () {
+
+                // Retrieve the input field text and reset the count to zero
+                var filter = $(this).val(), count = 0;
+
+                // Loop through the comment list
+                $("#fahadmenulist ul li").each(function () {
+
+                    // If the list item does not contain the text phrase fade it out
+                    if ($(this).text().search(new RegExp(filter, "i")) < 0) {
+                        $(this).fadeOut();
+
+                        // Show the list item if the phrase matches and increase the count by 1
+                    } else {
+                        $(this).show();
+                        count++;
+                    }
+                });
+
+                // Update the count
+                var numberItems = count;
+                $("#filter-count").text("Search Count = " + count);
+            });
+        });
+
+
+        var parentTable;
+        
+         parentTable = new Tabulator("#example-table", {
+            layout: "fitColumns",
+            
+            columns: [
+                
+                
+                { 
+                    title: "SLNo", 
+                    field: "Id", 
+                    visible: true 
+                },
+                { 
+                    title: "MenuId", 
+                    field: "MenuId", 
+                    visible: false 
+                },
+                { 
+                    title: "Menu Group Name", 
+                    field: "MenuGroupName", 
+                    headerFilter: "input",
+                },
+                { 
+                    title: "Parent Name", 
+                    field: "ParentMenuName", 
+                    headerFilter: "input",
+                },
+                {
+                    title: "Permitted",
+                    field: "Permitted",
+                    hozAlign: "center",
+                    formatter: "tickCross",
+                    formatterParams: { crossElement: false },
+                    cellClick: function(e, cell) {
+                        // Toggle the isvisible property when the checkbox is clicked
+                        var rowData = cell.getRow().getData();
+                        rowData.Permitted = !rowData.Permitted;
+                        cell.getRow().update({ Permitted: rowData.Permitted });
+
+                        //parentTable.setSort("Permitted", "desc");
+                        
+                    },
+                },
+                { 
+                    title: "Menu Name", 
+                    field: "MenuName", 
+                    headerFilter: "input",
+                },
+                
+            ],
+            
+        });
+        
+
+         $("#loadButton").on("click", function () {
+            GetUserMenuList();
+        });
+
+
+        // Fetch menu list data via AJAX
+             function GetUserMenuList() {
+                 var BusinessTypeId = $("#BusinessTypeId").val();
+
+                $.ajax({
+                url:  '@Url.Action("GetMenuPermission", "Admin")' + '?BusinessTypeId=' + BusinessTypeId,
+                    method: "GET",
+                    success: function (data) {
+                        console.log(data);
+                        // Assuming data is an array of objects with the same structure as the columns
+                    parentTable.setData(data.data);
+                    
+
+                    },
+                });
+             }
+       
+
+           $("#SaveMenu").on("click", function () {
+                 GetSaveMenu();
+           });
+
+
+        function GetSaveMenu() {
+
+             var allData = parentTable.getData();
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AddMenuPermission", "Admin")', 
+                contentType: "application/json; charset=utf-8",
+                data:  JSON.stringify(allData),
+                success: function (response) {
+                    if (response.success === 2) {
+                        
+                         toastr.success(response.message);
+                          $(".toast-success").css("background-color", "green");
+                          $(".toast-success").css("color", "white");
+                          GetUserMenuList();
+                    } else {
+                        
+                        toastr.error("Error: " + response.message);
+                         $(".toast-error").css("background-color", "red");
+                         $(".toast-error").css("color", "white");
+                    }
+                },
+                error: function (error) {
+                    
+                      toastr.error("Error: " + error.statusText);
+                      $(".toast-error").css("background-color", "red");
+                      $(".toast-error").css("color", "white");
+                }
+            });
+        }
+
+    </Script> 
+    
+}

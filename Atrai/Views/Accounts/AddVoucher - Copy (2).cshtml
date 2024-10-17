@@ -1,0 +1,1741 @@
+﻿@using Microsoft.AspNetCore.Http
+@*@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery AntiForgery*@
+@inject IHttpContextAccessor HttpContextAccessor
+@*@model int*@
+@{
+    ViewData["Title"] = "Voucher Entry";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    var VoucherTypeId = ViewBag.VoucherTypeId;
+    var VoucherTypeName = ViewBag.VoucherTypeName;
+    var VoucherId = ViewBag.VoucherId;
+
+
+
+}
+
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        @*<div class="col-md-12 row mt-5" >*@
+
+        <div class="hiddenSector">
+            <div class="row">
+                <input type="hidden" id="CountryIdLocal" name="CountryIdLocal" value="" />
+                <input type="hidden" id="Id" name="Id" value="" />
+                <input type="hidden" id="VoucherSerialId" name="VoucherSerialId" value="" />
+                <input type="hidden" id="LuserId" name="LuserId" value="" />
+                <input type="hidden" id="ComId" name="ComId" value="" />
+                <input type="hidden" id="LuserIdUpdate" name="LuserIdUpdate" value="" />
+                <input type="hidden" id="CreateDate" name="CreateDate" value="" />
+                <input type="hidden" id="UpdateDate" name="UpdateDate" value="" />
+                <input type="hidden" id="isPosted" name="isPosted" value="" />
+                <input type="hidden" id="IsCash" name="IsCash" value="" />
+                <input type="hidden" id="LuserIdApprove" name="LuserIdApprove" value="" />
+                <input type="hidden" id="LuserIdCheck" name="LuserIdCheck" value="" />
+                <input type="hidden" id="vAmountInWords" name="vAmountInWords" value="" />
+            </div>
+
+        </div>
+
+
+        <div class="upperSection">
+            <div class="row">
+                <div class="col-md-1 col-4">
+                    <button type="button" class="btn text-center border" data-bs-toggle="modal" data-bs-target="#historyModal">
+                        <i class="bi bi-clock-history fw-bold"></i>
+                    </button>
+                    <!---Modal start-->
+                    <div class="modal fade modal-lg" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="historyModalLabel">Modal title</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+
+                                    <div class="card rounded-10">
+                                        <div id="jsClockHistory"></div>
+
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    @*<button type="button" class="btn btn-primary">Save changes</button>*@
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!---Modal ends-->
+
+                </div>
+
+                <div class="col-md-4 col-4">
+                    <button class="btn btn-primary" id="VoucherTypeName" style="width:100%" disabled>@VoucherTypeName</button>
+                    <input type="hidden" id="VoucherTypeId" name="" value="@VoucherTypeId" />
+                </div>
+
+@*                                <div class="col-md-4 col-4">
+                    <button class="btn btn-primary" id="VoucherTypeName" style="width:100%" disabled>Cash Payment</button>
+                    <input type="hidden" id="VoucherTypeId" name="" value="1" />
+                </div>*@
+                <div class="col-md-2 col-4">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            BDT
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><button class="dropdown-item">Doller</button></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-2 col-4">
+                    <p class="fw-bold">Convert Rate: 00</p>
+                </div>
+                <div class="col-md-2 col-4">
+                    <p class="fw-bold">Amount: 00</p>
+                </div>
+
+            </div>
+        </div>
+        <div class="heroSection" style="width:50%" id="cpSection">
+            <div class="row mt-5">
+                <div class="col-md-4 col-12">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Voucher Date</label>
+                        <input type="text" class="form-control tg" id="Date">
+                    </div>
+                </div>
+                <div class="col-md-4 col-12" id="divVoucherno">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Voucher no:</label>
+                        <input type="text" class="form-control" id="Voucherno" readonly>
+
+                    </div>
+                    
+                </div>
+               @* <div class="col-md-4 col-12" id="divInvoiceno">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Find by invoice no:</label>
+                        <input type="text" class="form-control" id="Invoiceno" readonly>
+
+                    </div>
+
+                </div>*@
+
+                <div class="col-md-4 col-12">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Ref.One:</label>
+                        <input type="text" class="form-control" id="Referance">
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="row mt-5" id="TheadDropdown">
+
+                @*<div class="form-floating col-md-4 col-12 select-option" id="divAccountHead" >
+                <select class="form-select select2me thead" id="THead"
+                aria-label="Floating label select example">
+                </select>
+                <label for="floatingSelect">Transaction Head</label>
+                </div>*@
+
+
+                <div class="col-md-4 col-12" id="divAccountHead">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Payment Account
+                        </label>
+                        <select class="form-select select2me thead" id="THead"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-4 col-12" id="divLocation">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Location
+                        </label>
+                        <select class="form-select select2me thead" id="location"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-4 col-12" id="divBalance">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Balance</label>
+                        <input type="text" class="form-control" id="balance" readonly>
+
+                    </div>
+                    
+                </div>
+
+
+            </div>
+            @*<div class="row mt-5" id="paymentMethod">
+
+                <div class="col-md-4 col-12" id="customerDropdown">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Customer
+                        </label>
+                        <select class="form-select select2me thead" id="customer"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-4 col-12" id="divPayment">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Payment Method
+                        </label>
+                        <select class="form-select select2me thead" id="payment"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-4 col-12" id="divDeposit">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Deposit to
+                        </label>
+                        <select class="form-select select2me thead" id="deposit"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+
+            </div>*@
+           </div>
+            
+            <!-- Default checked -->
+
+
+
+        
+         <div class="heroSection" style="width:50%" id="bpSection">
+            <div class="row mt-5">
+                <div class="col-md-4 col-12">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Voucher Date</label>
+                        <input type="text" class="form-control tg" id="bpDate">
+                    </div>
+                </div>
+                <div class="col-md-4 col-12" id="divbpVoucherno">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Voucher no:</label>
+                        <input type="text" class="form-control" id="bpVoucherno" readonly>
+
+                    </div>
+                    
+                </div>
+               @* <div class="col-md-4 col-12" id="divInvoiceno">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Find by invoice no:</label>
+                        <input type="text" class="form-control" id="Invoiceno" readonly>
+
+                    </div>
+
+                </div>*@
+
+                <div class="col-md-4 col-12">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Ref.One:</label>
+                        <input type="text" class="form-control" id="bpReferance">
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="row mt-5" id="bpTheadDropdown">
+
+                @*<div class="form-floating col-md-4 col-12 select-option" id="divAccountHead" >
+                <select class="form-select select2me thead" id="THead"
+                aria-label="Floating label select example">
+                </select>
+                <label for="floatingSelect">Transaction Head</label>
+                </div>*@
+
+
+                <div class="col-md-4 col-12" id="divbpAccountHead">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Payment Account
+                        </label>
+                        <select class="form-select select2me thead" id="bpTHead"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-4 col-12" id="divbpLocation">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Location
+                        </label>
+                        <select class="form-select select2me thead" id="bplocation"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-4 col-12" id="divbpBalance">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Balance</label>
+                        <input type="text" class="form-control" id="bpbalance" readonly>
+
+                    </div>
+                    
+                </div>
+
+
+            </div>
+            @*<div class="row mt-5" id="paymentMethod">
+
+                <div class="col-md-4 col-12" id="customerDropdown">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Customer
+                        </label>
+                        <select class="form-select select2me thead" id="customer"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-4 col-12" id="divPayment">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Payment Method
+                        </label>
+                        <select class="form-select select2me thead" id="payment"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-4 col-12" id="divDeposit">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Deposit to
+                        </label>
+                        <select class="form-select select2me thead" id="deposit"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+
+            </div>*@
+           
+            <!-- Default checked -->
+
+
+
+        </div>
+        <div class="heroSection" style="width:50%" id="crSection">
+            <div class="row mt-5">
+                <div class="col-md-4 col-12" id="divcrCustomerHead">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Customer
+                        </label>
+                        <select class="form-select select2me thead" id="crCustomer"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-4 col-12" id="divcrPaymentHead">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Payment Method
+                        </label>
+                        <select class="form-select select2me thead" id="crPayment"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+               
+                
+                <div class="col-md-4 col-12" id="divcrInvoiceno">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Find by invoice no:</label>
+                        <input type="text" class="form-control" id="crInvoiceno" readonly>
+
+                    </div>
+
+                </div>
+               
+
+
+
+            </div>
+            <div class="row mt-5">
+
+                <div class="col-md-4 col-12">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Payment Date</label>
+                        <input type="text" class="form-control tg" id="crDate">
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-12" id="divcrDeposit">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Deposit To
+                        </label>
+                        <select class="form-select select2me thead" id="crDeposit"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-4 col-12">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Ref.One:</label>
+                        <input type="text" class="form-control" id="crReferance">
+                    </div>
+                </div>
+          
+            </div>
+           
+          
+            <!-- Default checked -->
+
+
+
+        </div>
+        <div class="heroSection" style="width:50%" id="brSection">
+            <div class="row mt-5">
+                <div class="col-md-4 col-12" id="divbrCustomerHead">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Customer
+                        </label>
+                        <select class="form-select select2me thead" id="brCustomer"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-4 col-12" id="divbrPaymentHead">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Payment Method
+                        </label>
+                        <select class="form-select select2me thead" id="brPayment"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+
+
+                <div class="col-md-4 col-12" id="divbrInvoiceno">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Find by invoice no:</label>
+                        <input type="text" class="form-control" id="brInvoiceno" readonly>
+
+                    </div>
+
+                </div>
+
+
+
+
+            </div>
+            <div class="row mt-5">
+
+                <div class="col-md-4 col-12">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Payment Date</label>
+                        <input type="text" class="form-control tg" id="brDate">
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-12" id="divbrDeposit">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">
+                            Deposit To
+                        </label>
+                        <select class="form-select select2me thead" id="brDeposit"
+                                aria-label="Floating label select example">
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-md-4 col-12">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Ref.One:</label>
+                        <input type="text" class="form-control" id="brReferance">
+                    </div>
+                </div>
+
+            </div>
+
+          
+            <!-- Default checked -->
+
+
+
+        </div>
+        <div class="heroSection" style="width:50%" id="contraSection">
+            <div class="row mt-5">
+                <div class="col-md-4 col-12">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Voucher Date</label>
+                        <input type="text" class="form-control tg" id="contraDate">
+                    </div>
+                </div>
+                <div class="col-md-4 col-12" id="divjournalVoucherno">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Journal no:</label>
+                        <input type="text" class="form-control" id="contraVoucherno" readonly>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4 col-12">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Ref.One:</label>
+                        <input type="text" class="form-control" id="contraReferance">
+                    </div>
+                </div>
+
+
+
+            </div>
+
+
+           
+            <!-- Default checked -->
+
+
+
+        </div>
+        <div class="heroSection" style="width:50%" id="journalSection">
+            <div class="row mt-5">
+                <div class="col-md-4 col-12">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Voucher Date</label>
+                        <input type="text" class="form-control tg" id="journalDate">
+                    </div>
+                </div>
+                <div class="col-md-4 col-12" id="divjournalVoucherno">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Journal no:</label>
+                        <input type="text" class="form-control" id="journalVoucherno" readonly>
+
+                    </div>
+
+                </div>
+                
+
+                <div class="col-md-4 col-12">
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Ref.One:</label>
+                        <input type="text" class="form-control" id="journalReferance">
+                    </div>
+                </div>
+
+
+
+            </div>
+           
+           
+            <!-- Default checked -->
+
+
+
+        </div>
+
+        <div class="row mt-5" id="TagField">
+                <div class="col-md-6 col-12">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tags</label>
+                        @* <select multiple="multiple" data-role="tagsinput" id="MultiTags">
+
+
+                        </select>*@
+                        <input id="MultiTags" type="text" value="" data-role="tagsinput" />
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked">
+                        <label class="form-check-label" for="flexSwitchCheckChecked"></label>
+                    </div>
+
+                </div>
+
+
+            </div>
+        <div class="gridSection" style="overflow:hidden">
+            <div class="row">
+                <div class="col-12 col-md-12">
+                    <div id="jsFilterGrid" style="font-size:14px;"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-12">
+                    <hr />
+                    <div id="jsGridItems"></div>
+                </div>
+            </div>
+            <div class="totalAmount" style="margin-top:4%;text-align: right;">
+                <label style="font-weight:bold" for="total">Total:</label>
+                <input type="text" style="text-align:right;" id="total">
+                <input type="hidden" style="text-align:right; font-weight:bold" id="Difference">
+            </div>
+
+
+        </div>
+
+        <div class="row">
+               <div class="col-md-4 col-12">
+              <div class="mb-2">
+                           <label class="form-label fw-bold">
+                         Description 
+                  </label>
+                
+                  <textarea class="form-control text-box multi-line" id="VoucherDesc" name="VoucherDesc" rows="4"></textarea>
+              </div>
+              </div>
+              <div class="col-md-4 col-12 mt-4 pt-1"> 			 
+                    <input id="image-uploadify" type="file" accept=".xlsx,.xls,image/*,.doc,audio/*,.docx,video/*,.ppt,.pptx,.txt,.pdf" multiple>	                           
+             </div>
+                 
+               
+        </div>
+      
+        <div class="footerButton" style="margin-top:5%">
+            <button class="btn btn-info btn-sm" id="BtnSave" data-voucher-Id="@VoucherId">Json Data</button>
+            <button id="voucherSave" class="btn btn-primary btnVoucher btn-sm" type="button" @*onclick="Voucher_save()"*@>
+                <span class="d-none spinner-border spinner-border-lg" id="voucherspinner" role="status" aria-hidden="true"></span> Save
+            </button>
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+@section Scripts{
+    <script type="text/javascript">
+
+        
+
+        $(document).ready(function () {
+
+          
+
+
+            $('#bpSection').hide();
+            $('#cpSection').hide();
+            $('#journalSection').hide();
+            $('#contraSection').hide();
+            $('#crSection').hide();
+            $('#brSection').hide();
+
+           
+
+
+              function getVoucher(id) {
+                    return $.ajax({
+                        type: 'GET',
+                        datatype: "Json",
+                        url: "../Accounts/GetVoucher",
+                        data: { "VoucherId": id, isCopy: @ViewBag.IsCopy }
+                    });
+                }
+
+                var VoucherId = $("#BtnSave").attr("data-voucher-Id");
+
+                if (VoucherId > 0) {
+                    $.when(getVoucher(VoucherId)).then(function(res) {
+                        console.log(res);
+                       
+
+                        if (@ViewBag.IsCopy == "2") {
+                            //let idGencopy = new Generator();
+                            $("#BtnSave").attr("data-voucher-Id", "0");
+                            $('#VoucherNo').val("Auto Generated");
+                            //$('#Date').val(ret);
+                        }
+                        else {
+                            $("#VoucherNo").val(res.VoucherNo);
+
+                        }
+
+
+
+                        //var value = new Date(res.SalesDate);
+
+                        //var ret = value.getDate() + "-" + months[value.getMonth()] + "-" + value.getFullYear(); //value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
+
+
+
+
+                        //$("#CreateDate").val(res.CreateDate);
+                        //$("#LuserId").val(res.LuserId);
+                        //$("#OrderId").val(res.OrderId);
+                       
+                       }).fail(function(err) {
+                        console.log(err);
+                    });
+                }
+
+
+
+
+
+
+
+                var $tagInput = $("#MultiTags");
+
+                //Get the values to be added as tags
+                var values = ["tag1", "tag2", "tag3"];
+
+                //Iterate over each value and add it as a tag
+                $.each(values, function(i, value) {
+                    $tagInput.tagsinput('add', value);
+                });
+
+
+
+            
+            function LedgerBalance(AccountId) {
+                //alert(AccountId);
+                //alert($("#Customer").val());
+                //tblaccountList.rows().remove().draw(false);
+                 var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetLedgerBalance", "Values")'
+                }
+                //alert('test');
+                $.ajax({
+                    type: 'Get',
+                   // data: { VoucherType: "Cash Payment" },
+                    url: MyAppUrlSettings.MyUsefulUrl,
+                    dataType: 'json',
+                    data: { AccountId: AccountId, TransactionId:0  }, //, $("#Id").val() 
+                    success: function (result) {
+                        
+                        $("#balance").text(result.toLocaleString());
+                        $("#balance").val(result.toLocaleString());
+                    },
+                    error: function (ex) {
+                        alert('Failed.' + ex);
+                    }
+                });
+                return false;
+            };
+
+             $('#THead').select2({})
+                .on("select2:select", function (e) { 
+                    LedgerBalance($('#THead').val());
+                });
+
+
+
+
+
+
+
+
+
+
+            var VoucherDate;
+            var VoucherNo;
+            var VoucherList = [];
+
+            $.ajax({
+                method: "get",
+                async: false,
+                url: '@Url.Action("LastVoucher", "Accounts")',//url: "https://www.pqstec.com/InvoiceApps/values/GetSupplierDropdown",
+                data: { vouchertypeid: "1", vouchertypesearch: " " },
+
+                success: function(data) {
+                    VoucherDate = data.LastVoucherDate;
+                    VoucherNo = data.LastVoucherNo;
+                    VoucherList = data.PrevVoucherList;
+                    
+                   
+                }
+            });
+
+            $('#Date').val(VoucherDate);
+            $('#bpDate').val(VoucherDate);
+            $('#journalDate').val(VoucherDate);
+            $('#contraDate').val(VoucherDate);
+            $('#crDate').val(VoucherDate);
+            $('#brDate').val(VoucherDate);
+
+
+            $('#Voucherno').val(VoucherNo);
+            $('#bpVoucherno').val(VoucherNo);
+            $('#journalVoucherno').val(VoucherNo);
+            $('#contraVoucherno').val(VoucherNo);
+
+
+
+
+            $('#jsClockHistory').jsGrid({
+                width: '100%',
+                data: VoucherList,
+                fields: [
+                    { name: "Id", title: 'Id', type: "label", visible: false },
+                    { name: "VoucherNo", title: 'Voucher', type: "label" },
+                    { name: "VoucherType", title: 'Type', type: "label", visible: false },
+                    { name: "VoucherDate", title: 'Voucher Date', type: "label" },
+                    { name: "VoucherDesc", title: 'Description', type: "label" },
+                    { name: "Amount", title: 'Amount', type: "label" }
+                ]
+
+
+            });
+
+            /////////***** condition based div hide and show **** ///////
+
+            if($('#VoucherTypeId').val()==1){
+
+              
+                $('#cpSection').show();
+                $('#bpSection').hide();
+                $('#journalSection').hide();
+                $('#contraSection').hide();
+
+                $.ajax({
+                    method: "get",
+                    async: false,
+                    url: '@Url.Action("GetAccountHeadDropdown", "Admin")',
+                    data: { VoucherType: "Cash Payment" },
+
+                    success: function (data) {
+                    
+                      
+
+                        const select = document.querySelector('#THead');
+                        for (var i = 0; i < data.length; i++) {
+                            const option = document.createElement('option');
+                            option.value = data[i].Value;
+                            option.text = data[i].Text;
+                            select.appendChild(option);
+                        }
+                    }
+                });
+
+
+                
+
+                $.ajax({
+                    method: "get",
+                    async: false,
+                    url: '@Url.Action("GetWarehouseDropdown", "Admin")',//url: "https://www.pqstec.com/InvoiceApps/values/GetSupplierDropdown",
+                    //headers: {
+                    //    contentType: "application/json; charset=utf-8",
+                    //    Authorization: token
+                    //},
+                    success: function (data) {
+                        const select = document.querySelector('#location');
+                        for (var i = 0; i < data.length; i++) {
+                            const option = document.createElement('option');
+                            option.value = data[i].Value;
+                            option.text = data[i].Text;
+                            select.appendChild(option);
+                        }
+                    }
+                });
+
+               $('#Date').datepicker({
+                dateFormat: 'dd-M-yy',
+                todayHighlight: true,
+                autoclose: true
+            });
+
+                $("#flexSwitchCheckChecked").click(function() {
+                // $('select').select2();
+                $('#jsFilterGrid').toggle();
+                VoucherTypeName();
+            });
+
+
+            }
+            else if($('#VoucherTypeId').val()==3){
+                $('#bpSection').show();
+                $('#cpSection').hide();
+                $('#journalSection').hide();
+                $('#contraSection').hide();
+
+                $.ajax({
+                    method: "get",
+                    async: false,
+                    url: '@Url.Action("GetAccountHeadDropdown", "Admin")',
+                    data: { VoucherType: "Cash Payment" },
+
+                    success: function (data) {
+
+                        const select = document.querySelector('#bpTHead');
+                        for (var i = 0; i < data.length; i++) {
+                            const option = document.createElement('option');
+                            option.value = data[i].Value;
+                            option.text = data[i].Text;
+                            select.appendChild(option);
+                        }
+                    }
+                });
+
+                $.ajax({
+                    method: "get",
+                    async: false,
+                    url: '@Url.Action("GetWarehouseDropdown", "Admin")',//url: "https://www.pqstec.com/InvoiceApps/values/GetSupplierDropdown",
+                    //headers: {
+                    //    contentType: "application/json; charset=utf-8",
+                    //    Authorization: token
+                    //},
+                    success: function (data) {
+                        const select = document.querySelector('#bplocation');
+                        for (var i = 0; i < data.length; i++) {
+                            const option = document.createElement('option');
+                            option.value = data[i].Value;
+                            option.text = data[i].Text;
+                            select.appendChild(option);
+                        }
+                    }
+                });
+
+                 $('#bpDate').datepicker({
+                    dateFormat: 'dd-M-yy',
+                    todayHighlight: true,
+                    autoclose: true
+                });
+
+                 $("#bpflexSwitchCheckChecked").click(function() {
+                // $('select').select2();
+                    $('#jsFilterGrid').toggle();
+                    VoucherTypeName();
+                });
+
+            }
+            else if ($('#VoucherTypeId').val() == 2) {
+                $('#crSection').show();
+                $('#bpSection').hide();
+                $('#cpSection').hide();
+                $('#journalSection').hide();
+                $('#contraSection').hide();
+
+                $.ajax({
+                    method: "get",
+                    async: false,
+                    url: '@Url.Action("GetAccountHeadDropdown", "Admin")',
+                    data: { VoucherType: "Cash Payment" },
+
+                    success: function (data) {
+
+                        const select = document.querySelector('#crCustomer');
+                        for (var i = 0; i < data.length; i++) {
+                            const option = document.createElement('option');
+                            option.value = data[i].Value;
+                            option.text = data[i].Text;
+                            select.appendChild(option);
+                        }
+                    }
+                });
+
+                $.ajax({
+                    method: "get",
+                    async: false,
+                    url: '@Url.Action("GetAccountHeadDropdown", "Admin")',
+                    data: { VoucherType: "Cash Payment" },
+
+                    success: function (data) {
+
+                        const select = document.querySelector('#crDeposit');
+                        for (var i = 0; i < data.length; i++) {
+                            const option = document.createElement('option');
+                            option.value = data[i].Value;
+                            option.text = data[i].Text;
+                            select.appendChild(option);
+                        }
+                    }
+                });
+
+                $.ajax({
+                    method: "get",
+                    async: false,
+                    url: '@Url.Action("GetWarehouseDropdown", "Admin")',//url: "https://www.pqstec.com/InvoiceApps/values/GetSupplierDropdown",
+
+                    success: function (data) {
+                        const select = document.querySelector('#crPayment');
+                        for (var i = 0; i < data.length; i++) {
+                            const option = document.createElement('option');
+                            option.value = data[i].Value;
+                            option.text = data[i].Text;
+                            select.appendChild(option);
+                        }
+                    }
+                });
+
+                $('#crDate').datepicker({
+                    dateFormat: 'dd-M-yy',
+                    todayHighlight: true,
+                    autoclose: true
+                });
+
+                $("#crflexSwitchCheckChecked").click(function () {
+                    // $('select').select2();
+                    $('#jsFilterGrid').toggle();
+                    VoucherTypeName();
+                });
+
+            }
+            else if ($('#VoucherTypeId').val() == 4) {
+                $('#brSection').show();
+                $('#crSection').hide();
+                $('#bpSection').hide();
+                $('#cpSection').hide();
+                $('#journalSection').hide();
+                $('#contraSection').hide();
+
+                $.ajax({
+                    method: "get",
+                    async: false,
+                    url: '@Url.Action("GetAccountHeadDropdown", "Admin")',
+                    data: { VoucherType: "Cash Payment" },
+
+                    success: function (data) {
+
+                        const select = document.querySelector('#brCustomer');
+                        for (var i = 0; i < data.length; i++) {
+                            const option = document.createElement('option');
+                            option.value = data[i].Value;
+                            option.text = data[i].Text;
+                            select.appendChild(option);
+                        }
+                    }
+                });
+
+                $.ajax({
+                    method: "get",
+                    async: false,
+                    url: '@Url.Action("GetAccountHeadDropdown", "Admin")',
+                    data: { VoucherType: "Cash Payment" },
+
+                    success: function (data) {
+
+                        const select = document.querySelector('#brDeposit');
+                        for (var i = 0; i < data.length; i++) {
+                            const option = document.createElement('option');
+                            option.value = data[i].Value;
+                            option.text = data[i].Text;
+                            select.appendChild(option);
+                        }
+                    }
+                });
+
+                $.ajax({
+                    method: "get",
+                    async: false,
+                    url: '@Url.Action("GetWarehouseDropdown", "Admin")',//url: "https://www.pqstec.com/InvoiceApps/values/GetSupplierDropdown",
+
+                    success: function (data) {
+                        const select = document.querySelector('#brPayment');
+                        for (var i = 0; i < data.length; i++) {
+                            const option = document.createElement('option');
+                            option.value = data[i].Value;
+                            option.text = data[i].Text;
+                            select.appendChild(option);
+                        }
+                    }
+                });
+
+                $('#brDate').datepicker({
+                    dateFormat: 'dd-M-yy',
+                    todayHighlight: true,
+                    autoclose: true
+                });
+
+                $("#brflexSwitchCheckChecked").click(function () {
+                    // $('select').select2();
+                    $('#jsFilterGrid').toggle();
+                    VoucherTypeName();
+                });
+
+            }
+            else if($('#VoucherTypeId').val()==6){
+                $('#journalSection').show();
+                $('#bpSection').hide();
+                $('#cpSection').hide();
+                $('#contraSection').hide();
+
+                 $('#journalDate').datepicker({
+                    dateFormat: 'dd-M-yy',
+                    todayHighlight: true,
+                    autoclose: true
+                });
+
+                 $("#journalflexSwitchCheckChecked").click(function() {
+                // $('select').select2();
+                    $('#jsFilterGrid').toggle();
+                    VoucherTypeName();
+                });
+
+            }
+            else if($('#VoucherTypeId').val()==5){
+                $('#contraSection').show();
+                $('#journalSection').hide();
+                $('#bpSection').hide();
+                $('#cpSection').hide();
+
+
+                 $('#contraDate').datepicker({
+                    dateFormat: 'dd-M-yy',
+                    todayHighlight: true,
+                    autoclose: true
+                });
+
+                 $("#contraflexSwitchCheckChecked").click(function() {
+                // $('select').select2();
+                    $('#jsFilterGrid').toggle();
+                    VoucherTypeName();
+                });
+
+            }
+            else
+            {
+                
+                $('#cpSection').show();
+                $('#bpSection').hide();
+                $('#journalSection').hide();
+                $('#contraSection').hide();
+            }
+
+            //if($('#VoucherTypeId').val()==6){
+
+            //    $('#TheadDropdown').hide();
+            //}
+
+            //if($('#VoucherTypeId').val()==3){
+
+            //    $('#divInvoiceno').show();
+            //    $('#divVoucherno').hide();
+            //    $('#TheadDropdown').hide();
+            //}
+
+
+            ////////****** end ******//////////
+
+            $('#jsFilterGrid').hide();
+
+            var text = '';
+            function VoucherTypeName() {
+                text = $('#VoucherTypeName').text();
+                if ((text == 'Cash Payment') || (text == 'Bank Payment')) {
+                    $("#jsGridItems").jsGrid("fieldOption", "TKDebit", "visible", true);
+                    $("#jsGridItems").jsGrid("fieldOption", "TKCredit", "visible", false);
+
+                }
+                else if ((text == 'Cash Receipt') || (text == 'Bank Receipt')) {
+                    $("#jsGridItems").jsGrid("fieldOption", "TKDebit", "visible", false);
+                    $("#jsGridItems").jsGrid("fieldOption", "TKCredit", "visible", true);
+                }
+
+                else if ((text == 'Journal') || (text == 'Contra')) {
+                    $("#jsGridItems").jsGrid("fieldOption", "TKDebit", "visible", true);
+                    $("#jsGridItems").jsGrid("fieldOption", "TKCredit", "visible", true);
+
+                }
+
+
+                else {
+                    $("#jsGridItems").jsGrid("fieldOption", "TKDebit", "visible", true);
+                    $("#jsGridItems").jsGrid("fieldOption", "TKCredit", "visible", false);
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            //
+            var filterSearchUrl = '@Url.Action("GetCOAList", "Admin")';
+
+            var filterSearchDb = {
+                loadData: function(filter) {
+
+                    var d = $.Deferred();
+                    $.ajax({
+                        type: "GET",
+                        url: filterSearchUrl,
+                        //headers: {
+                        //    contentType: "application/json; charset=utf-8",
+                        //    Authorization: token
+                        //},
+                        data: { AccType: "L", searchquery: JSON.stringify(filter) },
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json"
+                    })
+                        .done(function(result) {
+                            d.resolve(result.AccountHeadList);
+
+                            //for (let i = 0; i < result.ProductList.length; i++) {
+                            //    result.ProductList[i].Quantity = 0;
+
+
+                            //}
+                            // console.log(result.AccountHeadList);
+
+                        });
+                    return d.promise();
+
+                }
+
+            }
+            var serial=0;
+            $("#jsFilterGrid").jsGrid({
+
+                width: "100%",
+                height: 'auto',
+                filtering: true,
+                autoload: true,
+                pageSize: 5,
+                pageIndex: 1,
+                paging: true,
+                controller: filterSearchDb,
+                fields: [
+
+                    { name: "AccType", title: 'Type', type: "text", width: 220, visible: false },
+                    { name: "AccountCategory", title: 'Category', type: "text" },
+                    { name: "AccCode", title: 'Code', type: "text" },
+                    { name: "AccName", title: 'Account Head', type: "text" },
+                    { name: "ParentName", title: 'Group Head', type: "text" },
+                    { name: "AccountBalance", title: 'Balance', type: "text" }
+                    // { name: "Currency", title: 'Currency', type: "text" },
+
+
+
+                ],
+                rowDoubleClick: function(args) {
+
+                    var args = args.item;
+                    console.log('args.....?/////');
+                    console.log(args);
+                    var parentValue = $('#jsGridItems').jsGrid('option', 'data');
+                    serial = parentValue.length + 1;
+                    Entry(args, serial);
+
+                }
+            })
+            function Entry(args,serial) {
+
+
+                var newData = {
+                    "SLNo": serial,
+                    "CurrencyId": '18',
+                    "CurrencyForeignId": '18',
+                    "AccId": args.Id,
+                    //"DisplayName": "<b>" + Name + "</b>" + "-" + productCode + "<br>" + "<i><p style='font-size:11px; margin-bottom:0px'>" + CategoryName + Color + Size + Brand + "</p></i>",
+                    "accname": args.AccName,//args.item.Description,
+                    "EmpId": 1,
+                    "Note1": " ",
+                    "Note2": " ",
+                    "CustomerId": 1,
+                    "SupplierId": 1,
+                    "TKDebit": 0.00,
+                    "TKCredit": 0.00,
+                }
+
+
+                $("#jsGridItems").jsGrid("insertItem", newData).done(function() {
+
+                    //  $(".jsgrid-update-button").trigger( "click" );
+                    // toastr.success('Items Added..');
+
+
+                });
+            }
+
+
+
+            function calculation() {
+
+                let TotalDebit = 0.00;
+                let TotalCredit = 0.00;
+                let TotalAmount = 0.00;
+                let Difference = 0.00;
+
+                const items = ($("#jsGridItems").jsGrid('option', 'data'));
+
+
+                items.forEach(function(item) {
+
+                    TotalDebit += parseFloat(item.TKDebit);
+                    TotalCredit += parseFloat(item.TKCredit);
+
+                });
+
+
+                TotalAmount = TotalDebit + TotalCredit;
+                Difference = TotalDebit - TotalCredit;
+                console.log(TotalAmount);
+
+                $('#total').val(TotalAmount);
+                $('#Difference').val(Difference);
+
+            }
+
+
+            $("#jsGridItems").jsGrid({
+                width: "100%",
+                // inserting: true,
+                // filtering: true,
+                editing: true,
+
+                sorting: true,
+                paging: true,
+                autoload: true,
+                deleteConfirm: "Do you really want to delete the client?",
+                fields: [
+                    { name: "Id", title: 'ID', type: "label", visible: false },
+                    { name: "SLNo", title: "SL.No", visible: true },
+                    { name: "AccId", title: 'Account Id', type: "label", visible: true },
+                    { name: "VoucherId", title: "Voucher", type: "text", visible: false },
+                    { name: "VoucherSubId", title: "Voucher sub", type: "text", visible: false },
+                    { name: "CurrencyId", title: 'Currency Id', type: "select", visible: false },
+                    { name: "CurrencyForeignId", title: 'Currency Foreign Id', type: "select", visible: false },
+                    { name: "accname", title: "Account Head", "visible": true },////////   7  display name
+
+                    { name: "EmpId", title: 'Employee', type: "select", visible: false },
+                    { name: "Note1", title: 'Note 1', type: "text" },
+                    { name: "Note2", title: 'Note 2', type: "text", align: "center" },
+                    { name: "CustomerId", title: 'Customer', type: "select", visible: false },
+
+                    { name: "SupplierId", title: "Supplier", type: "select", visible: false },
+                    { name: "TKDebit", title: "Debit", type: "text" },
+                    { name: "TKCredit", title: "Credit", type: "text" },
+                    { name: "CurrencyRate", title: "currencyrate", visible: false, type: "text" },
+                    { name: "TKDebitLocal", title: "debitlocal", visible: false, type: "text" },
+                    { name: "TKCreditLocal", title: "creditlocal", visible: false, type: "text" },
+                    { name: "VoucherTranGroupIdRow", title: "Transaction Group", visible: false },
+
+                    { type: "control", width: '80', title: 'Action', editButton: false }
+                ],
+                onItemEditing: function(args) {
+
+                    calculation();
+                    $("#jsGridItems").keypress(function(e) {
+                        if (e.which == 13) {
+                            $("#jsGridItems .jsgrid-update-button").trigger("click");
+                            //  $('#jsFilterGrid :input[type=text]').eq(1).focus();
+                        }
+                    });
+                },
+                onItemUpdated: function(args) {
+                    calculation();
+                    if (args.item.TKDebit <= 0) {
+
+                        alert('Put a valid Debit value');
+                        $("#jsGridItems").jsGrid("editItem", args.item);
+                    }
+                    else {
+
+                        $('#jsFilterGrid :input[type=text]').eq(1).focus();
+                    }
+
+
+                },
+                onItemDeleted: function(args){
+                    var parentValue= $('#jsGridItems').jsGrid('option','data');
+                          var serial=0;
+                          for(var i=0;i<parentValue.length;i++){
+                            parentValue[i].SLNo=serial+1;
+                            serial++;
+                          }
+
+                         $("#jsGridItems").jsGrid("refresh");
+
+                },
+                onRefreshed: function(args) {
+
+                    calculation();
+                }
+
+
+            });
+
+
+
+            // json data generate
+            $('#BtnSave').click(function() {
+                var isMultiDebitCredit = '@HttpContextAccessor.HttpContext.Session.GetString("isMultiDebitCredit").ToLower()' == 'true';
+                var isMultiCurrency = '@HttpContextAccessor.HttpContext.Session.GetString("isMultiCurrency").ToLower()' == '1';
+                var isVoucherDistributionEntry = '@HttpContextAccessor.HttpContext.Session.GetString("isVoucherDistributionEntry").ToLower()' == 'true';
+                var isChequeDetails = '@HttpContextAccessor.HttpContext.Session.GetString("isChequeDetails").ToLower()' == 'true';
+                var isModal = true;
+
+
+                  var UserId = '@HttpContextAccessor.HttpContext.Session.GetInt32("UserId").ToString()';
+                    var ComId = '@HttpContextAccessor.HttpContext.Session.GetInt32("ComId").ToString()';
+                $("#ComId").val(ComId);
+                $("#LuserId").val(UserId);
+
+                   
+                // if (isMultiDebitCredit == true ) { //|| VoucherType == "VJR"
+
+                //    if ($('#Difference').val() != 0) {
+
+                //        alert("Debit And Credit Amount is Not Same");
+                //        StopSpinner(".btnVoucher");
+
+
+                //        return false;
+
+
+                //    };
+                //}
+                //else {
+                //    var x = $('#AccountMainId').val() || 0;
+                //    if (x == 0) {
+                //        alert("Please Confirm the Opposite Head");
+                //        $('#AccountMainId').focus();
+                //        StopSpinner(".btnVoucher");
+                //        return false;
+                //    }
+
+
+                //};
+
+
+
+                var Items = $("#jsGridItems").jsGrid('option', 'data');
+
+                for(var i=0;i<Items.length;i++){
+                Items[i].TKDebitLocal=0;
+                Items[i].TKCreditLocal=0;
+                Items[i].ComId = $("#ComId").val();
+                Items[i].LuserId = $("#LuserId").val();
+                Items[i].SRowNo=0;
+                //Items[i].VoucherId= null;//$('#Id').val();
+                Items[i].VoucherSubId = 0;
+                }
+
+                
+             
+
+
+            
+            
+                var VouType = $('#VoucherTypeId').val();
+
+               var multipleTag = $("#MultiTags").tagsinput('items');
+                 console.log(multipleTag);
+
+                if(VouType==1){
+                    var VoucherDate = $('#Date').val();
+                    var ref = $('#Referance').val();
+                    var Location = $('#location :selected').val();
+                    var Thead = $('#THead :selected').val();
+                   
+
+                }
+                else if(VouType==2){
+                    var VoucherDate = $('#crDate').val();
+                    var ref = $('#crReferance').val();
+                    var customer = $('#crCustomer :selected').val();
+                    var payment = $('#crPayment :selected').val();
+                    var deposit = $('#crDeposit :selected').val();
+                   
+                }
+                else if (VouType == 3) {
+                    var VoucherDate = $('#bpDate').val();
+                    var ref = $('#bpReferance').val();
+                    var Location = $('#bplocation :selected').val();
+                    var Thead = $('#bpTHead :selected').val();
+                    
+                }
+                 else if(VouType==4){
+                    var VoucherDate = $('#brDate').val();
+                    var ref = $('#brReferance').val();
+                    var customer = $('#brCustomer :selected').val();
+                    var payment = $('#brPayment :selected').val();
+                    var deposit = $('#brDeposit :selected').val();
+                   
+                }
+                 else if(VouType==5){
+                    var VoucherDate = $('#contraDate').val();
+                    var ref = $('#contraReferance').val();
+
+                    
+                }
+                 else if(VouType==6){
+                    var VoucherDate = $('#journalDate').val();
+                    var ref = $('#journalReferance').val();
+
+                    
+                }
+
+                 var description = $.trim($("#VoucherDesc").val());
+
+
+
+
+                var Acc_VoucherSub = {};
+
+                if (isMultiDebitCredit == false) {
+
+                    Acc_VoucherSub.SLNo = 1;
+                    Acc_VoucherSub.CurrencyId = '@HttpContextAccessor.HttpContext.Session.GetInt32("defaultcurrencyid").ToString()';
+                    Acc_VoucherSub.CurrencyForeignId = '18';///countryid foreign
+                    Acc_VoucherSub.AccId = Thead;
+                    Acc_VoucherSub.accname='';
+                    Acc_VoucherSub.EmpId = 1;
+                    Acc_VoucherSub.Note1 = ref;//$("#Referance").val();
+                    Acc_VoucherSub.Note2 = "";//$("#ReferanceTwo").val();
+                    Acc_VoucherSub.CustomerId = 1;
+                    Acc_VoucherSub.SupplierId = 1;
+
+
+
+
+                    //'Cash Payment'
+                    //'Bank Payment'
+                    //'Cash Receipt'
+                    //'Bank Receipt'
+
+                    if (VouType == 1 || VouType == 3) {
+                        Acc_VoucherSub.TKDebit = 0;//$("#VAmount").val();
+                        Acc_VoucherSub.TKCredit = $("#total").val();
+                        Acc_VoucherSub.TKDebitLocal = 0;//$("#VAmountLocal").val();
+                        Acc_VoucherSub.TKCreditLocal = $("#total").val();
+
+                    }
+                    if (VouType == 2 || VouType == 4) {
+
+                        Acc_VoucherSub.TKDebit = $("#total").val();
+                        Acc_VoucherSub.TKCredit = 0;
+                        Acc_VoucherSub.TKDebitLocal = $("#total").val();
+                        Acc_VoucherSub.TKCreditLocal = 0;
+
+                    }
+                    else {
+                        var totalamt = $("#Difference").val();
+                        if (totalamt > 0) {
+                            Acc_VoucherSub.TKDebit = 0;//$("#VAmount").val();
+                            Acc_VoucherSub.TKCredit = $("#total").val();
+                            Acc_VoucherSub.TKDebitLocal = 0;//$("#VAmountLocal").val();
+                            Acc_VoucherSub.TKCreditLocal = $("#total").val();
+                        }
+                        else {
+
+
+
+                            Acc_VoucherSub.TKDebit = $("#total").val();
+                            Acc_VoucherSub.TKCredit = 0;
+                            Acc_VoucherSub.TKDebitLocal = $("#total").val();
+                            Acc_VoucherSub.TKCreditLocal = 0;
+                        }
+                        Acc_VoucherSub.ComId = $("#ComId").val();
+                        Acc_VoucherSub.LuserId = $("#LuserId").val();
+                        Acc_VoucherSub.SRowNo = -1;
+                         /*Acc_VoucherSub.VoucherId = $('#Id').val();*/
+                         /*Acc_VoucherSub.VoucherId = $('#Id').val();*/
+                        Acc_VoucherSub.VoucherSubId = 0;
+                    }
+
+                    console.log(Acc_VoucherSub);
+                    Items[Items.length] = Acc_VoucherSub;
+
+
+                }
+
+
+                //console.log(Items);
+                var CountryId = 18;
+                var CountryIdLocal = 18;
+                var VoucherId = 0;
+                 var vouchermodel =
+                 { VoucherTypeId: VouType,
+                 VoucherDate: VoucherDate,
+                 AccountMainId: Thead,
+                 WarehouseId: Location,
+                 CountryId: CountryId,
+                 VoucherId:VoucherId,
+                 CountryIdLocal: CountryIdLocal,
+
+              /*   VoucherNo: Voucherno,*/
+                 Reference: ref,
+                 VoucherTags: multipleTag, 
+                 VoucherDesc: description,
+                 VoucherSubs: Items
+             };
+                //var CombineData = { 'VoucherTypeId': VouType, 'VoucherDate': VoucherDate, 'AccountMainId': Thead, 'WarehouseId': Location, 'VoucherDesc': description };
+
+              //  var jsonItems=JSON.stringify(CombineData);
+
+                //var data = JSON.stringify({ 'Id':0 ,'VoucherTypeId': VouType, 'VoucherDate': VoucherDate, 'AccountMainId': Thead, 'WarehouseId': Location, 'Reference': ref, 'VoucherDesc': description, 'VoucherSubs': Items });
+
+              //var jsonItems = CombineData;
+
+                console.log(vouchermodel);
+                alert('hit');
+                //$.ajax({
+                //    type: "POST",
+                //    url: '@Url.Action("AddVoucher", "Accounts")',
+                //    contentType: "application/json",
+                //    data: data,
+                //    success: function (response) {
+                //        alert('found');
+                //        // Do something with the response
+                //    },
+                //    error: function (xhr, status, error) {
+                //        console.error(error);
+                //    }
+                //});
+
+                //var vouchermodel =
+                //    {
+                //        "Id": 0,
+                //        "VoucherTypeId": "1",
+                //        "VoucherDate": "05-Feb-23"
+                //    };
+
+                //console.log(vouchermodel);
+
+
+                //var AccountHead = {
+                //    Id: 0,
+                //    AccName: "Fahad",
+                //    AccountCategoryId: 1,
+                //    ParentId: 1,
+                //    AccCode: "10001",
+                //    AccType: "L",
+                //    CountryId: "1",
+                //    OpDebit: 1000,
+                //    OpCredit: 2000,
+                //    Description: "Test ABC"
+
+                //}
+
+               //var AccountHead = {
+               //     Property1: "Fahad",
+               //     Property2: 0
+
+               // }
+
+
+                $.ajax({
+                    async: true,
+                    type: "POST",
+                    url: '@Url.Action("AddVoucher", "Accounts")',
+                     data: { model:vouchermodel },
+                    //contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        // Handle the response
+                    }
+                });
+
+
+
+                //$.ajax({
+                //    type: "POST",
+                //    url: '@Url.Action("AddVoucher", "Accounts")',
+                //    contentType: "application/json",
+                //    dataType: 'json',
+                //   data: {modelabc : JSON.stringify(data)},
+                //    success: function (response) {
+                //        // Do something with the response
+                //    },
+                //    error: function (xhr, status, error) {
+                //        console.error(error);
+                //    }
+                //});
+
+
+
+                //$.ajax({
+                ////    //url: '/Voucher/Create',
+                ////    //url: '@Url.Action("Create", "Accounts")',
+                ////    //data: model,
+                ////    //type: 'POST',
+                ////    //contentType: 'application/json;',
+                ////    // dataType: 'json',
+
+                ////    type: 'POST',
+                //    type: "POST",
+                //    url: '@Url.Action("AddVoucher", "Accounts")',
+                //    //dataType: 'json',
+
+                //    //contentType: false,
+                //    //processData: false,
+                //    ////async: 'false',
+                //    //beforeSend: function() {
+                //    //    //$('#loader').removeClass('hidden');
+                //    //    //$('#voucherSave').attr('disabled');
+                //    //},
+                //    //data: { acc_voucherMain: jsonItems },
+
+                //    data: data,
+                //    contentType: "application/json; charset=utf-8",
+                //    dataType: "json",
+
+
+                //    success: function(result) {
+                //        console.log(result);
+                //        if (result.Success == "1") {
+                //            //window.location.href = "/Voucher/VoucherList";
+                //            //window.location.href = '@Url.Action("VoucherList", "Accounts")';
+                //        }
+                //        else {
+                //            alert(result.ex);
+                //        }
+                //        //StopSpinner(".btnVoucher");
+                //    }
+                //    //complete: function() {
+                //    //   // $('#loader').addClass('hidden');
+                //    //   // $('#voucherSave').attr('enabled');
+                //    //},
+                //    //error: function() {
+                //    //    //StopSpinner(".btnVoucher");
+                //    //}
+                //});
+
+
+            });
+
+
+
+        });
+    </script>
+}
+
+
+
+
+

@@ -1,0 +1,155 @@
+﻿@model Atrai.Core.Entity.SupplierModel
+@{
+    ViewData["Title"] = "AddSupplier";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-md-10 col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4 class="text-primary">Supplier Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="admin" asp-action="AddSupplier" method="post">
+                                @if (Model != null)
+                                {
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" />
+                                    <input type="hidden" asp-for="LuserId" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Id" value="0" />
+                                }
+                                <div class="row">
+
+
+
+                                    <div class="col-md-6 col-6">
+                                        <div class="form-floating mb-3 p-0">
+                                            <input type="text" asp-for="SupplierName" class="form-control form-control-sm" placeholder="Type Here">
+                                            <label for="floatingInput" asp-for="SupplierName"></label>
+                                            <span asp-validation-for="SupplierName" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-6 col-6">
+                                        <div class="form-floating mb-3">
+                                            <input asp-for="Email" class="form-control form-control-sm" type="email" placeholder="Enter Email">
+                                            <label for="floatingInput" asp-for="Email"></label>
+                                            <span asp-validation-for="Email" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="col-md-6 col-6">
+                                        <div class="form-floating mb-3">
+                                            <input asp-for="Phone" class="form-control form-control-sm" type="tel" placeholder="Enter phone">
+                                            <label asp-for="Phone"></label>
+                                            <span asp-validation-for="Phone" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                     <div class="col-md-3 col-6">
+                                        <div class="form-floating mb-3">
+                                            <input asp-for="OpBalance" class="form-control form-control-sm" type="number" placeholder="Opening balance">
+                                            <label asp-for="OpBalance"></label>
+                                            <span asp-validation-for="OpBalance" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+
+
+                   
+
+
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <textarea class="form-control form-control-sm" asp-for="PrimaryAddress" rows="3" placeholder="Primary Address input"></textarea>
+                                            <label asp-for="PrimaryAddress"></label>
+
+                                            <span asp-validation-for="PrimaryAddress" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <textarea class="form-control form-control-sm" asp-for="SecoundaryAddress" rows="3" placeholder="Secoundary Address input"></textarea>
+                                            <label asp-for="SecoundaryAddress"></label>
+
+                                            <span asp-validation-for="SecoundaryAddress" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                                     <div class="col-md-6">
+                                        <div class="form-floating mb-3">
+                                            <input asp-for="Notes" class="form-control form-control-sm" type="text" placeholder="Enter Notes">
+                                            <label asp-for="Notes"></label>
+
+                                            <span asp-validation-for="Notes" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                  
+
+                                    <div class="col-md-3 col-6">
+                                        <div class="form-floating mb-3">
+                                            @Html.DropDownList("SupType", new List<SelectListItem>
+                                            {
+                                            new SelectListItem() {Text = "Ledger", Value="L"},
+                                            new SelectListItem() {Text = "Group", Value="G"},
+                                            }, new { @class = "form-control form-control-sm" })
+                                            <label for="Date"> Supplier Type : </label>
+                                            @Html.ValidationMessage("SupType", "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="col-md-6 col-6">
+                                        <div class="form-floating mb-3">
+
+                                            @Html.DropDownListFor(x => x.SupParentId,
+                                            new SelectList((IEnumerable<SelectListItem>)ViewBag.SupplierGroupHead, "Value", "Text"), "Select Supplier Group",
+                                            htmlAttributes: new { @class = "form-control form-control-sm", id = "SupParentId" })
+                                            @Html.LabelFor(x => x.SupParentId)
+                                            @Html.ValidationMessageFor(x => x.SupParentId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="form-group">
+                                    @if (ViewBag.ActionType == "Create")
+                                    {
+                                        <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" />
+                                    }
+                                    else if (ViewBag.ActionType == "Edit")
+                                    {
+                                        <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" />
+                                    }
+                                    else if (ViewBag.ActionType == "Delete")
+                                    {
+                                        <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>
+                                    }
+                                    @Html.ActionLink("Back", "SupplierList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                </div>
+
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->

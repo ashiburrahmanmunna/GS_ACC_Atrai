@@ -1,0 +1,248 @@
+﻿@model Atrai.Core.Entity.PurchaseBatchItemsModel
+@{
+    ViewData["Title"] = "IMEIExchange";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>Exchange IMEI </h4>
+
+                    </div>
+
+
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="Purchase" asp-action="IMEIExchange" method="post">
+                                @if (Model != null)
+                                {
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" />
+                                    <input type="hidden" asp-for="LuserId" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Id" value="0" />
+                                }
+
+                                <div class="row">
+                                      <div class="col-md-11 col-12">
+
+                                        <div class="form-group">
+                                              <div class="row">
+
+                                                <div class="col-md-4 col-12">
+                                                    <label asp-for="BatchSerialNo">Given IMEI</label>
+                                                    @Html.TextBoxFor(x => x.BatchSerialNo, null, new { @id = "SerialNo", @class = "form-control", @placeholder = "Serial No" ,  @autocomplete="off" })
+                                                    @Html.ValidationMessageFor(x => x.BatchSerialNo, "", new { @class = "text-danger" })
+                                                </div>
+
+                                                <div class="col-md-5 col-12">
+                                                    @Html.Label("Product Name")
+                                                    @Html.TextBoxFor(x=>x.ProductName,null , new { @id = "ProductName", @class = "form-control", @readonly = "readonly" })
+                                                </div>
+
+                                                <div class="col-md-3 col-12">
+                                                     @Html.Label("Purchase Invoice")
+                                                     @Html.TextBoxFor(x=>x.PurchaseInvoiceNo, null, new {@id= "PurchaseInvoiceNo" , @class = "form-control", @readonly = "readonly" })
+                                                </div>
+
+
+                                                     <div class="col-md-4 col-12">
+                                                    <label asp-for="ExchangeSerialNo">Taken IMEI</label>
+                                                    <input asp-for="ExchangeSerialNo" class="form-control" placeholder="Taken IMEI"  autocomplete="off">
+                                                    <span asp-validation-for="ExchangeSerialNo" class="text-danger"></span>
+                                                </div>
+
+
+
+                                                 <div class="col-md-4 col-12 ">
+                                                    <label asp-for="ExchangeDate">Exchange Date</label>
+                                                    <input type="date" asp-for="ExchangeDate" class="form-control" autocomplete="off">
+                                                    <span asp-validation-for="ExchangeDate" class="text-danger"></span>
+                                                </div>
+
+
+                                               <div class="col-md-4 col-12">
+                                                @Html.LabelFor(x => x.SupplierId)
+                                                @Html.DropDownListFor(x => x.SupplierId,
+                                                new SelectList((IEnumerable<SelectListItem>)ViewBag.Suppliers, "Value", "Text"), "Select Supplier",
+                                                htmlAttributes: new { @class = "form-control", id = "SupplierId" })
+                                                @Html.ValidationMessageFor(x => x.SupplierId, "", new { @class = "text-danger" })
+                                            </div>
+                                        
+                                            </div>
+                                        </div>
+
+
+     
+
+
+                                        <div class="form-group">
+                                            @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+
+
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                                <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" /> }
+                                            else if (ViewBag.ActionType == "Edit")
+                                            {
+                                                <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" /> }
+                                            else if (ViewBag.ActionType == "Delete")
+                                            {
+                                                <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>}
+
+
+                                            @Html.ActionLink("Back", "ExchangeList", "Purchase", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                        </div>
+
+
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+@section scripts {
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+        //$('#ExchangeDate').datepicker({
+        //    //dateFormat: 'dd/mm/yy',
+        //    dateFormat: 'dd-M-yy',
+        //    todayHighlight: true,
+        //    autoclose: true
+        //});
+
+
+
+        //if ($("#Id").val() > 0) {
+
+        //    if ($("#ExchangeDate").val() == "") {
+        //    }
+
+        //    if ($("#ExchangeDate").val() == "01-Jan-01 12:00:00 AM")
+        //    {
+        //        $("#ExchangeDate").val("");
+        //    };
+
+        //}
+        //else {
+        //        CurrentDateForExchangeDate();
+
+        //}
+
+
+        function CurrentDateForExchangeDate() {
+            var date = new Date();
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear();
+            $("#ExchangeDate").val(val);
+
+        }
+
+
+
+        autocompletefunctionBarcodeScan();
+        function autocompletefunctionBarcodeScan() {
+            $("#SerialNo").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '../admin/SerialSearchForExchange/',///fahad after dinner
+                        dataType: "json",
+                        data: { query: $("#SerialNo").val() },
+                        success: function (data) {
+                            console.log(data);
+                            //alert('Wait');
+                            response($.map(data, function (item) {
+                                return { Id: item.Id, ProductId: item.ProductId, label: item.BatchSerialNo + ' ' + item.ProductName, ProductName: item.ProductName,  BatchSerialNo: item.BatchSerialNo, Price: item.SalePrice, InvoiceNo: item.InvoiceNo, InvoiceDate: item.InvoiceDate , SupplierId:item.SupplierId};
+                            }));
+
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                //response: function (event, ui) {
+                //    // Make your preferred selection here
+
+                //    var downKeyEvent = $.Event("keydown");
+                //    downKeyEvent.keyCode = $.ui.keyCode.DOWN; // event for pressing "down" key
+
+                //    var enterKeyEvent = $.Event("keydown");
+                //    enterKeyEvent.keyCode = $.ui.keyCode.ENTER; // event for pressing "enter" key
+                //    ////alert('found');
+
+                //    ////$("#SerialNo").val("SSD20"); // enter text to trigger autocomplete
+                //    $("#SerialNo").trigger(downKeyEvent); // First downkey invokes search
+                //    $("#SerialNo").trigger(downKeyEvent); // Second downkey highlights first item
+
+
+                //    $("#SerialNo").trigger(enterKeyEvent); // Enter key selects
+
+                //},
+                autoFocus: true,
+                focus: function (event, ui) { event.preventDefault(); },
+                minLength: 0,
+                select: function (event, ui) {
+
+
+                    var duplicatefound = 0;
+                    $("#Id").val(ui.item.Id);
+                    $("#ProductId").val(ui.item.ProductId);
+                    $("#ProductName").val(ui.item.ProductName);
+                    //$("#PurchaseId").val(ui.item.InvoiceId);
+                    $("#PurchaseInvoiceNo").val(ui.item.InvoiceNo);
+                    //$("#PurchaseBatchId").val(ui.item.SerialId);
+                    $("#SerialNo").val(ui.item.BatchSerialNo);
+
+                    $("#SupplierId").val(ui.item.SupplierId);
+
+                    return false;
+                }
+            }).on("focus", function () {
+                if ($("#SerialNo").val().length > 0) {
+                    $(this).autocomplete("search", '');
+                    //$(this).data('ui-autocomplete').menu.element.children().first().click();
+                    //var e = $.Event("keypress", { which: 9 });
+                    //$('#SerialNo').trigger(e);
+                };
+
+            });
+        }
+
+
+
+
+    });
+
+    function PreviewImage() {
+        var oFReader = new FileReader();
+        oFReader.readAsDataURL(document.getElementById("FileUpload").files[0]);
+
+        oFReader.onload = function (oFREvent) {
+            document.getElementById("UploadFile").src = oFREvent.target.result;
+        };
+    };
+</script>
+}
+

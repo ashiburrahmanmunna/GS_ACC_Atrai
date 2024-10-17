@@ -1,0 +1,498 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@*@model IEnumerable<Atrai.Core.Entity.InvoiceBillModel>*@
+@{ ViewData["Title"] = "Invoice / Bill List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+
+        @*
+
+            </div>*@
+
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-md-2 col-12">
+                                @Html.ActionLink("Create Invoice / Bill", "AddInvoiceBill", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md-2 col-12 mt-1">
+                                <h4 style="color: #1976d2;">Invoice Bill List</h4>
+                            </div>
+                        </div>
+
+
+                        <div class="card p-2 mb-2">
+                            <div class="row">
+                                <div class="col-md-2 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("User", ViewBag.User as List<SelectListItem>, "Select User", new { id = "UserId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                <label for="FDate">From Date</label>
+                                            </span>
+                                        </div>
+                                        @Html.TextBox("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "Select From Date ", @autocomplete = "off", name = "FromDate" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                <label for="TDate">To Date</label>
+                                            </span>
+                                        </div>
+                                        @Html.TextBox("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "Select To Date ", @autocomplete = "off", name = "ToDate" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <label class="pr-2"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="HTML5" /> HTML5  </label>
+
+
+                                </div>
+
+
+
+
+                                <div class="col-md-3 col-12">
+
+                                    @Html.DropDownList("Status", new List<SelectListItem>
+                                                                                                                                        {
+                                            new SelectListItem() {Text = "Bad Debt", Value="BadDebt"},
+                                            new SelectListItem() {Text = "Discount", Value="Discount"},
+                                            new SelectListItem() {Text = "Received", Value="Received"},
+                                            new SelectListItem() {Text = "Last Month Due", Value="LastMonthDue"},
+
+                                        }, "Select Status", new { @class = "form-control form-control-sm" })
+
+                                </div>
+                                <div class="col-md-2 col-12">
+                                    <button class="btn btn-success mb-1 btn-block rounded-0" type="button" onclick="ReportPrint('PrintInvoiceSummary')">Invoice Summary</button>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                        @Html.TextBox("InternetUserId", null, new { @class = "form-control form-control-sm text-center UserId", @placeholder = "Select Member Id ", @autocomplete = "off", name = "UserId" })
+                                </div>
+                                <div class="col-md-2 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.TextBox("UserName", null, new { @class = "form-control form-control-sm text-center UserName", @readonly = "readonly", @placeholder = "User Name ", @autocomplete = "off", name = "UserName" })
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-12">
+                                    <button class="btn btn-success mb-1 btn-block rounded-0" type="button" onclick="ReportPrint('PrintSubLedger')">Member Ledger</button>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+
+                        <div class="table-responsive m-t-10">
+                            <table id="tbllist" class="display nowrap table table-sm display compacttable-hover  table-bordered" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr></tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr></tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+
+@section scripts{
+    <script InvoiceBillId="text/javascript">
+
+
+
+
+        autocompletefunction();
+        function autocompletefunction() {
+            $("#InternetUserId").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '../admin/billuserIddata/',
+                        dataType: "json",
+                        data: { query: $("#InternetUserId").val() },
+                        success: function (data) {
+                            console.log(data);
+                            response($.map(data, function (item) {
+                                return { UserId: item.UserId, label: item.UserId, UserName: item.UserName, Id: item.Id };//, , BillAmount: item.BillAmount
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                autoFocus: true,
+                minLength: 3,
+                select: function (event, ui) {
+
+
+                    $("#UserName").val(ui.item.UserName);
+                    $("#InternetUserId").val(ui.item.UserId);
+
+                    return false;
+                }
+            });
+        }
+
+
+
+
+
+
+        function ReportPrint(btnvalue) {
+
+
+            var reporttype = $("input[name=RptType]:checked").val();
+            var criteria = "DownloadReport";
+
+
+            var InternetUserId = $('#InternetUserId').val();
+            var UserId = $("UserId").val();
+
+
+            var FromDate = $(".FromDate").val();
+            var ToDate = $(".ToDate").val();
+
+
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("InvoiceBillReportList", "Admin")',
+                dataType: 'json',
+                async: true,
+                data: { rptFormat: reporttype, action: btnvalue, FromDate: FromDate, ToDate: ToDate, InternetUserId: InternetUserId, UserId: UserId },
+                success: function (response) {
+
+                    window.open(response.Url, '_blank')
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+
+        }
+
+
+
+
+
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            CurrentDate();
+
+            $(".FromDate").datepicker({
+
+                dateFormat: "dd-M-y",
+                changeMonth: true,
+                changeYear: true
+
+            });
+
+
+        $(".ToDate").datepicker({
+
+            dateFormat: "dd-M-y",
+            changeMonth: true,
+            changeYear: true
+
+        });
+
+        function CurrentDate() {
+            var date = new Date();
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+            if ($(".FromDate").val() == '') {
+                $(".FromDate").val(val);
+            }
+            if ($(".ToDate").val() == '') {
+                $(".ToDate").val(val);
+            }
+        }
+
+        var UserId = $("#UserId").val();
+        //alert(UserId);
+    var fromdate = $("#FromDate").val();
+    var todate = $("#ToDate").val();
+
+    loaddata(fromdate, todate, UserId ,1);
+
+
+
+        function loaddata(FromDate = "", ToDate = "", UserId = "", isAll = 1) {
+            //alert(UserId, FromDate, ToDate);
+
+            table = $('#tbllist').DataTable({
+                initComplete: function () {
+
+                    var input = $('.dataTables_filter input').unbind(),
+                        self = this.api(),
+
+                        $searchButton = $('<button class="btn rounded-0 btn-info btn-sm" tabindex="0" aria-controls="tbllist" InvoiceBillId="button" title="Search"><span><i class="mdi mdi-file-excel"></i></span></button>')
+                            .text('Search')
+                            .click(function () {
+                                if (input.val().length > 0) {
+                                    self.search(input.val()).draw();
+
+                                }
+                                else {
+                                    loaddata(fromdate, todate, UserId, 1);
+
+                                }
+                            }),
+
+                        $allButton = $('<button class="ml-1 btn rounded-0 btn-primary btn-sm" tabindex="0" aria-controls="tbllist" InvoiceBillId="button" title="Load"><span><i class="mdi mdi-file-excel"></i></span></button>')
+                            .text('Load')
+                            .click(function () {
+                                input.val('');
+                                loaddata(fromdate, todate, UserId, 1);
+                            })
+                    $('.dataTables_filter').append($allButton, $searchButton);//, $clearButton
+                },
+
+                serverSide: true,  "scrollX": true,
+                "orderCellsTop": true,
+                //"scrollX": true,
+                //"scrollY": "60vh",
+                //"scrollCollapse": true,
+                //"info": true,
+                "iDisplayLength": 10,
+                "lengthMenu": [[5, 10, 20, 50,100,500,1000], [5, 10, 20, 50, 100,500,1000]],
+                //"columnDefs": [
+                //    // Hide second, third and fourth columns
+                //    { "visible": false, "targets": [] }
+                //    //{ targets: [7], className: "noWrapTd" } // white-space: nowrap;
+                //],
+                dom: '<"dom_wrapper fh-fixedHeader"lBf>tip',
+                //buttons: [
+                //    'copy', 'csv', 'excel', 'pdf'
+                //],
+                buttons: {
+                    dom: {
+                        button: {
+                            className: 'btn rounded-0'
+                        }
+                    },
+                    buttons: [
+                        //'copy', 'csv', 'excel', 'pdf'
+                        //$(this).addClass("btn-group dt-buttons justify-content-center mb-3")
+                        //{
+                        //    extend: 'colvis',
+                        //    "columns": ':not(:last-child)',
+                        //    text: '<i class="mdi mdi-view-column"></i>',
+                        //    className: 'btn-info',
+                        //    titleAttr: 'Show / hide columns',
+                        //    //collectionLayout: 'fixed two-column'
+
+                        //},
+                        {
+                            extend: 'excel',
+                            text: '<i class="mdi mdi-file-excel"></i>',
+                            className: 'btn-success',
+                            titleAttr: 'Export to excel'
+                        }
+
+                    ]
+                },
+                //"datatest": function (d) {
+                //    d.FromDate = $('#FromDate').val();
+                //    d.ToDate = $('#ToDate').val();
+                //    alert(d);
+                //},
+                //"fixedHeader": true,
+                //"responsive": true,
+                "ajax": {
+                    "url": "@Url.Action("GetInvoiceBillList", "Admin")",
+                    "data": { FromDate: $("#FromDate").val(), ToDate: $("#ToDate").val(), UserId: $("#UserId").val(), isAll: isAll, Status: $("#Status").val() },
+
+                    //"url": "/Cities/GetListViewModel",
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "title": "InvoiceBillId", "data": "Id", "searchable": true ,"visible" : false},
+                    //{
+                    //    "title": "BillNo", "data": "BillNo", "searchable": true
+                    //},
+
+                    {   "title":"Bill No",
+                        "className": "text-nowrap",
+                        "data": {
+                            Id: "BillNo"
+                        },
+                        "searchable": true,
+
+                        "render": function (data, InvoiceBillId, row) {
+
+                            var myUrlprint = '@Url.Action("InvoiceBillPrint", "Admin")?InvoiceBillId=' + data.Id;
+                            var billno = data.BillNo;
+                            var buttons = '';
+                            buttons += '<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"btn btn-icon btn-success btn m-b-0\" target=\"_blank\"><i class="fa fa-print"> ' + billno +'</i></a></span>';
+                            return buttons;
+                        }
+
+                    },
+
+
+
+                    { "title": "UserId", "data": "UserId", "searchable": true },
+                    { "title": "User Name", "data": "UserName", "searchable": true },
+                    { "title": "Billed Date", "data": "BilledDateString", "searchable": false },
+                    { "title": "Follow Date", "data": "NextFollowDateString", "searchable": false },
+
+                    
+                    { "title": "Expired Date", "data": "BilledDateString", "searchable": false },
+
+                    { "title": "Received Date", "data": "ReceivedDateString", "searchable": false },
+
+                    //{
+                    //    "InvoiceBillId": 'datetime',
+                    //    "def": function () { return new Date(); },
+                    //    "format": 'M/D/YYYY',
+                    //    "fieldInfo": 'US style m/d/y format', "data": "BilledDate", "title": "Bill Date", "searchable": false
+                    //},
+                    //{
+                    //    "InvoiceBillId": 'datetime',
+                    //    "def": function () { return new Date(); },
+                    //    "format": 'M/D/YYYY',
+                    //    "fieldInfo": 'US style m/d/y format', "data": "ReceivedDate", "title": "Received Date", "searchable": false
+                    //},
+                    { "title": "Description", "data": "Description", "searchable": true },
+                    { "title": "Bill Amount", "data": "BillAmount", "searchable": true },
+                    { "title": "Received By", "data": "ReceivedByHead", "searchable": true },
+
+                    
+                    {
+                        "title": "Received Amount",
+                        "className": "text-nowrap text-center",
+                        "data": {
+                            ReceivedAmount: "ReceivedAmount" //,
+                        },
+                        "render": function (data, type, row) {
+                            var buttons = '';
+                            if (data.ReceivedAmount <= 0) {
+                                buttons += '<p style="color:red"> ' + formatter.format(data.ReceivedAmount) + ' </p>';
+                            }
+                            else {
+                                buttons += '<label class="label label-info" style="vertical font-size:16px;color:black;;margin-top: 10px"> ' + formatter.format(data.ReceivedAmount) + ' </label>';
+                            }
+                            return buttons;
+                        }
+                    },
+
+                    
+                    //{ "title": "Received Amount", "data": "ReceivedAmount", "searchable": true },
+                    { "title": "Discount", "data": "Discount", "searchable": true },
+                    { "title": "Bad Debt", "data": "BadDebt", "searchable": true },
+
+                    {
+                        "className": "text-nowrap",
+                        "data": {
+                            Id: "Id" //,
+                            //VoucherInvoiceBillIdName:"VoucherInvoiceBillIdName",
+                            //isPosted:"isPosted"
+                        },
+
+                        "render": function (data, InvoiceBillId, row) {
+
+                            var IsUserLevel = @HttpContextAccessor.HttpContext.Session.GetInt32("IsUserLevel").ToString();
+                            var myUrlprint = '@Url.Action("InvoiceBillPrint", "Admin")?InvoiceBillId=' + data.Id;
+                            var myUrledit = '@Url.Action("EditInvoiceBill", "Admin")?InvoiceBillId=' + data.Id;
+                            var myUrldelete = '@Url.Action("DeleteInvoiceBill", "Admin")?InvoiceBillId=' + data.Id;
+                            var myUrlView = '@Url.Action("ViewInvoiceBill", "Admin")?InvoiceBillId=' + data.Id;
+
+                            var message = `return confirm('Are you sure you want to Remove this InvoiceBill ?')`;
+
+                            var buttons = '';
+                            if (!data.isPost) {
+
+                                if (IsUserLevel == "1" || IsUserLevel == "2") {
+                                   // alert('1,2')
+                                    //alert(IsUserLevel);
+                                    buttons += '<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"btn btn-icon btn-success btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-print"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick = \"' + message + '\"   class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-remove"></i></a></span>';
+                                }
+                                else if (IsUserLevel == "3")
+                                {
+                                    //alert('Enter');
+                                    buttons +='<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                    '<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"btn btn-icon btn-success btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-print"></i></a></span>';
+                                }
+                                //else {
+                                //    buttons += '<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"btn btn-icon btn-success btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-print"></i></a></span>';
+                                //}
+
+                            } else {
+                                buttons += '<span data-toggle="tooltip" title="View"> <a href=\"' + myUrlView + '\" class=\"fa fa-eye text-info px-1 h4\" target=\"_blank\"></a></span>';
+                            }
+                            return buttons;
+                        }
+
+                    }
+                ],
+                "order": [0, "desc"],
+                "processing": true,
+                "language": {
+                    sLengthMenu: " _MENU_",
+                    search: "",
+                    searchPlaceholder: "Search..."
+                },
+                "destroy": true
+            });
+            //$('#tbllist_filter input').unbind();
+            // alert('Load Successfully');
+            //$('.dataTables_filter input').bind('keyup', function (e) {
+            //    if (e.keyCode == 13) {
+            //        //alert('enter');
+            //        table.search(this.value).draw();
+            //    }
+            //});
+        }
+
+    });
+
+
+
+        var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+        var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+        var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+            {
+            style: 'currency',
+            currency: CurrencyShortNameViewFormat,///'BDT'
+            minimumFractionDigits: 2,
+        });
+
+    </script>
+}
+

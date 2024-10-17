@@ -1,0 +1,373 @@
+﻿@model List<Atrai.Core.Entity.UserRoleMenuView>
+@{ ViewData["Title"] = "AddAndroidMenuPermission";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; 
+}
+<style>
+/*    .list {
+        display: grid;
+        grid-template-columns: 180px 180px 180px 180px 180px;
+        width: 360px;
+        margin-left: 0;
+        padding-left: 0;
+        border: 1px solid rgb(0, 0, 0);
+        list-style-type: none;
+    }
+
+        .list li {
+            width: 180px;
+            border: 1px solid rgb(0, 0, 0);
+            box-sizing: border-box;
+        }
+
+            .list li span {
+                display: block;
+                padding: 6px 9px;
+                border: 1px solid rgb(0, 0, 0);
+            }
+
+                .list li span.category {
+                    font-weight: bold;
+                    text-align: center;
+                    text-transform: uppercase;
+                }*/
+
+    .row ul li {
+        list-style-type: none;
+    }
+
+    .list-group-item {
+        display: flex;
+        width: 80%;
+        justify-content: space-between;
+        flex-direction: row;
+        flex-flow: row wrap;
+        min-height: 3em;
+    }
+
+    .items {
+    }
+
+
+</style>
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>Menu Permission</h4>
+                    </div>
+
+                        @*@Html.HiddenFor(m => m.Id, new { @value = Model.Id })
+                        @Html.HiddenFor(m => m.CreateDate, new { @value = Model.CreateDate })
+                        @Html.HiddenFor(m => m.LuserId, new { @value = Model.LuserId })*@
+
+                            <div class="card-body">
+                
+                                    <div class="form-group">
+                                        <form asp-controller="Admin" asp-action="AddAndroidMenuPermission" method="get">
+                                            <div class="row">
+                                                <div class="col-md-3 col-12 ">
+                                                    @Html.DropDownList("BusinessTypeId", new SelectList((IEnumerable<SelectListItem>)ViewBag.BusinessType, "Value", "Text"), "Select BusinessType",
+                                                        htmlAttributes: new { @class = "form-control", id = "BusinessTypeId" })
+                                                </div>
+                                                @*<div class="col-md-3 col-12 ">
+                                                    <label for="Role"> Role : </label>
+                                                    @Html.DropDownList("UserRoleId", new SelectList((IEnumerable<SelectListItem>)ViewBag.Role, "Value", "Text"), "Select User Role",
+                                                    htmlAttributes: new { @class = "form-control", id = "UserRoleId" })
+                                                </div>*@
+
+                                                <div class="col-md-1 col-12 text-center">
+                                                    <button type="submit" class="btn btn-success btn-block  rounded-0"> Load </button>
+                                                </div>
+
+
+                                            </div>
+                                        </form>
+
+
+
+                                        <form asp-action="AddAndroidMenuPermission" id="fahadmenulist">
+
+                                            <div class="form-group">
+                                                <div class="row">
+
+                                                    <div class="col-md-3 col-12 text-center">
+
+                                                        <input class="form-control" type="checkbox" id="myCheckAll" /> Check All
+
+                                                        <br />
+                                                        <br />
+                                                    </div>
+
+                                                    <div class="col-md-2 col-12 text-center">
+                                                        <input type="submit" value="Save" class="btn btn-primary btn-block rounded-0" />
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+
+                                            @*<div class="row">
+            <div class="card p-2">
+                <div class="table-responsive text-nowrap">
+                    <table id="tbllist" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%">
+                        <thead class="">
+                            <tr>
+                                <th style="display:none">
+                                    Id
+                                </th>
+                                <th style="display:none">
+                                    Menu Id
+                                </th>
+                                <th style="display:none">
+                                    User Role Id
+                                </th>
+                                <th style="display:none">
+                                    Business Type Id
+                                </th>
+                                <th>
+                                    SLNo
+                                </th>
+                                <th>
+                                    Permission
+                                </th>
+                                <th>
+                                    Group
+                                </th>
+                                <th>
+                                    Parent
+                                </th>
+                                <th>
+                                    Menu
+                                </th>
+                                <th>
+                                    Create
+                                </th>
+                                <th>
+                                    Update
+                                </th>
+                                <th>
+                                    Delete
+                                </th>
+
+
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @if (Model != null)
+                            {
+                                var slno = 0;
+                                for (var i = 0; i < Model.Count; i++)
+                                {
+                                    slno++;
+                                    <tr>
+                                        <td style="display:none">
+                                            @Model[i].Id
+                                        </td>
+                                        <td style="display:none">
+                                            @Model[i].MenuId
+                                        </td>
+                                        <td style="display:none">
+                                            @Model[i].UserRoleId
+                                        </td>
+                                        <td style="display:none">
+                                            @Model[i].BusinessTypeId
+                                        </td>
+                                        <td>
+                                            @slno
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" class="checkboxpermit" asp-for="@Model[i].Permitted" />
+                                        </td>
+                                        <td>
+                                            @Model[i].MenuGroupName
+                                        </td>
+                                        <td>
+                                            @Model[i].ParentMenuName
+                                        </td>
+                                        <td>
+                                            @Model[i].MenuName
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" class="checkboxcreate" asp-for="@Model[i].IsCreate" />
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" class="checkboxupdate" asp-for="@Model[i].IsUpdate" />
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" class="checkboxdelete" asp-for="@Model[i].IsDelete" />
+                                        </td>
+
+                                    </tr>
+                                    }
+                                   }
+
+                            </table>
+                </div>
+                <br />
+            </div>
+
+        </div>*@
+
+                                            @*<div id="live-search" action="" class="styled" method="post">
+                                                <fieldset>
+                                                </fieldset>
+                                            </div>*@
+                                            <input type="text" class="form-control col-md-3" id="filter" value="" placeholder="Search"/>
+                                            <span id="filter-count"></span>
+
+                                            <div class="row display">
+                                                <div class="col-md-12">
+
+                                                    <div class="form-group">
+                                                        <ul>
+                                                            @if (Model != null)
+                                                            {
+                                                <li class="list-group-item">
+                                                    <span class="col-md-1">
+                                                        SLNo
+                                                    </span>
+                                                    <span>
+                                                        Menu Caption
+                                                    </span>
+                                                    <span class="col-md-3">
+                                                        Menu Permission
+                                                    </span>
+                                                    @*<span class="col">
+                    Create
+                </span>
+                <span class="col">
+                    Update
+                </span>
+                <span class="col">
+                    Delete
+                </span>*@
+
+                                                </li>
+                                                 var slno = 0;
+                                                for (var i = 0; i < Model.Count; i++)
+                                                {
+                                                    slno++;
+                                        <li class="list-group-item tr">
+
+                                            <span class="td col-md-1">
+
+                                                @slno
+                                            </span>
+
+
+
+                                            <span class="col-md-3 col-4">
+                                                @Model[i].MenuGroupName
+                                            </span>
+                                            <span class="col-md-3">
+                                                <input type="checkbox" class="checkboxpermit" asp-for="@Model[i].Permitted" /> -  @Model[i].MenuName
+                                                <input type="hidden" asp-for="@Model[i].Id" />
+                                                <input type="hidden" asp-for="@Model[i].MenuId" />
+                                                @*<input type="hidden" asp-for="@Model[i].UserRoleId" />*@
+                                                <input type="hidden" asp-for="@Model[i].BusinessTypeId" />
+                                            </span>
+
+                                            @*<span class="col">
+            <input type="checkbox" class="checkboxcreate" asp-for="@Model[i].IsCreatePermission" /> - Create
+        </span>
+
+        <span class="col">
+            <input type="checkbox" class="checkboxupdate" asp-for="@Model[i].IsUpdatePermission" /> - Update
+        </span>*@
+
+                                            @*<span class="col">
+            <input type="checkbox" class="checkboxdelete" asp-for="@Model[i].IsDeletePermission" /> - Delete
+
+
+        </span>*@
+
+
+
+                                        </li>
+}
+                                }
+                                                        </ul>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </form>
+
+
+                                    </div>
+
+
+
+         
+
+               
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+@section scripts {
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $('#myCheckAll').click(function () {
+            var chk = $(this).is(':checked');
+            var cnt = $('input[type=checkbox]').length;
+            $('input[type=checkbox]').each(function () {
+                if (chk) {
+                    $(this).attr('checked', 'checked');
+                }
+                else {
+                    $(this).removeAttr('checked');
+                }
+            });
+        }); 
+
+
+    });
+
+
+
+        $(document).ready(function () {
+            $("#filter").keyup(function () {
+
+                // Retrieve the input field text and reset the count to zero
+                var filter = $(this).val(), count = 0;
+
+                // Loop through the comment list
+                $("#fahadmenulist ul li").each(function () {
+
+                    // If the list item does not contain the text phrase fade it out
+                    if ($(this).text().search(new RegExp(filter, "i")) < 0) {
+                        $(this).fadeOut();
+
+                        // Show the list item if the phrase matches and increase the count by 1
+                    } else {
+                        $(this).show();
+                        count++;
+                    }
+                });
+
+                // Update the count
+                var numberItems = count;
+                $("#filter-count").text("Search Count = " + count);
+            });
+        });
+
+
+
+
+
+    </Script>
+    
+}

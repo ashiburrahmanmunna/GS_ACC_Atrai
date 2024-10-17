@@ -1,0 +1,1092 @@
+﻿@*@model IEnumerable<Atrai.Core.Entity.Online OrderModel>*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Online Order List";
+    var pagewrapper = "";
+
+    var customerid = HttpContextAccessor.HttpContext.Session.GetInt32("CustomerId");
+    if (customerid > 0)
+    { 
+
+        Layout = "~/Views/Shared/_customerLayout.cshtml"; 
+
+    }
+    else
+    {
+        pagewrapper = "page-wrapper";
+        Layout = "~/Views/Shared/_adminLayout.cshtml"; 
+        
+    }
+
+
+}
+
+
+
+<style>
+    div.dataTables_wrapper div.dataTables_filter input {
+        width: 130px;
+    }
+
+    .p-15 {
+        padding: 10px 13px 15px 13px !important;
+    }
+
+    .card-dashboard p {
+        font-size: 14px;
+        font-family: arial narrow;
+    }
+
+    .media p {
+        font-size: 13px;
+        font-family: "Arial Narrow";
+    }
+
+    .media {
+        font-size: 15px;
+        font-family: "Arial Narrow";
+        text-align: right;
+        padding-bottom: 2px !important;
+    }
+
+    a {
+        color: #0a275ec9;
+    }
+
+/*    tbody tr td {
+        font-family: "Arial Narrow";
+        font-size: 13px;
+    }*/
+
+
+
+
+    hr.solid {
+        border-top: 2px solid #bbb;
+        margin-top: .2rem;
+        margin-bottom: .2rem;
+        vertical-align: middle;
+    }
+
+    .lineheight {
+    margin-bottom:2px;
+    }
+    h5 {
+        margin-top: 5px;
+        margin-bottom: 1px;
+    }
+
+
+    .table-sm td, .table-sm th {
+      padding: .3rem;
+    }
+</style>
+
+<div class="@pagewrapper">
+
+
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+
+                                                                   @Html.Hidden("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+                                @Html.Hidden("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+
+                        @*<h5 class="card-header">Online Order List</h5>*@
+        <div class="card p-2">
+                      
+                        <div class="row">
+                            @*<div class="col-md-2 col-12">
+            @Html.ActionLink("New Online Order", "AddSaleBySerialSearch", null, null, new { @class = "btn btn-outline-success btn-block rounded-0", @id = "btnsale" })
+
+        </div>
+        <div class="col-md-2 col-12">
+            @Html.ActionLink("New Whole Online Order", "AddWholeSale", null, null, new { @class = "btn btn-outline-primary btn-block rounded-0", @id = "btnwholesale" })
+
+        </div>*@
+
+
+                            <div class="col-md-3 col-12">
+
+                                <h4  style="color: #1976d2;">Online Order List</h4>
+
+                            </div>
+                            <div class="col-md-3 col-12">
+                                <label class="pr-2"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                                <label class="pr-2"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                                <label class="pr-2"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+
+                            </div>
+
+
+                                 <div class="col-md-4 col-12  mb-2">
+                                               <div class="form-inline divHiddenItems">
+                                         <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text">
+                                               <i class="fa fa-calendar"></i>
+                                             </div>
+                                        </div>
+                                        <input type="text" class="form-control from-control-sm" name="date" id="daterange-btn" style="width: auto;">
+                                         <button id='btnDec' type="button" class="btn btn-danger rounded-0" title='Decrement month'><i class="fa fa-calendar-minus-o" aria-hidden="true"></i></button>
+                                        <button id='btnInc' type="button" class="btn btn-info  rounded-0" title='Increment month'><i class="fa fa-calendar-plus-o" aria-hidden="true"></i></button>
+                                        </div>
+                                        @*<span type="button" class="btn btn-sm btn-outline-info" id="daterange-btn">
+
+                                            <i class="fa fa-calendar"></i>&nbsp; <span>defaut date</span>
+
+                                            <i class="fa fa-caret-down"></i>
+                                        </span>
+                                        <input id="daterange-btn" size="40" value="">*@
+                                    </div>
+                                </div>
+@*                                    <div class="col-md-3 col-12 mb-1">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text py-0">
+                                                        From
+                                   
+                                                    </span>
+                                                </div>
+                                                @Html.TextBox("FromDate", null, new { @class = "form-control form-control-sm text-center FromDate", @placeholder = "Select From Date ", @autocomplete = "off", name = "FromDate" })
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 col-12 mb-1">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text py-0">
+                                                        To
+                                                   
+                                                    </span>
+                                                </div>
+                                                @Html.TextBox("ToDate", null, new { @class = "form-control form-control-sm  text-center ToDate", @placeholder = "Select To Date ", @autocomplete = "off", name = "ToDate" })
+                                            </div>
+                                        </div>*@
+                                        @if (customerid > 0)
+                                        {
+                                            <div class="col-md-3 col-12  mb-2">
+                                                @Html.ActionLink("Back to Dashboard", "CustomerDashboard", "Admin", null, new { @class = "btn btn-primary rounded-0", @id = "btnBack" })
+                                            </div>
+                                        }
+
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Customers", ViewBag.Customers as List<SelectListItem>, "Select Customers", new { id = "CustomerId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Users", ViewBag.Users as List<SelectListItem>, "Select Online Order User", new { id = "UserId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+
+
+                                    <div class="col-md-2 col-12">
+                                        @Html.DropDownList("Status", new List<SelectListItem>
+                                                                                                                                                                                                                                                                                                                    {
+                                                new SelectListItem() {Text = "Invoice Not Done", Value="False"},
+                                                new SelectListItem() {Text = "Invoice Done", Value="True"},
+                                                new SelectListItem() {Text = "All Online Order", Value="All"},
+                                            }, new { @class = "form-control form-control-sm" })
+                                    </div>
+
+
+                                
+                        </div>
+
+        </div>
+
+
+
+                        <div class="table-responsive mt-2">
+                            <table id="OnlineOrderList" class="table table-sm table-hover  table-bordered table-striped" cellspacing="0" width="100%">
+                            </table>
+                        </div>
+
+                        @*<div class="p-2 mb-2 animated slideInRight">
+                            <div class="row">
+                                <div class="col-md-3 col-12">
+
+                                    <div id="divfullinfoone" class="card-dashboard P-15 mt-3" style="background:antiquewhite">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-user fontshadow f-s-40 color-success"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>User Wise Online Order</h5>
+                                               
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfoone" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+                                    <div id="divfullinfofour" class="card-dashboard P-15 mt-3" style="background:lavender">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-money fontshadow f-s-40 color-primary"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>User Wise Commission</h5>
+                                 
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfofour" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+                                    <div id="divfullinfoeight" class="card-dashboard P-15 mt-3" style="background:aliceblue">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-copy fontshadow f-s-40 font-color-7"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Post / Unpost Online Order</h5>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfoeight" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3 col-12">
+
+                                    <div id="divfullinfotwo" class="card-dashboard P-15 mt-3" style="background:beige">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-calendar fontshadow f-s-40 color-info"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Date Wise Online Order</h5>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfotwo" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+                                    <div id="divfullinfonine" class="card-dashboard P-15 mt-3" style="background:ivory">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-cubes fontshadow f-s-40 color-primary"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Top Selling Category</h5>
+                                     
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfonine" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div id="divfullinfothree" class="col">
+
+                                    <div class="card-dashboard P-15 mt-3" style="background:seashell">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-sitemap fontshadow f-s-40 color-warning"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Receive By Head</h5>
+                                             
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfothree" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div id="divfullinfoseven" class="card-dashboard P-15 mt-3" style="background:honeydew">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-users fontshadow f-s-40 color-info"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Top Selling Customer</h5>
+                                       
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfoseven" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-3 col-12">
+
+                                    <div id="divfullinfofive" class="card-dashboard P-15 mt-3" style="        background: lavenderblush">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd fontshadow f-s-40 color-info"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Top Selling Item</h5>
+             
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfofive" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div id="divfullinfosix" class="card-dashboard P-15 mt-3" style="background:ivory">
+                                        <div class="media">
+                                            <div class="media-left meida media-middle">
+                                                <span><i class="fa fa-usd fontshadow f-s-40 color-danger"></i></span>
+                                            </div>
+                                            <div class="media-body media-text-right">
+                                                <h5>Top Due Customer</h5>
+                         
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p id="fullinfosix" class="m-b-0"></p>
+                                        </div>
+                                    </div>
+
+
+
+
+
+                                </div>
+
+                            </div>
+                        </div>*@
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+
+
+</div>
+
+
+
+
+
+
+@section Scripts{
+
+
+
+
+
+    <script TransactionId="text/javascript">
+
+
+        var filter = '@ViewBag.filter';
+        $("#Status").val(filter);
+
+
+
+        if (filter == "Due") {
+
+            $(".FromDate").val('1-jan-' + new Date().getFullYear().toString().substr(-2));
+        }
+
+
+        DefaultFormat('pdf');
+        $('input[type="radio"]').change(function () {
+            selectedValue = this.value;
+            DefaultFormat(selectedValue);
+
+        });
+
+        function DefaultFormat(selectedValue) {
+            $.ajax({
+                type: "GET",
+                //url: "../Admin/SetReportFormat",
+                "url": "@Url.Action("SetReportFormat", "Admin")",
+                datatype: "Json",
+                data: { reportformat: selectedValue },
+                success: function (data) {
+                    if (data.Success == 1) {
+                        //toastr.success(selectedValue + " Format Selected");
+                    }
+                }
+            });
+        }
+
+
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        //    CurrentDate();
+
+        //    $(".FromDate").datepicker({
+
+        //        dateFormat: "dd-M-y",
+        //        changeMonth: true,
+        //        changeYear: true
+
+        //    });
+
+
+        //$(".ToDate").datepicker({
+
+        //    dateFormat: "dd-M-y",
+        //    changeMonth: true,
+        //    changeYear: true
+
+        //});
+
+        //function CurrentDate() {
+        //    var date = new Date();
+        //    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        //    var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+        //    if ($(".FromDate").val() == '') {
+        //        $(".FromDate").val(val);
+        //    }
+        //    if ($(".ToDate").val() == '') {
+        //        $(".ToDate").val(val);
+        //    }
+        //}
+
+
+        
+       
+
+            //var CustomerId = $("#CustomerId").val();
+            //var UserId = $("#UserId").val();
+            //var Status = $("#Status").val();
+            //var WarehouseId = $("#WarehouseId").val();
+
+
+
+                var fromdate = $("#FromDate").val();
+                var todate = $("#ToDate").val();
+
+
+            var permission = false;
+            var UserRole = `@HttpContextAccessor.HttpContext.Session.GetString("UserRole")`;
+            //alert(UserRole);
+            //alert(permission);
+
+            if (UserRole.toLowerCase().includes("admin")) { permission = true; };
+            //alert(permission);
+
+
+
+            loaddata();
+
+            //loadsummarydata($("#FromDate").val(), $("#ToDate").val(), $("#CustomerId").val(), $("#UserId").val(), $("#WarehouseId").val());
+
+
+
+
+
+            function loaddata() {
+                //alert(CustomerId, FromDate, ToDate);
+
+
+
+
+
+
+
+
+                table = $('#OnlineOrderList').DataTable({
+                    initComplete: function () {
+
+                        var input = $('.dataTables_filter input'),//.unbind(),
+                            self = this.api(),
+
+
+                            $allButton = $('<button class="btn rounded-0 btn-purple btn-sm" tabindex="0" aria-controls="OnlineOrderList" TransactionId="button" title="Customer & Load"></button>')
+                                .text('Load')
+                                .click(function () {
+                                    input.val('');
+                                    //alert(FromDate);
+                                    loaddata();
+
+                                    //loadsummarydata($("#FromDate").val(), $("#ToDate").val());
+
+
+                                })
+                        $('.dataTables_filter').prepend($allButton);//, $clearButton // , $searchButton
+                    },
+
+                    serverSide: true, "scrollX": true,
+                    "orderCellsTop": true,
+
+                    "iDisplayLength": 10,
+                    "lengthMenu": [[5, 10, 20, 50, -1], [5, 10, 20, 50, "All"]],
+
+                    //dom: '<"dom_wrapper fh-fixedHeader"lBf>tip',
+                    dom: '<"dom_wrapper fh-fixedHeader"fl>tip',
+                    buttons: {
+                        dom: {
+                            button: {
+                                className: 'btn rounded-0'
+                            }
+                        },
+                        buttons: [
+                        ]
+                    },
+
+
+
+                    "ajax": {
+                        "url": "@Url.Action("GetOnlineOrderList", "Sales")",
+                        "data": { FromDate: $("#FromDate").val(), ToDate: $("#ToDate").val(), Status: $("#Status").val(),CustomerId: $("#CustomerId").val(),UserId: $("#UserId").val() },
+                        "type": "POST",
+                        "datatype": "json"
+                    },
+                    "columns": [
+                        { "title": "Id", "data": "Id", "visible": false },
+                        {
+                            "title": "Order Code",
+                            "className": "text-nowrap",
+                            "data": {
+                                Id: "OrderCode"
+                            },
+                            "searchable": true,
+
+                            "render": function (data, InternetUserId, row) {
+
+                                var myUrlprint = '@Url.Action("OrderReport", "Sales")?OrderId=' + data.Id;
+                                //var myUrlprintCH = '@Url.Action("ChallanReport", "Sales")?OrderId=' + data.Id;
+
+                                var OrderCode = data.OrderCode;
+                                var buttons = '';
+                                buttons += '<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"btn btn-icon btn-success  m-b-0\" target=\"_blank\"><i class="fa fa-print"> ' + OrderCode + '</i></a></span>';
+
+
+                                return buttons;
+                            }
+                        },
+                        {
+                        "class": 'details-control',
+                        "role":"row",
+                        "orderable": false,
+                        "data": null,
+                        "defaultContent": ''
+                        },
+                        { "title": "Order Date", "data": "OrdersDateString", "className": "nowrap text-nowrap text-center", "searchable": false },
+                        { "title": "Customer Name", "data": "CustomerName", "className": "nowrap text-nowrap text-center", "searchable": true },
+                        { "title": "Primary Address", "data": "PrimaryAddress", "className": "nowrap text-nowrap text-center", "searchable": true },
+                        { "title": "Mobile", "data": "PhoneNo", "searchable": true },
+                        { "title": "Notes", "data": "Notes", "className": "nowrap text-nowrap text-center", "searchable": true },
+                        //{ "title": "Total", "data": "Total", "searchable": true },
+                        //{ "title": "Discount", "data": "Discount", "searchable": true },
+                        { "title": "Net.Amt.", "data": "NetAmount", "searchable": true },
+                        //{ "title": "Rcvd.Amt.", "data": "PaidAmt", "searchable": false },
+                        //{ "title": "Location", "data": "Location", "searchable": false },
+                        //{
+                        //    "title": "Received By",
+                        //    "data": {
+                        //        Id: "Id" //,
+                        //    },
+                        //    "className": "nowrap text-nowrap text-center", "searchable": false,
+                        //    "render": function (data, type, row) {
+
+                        //        var dueamount = data.NetAmount - data.PaidAmt;
+
+
+                        //        if (data.OrdersPayments.length != 0) {
+
+                        //            var output = "";
+
+                        //            for (var i = 0; i < data.OrdersPayments.length; i++) {
+                        //                if (data.OrdersPayments[i].vChartofAccounts != null) {
+                        //                    //console.log(data[i]);
+                        //                    output += '<p class=narrowlineheight style="font-weight: bold; color:darkgreen">' + data.OrdersPayments[i].vChartofAccounts.AccName + " : " + data.OrdersPayments[i].Amount
+                        //                }
+
+                        //                if (i < data.OrdersPayments.length - 1) {
+                        //                    output += '  </p>';
+
+                        //                    //'<p>' + this + '</p>'
+                        //                }
+                        //            };
+
+                        //            console.log(data.NetAmount);
+                        //            if (dueamount > 0) {
+                        //                output += '<p class=narrowlineheight style="font-weight: bold; color:red">Due  : ' + dueamount + '</p>';
+                        //            }
+                        //            else if (dueamount < 0)
+                        //            {
+                        //                output += '<p class=narrowlineheight style="font-weight: bold; color:brown">Excess Rcvd.  : ' + dueamount + '</p>';
+                        //            };
+
+
+                        //            //console.log(output);
+
+                        //            return output;
+                        //        }
+                        //        else {
+
+                        //            var output = '<p class=narrowlineheight style="font-weight: bold; color:red">Due : ' + dueamount + '</p>';
+                        //            return output;
+
+                        //            //return null;
+                        //        }
+                        //    }
+
+                        //},
+
+
+
+                        //{ "title": "Total.Cost", "data": "FinalCostingPrice", "searchable": false, "visible": permission  },
+                        //{ "title": "Profit", "data": "Profit", "searchable": false, "visible": permission },
+                        //{ "title": "Profit[%]", "data": "ProfitPercentage", "searchable": false, "visible": permission },
+
+
+                        {
+                            "title": "Post.Status",
+                            "data": {
+                                Id: "Id" //,
+                            },
+                            "render": function (data, type, row) {
+                                var information = '';
+                                if (!data.isPosted) {
+                                    information = '<p class=narrowlineheight style="font-weight: bold; color:red">Pending</p>';
+                                }
+                                else {
+                                    information = '<p class=narrowlineheight style="font-weight: bold; color:darkgreen">Placed for Invoice</p>';
+                                }
+                                return information;
+                            }
+
+                        },
+                        {
+                            "title": "Action",
+                            "className": "text-nowrap",
+                            //"data": "Id",
+                            "data": {
+                                Id: "Id" //,
+                                //VoucherTypeName:"VoucherTypeName",
+                                //isPosted:"isPosted"
+                            },
+                            "render": function (data, type, row) {
+                                //var dueamount = data.NetAmount - data.PaidAmt;
+                                //var myUrledit = '@Url.Action("EditCustomerOrder", "Home")?OrderId=' + data.Id;
+                                //var myUrldelete = '@Url.Action("DeleteOrder", "Sales")?OrderId=' + data.Id;
+                                var myUrlReport = '@Url.Action("OrderReport", "Sales")?OrderId=' + data.Id;
+                                var myUrlCopy = '@Url.Action("CopyOnlineOrder", "Sales")?OrderId=' + data.Id;
+                                var customerid = '@HttpContextAccessor.HttpContext.Session.GetInt32("CustomerId")';
+
+                                //var message = `return confirm('Are you sure want to Remove the Order Information ?')`;
+                                var copymessage = `return confirm('Are you sure want to Convert the Order to Sales ?')`;
+
+
+                                var buttons = '';// '<span data-toggle="tooltip" title="Report"> <a href=\"' + myUrlReport + '\"  class=\"btn btn-icon btn-success btn-sm rounded-0 m-b-5\" target=\"_blank\"><i class="fa fa-print"></i></a></span>';
+                                if (!data.isPosted) {
+                                    {
+                                        if (customerid > 0)
+                                        {
+                                           // buttons += '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>';
+                                        }
+                                        else        
+                                        {
+                                            buttons += '<span data-toggle="tooltip" title="Proceed To Sales"> <a href=\"' + myUrlCopy + '\"  onclick = \"' + copymessage + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 m-b-5\" target=\"_self\"><i class="fa fa-copy"></i></a></span>';
+
+                                        }
+
+                                    }
+                                    //buttons += '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\"  onclick = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 m-b-5\" target=\"_self\"><i class="fa fa-remove"></i></a></span>';
+
+                                }
+                                //else {
+                                //    if (dueamount > 0) {
+                                //        buttons += '<span data-toggle="tooltip" title="Received"> <a href=\"' + myUrlAccTransaction + '\"  class=\"btn btn-icon btn-info btn-sm rounded-0 m-b-5\" target=\"_self\"><i class="fa fa-money"></i></a></span>';
+                                //    }
+
+                                //}
+                                return buttons;
+
+                            }
+
+                        }
+                    ],
+                    "order": [0, "desc"],
+                    "processing": true,
+                    "language": {
+                        sLengthMenu: " _MENU_",
+                        search: "",
+                        searchPlaceholder: "Search..."
+                    },
+                    "destroy": true
+                });
+            }
+
+
+                 function format(d) {
+                //console.log(d.Items);
+                var trs = '';
+                var trf = '';
+                var sumindsalesprice = 0.00;
+                var sumindcostprice = 0.00;
+                var suminddiscount = 0.00;
+                var sumindquantity = 0.00;
+
+                var sumindprofit = 0.00;
+                var sumindcomissionamount = 0.00;
+
+                var sumsalesprice = 0.00;
+                var sumcostprice = 0.00;
+                var sumavgcostprice = 0.00;
+
+                var sumprofit = 0.00;
+                var sumcommission = 0.00;
+
+
+
+                var i = 0;
+
+
+
+                $.each($(d.Items), function (key, value) {
+                    //console.log(d.Items[0].Name);
+                    //console.log(value);
+                    i++;
+                    var indsalesprice = (parseFloat(d.Items[key].Price));
+                    var indcostprice = (parseFloat(d.Items[key].CostPrice));
+                    var indavgcostprice = (parseFloat(d.Items[key].AvgCostPrice));
+
+                    var inddiscount = (parseFloat(d.Items[key].IndDiscountProportion));
+                    var indquantity = (parseFloat(d.Items[key].Quantity));
+
+                    var totalsalesprice = indsalesprice * indquantity;
+                    var totalcostprice = indcostprice * indquantity;
+                    var totalavgcostprice = indavgcostprice;
+
+                    var totalprofit = totalsalesprice - totalcostprice ;//- totalservicecharge - totalvat;
+
+                    //console.log(profit);
+
+                    sumindsalesprice += parseFloat(indsalesprice);
+                    suminddiscount += parseFloat(inddiscount);
+                    sumindquantity += parseFloat(indquantity);
+                    sumsalesprice += parseFloat(totalsalesprice);
+
+                    
+                    if (permission == false)
+                    {
+                        indcostprice = 0.00;
+                        indavgcostprice = 0.00;
+                        indprofit = 0.00;
+                        totalcostprice = 0.00;
+                    }
+                    else 
+                    {
+                    //alert('found');
+                        sumindcostprice += parseFloat(indcostprice);
+                        
+                    }
+
+                    trs += '<tr><td>' + i + '</td><td>' + d.Items[key].Product.Category.Name + '</td><td>' + d.Items[key].Product.Code + '</td><td>' + d.Items[key].Product.Name + '</td><td>' + indsalesprice.toLocaleString() + '</td><td>' + indquantity.toLocaleString() + '</td><td>' + totalsalesprice.toLocaleString() + '</td></tr>';
+
+                })
+
+                if (i > 1) {
+                    trf += '<tr><td></td><td>Total :</td><td></td><td>Item Count : '+ i +'</td><td>' + sumindsalesprice.toLocaleString() + '</td><td>' + sumindquantity.toLocaleString() + '</td><td>' + sumsalesprice.toLocaleString() + '</td></tr>';
+
+                }
+
+                // `d` is the original data object for the row
+                return '<div class="offset-md-1 col-md-6"><table class="table text-center table-sm text-nowrap table-border">' +
+                    '<thead>' +
+                    '<th>SLNo.</th>' +
+                    '<th>Category</th>' +
+                    '<th>Code</th>' +
+                    '<th>Product Name</th>' +
+                    '<th>Sales Price</th>' +
+                    '<th>Quantity</th>' +
+                    '<th>Total Sales</th>' +
+                    '</thead><tbody>' +
+
+                    trs +
+                    '</tbody><tfoot class="text-center font-weight-bold">' + trf + '</tfoot></table></div>';
+            }
+
+
+
+            $('#OnlineOrderList tbody').on('click', 'td.details-control', function () {
+                //alert('hit');
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+
+                if (row.child.isShown()) {
+                    // This row is already open - close it
+                    row.child.hide();
+                    tr.removeClass('shown');
+                }
+                else {
+                    // Open this row
+                    row.child(format(row.data())).show();
+                    tr.addClass('shown');
+                }
+            });
+
+
+
+             function loadsummarydata(abcFromDate = "", abcToDate = "" ) {
+
+                 //alert($("#FromDate").val());
+
+                 var x = $("#FromDate").val();
+                 var y = $("#ToDate").val();
+
+                 //alert(x , y);
+                $.ajax({
+
+                    url: '@Url.Action("GetSalesummaryInfo", "Sales")',
+                    data: { FromDate: x, ToDate: y },
+                        //data: JSON.stringify(purchasesmain),
+                        //type: 'POST',
+                        //async: true,
+                        contentType: 'application/json;',
+                        dataType: 'json',
+                        success: function (result) {
+                            //console.log(result);
+                            //console.log(result.Salesbyuser);
+                            //console.log(result.Salesreceivebyhead);
+
+
+                            var output = "";
+                            if (result.Salesbyuser.length != 0) {
+                                for (var i = 0; i < result.Salesbyuser.length; i++) {
+                                    if (result.Salesbyuser[i] != null) {
+                                        console.log(result.Salesbyuser[i]);
+                                        output += '<p class=lineheight  style="color:darkslategray">' + result.Salesbyuser[i].UserName + " : " + result.Salesbyuser[i].TotalSalesCount + " : " + result.Salesbyuser[i].TotalSalesSum + ' </p>'
+                                    }
+                                };
+                                $("#divfullinfoone").show();
+                                document.getElementById("fullinfoone").innerHTML = output;
+                            }
+                            else {
+                                $("#divfullinfoone").hide();
+                            }
+
+
+
+                            output = "";
+                            if (result.commissionbyuser.length != 0) {
+                                for (var i = 0; i < result.commissionbyuser.length; i++) {
+                                    if (result.commissionbyuser[i] != null) {
+                                        //console.log(result.commissionbyuser[i]);
+                                        output += '<p class=lineheight  style="color:darkslategray">' + result.commissionbyuser[i].UserName + " : " + result.commissionbyuser[i].TotalSalesCount + " : " + result.commissionbyuser[i].TotalCommissionAmount + ' </p>'
+                                    }
+                                };
+                                $("#divfullinfofour").show();
+                                document.getElementById("fullinfofour").innerHTML = output;
+                            }
+                            else {
+                                $("#divfullinfofour").hide();
+                            }
+
+
+
+                            output = "";
+                            if (result.totalSalessummary.length != 0) {
+                                for (var i = 0; i < result.totalSalessummary.length; i++) {
+                                    if (result.totalSalessummary[i] != null) {
+                                        console.log(result.totalSalessummary[i]);
+                                        output += '<p class=lineheight> Total Online Order :' + result.totalSalessummary[i].TotalSalesCount + ' </p>'
+                                        output += '<p class=lineheight> Total Online Order Value : ' + result.totalSalessummary[i].TotalSalesValue + ' </p>'
+                                        output += '<p class=lineheight> Total Costing : ' + result.totalSalessummary[i].TotalCosting + ' </p>'
+                                        output += '<p class=""> Total Profit : '  + result.totalSalessummary[i].TotalProfit + ' </p>'
+                                    }
+
+                                };
+                                $("#divfullinfotwo").show();
+                                document.getElementById("fullinfotwo").innerHTML = output;
+                            }
+                            else {
+                                $("#divfullinfotwo").hide();
+                            }
+
+
+
+
+                            output = "";
+                            if (result.Salesreceivebyhead.length != 1) {
+                                for (var i = 0; i < result.Salesreceivebyhead.length; i++) {
+                                    if (result.Salesreceivebyhead[i] != null) {
+                                        //console.log(result.Salesreceivebyhead[i]);
+
+
+                                        if (result.Salesreceivebyhead[i].AccName == "Due" && result.Salesreceivebyhead[i].Amount != 0) {
+                                            output += '<p class=lineheight style="color:red">Total Due  : ' + result.Salesreceivebyhead[i].Amount + '</p>';
+                                        }
+                                        else {
+                                            output += '<p class=lineheight style="color:darkslategray">' + result.Salesreceivebyhead[i].AccName + " : " + result.Salesreceivebyhead[i].Amount + ' </p>'
+                                        }
+
+                                    }
+                                };
+                                $("#divfullinfothree").show();
+                                document.getElementById("fullinfothree").innerHTML = output;
+
+                            }
+                            else {
+
+                                $("#divfullinfothree").hide();
+                            }
+
+
+                            var output = "";
+                            if (result.topsellingitem.length != 0) {
+                                for (var i = 0; i < result.topsellingitem.length; i++) {
+                                    if (result.topsellingitem[i] != null) {
+                                        //console.log(result.topsellingitem[i]);
+                                        output += '<p class=lineheight style="color:darkslategray">' + result.topsellingitem[i].ProductName + " : " + result.topsellingitem[i].ProductCount + ' </p>'
+                                    }
+                                };
+                                $("#divfullinfofive").show();
+                                document.getElementById("fullinfofive").innerHTML = output;
+                            }
+                            else {
+
+                                $("#divfullinfofive").hide();
+                            }
+
+
+
+
+
+                            output = "";
+                            if (result.topsellingcustomer.length != 0) {
+                                for (var i = 0; i < result.topsellingcustomer.length; i++) {
+                                    if (result.topsellingcustomer[i] != null) {
+
+                                        if (result.topsellingcustomer[i].CustomerName == "") {
+                                            result.topsellingcustomer[i].CustomerName = "=N/A=";
+                                        }
+
+                                        //console.log(result.topsellingcustomer[i]);
+                                        output += '<p class=lineheight style="color:darkslategray">' + result.topsellingcustomer[i].CustomerName + " : " + result.topsellingcustomer[i].SalesAmount + ' </p>'
+                                    }
+                                };
+                                $("#divfullinfoseven").show();
+                                document.getElementById("fullinfoseven").innerHTML = output;
+                            }
+                            else {
+
+                                $("#divfullinfoseven").hide();
+                            }
+
+
+
+                            output = "";
+                            if (result.topduecustomer.length != 0) {
+                                for (var i = 0; i < result.topduecustomer.length; i++) {
+
+                                    var DueAmount = result.topduecustomer[i].TotalSales - result.topduecustomer[i].ReceivedAmount;
+
+                                    if (result.topduecustomer[i].CustomerName == "") {
+                                        result.topduecustomer[i].CustomerName = "=N/A=";
+                                    }
+
+
+                                    if (result.topduecustomer[i] != null && DueAmount > 0) {
+                                        output += '<p class=lineheight style="color:darkslategray">' + result.topduecustomer[i].CustomerName + " : " + DueAmount + ' </p>'
+                                    }
+                                };
+                                $('#divfullinfosix').show();
+                                document.getElementById("fullinfosix").innerHTML = output;
+
+                            }
+                            else {
+
+                                $("#divfullinfosix").hide();
+                            }
+
+
+                            output = "";
+                            if (result.postunpostcount.length != 0) {
+                                for (var i = 0; i < result.postunpostcount.length; i++) {
+                                    if (result.postunpostcount[i] != null && result.postunpostcount[i].DocCount > 0 && result.postunpostcount[i].isPosted == false) {
+                                        output += '<p class=lineheight  style="color:darkslategray">' + "Pending : " + result.postunpostcount[i].DocCount + ' </p>'
+                                    }
+                                    else {
+                                        output += '<p class=lineheight  style="color:darkslategray">' + "Placed for Invoice : " + result.postunpostcount[i].DocCount + ' </p>'
+                                    }
+                                };
+                                $('#divfullinfoeight').show();
+                                document.getElementById("fullinfoeight").innerHTML = output;
+                            }
+                            else {
+                                $("#divfullinfoeight").hide();
+                            }
+
+
+
+                            output = "";
+                            if (result.sellingitembycategory.length != 0) {
+                                for (var i = 0; i < result.sellingitembycategory.length; i++) {
+                                    if (result.sellingitembycategory[i] != null) {
+                                        //console.log(result.topsellingitem[i]);
+                                        output += '<p class=lineheight  style="color:darkslategray">' + result.sellingitembycategory[i].CategoryName + " (" + result.sellingitembycategory[i].CategoryCount + ") " + result.sellingitembycategory[i].TotalSales.toFixed()  + " : Profit - " + result.sellingitembycategory[i].TotalProfit.toFixed() + ' </p>'
+                                    }
+                                };
+                                $('#divfullinfonine').show();
+                                document.getElementById("fullinfonine").innerHTML = output;
+                            }
+                            else {
+                                $("#divfullinfonine").hide();
+                            }
+
+
+
+                            toastr.success('Sales Summary Load Successfully.');
+                            //alert('Wait');
+                        },
+                        error: function () {
+                            toastr.error('Unable to Load');
+                            //alert('Unable to Save');
+                        }
+                    });
+
+
+            };
+
+
+    });
+
+
+
+        @*var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+        var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+        var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+            {
+            style: 'currency',
+            currency: CurrencyShortNameViewFormat,///'BDT'
+            minimumFractionDigits: 2,
+        });*@
+
+    </script>
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+

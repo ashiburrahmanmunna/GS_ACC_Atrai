@@ -1,0 +1,1896 @@
+﻿@*@model IEnumerable<Atrai.Model.Core.Entity.PurchaseModel>*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Purchase List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<link href="~/admin_theme_gtr/assets/css/customcardsdesign.css" rel="stylesheet" />
+<style>
+    hr.solid {
+        border-top: 2px solid #bbb;
+        margin-top: .2rem;
+        margin-bottom: .2rem;
+        vertical-align: middle;
+    }
+
+
+    .border {
+        border: 1px solid #c9c9c9 !important;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    }
+
+    .main-container {
+        padding: 30px;
+    }
+
+    /* HEADING */
+
+    .heading {
+        text-align: center;
+    }
+
+    .heading__title {
+        font-weight: 600;
+    }
+
+    .heading__credits {
+        margin: 10px 0px;
+        color: #888888;
+        font-size: 25px;
+        transition: all 0.5s;
+    }
+
+    .heading__link {
+        text-decoration: none;
+    }
+
+    .heading__credits .heading__link {
+        color: inherit;
+    }
+
+    .jsgrid-grid-body {
+        overflow: auto;
+    }
+
+    .nowrap {
+        white-space: nowrap;
+    }
+
+</style>
+
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-7 my-3">
+
+                        <h4 style="color: #1976d2;">Purchase List</h4>
+
+                    </div>
+                    <div class="col-md-5">
+                        <div class="row">
+                            <div class="col-md-9 col-12 text-end">
+                                <label class="pr-2"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                                <label class="pr-2"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                                <label class="pr-2"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+                            </div>
+                            <div class="col-md-3 col-12">
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        New
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            @Html.ActionLink("Create Purchase.", "AddPurchaseBatch", null, null, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @*@Html.ActionLink("Create Batch Pur.", "AddPurchaseBatch", null, null, new { @class = "btn btn-outline-primary btn-block ", @id = "btnBack" })*@
+
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" onclick="ReportPrint('PrintPurchaseListWithItem');" class="dropdown-item">Purchase Details List</a>
+
+                                            @*<button class=" " type="button" onclick="ReportPrint('PrintPurchaseListWithItem')">Purchase Details List</button>*@
+                                        </li>
+                                     
+                                           
+                                    </ul>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                @Html.Hidden("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+                @Html.Hidden("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+
+                @*<h5 class="card-header">Purchase List</h5>*@
+                @*  <div class="row mb-1">
+                <div class="col-md-2 col-12">
+                @Html.ActionLink("Create Invoice", "AddPurchase", null, null, new { @class = "btn btn-sm btn-outline-info btn-block ", @id = "btnBack" })
+                </div>
+                <div class="col-md-2 col-12">
+                @Html.ActionLink("POS Purchase", "POSCreate", null, null, new { @class = "btn btn-outline-primary btn-block ", @id = "btnBack" })
+                </div>
+                <div class="col-md-2 col-12">
+                @Html.ActionLink("Purchase With Serial", "AddPurchaseSerial", null, null, new { @class = "btn btn-outline-danger btn-block ", @id = "btnBack" })
+                </div>
+                <div class="col-md-2 col-12">
+                @Html.ActionLink("Purchase With [ Row Wise Serial]", "AddPurchaseSerialSide", null, null, new { @class = "btn btn-outline-primary btn-block ", @id = "btnBack" })
+                </div>*@
+                @*<div class="col-md-2 col-12">
+                @Html.ActionLink("Create Purchase", "AddPurchase", null, null, new { @class = "btn btn-sm btn-outline-info btn-block ", @id = "btnBack" })
+                </div>
+
+
+
+
+                </div>*@
+
+
+
+
+                <div class="row mb-4">
+                    <div class="col-md-3 col-12">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">Supplier</label>
+                            @Html.DropDownList("Suppliers", ViewBag.Suppliers as List<SelectListItem>, "Select Suppliers", new { id = "SupplierId", @class = "form-control" })
+
+                        </div>
+
+                    </div>
+                    <div class="col-md-3 col-12">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">User</label>
+                            @Html.DropDownList("Users", ViewBag.Users as List<SelectListItem>, "Select User", new { id = "UserId", @class = "form-control" })
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-3 col-12">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">Location</label>
+                            @Html.DropDownList("Warehouse", ViewBag.Warehouse as List<SelectListItem>, "Select Location", new { id = "WarehouseId", @class = "form-control" })
+                        </div>
+                    </div>
+
+
+
+
+
+                    <div class="col-md-3 col-12">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">Status</label>
+                            @Html.DropDownList("Status", new List<SelectListItem>
+                            {
+                            new SelectListItem() {Text = "Due", Value="Due"},
+                            new SelectListItem() {Text = "Date Wise Due", Value="Date Wise Due"},
+                            new SelectListItem() {Text = "All Purchase", Value="All"},
+
+
+                            }, new { @class = "form-control" })
+
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-12">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">Category</label>
+                            @Html.DropDownList("Category", ViewBag.Warehouse as List<SelectListItem>, "Select Category", new { id = "CategoryId", @class = "form-control" })
+                        </div>
+                    </div>
+
+
+
+                    <div class="col-md-3 col-12">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">Type</label>
+                            @*<input type="text" id="myInput" class="form-control" onmouseover="this.focus();" placeholder="On Page Filtering / Search." title="Search Item">*@
+                            @Html.DropDownList("DocType", ViewBag.DocType as List<SelectListItem>, "Select Type", new { id = "DocTypeId", @class = "form-control" })
+
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-12  divHiddenItems">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">Date</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control from-control-sm" name="date" id="daterange-btn">
+                                <button id='btnDec' type="button" class="btn btn-danger " title='Decrement month'><i class="bi bi-calendar-minus" aria-hidden="true"></i></button>
+                                <button id='btnInc' type="button" class="btn btn-success  " title='Increment month'><i class="bi bi-calendar-plus" aria-hidden="true"></i></button>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    @*                 <div class="col-md-3 col-12">
+                    <div class="input-group mb-2">
+                    <input type="text" id="myInput" class="form-control" onmouseover="this.focus();" placeholder="On Page Filtering / Search." title="Search Item">
+                    </div>*@
+                </div>
+
+
+
+
+
+                @*<div class="table-responsive mt-2">
+                    <table id="purchaselist" class="table table-sm text-nowrap table-bordered table-striped table-hover border-start" width="100%">
+                    </table>
+                </div>*@
+
+
+                <div>
+
+                    <div class="dropdown1 mt-3" style="display:inline-block;">
+                        <button class="btn btn-white border-0" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                            <i class="bi bi-gear" me-1"></i>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                            <div class="row row-cols-lg-3 p-4 main-dropdown-size" style="overflow:hidden;">
+                                <div class="col" style="width: 188px; float:left;">
+                            <li class="fw-bold ms-3">Columns</li>
+                            <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                            <li>
+                                <div id="dropdown-titles">
+                                </div>
+                            </li>
+                    </div>
+                    <div class="vertical-hr"></div>
+
+                    <div class="col right-dropdown" style="width: 188px;">
+                        <li class="fw-bold ms-3">Others</li>
+                        <hr class="m-0 w-75 w-sm-50  ms-3" />
+                        <li><a id="show-all" value="100" class="dropdown-item" href="#">Show all</a></li>
+                        <li><a id="hide-all" class="dropdown-item" href="#">Hide all</a></li>
+                        <li><a id="restore" class="dropdown-item" href="#">Restore</a></li>
+
+
+                        <li>
+                            <select name="rows" id="rows" class="border-0 cursor-pointer" style="margin-left: 13px;padding: 10px 0;width: 70px; ">
+                                            @*<option value="0" class="w-100">Rows</option>*@
+                                <option value="0" disabled selected>Rows</option>
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="1000">1000</option>
+                            </select>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input title-input" id="withChild" value="withChild">
+                                    <label class="custom-control-label cursor-pointer" id="withChild-label" for="withChild">Export with Child</label>
+                                </div>
+                            </a>
+                        </li>
+                    </div>
+                </div>
+                </ul>
+                
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-sm border border-end-0" type="button" id="exportUl">
+                    <img src="~/assets/excel 1.png" alt="">
+                </button>
+                <button type="button" class="btn border border-start-0 dropdown-toggle dropdown-toggle-split" id="exportBtn" data-bs-toggle="dropdown" data-target="#exportUl" aria-expanded="false">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu" id="exportPDF">
+                    <li><a class="dropdown-item" href="#"><img src="~/assets/pdf 1.png" alt="">PDF</a></li>
+                </ul>
+            </div>
+
+
+        </div>
+
+        <div class="gridSection">
+            <div class="row mt-2">
+                <div class="col-12 col-md-12">
+                    <div id="jsGridItems"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-2 mb-2 animated slideInRight">
+            <div class="row">
+                @*<div class="col">
+                </div>*@
+
+
+                <div class="col-md-3 col-12 my-3">
+                    <div class="cards">
+                        <div class="card-d card-1">
+                            <div class="card__icon"><i class="bi bi-lightning"></i></div>
+
+                            <h5 class="card__exit">User Wise Purchase</h5>
+                            <p class="card__apply">
+                                <a class="card__link" href="javascript:void(0);" id="fullinfoone"><i class="fas fa-arrow-right"></i></a>
+
+                            </p>
+                        </div>
+                    </div>
+                    @*                       <div class="card-dashboard p-5 mt-3" style="background:antiquewhite">
+                    <div class="media">
+                    <div class="media-left meida media-middle">
+                    <span><i class="fa fa-user f-s-40 color-primary"></i></span>
+                    </div>
+                    <div class="media-body media-text-right">
+                    <h5>User Wise Purchase</h5>
+                    <p id="fullinfoone" class="m-b-0"></p>
+                    </div>
+                    </div>
+                    </div>*@
+                    @*<div class="card-dashboard p-20 mt-3" style="background:lavender">
+                    <div class="media">
+                    <div class="media-left meida media-middle">
+                    <span><i class="fa fa-usd f-s-40 color-primary"></i></span>
+                    </div>
+                    <div class="media-body media-text-right">
+                    <h5>User Wise Commission</h5>
+                    <p id="fullinfofour" class="m-b-0"></p>
+                    </div>
+                    </div>
+                    </div>*@
+
+                </div>
+                <div class="col-md-3 col-12 my-3">
+                    <div class="cards">
+                        <div class="card-d card-2">
+                            <div class="card__icon"><i class="bi bi-lightning"></i></div>
+
+                            <h5 class="card__exit">Date Wise Purchase</h5>
+                            <p class="card__apply">
+                                <a class="card__link" href="javascript:void(0);" id="fullinfotwo"><i class="fas fa-arrow-right"></i></a>
+
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @*            <div class="card-dashboard p-5 mt-3" style="background:beige">
+                <div class="media">
+                <div class="media-left meida media-middle">
+                <span><i class="bi bi-calendar f-s-40 color-primary"></i></span>
+                </div>
+                <div class="media-body media-text-right">
+                <h5>Date Wise Purchase</h5>
+                <p id="fullinfotwo" class="m-b-0"></p>
+                </div>
+                </div>
+                </div>*@
+                <div class="col-md-3 col-12 my-3">
+                    <div class="cards">
+                        <div class="card-d card-3">
+                            <div class="card__icon"><i class="bi bi-lightning"></i></div>
+
+                            <h5 class="card__exit">Post / Unpost Purchase</h5>
+                            <p class="card__apply">
+                                <a class="card__link" href="javascript:void(0);" id="fullinfoeight"><i class="fas fa-arrow-right"></i></a>
+
+                            </p>
+                        </div>
+                    </div>
+                    @*          <div class="card-dashboard p-5 mt-3" style="background:aliceblue">
+                    <div class="media">
+                    <div class="media-left meida media-middle">
+                    <span><i class="bi bi-files f-s-40 color-primary"></i></span>
+                    </div>
+                    <div class="media-body media-text-right">
+                    <h5>Post / Unpost Purchase</h5>
+                    <p id="fullinfoeight" class="m-b-0"></p>
+                    </div>
+                    </div>
+                    </div>*@
+
+                </div>
+                <div class="col-md-3 col-12 my-3">
+                    <div class="cards">
+                        <div class="card-d card-4">
+                            <div class="card__icon"><i class="bi bi-lightning"></i></div>
+
+                            <h5 class="card__exit">Receive By Head</h5>
+                            <p class="card__apply">
+                                <a class="card__link" href="javascript:void(0);" id="fullinfothree"><i class="fas fa-arrow-right"></i></a>
+
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @*           <div class="card-dashboard p-5 mt-3" style="background:seashell">
+                <div class="media">
+                <div class="media-left meida media-middle">
+                <span><i class="fa fa-sitemap f-s-40 color-info"></i></span>
+                </div>
+                <div class="media-body media-text-right">
+                <h5>Receive By Head</h5>
+                <p id="fullinfothree" class="m-b-0"></p>
+                </div>
+                </div>
+                </div>*@
+                <div class="col-md-3 col-12 my-3">
+                    <div class="cards">
+                        <div class="card-d card-5">
+                            <div class="card__icon"><i class="bi bi-lightning"></i></div>
+
+                            <h5 class="card__exit">Top Purchase Supplier</h5>
+                            <p class="card__apply">
+                                <a class="card__link" href="javascript:void(0);" id="fullinfoseven"><i class="fas fa-arrow-right"></i></a>
+
+                            </p>
+                        </div>
+                    </div>
+                    @*           <div class="card-dashboard p-5 mt-3" style="background:honeydew">
+                    <div class="media">
+                    <div class="media-left meida media-middle">
+                    <span><i class="fa fa-users f-s-40 color-primary"></i></span>
+                    </div>
+                    <div class="media-body media-text-right">
+                    <h5>Top Purchase Supplier</h5>
+                    <p id="fullinfoseven" class="m-b-0"></p>
+                    </div>
+                    </div>
+                    </div>*@
+
+                </div>
+                <div class="col-md-3 col-12 my-3">
+                    <div class="cards">
+                        <div class="card-d card-1">
+                            <div class="card__icon"><i class="bi bi-lightning"></i></div>
+
+                            <h5 class="card__exit">Top Purchase Item</h5>
+                            <p class="card__apply">
+                                <a class="card__link" href="javascript:void(0);" id="fullinfofive"><i class="fas fa-arrow-right"></i></a>
+
+                            </p>
+                        </div>
+                    </div>
+                    @*
+                    <div class="card-dashboard p-5 mt-3" style="background: lavenderblush">
+                    <div class="media">
+                    <div class="media-left meida media-middle">
+                    <span><i class="fa fa-bar-chart f-s-40 color-primary"></i></span>
+                    </div>
+                    <div class="media-body media-text-right">
+                    <h5>Top Purchase Item</h5>
+                    <p id="fullinfofive" class="m-b-0"></p>
+                    </div>
+                    </div>
+                    </div>*@
+                </div>
+                <div class="col-md-3 col-12 my-3">
+                    <div class="cards">
+                        <div class="card-d card-1">
+                            <div class="card__icon"><i class="bi bi-lightning"></i></div>
+
+                            <h5 class="card__exit">Top Due Supplier</h5>
+                            <p class="card__apply">
+                                <a class="card__link" href="javascript:void(0);" id="fullinfosix"><i class="fas fa-arrow-right"></i></a>
+
+                            </p>
+                        </div>
+                    </div>
+                    @*              <div class="card-dashboard p-5 mt-3" style="background:ivory">
+                    <div class="media">
+                    <div class="media-left meida media-middle">
+                    <span><i class="fa fa-user-secret f-s-40 color-primary"></i></span>
+                    </div>
+                    <div class="media-body media-text-right">
+                    <h5>Top Due Supplier</h5>
+                    <p id="fullinfosix" class="m-b-0"></p>
+                    </div>
+                    </div>
+                    </div>*@
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+
+<button type="button" id="checkmodalbuttonid" class="btn btn-primary d-none " data-bs-toggle="modal" data-bs-target="#exampleModal">
+    Launch demo modal
+</button>
+
+<div class="modal fade modal-xl" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="card rounded-10">
+                    <div id="jsChildItems"></div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+@section Scripts{
+
+    <script TransactionId="text/javascript">
+
+        $("#SupplierId,#UserId,#WarehouseId,#Status,#CategoryId,#DocTypeId").select2({
+            theme: "bootstrap-5"
+
+        });
+
+        var filter = '@ViewBag.filter';
+        $("#Status").val(filter);
+
+        if (filter == "Due") {
+
+            $(".FromDate").val('1-jan-' + new Date().getFullYear().toString().substr(-2));
+        }
+
+
+        DefaultFormat('pdf');
+        $('input[type="radio"]').change(function () {
+            selectedValue = this.value;
+            DefaultFormat(selectedValue);
+
+        });
+
+        function DefaultFormat(selectedValue) {
+            $.ajax({
+                type: "GET",
+                //url: "../Admin/SetReportFormat",
+                "url": "@Url.Action("SetReportFormat", "Admin")",
+                datatype: "Json",
+                data: { reportformat: selectedValue },
+                success: function (data) {
+                    if (data.Success == 1) {
+                        //toastr.success(selectedValue + " Format Selected");
+                    }
+                }
+            });
+        }
+
+
+        function ReportPrint(btnvalue) {
+
+            //var peopleList = $('#tbllist').DataTable();
+            //var rows = peopleList.rows('.selected').data();
+
+            var SupplierId = $('#SupplierId').val();
+            var UserId = $('#UserId').val();
+            var WarehouseId = $('#WarehouseId').val();
+            var Status = $('#Status').val();
+
+
+            var reporttype = $("input[name=RptType]:checked").val();
+            var FromDate = $(".FromDate").val();
+            var ToDate = $(".ToDate").val();
+
+
+
+            ////console.log(rows.length);
+            ////console.log(rows);
+
+
+            //var productidlist = [];
+            //var pid = 0;
+
+            //if (rows.length > 0) {
+            //    pid = rows[0]["Id"];
+            //}
+
+
+
+            //if (btnvalue == "PrintpurchaseListWithItem") {
+
+            //     //if ((WarehouseId == null) || (WarehouseId == "")) {
+            //     //    toastr.error("Please Select Store First.");
+            //     //    return true;
+
+            //     //}
+            //     //else if ((pid == null) || (pid == ""))
+            //     //{
+            //     //    toastr.error("Please Select Product from the List.");
+            //     //    return true;
+            //     //}
+            //     //alert('Wait');
+            // }
+
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("AllPurchaseReport", "Purchase")',
+                dataType: 'json',
+                async: true,
+                data: { rptFormat: reporttype, action: btnvalue, SupplierId: SupplierId, UserId: UserId, FromDate: FromDate, ToDate: ToDate, WarehouseId: WarehouseId, Status: Status },
+                success: function (response) {
+                    //console.log(response.Url)
+                    window.open(response.Url, '_blank')
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+
+        }
+
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            CurrentDate();
+
+            $(".FromDate").datepicker({
+
+                dateFormat: "dd-M-y",
+                changeMonth: true,
+                changeYear: true
+
+            });
+
+
+            $(".ToDate").datepicker({
+
+                dateFormat: "dd-M-y",
+                changeMonth: true,
+                changeYear: true
+
+            });
+
+            function CurrentDate() {
+                var date = new Date();
+                var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+                if ($(".FromDate").val() == '') {
+                    $(".FromDate").val(val);
+                }
+                if ($(".ToDate").val() == '') {
+                    $(".ToDate").val(val);
+                }
+            }
+
+            var SupplierId = $("#SupplierId").val();
+            var UserId = $("#UserId").val();
+            var CategoryId = $("#CategoryId").val();
+
+            var Status = $("#Status").val();
+
+
+            var fromdate = $("#FromDate").val();
+            var todate = $("#ToDate").val();
+
+
+            var permission = false;
+            var UserRole = `@HttpContextAccessor.HttpContext.Session.GetString("UserRole")`;
+            //alert(UserRole);
+            //alert(permission);
+
+            if (UserRole.toLowerCase().includes("admin")) { permission = true; };
+            //alert(permission);
+
+
+
+            //loaddata(fromdate, todate, SupplierId, UserId, $("#Status").val(), 1);
+
+            loadsummarydata($("#FromDate").val(), $("#ToDate").val(), $("#SupplierId").val(), $("#UserId").val(), $("#CategoryId").val());
+
+
+
+            function format(d) {
+                //console.log(d.Items);
+                var trs = '';
+                var trf = '';
+                var sumindpurchaseprice = 0.00;
+                var sumindquantity = 0.00;
+
+
+                var sumpurchaseprice = 0.00;
+                var sumcostprice = 0.00;
+
+
+
+                var i = 0;
+
+
+
+                $.each($(d.PurchaseItems), function (key, value) {
+                    //console.log(d.Items[0].Name);
+                    //console.log(value);
+                    i++;
+                    var indpurchaseprice = (parseFloat(d.PurchaseItems[key].Price));
+                    var indquantity = (parseFloat(d.PurchaseItems[key].Quantity));
+
+                    var indprofitper = (parseFloat(d.PurchaseItems[key].ProfitPer));
+                    var indsalesunitprice = (parseFloat(d.PurchaseItems[key].SalesUnitPrice));
+
+
+                    var totalpurchaseprice = indpurchaseprice * indquantity;
+
+                    sumindpurchaseprice += parseFloat(indpurchaseprice);
+                    sumindquantity += parseFloat(indquantity);
+
+                    sumpurchaseprice += parseFloat(totalpurchaseprice);
+
+
+                    //trs += '<tr><td>' + i + '</td><td>' + d.Items[key].Product.Category.Name + '</td><td>' + d.Items[key].Product.Code + '</td><td>' + d.Items[key].Product.Name + '</td><td>' + indpurchaseprice + '</td><td>' + indquantity + '</td><td>' + totalpurchaseprice.toLocaleString() + '</td><td>' + indprofitper.toLocaleString() + '</td><td>' + indsalesunitprice.toLocaleString() + '</td></tr>';
+
+                    let allbatchno = ' ; ';
+                    //console.log(d.SalesItems[key]);
+                    $.each($(d.PurchaseItems[key].BatchSerial), function (keyabc, valueabc) {
+                        allbatchno += d.PurchaseItems[key].BatchSerial[keyabc].BatchSerialNo + ' ; ';
+                        //console.log(d.SalesItems[key].BatchSerial[keyabc].BatchSerialNo);
+                    })
+
+
+                    trs += '<tr><td>' + i + '</td><td>' + d.PurchaseItems[key].CategoryName + '</td><td>' + d.PurchaseItems[key].ProductCode + '</td><td>' + d.PurchaseItems[key].ProductName + ' ' + allbatchno + '</td><td>' + indpurchaseprice + '</td><td>' + indquantity + '</td><td>' + totalpurchaseprice.toLocaleString() + '</td><td>' + indprofitper.toLocaleString() + '</td><td>' + indsalesunitprice.toLocaleString() + '</td></tr>';
+
+                })
+
+                if (i > 1) {
+                    trf += '<tr><td></td><td>Total :</td><td></td><td>Item Count : ' + i + '</td><td>' + sumindpurchaseprice.toLocaleString() + '</td><td>' + sumindquantity + '</td><td>' + sumpurchaseprice.toLocaleString() + '</td><td></td><td></td></tr>';
+
+                }
+
+                // `d` is the original data object for the row
+                return '<div class="offset-md-1 col-md-6"><table class="table table-sm text-nowrap  table-bordered">' +
+                    '<thead class="border bg-light">' +
+                    '<th>SLNo.</th>' +
+                    '<th>Category</th>' +
+                    '<th>Code</th>' +
+                    '<th>Product Name</th>' +
+                    '<th>Purchase Price</th>' +
+                    '<th>Quantity</th>' +
+                    '<th>Total Purchase</th>' +
+                    '<th>Profit%</th>' +
+                    '<th>Unit Selling Price</th>' +
+
+                    '</thead><tbody>' +
+
+                    trs +
+                    '</tbody><tfoot class="text-center font-weight-bold">' + trf + '</tfoot></table></div>';
+            }
+
+
+
+            $('#purchaselist tbody').on('click', 'td.details-control', function () {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+
+                if (row.child.isShown()) {
+                    // This row is already open - close it
+                    row.child.hide();
+                    tr.removeClass('shown');
+                }
+                else {
+                    // Open this row
+                    row.child(format(row.data())).show();
+                    tr.addClass('shown');
+                }
+            });
+
+
+
+
+            //function loaddata(FromDate = "", ToDate = "", SupplierId = "", UserId = "", Status = "", isAll = 1) {
+            //    //alert(SupplierId, FromDate, ToDate);
+
+
+
+            //    var othersearchvalue = $("#myInput").val() || "";
+
+
+
+
+            //    table = $('#purchaselist').DataTable({
+            //        initComplete: function () {
+
+            //            var input = $('.dataTables_filter input'),//.unbind(),
+            //                self = this.api(),
+
+            //                //$searchButton = $('<button class="btn  btn-info btn-sm" tabindex="0" aria-controls="purchaselist" TransactionId="button" title="Search"><span><i class="bi bi-file-earmark-excel"></i></span></button>')
+            //                //    .text('Search')
+            //                //    .click(function () {
+            //                //        if (input.val().length > 0) {
+            //                //            self.search(input.val()).draw();
+
+            //                //        }
+            //                //        else {
+            //                //            loaddata(fromdate, todate, SupplierId, UserId , Status, 1);
+
+            //                //        }
+            //                //    }),
+            //                //$clearButton = $('<button class="btn  btn-warning btn-sm" tabindex="0" aria-controls="purchaselist" TransactionId="button" title="Export to PDF"><span><i class="bi bi-file-earmark-pdf"></i></span></button>')
+            //                //    .text('Clear')
+            //                //    .click(function () {
+            //                //        input.val('');
+            //                //        $searchButton.click();
+            //                //    }),
+            //                $OtherSearch = $('<input  class="form-control text-center  ml-2" id="myInput" name="myInput" placeholder="On Page Filtering / Search. " title="Search" type="text" value="' + othersearchvalue + '">')
+
+
+            //            $allButton = $('<button class="btn  btn-primary btn-sm" tabindex="0" aria-controls="purchaselist" TransactionId="button" title="Supplier & Load"></button>')
+            //                .text('Supplier & Load')
+            //                .click(function () {
+            //                    input.val('');
+            //                    //alert(FromDate);
+            //                    loaddata(fromdate, todate, SupplierId, UserId, Status, 1);
+
+            //                    loadsummarydata($("#FromDate").val(), $("#ToDate").val(), $("#SupplierId").val(), $("#UserId").val(), $("#CategoryId").val());
+
+            //                    //table.ajax.reload();
+
+
+            //                })
+            //            //$('.dataTables_filter').prepend($allButton);//, $clearButton // , $searchButton
+            //            $('.dataTables_filter').append($allButton, $OtherSearch);
+
+
+            //            $("#myInput").on("click", function () {
+
+            //                setTimeout(function () {
+            //                    // whene transaction error then reload page
+            //                    table.page.len(1000).draw();
+
+            //                }, 1);
+
+
+            //            });
+
+            //            $("#myInput").on("keyup", function () {
+            //                //table.page.len(100).draw();
+            //                var value = $(this).val().toLowerCase();
+            //                //alert(value);
+            //                $("#saleslist tr").filter(function () {
+            //                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            //                    //$(this).addClass("selected");
+
+
+            //                });
+
+
+            //            });
+
+
+            //        },
+
+            //        serverSide: true,
+            //        processing: true,
+            //        "scrollX": true,
+            //        "orderCellsTop": true,
+            //        async: 'false',
+            //        beforeSend: function () {
+            //            $('#loader').removeClass('hidden');
+            //            $('#btnLoad').attr('disabled');
+            //        },
+            //        complete: function () {
+            //            $('#loader').addClass('hidden');
+            //            $('#btnLoad').attr('enabled');
+            //        },
+            //        "iDisplayLength": 5,
+            //        "lengthMenu": [[5, 10, 20, 50, 100, 500, 1000], [5, 10, 20, 50, 100, 500, 1000]],
+            //        //rowId: 'Id',
+            //        //dom: 'Bfrtip',
+            //        dom: '<"dom_wrapper fh-fixedHeader"flB>tip',
+
+            //        buttons: {
+            //            dom: {
+            //                button: {
+            //                    className: 'btn  mb-1'
+            //                }
+            //            },
+            //            buttons: [
+            //                //'copy', 'csv', 'excel', 'pdf', 'print'
+            //                //{ "extend": 'excel', "text": 'Excel', "className": 'btn btn-sm btn-success-info fa fa-excel rouned-0' }
+
+            //                {
+            //                    extend: 'excel',
+            //                    text: '<i class="bi bi-file-earmark-excel"></i>',
+            //                    className: 'btn-success',
+            //                    titleAttr: 'Export to excel'
+            //                }
+
+            //            ],
+            //        },
+            //        "ajax": {
+            //            "url": "@Url.Action("GetPurchaseList", "Purchase")",
+            //            "data": { FromDate: $("#FromDate").val(), ToDate: $("#ToDate").val(), SupplierId: $("#SupplierId").val(), UserId: $("#UserId").val(), WarehouseId: $("#WarehouseId").val(), CategoryId: $("#CategoryId").val(), DocTypeId: $("#DocTypeId").val(), Status: $("#Status").val(), isAll: isAll },
+            //            "type": "POST",
+            //            "datatype": "json"
+            //        },
+            //        "columns": [
+            //            { "title": "Id", "data": "Id", "visible": false },
+            //            //    { "title": "Purchase Code", "data": "PurchaseCode", "searchable": true },
+
+
+            //            {
+            //                "title": "Purchase Code",
+            //                "className": "text-nowrap text-left",
+            //                "data": {
+            //                    Id: "PurchaseCode"
+            //                },
+            //                "searchable": true,
+
+            //                "render": function (data, InternetUserId, row) {
+
+            //                    var myUrlprint = '@Url.Action("PurchaseReport", "Purchase")?PurchaseId=' + data.Id;
+            //                    var PurchaseCode = data.PurchaseCode;
+            //                    var buttons = '';
+
+            //                    //alert(data.DocType);
+            //                    if (data.DocType == 'Purchase') {
+            //                        buttons += '<span data-toggle="tooltip" title="Print Purchase"> <a href=\"' + myUrlprint + '\" class=\"btn btn-sm btn-icon btn-success w-100 m-b-0\" target=\"_blank\"><i class="bi bi-printer"> ' + PurchaseCode + '</i></a></span>';
+
+            //                    }
+            //                    else {
+            //                        buttons += '<span data-toggle="tooltip" title="Print PO"> <a href=\"' + myUrlprint + '\" class=\"btn btn-sm btn-outline-primary  w-100 mb-0 \"  target=\"_blank\"><i class="bi bi-printer"> ' + PurchaseCode + '</i></a></span>';
+
+            //                    }
+
+
+            //                    return buttons;
+            //                }
+            //            },
+            //            { "title": "Entry By", "data": "PurchaseUser", "className": "nowrap text-nowrap text-center", "searchable": true },
+            //            {
+            //                "class": 'details-control',
+            //                "role":"row",
+            //                "orderable": false,
+            //                "data": null,
+            //                "defaultContent": ''
+            //            },
+
+
+
+            //            { "title": "Date", "data": "PurchaseDateString", "className": "nowrap text-nowrap text-center", "searchable": false },
+            //            { "title": "Supplier", "data": "SupplierName", "className": "nowrap text-nowrap text-center", "searchable": true },
+            //            { "title": "Address", "data": "PrimaryAddress", "className": "nowrap text-nowrap text-center", "searchable": true },
+            //            { "title": "Mobile", "data": "PhoneNo", "searchable": true },
+            //            { "title": "Notes", "data": "Notes", "className": "nowrap text-nowrap text-center", "searchable": true },
+            //            { "title": "Total", "data": "Total", "searchable": true },
+            //            { "title": "Disc.", "data": "Discount", "searchable": true },
+            //            { "title": "Net.Amt.", "data": "NetAmount", "searchable": true },
+            //            //{ "title": "Status", "data": "Status", "searchable": true },
+            //            { "title": "Rcvd.Amt.", "data": "PaidAmt", "searchable": false },
+            //            { "title": "Location", "data": "Location", "searchable": false },
+            //            //{ "title": "Paid By", "data": "ReceivingHead", "searchable": false },
+
+            //            {
+            //                "title": "Paid By",
+            //                //"data": "PurchasePayments",
+            //                "data": {
+            //                    Id: "Id" //,
+            //                },
+            //                "className": "nowrap text-nowrap text-center", "searchable": false,
+            //                "render": function (data, type, row) {
+            //                    //console.log(data);
+
+
+
+            //                    //for (var i = 0; i < data.length; i++) {
+            //                    //    //output += '<p class="lineheight">' + data[i].WhShortName + ' : ' + data[i].CurrentStock + ' : ' + data[i].CostingValue.toFixed(2) + ' : ' + data[i].PurchaseValue;
+            //                    //    //totalpurchasevalue = totalpurchasevalue + parseFloat(data[i].PurchaseValue.toFixed(2))
+
+            //                    //    if (i < data.length - 1) {
+            //                    //        output += "  </p>";
+
+            //                    //        //'<p>' + this + '</p>'
+            //                    //    }
+            //                    //    count++;
+            //                    //};
+            //                    var dueamount = data.NetAmount - data.PaidAmt;
+
+
+            //                    if (data.PurchasePayments.length != 0) {
+
+            //                        var output = "";
+
+            //                        for (var i = 0; i < data.PurchasePayments.length; i++) {
+            //                            if (data.PurchasePayments[i].AccName != null) {
+            //                                //console.log(data[i]);
+            //                                output += '<p class="narrowlineheight" style="font-weight: bold; color:darkgreen">' + data.PurchasePayments[i].AccName + " : " + data.PurchasePayments[i].Amount
+            //                            }
+            //                            else {
+            //                                output += '<p class=narrowlineheight style="font-weight: bold; color:red">' + data.PurchasePayments[i].TransactionCode + " <br> Missing Paid Head"
+
+            //                            }
+
+            //                            if (i < data.PurchasePayments.length - 1) {
+            //                                output += "  </p>";
+
+            //                                //'<p>' + this + '</p>'
+            //                            }
+            //                        };
+
+            //                        //console.log(data.NetAmount);
+            //                        if (dueamount > 0 && data.DocType == "Purchase") {
+            //                            output += '<p class="narrowlineheight" style="font-weight: bold; color:red">Due  : ' + dueamount + '</p>';
+            //                        };
+
+
+            //                        //console.log(output);
+
+            //                        return output;
+            //                    }
+            //                    else {
+
+            //                        var output = "";
+            //                        if (data.DocType == "Purchase") {
+            //                            output += '<p class="narrowlineheight" style="font-weight: bold; color:red">Due  : ' + dueamount + '</p>';
+            //                        };
+
+            //                        return output;
+
+            //                        //return null;
+            //                    }
+            //                }
+
+            //            },
+
+
+
+            //            //{ "title": "Total.Cost", "data": "FinalCostingPrice", "searchable": false, "visible": permission  },
+            //            //{ "title": "Profit", "data": "Profit", "searchable": false, "visible": permission },
+            //            //{ "title": "Profit[%]", "data": "ProfitPercentage", "searchable": false, "visible": permission },
+
+
+            //            {
+            //                "title": "Status",
+            //                "data": {
+            //                    Id: "Id" //,
+            //                },
+            //                "render": function (data, type, row) {
+            //                    var information = '';
+            //                    if (!data.isPosted) {
+            //                        information = '<p class="narrowlineheight" style="font-weight: bold; color:red">Not Posted</p>';
+            //                    }
+            //                    else {
+            //                        information = '<p class="narrowlineheight" style="font-weight: bold; color:darkgreen">Posted</p>';
+            //                    }
+            //                    return information;
+            //                }
+
+            //            },
+            //            {
+            //                "title": "Action",
+            //                "className": "text-nowrap",
+            //                //"data": "Id",
+            //                "data": {
+            //                    Id: "Id" //,
+            //                    //VoucherTypeName:"VoucherTypeName",
+            //                    //isPosted:"isPosted"
+            //                },
+            //                "render": function (data, type, row) {
+            //                    var dueamount = data.NetAmount - data.PaidAmt;
+            //                    var myUrledit = '@Url.Action("EditPurchase", "Purchase")?PurchaseId=' + data.Id;
+            //                    var myUrldelete = '@Url.Action("DeletePurchase", "Purchase")?PurchaseId=' + data.Id;
+            //                    var myUrlposedit = '@Url.Action("POSEdit", "Purchase")?PurchaseId=' + data.Id;
+            //                    var myUrlSerialPurchaseedit = '@Url.Action("EditPurchaseBySerialSearch", "Purchase")?PurchaseId=' + data.Id;
+            //                    var myUrlBarcodePrint = '@Url.Action("PurchaseBarcodeReport", "Admin")?PurchaseId=' + data.Id;
+
+
+
+
+            //                    var myUrlReport = '@Url.Action("PurchaseReport", "Purchase")?PurchaseId=' + data.Id;
+            //                    var myUrlAccTransaction = '@Url.Action("AddTransaction", "Admin")?Type=Purchase&RefId=' + data.Id;
+
+
+            //                    var message = `return confirm('Are you sure you want to Remove the Purchase Information ?')`;
+
+            //                    //var buttons = '';// '<span data-toggle="tooltip" title="Report"> <a href=\"' + myUrlReport + '\"  class=\"btn btn-icon btn-success btn-sm  m-b-5\" target=\"_blank\"><i class="bi bi-printer"></i></a></span>';
+
+            //                    var buttons = '<span data-toggle="tooltip" title="Barcode Report"> <a href=\"' + myUrlBarcodePrint + '\"  class=\"btn btn-icon btn-success btn-sm  m-b-5\" target=\"_blank\"><i class="bi bi-printer"></i></a></span>';
+
+            //                    if (!data.isPosted) {
+            //                        if (data.isPOSPurchase) {
+            //                            buttons += '<span data-toggle="tooltip" title="POS Edit"> <a href=\"' + myUrlposedit + '\" class=\"btn btn-icon btn-info btn-sm   m-b-5\" target=\"_blank\"><i class="bi bi-pencil-square"></i></a></span>';
+            //                        }
+            //                        //else if (data.isSerialPurchase) {
+            //                        //    buttons += '<span data-toggle="tooltip" title="Barcode Scan Purchase Edit"> <a href=\"' + myUrlSerialPurchaseedit + '\" class=\"btn btn-icon btn-default btn-sm   m-b-5\" target=\"_blank\"><i class="bi bi-pencil-square"></i></a></span>';
+            //                        //}
+            //                        else {
+            //                            buttons += '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm  m-b-5\" target=\"_blank\"><i class="bi bi-pencil-square"></i></a></span>';
+            //                        }
+            //                        buttons += '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\"  onclick = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm  m-b-5\" target=\"_self\"><i class="bi bi-x"></i></a></span>';
+
+
+
+
+            //                    }
+            //                    if (dueamount > 0) {
+            //                        buttons += '<span data-toggle="tooltip" title="Paid"> <a href=\"' + myUrlAccTransaction + '\"  class=\"btn btn-icon btn-info btn-sm  m-b-5\" target=\"_self\"><i class="fa fa-money"></i></a></span>';
+            //                    }
+            //                    //else
+            //                    //{
+            //                    //    if (dueamount > 0) {
+            //                    //        buttons += '<span data-toggle="tooltip" title="Paid"> <a href=\"' + myUrlAccTransaction + '\"  class=\"btn btn-icon btn-info btn-sm  m-b-5\" target=\"_self\"><i class="fa fa-money"></i></a></span>';
+            //                    //    }
+
+            //                    //   // buttons += '<span data-toggle="tooltip" title="View"> <a href=\"' + myUrlView + '\" class=\"fa fa-eye text-info px-1 h4\" target=\"_blank\"></a></span>';
+            //                    //}
+            //                    return buttons;
+
+            //                    //if (!data.isPOSPurchase) {
+            //                    //    return '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm  mb-1\" target=\"_blank\"><i class="bi bi-pencil-square"></i></a></span>' +
+            //                    //        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick=return confirm("Are you sure you want to Remove this Supplier ?")  class=\"btn btn-icon btn-danger btn-sm  mb-1\" target=\"_blank\"><i class="bi bi-x"></i></a></span>' +
+            //                    //        '<span data-toggle="tooltip" title="Report"> <a href=\"' + myUrlReport + '\"  class=\"btn btn-icon btn-success btn-sm  mb-1\" target=\"_blank\"><i class="bi bi-printer"></i></a></span>';
+            //                    //}
+            //                    //else {
+            //                    //    return '<span data-toggle="tooltip" title="POS Edit"> <a href=\"' + myUrlposedit + '\" class=\"btn btn-icon btn-warning btn-sm  mb-1\" target=\"_blank\"><i class="bi bi-pencil-square"></i></a></span>' +
+            //                    //        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick=return confirm("Are you sure you want to Remove this Supplier ?")  class=\"btn btn-icon btn-danger btn-sm  mb-1\" target=\"_blank\"><i class="bi bi-x"></i></a></span>' +
+            //                    //        '<span data-toggle="tooltip" title="Report"> <a href=\"' + myUrlReport + '\"  class=\"btn btn-icon btn-success btn-sm  mb-1\" target=\"_blank\"><i class="bi bi-printer"></i></a></span>';
+            //                    //}
+            //                }
+
+            //            }
+            //        ],
+
+            //        //"columnDefs": [
+            //        //    { "width": "100px", "targets": 0 },
+            //        //    { "width": "140px", "targets": 1 },
+            //        //    { "width": "100px", "targets": 2 },
+            //        //    { "width": "120px", "targets": 3 },
+            //        //    { "width": "120px", "targets": 4 },
+            //        //    { "width": "100px", "targets": 5 }
+            //        //],
+            //        "order": [0, "desc"],
+            //        "processing": true,
+            //        "language": {
+            //            "lengthMenu": "_MENU_",
+            //            //"zeroRecords": "Nothing found - sorry",
+            //            //"info": "Showing page _PAGE_ of _PAGES_",
+            //            "infoEmpty": "No records available",
+            //            "infoFiltered": "(filtered from _MAX_ total records)",
+            //            "searchPlaceholder": "Search",
+            //            "sSearch": '<em class="bi bi-search"></em>'
+            //        },
+            //        "destroy": true
+            //    });
+            //    //$('#purchaselist_filter input').unbind();
+            //    // alert('Load Successfully');
+            //    //$('.dataTables_filter input').bind('keyup', function (e) {
+            //    //    if (e.keyCode == 13) {
+            //    //        //alert('enter');
+            //    //        table.search(this.value).draw();
+            //    //    }
+            //    //});
+            //}
+
+            //////***** JsGrid ****//////
+
+            function restoreDropdown() {
+                $("#dropdown-titles").empty();
+                for (var i = 0; i < globalFields.length; i++) {
+                    var title = globalFields[i].title;
+                    var name = globalFields[i].name;
+                    var visible = true;
+                    if (globalFields[i].visible == false) {
+                        visible = false;
+                    }
+                    //console.log(visible);
+                    titles = `<li>
+                             <a class="dropdown-item" href="#">
+                             <div class="custom-control custom-checkbox" >
+                             <input type="checkbox" class="custom-control-input title-input" id="${name}" value="${name}">
+                             <label class="custom-control-label w-100 cursor-pointer" id="${name}" for="${name}">${title}</label>
+                             </div>
+                             </a>
+                             </li>`;
+
+                    $("#dropdown-titles").append(titles);
+
+                    document.querySelector(`${'#' + name}`).addEventListener('click', function () {
+                        var checkbox = event.target;
+                        var isChecked = checkbox.checked;
+                        if (isChecked) {
+                            $("#jsGridItems").jsGrid("fieldOption", this.value, "visible", true);
+                        }
+                        else {
+                            $("#jsGridItems").jsGrid("fieldOption", this.value, "visible", false);
+                        }
+                    });
+
+                    $(`${'#' + name}`).prop('checked', visible);
+
+
+                    $('.custom-control-label').on('click', function (e) {
+                        e.stopPropagation();
+                    });
+                    $('#dropdown-titles').on('click', function (e) {
+                        e.stopPropagation();
+                    });
+
+                    //console.log(data.BankBalance[i].AccName);
+                }
+
+                AccType = 'L';
+                IncludingInactive = false;
+            }
+
+            document.getElementById("rows").addEventListener("change", function (e) {
+
+                globalPageSize = this.value;
+
+                $("#jsGridItems").jsGrid({
+                    pageSize: globalPageSize
+                });
+
+
+            });
+
+            document.getElementById("hide-all").addEventListener("click", function (e) {
+                //e.stopPropagation();
+                //e.preventDefault();
+
+                //globalPageSize = 0;
+                //$("#jsGridItems").jsGrid({
+                //    pageSize: globalPageSize
+                //});
+
+                //$("#rows").prop('selectedIndex', 0);
+
+                $("#jsGridItems .jsgrid-table tr.jsgrid-row").hide();
+                $("#rows").val(0);
+
+            });
+            document.getElementById("show-all").addEventListener("click", function (e) {
+
+                globalPageSize = 100;
+                $("#jsGridItems").jsGrid({
+                    pageSize: globalPageSize
+                });
+                $("#rows").prop('selectedIndex', 0);
+
+            });
+            document.getElementById("restore").addEventListener("click", function (e) {
+
+                globalPageSize = 5;
+
+                $("#jsGridItems").jsGrid({
+                    pageSize: globalPageSize
+                });
+                restoreDropdown();
+
+                //$('#rows').value(0);
+                $("#rows").prop('selectedIndex', 0);
+
+            });
+
+            var withChildFlag = false;
+            document.getElementById("withChild").addEventListener("click", function (e) {
+
+
+                withChildFlag = true;
+
+                //alert('SAS');
+            });
+
+            var globalPageSize = 5;
+            var globalFields = [
+                { name: "Id", title: "Id", visible: false },
+                //{
+                //    name: "PurchaseCode",
+                //    title: "Purchase Code",
+                //    itemTemplate: function (value, item) {
+                //        var myUrlprint = '@Url.Action("PurchaseReport", "Purchase")?PurchaseId=' + item.Id;
+                //        var PurchaseCode = item.PurchaseCode;
+                //        var buttons = '';
+
+                //        if (item.DocType == 'Purchase') {
+                //            buttons += '<span data-toggle="tooltip" title="Print Purchase"> <a href="' + myUrlprint + '" class="btn btn-sm btn-icon btn-success w-100 m-b-0"><i class="bi bi-printer"></i> ' + PurchaseCode + '</a></span>';
+                //        } else {
+                //            buttons += '<span data-toggle="tooltip" title="Print PO"> <a href="' + myUrlprint + '" class="btn btn-sm btn-outline-primary w-100 mb-0"><i class="bi bi-printer"></i> ' + PurchaseCode + '</a></span>';
+                //        }
+
+                //        return buttons;
+                //    },
+                //},
+                {
+                    name: "PurchaseCode",
+                    title: "Purchase Code",
+                    width: 175,
+                    itemTemplate: function (value, item) {
+                        var myUrlprint = '@Url.Action("PurchaseReport", "Purchase")?PurchaseId=' + item.Id;
+                        var dueamount = item.NetAmount - item.PaidAmt;
+                        var myUrledit = '@Url.Action("EditPurchase", "Purchase")?PurchaseId=' + item.Id;
+                        var myUrldelete = '@Url.Action("DeletePurchase", "Purchase")?PurchaseId=' + item.Id;
+                        var myUrlposedit = '@Url.Action("POSEdit", "Purchase")?PurchaseId=' + item.Id;
+                        var myUrlSerialPurchaseedit = '@Url.Action("EditPurchaseBySerialSearch", "Purchase")?PurchaseId=' + item.Id;
+                        var myUrlBarcodePrint = '@Url.Action("PurchaseBarcodeReport", "Admin")?PurchaseId=' + item.Id;
+                        var myUrlReport = '@Url.Action("PurchaseReport", "Purchase")?PurchaseId=' + item.Id;
+                        var myUrlAccTransaction = '@Url.Action("AddTransaction", "Admin")?Type=Purchase&RefId=' + item.Id;
+                        var message = 'return confirm("Are you sure you want to Remove the Purchase Information ?")';
+
+                        var PurchaseCode = item.PurchaseCode;
+                        var buttons = '';
+
+                        if (item.DocType == 'Purchase') {
+                            //buttons += '<span data-toggle="tooltip" title="Print Purchase"> <a href="' + myUrlprint + '" class="btn btn-sm btn-icon btn-success w-100 m-b-0"><i class="bi bi-printer"></i> ' + PurchaseCode + '</a></span>';
+                            buttons += '<div class="btn-group w-100">';
+                            buttons += '<button class="btn btn-default btn-sm" type="button">';
+                            buttons += '<a href="' + myUrlprint + '" class="text-primary rounded-0 fw-500 nowrap" target="_blank">' + PurchaseCode + '</a>';
+                            buttons += '</button>';
+                            buttons += '<button type="button" class="btn btn-sm btn-default dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >';
+                            buttons += '<span class="sr-only"></span>';
+                            //buttons += '<i class="bi bi-printer"></i>';
+                            buttons += '</button>';
+                            buttons += '<div class="dropdown-menu dropdownplacement">';
+                            buttons += `<a class="dropdown-item" href="${myUrlBarcodePrint}" target="_blank"><i class="bi bi-printer pe-1"></i>Barcode Report</a>`;
+                            buttons += '<div class="dropdown-divider"></div>';
+                            // Add Edit, Delete, Collection options based on conditions
+                            if (!item.isPosted) {
+                                if (item.isPOSPurchase) {
+                                    buttons += `<a class="dropdown-item" href="${myUrlposedit}" target="_blank"><i class="bi bi-pencil-square pe-1"></i>Edit</a>`;
+                                } else {
+                                    buttons += `<a class="dropdown-item" href="${myUrledit}" target="_blank"><i class="bi bi-pencil-square pe-1"></i>Edit</a>`;
+                                }
+
+                                buttons += '<div class="dropdown-divider"></div>';
+                                buttons += `<a class="dropdown-item" href="${myUrldelete}" onclick="${message}" target="_blank"><i class="bi bi-x-lg pe-1"></i>Delete</a>`;
+
+                            }
+
+                            
+
+                            
+                                if (dueamount > 0 && item.DocType !== 'Quotation') {
+                                    buttons += `<a class="dropdown-item" href="${myUrlAccTransaction}" target="_blank"><i class="bi bi-cash pe-1"></i>Collection</a>`;
+                                }
+                            
+
+                            buttons += '</div>';
+                            buttons += '</div>';
+
+                        } else {
+                            buttons += '<span data-toggle="tooltip" title="Print PO"> <a href="' + myUrlprint + '" class="btn btn-sm btn-outline-primary w-100 mb-0" target="_blank"><i class="bi bi-printer"></i> ' + PurchaseCode + '</a></span>';
+                        }
+
+                        return buttons;
+                    },
+                },
+                { name: "PurchaseUser", title: "Entry By", className: "nowrap text-nowrap text-center", searchable: true },
+                {
+                    name: 'details-control',
+                    title: 'Details',
+
+                    width: '70',
+                    align: 'center',
+                    itemTemplate: function (value, item) {
+                        var $iconPencil = $(" <input class='jsgrid-button jsgrid-insert-button' type = 'button' title = 'Details' >").click(function (e) {
+                            $("#checkmodalbuttonid").trigger('click');
+                        });
+
+                        var $result = jsGrid.fields.control.prototype.itemTemplate.apply(this, arguments);
+                        return $result.add($iconPencil);
+                    }
+                },
+                { name: "PurchaseDateString", title: "Date", className: "nowrap text-nowrap text-center", searchable: false },
+                { name: "SupplierName", title: "Supplier", type: "text", className: "nowrap text-nowrap text-center", searchable: true },
+                { name: "PrimaryAddress", title: "Address", className: "nowrap text-nowrap text-center", searchable: true },
+                { name: "PhoneNo", title: "Mobile", align: 'center', searchable: true },
+                { name: "Notes", title: "Notes", className: "nowrap text-nowrap text-center", searchable: true },
+                { name: "Total", title: "Total", align: 'center', type: "text", searchable: true },
+                { name: "Discount", title: "Disc.", align: 'center', searchable: true },
+                { name: "NetAmount", title: "Net.Amt.", align: 'center', type: "text", searchable: true },
+                { name: "PaidAmt", title: "Rcvd.Amt.", align: 'center', searchable: false },
+                { name: "Location", title: "Location", searchable: false },
+                {
+                    title: "Paid By",
+                    itemTemplate: function (value, item) {
+                        var dueamount = item.NetAmount - item.PaidAmt;
+                        var output = "";
+
+                        if (item.PurchasePayments.length != 0) {
+                            for (var i = 0; i < item.PurchasePayments.length; i++) {
+                                if (item.PurchasePayments[i].AccName != null) {
+                                    output += '<p class="narrowlineheight" style="font-weight: bold; color: darkgreen">' + item.PurchasePayments[i].AccName + " : " + item.PurchasePayments[i].Amount + "</p>";
+                                } else {
+                                    output += '<p class="narrowlineheight" style="font-weight: bold; color: red">' + item.PurchasePayments[i].TransactionCode + " <br> Missing Paid Head</p>";
+                                }
+                            }
+
+                            if (dueamount > 0 && item.DocType == "Purchase") {
+                                output += '<p class="narrowlineheight" style="font-weight: bold; color: red">Due  : ' + dueamount + '</p>';
+                            }
+
+                            return output;
+                        } else {
+                            if (item.DocType == "Purchase") {
+                                output += '<p class="narrowlineheight" style="font-weight: bold; color: red">Due  : ' + dueamount + '</p>';
+                            }
+
+                            return output;
+                        }
+                    }
+                },
+                {
+                    title: "Status",
+                    itemTemplate: function (value, item) {
+                        var information = '';
+
+                        if (!item.isPosted) {
+                            information = '<p class="narrowlineheight" style="font-weight: bold; color: red">Not Posted</p>';
+                        } else {
+                            information = '<p class="narrowlineheight" style="font-weight: bold; color: darkgreen">Posted</p>';
+                        }
+
+                        return information;
+                    }
+                },
+                //{
+                //    title: "Action",
+                //    itemTemplate: function (value, item) {
+                //        var dueamount = item.NetAmount - item.PaidAmt;
+                //        var myUrledit = '@Url.Action("EditPurchase", "Purchase")?PurchaseId=' + item.Id;
+                //        var myUrldelete = '@Url.Action("DeletePurchase", "Purchase")?PurchaseId=' + item.Id;
+                //        var myUrlposedit = '@Url.Action("POSEdit", "Purchase")?PurchaseId=' + item.Id;
+                //        var myUrlSerialPurchaseedit = '@Url.Action("EditPurchaseBySerialSearch", "Purchase")?PurchaseId=' + item.Id;
+                //        var myUrlBarcodePrint = '@Url.Action("PurchaseBarcodeReport", "Admin")?PurchaseId=' + item.Id;
+                //        var myUrlReport = '@Url.Action("PurchaseReport", "Purchase")?PurchaseId=' + item.Id;
+                //        var myUrlAccTransaction = '@Url.Action("AddTransaction", "Admin")?Type=Purchase&RefId=' + item.Id;
+                //        var message = 'return confirm("Are you sure you want to Remove the Purchase Information ?")';
+                //        var buttons = '';
+
+                //        buttons += '<span data-toggle="tooltip" title="Barcode Report"> <a href="' + myUrlBarcodePrint + '" class="btn btn-icon btn-success btn-sm m-b-5" target="_blank"><i class="bi bi-printer"></i></a></span>';
+
+                //        if (!item.isPosted) {
+                //            if (item.isPOSPurchase) {
+                //                buttons += '<span data-toggle="tooltip" title="POS Edit"> <a href="' + myUrlposedit + '" class="btn btn-icon btn-info btn-sm m-b-5" target="_blank"><i class="bi bi-pencil-square"></i></a></span>';
+                //            } else {
+                //                buttons += '<span data-toggle="tooltip" title="Edit"> <a href="' + myUrledit + '" class="btn btn-icon btn-warning btn-sm m-b-5" target="_blank"><i class="bi bi-pencil-square"></i></a></span>';
+                //            }
+
+                //            buttons += '<span data-toggle="tooltip" title="Delete"> <a href="' + myUrldelete + '" onclick="' + message + '" class="btn btn-icon btn-danger btn-sm m-b-5" target="_self"><i class="bi bi-x"></i></a></span>';
+                //        }
+
+                //        if (dueamount > 0) {
+                //            buttons += '<span data-toggle="tooltip" title="Paid"> <a href="' + myUrlAccTransaction + '" class="btn btn-icon btn-info btn-sm m-b-5" target="_self"><i class="bi bi-cash pe-1"></i></a></span>';
+                //        }
+
+                //        return buttons;
+                //    }
+                //}
+            ];
+
+
+            var jsGridItemsUrl = '@Url.Action("GetPurchaseListByPage", "Purchase")';
+            function initJsGrid() {
+                var jsGridItemsDB = {
+                    loadData: function (filter) {
+                        console.log(filter);
+                        var d = $.Deferred();
+                        $.ajax({
+                            type: "GET",
+                            url: jsGridItemsUrl,
+                            //headers: {
+                            //    contentType: "application/json; charset=utf-8",
+                            //    Authorization: token
+                            //},
+                            data: { searchquery: JSON.stringify(filter) },                            
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json"
+                        })
+
+                            .done(function (result) {
+                                console.log("jsgrid", result);
+                                d.resolve(result);
+                                //console.log(result.ProductList);
+
+                            });
+                        return d.promise().then(function (q) {
+
+                            //console.log(q);
+                            return {
+
+                                data: q,
+                                itemsCount: parseInt(q.PageInfo.TotalRecordCount)
+                            }
+                        });
+                    }
+
+                    
+
+                }
+
+
+
+                //$("#exampleModal").on('hide.bs.modal', function () {
+                //      $("#jsGridItems .jsgrid-update-button").trigger( "click" );
+                //  });
+
+                var child = [];
+
+                var serial = 0;
+                $("#jsGridItems").jsGrid({
+                    width: "100%",
+                    height: 400,
+                    filtering: true,
+                    editing: true,
+                    autoload: true,
+                    pageSize: globalPageSize,
+                    pageLoading: true,
+                    pageIndex: 1,
+                    paging: true,
+                    controller: jsGridItemsDB,
+                    pagerFormat: "{prev} {pages} {next}   Results: {pageIndex} - {pageCount} of {itemCount}",
+                    pagePrevText: "<",
+                    pageNextText: ">",
+                    // selecting: true,
+
+                    fields: globalFields,
+                    rowClick: function (args) {
+                        // this.select(args.itemIndex, true);
+
+                        // console.log(args.item);
+                        // var Item=args.item;
+
+                        child = args.item.PurchaseItems;
+
+                        //// delete (Item);
+                        showModal(child, args.item.PurchaseCode);
+
+                        // $("#jsGridItems").jsGrid("updateItem", args.item);
+
+
+                        $checkbox = $(args.event.currentTarget).find("input[type=checkbox]");
+                        if ($(args.event.target).closest("td").index() !== 8 && $(args.event.target).closest("td").index() !== 0 && $(args.event.target).closest("td").index() !== 1) {
+                            $checkbox.prop("checked", !$checkbox.prop("checked"));
+
+                            // Update selected items array
+                            if ($checkbox.prop("checked")) {
+                                selectItem(args.item);
+                            } else {
+                                unselectItem(args.item);
+                            }
+                        }
+
+                    },
+
+                    onItemDeleting: function (args) {
+                        console.log(args.item);
+                        var abcvalue = args.item.isPosted;
+                        console.log(abcvalue);
+                        if (abcvalue == true) {
+                            //$("#grid").jsGrid("deleteItem", args);
+                            args.cancel = true;
+                            alert('Already Posted');
+                        }
+
+                    },
+                    onItemDeleted: function (args) {
+                        parentValue = $('#jsGridItems').jsGrid('option', 'data');
+                        var serial = 0;
+                        for (var i = 0; i < parentValue.length; i++) {
+                            parentValue[i].SLNo = serial + 1;
+                            serial++;
+                        }
+                        console.log('serial');
+                        console.log(serial);
+                        $("#jsGridItems").jsGrid("refresh");
+
+                    }
+
+                });
+
+            }
+            initJsGrid();
+            restoreDropdown();
+
+
+            function sendData() {
+
+                var jsSendDataDB = {
+                    loadData: function (filter) {
+                        console.log(filter);
+                        var d = $.Deferred();
+                        $.ajax({
+                            type: "GET",
+                            url: jsGridItemsUrl,
+                            //headers: {
+                            //    contentType: "application/json; charset=utf-8",
+                            //    Authorization: token
+                            //},
+                            data: { searchquery: JSON.stringify(filter), FromDate: $("#FromDate").val(), ToDate: $("#ToDate").val() },
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json"
+                        })
+
+                            .done(function (result) {
+                                //console.log(result);
+                                d.resolve(result);
+                                //console.log(result.ProductList);
+
+                            });
+                        return d.promise().then(function (q) {
+
+                            //console.log(q);
+                            return {
+
+                                data: q.VoucherList,
+                                itemsCount: parseInt(q.PageInfo.TotalRecordCount)
+                            }
+                        });
+                    }
+
+                }
+
+                $("#jsGridItems").jsGrid({
+                    controller: jsSendDataDB
+                })
+
+            }
+
+            $(document).ready(function () {
+                $('#FromDate, #ToDate, #daterange-btn, #SupplierId, #UserId, #WarehouseId, #CategoryId, #Status, #DocTypeId').on('change', function () {
+                    // Display an alert message
+                    //alert('Success! Date changed.');
+                    //alert('hit');
+                    sendData();
+                    loadsummarydata();
+                });
+            });
+
+            $('#daterange-btn').on('apply.daterangepicker', function () {
+                // alert("show");
+                sendData();
+                loadsummarydata();
+            });
+
+            function showModal(child, PurchaseCode) {
+                $("#exampleModalLabel").text("Purchase Code: " + PurchaseCode);
+                $('#jsChildItems').jsGrid({
+                    data: child
+                });
+
+            }
+
+            $('#jsChildItems').jsGrid({
+                width: '100%',
+                fields: [
+                    { name: "Id", title: 'SLNo.' },
+                    { name: "CategoryName", title: 'Category' },
+                    { name: "ColorName", title: 'Color' },
+                    { name: "BrandName", title: 'Brand' },
+                    { name: "SizeName", title: 'Size' },
+                    { name: "ProductCode", title: 'Product Code' },
+                    { name: "ProductName", title: 'Product Name' },
+                    { name: "Price", title: 'Price' },
+                    { name: "Quantity", title: 'Quantity' },                   
+                    { name: "ProfitPer", title: 'Profit' },
+                    { name: "SalesUnitPrice", title: 'Sales Unit Price' },
+                    { name: "AccType", title: 'Type', visible: false }
+                ]
+            });
+
+            //////***** JsGrid ****//////
+
+            function loadsummarydata(abcFromDate = "", abcToDate = "", SupplierId = "", UserId = "") {
+
+                //alert($("#FromDate").val());
+
+                var x = $("#FromDate").val();
+                var y = $("#ToDate").val();
+                var SupplierId = $("#SupplierId").val();
+                var UserId = $("#UserId").val();
+                var CategoryId = $("#CategoryId").val();
+                var Status = $("#Status").val();
+
+
+                //alert(x , y);
+                $.ajax({
+
+                    url: '@Url.Action("GetPurchaseSummaryInfo", "Purchase")',
+                    data: { FromDate: x, ToDate: y, SupplierId: SupplierId, UserId: UserId },
+                    //data: JSON.stringify(purchasesmain),
+                    //type: 'POST',
+                    //async: true,
+                    contentType: 'application/json;',
+                    dataType: 'json',
+                    success: function (result) {
+                        //console.log(result);
+                        //console.log(result.purchasebyuser);
+                        //console.log(result.purchasereceivebyhead);
+
+
+                        var output = "";
+                        if (result.purchasebyuser.length != 0) {
+                            for (var i = 0; i < result.purchasebyuser.length; i++) {
+                                if (result.purchasebyuser[i] != null) {
+                                    //console.log(result.purchasebyuser[i]);
+                                    output += '<p class="lineheight"  ; color:black">' + result.purchasebyuser[i].UserName + " : " + result.purchasebyuser[i].TotalPurchaseCount + " : " + result.purchasebyuser[i].TotalPurchaseSum + ' </p>'
+                                }
+                            };
+                        }
+                        document.getElementById("fullinfoone").innerHTML = output;
+
+
+
+                        //output = "";
+                        //if (result.commissionbyuser.length != 0) {
+                        //    for (var i = 0; i < result.commissionbyuser.length; i++) {
+                        //        if (result.commissionbyuser[i] != null) {
+                        //            //console.log(result.commissionbyuser[i]);
+                        //            output += '<p class="lineheight"  ; color:black">' + result.commissionbyuser[i].UserName + " : " + result.commissionbyuser[i].TotalPurchaseCount + " : " + result.commissionbyuser[i].TotalCommissionAmount + ' </p>'
+                        //        }
+                        //    };
+                        //}
+                        //document.getElementById("fullinfofour").innerHTML = output;
+
+
+
+
+
+
+                        output = "";
+                        if (result.totalpurchasesummary.length != 0) {
+                            for (var i = 0; i < result.totalpurchasesummary.length; i++) {
+                                if (result.totalpurchasesummary[i] != null) {
+                                    //(result.totalpurchasesummary[i]);
+                                    output += '<p class="lineheight"  > Total Purchase :' + result.totalpurchasesummary[i].TotalPurchaseCount + ' </p>'
+                                    output += '<p class="lineheight"  > Total Purchase Value : ' + result.totalpurchasesummary[i].TotalPurchaseValue + ' </p>'
+                                    //output += '<p class="lineheight"  > Total Costing : ' + result.totalpurchasesummary[i].TotalCosting + ' </p>'
+                                    //output += '<p class=""  > Total Profit : '  + result.totalpurchasesummary[i].TotalProfit + ' </p>'
+                                }
+
+                            };
+                        }
+                        document.getElementById("fullinfotwo").innerHTML = output;
+
+
+
+                        output = "";
+                        if (result.purchasereceivebyhead.length != 0) {
+                            for (var i = 0; i < result.purchasereceivebyhead.length; i++) {
+                                if (result.purchasereceivebyhead[i] != null) {
+                                    //console.log(result.purchasereceivebyhead[i]);
+
+
+                                    if (result.purchasereceivebyhead[i].AccName == "Due" && result.purchasereceivebyhead[i].Amount > 0) {
+                                        output += '<span class="lineheight my-2 btn-danger rounded px-2">Tota Due  : ' + result.purchasereceivebyhead[i].Amount + '</span>';
+                                    }
+                                    else {
+                                        output += '<span class="lineheight d-block"  ; color:black">' + result.purchasereceivebyhead[i].AccName + " : " + result.purchasereceivebyhead[i].Amount + ' </span>'
+                                    }
+
+                                }
+                            };
+
+
+
+                        }
+                        document.getElementById("fullinfothree").innerHTML = output;
+
+
+                        var output = "";
+                        if (result.toppurchaseitem.length != 0) {
+                            for (var i = 0; i < result.toppurchaseitem.length; i++) {
+                                if (result.toppurchaseitem[i] != null) {
+                                    //console.log(result.toppurchaseitem[i]);
+                                    output += '<span class="lineheight d-block"  ; color:black">' + result.toppurchaseitem[i].ProductName + " : " + result.toppurchaseitem[i].ProductCount + ' </span>'
+                                }
+                            };
+                        }
+                        document.getElementById("fullinfofive").innerHTML = output;
+
+
+
+                        output = "";
+                        if (result.toppurchasesupplier.length != 0) {
+                            for (var i = 0; i < result.toppurchasesupplier.length; i++) {
+                                if (result.toppurchasesupplier[i] != null) {
+
+                                    if (result.toppurchasesupplier[i].SupplierName == "") {
+                                        result.toppurchasesupplier[i].SupplierName = "=N/A=";
+                                    }
+
+                                    //console.log(result.toppurchasesupplier[i]);
+                                    output += '<span class="lineheight d-block"  ; color:black">' + result.toppurchasesupplier[i].SupplierName + " : " + result.toppurchasesupplier[i].PurchaseAmount + ' </span>'
+                                }
+                            };
+                        }
+                        document.getElementById("fullinfoseven").innerHTML = output;
+
+
+
+                        output = "";
+                        if (result.topduesupplier.length != 0) {
+                            for (var i = 0; i < result.topduesupplier.length; i++) {
+
+                                var DueAmount = result.topduesupplier[i].TotalPurchase - result.topduesupplier[i].PaidAmount;
+
+                                if (result.topduesupplier[i].SupplierName == "") {
+                                    result.topduesupplier[i].SupplierName = "=N/A=";
+                                }
+
+
+                                if (result.topduesupplier[i] != null && DueAmount > 0) {
+                                    output += '<span class="lineheight px-2 d-block"  ; color:black">' + result.topduesupplier[i].SupplierName + " : " + DueAmount + ' </span>'
+                                }
+                            };
+                        }
+                        document.getElementById("fullinfosix").innerHTML = output;
+
+
+                        output = "";
+                        if (result.postunpostcount.length != 0) {
+                            for (var i = 0; i < result.postunpostcount.length; i++) {
+                                if (result.postunpostcount[i] != null && result.postunpostcount[i].DocCount > 0 && result.postunpostcount[i].isPosted == false) {
+                                    output += '<p class="lineheight"  ; color:black">' + "Not Posted : " + result.postunpostcount[i].DocCount + ' </p>'
+                                }
+                                else {
+                                    output += '<p class="lineheight"  ; color:black">' + "Posted : " + result.postunpostcount[i].DocCount + ' </p>'
+                                }
+                            };
+                        }
+                        document.getElementById("fullinfoeight").innerHTML = output;
+
+
+
+                        //toastr.success('Purchase Summary Load Successfully.');
+                        //alert('Wait');
+                    },
+                    error: function () {
+                        toastr.error('Unable to Load');
+                        //alert('Unable to Save');
+                    }
+                });
+
+
+            };
+
+
+        });
+
+
+
+        @*var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+        var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+        var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+        {
+        style: 'currency',
+        currency: CurrencyShortNameViewFormat,///'BDT'
+        minimumFractionDigits: 2,
+        });*@
+
+    </script>
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+

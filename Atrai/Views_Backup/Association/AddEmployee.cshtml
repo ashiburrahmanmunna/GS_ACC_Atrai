@@ -1,0 +1,321 @@
+﻿@model Atrai.Core.Entity.EmployeeModel
+@{ ViewData["Title"] = "Add Employee";
+                Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>Employee Information</h4>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="Association" asp-action="AddEmployee" method="post" enctype="multipart/form-data">
+
+                                @if (Model != null)
+                                {
+                                <input type="hidden" asp-for="Id" />
+                                <input type="hidden" asp-for="CreateDate" />
+                                <input type="hidden" asp-for="LuserId" /> 
+                                <input type="hidden" asp-for="IsExistImage" /> 
+
+                                }
+                                else
+                                {
+                                <input type="hidden" asp-for="Id" value="0" />         
+                                <input type="hidden" asp-for="IsExistImage" value="false" /> 
+                                }
+
+
+                                <div class="row">
+                                    <div class="col-md-10 col-12">
+
+
+                                        <div class="form-group row">
+
+                                            <div class="col-md-2 col-12">
+                                                <img src="..@Model.EmployeeImagePath" alt="img" id="UploadFile" class="img-thumbnail" style="height: 150px;width:150px" onerror="this.onerror=null;this.src='../Content/EmployeeImages/0.png'" /> <br />
+                                                <input type="file" name="logoPostedFileBase" accept="image/x-png, image/gif, image/jpeg" id="FileUpload" onchange="PreviewImage()" />
+                                            </div>
+                                            <div class="col-md-2 col-12 text-center">
+                                                <label asp-for="isActive"></label>
+                                                <input asp-for="isActive" class="form-control" type="checkbox">
+                                                <span asp-validation-for="isActive" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="form-group row">
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="EmployeeName"></label>
+                                                <input asp-for="EmployeeName" class="form-control" type="text">
+                                                <span asp-validation-for="EmployeeName" class="text-danger"></span>
+                                            </div>
+
+
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="FathersName"></label>
+                                                <input asp-for="FathersName" class="form-control" type="text">
+                                                <span asp-validation-for="FathersName" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="DtBirth"></label>
+                                                <input asp-for="DtBirth" class="form-control" type="date" placeholder="Date Of Birth">
+                                                <span asp-validation-for="DtBirth" class="text-danger"></span>
+                                            </div>
+
+
+@*                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="BloodGroup"></label>
+                                                <input asp-for="BloodGroup" class="form-control" type="text" placeholder="Blood Group">
+                                                <span asp-validation-for="BloodGroup" class="text-danger"></span>
+                                            </div>*@
+
+                                                     <div class="col-md-3 col-12 ">
+                                                @Html.LabelFor(x => x.BloodId)
+                                                @Html.DropDownListFor(x => x.BloodId,
+                                                                                                          new SelectList((IEnumerable<SelectListItem>)ViewBag.BloodGroup, "Value", "Text"), "Select Blood Group",
+                                                                                                          htmlAttributes: new { @class = "form-control", id = "BloodGroupId" })
+                                                @Html.ValidationMessageFor(x => x.BloodId, "", new { @class = "text-danger" })
+                                            </div>
+
+                                        </div>
+
+
+
+
+
+                                        <div class="form-group row">
+
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="MobileNo"></label>
+                                                <input asp-for="MobileNo" class="form-control" type="text">
+                                                <span asp-validation-for="MobileNo" class="text-danger"></span>
+                                            </div>
+
+
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="NID"></label>
+                                                <input asp-for="NID" class="form-control" type="text">
+                                                <span asp-validation-for="NID" class="text-danger"></span>
+                                            </div>
+
+
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="DtJoin"></label>
+                                                <input asp-for="DtJoin" class="form-control" type="date">
+                                                <span asp-validation-for="DtJoin" class="text-danger"></span>
+                                            </div>
+
+
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="Salary"></label>
+                                                <input asp-for="Salary" class="form-control" type="text">
+                                                <span asp-validation-for="Salary" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+
+
+
+
+                                        <div class="form-group row">
+
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="WorkLocation"></label>
+                                                <input asp-for="WorkLocation" class="form-control" type="text">
+                                                <span asp-validation-for="WorkLocation" class="text-danger"></span>
+                                            </div>
+
+
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="Department"></label>
+                                                <input asp-for="Department" class="form-control" type="text">
+                                                <span asp-validation-for="Department" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="PositionTitle"></label>
+                                                <input asp-for="PositionTitle" class="form-control" type="text">
+                                                <span asp-validation-for="PositionTitle" class="text-danger"></span>
+                                            </div>
+
+
+                                            <div class="col-md-3 col-12 ">
+                                                <label asp-for="EmployeeCode"></label>
+                                                <input asp-for="EmployeeCode" class="form-control" type="number">
+                                                <span asp-validation-for="EmployeeCode" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
+
+
+                                            <div class="col-md-3 col-12 ">
+                                                @Html.LabelFor(x => x.DepartmentList)
+                                                @Html.DropDownListFor(x => x.DepartmentId,
+                                                                                                          new SelectList((IEnumerable<SelectListItem>)ViewBag.Department, "Value", "Text"), "Select Department",
+                                                                                                          htmlAttributes: new { @class = "form-control", id = "DepartmentId" })
+                                                @Html.ValidationMessageFor(x => x.DepartmentId, "", new { @class = "text-danger" })
+                                            </div>
+
+
+                                            <div class="col-md-3 col-12 ">
+                                                @Html.LabelFor(x => x.DesignationList)
+                                                @Html.DropDownListFor(x => x.Designationid,
+                                                                                                          new SelectList((IEnumerable<SelectListItem>)ViewBag.Designation, "Value", "Text"), "Select Designation",
+                                                                                                          htmlAttributes: new { @class = "form-control", id = "DesignationId" })
+                                                @Html.ValidationMessageFor(x => x.Designationid, "", new { @class = "text-danger" })
+                                            </div>
+
+                                                                 <div class="col-md-3 col-12 ">
+                                                @Html.LabelFor(x => x.ShiftId)
+                                                @Html.DropDownListFor(x => x.ShiftId,
+                                                                                                          new SelectList((IEnumerable<SelectListItem>)ViewBag.Shift, "Value", "Text"), "Select Shift",
+                                                                                                          htmlAttributes: new { @class = "form-control", id = "DesignationId" })
+                                                @Html.ValidationMessageFor(x => x.ShiftId, "", new { @class = "text-danger" })
+                                            </div>
+
+
+                                                                 <div class="col-md-3 col-12 ">
+                                                @Html.LabelFor(x => x.SectId)
+                                                @Html.DropDownListFor(x => x.SectId,
+                                                                                                          new SelectList((IEnumerable<SelectListItem>)ViewBag.Section, "Value", "Text"), "Select Section",
+                                                                                                          htmlAttributes: new { @class = "form-control", id = "DesignationId" })
+                                                @Html.ValidationMessageFor(x => x.SectId, "", new { @class = "text-danger" })
+                                            </div>
+
+
+                                        </div>
+
+
+                                        <div class="form-group row">
+                                            <div class="col-md-6 col-12 ">
+                                                <div class="form-group">
+                                                    <label asp-for="PresentAddress"></label>
+                                                    <input asp-for="PresentAddress" class="form-control" type="text">
+                                                    <span asp-validation-for="PresentAddress" class="text-danger"></span>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 col-12 ">
+                                                <div class="form-group">
+                                                    <label asp-for="PermanentAddress"></label>
+                                                    <input asp-for="PermanentAddress" class="form-control" type="text">
+                                                    <span asp-validation-for="PermanentAddress" class="text-danger"></span>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+
+
+
+
+                                        <div class="form-group row">
+                                            <div class="col-md-4 col-12 ">
+                                                <label asp-for="EmergencyContactName"></label>
+                                                <input asp-for="EmergencyContactName" class="form-control" type="text">
+                                                <span asp-validation-for="EmergencyContactName" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-4 col-12 ">
+                                                <label asp-for="EmergencyContactRelationship"></label>
+                                                <input asp-for="EmergencyContactRelationship" class="form-control" type="text">
+                                                <span asp-validation-for="EmergencyContactRelationship" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-4 col-12 ">
+                                                <label asp-for="EmergencyMobileNo"></label>
+                                                <input asp-for="EmergencyMobileNo" class="form-control" type="text">
+                                                <span asp-validation-for="EmergencyMobileNo" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+
+
+
+
+                                        <div class="form-group row">
+
+                                            <div class="col-md-4 col-12 ">
+                                                <label asp-for="IntroducerName"></label>
+                                                <input asp-for="IntroducerName" class="form-control" type="text">
+                                                <span asp-validation-for="IntroducerName" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-4 col-12 ">
+                                                <label asp-for="IntroducerContctNo"></label>
+                                                <input asp-for="IntroducerContctNo" class="form-control" type="text">
+                                                <span asp-validation-for="IntroducerContctNo" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-4 col-12 ">
+                                                <label asp-for="IntroducerAddress"></label>
+                                                <input asp-for="IntroducerAddress" class="form-control" type="text">
+                                                <span asp-validation-for="IntroducerAddress" class="text-danger"></span>
+                                            </div>
+
+                                        </div>
+
+
+
+
+
+
+
+
+
+                                        <div class="form-group">
+                                            @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                                    <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" /> }
+                                                else if (ViewBag.ActionType == "Edit")
+                                                {
+                                                    <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" /> }
+                                                else if (ViewBag.ActionType == "Delete")
+                                                {
+                                             <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>}
+
+
+                                            @Html.ActionLink("Back", "EmployeeList", "Association", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+
+        });
+
+        function PreviewImage() {
+            var oFReader = new FileReader();
+            oFReader.readAsDataURL(document.getElementById("FileUpload").files[0]);
+
+            oFReader.onload = function (oFREvent) {
+                document.getElementById("UploadFile").src = oFREvent.target.result;
+            };
+        };
+    </script>
+}
+

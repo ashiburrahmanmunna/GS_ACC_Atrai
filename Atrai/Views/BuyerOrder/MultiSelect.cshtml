@@ -1,0 +1,328 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Multi select";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<link href="~/css/accountHeadListGearDropdown.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    .tabulator {
+        border: none;
+    }
+
+    .tabulator-col .tabulator-col-title {
+        text-align: center;
+    }
+
+    .tabulator-tableholder {
+        background-color: white;
+    }
+
+    .tabulator[tabulator-layout=fitDataTable] {
+        display: inherit;
+    }
+
+    .tabulator .tabulator-header .tabulator-col, .tabulator .tabulator-header {
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .tabulator-row .tabulator-cell.tabulator-frozen.tabulator-frozen-left {
+        border-right: 2px solid #aaaaaa38;
+    }
+
+    .tabulator-row .tabulator-cell {
+        border-right: 1px solid #aaaaaa38;
+        border-left: 1px solid #aaaaaa38;
+    }
+
+    .tabulator-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabulator .tabulator-row .active-cell {
+        overflow: visible;
+    }
+
+    .tabulator-row:nth-child(even) {
+        background-color: white;
+    }
+
+    .tabulator-row {
+        border: none;
+    }
+
+    .form-control {
+        border: 1px solid #adb5bd !important;
+    }
+
+    #example-table {
+        height: auto !important;
+        border-bottom: 3px solid #ccc;
+        margin-bottom: 10px
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #393a3d;
+        color: #fff;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        margin-left: 39px;
+    }
+</style>
+
+<button id="getTableDataButton">Get Table Data</button>
+<button id="populateTableButton">Populate Table</button>
+<div id="example-table" style="margin-top: 30px;"></div>
+<div class="row" style="margin-bottom: 50px;">
+    <div class="col-md-3 col-12">
+        <div class="btn-group">
+            <button type="button" class="btn btn-success btn-sm" id="add-row">Add Row</button>
+            <button type="button" class="btn btn-danger btn-sm" id="del-row">Clear Table</button>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+
+    <script>
+        function warehouseEditor(cell, onRendered, success, cancel, editorParams) {
+            var editor = document.createElement("select");
+            editor.setAttribute("class", "select2");
+            editor.style.width = "100%";
+            
+            onRendered(function () {
+                $(editor).select2({
+                    closeOnSelect: false,
+                    ajax: {
+                        url: '@Url.Action("GetWarehouse", "Admin")',
+                        dataType: 'json',
+                        data: function (params) {
+                            return {
+                                dropdownSearch: params.term,
+                                pageNo: params.page || 1
+                            };
+                        },
+                        processResults: function (data) {
+                            var options = data.map(function (item) {
+                                return {
+                                    id: item.Value,
+                                    text: item.Text,
+                                };
+                            });
+                            return { results: options };
+                        },
+                        cache: false
+                    }
+                });
+                editor.style.css = "100%";
+                $(editor).select2('open');
+            });
+
+            function successFunc(e) {
+                var data = e.params.data;
+                cell.getRow().update({
+                    "WarehouseId": data.id,
+                    "Warehouse": data.text,
+                });
+                success(data.text);
+                $(editor).select2('close');
+            }
+
+            function DestroyFunc() {
+                cancel();
+                cell.navigateRight();
+            }
+
+            $(editor).on("select2:select", successFunc);
+            $(editor).on("select2:close", DestroyFunc);
+
+            return editor;
+        }
+
+        const productList = [
+            { id: 1, text: 'Electronics' },
+            { id: 2, text: 'Furniture' },
+            { id: 3, text: 'Clothing' },
+            { id: 4, text: 'Food' },
+            { id: 5, text: 'Automobile' }
+        ];
+
+        var productCache = {};
+
+        var multiSelectEditor = function (cell, onRendered, success, cancel, editorParams) {
+            var editor = document.createElement("select");
+            editor.setAttribute("multiple", "multiple");
+            var rowData = cell.getRow().getData();
+
+            onRendered(function () {
+                var initialValue = cell.getValue() || [];
+
+                $(editor).select2({
+                    ajax: {
+                        url: '@Url.Action("GetProducts", "BuyerOrder")',
+                        dataType: 'json',
+                        data: function (params) {
+                            return {
+                                WarehouseId: rowData.WarehouseId,
+                                q: params.term,
+                                page: params.page || 1
+                            };
+                        },
+                        processResults: function (data, params) {
+                            params.page = params.page || 1;
+                            var results = data.map(item => ({ id: item.Id, text: item.Name }));
+                            results.forEach(item => {
+                                productCache[item.id] = item.text;
+                            });
+                            return {
+                                results: results,
+                                pagination: {
+                                    more: data.hasMore
+                                }
+                            };
+                        },
+                        cache: true
+                    },
+                    width: '100%',
+                    multiple: true,
+                    minimumInputLength: 0,
+                    initSelection: function (element, callback) {
+                        var data = initialValue.map(id => ({ id: id, text: productCache[id] || id }));
+                        callback(data);
+                    }
+                });
+
+                // Prepopulate the select2 with initial values
+                initialValue.forEach(id => {
+                    if (productCache[id]) {
+                        var option = new Option(productCache[id], id, true, true);
+                        $(editor).append(option);
+                    } else {
+                        var option = new Option(id, id, true, true);
+                        $(editor).append(option);
+                    }
+                });
+
+                $(editor).on('change', function () {
+                    success($(editor).val());
+                });
+
+                editor.focus();
+            });
+
+            return editor;
+        };
+
+        var warehousetablecolumns = [
+            { title: "Id", field: "Id", headerSort: false, visible: false },
+            {
+                title: "Warehouse",
+                field: "Warehouse",
+                headerHozAlign: "center",
+                hozAlign: "center",
+                sorter: "number",
+                editor: warehouseEditor,
+            },
+            {
+                title: "Hidden Tax",
+                field: "WarehouseId",
+                visible: false,
+                editor: "input",
+            },
+            {
+                title: "Product",
+                field: "product",
+                width: "50px",
+                editor: multiSelectEditor,
+                formatter: function (cell, formatterParams, onRendered) {
+                    var value = cell.getValue();
+                    if (Array.isArray(value)) {
+                        return value.map(id => productCache[id] || id).join(', ');
+                    }
+                    return value;
+                }
+            },
+        ];
+
+        var deleteColumn = {
+            title: "",
+            field: "Delete",
+            formatter: function (cell, formatterParams) {
+                return "<i class='fas fa-trash-alt delete-icon'></i>";
+            },
+            width: 30,
+            headerSort: false,
+            cellClick: function (e, cell) {
+                var row = cell.getRow();
+                deleteRow(row);
+            }
+        };
+
+        warehousetablecolumns.push(deleteColumn);
+
+        var warehousetable = new Tabulator("#example-table", {
+            addRowPos: "bottom",
+            columns: warehousetablecolumns,
+        });
+        document.getElementById('getTableDataButton').addEventListener('click', function () {
+            var tableData = warehousetable.getData();
+            console.log(tableData);
+        });
+
+        document.getElementById('populateTableButton').addEventListener('click', function () {
+            // Fetch product names to populate the productCache
+            $.ajax({
+                url: '@Url.Action("GetProducts", "BuyerOrder")',
+                dataType: 'json',
+                success: function (data) {
+                    data.forEach(item => {
+                        productCache[item.Id] = item.Name;
+                    });
+
+                    // Example data to populate the table
+                    var newTableData = [
+                        { Id: 1, Warehouse: "Warehouse A", WarehouseId: "101", product: ["12", "11"] },
+                        { Id: 2, Warehouse: "Warehouse B", WarehouseId: "102", product: ["22", "21"] }
+                    ];
+
+                    // Populate the table with new data
+                    warehousetable.setData(newTableData);
+                }
+            });
+        });
+
+        document.getElementById("add-row").addEventListener("click", function () {
+            warehousetable.addRow({});
+        });
+
+        document.getElementById("del-row").addEventListener("click", function () {
+            warehousetable.clearData();
+        });
+
+        function deleteRow(row) {
+
+            if (confirm("Are you sure you want to delete this row?")) {
+                warehousetable.deleteRow(row);
+            }
+
+        }
+    </script>
+
+}

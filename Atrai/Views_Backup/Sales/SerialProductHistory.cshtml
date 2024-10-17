@@ -1,0 +1,406 @@
+﻿@*@model IEnumerable<Atrai.Core.Entity.SalesModel>*@
+@{ ViewData["Title"] = "Serial Product History List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                                           @Html.Hidden("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+                                @Html.Hidden("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+
+                        <div class="row mb-2">
+                            <div class="col-md-4 col-12 mt-1">
+                                <h4 style="color: #1976d2;">Product Serial History List</h4>
+                            </div>
+                        </div>
+
+
+                        <div class="card p-2 mb-2">
+                            <div class="row">
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        @Html.DropDownList("Products", ViewBag.Products as List<SelectListItem>, "Select Products", new { id = "ProductId", @class = "form-control form-control-sm" })
+                                    </div>
+                                </div>
+                                 <div class="col-md-4 col-12  mb-2">
+                                               <div class="form-inline divHiddenItems">
+                                         <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text">
+                                               <i class="fa fa-calendar"></i>
+                                             </div>
+                                        </div>
+                                        <input type="text" class="form-control from-control-sm" name="date" id="daterange-btn" style="width: auto;">
+                                         <button id='btnDec' type="button" class="btn btn-danger rounded-0" title='Decrement month'><i class="fa fa-calendar-minus-o" aria-hidden="true"></i></button>
+                                        <button id='btnInc' type="button" class="btn btn-info  rounded-0" title='Increment month'><i class="fa fa-calendar-plus-o" aria-hidden="true"></i></button>
+                                        </div>
+                                        @*<span type="button" class="btn btn-sm btn-outline-info" id="daterange-btn">
+
+                                            <i class="fa fa-calendar"></i>&nbsp; <span>defaut date</span>
+
+                                            <i class="fa fa-caret-down"></i>
+                                        </span>
+                                        <input id="daterange-btn" size="40" value="">*@
+                                    </div>
+                                </div>
+@*                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                <label for="FDate">From Date</label>
+                                            </span>
+                                        </div>
+                                        @Html.TextBox("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "Select From Date ", @autocomplete = "off", name = "FromDate" })
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                <label for="TDate">To Date</label>
+                                            </span>
+                                        </div>
+                                        @Html.TextBox("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "Select To Date ", @autocomplete = "off", name = "ToDate" })
+                                    </div>
+                                </div>*@
+                                <div class="col-md-3 col-12">
+                                    <label class="pr-2"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                                    <label class="pr-2"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <div class="table-responsive mt-1">
+                            <table id="saleslist" class="display table table-hover  table-bordered table-striped" cellspacing="0" width="100%">
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+
+
+@section Scripts{
+
+
+
+
+
+    <script TransactionId="text/javascript">
+
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        //    CurrentDate();
+
+        //    $(".FromDate").datepicker({
+
+        //        dateFormat: "dd-M-y",
+        //        changeMonth: true,
+        //        changeYear: true
+
+        //    });
+
+
+        //$(".ToDate").datepicker({
+
+        //    dateFormat: "dd-M-y",
+        //    changeMonth: true,
+        //    changeYear: true
+
+        //});
+
+        //function CurrentDate() {
+        //    var date = new Date();
+        //    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        //    var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+        //    if ($(".FromDate").val() == '') {
+        //        $(".FromDate").val(val);
+        //    }
+        //    if ($(".ToDate").val() == '') {
+        //        $(".ToDate").val(val);
+        //    }
+        //}
+
+        var ProductId = $("#ProductId").val();
+        var fromdate = $("#FromDate").val();
+        var todate = $("#ToDate").val();
+
+    loaddata(fromdate, todate, ProductId ,1);
+
+
+
+        function loaddata(FromDate = "", ToDate = "", ProductId = "", isAll = 1) {
+            //alert(ProductId, FromDate, ToDate);
+
+            table = $('#saleslist').DataTable({
+                initComplete: function () {
+
+                    //var input = $('.dataTables_filter input').unbind(),
+                        //self = this.api(),
+
+                        //$searchButton = $('<button class="btn rounded-0 btn-info btn-sm" tabindex="0" aria-controls="saleslist" TransactionId="button" title="Search"><span><i class="mdi mdi-file-excel"></i></span></button>')
+                            //.text('Search')
+                            //.click(function () {
+                            //    if (input.val().length > 0) {
+                            //        self.search(input.val()).draw();
+
+                            //    }
+                            //    else {
+                            //        loaddata(fromdate, todate, ProductId, 1);
+
+                            //    }
+                            //}),
+                        //$clearButton = $('<button class="btn rounded-0 btn-warning btn-sm" tabindex="0" aria-controls="saleslist" TransactionId="button" title="Export to PDF"><span><i class="mdi mdi-file-pdf"></i></span></button>')
+                        //    .text('Clear')
+                        //    .click(function () {
+                        //        input.val('');
+                        //        $searchButton.click();
+                        //    }),
+                        $allButton = $('<button class="ml-1 btn rounded-0 btn-purple btn-sm" tabindex="0" aria-controls="saleslist" TransactionId="button" title="Load"><span><i class="mdi mdi-file-excel"></i></span></button>')
+                            .text('Load')
+                            .click(function () {
+                                input.val('');
+                                //alert(FromDate);
+                                loaddata(fromdate, todate, ProductId, 1);
+                                //table.ajax.reload();
+
+
+                            })
+                    $('.dataTables_filter').append($allButton);//, $clearButton ,$searchButton
+                },
+
+                serverSide: true,  "scrollX": true,
+                "orderCellsTop": true,
+
+                "iDisplayLength": 10,
+                "lengthMenu": [[5, 10, 20, 50, -1], [5, 10, 20, 50, "All"]],
+
+                    dom: '<"dom_wrapper fh-fixedHeader"flB>t',
+                    //dom: 'lBfrtipF',
+
+                    buttons: {
+                        buttons: [
+                            {
+                                extend: 'excel',
+                                text: '<i class="mdi mdi-file-excel"></i>',
+                                className: 'btn-success',
+                                titleAttr: 'Export to excel'
+                            }
+
+                        ],
+                    },
+
+                //dom: '<"dom_wrapper fh-fixedHeader"lBf>tip',
+
+                //buttons: {
+                //    dom: {
+                //        button: {
+                //            className: 'btn rounded-0'
+                //        }
+                //    },
+                //    buttons: [
+                //    ]
+                //},
+                "ajax": {
+                    "url": "@Url.Action("GetSerialProductList", "Sales")",
+                    "data": { FromDate: $("#FromDate").val(), ToDate: $("#ToDate").val(), ProductId: $("#ProductId").val(), isAll: isAll },
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "title": "Id", "data": "Id", "visible": false },
+                    { "title": "Sales Code", "data": "SalesCode", "searchable": true },
+                    { "title": "Sales Date", "data": "SalesDate", "searchable": false },
+                    { "title": "Selling Price", "data": "SellingPrice", "searchable": false },
+
+
+                    { "title": "Customer Name", "data": "CustomerName", "searchable": false },
+                    //{ "title": "Primary Address", "data": "CustomerAddress", "searchable": false },
+                    //{ "title": "Phone No", "data": "CustomerMobileNo", "searchable": false },
+
+
+                    { "title": "Supplier", "data": "SupplierName", "searchable": false },
+                    //{ "title": "Total", "data": "SupplierMobileNo", "searchable": false },
+                    //{ "title": "Discount", "data": "SupplierAddress", "searchable": false },
+
+                    { "title": "Product Code", "data": "ProductCode", "searchable": true },
+                    { "title": "Product Name", "data": "ProductName", "searchable": true },
+                    { "title": "Model Name", "data": "ModelName", "searchable": true },
+                    { "title": "Brand Name", "data": "BrandName", "searchable": true },
+                    { "title": "Size", "data": "SizeName", "searchable": true },
+                    { "title": "Color", "data": "ColorName", "searchable": true },
+
+                    { "title": "Serial No", "data": "BatchSerialNo", "searchable": true },
+                    {
+                        "title": "Replaced Serial",
+                        "data": {
+                            Id: "Id" //,
+                        },
+                        "searchable": false,
+                        "render": function (data, type, row) {
+                            var replaceserial = data.ReplaceSerialNo;
+                            var replacedate = data.ReplaceDate;
+
+                            return (replaceserial + " " + replacedate);
+                        }
+                    },
+
+                    { "title": "Purchase Code", "data": "PurchaseCode", "searchable": false },
+                    { "title": "Purchase Date", "data": "PurchaseDate", "searchable": false },
+                    { "title": "Purchase Price", "data": "PurchasePrice", "searchable": false },
+
+
+                    { "title": "Warrenty", "data": "WarrentyName", "searchable": false },
+                    //{ "title": "Warrenty Day", "data": "WarrentyDay", "searchable": false },
+
+                    {
+                        "title": "Warrenty Day",
+                        "data": {
+                            Id: "Id" //,
+                        },
+                        "searchable": false,
+                        "render": function (data, type, row) {
+                            //var showdata = '';
+                            //if (data.WarrentyDay != null) {
+
+                            //    var showdata = data.salesdateformat;
+                            //}
+                            //else {
+                            //    showdata = "";
+                            //    return showdata;
+                            //}
+                            var days = data.WarrentyDay*365;
+
+                            return (days + " Days");
+                        }
+                    },
+
+                    //{ "title": "Product Age", "data": "ProductAge", "searchable": false }   
+                    {
+                        "title": "Product Age",
+                        "data": {
+                            Id: "Id" //,
+                        },
+                        "searchable": false,
+                        "render": function (data, type, row) {
+                            var showdata = '';
+                            //alert(new Date());
+                            //alert(new Date(data.SalesDate));
+                            //alert(data.SalesDate);
+
+
+                            if (data.SalesDate != null) {
+                                //alert(GetDate(data.SalesDate));
+
+                                var salesdateok = data.salesdateformat;
+                                var currentdate = new Date();
+
+                                var mydate = new Date(data.salesdateformat);
+
+                                //alert(salesdateok);
+                                //alert(mydate);
+
+                                //alert(currentdate);
+                                showdata = (currentdate - mydate);
+                           
+
+                                //alert(showdata);
+                            }
+                            else {
+                                showdata = "";
+                                return showdata;
+                            }
+
+                            //var diff = new Date(end - start);
+
+                            // get days
+                            var days = showdata/1000/60/60/24;
+                            
+                            return Math.floor(days);
+                        }
+                    },
+
+
+
+
+                    ////{ "title": "Net Amount", "data": "ProductAge", "searchable": false },
+                    //{ "title": "Selling price", "data": "SellingPrice", "searchable": false },
+                    //{ "title": "purchase Price", "data": "PurchasePrice", "searchable": false }
+
+
+                            
+                        ],
+                //"order": [0, "desc"],
+                "processing": true,
+                    "language": {
+                        "lengthMenu": "_MENU_",
+                        //"zeroRecords": "Nothing found - sorry",
+                        //"info": "Showing page _PAGE_ of _PAGES_",
+                        "infoEmpty": "No records available",
+                        //"infoFiltered": "(filtered from _MAX_ total records)",
+                        "searchPlaceholder": "Search",
+                        "sSearch": '<em class="fa fa-search"></em>'
+                    },
+                "destroy": true
+            });
+
+        }
+
+    });
+
+
+        function GetDate(str) {
+            var arr = str.split("-");
+            var months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+            var month = months.indexOf(arr[1].toLowerCase());
+
+            return new Date(parseInt(arr[2]), month, parseInt(arr[0]));
+        }
+
+
+
+        @*var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+        var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+        var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+            {
+            style: 'currency',
+            currency: CurrencyShortNameViewFormat,///'BDT'
+            minimumFractionDigits: 2,
+        });*@
+
+    </script>
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+

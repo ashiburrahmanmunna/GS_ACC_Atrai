@@ -1,0 +1,898 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model Atrai.Core.Entity.TransactionModel
+@{
+    ViewData["Title"] = "AddTransaction";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+<style>
+    p.lineheight {
+        line-height: 6px;
+        vertical-align: middle;
+    }
+
+    hr.hr-text {
+        position: relative;
+        border: none;
+        height: 1px;
+        background: #999;
+    }
+
+        hr.hr-text::before {
+            content: attr(data-content);
+            display: inline-block;
+            background: #fff;
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: #999;
+            border-radius: 30rem;
+            padding: 0.2rem 0.5rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .dropdown-item {
+          padding: 5px 1rem;
+          color: #67757c;
+          /*text-align: center;*/
+        }
+</style>
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row"> 
+        <div class="col-md-9 col-12"> 
+        
+        
+
+        <div class="card">
+            <div class="card-header py-1">
+                @if (@ViewBag.Type == "Sales" || @ViewBag.Type == "Customer")
+                {
+                    <h3 style="color:darkgreen">Received Amount From Customer</h3>
+                }
+                else if (@ViewBag.Type == "Purchase" || @ViewBag.Type == "Supplier")
+                {
+                    <h3 style="color:red">Paid To Supplier</h3>
+                }
+                else if (@ViewBag.Type == "Paid")
+                {
+                    <h3 style="color:red">Amount Paid</h3>
+                }
+                else if (@ViewBag.Type == "PaidToCustomer")
+                {
+                    <h3 style="color:red">Amount Paid To Customer</h3>
+                }
+                else if (@ViewBag.Type == "Received")
+                {
+                    <h3 style="color:darkgreen">Amount Received</h3>
+                }
+                else if (@ViewBag.Type == "ReceivedFromSupplier")
+                {
+                 <h3 style="color:darkgreen">Amount Received From Supplier</h3>
+                }
+                else if (@ViewBag.Type == "Contra")
+                {
+                    <h3 style="color:darkgreen"> Amount Transfer to Cash / Bank .</h3>
+                }
+                else if (@ViewBag.Type == "CashContra")
+                {
+                    <h3 style="color:darkgreen"> Cash Received / Withdrawn from Bank.</h3>
+                }
+                else if (@ViewBag.Type == "BankContra")
+                {
+                    <h3 style="color:royalblue"> Cash Deposit To Bank.</h3>
+                }
+                else if (@ViewBag.Type == "CustomerDiscount")
+                {
+                    <h3 style="color:red"> Discount Given to Customer</h3>
+                }
+                else if (@ViewBag.Type == "SupplierDiscount")
+                {
+                    <h3 style="color:royalblue">Discount by Supplier.</h3>
+                }
+                else
+                {
+                    <h3 style="color:royalblue"> Accounts Transaction </h3>
+                }
+            </div>
+
+            <div class="card-body">
+                       <div>
+                    <form asp-controller="admin" asp-action="AddTransaction" method="post">
+                        @if (Model != null)
+                        {
+                            <input type="hidden" asp-for="Id" />
+                            <input type="hidden" asp-for="CreateDate" />
+                            <input type="hidden" asp-for="LuserId" />
+                            <input type="hidden" asp-for="isSystem" />
+                            <input type="hidden" asp-for="TransactionCategory" />
+
+                            <input type="hidden" asp-for="isPost" />
+                        }
+                        else
+                        {
+                            <input type="hidden" asp-for="Id" value="0" />
+                        }
+
+
+                        <div class="container-fluid">
+
+                                    <div class="row">
+
+                                    <div class="col-md-4 col-12">
+                                        <div class="input-group mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text py-0">
+                                                    @Html.LabelFor(model => model.WarehouseId)
+                                                </span>
+                                            </div>
+                                            @Html.DropDownListFor(x => x.WarehouseId,
+                                            new SelectList((IEnumerable<SelectListItem>)ViewBag.Warehouse, "Value", "Text"),
+                                            htmlAttributes: new { @class = "form-control", id = "WarehouseId" })
+                                            @Html.ValidationMessageFor(model => model.WarehouseId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+
+                                    </div>
+
+
+                            <div class="row">
+
+                                <div class="col-md-5 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                @Html.LabelFor(model => model.TransactionCode, "Code")
+                                            </span>
+                                        </div>
+                                        @Html.EditorFor(model => model.TransactionCode, new { htmlAttributes = new { @class = "form-control" , @readonly="readonly" } })
+                                        @Html.ValidationMessageFor(model => model.TransactionCode, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-4 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                @Html.LabelFor(model => model.InputDate, "Entry Date")
+                                            </span>
+                                        </div>
+                                        <input asp-for="InputDate" class="form-control tg" value="@Model.InputDate.ToString("yyyy-MM-dd")" type="date" />
+                                        <span asp-validation-for="InputDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+
+
+
+
+                            </div>
+
+
+
+
+                            <div class="row">
+
+
+                                <div id="divcurrencyid" class="col-md-6 col-12 my-2">
+                                    @Html.LabelFor(x => x.CurrencyId)
+                                    @Html.DropDownListFor(x => x.CurrencyId,
+                                    new SelectList((IEnumerable<SelectListItem>)ViewBag.Currency, "Value", "Text"),
+                                    htmlAttributes: new { @class = "form-control", id = "CurrencyId" })
+                                    @Html.ValidationMessageFor(x => x.CurrencyId, "", new { @class = "text-danger" })
+                                </div>
+                                <div id="divcurrencyrate" class="col-md-6 col-12  my-2">
+                                    @Html.LabelFor(x => x.CurrencyRate)
+                                    @Html.TextBoxFor(x => x.CurrencyRate, null, new { @class = "form-control", @placeholder = "Currency Rate" })
+                                    @Html.ValidationMessageFor(x => x.CurrencyRate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div id="divcustomerid" class="col-md-5 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                @Html.LabelFor(model => model.Customer, "Customer")
+                                            </span>
+                                        </div>
+                                        @Html.DropDownListFor(x => x.CustomerId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.Customer, "Value", "Text"), "Select Customer",
+                                        htmlAttributes: new { @class = "form-control", id = "CustomerId" })
+                                        <h3 id="CustomerPrevDue" class="float-right text-danger">
+
+                                        </h3>
+                                        @Html.ValidationMessageFor(model => model.CustomerId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+                                <div id="divsupplierid" class="col-md-5 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                @Html.LabelFor(x => x.Supplier)
+                                            </span>
+                                        </div>
+                                        @Html.DropDownListFor(x => x.SupplierId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.Supplier, "Value", "Text"), "Select Supplier",
+                                        htmlAttributes: new { @class = "form-control", id = "SupplierId" })
+                                          <h3 id="SupplierPrevDue" class="float-right text-danger">
+
+                                        </h3>
+                                        @Html.ValidationMessageFor(x => x.SupplierId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                
+
+
+
+                                <div id="divdiscountamount" class="col-md-4 col-12  my-2">
+                                                               <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                @Html.LabelFor(x => x.DiscountAmount)
+                                            </span>
+                                        </div>
+                                    @Html.TextBoxFor(x => x.DiscountAmount, null, new { @class = "form-control", @placeholder = "Enter Discount Amount " })
+                                    @Html.ValidationMessageFor(x => x.DiscountAmount, "", new { @class = "text-danger" })
+                                </div>
+                                </div>
+
+
+
+                                <div id="divtransactiontype" class="col-md-4 col-12  my-2">
+                                                                                                   <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                  <label for="Status"> Transaction Type : </label>
+                                            </span>
+                                        </div>
+                                 
+                                    @Html.DropDownList("TransactionType", new List<SelectListItem>
+                                    {
+                                    new SelectListItem() {Text = "Received", Value="Received"},
+                                    new SelectListItem() {Text = "Paid", Value="Paid"},
+                                    new SelectListItem() {Text = "Increase", Value="Increase"},
+                                    new SelectListItem() {Text = "Decrease", Value="Decrease"}
+                                    //new SelectListItem() {Text = "Advance", Value="Advance"},
+                                    }, "Select Transaction Type", new { @class = "form-control" })
+                                    @*<small id="error_Status" class="form-text error_msg">Select Transaction Type</small>*@
+                                </div>
+                                </div>
+
+
+                                
+                                <div id="divaccountid" class="col-md-8 col-12 my-2">
+                      
+                                    <h3 id="AccountIdBalance" class="float-right text-danger"></h3>
+
+                             
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                @Html.LabelFor(model => model.AccountId)
+                                            </span>
+                                        </div>
+            
+                                        @Html.DropDownListFor(x => x.AccountId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.IncomeExpenseHead, "Value", "Text"), "Select Account Head / Income / Expense",
+                                        htmlAttributes: new { @class = "form-control", id = "AccountId" })
+                                 
+                                        @Html.ValidationMessageFor(x => x.AccountId, "", new { @class = "text-danger" })
+                                    </div>
+                                            
+                                </div>
+
+                                <div class="col-md-5 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                @Html.LabelFor(model => model.TransactionAmount, "Amount")
+                                            </span>
+                                        </div>
+                                        <input type="text" asp-for="TransactionAmount" class="form-control" />
+                                        @Html.ValidationMessageFor(model => model.TransactionAmount, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+
+
+
+
+                                <div id="divaccountpaytypeid" class="col-md-8 col-12 my-2">
+                                            <h3 id="AccountPayTypeIdBalance" class="float-right text-danger"></h3>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                @Html.LabelFor(model => model.AccountPayTypeId)
+                                            </span>
+                                        </div>
+                                        @Html.DropDownListFor(x => x.AccountPayTypeId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.CashBankHead, "Value", "Text"), "Select Payment / Received by Head",
+                                        htmlAttributes: new { @class = "form-control", id = "AccountPayTypeId" })
+                                        @Html.ValidationMessageFor(x => x.AccountPayTypeId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+
+
+
+
+
+
+                                <div id="divassetliabilityaccountid" class="col-md-8 col-12  my-2">
+                                            <h3 id="AssetLiabilityAccountIdBalance" class="float-right text-danger"></h3>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                @Html.LabelFor(model => model.AssetLiabilityAccountId)
+                                            </span>
+                                        </div>
+                                        @Html.DropDownListFor(x => x.AssetLiabilityAccountId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.AssetLiabilityHead, "Value", "Text"), "Select Asset / Liability Head",
+                                        htmlAttributes: new { @class = "form-control", id = "AssetLiabilityAccountId" })
+                                        @Html.ValidationMessageFor(x => x.AssetLiabilityAccountId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+
+
+
+
+
+
+                                @{
+                                    var BusinessType = @HttpContextAccessor.HttpContext.Session.GetString("BusinessType").ToString();
+                                    if (BusinessType == "Association")
+                                    {
+                                                                                        <div class="col-md-4 col-12  my-2">
+                                                                                            <div class="input-group mb-2">
+                                                                                                <div class="input-group-prepend">
+                                                                                                    <span class="input-group-text py-0">
+                                                                                                        @Html.LabelFor(model => model.MemberId, "Member")
+                                                                                                    </span>
+                                                                                                </div>
+                                                                                                @Html.DropDownListFor(x => x.MemberId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.Member, "Value", "Text"), "Select Member",
+                                        htmlAttributes: new { @class = "form-control", id = "MemberId" })
+                                                                                                @Html.ValidationMessageFor(x => x.MemberId, "", new { @class = "text-danger" })
+
+                                                                                            </div>
+                                                                                        </div>
+
+                                    }
+                                }
+
+
+                                <div id="divemployeeid" class="col-md-5 col-12  my-2">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                @Html.LabelFor(model => model.EmployeeId, "Employee")
+                                            </span>
+                                        </div>
+                                        @Html.DropDownListFor(x => x.EmployeeId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.Employee, "Value", "Text"), "Select Employee",
+                                        htmlAttributes: new { @class = "form-control", id = "EmployeeId" })
+                                        @Html.ValidationMessageFor(x => x.EmployeeId, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+
+
+
+
+
+
+                                <div id="divsalesid" class="col-md-8 col-12  my-2">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                @Html.LabelFor(model => model.SalesId, "Invoice")
+                                            </span>
+                                        </div>
+                                        @Html.DropDownListFor(x => x.SalesId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.Sales, "Value", "Text"), "Select Sales Invoice",
+                                        htmlAttributes: new { @class = "form-control", id = "SalesId" })
+                                        @Html.ValidationMessageFor(x => x.SalesId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+
+
+                                <div id="divpurchaseid" class="col-md-8 col-12  my-2">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                @Html.LabelFor(model => model.PurchaseId, "Purchase Order")
+                                            </span>
+                                        </div>
+                                        @Html.DropDownListFor(x => x.PurchaseId,
+                                        new SelectList((IEnumerable<SelectListItem>)ViewBag.Purchase, "Value", "Text"), "Select Purchase Bill",
+                                        htmlAttributes: new { @class = "form-control form-control-sm", id = "PurchaseId" })
+                                        @Html.ValidationMessageFor(x => x.PurchaseId, "", new { @class = "text-danger" })
+
+                                    </div>
+                                </div>
+
+
+
+                                <div class="col-md-8 col-12">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text py-0">
+                                                @Html.LabelFor(model => model.Description, "Description")
+                                            </span>
+                                        </div>
+                                        @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div id="divbutton" class="col-md-8 col-12 my-2">
+                                    @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+
+
+                                    @if (ViewBag.ActionType == "Create")
+                                    {
+                                        <input type="submit" value="Save Changes" class="btn  btn-outline-primary rounded-0" />
+                                    }
+                                    else if (ViewBag.ActionType == "Edit")
+                                    {
+                                        <input type="submit" value="Update Changes" class="btn btn-outline-warning rounded-0" />
+                                    }
+                                    else if (ViewBag.ActionType == "Delete")
+                                    {
+                                        <button class="btn btn-outline-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>
+                                    }
+
+
+                                    @Html.ActionLink("Back To List", "TransactionList", "Admin", null, new { @class = "btn btn-outline-info rounded-0", @id = "btnBack" })
+
+                                    <!-- Example single danger button -->
+                                    <div class="dropdown mt-1 d-inline">
+                                        <a class="btn btn-primary rounded-0 dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Add New Entry
+                                        </a>
+
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+
+                                            @Html.ActionLink("Transaction", "AddTransaction", null, null, new { @class = "dropdown-item", @id = "btnBack" })
+                                                    <hr data-content="Received" class="hr-text">
+                                            @Html.ActionLink("By Income", "AddTransaction", new { Type = "Received" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("From Customer", "AddTransaction", new { Type = "Customer" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("By Invoice", "AddTransaction", new { Type = "Sales" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("From Customer - Multiple Invoice", "AddTransactionDetails", new { Type = "Customer" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("From Supplier", "AddTransaction", new { Type = "ReceivedFromSupplier" }, new { @class = "dropdown-item", @id = "btnFromSupplier" })
+                                            @*<div class="dropdown-divider"></div>*@
+                                            <hr data-content="Paid" class="hr-text">
+                                            @Html.ActionLink("For Expense", "AddTransaction", new { Type = "Paid" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("To Supplier", "AddTransaction", new { Type = "Supplier" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("By Purchase Order", "AddTransaction", new { Type = "Purchase" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("To Supplier - Multiple Invoice", "AddTransactionDetails", new { Type = "Supplier" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("To Customer", "AddTransaction", new { Type = "PaidToCustomer" }, new { @class = "dropdown-item", @id = "btnBack" })
+
+
+                                            <hr data-content="Accounts" class="hr-text">
+                                            @Html.ActionLink("Cash Received From Bank", "AddTransaction", new { Type = "CashContra" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("Cash Deposit To Bank", "AddTransaction", new { Type = "BankContra" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("Contra", "AddTransaction", new { Type = "Contra" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            <hr data-content="Discount" class="hr-text">
+                                            @Html.ActionLink("Discount To Customer", "AddTransaction", new { Type = "CustomerDiscount" }, new { @class = "dropdown-item", @id = "btnBack" })
+                                            @Html.ActionLink("Discount From Supplier", "AddTransaction", new { Type = "SupplierDiscount" }, new { @class = "dropdown-item", @id = "btnBack" })
+
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+                            </div>
+
+                            </div>
+
+                      
+
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- End PAge Content -->
+                
+        </div>
+
+
+        </div>
+    </div>
+</div>
+
+
+
+
+@section scripts {
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            var isMultiCurrency = '@HttpContextAccessor.HttpContext.Session.GetInt32("isMultiCurrency").ToString()';
+            if (isMultiCurrency == "0") {
+                $("#divcurrencyid").hide();
+                $("#divcurrencyrate").hide();
+            }
+
+            var Type = '@ViewBag.Type';
+            $("#divdiscountamount").hide();
+            //$("#Status").val(filter);
+            //alert(Type);
+
+            if (Type.toLowerCase() == "Sales".toLowerCase()) {
+
+                $("#divsupplierid").hide();
+                $("#divaccountid").hide();
+                $("#divemployeeid").hide();
+                $("#divpurchaseid").hide();
+                $("#divcustomerid").hide();
+                $("#divtransactiontype").hide();
+                $("#divassetliabilityaccountid").hide();
+
+                //$("#TransactionType").attr('disabled', true);
+                //$("#AssetLiabilityAccountId").attr('disabled', true);
+                //$("#CustomerId").attr('disabled', true);
+                //$("#SalesId").attr('disabled', true);
+
+                //alert($("#CustomerId").val());
+
+            }
+            else if ((Type.toLowerCase() == "Customer".toLowerCase()) || (Type.toLowerCase() == "PaidToCustomer".toLowerCase())) {
+
+
+                $("#divsupplierid").hide();
+                $("#divaccountid").hide();
+                $("#divemployeeid").hide();
+                $("#divpurchaseid").hide();
+                $("#divdiscountamount").hide();
+                $("#divtransactiontype").hide();
+                $("#divassetliabilityaccountid").hide();
+
+            }
+            else if ((Type.toLowerCase() == "Received".toLowerCase())) {
+
+                $("#divsupplierid").hide();
+                //$("#divassetliabilityaccountid").hide();
+                $("#divemployeeid").hide();
+                $("#divpurchaseid").hide();
+                $("#divcustomerid").hide();
+                $("#divassetliabilityaccountid").hide();
+                $("#divtransactiontype").hide();
+                //$("#divcustomerid").hide();
+                $("#divsalesid").hide();
+
+            }
+            else if (Type.toLowerCase() == "Purchase".toLowerCase()) {
+
+                $("#divcustomerid").hide();
+                $("#divaccountid").hide();
+                $("#divemployeeid").hide();
+                $("#divsalesid").hide();
+                $("#divtransactiontype").hide();
+                $("#divassetliabilityaccountid").hide();
+                $("#divsupplierid").hide();
+
+
+            }
+            else if ((Type.toLowerCase() == "Supplier".toLowerCase()) || (Type.toLowerCase() == "ReceivedFromSupplier".toLowerCase())) {
+
+                $("#divcustomerid").hide();
+                $("#divaccountid").hide();
+                $("#divemployeeid").hide();
+                $("#divsalesid").hide();
+                $("#divtransactiontype").hide();
+                $("#divassetliabilityaccountid").hide();
+
+
+
+            }
+            else if (Type.toLowerCase() == "Paid".toLowerCase()) {
+
+                $("#divcustomerid").hide();
+                //$("#divassetliabilityaccountid").hide();
+                $("#divsupplierid").hide();
+                $("#divpurchaseid").hide();
+
+
+                $("#divemployeeid").hide();
+                $("#divsalesid").hide();
+                $("#divassetliabilityaccountid").hide();
+                $("#divtransactiontype").hide();
+
+                //$("#divsupplierid").hide();
+
+
+            }
+            else if (Type.toLowerCase() == "CashContra".toLowerCase()) {
+
+                $("#divsupplierid").hide();
+                $("#divcustomerid").hide();
+                $("#divemployeeid").hide();
+
+                //$("#divassetliabilityaccountid").hide();
+                $("#divpurchaseid").hide();
+                $("#divsalesid").hide();
+
+                $("#divaccountid").hide();
+                $("#divtransactiontype").hide();
+
+            }
+            else if (Type.toLowerCase() == "BankContra".toLowerCase()) {
+
+                $("#divsupplierid").hide();
+                $("#divcustomerid").hide();
+                $("#divemployeeid").hide();
+
+                $("#divpurchaseid").hide();
+                $("#divsalesid").hide();
+
+                $("#divaccountid").hide();
+                $("#divtransactiontype").hide();
+
+            }
+            else if (Type.toLowerCase() == "CustomerDiscount".toLowerCase()) {
+                //alert('hit customer discoutn');
+                $("#divsupplierid").hide();
+                $("#divcustomerid").show();
+                $("#divemployeeid").hide();
+
+                $("#divpurchaseid").hide();
+                $("#divsalesid").show();
+
+                $("#divaccountpaytypeid").hide();
+                $("#divtransactiontype").hide();
+                $("#divassetliabilityaccountid").hide();
+
+
+
+            }
+            else if (Type.toLowerCase() == "SupplierDiscount".toLowerCase()) {
+
+                $("#divsupplierid").show();
+                $("#divcustomerid").hide();
+                $("#divemployeeid").hide();
+
+                $("#divpurchaseid").show();
+                $("#divsalesid").hide();
+
+                $("#divaccountpaytypeid").hide();
+                $("#divtransactiontype").hide();
+                $("#divassetliabilityaccountid").hide();
+
+            }
+            else {
+
+                $("#divsupplierid").hide();
+                $("#divcustomerid").hide();
+                $("#divemployeeid").hide();
+
+                $("#divpurchaseid").hide();
+                $("#divsalesid").hide();
+
+                $("#divaccountid").hide();
+                //$("#divtransactiontype").hide();
+            }
+
+
+
+
+
+            //console.log("ready!");
+
+            //$("#AccountId").select2();
+            //$("#AssetLiabilityAccountId").select2();
+            //$("#AccountPayTypeId").select2();
+            //$("#CustomerId").select2();
+            //$("#SupplierId").select2();
+
+
+
+
+            function LedgerBalance(Type,AccountId) {
+                //alert(AccountId);
+                //alert($("#Customer").val());
+                //tblaccountList.rows().remove().draw(false);
+                var MyAppUrlSettings = {
+                    MyUsefulUrl: '@Url.Action("GetLedgerBalance", "Values")'
+                }
+                //alert('test');
+                $.ajax({
+                    type: 'Get',
+                    url: MyAppUrlSettings.MyUsefulUrl,
+                    dataType: 'json',
+                    data: { AccountId: AccountId, TransactionId: $("#Id").val() }, //, saleid: $("#Id").val()
+                    success: function (result) {
+
+                        //console.log(result);
+                        if (Type == 'AccountId') {
+                            $("#AccountIdBalance").text("Balance :  " + result.toLocaleString());
+                        }
+                        else if(Type == 'AccountPayTypeId') 
+                        {
+                            $("#AccountPayTypeIdBalance").text("Balance :  " + result.toLocaleString());
+                        }
+                        else if (Type == 'AssetLiabilityAccountId') {
+                            $("#AssetLiabilityAccountIdBalance").text("Balance :  " + result.toLocaleString());
+                            //$("#CustomerPrevDue").text("Previous Due :  " + result.CustomerInfo.PrevDue.toLocaleString());
+                        }
+                       
+                    },
+                    error: function (ex) {
+                        alert('Failed.' + ex);
+                    }
+                });
+                return false;
+            };
+
+
+            $('#AccountId').select2({})
+                .on("select2:select", function (e) {
+                    //alert('hit');
+                    LedgerBalance('AccountId',$('#AccountId').val());
+                });
+
+            $('#AssetLiabilityAccountId').select2({})
+                .on("select2:select", function (e) {
+                    //alert('hit');
+                    LedgerBalance('AssetLiabilityAccountId', $('#AssetLiabilityAccountId').val());
+                });
+
+
+            $('#AccountPayTypeId').select2({})
+                .on("select2:select", function (e) {
+                    //alert('hit');
+                    LedgerBalance('AccountPayTypeId',$('#AccountPayTypeId').val());
+                });
+
+
+
+            $('#CustomerId').select2({})
+            .on("select2:select", function(e) {
+                 $('#SalesId').empty();
+                customerinvoice();
+            });
+
+            
+            $('#SupplierId').select2({})
+            .on("select2:select", function(e) {
+                 $('#PurchaseId').empty();
+                supplierinvoice();
+            });
+
+
+            $("#MemberId").select2();
+            $("#EmployeeId").select2();
+
+            $("#PurchaseId").select2();
+            $("#SalesId").select2();
+
+            if ($("#Id").val() > 0) {
+                customerinvoice();
+                supplierinvoice();
+            }
+
+               function customerinvoice() {
+                //alert($("#Customer").val());
+                 //tblaccountList.rows().remove().draw(false);
+                    var MyAppUrlSettings = {
+                        MyUsefulUrl : '@Url.Action("GetCustomerInvoice", "Sales")'
+                    }
+                       //alert(WW'test');
+                        $.ajax({
+                            type: 'POST',
+                            url: MyAppUrlSettings.MyUsefulUrl,
+                            dataType: 'json',
+                            data: { CustomerId: $("#CustomerId").val() , TransactionId : $("#Id").val()}, //, saleid: $("#Id").val()
+                            success: function (result) {
+                                console.log(result.CustomerInvoiceList);
+                                var s = '<option value=>Please Select Sales Invoice</option>';  
+                                for (var i = 0; i < result.CustomerInvoiceList.length; i++) {  
+                                    s += '<option value="' + result.CustomerInvoiceList[i].Value + '">' + result.CustomerInvoiceList[i].Text + '</option>';  
+                                }  
+                                $("#SalesId").html(s);  
+
+                                
+
+                                $("#CustomerPrevDue").text("Previous Due :  " + result.CustomerInfo.PrevDue.toLocaleString());
+                            },
+                            error: function (ex) {
+                                alert('Failed.' + ex);
+                            }
+                        });
+                    return false;
+                 };
+
+            function supplierinvoice() {
+
+                                //alert($("#Customer").val());
+                // tblaccountList.rows().remove().draw(false);
+                    var MyAppUrlSettings = {
+                        MyUsefulUrl : '@Url.Action("GetSupplierInvoice", "Purchase")'
+                    }
+                       //alert('test');
+                        $.ajax({
+                            type: 'POST',
+                            url: MyAppUrlSettings.MyUsefulUrl,
+                            dataType: 'json',
+                            data: { SupplierId: $("#SupplierId").val(),TransactionId : $("#Id").val()}, //, saleid: $("#Id").val()
+                            success: function (result) {
+                            
+                                var s = '<option value=>Please Select Purchase Invoice</option>';  
+                                for (var i = 0; i < result.SupplierInvoiceList.length; i++) {  
+                                    s += '<option value="' + result.SupplierInvoiceList[i].Value + '">' + result.SupplierInvoiceList[i].Text + '</option>';  
+                                }  
+                                $("#PurchaseId").html(s);  
+
+                                $("#SupplierPrevDue").text("Previous Due :  " + result.SupplierInfo.PrevDue.toLocaleString());
+                            },
+                            error: function (ex) {
+                                alert('Failed.' + ex);
+                            }
+                        });
+                    return false;
+
+            };
+
+
+
+            if ($("#Id").val() > 0) {
+
+            }
+            else {
+                //CurrentDate();
+
+            }
+
+
+            //$('#InputDate').datepicker({
+            //    dateFormat: 'dd-M-yy',
+            //    todayHighlight: true,
+            //    autoclose: true
+
+            //})
+
+            //$('.mydatepicker').datepicker({
+            //    format: 'dd-M-yyyy',
+            //    todayHighlight: true,
+            //    autoclose: true
+
+            //})
+
+            //function CurrentDate() {
+            //    var date = new Date();
+            //    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+            //        "Aug", "Sep", "Oct", "Nov", "Dec"];
+            //    var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear();
+            //    //var val = date.getMonth()+1 + "/" +  date.getDate()  + "/" + date.getFullYear();
+
+
+            //    //alert(val);
+            //    $("#InputDate").val(val);
+
+            //}
+
+            //$('#AccountId').select2();
+            //$('#AccountPayTypeId').select2();
+        });
+    </script>
+}

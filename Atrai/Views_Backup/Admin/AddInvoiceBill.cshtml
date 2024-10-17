@@ -1,0 +1,834 @@
+﻿@model Atrai.Core.Entity.InvoiceBillModel
+@{ ViewData["Title"] = "AddInvoiceBill";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+<div class="page-wrapper">
+    @Html.AntiForgeryToken()
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>New InvoiceBill</h4>
+
+                    </div>
+
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form id="myform" asp-controller="admin" asp-action="AddInvoiceBill" method="post">
+                                @if (Model != null)
+                                {
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" />
+                                    <input type="hidden" asp-for="LuserId" />
+                                    <input type="hidden" asp-for="isSystem" />
+                                    <input type="hidden" asp-for="isPost" />
+                                    @*<input type="hidden" asp-for="InternetUserId" />*@
+
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Id" value="0" />
+                                }
+
+                                <div class="row">
+                                    <div class="col-lg-8">
+
+
+
+                                        <div class="form-group">
+                                            <div class="row">
+
+                                                <div class="col-md-6 col-12">
+                                                    @Html.LabelFor(x => x.UserId)
+                                                    @Html.TextBoxFor(x => x.UserId, null, new { @class = "form-control", @placeholder = "User Id" })
+                                                    @Html.ValidationMessageFor(x => x.UserId, "", new { @class = "text-danger" })
+                                                </div>
+
+                                                <div class="col-md-4 col-12">
+                                                    @Html.LabelFor(x => x.UserName)
+                                                    @Html.TextBoxFor(x => x.UserName, null, new { @class = "form-control", @placeholder = "User Name " })
+                                                    @Html.ValidationMessageFor(x => x.UserName, "", new { @class = "text-danger" })
+                                                </div>
+
+                                                <div class="col-md-2 col-12">
+                                                    @Html.LabelFor(x => x.InternetUserId)
+                                                    @Html.TextBoxFor(x => x.InternetUserId, null, new { @class = "form-control", @placeholder = "Apps User Id" , @readonly="readonly" })
+                                                    @Html.ValidationMessageFor(x => x.InternetUserId, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="form-group row">
+
+
+                                            <div class="col-md-12 order-md-1 mb-2">
+                                                <div class="card p-1">
+                                                    <div class="table-responsive">
+                                                        <table id="tblexportordermain" class="table text-nowrap tblexportordermain display table-bordered table-striped table-hover" width="100%">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Id</th>
+                                                                    <th>Bill No</th>
+                                                                    <th>User Id</th>
+                                                                    <th>User Name</th>
+                                                                    <th>Billed Date</th>
+                                                                    <th>Bill</th>
+                                                                    <th>Received</th>
+                                                                    <th>Due</th>
+                                                                    <th>Desc.</th>
+
+                                                                </tr>
+                                                            </thead>
+                                                            <tfoot>
+                                                                <tr>
+                                                                    <td class="text-right" colspan="7">
+                                                                        <h6>Total Due</h6>
+                                                                    </td>
+                                                                    <td colspan="1" class="text-center">
+                                                                        <h6 class="TotalChallanQty">0.00</h6>
+                                                                    </td>
+                                                                </tr>
+                                                            </tfoot>
+
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+
+                                        </div>
+
+                                        <div class="form-group row">
+                                            @if (Model != null)
+                                            {
+                                                <div class="col-md-3 col-12">
+                                                    @Html.LabelFor(x => x.BillNo)
+                                                    @Html.TextBoxFor(x => x.BillNo, null, new { @class = "form-control", @placeholder = "Bill No", @readonly = "readonly" })
+                                                    @Html.ValidationMessageFor(x => x.BillNo, "", new { @class = "text-danger" })
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <input type="hidden" asp-for="BillNo" />
+                                            }
+                                            <div class="col-md-3 col-12">
+                                                @Html.LabelFor(x => x.BilledDate)
+                                                @Html.TextBoxFor(x => x.BilledDate, @"{0:dd-MMM-yyyy}", new { id = "BilledDate", @class = "form-control", @placeholder = "Enter InvoiceBill Date", autocomplete = "off" })
+                                                @Html.ValidationMessageFor(x => x.BilledDate, "", new { @class = "text-danger" })
+                                            </div>
+
+                                            <div class="col-md-3 col-12">
+                                                @Html.LabelFor(x => x.NextFollowDate)
+                                                @Html.TextBoxFor(x => x.NextFollowDate, @"{0:dd-MMM-yyyy}", new { id = "NextFollowDate", @class = "form-control", @placeholder = "Enter Follow Date", autocomplete = "off" })
+                                                @Html.ValidationMessageFor(x => x.NextFollowDate, "", new { @class = "text-danger" })
+                                            </div>
+
+                                            <div class="col-md-3 col-12">
+                                                @Html.LabelFor(x => x.BillAmount)
+                                                @Html.TextBoxFor(x => x.BillAmount, null, new { @class = "form-control", @placeholder = "Bill Amount ", onchange = "calculatebalance()", autocomplete = "on" })
+                                                @Html.ValidationMessageFor(x => x.BillAmount, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="row">
+
+
+                                                <div class="col-md-4 col-12">
+                                                    @Html.LabelFor(x => x.ReceivedDate)
+                                                    @Html.TextBoxFor(x => x.ReceivedDate, @"{0:dd-MMM-yyyy}", new { id = "ReceivedDate", @class = "form-control", @placeholder = "Enter InvoiceBill Date", autocomplete = "off" })
+                                                    @Html.ValidationMessageFor(x => x.ReceivedDate, "", new { @class = "text-danger" })
+                                                </div>
+
+                                                <div class="col-md-4 col-12">
+                                                    @Html.LabelFor(x => x.ReceivedAmount)
+                                                    @Html.TextBoxFor(x => x.ReceivedAmount, null, new { @class = "form-control", @placeholder = "Received Amount ", onchange = "calculatebalance()" })
+                                                    @Html.ValidationMessageFor(x => x.ReceivedAmount, "", new { @class = "text-danger" })
+                                                </div>
+
+
+                                                <div class="col-md-4 col-12">
+                                                    @Html.LabelFor(x => x.AccountReceiveHeadId)
+                                                    @Html.DropDownListFor(x => x.AccountReceiveHeadId,
+                                                                                  new SelectList((IEnumerable<SelectListItem>)ViewBag.CashBankHead, "Value", "Text"), "Select Received by Head",
+                                                                                  htmlAttributes: new { @class = "form-control", id = "AccountReceiveHeadId" })
+                                                    @Html.ValidationMessageFor(x => x.AccountReceiveHeadId, "", new { @class = "text-danger" })
+                                                </div>
+
+
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="row">
+
+                                                <div class="col-md-4 col-12">
+                                                    @Html.LabelFor(x => x.Discount)
+                                                    @Html.TextBoxFor(x => x.Discount, null, new { @class = "form-control", @placeholder = "Discount", onchange = "calculatebalance()" })
+                                                    @Html.ValidationMessageFor(x => x.Discount, "", new { @class = "text-danger" })
+                                                </div>
+
+                                                <div class="col-md-4 col-12">
+                                                    @Html.LabelFor(x => x.BadDebt)
+                                                    @Html.TextBoxFor(x => x.BadDebt, null, new { @class = "form-control", @placeholder = "Bad Debt", onchange = "calculatebalance()" })
+                                                    @Html.ValidationMessageFor(x => x.BadDebt, "", new { @class = "text-danger" })
+                                                </div>
+
+                                                <div class="col-md-4 col-12">
+                                                    @Html.LabelFor(x => x.Balance)
+                                                    @Html.TextBoxFor(x => x.Balance, null, new { @class = "form-control", @readonly = "readonly", @placeholder = "Balance" })
+                                                    @Html.ValidationMessageFor(x => x.Balance, "", new { @class = "text-danger" })
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="form-group row">
+
+                                            <div class="col-md-8 col-12">
+                                                @Html.LabelFor(x => x.Description)
+                                                @Html.TextAreaFor(x => x.Description, new { @class = "form-control" })
+                                                @*, new { @class = "form-control", @placeholder = "Note / Description" }*@
+                                                @Html.ValidationMessageFor(x => x.Description, "", new { @class = "text-danger" })
+                                            </div>
+
+                                            <div class="col-md-4 col-12">
+                                                @Html.LabelFor(x => x.ExpiredDate)
+                                                @Html.TextBoxFor(x => x.ExpiredDate, @"{0:dd-MMM-yyyy}", new { id = "ExpiredDate", @class = "form-control", @placeholder = "Enter ExpiredDate Date", autocomplete = "off", @readonly = "readonly" })
+                                                @*@Html.ValidationMessageFor(x => x.ExpiredDate, "", new { @class = "text-danger" })*@
+                                            </div>
+
+
+                                        </div>
+
+
+
+                                        <div class="form-group">
+                                            @*<button type="submit" class="btn btn-primary rounded-0"> Save Changes </button>*@
+
+
+                                            @if (ViewBag.ActionType == "Create")
+                                            {
+                                                <button id="create" class="btn btn-primary rounded-0" onclick="ConfirmDialog('Do you want to Save ?')" type="button">Save</button>
+
+                                                @*<input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" />*@
+                                            }
+                                            else if (ViewBag.ActionType == "Edit")
+                                            {
+                                                @*<input type="submit" value="Update Changes" class="btn btn-warning rounded-0" />*@
+                                                <button id="Update" class="btn btn-warning rounded-0" onclick="ConfirmDialog('Do you want to Update ?')" type="button">Update</button>
+                                            }
+                                            else if (ViewBag.ActionType == "Delete")
+                                            {
+                                                <button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>
+                                            }
+
+
+                                            @Html.ActionLink("Back", "InvoiceBillList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                        </div>
+
+
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+@section scripts {
+    <script type="text/javascript">
+
+        var antiForgeryToken;
+        var billeddateglobal = new Date();
+        antiForgeryToken = $("input[name='Dominate_ANTIFORZERY']").val();
+
+        $(document).ready(function () {
+
+            var tblexportordermain = $('#tblexportordermain').dataTable({
+
+                "aoColumns": [
+                    { "sClass": "InvoiceId", "visible": false },
+                    { "sClass": "BillNo", "visible": true },
+                    { "sClass": "UserId", "visible": true },
+                    { "sClass": "UserName", "visible": true },
+                    { "sClass": "BilledDate", "visible": true },
+                    { "sClass": "BillAmount", "visible": true },
+                    { "sClass": "ReceivedAmount", "visible": true },
+                    { "sClass": "DueAmount", "visible": true },
+                    { "sClass": "Description", "visible": true }
+
+                ],
+                "bFilter": false,
+                "bSort": false,
+                "bInfo": false,
+                "paging": false,
+                "iDisplayLength": 5,
+                "lengthMenu": [[5, 10, 20, 50, -1], [5, 10, 20, 50, "All"]],
+                rowCallback: function (row) {
+                    $(row).addClass('txtMultExportInvoiceMaster');
+                }
+            })
+        });
+
+        $("#UserId").focusout(function () {
+            ExportOrderSummaryGrid();
+            multInputsexportinvoice();
+        });
+
+         function ExportOrderSummaryGrid() {
+            tblexportordermain = $('#tblexportordermain').DataTable();
+            tblexportordermain
+                .clear()
+                .draw();
+
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("GetInvoiceDueList", "Admin")',
+                dataType: 'json',
+                async: false,
+                data: { id: $('#UserId').val() },
+                success: function (data) {
+
+                    for (var i = 0; i < data.length; i++) {
+                        $('#tblexportordermain').dataTable().fnAddData([data[i].Id, data[i].BillNo, data[i].UserId, data[i].UserName, data[i].BilledDateString, data[i].BillAmount, data[i].ReceivedAmount, data[i].DueAmount, data[i].Description] );
+
+                    }
+
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+            });
+        }
+        function multInputsexportinvoice() {
+
+            var totalorderqty = 0;
+
+
+            $("tr.txtMultExportInvoiceMaster").each(function () {
+
+                var $val1 = $('.DueAmount', this).text().replace(/[\$,]/g, '');
+
+                totalorderqty += parseFloat($val1);
+
+
+            });
+
+            //alert(totalorderqty);
+
+            $(".TotalChallanQty").val(totalorderqty.toFixed(2));//---fahad
+            $(".TotalChallanQty").text(totalorderqty.toFixed(2));//---fahad
+
+        }
+
+
+        function calculatebalance() {
+
+            if ($('#ReceivedAmount').val() == "NaN" || $('#ReceivedAmount').val() == "") { $('#ReceivedAmount').val(0) };
+            if ($('#BillAmount').val() == "NaN" || $('#BillAmount').val() == "") { $('#BillAmount').val(0) };
+            if ($('#Discount').val() == "NaN" || $('#Discount').val() == "") { $('#Discount').val(0) };
+            if ($('#BadDebt').val() == "NaN" || $('#BadDebt').val() == "") { $('#BadDebt').val(0) };
+
+
+
+            var receivedamount = $('#ReceivedAmount').val();
+            var billamount = $('#BillAmount').val();
+
+            var discount = $('#Discount').val();
+            var baddebt = $('#BadDebt').val();
+
+            //alert(receivedamount);
+            //alert(billamount);
+            //alert(discount);
+            //alert(baddebt);
+
+            var Balance = parseFloat(billamount) - (parseFloat(receivedamount) + parseFloat(discount) + parseFloat(baddebt));
+            //$('#Balance').text(Balance.toFixed(2));
+            $('#Balance').val(Balance.toFixed(2));
+            //alert(Balance);
+
+        }
+
+        //billuserNamedata
+        autocompletefunction();
+        function autocompletefunction() {
+            $("#UserId").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '../admin/billuserIddata/',
+                        dataType: "json",
+                        data: { query: $("#UserId").val() },
+                        success: function (data) {
+                            console.log(data);
+                            response($.map(data, function (item) {
+                                return { UserId: item.UserId, label: item.UserId, UserName: item.UserName, Id: item.Id, InternetUserId: item.InternetUserId};//, , BillAmount: item.BillAmount
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                autoFocus: true,
+                minLength: 3,
+                select: function (event, ui) {
+
+                    //alert(ui.item.InternetUserId);
+                    $("#UserName").val(ui.item.UserName);
+                    $("#UserId").val(ui.item.UserId);
+                    $("#InternetUserId").val(ui.item.InternetUserId);
+
+
+                    //$("#BillAmount").val(ui.item.BillAmount);
+
+
+                    $.ajax({
+                        url: '../admin/BillAmountbyId/',
+                        dataType: "json",
+                        data: { query: ui.item.Id },
+                        success: function (data) {
+                            console.log(data);
+                            $("#BillAmount").val(data.BillAmount);
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+
+                    $("#ReceivedAmount").val(0);
+                    $("#Discount").val(0);
+                    $("#BadDebt").val(0);
+
+                    //newrowwithui(ui);
+                    //ExportOrderSummaryGrid();
+                    calculatebalance();
+                    //$('#Search').val("");
+
+
+                    return false;
+                },
+                change: function (event, ui) {
+                    if (ui.item === null) {
+                        //$(this).val('');
+                        //$('#UserId').val('');
+                        //$('#UserName').val('');
+                        $('#InternetUserId').val('');
+                    }
+                },
+            });
+        }
+
+        $(document).ready(function () {
+            console.log("ready!");
+
+
+
+
+
+
+        if ($("#Id").val() > 0) {
+
+            if ($("#ReceivedDate").val() == "")
+            {
+
+                CurrentDateForReceivedDate();
+            }
+            ExportOrderSummaryGrid();
+
+
+        }
+        else {
+
+            CurrentDate();
+            CurrentDateForExpiredDate();
+
+            $("#BilledDate").change(function () {
+
+                ExpiredDateFromBillDate();
+
+            });
+        }
+
+
+
+
+            $('#BilledDate').datepicker({
+                dateFormat: 'dd-M-yy',
+                todayHighlight: true,
+                autoclose: true
+
+            });
+
+            $('#ReceivedDate').datepicker({
+                //dateFormat: 'dd/mm/yy',
+                dateFormat: 'dd-M-yy',
+                todayHighlight: true,
+                autoclose: true
+            });
+            $('#NextFollowDate').datepicker({
+                //dateFormat: 'dd/mm/yy',
+                dateFormat: 'dd-M-yy',
+                todayHighlight: true,
+                autoclose: true
+            });
+
+            $('#ExpiredDate').datepicker({
+                //dateFormat: 'dd/mm/yy',
+                dateFormat: 'dd-M-yy',
+                todayHighlight: true,
+                autoclose: true
+            });
+
+
+
+            //function pad2(n) {
+            //    return (n < 10 ? '0' : '') + n;
+            //}
+
+
+        //$('.mydatepicker').datepicker({
+        //    format: 'dd-M-yyyy',
+        //    todayHighlight: true,
+        //    autoclose: true
+
+        //})
+
+        function CurrentDate() {
+            var date = new Date();
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul","Aug", "Sep", "Oct", "Nov", "Dec"];
+            //var val = pad2(date.getDate()) + "/" + pad2(date.getMonth() + 1) + "/" + date.getFullYear();
+
+            //pad2(date.getMonth() + 1)
+            //var val = date.getMonth()+1 + "/" +  date.getDate()  + "/" + date.getFullYear();
+            //alert('hit');
+
+            //alert(val);
+
+
+            var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear();
+            $("#BilledDate").val(val);
+
+        }
+            function CurrentDateForReceivedDate() {
+                var date = new Date();
+                var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+                //var val = pad2(date.getDate()) + "/" + pad2(date.getMonth() + 1) + "/" + date.getFullYear();
+                //var val = date.getMonth()+1 + "/" +  date.getDate()  + "/" + date.getFullYear();
+
+
+                //alert(val);
+                var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear();
+                $("#ReceivedDate").val(val);
+
+            }
+
+
+            function CurrentDateForExpiredDate() {
+
+                //var tt = new Date();// document.getElementById('BilledDate').value;
+
+                //var date = new Date(tt);
+                //var newdate = new Date(date);
+
+                //newdate.setDate(newdate.getDate() + 30);
+
+                //var dd = pad2(newdate.getDate());
+                //var mm = pad2(newdate.getMonth() + 1);
+                //var y = newdate.getFullYear();
+
+                ////var someFormattedDate = mm + '/' + dd + '/' + y;
+
+                //var someFormattedDate = pad2(newdate.getDate()) + "/" + pad2(newdate.getMonth() + 1) + "/" + newdate.getFullYear();
+
+                //document.getElementById('ExpiredDate').value = someFormattedDate;
+
+
+
+                var date = new Date();
+                var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                var lastday = new Date(date.getFullYear(), date.getMonth() + 2, 0);
+
+                //var val = pad2(date.getDate()) + "/" + pad2(date.getMonth() + 1) + "/" + date.getFullYear();
+                //var val = date.getMonth()+1 + "/" +  date.getDate()  + "/" + date.getFullYear();
+                
+
+                if (date.getMonth() + 1 == 12) {
+
+
+
+                    var val = date.getDate() + "-" + months[0] + "-" + (parseInt(date.getFullYear()) + 1);
+
+                    //alert(val);
+                    $("#ExpiredDate").val(val);
+                }
+                else {
+
+                    //alert(lastday.getDate());
+                    //alert(date.getDate());
+
+                    if (date.getDate() > lastday.getDate()) {
+
+                        //alert(val);
+                        var val = lastday.getDate() + "-" + months[date.getMonth() + 1] + "-" + date.getFullYear();
+                        $("#ExpiredDate").val(val);
+
+                    } else {
+                        //alert(val);
+                        var val = date.getDate() + "-" + months[date.getMonth() + 1] + "-" + date.getFullYear();
+                        $("#ExpiredDate").val(val);
+                    }
+                    
+    
+                }
+
+            }
+
+
+            //function ExpiredDateFromBillDate() {
+            //    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            //    //var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+            //    //    "Aug", "Sep", "Oct", "Nov", "Dec"];
+            //    //var billdate = $("#BilledDate").val();
+
+            //    //var starts = $("#BilledDate").val();
+            //    //var match = /(\d+)\/(\d+)\/(\d+)/.exec(starts)
+            //    //var billdate = new Date(match[3], match[2], match[1]);
+
+
+
+            //    ////alert(billdate);
+            //    //var datethirty = new Date(billdate);
+            //    ////alert(datethirty);
+            //    //datethirty.setDate(datethirty.getDate() + 30); // add 30 days 
+            //    ////console.log(date);
+
+            //    //$("#ExpiredDate").val(pad2(datethirty.getDate()) + "/" + pad2(datethirty.getMonth()) + "/" + datethirty.getFullYear());
+
+
+            //    var date = new Date();
+            //    //var val = pad2(date.getDate()) + "/" + pad2(date.getMonth() + 1) + "/" + date.getFullYear();
+            //    //var val = date.getMonth()+1 + "/" +  date.getDate()  + "/" + date.getFullYear();
+
+
+            //    //alert(val);
+            //    var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear();
+            //    $("#ExpiredDate").val(val);
+
+            //}
+
+
+
+          
+
+        //$('#AccountId').select2();
+        //$('#AccountPayTypeId').select2();
+        });
+
+
+        function ConfirmDialog(message) {
+
+            SaveInvoiceBill();
+
+                //$('<div></div>').appendTo('body')
+                //    .html('<div><h6>' + message + '?</h6></div>')
+                //    .dialog({
+                //        modal: true,
+                //        title: 'Save / Update message',
+                //        zIndex: 10000,
+                //        autoOpen: true,
+                //        width: 'auto',
+                //        resizable: false,
+                //        buttons: {
+                //            Yes: function () {
+
+                //                $(this).dialog("close");
+                //                $("#create").prop("disabled", true);
+                //                SaveInvoiceBill();
+                //            },
+                //            No: function () {
+
+                //                $(this).dialog("close");
+
+                //            }
+                //        },
+                //        close: function (event, ui) {
+                //            $(this).remove();
+                //        }
+                //    });
+            };
+
+        function SaveInvoiceBill() {
+
+            //var d = parseFloat($("#TotalQty").val());
+            //if (d > 15) {
+            //    $("#TotalQty").removeClass(" yellow");
+            //    $("#TotalQty").addClass("important red");
+            //    $("#TotalQty").css({ 'color': 'yellow', 'font-size': '150%' });
+            //    toastr.error('Load qty must not be greter than 15 metric ton');
+            //    return true;
+            //}
+            //else {
+            //    $("#TotalQty").removeClass("important red");
+            //    $("#TotalQty").addClass(" yellow");
+            //    $("#TotalQty").css({ 'color': 'green', 'font-size': '100%' });
+            //}
+
+
+            $('select').removeAttr('disabled');
+
+
+            if (!$("#myform").valid()) {
+                toastr.error('Please Fill Up All Necessary Information Correctly.');
+                $("html, body").animate({ scrollTop: 0 }, 500);
+                $("#create").prop("disabled", false);
+                return true;
+            }
+
+
+
+            var InvoiceBills = {
+
+                Id: 0,
+                BillNo: "",
+                InternetUserId: "",
+                UserId:"",
+                UserName:"",
+                BilledDate:null,
+                ReceivedDate: null,
+                ExpiredDate: null,
+
+                Description:"",
+                BillAmount:0,
+                ReceivedAmount:0,
+                Discount:0,
+                BadDebt	:0,
+                AccountReceiveByHead:null
+            };
+
+
+
+            InvoiceBills.Id = $("#Id").val();
+            InvoiceBills.BillNo = $("#BillNo").val();
+            InvoiceBills.UserId = $("#UserId").val();
+            InvoiceBills.InternetUserId = $("#InternetUserId").val();
+            InvoiceBills.UserName = $("#UserName").val();
+            InvoiceBills.BilledDate = $("#BilledDate").val();
+            InvoiceBills.NextFollowDate = $("#NextFollowDate").val();
+
+            InvoiceBills.ReceivedDate = $("#ReceivedDate").val();
+            InvoiceBills.ExpiredDate = $("#ExpiredDate").val();
+            InvoiceBills.Description = $("#Description").val();
+            InvoiceBills.BillAmount = $("#BillAmount").val();
+            InvoiceBills.ReceivedAmount = $("#ReceivedAmount").val();
+            InvoiceBills.Discount = $("#Discount").val();
+            InvoiceBills.BadDebt = $("#BadDebt").val();
+            InvoiceBills.AccountReceiveHeadId = $("#AccountReceiveHeadId").val();
+
+
+
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("AddInvoiceBill", "Admin")',
+                dataType: 'json',
+                async: 'false',
+                headers: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                //argumentsheaders: { "X-CSRF-TOKEN-Dominate_ANTIFORZERY": antiForgeryToken },
+                data: { model: InvoiceBills },
+                success: function (result) {
+                    if (result.Success == "1") {
+
+                        toastr.success('Invoice Created Successfully');
+                        //ClearData();
+                        var InvoiceBillsidprint = result.Id;
+                        //alert(result.Id)
+                        var urllink = '@Url.Action("InvoiceBillPrint", "Admin", new { InvoiceBillId = "xxxx" })'.replace("xxxx", InvoiceBillsidprint);
+
+
+
+                        window.open(urllink, '_blank');
+                        //TotalLoadQty();
+
+                        setTimeout(
+                            function () {
+                                //do something special
+
+                                if ($('#Update').length) {
+
+                                    var urllinknew = '@Url.Action("AddInvoiceBill", "Admin")';
+                                    window.open(urllinknew, "_self");
+                                    /* it exists */
+                                }
+                                else {
+                                    $("#create").prop("disabled", false);
+                                    //$("#TruckNumber").val(result.TruckNumber);
+                                    ClearData();
+                                    /* it doesn't exist */
+                                }
+
+
+
+                            }, 3000);
+
+
+
+                    }
+                    else {
+                        alert(result.ex);
+                    }
+                },
+                error: function (ex) {
+                    alert('error');
+                }
+            });
+
+            //$('#TotalQty').attr("disabled", true);
+
+
+        };
+
+        function ClearData() {
+
+
+            tblexportordermain.clear().draw();
+
+
+            $("#Id").val(0);
+            $("#UserId").val('');
+            $("#InternetUserId").val('');
+            $("#UserName").val('');
+            $("#Description").val("");
+            $("#BillAmount").val(0);
+            $("#ReceivedAmount").val(0);
+            $("#Discount").val(0);
+            $("#BadDebt").val(0);
+            $("#AccountReceiveHeadId").val(null);
+
+        }
+    </script>
+
+}

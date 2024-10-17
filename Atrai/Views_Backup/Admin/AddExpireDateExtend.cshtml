@@ -1,0 +1,334 @@
+﻿@model Atrai.Core.Entity.ExpireDateExtendModel
+@{ ViewData["Title"] = "AddExpireDateExtend";
+                Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-md-8 col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>Expire Date Extend Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            <form asp-controller="admin" asp-action="AddExpireDateExtend" method="post">
+                                @if (Model != null)
+                                {
+                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="CreateDate" />
+                                                    <input type="hidden" asp-for="LuserId" /> }
+                                                else
+                                                {
+                                    <input type="hidden" asp-for="Id" value="0" />}
+
+                            <div class="form-group row">
+   
+
+                                <div class="col-md-6 col-12">
+
+                                    <label asp-for="InternetUserId">Apps User Id</label>
+                                    <input asp-for="InternetUserId" class="form-control" readonly="@(true)">
+                                    <span asp-validation-for="InternetUserId" class="text-danger"></span>
+                                </div>
+
+
+                                <div class="col-md-6 col-12">
+                                    @Html.LabelFor(x => x.UserName)
+                                    @Html.TextBoxFor(x => x.UserName, null, new { @class = "form-control", @placeholder = "User Name ", @readonly = "readonly" })
+                                    @Html.ValidationMessageFor(x => x.UserName, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+
+                            <div class="form-group row">
+
+
+                                <div class="col-md-6 col-12">
+                                    @Html.LabelFor(x => x.UserId)
+                                    @Html.TextBoxFor(x => x.UserId, null, new { @class = "form-control", @placeholder = "User Id" })
+                                    @Html.ValidationMessageFor(x => x.UserId, "", new { @class = "text-danger" })
+                                </div>
+
+                                @*<div class="col-md-6 col-12">
+                                    <label asp-for="OldExpireDate"></label>
+                                    <input asp-for="OldExpireDate" class="form-control" type="date">
+                                    <span asp-validation-for="OldExpireDate" class="text-danger"></span>
+                                </div>*@
+
+
+                                <div class="col-md-6 col-12">
+                                    @Html.LabelFor(x => x.OldExpireDate)
+                                    @Html.TextBoxFor(x => x.OldExpireDate, @"{0:dd-MMM-yyyy}", new { id = "OldExpireDate", @class = "form-control", autocomplete = "off", @readonly = "readonly" })
+                                    @Html.ValidationMessageFor(x => x.OldExpireDate, "", new { @class = "text-danger" })
+                                </div>
+
+                            </div>
+
+                            <div class="form-group row">
+
+                                <div class="col-md-6 col-12">
+                                    @Html.LabelFor(x => x.NewExpiredDate)
+                                    @Html.TextBoxFor(x => x.NewExpiredDate, @"{0:dd-MMM-yyyy}", new { id = "NewExpiredDate", @class = "form-control", autocomplete = "off" , @readonly = "readonly" })
+                                    @Html.ValidationMessageFor(x => x.NewExpiredDate, "", new { @class = "text-danger" })
+                                </div>
+
+                                @*<div class="col-md-6 col-12">
+                                    <label asp-for="NewExpiredDate"></label>
+                                    <input asp-for="NewExpiredDate" class="form-control" type="date" min="@DateTime.Now.AddDays(-1).ToString("yyyy-MM-ddThh:mm")"  max="2050-06-01T00:00" >
+                                    <span asp-validation-for="NewExpiredDate" class="text-danger"></span>
+                                </div>*@
+                                <div class="col-md-6 col-12">
+                                    <label asp-for="Note"></label>
+                                    <textarea class="form-control" asp-for="Note" rows="4" placeholder="Text input"></textarea>
+                                    <span asp-validation-for="Note" class="text-danger"></span>
+                                </div>
+
+                            </div>
+
+
+
+                                <div class="form-group">
+                                    @if (ViewBag.ActionType == "Create")
+                                    {
+                        <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" /> }
+                    else if (ViewBag.ActionType == "Edit")
+                    {
+        <input type="submit" value="Update Changes" class="btn btn-warning rounded-0" /> }
+    else if (ViewBag.ActionType == "Delete")
+    {
+<button class="btn btn-danger rounded-0" type="button" onclick="Bank_delete()">Delete</button>}
+                                    @Html.ActionLink("Back", "ExpireDateExtendList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+@section scripts {
+    <script type="text/javascript">
+
+        //$(document).ready(function () {
+
+        //    $(function () {
+        //        var now = new Date();
+        //        $("#NewExpiredDate").datepicker();
+        //        $("#NewExpiredDate").datepicker("setDate", new Date(now.getFullYear(), now.getMonth(), 1));
+        //        $("#NewExpiredDate").datepicker();
+        //        $("#NewExpiredDate").datepicker("setDate", now);
+        //    });
+
+        //    var date = new Date();
+        //    $("#NewExpiredDate").text(date);
+
+        //});
+
+
+
+
+
+        //var $docDate = "16-jan-2021";
+
+        //function formatDateForInput(date) {
+        //    var year = date.getFullYear();
+        //    var month = ("0" + (date.getMonth() + 1)).slice(-2);
+        //    var day = ("0" + date.getDate()).slice(-2);
+        //    return String.format("{0}-{1}-{2}", year, month, day);
+        //}
+
+
+
+        //$("[id$=NewExpiredDate]").val(formatDateForInput($docDate));
+
+        //$('#OldExpireDate').datepicker({
+        //    dateFormat: 'dd-M-yy',
+        //    todayHighlight: true,
+        //    autoclose: true
+
+        //});
+
+
+        //$('#NewExpiredDate').datepicker({
+        //    dateFormat: 'dd-M-yy',
+        //    todayHighlight: true,
+        //    autoclose: true,
+        //    changeMonth: true,
+
+        //});
+
+
+        //$("#OldExpireDate").datepicker({
+        //    dateFormat: 'yy-mm-dd',
+        //    changeMonth: true,
+        //    minDate: new Date(),
+        //    maxDate: '+2D',
+        //    onChange: function (date) {
+
+        //        var selectedDate = new Date(date);
+        //        var msecsInADay = 86400000;
+        //        var endDate = new Date(selectedDate.getTime() + msecsInADay);
+
+        //        //Set Minimum Date of EndDatePicker After Selected Date of StartDatePicker
+        //        $("#NewExpiredDate").datepicker("option", "minDate", endDate);
+        //        $("#NewExpiredDate").datepicker("option", "maxDate", '+2y');
+
+        //    }
+        //});
+
+        //$("#endDatePicker").datepicker({
+        //    dateFormat: 'yy-mm-dd',
+        //    changeMonth: true
+        //});
+
+
+
+
+        autocompletefunction();
+
+
+        function autocompletefunction() {
+            $("#UserId").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '../admin/internetuserIddataforExpire/',
+                        dataType: "json",
+                        data: { query: $("#UserId").val() },
+                        success: function (data) {
+                            console.log(data);
+                            response($.map(data, function (item) {
+                                return { label: item.UserId, UserName: item.UserName, Id: item.Id, LastExpireDate: item.LastExpireDate, testdate: item.testdate};//, , BillAmount: item.BillAmount
+                            }));
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error");
+                        },
+                    });
+                },
+                autoFocus: true,
+                minLength: 3,
+                change: function (event, ui) {
+                    if (ui.item === null) {
+                        $(this).val('');
+                        $('#UserId').val('');
+                        $('#UserName').val('');
+                        $('#InternetUserId').val('');
+                        $('#OldExpireDate').val('');
+                        $('#NewExpiredDate').val('');
+
+
+                    }
+                },
+                select: function (event, ui) {
+
+
+                    $("#UserName").val(ui.item.UserName);
+                    $("#UserId").val(ui.item.label);
+                    $("#InternetUserId").val(ui.item.Id);
+
+                    $("#OldExpireDate").val(ui.item.LastExpireDate);
+
+                    var date = new Date(ui.item.testdate);
+                    //alert(date);
+                    var mindate = new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
+                    var maxdate = new Date(date.getFullYear(), date.getMonth(), date.getDate()+3);
+                    //alert(mindate);
+                    //alert(maxdate);
+
+
+                    $(function () {
+                        $("#NewExpiredDate").datepicker({
+                            daysOfWeekHighlighted: "1,3,6",
+                            //dateFormat: "mm/dd/yy",
+                            dateFormat: 'dd-M-yy',
+                            changeYear: true,
+                            minDate: mindate,
+                            maxDate: maxdate,
+                            autoclose: true
+                            // onSelect: function(dateText, inst) { 
+                            //    var date = $(this).datepicker('getDate');
+                            //   day=date.getDay();
+
+                            // }
+                        });
+                    });
+
+          
+                    //$("#NewExpiredDate").focus();
+                    //var msecsInADay = 86400000;
+                    //var endDate = new Date(selectedDate.getTime() + msecsInADay);
+
+                    ////Set Minimum Date of EndDatePicker After Selected Date of StartDatePicker
+                    //$("#NewExpiredDate").datepicker("option", "minDate", endDate);
+                    //$("#NewExpiredDate").datepicker("option", "maxDate", '+2D');
+
+                    //$("#NewExpiredDate").val(ui.item.LastExpireDate);
+
+                    //var date = new Date(ui.item.testdate);//$('#OldExpireDate').val();//'7.29.2021'.split("."); //Default date
+
+                    //var testvalues = (((date.getMonth() > 8) ? (date.getMonth() + 1) : ('0' + (date.getMonth() + 1))) + '.' + ((date.getDate() > 9) ? date.getDate() : ('0' + date.getDate())) + '.' + date.getFullYear()).split(".");
+                    //alert(testvalues);
+                    //var values = testvalues.split(".");
+
+                    //var parsed_date = new Date(values[2], values[1] - 1, values[0]);
+                    //alert(parsed_date);
+
+                    ////$('#NewExpireDate').datepicker('option', 'minDate', selectedDate || '2013-09-10');
+
+
+                    //    $("#NewExpiredDate").datepicker({
+                    //        //dateFormat: 'dd-M-yy',
+                    //        changeYear: false,
+                    //        //todayHighlight: true,
+                    //        autoclose: true,
+                    //        minDate: '-1D',
+                    //        maxDate: '+3D',
+                    //        defaultDate: parsed_date,
+                    //    });
+               
+
+
+                    //$("#BillAmount").val(ui.item.BillAmount);
+
+
+                    //$.ajax({
+                    //    url: '../admin/BillAmountbyId/',
+                    //    dataType: "json",
+                    //    data: { query: ui.item.Id },
+                    //    success: function (data) {
+                    //        console.log(data);
+                    //        $("#BillAmount").val(data.BillAmount);
+                    //    },
+                    //    error: function (xhr, status, error) {
+                    //        alert("Error");
+                    //    },
+                    //});
+
+                    //$("#ReceivedAmount").val(0);
+                    //$("#Discount").val(0);
+                    //$("#BadDebt").val(0);
+
+                    //newrowwithui(ui);
+                    //ExportOrderSummaryGrid();
+                    //calculatebalance();
+                    //$('#Search').val("");
+
+
+                    return false;
+                }
+            });
+        }
+
+    </script>
+
+}

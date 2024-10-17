@@ -1,0 +1,1432 @@
+﻿
+@{
+    ViewData["Title"] = "Supplier Created Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+<link href="~/css/SupplierListGearDropdown.css" rel="stylesheet" />
+<script src="https://kit.fontawesome.com/47bfbe2b1b.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+<style>
+    /*style written by shahinur*/
+    .jsgrid-grid-body {
+        overflow: auto;
+    }
+</style>
+@using (Html.BeginForm())
+{
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row my-3">
+                <div class="col-md-8 col-12">
+                    <h4 class="center fw-semibold">Supplier List</h4>
+                </div>
+                <div class="col-md-3 col-12 text-end pt-3">
+                    <label class="ps-1"><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF  </label>
+                    <label class="ps-1"><input type="radio" name="RptType" value="EXCEL" /> EXCEL  </label>
+                    <label class="ps-1"><input type="radio" name="RptType" value="WORD" /> WORD  </label>
+
+                </div>
+                <div class="col-md-1 text-end">
+                    <div class="dropdown">                     
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" onclick="window.location.href='/Admin/AddSupplier';">
+                            new
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="heroSection" style="width:60%">
+                <div class="row mt-2">
+                    <div class="col-md-4 col-12">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">From Date</label>
+                            <input type="text" class="form-control tg" id="Date">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 col-12">
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">To Date</label>
+                            <input type="text" class="form-control tg" id="Date2">
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-12 mb-2">
+                          <label class="form-label fw-semibold">Status</label>
+                        @Html.DropDownList("Status", new List<SelectListItem>
+                    {
+                    new SelectListItem() {Text = "Due", Value="Due"},
+                    new SelectListItem() {Text = "All", Value="All"}
+                    }, new { @class = "form-select" })
+                    </div>
+
+
+
+
+                </div>
+                @*<div class="row mt-5">
+            <div class="col-md-12 col-12">
+            <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked">
+            <label class="form-check-label" for="flexSwitchCheckChecked"></label>
+            </div>
+
+            </div>
+
+
+            </div>*@
+                <!-- Default checked -->
+
+            </div>
+
+
+
+            <div>
+
+                <div class="dropdown1 mt-3" style="display:inline-block;">
+                    <button class="btn btn-white border-0" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        <i class="bi bi-gear" me-1"></i>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <div class="row row-cols-lg-3 p-4 main-dropdown-size" style="overflow:hidden;">
+                            <div class="col" style="width: 188px; float:left;">
+                        <li class="fw-bold ms-3">Columns</li>
+                        <hr class="m-0 w-75 ms-3 w-sm-50 " />
+                        <li>
+                            <div id="dropdown-titles">
+                            </div>
+                        </li>
+                </div>
+                <div class="vertical-hr"></div>
+
+                <div class="col right-dropdown" style="width: 188px;">
+                    <li class="fw-bold ms-3">Others</li>
+                    <hr class="m-0 w-75 w-sm-50  ms-3" />
+                    <li><a id="show-all" value="100" class="dropdown-item" href="#">Show all</a></li>
+                    <li><a id="hide-all" class="dropdown-item" href="#">Hide all</a></li>
+                    <li><a id="restore" class="dropdown-item" href="#">Restore</a></li>
+
+
+                    <li>
+                        <select name="rows" id="rows" class="border-0 cursor-pointer" style="margin-left: 13px;padding: 10px 0;width: 70px; ">
+                                        @*<option value="0" class="w-100">Rows</option>*@
+                            <option value="0" disabled selected>Rows</option>
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input title-input" id="withChild" value="withChild">
+                                <label class="custom-control-label cursor-pointer" id="withChild-label" for="withChild">Export with Child</label>
+                            </div>
+                        </a>
+                    </li>
+                </div>
+            </div>
+            </ul>
+        </div>
+
+                @* <button style="border-top-right-radius: 0px; border-bottom-right-radius: 0px" class="btn btn-secondary" type="button">
+    <img src="~/assets/pdf 1.png" alt="">
+    <button class="btn btn-secondary another-dropdown" type="button" id="exportBtn" data-target="#exportUl" style="border-top-left-radius: 0px; border-bottom-left-radius: 0px; height: 35px; width: 0px; height:40px;">
+    <img style="margin-left: -16px;" src="~/assets/collapsedown.png" />
+    </button>
+    </button>
+    <div class="export-dropdown-siz" style="width:10px;">
+    <ul style="margin-left:10px;" class="dropdown-menu" id="exportUl">
+    <li><a class="dropdown-item" href="#"><img src="~/assets/excel 1.png" alt="">Export</a></li>
+    </ul>
+    </div>*@
+
+        <div class="btn-group">
+            <button class="btn btn-sm border border-end-0" type="button" id="exportUl">
+                <img src="~/assets/excel 1.png" alt="">
+            </button>
+            <button type="button" class="btn border border-start-0 dropdown-toggle dropdown-toggle-split" id="exportBtn" data-bs-toggle="dropdown" data-target="#exportUl" aria-expanded="false">
+                <span class="visually-hidden">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu" id="exportPDF">
+                <li><a class="dropdown-item" href="#"><img src="~/assets/pdf 1.png" alt="">PDF</a></li>
+            </ul>
+        </div>
+
+
+
+    </div>
+
+            @*  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+
+
+            <button class="btn btn-primary me-md-2" type="button">PDF</button>
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 me-md-2">
+                <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        CSV
+                      </a>
+                      <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" id="csv">With Child</a></li>
+                        <li><a class="dropdown-item" id="csvWithoutchild">Without Child</a></li>
+                      </ul>
+                </li>
+            </ul>
+        </div>*@
+
+    <div class="gridSection" style="overflow:hidden">
+                @*<div class="row">
+    <div class="col-12 col-md-12">
+    <div id="jsFilterGrid" style="font-size:14px;"></div>
+    </div>
+    </div>*@
+        <div class="row mt-2">
+            <div class="col-12 col-md-12">
+                        @* <hr />*@
+                <div id="jsGridItems" style="overflow-y:auto"></div>
+            </div>
+        </div>
+
+    </div>
+
+        </div>
+        </div>
+
+}
+
+
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.2/xlsx.full.min.js"></script>
+    <script type="text/javascript">
+
+
+        $('input[name=RptType]').click(function () {
+            var reporttypeind = $("input[name=RptType]:checked").val();
+            //alert(reporttype);
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SetSessionReportType", "Admin")',
+                dataType: 'json',
+                async: true,
+                data: { reporttype: reporttypeind },
+                success: function (response) {
+                    //  window.location.href = response.Url;
+
+                    //window.open(response.Url, '_blank')
+                },
+                error: function (ex) {
+                    alert('Failed.' + ex);
+                }
+
+            });
+
+        });
+
+        $(document).ready(function () {
+
+            //  $('select').select2();
+            $('#THead').select2({
+                theme: 'bootstrap-5'
+            });
+            $('#location').select2({
+                theme: 'bootstrap-5'
+            });
+
+            $('#Date').datepicker({
+                dateFormat: 'dd-M-yy',
+                todayHighlight: true,
+                autoclose: true
+            }).datepicker("setDate", new Date());
+
+            $('#Date2').datepicker({
+                dateFormat: 'dd-M-yy',
+                todayHighlight: true,
+                autoclose: true
+            }).datepicker("setDate", new Date());
+
+            var globalFields = [
+                {
+                    name: "CheckBox", title: 'Check Box', headerTemplate: function () {
+                        return $("<button>").attr("type", "button").css({
+                            'border': '0', 'background': 'transparent'
+                        }).html("<i class='fas fa-trash text-danger'></i>") //text("Delete")
+                            .on("click", function () {
+                                deleteSelectedItems();
+                                initjsGrid();
+                            });
+                    },
+                    itemTemplate: function (_, item) {
+                        return $("<input>").attr("type", "checkbox").css({
+                            'width': '20px',
+                            'height': '20px'
+                        }).prop("checked", $.inArray(item, selectedItems) > -1)
+                            .on("change", function () {
+                                $(this).is(":checked") ? selectItem(item) : unselectItem(item);
+                            });
+                    },
+
+                    align: "center",
+                    width: 50
+                },
+                { name: "Name", title: 'Account Head' },
+                { name: "Phone", title: 'Phone' },
+                { name: "Email", title: 'Email' },
+                { name: "Address", title: 'Address' },
+                { name: "Notes", title: 'Notes', type: 'text' },
+                { name: "SupType", title: 'SupType', type: 'text' },
+                { name: "ClBalance", title: 'Balance' },
+                {
+                    name: "button", width: '100', title: 'Actions', align: 'center', itemTemplate: function (value, data) {
+                        console.log('Supplier:',data.Id);
+
+                            var myUrldelete = '@Url.Action("DeleteSupplier", "Admin")?SupplierId=' + data.Id;
+                        //var myUrlGet = `editSupplier(${data.Id})`;
+                        var myUrlGet = '@Url.Action("Editsupplier", "Admin")?SupplierId=' + data.Id;
+
+                        var message = `return confirm('Are you sure you want to Remove the Supplier Information ?')`;
+                        var myUrlprint = '@Url.Action("Print", "Admin")/' + data.Id;
+
+                        var $dropdown = $("<div class='dropdown ms-1'>").append(
+                            $("<button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'>")
+                        ).append(
+                            $("<ul class='dropdown-menu' aria-labelledby='dropdownMenuButton1'>").css({
+                                'margin-left': '-105px'
+                            }).append(function () {
+                                return $("<li>").append(
+
+                                    $(`<a href='${myUrlGet}' target="_blank" class=" text-decoration-none text-black ms-3 mt-1"><i class='fa-solid fa-pen-to-square'></i> <span>Edit</span>  <br /></a>`),
+                                    $(`<a class='text-decoration-none text-black ms-3 mt-1'>`).attr("href", `#`)
+                                        .html(`<i class='fa-sharp fa-solid fa-trash mt-2'></i><span class='ms-2 mt-2' >Delete</span>`).click(function () {
+                                            setDeleteUrl(data.Id);
+                                        })
+
+
+                                    //$(`<a class='text-decoration-none text-black ms-3 mt-1'>`).attr("href", `${myUrlGet}`).html("<i class='fa-solid fa-pen-to-square'></i> <span>Edit</span>  <br />")
+                                    ////.click(function () {
+                                    ////    editSupplierList(data.SupplierId , data.SupplierTypeNameShort);
+                                    ////})
+                                    //,
+                                    //$(`<a class='text-decoration-none text-black ms-3 mt-1'>`).attr("href", `#`)
+                                    //    .html(`<i class='fa-sharp fa-solid fa-trash mt-2'></i><span class='ms-2 mt-2' >Delete</span>`).click(function () {
+                                    //        setDeleteUrl(data.SupplierId);
+                                    //    })
+                                );
+                            }));
+
+                        var $iconButton = $(`<a href='${myUrlprint}' target="_blank" class="fw-bolder mt-2">Run Report</a>`)
+                        var $flex = $("<div class='d-flex justify-content-center'></div>").append($iconButton).append($dropdown)
+                        var $result = jsGrid.fields.control.prototype.itemTemplate.apply(this, arguments);
+                        return $result.add($flex);
+                    }
+                },
+
+                //    {
+                //         name:"button", width: '80', title: 'Action', align: 'center', itemTemplate: function (value, data) {
+                //            var options = [
+                //                { value: "Edit", text: "<i class='fa-solid fa-pen-to-square'></i> Edit"},
+                //                { value: "Delete", text: "<i class='fa-sharp fa-solid fa-trash'></i> Delete" },
+                //            ];
+
+                //            var $dropdown = $("<div class='dropdown ms-1'>").append(
+                //                $("<button class='btn dropdown-toggle' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'>")
+                //            ).append(
+                //                $("<ul class='dropdown-menu' aria-labelledby='dropdownMenuButton1'>").css({
+                //                    'margin-left':'-105px'
+                //                }).append(options.map(function (option) {
+                //                    return $("<li>").append(
+                //                        $("<a class='text-decoration-none text-black ms-3 mt-1'>").attr("href", "#").html(option.text)
+                //                    );
+                //                }))
+                //            );
+
+
+                //            var $iconButton = $("<a href='https://google.com'>Run Report</a>").click(function (e) {
+                //                e.preventDefault();
+
+                //        //alert('checjed');
+                //        });
+                //            var $flex = $("<div class='d-flex'></div>").append($iconButton).append($dropdown)
+                //        var $result = jsGrid.fields.control.prototype.itemTemplate.apply(this, arguments);
+                //            return $result.add($flex);
+                //}
+                //    },
+                //    {
+                //       name:"button",title:'Button',width: '80',editButton:false,align:'center', itemTemplate: function (value, item) {
+
+                //            var $iconPencil = $(" <input class='jsgrid-button jsgrid-edit-button' type = 'button' title = 'Edit' >").click(function (e) {
+
+                //                //$("#checkmodalbuttonid").trigger('click');
+                //                alert('checked');
+
+                //            });
+                //            var $iconTrash = $(" <input class='jsgrid-button jsgrid-delete-button' style='margin-left: 10px;' type = 'button'  data-bs-toggle='tooltip' data-bs-placement='top' title='Delete' >").click(function (e) {
+                //                console.log('item');
+                //                console.log(item);
+                //               $("#jsGridItems").jsGrid("deleteItem", item);
+
+                //            });
+
+
+                //            var $iconPrint = $('<a href="/atrai/Admin/Print/6919" class="dropdown-item tooltip-test" title="Print" style="width: auto;display: inline-block;margin-left:10px;" target="_blank"><i class="bi bi-printer" style="height:30px;width:30px;"></i></a>').click(function (e) {
+
+                //            });
+                //            var $iconCopy = $('<a href="/atrai/Admin/CreateCopy?Type=VJR&amp;SupplierId=6919" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy" style="width: auto;display:inline-block;margin-left:10px;"  target="_blank"><i class="bi bi-files pe-1"></i></a>').click(function () {
+
+                //                });
+
+
+
+                //            var $result = jsGrid.fields.control.prototype.itemTemplate.apply(this, arguments);
+                //            return $result.add($iconPencil).add($iconTrash).add($iconPrint).add($iconCopy);
+
+                //        }
+                //    }
+
+
+                // { name: "Currency", title: 'Currency', type: "text" },
+
+
+
+            ];
+            var eachGlobalIdForSupplierDelete = [];
+            var globalIdsForSupplierDelete = [];
+            var globalPageSize = 5;
+            function restoreDropdown() {
+                $("#dropdown-titles").empty();
+                for (var i = 0; i < globalFields.length; i++) {
+                    var title = globalFields[i].title;
+                    var name = globalFields[i].name;
+                    var visible = true;
+                    if (globalFields[i].visible == false) {
+                        visible = false;
+                    }
+                    //console.log(visible);
+                    titles = `<li>
+                                <a class="dropdown-item" href="#">
+                                <div class="custom-control custom-checkbox" >
+                                <input type="checkbox" class="custom-control-input title-input" id="${name}" value="${name}">
+                                <label class="custom-control-label w-100 cursor-pointer" id="${name}" for="${name}">${title}</label>
+                                </div>
+                                </a>
+                                </li>`;
+
+                    $("#dropdown-titles").append(titles);
+
+                    document.querySelector(`${'#' + name}`).addEventListener('click', function () {
+                        var checkbox = event.target;
+                        var isChecked = checkbox.checked;
+                        if (isChecked) {
+                            $("#jsGridItems").jsGrid("fieldOption", this.value, "visible", true);
+                        }
+                        else {
+                            $("#jsGridItems").jsGrid("fieldOption", this.value, "visible", false);
+                        }
+                    });
+
+                    $(`${'#' + name}`).prop('checked', visible);
+
+
+                    $('.custom-control-label').on('click', function (e) {
+                        e.stopPropagation();
+                    });
+                    $('#dropdown-titles').on('click', function (e) {
+                        e.stopPropagation();
+                    });
+
+                    //console.log(data.BankBalance[i].AccName);
+                }
+
+                AccType = 'L';
+                IncludingInactive = false;
+            }
+
+            document.getElementById("rows").addEventListener("change", function (e) {
+
+                globalPageSize = this.value;
+
+                $("#jsGridItems").jsGrid({
+                    pageSize: globalPageSize
+                });
+
+
+            });
+
+            document.getElementById("hide-all").addEventListener("click", function (e) {
+                //e.stopPropagation();
+                //e.preventDefault();
+                globalPageSize = 0;
+                $("#jsGridItems").jsGrid({
+                    pageSize: globalPageSize
+                });
+
+                $("#rows").prop('selectedIndex', 0);
+
+            });
+            document.getElementById("show-all").addEventListener("click", function (e) {
+
+                globalPageSize = 100;
+                $("#jsGridItems").jsGrid({
+                    pageSize: globalPageSize
+                });
+                $("#rows").prop('selectedIndex', 0);
+
+            });
+            document.getElementById("restore").addEventListener("click", function (e) {
+
+                globalPageSize = 5;
+
+                $("#jsGridItems").jsGrid({
+                    pageSize: globalPageSize
+                });
+                restoreDropdown();
+
+                //$('#rows').value(0);
+                $("#rows").prop('selectedIndex', 0);
+
+            });
+
+            var withChildFlag = false;
+            document.getElementById("withChild").addEventListener("click", function (e) {
+
+
+                withChildFlag = true;
+
+                //alert('SAS');
+            });
+
+            $.ajax({
+                method: "get",
+                async: false,
+                url: '@Url.Action("GetUserDropdown", "Admin")',
+                //  data: { SupplierType: "Cash Payment" },
+                //  data: {SupplierType:$('#SupplierTypeName').text() },
+                //headers: {
+                //    contentType: "application/json; charset=utf-8",
+                //    Authorization: token
+                //},
+                success: function (data) {
+
+                    console.log(data);
+
+                    const select = document.querySelector('#THead');
+                    for (var i = 0; i < data.length; i++) {
+                        const option = document.createElement('option');
+                        option.value = data[i].Value;
+                        option.text = data[i].Text;
+                        select.appendChild(option);
+                    }
+                }
+            });
+
+            $.ajax({
+                method: "get",
+                async: false,
+                url: '@Url.Action("GetWarehouseDropdown", "Admin")',//url: "https://www.pqstec.com/InvoiceApps/values/GetSupplierDropdown",
+                //headers: {
+                //    contentType: "application/json; charset=utf-8",
+                //    Authorization: token
+                //},
+                success: function (data) {
+
+                    const select = document.querySelector('#location');
+                    for (var i = 0; i < data.length; i++) {
+                        const option = document.createElement('option');
+                        option.value = data[i].Value;
+                        option.text = data[i].Text;
+                        select.appendChild(option);
+                    }
+                }
+            });
+
+
+
+
+            var jsGridItemsUrl = '@Url.Action("GetSupplierList", "Admin")';
+            function initJsGrid() {
+                var jsGridItemsDB = {
+                    loadData: function (filter) {
+                        console.log(filter);
+                        var d = $.Deferred();
+                        $.ajax({
+                            type: "GET",
+                            url: jsGridItemsUrl,
+                            //headers: {
+                            //    contentType: "application/json; charset=utf-8",
+                            //    Authorization: token
+                            //},
+                            data: { searchquery: JSON.stringify(filter) },
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json"
+                        })
+
+                            .done(function (result) {
+                                //console.log(result);
+                                d.resolve(result);
+                                //console.log(result.ProductList);
+
+                            });
+                        return d.promise().then(function (q) {
+
+                            //console.log(q);
+                            return {
+
+                                data: q.SupplierList,
+                                itemsCount: parseInt(q.PageInfo.TotalRecordCount)
+                            }
+                        });
+                    }
+
+                    //    .done(function(result) {
+                    //        d.resolve(result.SupplierList);
+
+                    //        //for (let i = 0; i < result.ProductList.length; i++) {
+                    //        //    result.ProductList[i].Quantity = 0;
+
+
+                    //        //}
+                    //        console.log('///smrity');
+                    //         console.log(result.SupplierList);
+
+                    //    });
+                    //return d.promise();
+
+                }
+
+
+                //$("#exampleModal").on('hide.bs.modal', function () {
+                //      $("#jsGridItems .jsgrid-update-button").trigger( "click" );
+                //  });
+                var child = [];
+
+                var serial = 0;
+                $("#jsGridItems").jsGrid({
+
+                    width: "100%",
+                    height: 400,
+                    filtering: true,
+                    editing: true,
+                    autoload: true,
+                    pageSize: globalPageSize,
+                    pageLoading: true,
+                    pageIndex: 1,
+                    paging: true,
+                    controller: jsGridItemsDB,
+                    pagerFormat: "{prev} {pages} {next}   Results: {pageIndex} - {pageCount} of {itemCount}",
+                    pagePrevText: "<",
+                    pageNextText: ">",
+                    // selecting: true,
+
+                    fields: globalFields,
+                    rowClick: function (args) {
+                        // this.select(args.itemIndex, true);
+
+                        // console.log(args.item);
+                        // var Item=args.item;
+                        child = args.item.SupplierSubs;
+
+
+                        //// delete (Item);
+                        showModal(child, args.item.SupplierNo);
+
+                        // $("#jsGridItems").jsGrid("updateItem", args.item);
+
+
+                        $checkbox = $(args.event.currentTarget).find("input[type=checkbox]");
+                        if ($(args.event.target).closest("td").index() !== 8 && $(args.event.target).closest("td").index() !== 0 && $(args.event.target).closest("td").index() !== 1) {
+                            $checkbox.prop("checked", !$checkbox.prop("checked"));
+
+                            // Update selected items array
+                            if ($checkbox.prop("checked")) {
+                                selectItem(args.item);
+                            } else {
+                                unselectItem(args.item);
+                            }
+                        }
+
+                    },
+
+                    onItemDeleting: function (args) {
+
+                        console.log(args.item);
+                        var abcvalue = args.item.isPosted;
+                        console.log(abcvalue);
+
+
+                        if (abcvalue == true) {
+                            //$("#grid").jsGrid("deleteItem", args);
+                            args.cancel = true;
+                            alert('Already Posted');
+                        }
+
+                    },
+                    onItemDeleted: function (args) {
+                        parentValue = $('#jsGridItems').jsGrid('option', 'data');
+                        var serial = 0;
+                        for (var i = 0; i < parentValue.length; i++) {
+                            parentValue[i].SLNo = serial + 1;
+                            serial++;
+                        }
+                        console.log('serial');
+                        console.log(serial);
+                        $("#jsGridItems").jsGrid("refresh");
+
+                    }
+                    //rowDoubleClick: function(args) {
+
+                    //    var args = args.item;
+                    //    console.log('args.....?/////');
+                    //    console.log(args);
+                    //    var parentValue= $('#jsGridItems').jsGrid('option','data');
+                    //    serial = parentValue.length+1;
+                    //    Entry(args,serial);
+
+                    //}
+                });
+            }
+            initJsGrid();
+            restoreDropdown();
+
+            //function delete(Item){
+            //   alert('deleted');
+            //}
+
+
+
+            function sendData() {
+                var fromDate = new Date($('#Date').val());
+                var toDate = new Date($('#Date2').val());
+
+                if (fromDate > toDate) {
+                    alert('Invalid date range! From Date must be smaller than To Date.');
+                    return; // Abort the function and prevent further execution
+                }
+                var jsSendDataDB = {
+                    loadData: function (filter) {
+                        console.log(filter);
+                        var d = $.Deferred();
+                        $.ajax({
+                            type: "GET",
+                            url: jsGridItemsUrl,
+                            //headers: {
+                            //    contentType: "application/json; charset=utf-8",
+                            //    Authorization: token
+                            //},
+                            data: { searchquery: JSON.stringify(filter), FromDate: $('#Date').val(), ToDate: $('#Date2').val(), UserId: $('#THead').val(), Warehouse: $('#location').val(), IsPosted: $('#PostType').val() },
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json"
+                        })
+
+                            .done(function (result) {
+                                //console.log(result);
+                                d.resolve(result);
+                                //console.log(result.ProductList);
+
+                            });
+                        return d.promise().then(function (q) {
+
+                            //console.log(q);
+                            return {
+
+                                data: q.SupplierList,
+                                itemsCount: parseInt(q.PageInfo.TotalRecordCount)
+                            }
+                        });
+                    }
+
+                }
+
+                $("#jsGridItems").jsGrid({
+                    controller: jsSendDataDB
+                })
+
+            }
+
+            $(document).ready(function () {
+                $('#Date, #Date2, #THead, #location, #PostType').on('change', function () {
+                    // Display an alert message
+                    //alert('Success! Date changed.');
+
+                    sendData();
+                });
+            });
+
+
+
+
+            function showModal(child, SupplierNo) {
+                $("#exampleModalLabel").text("Supplier No: " + SupplierNo);
+                $('#jsChildItems').jsGrid({
+                    data: child
+                });
+
+            }
+
+
+
+
+            var titleTaker = [];
+            var titlekey = [];
+            var nameTaker = [];
+            var jsonKey = [];
+
+            //$('#exportPDF').click(function () {
+            //    alert('PDF exportation is under construction!! \nthank you!!');
+
+            //});
+
+            //////***** without child ****//////
+            $('#exportPDF').click(function () {
+                window.jsPDF = window.jspdf.jsPDF;
+
+                // Get the data from JSGrid
+                var data = $("#jsGridItems").jsGrid("option", "data");
+
+                // Initialize the PDF document
+                var doc = new jsPDF({
+                    orientation: 'landscape'
+                });
+
+
+                var parentJson = $('#jsGridItems').jsGrid('option', 'data');
+                console.log(parentJson);
+                // Set the table headers
+                var headers = [];
+                $("#jsGridItems").jsGrid("option", "fields").forEach(function (field) {
+                    console.log(field);
+                    if (field.name != "buttonDetails" && field.name != "button" && field.name != "CheckBox" && field.visible != false) {
+                        headers.push({
+                            title: field.title,
+                            dataKey: field.name
+                        });
+                    }
+                });
+                console.log(headers);
+
+                var tableData = [];
+                data.forEach(function (row) {
+                    var rowData = [];
+                    headers.forEach(function (header) {
+                        rowData.push(row[header.dataKey]);
+                    });
+                    tableData.push(rowData);
+                });
+
+
+                // AutoTable is a plugin for jsPDF that allows generating tables
+                doc.autoTable({
+                    head: [headers],
+                    body: tableData
+                });
+
+
+                var startY = 25; // Adjust the startY value as needed
+                doc.autoTable({
+                    startY: startY
+                });
+
+                // Add the text section
+                var text = "Supplier List";
+                var textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                var textHeight = doc.internal.getLineHeight() / doc.internal.scaleFactor;
+                var textX = (doc.internal.pageSize.width - textWidth) / 2;
+                var textY = startY - textHeight - 10; // Adjust the vertical position as needed
+                doc.text(text, textX, textY);
+                // Save the PDF
+                //doc.save("jsgrid.pdf");
+                var currentDate = new Date();
+                var timestamp = currentDate.toISOString().replace(/:/g, "-");
+                var fileName = "Supplier List " + timestamp + ".pdf";
+
+                doc.save(fileName);
+
+
+            });
+
+            //////////////////*** with child ****///////////
+            $('#exportPDF').click(function () {
+                window.jsPDF = window.jspdf.jsPDF;
+
+                // Get the data from JSGrid
+                var parentData = $("#jsGridItems").jsGrid("option", "data");
+
+                // Initialize the PDF document
+                var doc = new jsPDF({
+                    orientation: 'landscape'
+                });
+
+                var parentHeaders = [];
+                var childHeaders = [];
+
+                // Extract headers for parent and child items separately
+                $("#jsGridItems").jsGrid("option", "fields").forEach(function (field) {
+                    if (field.name != "buttonDetails" && field.name != "button" && field.name != "CheckBox" && field.visible != false) {
+                        parentHeaders.push({
+                            title: field.title,
+                            dataKey: field.name
+                        });
+                    }
+                });
+
+                // Extract headers for child items
+                $("#jsChildItems").jsGrid("option", "fields").forEach(function (field) {
+                    if (field.name != "SupplierId") { // Exclude the common key field
+                        childHeaders.push({
+                            title: field.title,
+                            dataKey: field.name
+                        });
+                    }
+                });
+
+                var tableData = [];
+                parentData.forEach(function (parentRow) {
+                    var rowData = [];
+                    parentHeaders.forEach(function (header) {
+                        rowData.push(parentRow[header.dataKey]);
+                    });
+                    tableData.push(rowData);
+
+                    // Add child headers with color
+                    var childHeaderRow = [];
+                    //childHeaderRow.push('');
+                    childHeaders.forEach(function (header) {
+                        childHeaderRow.push({
+                            content: header.title,
+                            styles: {
+                                fillColor: '#CCCCCC' // Specify the desired color
+                            }
+                        });
+                    });
+                    tableData.push(childHeaderRow);
+
+                    // Add child items to tableData
+                    if (parentRow.SupplierSubs) {
+                        parentRow.SupplierSubs.forEach(function (childItem) {
+                            var childRow = [];
+                            //childRow.push('');
+                            childHeaders.forEach(function (header) {
+                                childRow.push(childItem[header.dataKey]);
+                            });
+                            tableData.push(childRow);
+                        });
+                    }
+                });
+
+                // AutoTable is a plugin for jsPDF that allows generating tables
+                doc.autoTable({
+                    head: [parentHeaders],
+                    body: tableData,
+                    didParseCell: function (data) {
+                        if (data.row.index === 1) { // Apply styles only to the child header row
+                            data.cell.styles.fillColor = '#CCCCCC'; // Specify the desired color
+                        }
+                    }
+                });
+
+                var startY = 25; // Adjust the startY value as needed
+                doc.autoTable({
+                    startY: startY
+                });
+
+                // Add the text section
+                var text = "Supplier List";
+                var textWidth = doc.getStringUnitWidth(text) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+                var textHeight = doc.internal.getLineHeight() / doc.internal.scaleFactor;
+                var textX = (doc.internal.pageSize.width - textWidth) / 2;
+                var textY = startY - textHeight - 10; // Adjust the vertical position as needed
+                doc.text(text, textX, textY);
+
+                // Save the PDF
+                var currentDate = new Date();
+                var timestamp = currentDate.toISOString().replace(/:/g, "-");
+                var fileName = "Supplier List " + timestamp + ".pdf";
+
+                doc.save(fileName);
+            });
+
+            //////***** CSV File ****//////
+            $('#exportUl').click(function () {
+
+                let globalFields = $('#jsGridItems').jsGrid('option', 'fields');
+                let globalFieldsTitle = $('#jsGridItems').jsGrid('option', 'title');
+
+                //debugger
+
+                for (var i = 0; i < globalFields.length; i++) {
+
+                    if (globalFields[i].name != 'button' && globalFields[i].visible != false && globalFields[i].title != 'Check Box' && globalFields[i].title != 'Details') {
+                        nameTaker.push(globalFields[i]);
+                        titleTaker.push(globalFields[i].title);
+                    }
+                }
+                //debugger
+                var parentJson = $('#jsGridItems').jsGrid('option', 'data');
+                if (parentJson == '')
+                    return;
+                if (withChildFlag == true) {
+                    var csv = convertJsonToCsv(parentJson, titleTaker);
+                }
+                else if (withChildFlag == false) {
+                    var csv = convertJsonToCsvWithoutchild(parentJson, titleTaker);
+                }
+
+                titleTaker = [];
+                titlekey = [];
+                nameTaker = [];
+                jsonKey = [];
+                var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                var link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                var currentDate = new Date();
+                var timestamp = currentDate.toISOString().replace(/:/g, "-");
+                var fileName = "Supplier List " + timestamp + ".csv";
+                link.download = fileName;
+                //link.download = "data.csv";
+                link.click();
+
+
+            });
+
+
+
+
+            // $('#csv').click(function () {
+
+            //    jsonKey=[];
+            //    nameTaker=[];
+            //     for (var i = 0; i < globalFields.length; i++) {
+
+            //            if (globalFields[i].name != 'button' && globalFields[i].visible!=false) {
+            //               nameTaker.push(globalFields[i]);
+
+            //            }
+            //     }
+
+            //    var parentJson = $('#jsGridItems').jsGrid('option', 'data');
+            //        if (parentJson == '')
+            //        return;
+
+            //        var csv = convertJsonToCsv(parentJson);
+            //        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            //        var link = document.createElement("a");
+            //        link.href = URL.createObjectURL(blob);
+            //        link.download = "data.csv";
+            //        link.click();
+
+
+            //});
+
+            //function convertJsonToCsv(jsonData) {
+            //    var csv = '';
+            //    var keys = Object.keys(jsonData[0]);
+
+            //    csv += keys.join(',') + '\n';
+            //    jsonData.forEach(function(item) {
+            //        csv += keys.map(function(key) {
+
+            //            return item[key];
+            //            }).join(',') + '\n';
+            //         });
+            //     return csv;
+            //}
+
+
+            function convertJsonToCsv(jsonData, titletaker) {
+                //debugger
+
+                var csv = '';
+                var keys = Object.keys(jsonData[0]);
+                for (var k = 0; k < keys.length; k++) {
+                    for (var i = 0; i < nameTaker.length; i++) {
+
+                        if (nameTaker[i].name == keys[k]) {
+                            jsonKey[i] = keys[k];
+
+                        }
+                    }
+                }
+
+                for (var k = 0; k < keys.length; k++) {
+                    for (var i = 0; i < titleTaker.length; i++) {
+                        console.log(titleTaker[i]);
+                        console.log(keys[k]);
+                        if (titleTaker[i] == keys[k]) {
+                            titlekey[i] = keys[k];
+
+                        }
+                    }
+                }
+
+                //csv += jsonKey.join(',') + '\n';
+                csv += titleTaker.join(',') + '\n';
+                jsonData.forEach(function (item) {
+
+                    csv += jsonKey.map(function (key) {
+
+                        for (var i = 0; i < nameTaker.length; i++) {
+                            if (nameTaker[i].name == key) {
+                                return item[key];
+                            }
+                        }
+
+                    }).join(',') + '\n' + ',' + ',';
+
+                    var childHeaders = $('#jsChildItems').jsGrid('option', 'fields').map(function (field) {
+                        return field.title;
+                    });
+
+                    var typeIndex = childHeaders.indexOf('Type');
+                    if (typeIndex !== -1) {
+                        childHeaders.splice(typeIndex, 1);
+                    }
+
+                    csv += childHeaders.join(',') + '\n' + ',' + ',';
+
+                    item.SupplierSubs.forEach(function (childItems, index) {
+                        var childValues = Object.keys(childItems).map(function (key) {
+                            if (key !== 'AccType' && childItems != AccType) {
+                                return childItems[key];
+                            }
+                        });
+                        csv += childValues.join(',') + '\n' + (index === item.SupplierSubs.length - 1 ? '' : ',' + ',');
+                    });
+
+                });
+
+                //    var childkeys = Object.keys(item.SupplierSubs[0]);
+                //     csv += childkeys.join(',') + '\n'+','+',';
+                //     var count=0;
+
+                //   item.SupplierSubs.forEach(function(childItems){
+
+                //       count++;
+
+                //       if(count==item.SupplierSubs.length){
+                //           console.log('what');
+                //           console.log(count);
+                //           console.log(item.SupplierSubs.length);
+                //           csv += childkeys.map(function(key) {
+                //               if(childItems!= AccType){
+                //           return childItems[key];
+                //               }
+                //            }).join(',') + '\n';
+                //       }
+                //       else {
+                //           csv += childkeys.map(function(key) {
+                //               if(childItems!= AccType){
+                //           return childItems[key];
+                //               }
+                //            }).join(',') + '\n'+','+',';
+                //       }
+
+                //   });
+
+                //  // console.log('parent');
+
+                //});
+                return csv;
+            }
+
+            function convertJsonToCsvWithoutchild(jsonData, titletaker) {
+
+                //debugger
+                var csv = '';
+                var keys = Object.keys(jsonData[0]);
+                for (var k = 0; k < keys.length; k++) {
+                    for (var i = 0; i < nameTaker.length; i++) {
+
+                        if (nameTaker[i].name == keys[k]) {
+                            jsonKey[i] = keys[k];
+
+                        }
+                    }
+                }
+
+                for (var k = 0; k < keys.length; k++) {
+                    for (var i = 0; i < titleTaker.length; i++) {
+                        console.log(titleTaker[i]);
+                        console.log(keys[k]);
+                        if (titleTaker[i] == keys[k]) {
+                            titlekey[i] = keys[k];
+
+                        }
+                    }
+                }
+
+                //csv += jsonKey.join(',') + '\n';
+                csv += titletaker.join(',') + '\n';
+                let sumstring = "=";
+                let ii = 2;
+                jsonData.forEach(function (item) {
+                    sumstring += 'E' + ii + '+';
+
+                    ii++;
+                    csv += jsonKey.map(function (key) {
+
+                        for (var i = 0; i < nameTaker.length; i++) {
+                            if (nameTaker[i].name == key) {
+                                var value = item[key];
+                                console.log(value);
+                                if (typeof value === 'string' && value.includes(',')) {
+                                    // Wrap the value in double quotes if it contains commas
+                                    value = '"' + value + '"';
+                                }
+                                //return item[key];
+                                return value;
+                            }
+                        }
+
+                    }).join(',') + '\n';
+
+                });
+                sumstring = sumstring.slice(0, -1);
+                console.log(sumstring);
+                csv += ',,,,' + sumstring + '\n';
+                return csv;
+            }
+
+
+
+            //To load get data in main modal
+            function editSupplierList(data, type) {
+                alert('edit clicked')
+                var myUrlGet = '@Url.Action("Editsupplier", "Admin")?SupplierId=' + data + '&Type=' + type;
+            }
+
+
+
+            //delete Supplierlist function
+            function setDeleteUrl(data) {
+                var myUrldelete = '@Url.Action("DeleteSupplier", "Admin")';
+        @*var myUrldelete = '@Url.Action("DeleteCOA", "Admin")?SupplierId=' + data;*@
+                    //e.preventDefault();
+                    //e.stopPropagation();
+                    alert('Are you sure want to delete?');
+                $.ajax({
+                    type: "get",
+                    data: { Id: data },
+                    url: myUrldelete,
+                    success: function (response) {
+                        if (response.success == "1") {
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-green",
+                            });
+                            alert('deletedd');
+                            initJsGrid();
+                            //initjsGrid();
+                        }
+                        else if (response.success == "0") {
+                            //alert()
+                            toastr.success(response.msg, "", {
+                                "toastClass": "toast-red",
+                            });
+                            //initjsGrid();
+                        }
+                    }
+                });
+            };
+
+            //functions to select/unselect and manage batch delete starts
+            var selectedItems = [];
+
+            var selectItem = function (item) {
+                selectedItems.push(item);
+            };
+
+            var unselectItem = function (item) {
+                selectedItems = $.grep(selectedItems, function (i) {
+                    return i !== item;
+                });
+            };
+
+            var deleteSelectedItems = function () {
+                if (!selectedItems.length || !confirm("Are you sure?"))
+                    return;
+
+                deleteClientsFromDb(selectedItems);
+
+                var $grid = $("#jsGridItems");
+                $grid.jsGrid("option", "pageIndex", 1);
+                $grid.jsGrid("loadData");
+
+                selectedItems = [];
+                eachGlobalIdForSupplierDelete = [];
+
+            };
+            //      var deleteClientsFromDb = function (deletingClients) {
+            //          console.log(deletingClients)
+            //          console.log(deletingClients.SupplierId)
+
+            //    globalIdsForSupplierDelete = [...deletingClients]
+            //    console.log(globalIdsForSupplierDelete);
+            //    for (var i = 0; i < globalIdsForSupplierDelete.length; i++) {
+            //        console.log(globalIdsForSupplierDelete[i].SupplierId);
+            //        eachGlobalIdForSupplierDelete.push(globalIdsForSupplierDelete[i].Id);
+            //    }
+            //    console.log(eachGlobalIdForSupplierDelete);
+            //};
+
+            var deleteClientsFromDb = function (deletingClients) {
+                globalIdsForSupplierDelete = [...deletingClients]
+                for (var i = 0; i < globalIdsForSupplierDelete.length; i++) {
+                    eachGlobalIdForSupplierDelete.push(globalIdsForSupplierDelete[i].SupplierId);
+                }
+
+                for (var i = 0; i < eachGlobalIdForSupplierDelete.length; i++) {
+                    var myUrldelete = '@Url.Action("DeleteSupplier", "Admin")?SupplierId=' + eachGlobalIdForSupplierDelete[i];
+                    $.ajax({
+                        type: "get",
+                        url: myUrldelete, /*"/api/Supplier/DeleteSupplier?SupplierId=" + eachGlobalIdForSupplierDelete[i],*/
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (response) {
+                            if (response.success == "1") {
+                                toastr.success(response.msg, "", {
+                                    "toastClass": "toast-green",
+                                });
+                            }
+                            else if (response.success == "0") {
+                                toastr.success(response.msg, "", {
+                                    "toastClass": "toast-red",
+                                });
+                            }
+                            //initjsGrid();
+                            //console.log(response);
+                        },
+                        error: function (error) {
+                            console.error(error);
+                        }
+                    });
+                }
+            };
+            //  function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
+            //      //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+            //      var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+            //      var CSV = '';
+            //      var subCSV = '';
+
+            //      //Set Report title in first row or line
+
+            //      CSV += ReportTitle + '\r\n\n';
+
+            //      //This condition will generate the Label/Header
+            //      if (ShowLabel) {
+            //          var row = "";
+            //          var subrow = "";
+
+            //          //console.log(arrData[0]);
+            //          //This loop will extract the label from 1st index of on array
+            //          for (var index in arrData[0]) {
+            //              //
+            //              //Now convert each value to string and comma-seprated
+
+            //              if (index === 'subinfo') {
+            //                  row += ',' + ',' + index;
+            //              }
+            //              else {
+            //                  row += index + ',';
+            //              }
+
+            //          }
+
+            //          row = row.slice(0, -1);
+            //          //append Label row with line break
+            //          CSV += row + ',' + '\r\n';
+
+            //      }
+
+            //      //1st loop is to extract each row
+            //      for (var i = 0; i < arrData.length; i++) {
+            //          var row = "";
+            //          var subrow = "";
+
+            //          //2nd loop will extract each column and convert it in string comma-seprated
+            //          for (var index in arrData[i]) {
+            //              if (index != 'subinfo') {
+            //                  row += arrData[i][index] + ',';
+            //              }
+
+
+
+            //      }
+            //          CSV += row + ',';
+
+            //          row.slice(0, row.length - 1);
+
+            //          //add a line break after each row
+            //          // CSV += row + '\r\n';
+            //      }
+            //      //1st loop is to extract each row
+
+
+            //if (CSV == '') {
+            //          alert("Invalid data");
+            //          return;
+            //      }
+
+            //      //Generate a file name
+            //      var fileName = "MyReport_";
+            //      //this will remove the blank-spaces from the title and replace it with an underscore
+            //      fileName += ReportTitle.replace(/ /g, "_");
+
+            //      //Initialize file format you want csv or xls
+            //      var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+
+            //      // Now the little tricky part.
+            //      // you can use either>> window.open(uri);
+            //      // but this will not work in some browsers
+            //      // or you will not get the correct file extension
+
+            //      //this trick will generate a temp <a /> tag
+            //      var link = document.createElement("a");
+            //      link.href = uri;
+
+            //      //set the visibility hidden so it will not effect on your web-layout
+            //      link.style = "visibility:hidden";
+            //      link.download = fileName + ".csv";
+
+            //      //this part will append the anchor tag and remove it after automatic click
+            //      document.body.appendChild(link);
+            //      link.click();
+            //      document.body.removeChild(link);
+
+
+            //  }
+        @*function getReport(SupplierId) {
+            alert(SupplierId)
+            var type = '';
+            $.ajax({
+            type: 'POST',
+            url: '@Url.Action("Print", "Admin")',
+            dataType: 'json',
+            async: true,
+            data: { id: SupplierId, type: type },
+            success: function (response) {
+            console.log('success');
+            alert('ss')
+            location.open(response, '_blank')
+
+            },
+            error: function (ex) {
+            alert('Failed.' + ex);
+            }
+
+            });
+
+            }*@
+                  });
+
+
+
+
+    </script>
+}
+
+

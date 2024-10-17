@@ -1,0 +1,381 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@*@model IEnumerable<Atrai.Core.Entity.InternetUserModel>*@
+
+<style>
+
+    th {
+        white-space: nowrap;
+    }
+
+</style>
+
+@{ ViewData["Title"] = "InternetUser List";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+
+                    <div class="card-body">
+
+                        <div class="row mb-2">
+                            <div class="col-md-3 col-12">
+                                @Html.ActionLink("Create Internet User", "AddInternetUser", null, null, new { @class = "btn btn-sm btn-outline-info btn-block rounded-0", @id = "btnBack" })
+                            </div>
+                            <div class="col-md-3 col-12 mt-1">
+                                <h4  style="color: #1976d2;">InternetUser List</h4>
+                            </div>
+
+                            <div class="col-md-2 col-12">
+                                <div class="input-group mb-2">
+                                    @Html.DropDownList("InternetUserStatusId", ViewBag.InternetUserStatusId as List<SelectListItem>, "Select User Status", new { id = "InternetUserStatusId", @class = "form-control form-control-sm" })
+                                </div>
+                            </div>
+
+
+
+
+                            @*<div class="col-md-2 col-12 mt-1">
+                                <input type="text" id="myInput" class="form-control" onmouseover="this.focus();" placeholder="On Page Filtering / Search." title="Search Item" style="height: 45px !important;">
+                            </div>*@
+                        </div>
+
+                       
+
+                        <div class="table-responsive m-t-10">
+                            <table id="tbllist" class="table table-sm display compacttable-hover  table-bordered table-striped table-hover">
+                            </table>
+                        </div>
+
+
+
+                    </div>
+                    </div>
+
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+@*<td>
+        <div height="50px">
+            <div class="img-thumbnail flag flag-icon-background @item.FlagClass.ToString().ToLower()"></div>
+        </div>
+    </td>*@
+
+
+@section Scripts{
+
+    <script type="text/javascript">
+
+        //var filtervalue = '@ViewBag.filter';
+        //alert(testval);
+
+        var valueid = '@ViewBag.StatusId';
+        $("#InternetUserStatusId").val(valueid);
+
+        function Page_load() {
+            var InternetUserStatus = "All";
+            InternetUserStatus = $("#InternetUserStatusId option:selected").text();//$('#InternetUserStatusId').text();
+
+
+            var y = '@ViewBag.filter';
+            if (InternetUserStatus == "") {
+                window.location.href = "InternetUserList?filter=All";
+
+            }
+            else {
+                window.location.href = "InternetUserList?filter=" + InternetUserStatus;
+            }
+
+        };
+
+
+        $("#InternetUserStatusId").change(function () {
+            Page_load();
+        });
+
+
+
+                $(function () {
+                    var peopleList = $('#tbllist').DataTable({
+
+                        serverSide: true,  "scrollX": true,
+                        processing: true,
+
+
+
+                        "orderCellsTop": false,
+                        "scrollX": true,
+                        "scrollY": "60vh",
+                        "order": [0, "desc"],
+                        //"order"; false,
+                        //"sortable": false,
+                        "scrollCollapse": true,
+
+                        ajax: {
+                            url: '@Url.Action("GetInternetUserList", "Admin", new { filter = @ViewBag.filter })',
+                            type: "POST"
+                        },
+                        "lengthMenu": [[50, 100, 500, 1000, 5, 10, 20], [50, 100, 500, 1000, 5, 10, 20, ]],
+                        rowId: 'Id',
+                        dom: '<"dom_wrapper fh-fixedHeader"lBf>tip',
+                        //buttons: [
+                        //    'copy', 'csv', 'excel', 'pdf'
+                        //],
+                        buttons: {
+                            dom: {
+                                button: {
+                                    className: 'btn rounded-0'
+                                }
+                            },
+                            buttons: [
+                                //'copy', 'csv', 'excel', 'pdf'
+                                //$(this).addClass("btn-group dt-buttons justify-content-center mb-3")
+                                //{
+                                //    extend: 'colvis',
+                                //    "columns": ':not(:last-child)',
+                                //    text: '<i class="mdi mdi-view-column"></i>',
+                                //    className: 'btn-info',
+                                //    titleAttr: 'Show / hide columns',
+                                //    //collectionLayout: 'fixed two-column'
+
+                                //},
+                                {
+                                    extend: 'excel',
+                                    text: '<i class="mdi mdi-file-excel"></i>',
+                                    className: 'btn-success',
+                                    titleAttr: 'Export to excel'
+                                }
+
+                            ]
+                        },
+
+                        columns: [
+
+                            { "title": "Id", "data": "Id", "visible": true },
+                            //{ "title": "User Id", "data": "UserId", "searchable": true },
+
+                            {
+                                "title":"User Id",
+                                "className": "text-nowrap",
+                                "data": {
+                                    Id: "UserId"
+                                },
+                                "searchable": true,
+
+                                "render": function (data, InternetUserId, row) {
+
+                                    var myUrlprint = '@Url.Action("InternetUserLedgerPrintOther", "Internet")?InternetUserId=' + data.UserId;
+                                    var UserId = data.UserId;
+                                    var buttons = '';
+                                    buttons += '<span data-toggle="tooltip" title="Print"> <a href=\"' + myUrlprint + '\" class=\"btn btn-icon btn-success btn m-b-0\" target=\"_blank\"><i class="fa fa-print"> ' + UserId +'</i></a></span>';
+                                    return buttons;
+                                }
+                            },
+
+
+
+                            { "title": "User Type", "data": "UserType", "searchable": true },
+
+                            { "title": "Password", "data": "Password", "searchable": true },
+                            { "title": "User Name", "data": "UserName", "searchable": true },
+
+
+                            { "title": "Last Billed", "data": "LastBilledDateString", "className": "nowrap text-nowrap text-center", "searchable": false },
+                            { "title": "Expired", "data": "LastExpiredDateString", "className": "nowrap text-nowrap text-center", "searchable": false },
+                            { "title": "Last Received", "data": "LastReceivedDateString", "className": "nowrap text-nowrap text-center", "searchable": false },
+                            { "title": "Mobile No", "data": "MobileNo", "searchable": true },
+
+
+
+                            {
+                                "title": "Total Bill",
+                                "className": "text-nowrap text-center",
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "searchable": false,
+                                "render": function (data, type, row) {
+                                    var showdata = '';
+                                    if (data.TotalBill > 0) {
+                                        showdata += '<p style="color:black"> ' + (data.TotalBill) + ' </p>';
+                                    }
+                                    return showdata;
+                                }
+                            },
+                            {
+                                "title": "Total Received",
+                                "className": "text-nowrap text-center",
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "searchable": false,
+                                "render": function (data, type, row) {
+                                    var showdata = '';
+                                    if (data.TotalReceive > 0) {
+                                        showdata += '<p style="color:black"> ' + (data.TotalReceive) + ' </p>';
+                                    }
+                                    return showdata;
+                                }
+                            },
+                            {
+                                "title": "Ledger Balance",
+                                "className": "text-nowrap text-center",
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "render": function (data, type, row) {
+                                    var buttons = '';
+                                    if (data.TotalDue > 0) {
+                                        buttons += '<p style="color:red"> ' + (data.TotalDue) + ' </p>';
+                                    }
+                                    return buttons;
+                                }
+                            },
+
+
+                            {
+                                "title": "Client Address / Location", "data": "Address", "searchable": true
+
+                            },
+
+
+                            //{ "title": "Amount", "data": "Amount", "searchable": true },
+                            {
+                                "title": "Package Price",
+                                "className": "text-nowrap text-center",
+                                "data": {
+                                    Id: "Id" //,
+                                },
+                                "searchable": false,
+                                "render": function (data, type, row) {
+                                    var showdata = '';
+                                    if (data.Amount > 0) {
+                                        showdata += '<p style="color:black"> ' + formatter.format(data.Amount) + ' </p>';
+                                    }
+                                    return showdata;
+                                },
+                                "searchable": true
+                            },
+
+                            //{
+                            //    "title": "Paid Status",
+                            //    "className": "text-nowrap text-center",
+                            //    "data": {
+                            //        Id: "Id" //,
+                            //    },
+                            //    "searchable": false,
+                            //    "render": function (data, type, row) {
+                            //        var showdata = '';
+                            //        if (data.TotalDue > 0) {
+                            //            showdata += '<p style="color:red"> Due </p>';
+                            //        }
+                            //        else {
+                            //            showdata += '<p style="color:green"> Paid </p>';
+                            //        }
+                            //        return showdata;
+                            //    },
+                            //    "searchable": true
+                            //},
+
+                            {
+                                "title": "Paid Status",
+                                "className": "text-nowrap text-center",
+                                "data": {
+                                    Id: "PaidStatus" //,
+                                },
+                                "searchable": false,
+                                "render": function (data, type, row) {
+                                    var showdata = '';
+                                    if (data.PaidStatus == 'Due') {
+                                        showdata += '<p style="color:red"> Due </p>';
+                                    }
+                                    else {
+                                        showdata += '<p style="color:green"> Paid </p>';
+                                    }
+                                    return showdata;
+                                },
+                                "searchable": true
+                            },
+
+                            { "title": "ONUMac", "data": "ONUMac", "searchable": true },
+                            { "title": "IP Address", "data": "IPAddress", "searchable": true },
+                            { "title": "Con. Point Address", "data": "ConnectionPointAddress", "searchable": true },
+
+                            { "title": "Description", "data": "Description", "searchable": true },
+                            { "title": "Created On", "data": "CreateDateString", "searchable": false },
+                            { "title": "Created By", "data": "CreatedBy", "className": "nowrap text-nowrap text-center", "searchable": true },
+
+
+
+                            { "title": "National Id Card", "data": "NationalIdCard", "searchable": true },
+                            { "title": "User Status", "data": "UserStatusName", "searchable": true },
+                            { "title": "Package", "data": "PackageName", "searchable": true },
+
+
+                            {
+                                "title": "Action",
+                                "data": "Id",
+                                "render": function (data, type, row) {
+                                    var myUrledit = '@Url.Action("EditInternetUser", "Admin")?InternetUserId=' + data;
+                                    var myUrldelete = '@Url.Action("DeleteInternetUser", "Admin")?InternetUserId=' + data;
+                                    var message = `return confirm('Are you sure you want to Remove the InternetUser Information ?')`;
+
+
+                                    return '<span data-toggle="tooltip" title="Edit"> <a href=\"' + myUrledit + '\" class=\"btn btn-icon btn-warning btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-edit"></i></a></span>' +
+                                        '<span data-toggle="tooltip" title="Delete"> <a href=\"' + myUrldelete + '\" onclick = \"' + message + '\"  class=\"btn btn-icon btn-danger btn-sm rounded-0 mb-1\" target=\"_blank\"><i class="fa fa-remove"></i></a></span>';
+
+                                }
+
+                            }
+                        ],
+
+
+                        autoWidth: true,
+                        columnDefs: [
+                            { "width": "10px", "targets": [0, 1] },
+                            { "width": "400px", "targets": [4] }
+                        ]
+
+                    });
+
+
+                });
+
+
+
+
+                var CultureInfoViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CultureInfoViewFormat").ToString()';
+                var CurrencyShortNameViewFormat = '@HttpContextAccessor.HttpContext.Session.GetString("CurrencyShortName").ToString()';
+
+
+                var formatter = new Intl.NumberFormat(CultureInfoViewFormat, ///'en-US'
+                    {
+                    style: 'currency',
+                    currency: CurrencyShortNameViewFormat,///'BDT'
+                    minimumFractionDigits: 2,
+                });
+                //document.body.innerHTML += '<br />' + formatter.format(53425.34);
+
+
+
+
+            $(document).ready(function () {
+                $("#myInput").on("keyup", function () {
+                    var value = $(this).val().toLowerCase();
+                    $("#tbllist tr").filter(function () {
+                        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                    });
+                });
+            });
+
+    </script>
+}

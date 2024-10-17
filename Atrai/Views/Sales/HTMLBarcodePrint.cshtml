@@ -1,0 +1,451 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Barcode Print";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+<link href="~/AdminEla/Assets/css/barcode.css" rel="stylesheet" />
+    
+<style>
+    p.lineheight {
+        line-height: 6px;
+        vertical-align: middle;
+    }
+
+</style>
+
+
+
+<div class="page-wrapper">
+    <div class="container-fluid" id="fahadhide">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        Barcode Generation
+                    </div>
+                    <div class="card-body">
+
+                        <div class="col-md-12">
+                            <label class="col-md-2">Search Product</label>
+                            <div class="input-group input-group-default col-md-8">
+                                <span class="input-group-btn"><button class="btn btn-purple rounded-0" type="submit"><i class="bi bi-search"></i></button></span>
+                                <input type="text" placeholder="Search Product" name="Search" id="Search" class="form-control">
+                            </div>
+
+                            <br />
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="detailsTable" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th class="d-none">Id</th>
+                                            <th class="d-none">Product Id</th>
+                                            <th style="min-width:200px">Name</th>
+                                            <th style="min-width:200px">Barcode</th>
+                                            <th style="min-width:80px;max-width:100px">Unit Price</th>
+                                            <th style="min-width:80px;max-width:100px">Quantity</th>
+                                            <th style="min-width:80px;max-width:100px">Amount</th>
+                                            <th></th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemDetails"></tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td class="d-none"></td>
+                                            <td class="d-none"></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td> <strong> Total:</strong> </td>
+                                            <td> <strong id="TotalQty">  </strong> </td>
+                                            <td> <strong id="SubTotal">  </strong> </td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            @*<small id="error_SubTotal" class="form-text error_msg">Atleast add one item</small>
+                                <br />*@
+                            <br />
+
+                            <div class="form-horizontal">
+                                <label> </label>
+                                <input id="BtnBarcodePrint" class="btn btn-success col-md-3 pull-right" value="Make Barcode" onclick="MakeBarcode()" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- panel-body -->
+            </div>
+            <!-- panel -->
+        </div>
+    </div>
+
+    <div>
+        <div class="right-corder-container">
+            <button class="right-corder-container-button" onclick="printDiv('printableArea')">
+                <span class="iconposition">
+                    <i class="bi bi-printer"></i>
+                </span>
+                @*<span class="short-text">
+                        <i class="fa fa-print mb-5 iconposition"></i>
+                    </span>*@
+                <span class="long-text">Print Me</span>
+            </button>
+        </div>
+        <div class="container-fluid">
+            <!-- Start Page Content -->
+            @*<input class="button" type="button" onclick="printDiv('printableArea')" value="print" />*@
+
+            <div class="card">
+                <div class="card-body">
+                    @*<h5 class="card-header">Sales List</h5>*@
+
+
+
+                    <div id="printableArea">
+
+
+                        <div id="fahadbarcode" class="row text-center">
+
+                            <div class="col-md-3 col-12">
+                                <p>@HttpContextAccessor.HttpContext.Session.GetString("ComName")</p>
+                                <p>Women Dress Black Colour</p>
+                                <br />
+                                <p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M">*1022300111*</p>
+                                <br />
+                                <p style="font-weight:bold; font-size:18px">TK. 150/-</p>
+                                <br />
+
+                                @*<p>Inc. Vat</p>*@
+
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section scripts {
+    @*<script src="~/js/site.js" asp-append-version="true"></script>*@
+    <script type="text/javascript">
+
+
+
+        $('#detailsTable').on('change', ".quantity , .price", update);
+
+        function update() {
+
+            var qty = parseFloat($(this).parents('tr').find(".quantity").val());
+            var price = parseFloat($(this).parents('tr').find(".price").val());
+            var amount = qty * price;
+            $(this).parents('tr').find(".amount").text(amount);
+            calculateSum();
+        }
+
+        $("#Search").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '../admin/ProductSearch/',
+                    dataType: "json",
+                    data: { query: $("#Search").val() },
+                    success: function (data) {
+                        console.log(data);
+                        response($.map(data, function (item) {
+                            return { ProductId: item.Id, description: item.Description, Code: item.Code, label: item.Name, Price: item.Price, Code: item.Code };
+                        }));
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error");
+                    },
+                });
+            },
+            minLength: 1,
+            select: function (event, ui) {
+                //console.log(ui.item);
+                //var idGenrow = new Generator();
+                //var rowid = idGenrow.getId();
+
+                //alert(generateRandom());
+                //var idGenrow = new generateRandom();
+                //console.log(idGenrow);
+                var rowid = generateRandom();
+
+                //alert(ui.item.label);
+                //alert();
+
+
+
+                detailsTableBody = $("#detailsTable tbody");
+                var productItem = '<tr> + <td class="d-none SalesItemId">' + 0 +
+                    '</td><td class="d-none ProductId" id = \'PI' + rowid + '\'>' + ui.item.ProductId +
+                    '</td><td>' + '<input class="name form-control"  id = \'N' + rowid + '\'      type= "text" value= "1"  />' +
+                    '</td><td>' + '<input class="description form-control"  id = \'D' + rowid + '\' type= "text" value= "2" />' +
+                    '</td><td style="min-width:80px;max-width:100px">' + '<input class="price text-center form-control" type= "text"  id = \'P' + rowid + '\'   value= "1"  />' +
+                    '</td><td style="min-width:80px;max-width:100px">' + '<input class="quantity text-center form-control" type= "number"  id = \'Q' + rowid + '\' min= "1" step= "1" value= "1"  max="99" />' +
+                    '</td><td style="min-width:80px;max-width:100px" class="amount" id = \'A' + rowid + '\' >' + ui.item.Price + '</td><td><a data-itemId="' + 0 + '" href="#" class="deleteItem"><i class="bi bi-trash"></i></a></td></tr>';
+                detailsTableBody.append(productItem);
+
+                $("#N" + rowid).val(ui.item.label);
+                $("#D" + rowid).val(ui.item.Code);
+                $("#P" + rowid).val(ui.item.Price);
+
+                //alert('found fahad');
+                //$("#A" + rowid).html(ui.item.Price);
+
+
+
+                $("#N" + rowid).autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: '../admin/ProductSearch/',
+                            dataType: "json",
+                            data: { query: $("#N" + rowid).val() },
+                            success: function (data) {
+                                //console.log(data);
+                                response($.map(data, function (item) {
+                                    return { ProductId: item.Id, description: item.Description, Code: item.Code, label: item.Name, Price: item.Price };
+                                }));
+                            },
+                            error: function (xhr, status, error) {
+                                alert("Error");
+                            },
+                        });
+                    },
+                    minLength: 1,
+                    select: function (event, uirow) {
+
+                        //alert("#P" + rowid);
+                        $("#PI" + rowid).html(uirow.item.ProductId);
+                        $("#P" + rowid).val(uirow.item.Price);
+                        $("#D" + rowid).val(uirow.item.Code);
+
+                        var quantity = $("#Q" + rowid).val();
+
+                        $("#A" + rowid).html(uirow.item.Price * quantity);
+                        //$("#A" + rowid).html(uirow.item.Price);
+
+                        calculateSum();
+                        //return false;
+                        //alert(uirow.item.ProductId);
+                    }
+                });
+
+                //ui.item.description
+
+
+                //var myTable = document.getElementById('detailsTable');
+                //myTable.rows[myTable.length-1].cells[1].innerHTML = 'Hello';
+
+                //$(productItem).closest('tr').children('td:eq(4)').text('abcdef');
+
+                //var lastRow = $('#detailsTable tbody tr:last').html();
+                //console.log(lastRow);
+                //var row = table.insertRow(0);
+                //var Description_cell = lastRow(4);
+                //var cell2 = row.insertCell(1);
+                //Description_cell.innerHTML = "NEW CELL1";
+
+
+
+                //alert('you have selected ' + ui.item.label + ' ID: ' + ui.item.value);
+                $('#Search').val("");
+                calculateSum();
+
+
+                //$("#detailsTable").DataTable();
+                return false;
+            }
+        });
+
+
+        function printDiv(divName) {
+            var myPrintContent = document.getElementById(divName);
+            var myPrintWindow = window.open('', '', '');
+
+
+
+            myPrintWindow.document.write('<style>        body { margin: 25mm 25mm 25mm 25mm; }   </style>');
+
+
+            myPrintWindow.document.write('<html><head> <title> Print </title>');
+            myPrintWindow.document.write('<link rel="stylesheet" href="../AdminEla/Assets/css/lib/bootstrap/bootstrap.min.css">');
+            myPrintWindow.document.write('<link rel="stylesheet" href="../AdminEla/Assets/css/barcode.css">');
+            //alert('2nd ok');
+
+
+            myPrintWindow.document.write('</head><body><br/><br/>');
+            myPrintWindow.document.write(myPrintContent.innerHTML);
+            myPrintWindow.document.write('</body></html>');
+            //myPrintWindow.document.getElementById('fahadhide').display = 'block';
+            myPrintWindow.document.close();
+
+            //alert('2nd ok');
+
+            setTimeout(function () {
+                myPrintWindow.focus();
+                myPrintWindow.print();
+            }, 500);
+
+            return false;
+        }
+
+
+        //function printDiv(divName) {
+
+        //    $(divName).printElement();
+
+
+        //    //var printContents = document.getElementById(divName).innerHTML;
+        //    //var originalContents = document.body.innerHTML;
+
+        //    //document.body.innerHTML = printContents;
+
+        //    //window.print();
+
+        //    //document.body.innerHTML = originalContents;
+
+        //    //var abcd = $("#fahadbarcode");
+
+        //}
+
+        //function printDiv(elem) {
+        //    var mywindow = window.open('Barcode Print', 'PRINT',);
+
+        //    mywindow.document.write('<html><head><title>' + document.title + '</title>');
+        //    mywindow.document.write('</head><body >');
+        //    mywindow.document.write('<h1>' + document.title + '</h1>');
+        //    mywindow.document.write(document.getElementById(elem).innerHTML);
+        //    mywindow.document.write('</body></html>');
+
+        //    mywindow.document.close(); // necessary for IE >= 10
+        //    mywindow.focus(); // necessary for IE >= 10*/
+
+        //    mywindow.print();
+        //    mywindow.close();
+
+        //    return true;
+        //}
+
+        //function printDiv(elem) {
+        //    var mywindow = window.open('', 'new div', 'height=400,width=600');
+        //    mywindow.document.write('<html><head><title>my div</title>');
+        //    mywindow.document.write('<link rel="stylesheet" href="../AdminEla/Assets/css/barcode.css" type="text/css" />');
+        //    mywindow.document.write('</head><body >');
+        //    mywindow.document.write(data);
+        //    mywindow.document.write('</body></html>');
+
+        //    mywindow.print();
+        //    mywindow.close();
+
+        //    return true;
+        //}
+
+
+        function MakeBarcode() {
+
+            var abcd = $("#fahadbarcode");
+            var ComName = "";
+            var Name = "";
+            var Description = "";
+            var Price = "";
+            var Quantity = "";
+
+            abcd.empty();
+            var i = 0;
+
+
+
+            $.each($("#detailsTable tbody tr"), function () {
+
+                //alert($(this).find('td:eq(3)').html());
+                //alert($(this).find('td:eq(3)').text());
+
+                //ComName = "Dominate Bd";
+                    var ComName = '@HttpContextAccessor.HttpContext.Session.GetString("ComName")';
+                    Name =  $(this).find('.name').val(),
+                        Description = '*' + $(this).find('.description').val() + '*',
+                    Price =  $(this).find('.price').val(),
+                    Quantity = parseInt($(this).find('.quantity').val())
+
+                    for (i = 0; i < Quantity; i++) {
+                        var barcodeitems = '<div class="col-md-3 col-12 p-2"><p>' + ComName + '</p><p>' + Name + '</p><br/><p class="light" style="font-size:16pt ; font-family: IDAutomationHC39M;transform: scale(1, 0.9);">' + Description + '</p><br/><p style="font-weight:bold; font-size:18px">TK.' + Price + '/-</p><br /></div >';
+                        abcd.append(barcodeitems);
+                }
+                i = 0;
+
+
+            });
+
+        }
+
+
+        $(".right-corder-container-button").hover(function () {
+            $(".long-text").addClass("show-long-text");
+        }, function () {
+            $(".long-text").removeClass("show-long-text");
+        });
+
+
+
+        function generateRandom() {
+            const randomNum = 100000 + Math.random() * 100000;
+            return Math.round(randomNum / 10) * 10;
+        }
+
+        function calculateSum() {
+            var sum = 0;
+            var sumQty = 0;
+
+            // iterate through each td based on class and add the values
+            $(".amount").each(function () {
+
+                var value = $(this).text();
+                // add only if the value is number
+                if (!isNaN(value) && value.length !== 0) {
+                    sum += parseFloat(value);
+                }
+            });
+
+            $.each($("#detailsTable tbody tr"), function () {
+
+                var Quantity = parseInt($(this).find('.quantity').val());
+                if (!isNaN(Quantity) && Quantity.length !== 0) {
+                    sumQty += parseFloat(Quantity);
+                }
+            });
+
+
+            if (sum == 0.0) {
+                $('#Discount').text("0");
+                $('#GrandTotal').text("0");
+            }
+            //console.log(sum);
+            $('#SubTotal').text(sum.toFixed(2));
+            $('#TotalQty').text(sumQty.toFixed(2));
+
+            $('#GrandTotal').val(sum.toFixed(2));
+
+            //var b = parseFloat($('#Discount').val()).toFixed(2);
+            //if (isNaN(b)) return;
+            //var a = parseFloat($('#SubTotal').text()).toFixed(2);
+            //var c = parseFloat(a - b).toFixed(2);
+            //$('#GrandTotal').val(c);
+        };
+        //$('.amount').each(function () {
+        //    calculateSum();
+        //});
+
+
+    </script>
+}
+

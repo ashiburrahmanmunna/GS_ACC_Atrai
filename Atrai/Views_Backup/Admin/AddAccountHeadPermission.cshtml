@@ -1,0 +1,197 @@
+﻿@model List<Atrai.Core.Entity.UserAccountHeadView>
+@{ ViewData["Title"] = "Account Head Permission";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; 
+}
+<style>
+    .row ul li {
+        list-style-type: none;
+    }
+
+    .list-group-item {
+        display: flex;
+        width: 80%;
+        justify-content: space-between;
+        flex-direction: row;
+        flex-flow: row wrap;
+        min-height: 3em;
+    }
+
+    .items {
+    }
+
+
+</style>
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-1">
+                        <h4>Account Head Permission</h4>
+                    </div>
+                            <div class="card-body">
+                
+                                    <div class="form-group">
+                                        <form asp-controller="Admin" asp-action="AddAccountHeadPermission" method="get">
+                                            <div class="row">
+                                                <div class="col-md-4 col-6 ">
+                                                    @Html.DropDownList("LuserIdAllow", new SelectList((IEnumerable<SelectListItem>)ViewBag.LuserIdAllow, "Value", "Text"), "Select User",
+                                                        htmlAttributes: new { @class = "form-control", id = "LuserIdAllow" })
+                                                </div>
+
+                                                <div class="col-md-2 col-2 text-center">
+                                                    <button type="submit" class="btn btn-success btn-block rounded-0"> Load </button>
+                                                </div>
+
+
+                                            </div>
+                                        </form>
+
+
+
+                                        <form asp-action="AddAccountHeadPermission" id="fahadAccountHeadlist">
+
+                                            <div class="form-group">
+                                                <div class="row">
+
+                                                    <div class="col-md-4 col-12 text-center">
+
+                                                        <input class="form-control" type="checkbox" id="myCheckAll" /> Check All
+
+                                                        <br />
+                                                        <br />
+                                                    </div>
+
+                                                    <div class="col-md-2 col-12 text-center">
+                                                        <input type="submit" value="Save" class="btn btn-primary btn-block rounded-0" />
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+
+                                            
+                                            <input type="text" class="form-control col-md-3" id="filterabc" value="" placeholder="Search"/>
+                                            <span id="filter-count"></span>
+
+                                            <div class="row display">
+                                                <div class="col-md-12">
+
+                                                    <div class="form-group">
+                                                        <ul>
+                                                            @if (Model != null)
+                                                            {
+                                                <li class="list-group-item">
+                                                    <span class="col-md-1">
+                                                        SLNo
+                                                    </span>
+                                                    <span class="col-md-3">
+                                                        Parent Name
+                                                    </span>
+                                                    <span class="col-md-3">
+                                                        Account Head Permission
+                                                    </span>
+                                                </li>
+                                                 var slno = 0;
+                                                for (var i = 0; i < Model.Count; i++)
+                                                {
+                                                    slno++;
+                                                            <li class="list-group-item tr">
+
+                                                            <span class="td col-md-1">
+                                                                @slno
+                                                            </span>
+                                                            <span class="col-md-3">
+                                                                @Model[i].ParentAccName
+                                                            </span>
+                                                            <span class="col-md-3">
+                                                                <input type="checkbox" class="checkboxpermit" asp-for="@Model[i].Permitted" /> -  @Model[i].AccName
+                                                                <input type="hidden" asp-for="@Model[i].Id" />
+                                                                <input type="hidden" asp-for="@Model[i].AccId" />
+                                                                <input type="hidden" asp-for="@Model[i].LuserIdAllow" />
+                                                            </span>
+                                                                </li>
+                                                            }
+                                                  }
+                                                        </ul>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </form>
+
+
+                                    </div>
+
+
+
+         
+
+               
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+@section scripts {
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $('#myCheckAll').click(function () {
+            var chk = $(this).is(':checked');
+            var cnt = $('input[type=checkbox]').length;
+            $('input[type=checkbox]').each(function () {
+                if (chk) {
+                    $(this).attr('checked', 'checked');
+                }
+                else {
+                    $(this).removeAttr('checked');
+                }
+            });
+        }); 
+
+
+    });
+
+
+
+        $(document).ready(function () {
+            $("#filterabc").keyup(function () {
+
+                // Retrieve the input field text and reset the count to zero
+                var filter = $(this).val(), count = 0;
+
+                // Loop through the comment list
+                $("#fahadAccountHeadlist ul li").each(function () {
+
+                    // If the list item does not contain the text phrase fade it out
+                    if ($(this).text().search(new RegExp(filter, "i")) < 0) {
+                        $(this).fadeOut();
+
+                        // Show the list item if the phrase matches and increase the count by 1
+                    } else {
+                        $(this).show();
+                        count++;
+                    }
+                });
+
+                // Update the count
+                var numberItems = count;
+                $("#filter-count").text("Search Count = " + count);
+            });
+        });
+
+
+
+
+
+    </Script>
+    
+}

@@ -1,0 +1,88 @@
+﻿@model Atrai.Core.Entity.FiscalyearCreationModel
+@{
+    ViewData["Title"] = "AddFiscalYear";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+}
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+
+        <div class="card">
+            <div class="card-header py-1">
+                <h4>Fiscal Year Creation</h4>
+
+            </div>
+
+            <div class="card-body">
+
+                <form asp-controller="Accounts" asp-action="AddFiscalYear" method="post">
+
+                    <div class="row mb-3">
+                        <div class="col-md-3 col-12 mb-2">
+
+                            @*
+                            <input type="date" asp-for="OpeningYear" class="form-control" asp-format="{0:yyyy}" placeholder="eg Enter Fiscal Name">
+                            <span asp-validation-for="OpeningYear" class="text-danger"></span>*@
+                            <label>Opening Year</label>
+                            <input type="number" asp-for="OpeningYear" class="form-control"  id="OpeningYear">
+                            @*<input type="number" id="OpeningYear" placeholder="eg Enter Fiscal Name" />*@
+                        </div>
+
+
+                        <div class="col-md-3 col-12 mb-2">
+                            @Html.LabelFor(x => x.FiscalYearTypeId)
+                            @Html.DropDownListFor(x => x.FiscalYearTypeId,
+                            new SelectList((IEnumerable<SelectListItem>)ViewBag.FiscalYearType, "Value", "Text"),
+                            htmlAttributes: new { @class = "form-control", id = "FiscalYearTypeId" })
+                            @Html.ValidationMessageFor(x => x.FiscalYearTypeId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-3 col-12 mb-2">
+
+                        @if (ViewBag.ActionType == "Create")
+                        {
+                            <input type="submit" value="Create Fiscal Year" class="btn  btn-primary rounded-0" />
+                        }
+
+                        @Html.ActionLink("Back", "FiscalYearList", "Admin", null, new { @class = "btn btn-info rounded-0", @id = "btnBack" })
+
+                    </div>
+
+
+
+
+                </form>
+
+            </div>
+        </div>
+
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+
+
+        $(document).ready(function() {
+            $('#OpeningYear').datepicker({
+                changeMonth: true,
+                changeYear: true,
+                dateFormat: 'yy'
+            });
+        });
+
+
+        if ($('#OpeningYear').val().length == 0) {
+            //alert('hit');
+            $('#OpeningYear').val("2022");
+
+        }
+
+
+    </script>
+    }

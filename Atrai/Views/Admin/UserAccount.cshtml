@@ -1,0 +1,137 @@
+﻿@model UserCreateDto
+@{ ViewData["Title"] = "User Account";
+Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-8 col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>New User</h5>
+                    </div>
+                   
+                    <div class="card-body">
+                        <div class="basic-elements">
+                            @using (Html.BeginForm("UserAccount", "Admin", FormMethod.Post))
+                            {
+                                @if (Model != null)
+                                {
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="IsBaseUser"/>
+                                    <input type="hidden" asp-for="OTP"/>
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Id" value="0" />
+                                    <input type="hidden" asp-for="IsBaseUser" value="False" />
+                                    <input type="hidden" asp-for="OTP" value="NULL" />
+                                }
+
+
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })                             
+
+                            @Html.AntiForgeryToken()
+                                <div class="form-group row">
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="Fullname" class="control-label"></label>
+                                        <input asp-for="Fullname" class="form-control" />
+                                        <span asp-validation-for="Fullname" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="PhoneNumber" class="control-label"></label>
+                                        <input asp-for="PhoneNumber" class="form-control" />
+                                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group row">
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="UserName" class="control-label"></label>
+                                        <input asp-for="UserName" class="form-control" />
+                                        <span asp-validation-for="UserName" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="Email" class="control-label"></label>
+                                        <input asp-for="Email" class="form-control" />
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6 col-12">
+                                        <label asp-for="Password" class="control-label"></label>
+                                        <input asp-for="Password" class="form-control" />
+                                        <span asp-validation-for="Password" class="text-danger"></span>
+                                    </div>
+
+                                </div>
+
+
+
+
+                                <div class="form-group row">
+
+
+                                    <div class="col-md-6 col-12">
+                                        @Html.LabelFor(x => x.EmployeeId)
+                                        @Html.DropDownListFor(x => x.EmployeeId,
+                                             new SelectList((IEnumerable<SelectListItem>)ViewBag.Employee, "Value", "Text"), "Select Employee",
+                                             htmlAttributes: new { @class = "form-control", id = "EmployeeId" })
+                                        @Html.ValidationMessageFor(x => x.EmployeeId, "", new { @class = "text-danger" })
+
+                                    </div>
+
+
+                                    <div class="col-md-6 col-12">
+                                        @Html.LabelFor(x => x.UserRoleId)
+                                        @Html.DropDownListFor(x => x.UserRoleId,
+                                             new SelectList((IEnumerable<SelectListItem>)ViewBag.Role, "Value", "Text"), "Select User Role",
+                                             htmlAttributes: new { @class = "form-control", id = "UserRoleId" })
+                                        @Html.ValidationMessageFor(x => x.UserRoleId, "", new { @class = "text-danger" })
+
+                                    </div>
+
+
+                                </div>
+                                <div class="form-group row">
+
+                                    @* <div class="col-md-6 col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" asp-for="IsInacitve">
+                                        <label class="form-check-label" asp-for="IsInacitve"></label>
+                                    </div>
+                                    </div> *@
+
+                                 
+
+                                    <div class="col-md-6 col-12 text-center mt-3">
+                                        <div>
+
+                                            <input type="submit" value="Save Changes" class="btn  btn-primary rounded-0" />
+
+                                            <a href="@Url.Action("UserAccountList", "Admin")" class="btn btn-primary rounded-0">Back To List </a>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                                                           
+                                }
+                            </div><!-- panel-body -->
+                    </div>
+
+                </div>
+            </div>
+
+           
+        </div>
+    </div>
+
+</div>
+
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial.cshtml");
+    }
+}

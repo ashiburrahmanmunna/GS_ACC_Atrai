@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <!-- Tabulator CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.3.0/css/tabulator.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Your HTML code -->
+    <div id="incomeStatementTable"></div>
+
+    <!-- Tabulator JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.3.0/js/tabulator.min.js"></script>
+
+    <!-- Your JavaScript code -->
+    <script>
+        // Your JavaScript code
+        // Assuming you have an AJAX call that fetches the DataTable from the server.
+
+        // Function to fetch data using AJAX (Replace this with your actual AJAX call)
+        function fetchDataFromServer() {
+            return $.ajax({
+                url: '@Url.Action("IncomeStatementTabulatorReport", "Accounts")', // Replace with your API endpoint
+                type: "GET",
+                dataType: "json",
+            });
+        }
+
+        fetchDataFromServer().done(function (dataTable) {
+            var dataT = dataTable;
+
+            var table = new Tabulator("#incomeStatementTable", {
+                data: dataT, // Use the DataTable directly as the data source
+                layout: "fitColumns",
+                columns: [
+                    { title: "Particular", field: "AccName" },
+                    { title: "Note", field: "AccCode" },
+                    { title: "Amount", field: "Amount" },
+                    // Add more columns as needed...
+                ],
+            });
+        });
+    </script>
+</body>
+</html>

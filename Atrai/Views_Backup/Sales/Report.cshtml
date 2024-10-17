@@ -1,0 +1,631 @@
+﻿@*@model IEnumerable<Atrai.Core.Entity.ShopModel>*@
+@{ ViewData["Title"] = "Sales / Purchase / Inventory Report";
+    Layout = "~/Views/Shared/_adminLayout.cshtml"; }
+
+
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <!-- Start Page Content -->
+        <div class="card">
+            <h2> Product Related Report </h2>
+            <div class="col-12">
+
+
+
+                <div class="row">
+
+                    <div class="col-md-2 col-12 mb-2">
+                        @Html.DropDownList("CategoryId", new SelectList((IEnumerable<SelectListItem>)ViewBag.Category, "Value", "Text"), "Select Category",
+                                                                               htmlAttributes: new { @class = "form-control", id = "CategoryId" })
+                    </div>
+                    <div class="col-md-4 col-12 mb-2">
+                        @Html.DropDownList("ProductId", new SelectList((IEnumerable<SelectListItem>)ViewBag.Product, "Value", "Text"), "Select Product",
+                                                                                         htmlAttributes: new { @class = "form-control", id = "ProductId" })
+                    </div>
+                    <div class="col-md-2 col-12 mb-2">
+                        @Html.DropDownList("WarehouseId", new SelectList((IEnumerable<SelectListItem>)ViewBag.Warehouse, "Value", "Text"), "Select Warehouse",
+                                                                                         htmlAttributes: new { @class = "form-control", id = "WarehouseId" })
+                    </div>
+@*
+                      <div class="col-md-4 col-12  mb-2">
+                    <div id="reportrange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                        <i class="fa fa-calendar"></i>&nbsp;
+                        <span></span> <i class="fa fa-caret-down"></i>
+                    </div>
+                    </div>*@
+
+
+
+
+                                 <div class="col-md-4 col-12  mb-2">
+                                    <div class="form-inline">
+                                         <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text">
+                                               <i class="fa fa-calendar"></i>
+                                             </div>
+                                        </div>
+                                        <input type="text" class="form-control from-control-sm" name="date" id="daterange-btn" style="width: auto;">
+                                         <button id='btnDec' type="button" class="btn btn-danger rounded-0" title='Decrement month'><i class="fa fa-calendar-minus-o" aria-hidden="true"></i></button>
+                                        <button id='btnInc' type="button" class="btn btn-info  rounded-0" title='Increment month'><i class="fa fa-calendar-plus-o" aria-hidden="true"></i></button>
+                                        </div>
+                                        @*<span type="button" class="btn btn-sm btn-outline-info" id="daterange-btn">
+
+                                            <i class="fa fa-calendar"></i>&nbsp; <span>defaut date</span>
+
+                                            <i class="fa fa-caret-down"></i>
+                                        </span>
+                                        <input id="daterange-btn" size="40" value="">*@
+                                    </div>
+                                </div>
+
+
+
+                    @Html.Hidden("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+                    @Html.Hidden("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+
+
+                    @*<div class="col-md-2 col-12  mb-2">
+                        @Html.Hidden("FromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "FromDate" })
+                    </div>
+                    <div class="col-md-2 col-12  mb-2">
+                        @Html.Hidden("ToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "ToDate" })
+                    </div>*@
+
+                </div>
+
+            </div>
+        </div>
+
+
+        <br />
+
+        <div class="card p-2 mb-2">
+            <div class="row">
+                <div class="col-md-11 col-12">
+
+                    <div class="row text-center m-2">
+
+
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('PrintVoterList')">Product List</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('PrintSubLedger')">Stock List</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('PrintMarketWiseList')">Reorder List</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('ViewVoterList')">View Product List</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('ViewSubLedger')">View Sub Ledger Book</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('TransactionLedger')">Product Ledger</button>
+                        </div>
+
+                    </div>
+
+
+                </div>
+                <div class="col-md-1 col-12 mt-sm-3 round">
+                    <fieldset>
+                        <div><input type="radio" name="RptType" value="PDF" checked="checked" /> PDF</div>
+                        <div><input type="radio" name="RptType" value="EXCEL" /> EXCEL</div>
+                        <div><input type="radio" name="RptType" value="WORD" /> WORD</div>
+                    </fieldset>
+
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="card">
+
+            <h2> Sales Related Report </h2>
+            <div class="col-12">
+                <div class="row">
+
+                    <div class="col-md-2 col-12 mb-2">
+                        @Html.DropDownList("CustomerId", new SelectList((IEnumerable<SelectListItem>)ViewBag.Customer, "Value", "Text"), "Select Customer",
+                                                                htmlAttributes: new { @class = "form-control", id = "CustomerId" })
+                    </div>
+                    <div class="col-md-4 col-12 mb-2">
+                        @Html.DropDownList("AccountReceiveType", new SelectList((IEnumerable<SelectListItem>)ViewBag.AccountReceiveType, "Value", "Text"), "Select Receiving Head",
+                                                                          htmlAttributes: new { @class = "form-control", id = "AccountReceiveTypeId" })
+                    </div>
+                    <div class="col-md-2 col-12 mb-2">
+                        @Html.DropDownList("Status", new List<SelectListItem>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 {
+                                            new SelectListItem() {Text = "Due", Value="Due"},
+                                            new SelectListItem() {Text = "Paid", Value="Paid"},
+                                            new SelectListItem() {Text = "Advance", Value="Advance"},
+                                        }, "Select Status", new { @class = "form-control" })
+                    </div>
+                    <div class="col-md-2 col-12  mb-2">
+                        @Html.TextBox("SalesFromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "SalesFromDate" })
+                    </div>
+                    <div class="col-md-2 col-12  mb-2">
+                        @Html.TextBox("SalesToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "SalesToDate" })
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        <br />
+        <div class="card p-2 mb-2">
+            <div class="row">
+                <div class="col-md-11 col-12">
+
+                    <div class="row text-center m-2">
+
+
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('PrintVoterList')">Date Wise Sales List</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('PrintSubLedger')">Date Wise Sales Summary</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('PrintMarketWiseList')">Top 10 Selling Product</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('ViewVoterList')">Top 10 Selling Customer</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('ViewSubLedger')">Top Due List</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('TransactionLedger')">Customer List</button>
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+        <div class="card">
+
+            <h2> Purchase Related Report </h2>
+            <div class="col-12">
+                <div class="row">
+
+                    <div class="col-md-2 col-12 mb-2">
+                        @Html.DropDownList("Supplier", new SelectList((IEnumerable<SelectListItem>)ViewBag.Customer, "Value", "Text"), "Select Supplier",
+                                                                htmlAttributes: new { @class = "form-control", id = "Supplier" })
+                    </div>
+                    <div class="col-md-4 col-12 mb-2">
+                        @Html.DropDownList("AccountPayType", new SelectList((IEnumerable<SelectListItem>)ViewBag.AccountReceiveType, "Value", "Text"), "Select Payment Head",
+                                                                          htmlAttributes: new { @class = "form-control", id = "AccountPayTypeId" })
+                    </div>
+                    <div class="col-md-2 col-12 mb-2">
+                        @Html.DropDownList("Status", new List<SelectListItem>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 {
+                        new SelectListItem() {Text = "Due", Value="Due"},
+                        new SelectListItem() {Text = "Paid", Value="Paid"},
+                        new SelectListItem() {Text = "Advance", Value="Advance"},
+                    }, "Select Status", new { @class = "form-control" })
+                    </div>
+                    <div class="col-md-2 col-12  mb-2">
+                        @Html.TextBox("PurchaseFromDate", null, new { @class = "form-control text-center FromDate", @placeholder = "From Date", @autocomplete = "off", name = "PurchaseFromDate" })
+                    </div>
+                    <div class="col-md-2 col-12  mb-2">
+                        @Html.TextBox("PurchaseToDate", null, new { @class = "form-control text-center ToDate", @placeholder = "To Date", @autocomplete = "off", name = "PurchaseToDate" })
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        <br />
+        <div class="card p-2 mb-2">
+            <div class="row">
+
+
+
+
+                <div class="col-md-12 col-12">
+
+                    <div class="row text-center m-2">
+
+
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('PrintVoterList')">Date Wise Purchase List</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('PrintSubLedger')">Date Wise Purchase Summary</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('PrintMarketWiseList')">Top 10 Purchase Product</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('ViewVoterList')">Top 10 Purchasing Supplier</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('ViewSubLedger')">Top Due List</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark mb-2 btn-block" type="button" onclick="ReportPrint('TransactionLedger')">Supplier List</button>
+                        </div>
+
+                    </div>
+
+
+
+
+
+
+                    @*<div class="form-group">
+
+                        <label for="product_pr_date_filter">Date Range:</label>
+                        <input placeholder="Select a date range" class="form-control" id="product_pr_date_filter" readonly="" name="date_range" type="text">
+                    </div>*@
+
+
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+        <!-- End PAge Content -->
+    </div>
+</div>
+
+
+
+
+
+
+@section Scripts{
+
+@*    <script src="~/lib/daterangepicker/daterangepicker.min.js"></script>
+    <script src="~/lib/daterangepicker/moment.js"></script>*@
+
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+
+    <script type="text/javascript">
+    $(function() {
+
+        var start = moment().subtract(29, 'days');
+        var end = moment();
+
+        function cb(start, end) {
+            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+        }
+
+        $('#reportrange').daterangepicker({
+            startDate: start,
+            endDate: end,
+            ranges: {
+               'Today': [moment(), moment()],
+               'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+               'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+               'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+               'This Month': [moment().startOf('month'), moment().endOf('month')],
+               'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        }, cb);
+
+        cb(start, end);
+
+    });
+    </script>
+
+
+
+    <script type="text/javascript">
+
+
+        //var ranges = {};
+        //ranges[today] = [moment(), moment()];
+        //ranges[yesterday] = [moment().subtract(1, 'days'), moment().subtract(1, 'days')];
+        //ranges[last_7_days] = [moment().subtract(6, 'days'), moment()];
+        //ranges[last_30_days] = [moment().subtract(29, 'days'), moment()];
+        //ranges[this_month] = [moment().startOf('month'), moment().endOf('month')];
+        //ranges[last_month] = [
+        //    moment()
+        //        .subtract(1, 'month')
+        //        .startOf('month'),
+        //    moment()
+        //        .subtract(1, 'month')
+        //        .endOf('month'),
+        //];
+        //ranges[this_month_last_year] = [
+        //    moment()
+        //        .subtract(1, 'year')
+        //        .startOf('month'),
+        //    moment()
+        //        .subtract(1, 'year')
+        //        .endOf('month'),
+        //];
+        //ranges[this_year] = [moment().startOf('year'), moment().endOf('year')];
+        //ranges[last_year] = [
+        //    moment().startOf('year').subtract(1, 'year'),
+        //    moment().endOf('year').subtract(1, 'year')
+        //];
+        //ranges[this_financial_year] = [financial_year.start, financial_year.end];
+        //ranges[last_financial_year] = [
+        //    moment(financial_year.start._i).subtract(1, 'year'),
+        //    moment(financial_year.end._i).subtract(1, 'year')
+        //];
+
+
+        //var financial_year = {
+        //    start: moment('2021-01-01'),
+        //    end: moment('2021-12-31'),
+        //}
+
+        //var datepicker_date_format = "mm/dd/yyyy";
+        //var moment_date_format = "MM/DD/YYYY";
+        //var moment_time_format = "HH:mm";
+
+
+        ////var dateRangeSettings = {
+        ////    ranges: ranges,
+        ////    startDate: financial_year.start,
+        ////    endDate: financial_year.end,
+        ////    locale: {
+        ////        cancelLabel: clear,
+        ////        applyLabel: apply,
+        ////        customRangeLabel: custom_range,
+        ////        format: moment_date_format,
+        ////        toLabel: '~',
+        ////    },
+        ////};
+
+        ////if ($('#product_pr_date_filter').length == 1) {
+        ////    $('#product_pr_date_filter').daterangepicker(dateRangeSettings, function (start, end) {
+        ////        $('#product_pr_date_filter').val(
+        ////            start.format(moment_date_format) + ' ~ ' + end.format(moment_date_format)
+        ////        );
+        ////        //product_purchase_report.ajax.reload();
+        ////    });
+        ////    $('#product_pr_date_filter').on('cancel.daterangepicker', function (ev, picker) {
+        ////        $('#product_pr_date_filter').val('');
+        ////        //product_purchase_report.ajax.reload();
+        ////    });
+        ////};
+
+        ////Default settings for daterangePicker
+
+
+
+        ////var start = ''; //moment().startOf('month');
+        ////var end = ''; //moment().endOf('month');
+        ////var label = '';
+
+        //var start = moment().startOf('month');
+        //var end = moment().endOf('month');
+        //var label = '';
+
+        //$('#daterange-btn').daterangepicker({
+        //    locale: {
+        //        format: 'DD MMM YYYY'
+        //    },
+        //    startDate: moment(start),
+        //    endDate: moment(end),
+        //    ranges: {
+        //        'Today': [moment(), moment()],
+        //        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+        //        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+        //        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        //        'This Month': [moment().startOf('month'), moment().endOf('month')],
+        //        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+        //    }
+        //},
+        //    function (start, end, label) {
+        //        if (isDate(start)) {
+        //            $('#daterange-btn span').html(start.format('DD MMM YYYY') + ' - ' + end.format('DD MMM YYYY'));
+        //            $('#FromDate').val(start.format('DD MMM YYYY'));
+        //            $('#ToDate').val(end.format('DD MMM YYYY'));
+
+        //            //alert($('#FromDate').val());
+        //            //alert($('#ToDate').val());
+
+
+                    
+        //        }
+        //    });
+
+        //$('#btnInc').click(function (e) {
+        //    IncDecMonth('Inc')
+        //})
+
+        //$('#btnDec').click(function (e) {
+        //    IncDecMonth('Dec')
+        //})
+
+        //function isDate(val) {
+        //    //var d = new Date(val);
+        //    //return !isNaN(d.valueOf());
+        //    var d = Date.parse(val);
+        //    console.log(d);
+        //    return Date.parse(val);
+        //}
+
+        //function IncDecMonth(Action) {
+        //    if (!isDate(start)) {
+        //        start = moment().startOf('month');
+        //    }
+        //    if (Action == 'Inc') {
+        //        start = moment(start).add(1, 'month').startOf('month');
+        //        end = moment(start).endOf('month')
+        //    }
+        //    else {
+        //        start = moment(start).subtract(1, 'month').startOf('month');
+        //        end = moment(start).endOf('month')
+        //    }
+        //    if (isDate(start)) {
+        //        $('#daterange-btn span').html(start.format('DD MMM YYYY') + ' - ' + end.format('DD MMM YYYY'));
+        //    }
+        //    console.log('start=' + start)
+        //    console.log('end=' + end)
+
+        //    $('#FromDate').val(start.format('DD MMM YYYY'));
+        //    $('#ToDate').val(end.format('DD MMM YYYY'));
+
+        //    //alert($('#FromDate').val());
+        //    //alert($('#ToDate').val());
+
+        //}
+
+        //IncDecMonth();
+
+
+
+
+
+
+    </script>
+
+    <script type="text/javascript">
+
+
+
+                //CurrentDate();
+
+                //$(".FromDate").datepicker({
+
+                //    dateFormat: "dd-M-y",
+                //    changeMonth: true,
+                //    changeYear: true
+
+                //});
+
+
+                //$(".ToDate").datepicker({
+
+                //    dateFormat: "dd-M-y",
+                //    changeMonth: true,
+                //    changeYear: true
+
+                //});
+
+                //$(".PrintDate").datepicker({
+
+                //    dateFormat: "dd-M-y",
+                //    changeMonth: true,
+                //    changeYear: true
+
+                //});
+
+                //function CurrentDate() {
+                //    var date = new Date();
+                //    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                //    var val = date.getDate() + "-" + months[date.getMonth()] + "-" + date.getFullYear().toString().substr(-2);
+                //    if ($(".FromDate").val() == '') {
+                //        $(".FromDate").val(val);
+                //    }
+                //    if ($(".ToDate").val() == '') {
+                //        $(".ToDate").val(val);
+                //    }
+                //    if ($(".PrintDate").val() == '') {
+                //        $(".PrintDate").val(val);
+                //    }
+                //}
+
+
+                function ReportPrint(btnvalue) {
+
+
+
+                    var pathname = window.location.pathname; // Returns path only (/path/example.html)
+                    var url = window.location.href;     // Returns full URL (https://example.com/path/example.html)
+                    var origin = window.location.origin;
+                    //url = 'https://pqstec.com/invoiceapps/Showreport';
+
+                    //origin = 'https://pqstec.com';
+                    pathname = '/invoiceapps/Sales/Report';
+                    url = 'https://pqstec.com/invoiceapps/Association/Report';
+                    origin = 'https://pqstec.com';
+
+
+                    //alert(pathname);
+                    //alert(url);
+                    //alert(origin);
+
+
+                    //console.log(url.substring(1).split('//')[0]);
+
+
+                    //alert(url);
+
+                    var refno = $('#RefNo').val();
+                    var printdate = $('#PrintDate').val();
+                    var MemberType = $('#MemberType').val();
+
+
+                    var FromNo = $('#FromNo').val();
+                    var ToNo = $('#ToNo').val();
+
+
+
+                    var FromDate = $('#FromDate').val();
+                    var ToDate = $('#ToDate').val();
+                    var MemberId = $('#MemberId').val();
+                    var MarketId = $('#MarketId').val();
+
+                    if (btnvalue == "PrintVoterList") {
+
+
+                        //if (GroupLCId == '-1') {
+                        //    toastr.error('Please Select Group LC From List');
+                        //    return;
+
+                        //}
+
+                        //if (refno == '') {
+                        //    toastr.error('Please Type Ref. No');
+                        //    return;
+                        //} if (printdate == '') {
+                        //    toastr.error('Please Select Document Print Date');
+                        //    return;
+                        //}
+
+                    }
+
+                    var reporttype = $("input[name=RptType]:checked").val();
+
+                    // alert(reporttype);
+
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("ShowReport", "Association")',
+                        dataType: 'json',
+                        async: true,
+                        data: { reporttype: reporttype, action: btnvalue, refno: refno, printdate: printdate, origin: origin, urllink: pathname, membertype: MemberType, fromno: FromNo, tono: ToNo, fromdate: FromDate, todate: ToDate, memberid: MemberId , marketid : MarketId },
+                        success: function (response) {
+                            //  window.location.href = response.Url;
+
+                            window.open(response.Url, '_blank')
+                        },
+                        error: function (ex) {
+                            alert('Failed.' + ex);
+                        }
+
+                    });
+
+                }
+
+    </script>
+}

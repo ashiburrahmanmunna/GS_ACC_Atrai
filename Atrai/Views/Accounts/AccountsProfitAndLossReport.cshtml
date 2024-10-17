@@ -1,0 +1,906 @@
+﻿@*@model List<Atrai.Model.Core.Entity.AccountHeadModel>*@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model IEnumerable<Atrai.Controllers.AccountsController.BalanceSheetModel>
+@*@model Tuple<List<Atrai.Model.Core.Entity.AccountHeadModel>, IEnumerable<Atrai.Controllers.AccountsController.BalanceSheetModel>>*@
+@{
+    ViewData["Title"] = "Voucher Type";
+    Layout = "~/Views/Shared/_adminLayout.cshtml";
+    System.Globalization.CultureInfo BDFormat = new System.Globalization.CultureInfo("hi-IN");
+}
+
+<style>
+    .table > :not(:first-child) {
+        border-top: 0;
+    }
+
+    #treegridTable th {
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #BABEC5;
+        /*font-size: 14px;*/
+    }
+
+    .table > tbody > tr > td {
+        line-height: 15px !important;
+        border: 1px solid #c9c9c9;
+    }
+
+
+    .table tbody tr td {
+        /* border: 1px solid #c9c9c9;*/
+        font: 14px;
+        color: #8A8A8A;
+        line-height: 15px;
+    }
+    /*    .table>:not(caption)>*>* {
+
+             border-bottom-width: 0px;
+
+        }*/
+    .text-red {
+        color: #FF0000 !important;
+    }
+
+    #body td:not(:first-child) {
+        text-align: center;
+    }
+
+    .root-node {
+        font-weight: 500;
+    }
+
+    .upper-form-style {
+        background: #e9ecef6b;
+        padding-top: 62px
+    }
+
+    .report-text-style {
+        color: #0000ce;
+    }
+
+    .company-and-other-text-style {
+        margin-top: 40px;
+    }
+
+    .customize-btn {
+        background: #e9ecef6b;
+        border: 1px solid black;
+        border-radius: 20px;
+    }
+
+        .customize-btn:hover {
+            background: #ffffff;
+            border: 1px solid black;
+            color: black;
+            border-radius: 20px;
+        }
+
+    .customization-btn {
+        background: #2CA01C;
+        color: white;
+        /*border: 1px solid black;*/
+        border-radius: 20px;
+    }
+
+        .customization-btn:hover {
+            background: #235d1b;
+            color: white;
+            border-radius: 20px;
+        }
+
+    .dropdown-button-style {
+        border: 1px solid #ced4da;
+        background: white;
+    }
+
+        .dropdown-button-style:hover {
+            border: 1px solid #ced4da;
+            background: white;
+        }
+
+    .dropdown-menu.show {
+        width: 360px;
+    }
+
+    .modal-dialog {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .report-print-setting-style {
+        background: #e9ecef6b;
+    }
+
+    .total-accname {
+        border-bottom: 5px double black !important;
+    }
+
+    #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/assets/loading-load.gif') 50% 50% no-repeat rgb(249, 249, 249);
+        opacity: .6;
+    }
+</style>
+<div class="row" id="change-checkbox">
+    <div class="col-12 col-md-12">
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row m-0 ps-4 upper-form-style">
+                    <div class="col-md-12 mb-2">
+                        <span class="report-text-style"><i class="bi bi-chevron-left"></i> Back to report list</span>
+                        <h4 class="fw-bold fs-3 mt-3">
+                            Profit and Loss % of Total Income Report
+                        </h4>
+                        <span class="float-end">
+                            <button type="button" class="btn customize-btn fw-bold">Customize</button>
+                            <button type="button" class="btn customization-btn fw-bold">Save Customization</button>
+                        </span>
+                    </div>
+                    <div class="col-md-7 col-12 mb-2">
+
+
+
+                        <div class="row">
+                            <div class="col-md-4 col-12">
+                                <div class="mb-2" id="reportrange">
+                                    <label class="form-label">Report period</label>
+                                    <select onclick="setDateRange()" id="select2" class="form-select">
+                                        @*<option selected="selected" disabled="disabled">Select an Option</option>*@
+                                        <option value="1"> All Dates</option>
+                                        <option value="2">Custom</option>
+                                        <option value="3" selected>Today</option>
+                                        <option value="4">This Week</option>
+                                        <option value="5">This Week-to-date</option>
+                                        <option value="6">This Month</option>
+                                        <option value="7">This Month-to-date</option>
+                                        <option value="8">This Quarter</option>
+                                        <option value="9">This Quater-to-date</option>
+                                        <option value="10">This Year</option>
+                                        <option value="11">This Year-to-date</option>
+                                        <option value="12">This Year-to-last-month</option>
+                                        <option value="13">Yesterday</option>
+                                        <option value="14">Recent</option>
+                                        <option value="15">Last Week</option>
+                                        <option value="16">Last Week-to-date</option>
+                                        <option value="17">Last Month</option>
+                                        <option value="18">Last Month-to-date</option>
+                                        <option value="19">Last Quarter</option>
+                                        <option value="20">Last Quarter-to-date</option>
+                                        <option value="21">Last Year</option>
+                                        <option value="22">Last Year-to-date</option>
+                                        <option value="23">Since 30 days ago</option>
+                                        <option value="24">Since 60 days ago</option>
+                                        <option value="25">Since 90 days ago</option>
+                                        <option value="26">Since 365 days ago</option>
+                                        <option value="27">Next Week</option>
+                                        <option value="28">Next 4 Weeks</option>
+                                        <option value="29">Next Month</option>
+                                        <option value="30">Next Quarter</option>
+                                        <option value="31">Next Year</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-4 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">From Date</label>
+
+                                    <input class="form-control" id="start-date" disabled="disabled" />
+
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">To Date</label>
+
+                                    <input class="form-control" id="end-date" disabled="disabled" />
+
+                                </div>
+                            </div>
+                            @*<div class="col-md-4 col-12">
+                                <div class="mb-2">
+                                <label class="form-label">Show non-zero or active only</label>
+                                <select class="form-select">
+                                <option selected>Active rows/active columns</option>
+                                <option value="1">Months</option>
+                                </select>
+                                </div>
+                                </div>*@
+                            <div class="col-md-4 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">Display columns by</label>
+                                    <select class="form-select" id="select-form">
+                                        <option value="0" selected>Total Only</option>
+                                        <option value="1">Days</option>
+                                        <option value="2">Weeks</option>
+                                        <option value="2">Months</option>
+                                        <option value="2">Quarters</option>
+                                        <option value="2">Years</option>
+                                        <option value="2">Customers</option>
+                                        <option value="2">Vendors</option>
+                                        <option value="2">Products/Services</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 col-12">
+                                <div class="dropdown1" style="display: inline-block;">
+                                    <label class="form-label">Show non-zero or active only</label>
+                                    <button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                        Active rows/active columns
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                        <li class="fw-bold ms-3">Show rows</li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                                                    <label class="custom-control-label cursor-pointer" id="with-group-label" for="with-group">Active</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                                                    <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="with-inactive">All</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                                                    <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="with-inactive">Non-zero</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li class="fw-bold ms-3">Show columns</li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                                                    <label class="custom-control-label cursor-pointer" id="with-group-label" for="with-group">Active</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                                                    <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="with-inactive">All</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                                                    <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="with-inactive">Non-zero</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-12">
+                                <div class="dropdown1" style="display: inline-block;">
+                                    <label class="form-label">Compare another period</label>
+                                    <button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                        <span class="me-5">Select period </span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="flexRadioDefault1">
+                                                    <label class="custom-control-label cursor-pointer" id="with-group-label" for="with-group">Previous period (PP)</label>
+                                                </div>
+                                            </a>
+                                            <div class="ms-4 d-flex">
+                                                <a class="dropdown-item w-auto" href="#">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="flexRadioDefault1">
+                                                        <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="with-inactive">$ change</label>
+                                                    </div>
+                                                </a>
+                                                <a class="dropdown-item w-auto" href="#">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="flexRadioDefault1">
+                                                        <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="with-inactive">% change</label>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="flexRadioDefault1">
+                                                    <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="with-inactive">Previous period (PY)</label>
+                                                </div>
+                                            </a>
+                                            <div class="ms-4 d-flex">
+                                                <a class="dropdown-item w-auto" href="#">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="flexRadioDefault1">
+                                                        <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="with-inactive">$ change</label>
+                                                    </div>
+                                                </a>
+                                                <a class="dropdown-item w-auto" href="#">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="flexRadioDefault1">
+                                                        <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="with-inactive">% change</label>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="flexRadioDefault1">
+                                                    <label class="custom-control-label cursor-pointer" id="with-inactive-label" for="with-inactive">% of Row</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="form-check-input" type="checkbox" name="flexRadioDefault" id="flexRadioDefault1">
+                                                    <label class="custom-control-label cursor-pointer" id="with-group-label" for="with-group">% of Column</label>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li class="mt-3 ms-3"><a href="#">Reorder columns</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-12">
+                                <div class="mb-2">
+                                    <label class="form-label">Accounting method</label>
+                                    <select class="form-select">
+                                        <option selected>Cash</option>
+                                        <option value="1">Accrual</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-8 col-12 mb-12 d-none">
+                                <div class="input-group mb-1">
+
+                                    <span class="input-group-text ">
+                                        Voucher Transaction Group
+                                    </span>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-5 col-12 mb-2 mt-5 d-flex justify-content-center">
+                        <div>
+                            <button type="button" class="btn customize-btn fw-bold" style="" onclick="GetReport()">Run Report</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="balance-sheet" class="me-lg-auto ms-lg-auto w-50" style="border: 1px solid #e3eaf3;  margin-top:40px;">
+                    <div class="ms-3 mt-3">
+                        <a class="text-decoration-none text-black cursor-pointer" id="add-notes"><span>Add notes</span></a>
+                        <span class="float-end">
+                            <a type="button" href="#" class="text-decoration-none text-black" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <i class="bi bi-envelope me-3 fs-5"></i>
+                            </a>
+                            <a href="#" class="text-decoration-none text-black" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <i class="bi bi-printer me-3 fs-5"></i>
+                            </a>
+                            <span class="dropdown1 me-3">
+                                <a class="dropdown-toggle text-decoration-none text-black cursor-pointer" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="bi bi-upload fs-5"></i>
+                                </a>
+                                @*<button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    </button>*@
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li><a class="dropdown-item" href="#">Export to Excel</a></li>
+                                    <li><a class="dropdown-item" href="#">Export to PDF</a></li>
+                                    <li><a class="dropdown-item" href="#">Export to Google Sheets</a></li>
+                                </ul>
+                            </span>
+                            <span class="dropdown1 me-3">
+                                <a class="text-decoration-none text-black cursor-pointer" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="bi bi-gear fs-5"></i>
+
+                                </a>
+                                @*<button class="btn dropdown-button-style  dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    </button>*@
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                    <li class="fw-bold ms-3">Display density</li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input title-input" id="compact" value="compact">
+                                                <label class="custom-control-label cursor-pointer" id="compact-label" for="compact">Compact</label>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </span>
+                            @*<a href="#" class="text-decoration-none text-black">
+                                <i class="bi bi-upload me-3 fs-5"></i>
+                                </a>*@
+                            @*<a href="#" class="text-decoration-none text-black">
+                                <i class="bi bi-gear me-3 fs-5"></i>
+                                </a>*@
+                        </span>
+
+                        @*print modal*@
+                        <!-- Button trigger modal -->
+                        @*<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            Launch demo modal
+                            </button>*@
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content" style="border-radius:0px;">
+                                    <div class="d-flex mt-4 mb-3">
+                                        <h4 class="ms-3 fw-bold">Print, email, or save as PDF</h4>
+                                        <div class="ms-auto"><button type="button" class="btn-close me-2 mt-2" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                                    </div>
+                                    <div class="modal-body">
+                                        To print, right-click the preview and select <span class="fw-bold">Print</span>. Or, click the <span class="fw-bold">Print</span> icon if you see one below.
+                                        <div class="row">
+                                            @*report-print-setting-style*@
+                                            <p class="fw-bold">Report print settings</p>
+                                            <div class="col-lg-1 mt-2">
+                                                Orientation
+                                            </div>
+                                            <div class="col-lg-2">
+                                                <select class="form-select" id="orientation">
+                                                    <option value="portrait" selected>Portrait</option>
+                                                    <option value="landscape">Landscape</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-9">
+                                                <iframe id="pdf-iframe" style="width: 100%; height: 500px;"></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 mt-3">
+                                        <button type="button" class="btn ms-5 customize-btn fw-bolder" data-bs-dismiss="modal">Close</button>
+                                        <button id="print-pdf" type="button" class="btn float-end me-5 customization-btn fw-bolder">Print</button>
+                                        <button type="button" class="btn float-end me-2 customize-btn fw-bolder">Save as PDF</button>
+                                        <button type="button" class="btn float-end me-2 customize-btn fw-bolder">Email</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col">
+                            <div id="make-editable" class="text-center company-and-other-text-style" onclick="makeEditable()">
+                                <div class="form-check d-none" id="form-check-visibility">
+                                    <input class="form-check-input float-md-none" type="checkbox" name="flexCheckDefaultforImage" id="flexCheckDefaultforImage">
+                                    <label class="form-check-label" for="flexCheckDefaultforImage">
+                                        Show Image
+                                    </label>
+                                </div>
+                                <img id="company-image" style="width:10%" class="d-none" src="~/assets/Custom-URL-Shortener.jpg" />
+                                <h3 id="company-name">@HttpContextAccessor.HttpContext.Session.GetString("CompanyName")</h3>
+                                <h6 id="primary-address">@HttpContextAccessor.HttpContext.Session.GetString("PrimaryAddress")</h6>
+                                <h6 id="trial-balance" class="text-black fw-bolder">Profit and Loss % of Total Income </h6>
+                                <h6 id="date-month-year"></h6>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row m-0 p-0">
+                        <div class="table-responsive">
+                            <table class="table table-condensed table-hover tree bg-white border" data-statement-id="balancesheet" id="treegridTable">
+                                <tbody id="body">
+                                </tbody>
+                            </table>
+                            @*<div id="loader" class="d-none"></div>*@
+
+                        </div>
+                        <!--<table class="table-borderless table-sm">
+                            <thead style="border-top: 0.5px solid #00000059; border-bottom: 0.5px solid #00000059; ">
+                                <tr id="add-th">
+                                </tr>
+                                <tr id="t-head-rows">-->
+                        @*<th class="w-50" scope="col"></th>
+                            <th class="text-end p-2 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">DEBIT</th>
+                            <th class="text-end pe-3 text-black" scope="col" style="border-left: 0.5px solid #00000059; ">CREDIT</th>*@
+                        <!--</tr>
+                            </thead>
+
+                            <tbody id="t-body">
+                            </tbody>
+                        </table>-->
+                        @*<div id="tableContainer"></div>*@
+                        <div class="form-floating d-none" id="add-notes-textarea">
+                            <textarea class="form-control" placeholder="Add notes or include additional info with your report" id="floatingTextarea2" style="height: 200px"></textarea>
+                            <label for="floatingTextarea2">Add notes or include additional info with your report</label>
+                            <i class="bi bi-x cursor-pointer float-end" id="close-textarea" style="position: absolute; top: -10px; right: 13px; font-size:25px; "></i>
+                            @*<button type="button" class="close" id="close-textarea">&times;</button>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-treegrid/0.2.0/js/jquery.treegrid.bootstrap3.js"></script>
+    <script src="~/admin_theme_gtr/assets/js/dateRangeMultipleFunctionForAccountsVoucherReport.js" asp-append-version="true"></script>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#make-editable').mouseover(function () {
+                $('#form-check-visibility').removeClass('d-none').addClass('d-block');
+            });
+            $('#make-editable').mouseout(function () {
+                $('#form-check-visibility').removeClass('d-block').addClass('d-none');
+            });
+        });
+
+        function makeEditable() {
+            $("#form-check-visibility").removeClass("d-none");
+            var checkbox = document.getElementById("flexCheckDefaultforImage");
+            var image = document.getElementById("company-image");
+
+            checkbox.addEventListener("change", function () {
+                if (this.checked) {
+                    image.classList.remove("d-none");
+                } else {
+                    image.classList.add("d-none");
+                }
+            });
+            var companyName = document.getElementById("company-name");
+            var primaryAddress = document.getElementById("primary-address");
+            var trialBalanceName = document.getElementById("trial-balance");
+            var dateMonthYear = document.getElementById("date-month-year");
+            companyName.contentEditable = true;
+            primaryAddress.contentEditable = true;
+            trialBalanceName.contentEditable = true;
+            dateMonthYear.contentEditable = true;
+        }
+        //document.getElementById("change-checkbox").on("click", function () {
+        //    $("#form-check-visibility").toggleClass("d-none");
+        //})
+        $('#compact').change(function() {
+            if ($(this).is(':checked')) {
+                $('#treegridTable th').addClass('pt-3 pb-3');
+                $('.table tbody tr td').addClass('pt-3 pb-3');
+            }
+            else {
+                $('#treegridTable th').removeClass('pt-3 pb-3');
+                $('.table tbody tr td').removeClass('pt-3 pb-3');
+            }
+        });
+        //document.addEventListener("click", function (event) {
+        //    var visibilityDiv = document.getElementById("form-check-visibility");
+        //    var targetElement = event.target;
+        //    if (!targetElement.closest('#make-editible') && !targetElement.closest('#form-check-visibility')) {
+        //        visibilityDiv.removeClass("d-none").classList.add("d-none");
+        //    }
+        //})
+        /*function to goto the add notes text area after click*/
+        $("#add-notes").click(function() {
+            $("#add-notes-textarea").toggleClass("d-none");
+            $("#floatingTextarea2").focus();
+            $("#add-notes").text("Edit notes");
+        });
+
+        /*function to close  text area after click*/
+        $("#close-textarea").click(function() {
+            $("#add-notes-textarea").addClass("d-none");
+            $("#add-notes").text("Add notes");
+            var elem = document.getElementById("add-notes");
+            elem.scrollIntoView();
+        });
+
+        /*set ajax url globally*/
+        var targetPdfUrl = '';
+        $('#print-pdf').on('click', function() {
+            window.open(targetPdfUrl, '_blank');
+        })
+
+        /*ajax call to show portrait pdf on modal open*/
+        $.ajax({
+            url: '/Accounts/GetDemoPdfPortrait',
+            method: 'GET',
+            //xhrFields: {
+            //    responseType: 'arraybuffer'
+            //},
+            success: function(data) {
+                /*var file = new Blob([data], { type: 'application/pdf' });*/
+                /*var url = URL.createObjectURL(file);*/
+                //targetPdfUrl = url;
+                //targetPdfUrl = data;
+                targetPdfUrl = '/' + data;
+                $('#pdf-iframe').attr('src', targetPdfUrl);
+            }
+        });
+
+        /*ajax call to show portrait and landscape pdf on click*/
+        $('#orientation').on('change', function() {
+            if ($(this).val() === 'landscape') {
+                $.ajax({
+                    url: '/Accounts/GetDemoPdfLandscape',
+                    method: 'GET',
+                    //xhrFields: {
+                    //    responseType: 'blob'
+                    //},
+                    success: function(data) {
+                        /*var url = URL.createObjectURL(data);*/
+                        //targetPdfUrl = url;
+                        targetPdfUrl = '/' + data;
+                        console.log(targetPdfUrl);
+                        $('#pdf-iframe').attr('src', targetPdfUrl);
+                    }
+                });
+            }
+            else if ($(this).val() === 'portrait') {
+                $.ajax({
+                    url: '/Accounts/GetDemoPdfPortrait',
+                    method: 'GET',
+                    //xhrFields: {
+                    //    responseType: 'arraybuffer'
+                    //},
+                    success: function(data) {
+                        //var url = URL.createObjectURL(file);
+                        //targetPdfUrl = url;
+                        targetPdfUrl = '/' + data;
+                        console.log(targetPdfUrl);
+                        $('#pdf-iframe').attr('src', targetPdfUrl);
+                    }
+                });
+            }
+            else {
+                $('#pdf-iframe').attr('src', '~/assets/demo.pdf');
+            }
+        });
+
+
+
+        var totallength = "";
+        setDateRange(3);
+        GetReport();
+        function GetReport() {
+            $("#loader").toggleClass("d-none");
+           /* $("#treegridTable").empty();*/
+        var MyAppUrlSettings = {
+            MyUsefulUrl: '@Url.Action("GetIncomeStatementQuickBook", "Accounts")'
+            }
+        $.ajax({
+            //url:"https://raw.githubusercontent.com/kautuk-desai/demo-data/master/datagrid-lib.json",
+            url: MyAppUrlSettings.MyUsefulUrl,
+            data: { FromDate: $('#start-date').val(), ToDate: $('#end-date').val(), rpttype: "TB", criteria: $("#select2 option:selected").text(), isGroup: 0, isViewPageReport: 1, Months: $("#select-form option:selected").text()},
+            type: "GET",
+            dataType: 'json',
+            //shrinkToFit : false,
+            scrollX: true,
+            buttons: {
+                dom: {
+                    button: {
+                        className: 'btn btn-sm rounded-0'
+                    }
+                },
+                buttons: [
+
+                    {
+                        extend: 'excel',
+                        text: '<i class="bi bi-file-earmark-excel"></i>',
+                        className: 'btn-success',
+                        titleAttr: 'Export to excel'
+                    }
+
+                ],
+            },
+
+            success: function (response) {
+                $("#balance-sheet").removeClass("w-50").addClass("w-100");
+                // Remove existing thead element from the table
+                $("#treegrid-thead").remove();
+                //---Total Only---
+                /*console.log("balance sheet respone:", response)*/
+                const balanceSheet = response.data;
+                console.log("balance sheet respone:", balanceSheet)
+                //console.log(balanceSheet);
+
+                //---Month Wise---
+                //const balanceSheet = JSON.parse(response.data);
+                //console.log("Mont Wise data main rsponse:",balanceSheet.Table);
+
+                // Create span element with the last header name
+                //let trialBalanceDatee = `<span>${balanceSheet.Table[0].MonthCaption}</span>`;
+                // Create span element with the last header name
+                //let trialBalanceDatee = `<span>${balanceSheet[0].MonthCaption}</span>`;
+
+                //// Update the "date-month-year" element with the span
+                //$("#date-month-year").empty();
+                //$("#date-month-year").append(trialBalanceDatee);
+
+                const columns = [];
+                const keys = Object.keys(response.data[0]);
+                const keysWithoutLastElement = keys.slice(0, -1);
+
+                for (let i = 8; i < keysWithoutLastElement.length; i++) {
+                    columns.push(keys[i]);
+                }
+
+                //--for month wise--
+                //const keys = Object.keys(balanceSheet.Table[0]);
+                //console.log(keys);
+                //const keysWithoutLastElement = keys.slice(0, -2);
+
+                //for (let i = 8; i < keys.length; i++) {
+                //    columns.push(keys[i]);
+                //}
+                // Create new thead element and add it to the table
+                $('[data-statement-id="balancesheet"]').prepend(formHeaderColumns(columns));
+
+                // Remove existing tbody element from the table
+                $('#body').empty();
+
+                // Create new tbody element and add it to the table
+                formTable(balanceSheet, undefined, 1);
+                $(".tree").treegrid({
+                    expanderExpandedClass: "bi bi-chevron-down pe-4",
+                    expanderCollapsedClass: "bi bi-chevron-right pe-4"
+                });
+                $("#loader").toggleClass("d-none");
+            }
+
+
+        });
+    };
+        var tbody = $("#body");
+        var formHeaderColumns = function (timeseriesprojections) {
+            var thead = "<thead id='treegrid-thead'><tr><th>Account Head</th>";
+            $.grep(timeseriesprojections, function (ele, i) {
+                thead += "<th>" + ele + "</th>";
+            });
+            thead += "</thead>";
+            return thead;
+        };
+
+        var formTable = function (data, ParentId, level) {
+            var colIndex = 2;
+
+            var currentLevel = level;
+            console.log("currentLevel:", currentLevel);
+            $.each(data, function (i, ele) {
+                //console.log("ele.datalevel:", ele.datalevel); // check value of ele.datalevel
+                //console.log("currentLevel:", currentLevel); // check value of currentLevel
+                //console.log("i:", i);
+                console.log("ele:", ele);
+                //console.log("ele.datalevel::", ele.datalevel)
+                ;
+                ele.datalevel = currentLevel;
+                var tr = "<tr data-account-name='" + ele.AccName + "' class='";
+                tr += "treegrid-" + ele.AccId;
+                if (ParentId !== undefined && ele.AccId !== ParentId) {
+                    tr += " treegrid-parent-" + ParentId;
+                }
+                if (ele.datalevel == 1) {
+                    tr += " root-node'>";
+                } else {
+                    tr += " node'>";
+                }
+
+
+                if (ele.AccType == "G") {
+                    tr += "<td class='text-left text-nowrap font-weight-bold'>" + ele.AccName + "</td>";
+                }
+                else {
+                    tr += "<td class='text-left'>" + ele.AccName + "</td>";
+                }
+
+                if (jQuery.isEmptyObject(ele)) {
+
+                }
+                else {
+                    let sortedData = Object.keys(ele); //.sort();
+                    /*console.log(sortedData[8]);*/
+                    let group = 0;
+                    for (let i in sortedData) {
+                        let key = sortedData[i];
+                        /*console.log(i);*/
+                        let value = ele[sortedData[i]];
+                        /*console.log(i, ":", sortedData[4], "", ele[sortedData[4]]);*/
+                        //let length = sortedData.length;
+                        //if (ele[sortedData[4]] == "G") {
+                        //    length = sortedData.length - 1;
+                        //}
+                        if (i > 7 && i < sortedData.length-1) {
+                           //console.log("found");
+                            //console.log("value", value);
+                            if (value > 0) {
+                                if (group == 1) {
+                                    //console.log( key + ": " + value );
+                                    tr += "<td class='text-end font-weight-bold'>" + value.toLocaleString('en-IN') + "</td>";
+                                }
+                                else {
+
+                                    tr += "<td class=text-end>" + value.toLocaleString('en-IN') + "</td>";
+
+                                }
+                            }
+                            else if (value < 0) {
+                                if (group == 1) {
+                                    //console.log( key + ": " + value );
+                                    tr += "<td class='text-end font-weight-bold text-red'>" + value.toLocaleString('en-IN') + "</td>";
+                                }
+                                else {
+
+                                    tr += "<td class='text-end text-red'>" + value.toLocaleString('en-IN') + "</td>"; //balance sum
+
+                                }
+                            }
+                            //else {
+                            //    tr += "<td>-</td>";
+                            //}
+                        }
+                        //else {
+                        //    tr += "<td>-</td>";
+                        //}
+                        //console.log("Key: " + sortedData[i] + "   " + ele.data[sortedData[i]])
+                    }
+                }
+
+                if (ele.projections && ele.projections.length > 0) {
+                    tr += bindAccountValues(ele.projections);
+                }
+
+                tr += "</tr>";
+                tbody.append(tr);
+                ele.ParentId = ParentId;
+                if (ele.hasOwnProperty("Children")) {
+                    formTable(ele.Children, ele.AccId, parseInt(currentLevel + 1));
+                }
+            });
+        };
+
+        var bindAccountValues = function (projections) {
+            var accountValues = "";
+            $.grep(projections, function (ele, i) {
+                accountValues +=
+                    '<td data-account-dt="' + ele.dt + '">' + ele.value + "</td>";
+            });
+            return accountValues;
+        };
+
+
+        $(function () {
+            $("#start-date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+            $("#end-date").removeClass("hasDatepicker").datepicker({
+                dateFormat: "dd-M-yy"
+            });
+        });
+
+   /*     $("#treegridTable").empty();*/
+
+
+    </script>
+}
